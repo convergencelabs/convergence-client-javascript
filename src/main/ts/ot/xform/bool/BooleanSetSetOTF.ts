@@ -1,0 +1,15 @@
+/// <reference path="../OperationTransformationFunction.ts" />
+
+module convergence.ot {
+  export class BooleanSetSetOTF implements OperationTransformationFunction<BooleanSetOperation, BooleanSetOperation> {
+    transform(s:BooleanSetOperation, c:BooleanSetOperation):OperationPair {
+      if (s.value == c.value) {
+        // B-SS-1
+        return new OperationPair(s.copy({noOp: true}), s.copy({noOp: true}))
+      } else {
+        // B-SS-2
+        return new OperationPair(s, c.copy({noOp: true}))
+      }
+    }
+  }
+}

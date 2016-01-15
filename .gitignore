@@ -1,0 +1,11 @@
+.idea
+build
+dist
+coverage
+downloads
+node_modules
+*.zip
+npm-debug.log
+src/ts/**/*.js
+src/ts/**/*.js.map
+bower_components

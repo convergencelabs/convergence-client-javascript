@@ -1,0 +1,109 @@
+var gulp = require('gulp');
+var mkdirp = require('mkdirp');
+var path = require('path');
+var ts = require('gulp-typescript');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
+const tslint = require('gulp-tslint');
+const istanbul = require('gulp-istanbul');
+const mocha = require('gulp-mocha');
+const plumber = require('gulp-plumber');
+var insert = require('gulp-insert');
+var del = require('del');
+var Server = require('karma').Server;
+var wrapCommonjs = require('gulp-wrap-commonjs');
+
+var version = "1.0.0-M1-SNAPSHOT";
+
+var outputFileBase = "convergence-client-" + version;
+var outputFileJs = outputFileBase + ".js";
+var outputFileDts = outputFileBase + ".d";
+
+const plumberConf = {};
+
+gulp.task('mkdirs', function () {
+  mkdirp.sync("build");
+  mkdirp.sync("dist");
+});
+
+gulp.task('ts-compile', ["mkdirs"], function () {
+  var tsResult = gulp.src('src/main/ts/**/*.ts')
+    .pipe(ts({
+        out: outputFileJs,
+        target: "ES5",
+        declarationFiles: true
+    }));
+  tsResult.js
+    .pipe(gulp.dest('build'));
+
+  return tsResult.dts
+    .pipe(rename({
+      basename: outputFileDts
+    }))
+    .pipe(gulp.dest('build'));
+});
+
+gulp.task('tslint', function(){
+  return gulp.src('src/main/ts/**/*.ts')
+    .pipe(tslint())
+    .pipe(tslint.report('prose'));
+});
+
+gulp.task('istanbul', function (cb) {
+  gulp.src("build/**/*.js")
+    .pipe(istanbul()) // Covering files
+    .pipe(istanbul.hookRequire()) // Force `require` to return covered files
+    .on('finish', function () {
+      gulp.src("src/test/**/*.js")
+        .pipe(plumber(plumberConf))
+        .pipe(mocha())
+        .pipe(istanbul.writeReports()) // Creating the reports after tests run
+        .on('finish', function() {
+          process.chdir(__dirname);
+          cb();
+        });
+    });
+});
+
+gulp.task('dist', ["ts-compile"], function() {
+  return gulp.src('build/*.js')
+    .pipe(uglify())
+    .pipe(rename({
+      extname: '.min.js'
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('clean', function (cb) {
+  del([
+    'dist/',
+    "build"
+  ], cb);
+});
+
+// The default task (called when you run `gulp`)
+gulp.task('default', ["ts-compile"]);
+gulp.task('test2', ["istanbul"]);
+
+
+gulp.task('commonjs', ['ts-compile'], function(){
+    return gulp.src(['build/' + outputFileJs])
+        .pipe(wrapCommonjs({
+            pathModifier: function (path) {
+                return "convergence";
+            },
+            moduleExports: "{convergence: convergence}"
+        }))
+        .pipe(rename({
+            extname: '.commonjs.js'
+        }))
+        .pipe(gulp.dest('build/'));
+});
+
+gulp.task('test', function (done) {
+    new Server({
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: true
+    }, done).start();
+});

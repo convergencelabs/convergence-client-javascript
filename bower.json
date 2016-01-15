@@ -1,0 +1,38 @@
+{
+  "name": "convergence-client",
+  "version": "1.0.0-M1-SNAPSHOT",
+  "description": "Convergence Javascript Client",
+  "tags": [
+    "json",
+    "editor"
+  ],
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "main": [
+    "./dist/sapphire.min.js",
+    "./dist/sapphire.min.css"
+  ],
+  "bugs": "",
+  "ignore": [
+    ".idea",
+    ".npmignore",
+    ".gitignore",
+    "npm-debug.log",
+    "node_modules",
+    "test",
+    "test-pages",
+    "gulpfile.js",
+    "tslint.json",
+    "src",
+    "coverage",
+    "build",
+    "karma.conf.js"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "commonjs-require": "~1.4.5"
+  }
+}
