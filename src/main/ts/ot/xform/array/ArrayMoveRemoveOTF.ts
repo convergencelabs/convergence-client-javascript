@@ -59,7 +59,7 @@ module convergence.ot {
         case RangeIndexRelationship.End:
           // A-MR-12
           return new OperationPair(s.copy({noOp: true}), c);
-        case RangeIndexRelationship.Before:
+        case RangeIndexRelationship.After:
           // A-MR-13
           return new OperationPair(s, c);
       }

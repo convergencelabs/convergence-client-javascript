@@ -12,11 +12,11 @@ const plumber = require('gulp-plumber');
 var insert = require('gulp-insert');
 var del = require('del');
 var Server = require('karma').Server;
-var wrapCommonjs = require('gulp-wrap-commonjs');
+var insert = require('gulp-insert');
 
 var version = "1.0.0-M1-SNAPSHOT";
 
-var outputFileBase = "convergence-client-" + version;
+var outputFileBase = "convergence-client";
 var outputFileJs = outputFileBase + ".js";
 var outputFileDts = outputFileBase + ".d";
 
@@ -35,6 +35,7 @@ gulp.task('ts-compile', ["mkdirs"], function () {
         declarationFiles: true
     }));
   tsResult.js
+      .pipe(insert.append('if (module) module.exports = convergence;'))
     .pipe(gulp.dest('build'));
 
   return tsResult.dts
@@ -87,18 +88,10 @@ gulp.task('default', ["ts-compile"]);
 gulp.task('test2', ["istanbul"]);
 
 
-gulp.task('commonjs', ['ts-compile'], function(){
-    return gulp.src(['build/' + outputFileJs])
-        .pipe(wrapCommonjs({
-            pathModifier: function (path) {
-                return "convergence";
-            },
-            moduleExports: "{convergence: convergence}"
-        }))
-        .pipe(rename({
-            extname: '.commonjs.js'
-        }))
-        .pipe(gulp.dest('build/'));
+gulp.task('build', ['ts-compile'], function(){
+    return gulp.src('build/' + outputFileJs)
+        .pipe(insert.append('if (module) module.exports = convergence;'))
+        .pipe(gulp.dest('build/' + outputFileJs));
 });
 
 gulp.task('test', function (done) {

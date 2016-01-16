@@ -25,7 +25,7 @@ module convergence.ot {
         case RangeIndexRelationship.Within:
         case RangeIndexRelationship.End:
           // A-PM-3 and A-PM-4
-          return new OperationPair(s.copy({index: s.index - 1}), c)
+          return new OperationPair(s.copy({index: s.index - 1}), c);
       }
     }
 
@@ -35,11 +35,11 @@ module convergence.ot {
         case RangeIndexRelationship.After:
           // A-PM-6 and A-PM-10
           return new OperationPair(s, c);
-        case RangeIndexRelationship.Start:
+        case RangeIndexRelationship.End:
           // A-PM-7
           return new OperationPair(s.copy({index: c.toIndex}), c);
         case RangeIndexRelationship.Within:
-        case RangeIndexRelationship.End:
+        case RangeIndexRelationship.Start:
           // A-PM-8 and A-PM-9
           return new OperationPair(s.copy({index: s.index + 1}), c)
       }

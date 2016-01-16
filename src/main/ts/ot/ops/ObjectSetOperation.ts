@@ -21,7 +21,7 @@ module convergence.ot {
     copy(properties:any):ObjectSetOperation {
       return new ObjectSetOperation(
         properties.path || this._path,
-        properties.noOp || this._noOp,
+        properties.noOp !== undefined ? properties.noOp : this._noOp,
         properties.value || this._value);
     }
 

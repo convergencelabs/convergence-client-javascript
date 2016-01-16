@@ -4,7 +4,7 @@
 /// <reference path="../ops/StringSetOperation.ts" />
 
 module convergence.ot {
-  class TransformationFunctionRegistry {
+  export class TransformationFunctionRegistry {
     otfs:any = {};
 
     constructor() {

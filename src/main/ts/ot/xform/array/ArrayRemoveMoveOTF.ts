@@ -27,7 +27,7 @@ module convergence.ot {
           return new OperationPair(s.copy({index: s.index - 1}), c.copy({toIndex: c.toIndex - 1}));
         case RangeIndexRelationship.After:
           // A-RM-5
-          return new OperationPair(s.copy({index: s.index - 1}), c.copy({toIndex: c.toIndex - 1}))
+          return new OperationPair(s, c);
       }
     }
 
@@ -57,7 +57,7 @@ module convergence.ot {
         case RangeIndexRelationship.Start:
         case RangeIndexRelationship.Within:
         case RangeIndexRelationship.End:
-          // A-MR-12
+          // A-RM-12
           return new OperationPair(s, c.copy({noOp: true}));
         default:
           // A-RM-13

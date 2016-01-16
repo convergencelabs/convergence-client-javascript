@@ -25,7 +25,7 @@
       }
     },
     {
-      "id": "O-TT-2",
+      "id": "O-TT-3",
       "input": {
         "serverOp": {"type": "ObjectSetProperty", "noOp": false, "prop": "A", "value": 3},
         "clientOp": {"type": "ObjectSetProperty", "noOp": false, "prop": "A", "value": 3}

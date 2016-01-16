@@ -3,7 +3,7 @@
 module convergence.ot {
   export class ObjectSetSetOTF implements OperationTransformationFunction<ObjectSetOperation, ObjectSetOperation> {
     transform(s:ObjectSetOperation, c:ObjectSetOperation):OperationPair {
-      if (s.value != c.value) {
+      if (!EqualsUtil.deepEquals(s.value, c.value)) {
         // O-SS-1
         return new OperationPair(s, c.copy({noOp: true}));
       } else {

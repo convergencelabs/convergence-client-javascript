@@ -1,3 +1,6 @@
+var convergence = require("../../../../../build/convergence-client");
+var expect = require('chai').expect;
+
 describe('RangeRelationshipUtil', function () {
     var RangeRelationshipUtil = convergence.ot.RangeRelationshipUtil;
     var RangeRangeRelationship = convergence.ot.RangeRangeRelationship;

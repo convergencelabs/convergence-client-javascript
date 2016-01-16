@@ -9,7 +9,7 @@ module convergence.ot {
       }
       else {
         // S-II-3
-        return new OperationPair(s.copy({index1: s.index + c.value.length}), c);
+        return new OperationPair(s.copy({index: s.index + c.value.length}), c);
       }
     }
   }

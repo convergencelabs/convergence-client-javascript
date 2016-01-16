@@ -146,7 +146,7 @@ module convergence.ot {
     }
   }
 
-  export enum  MoveDirection {
+  export enum MoveDirection {
     Forward, Backward, Identity
   }
 }

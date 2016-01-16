@@ -25,7 +25,7 @@
     "gulp-concat": "^2.5.2",
     "gulp-concat-css": "^2.0.0",
     "gulp-declare": "^0.3.0",
-    "gulp-insert": "^0.4.0",
+    "gulp-insert": "^0.5.0",
     "gulp-istanbul": "^0.5.0",
     "gulp-mocha": "^1.1.0",
     "gulp-plumber": "^0.6.5",

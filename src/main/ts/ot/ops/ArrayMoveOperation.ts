@@ -26,7 +26,7 @@ module convergence.ot {
     copy(properties:any):ArrayMoveOperation {
       return new ArrayMoveOperation(
         properties.path || this._path,
-        properties.noOp || this._noOp,
+        properties.noOp !== undefined ? properties.noOp : this._noOp,
         properties.fromIndex || this._fromIndex,
         properties.toIndex || this._toIndex);
     }
