@@ -6,6 +6,7 @@
 module convergence.ot {
   export class TransformationFunctionRegistry {
     otfs:any = {};
+    ptfs:any = {};
 
     constructor() {
       // String Functions
@@ -82,6 +83,21 @@ module convergence.ot {
 
       // Boolean Functions
       this.registerOtf(BooleanSetOperation.TYPE, BooleanSetOperation.TYPE, new BooleanSetSetOTF());
+
+
+      //
+      // Path Transformation Functions
+      //
+
+      this.ptfs[ArrayInsertOperation.TYPE] = new ArrayInsertPTF();
+      this.ptfs[ArrayRemoveOperation.TYPE] = new ArrayRemovePTF();
+      this.ptfs[ArrayReplaceOperation.TYPE] = new ArrayReplacePTF();
+      this.ptfs[ArrayMoveOperation.TYPE] = new ArrayMovePTF();
+      this.ptfs[ArraySetOperation.TYPE] = new ArraySetPTF();
+
+      this.ptfs[ObjectSetPropertyOperation.TYPE] = new ObjectSetPropertyPTF();
+      this.ptfs[ObjectRemovePropertyOperation.TYPE] = new ObjectRemovePropertyPTF();
+      this.ptfs[ObjectSetOperation.TYPE] = new ObjectSetPTF();
     }
 
     registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>(s:string, c:string, otf:OperationTransformationFunction<S, C>):void {
@@ -96,6 +112,10 @@ module convergence.ot {
     getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s:S, c:C):OperationTransformationFunction<S, C> {
       var key:string = s.type() + c.type();
       return this.otfs[key]
+    }
+
+    getPathTransformationFunction<A extends DiscreteOperation>(a:A):PathTransformationFunction<A> {
+      return this.ptfs[a.type()]
     }
   }
 }
