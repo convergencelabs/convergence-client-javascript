@@ -20,29 +20,18 @@ var outputFileBase = "convergence-client";
 var outputFileJs = outputFileBase + ".js";
 var outputFileDts = outputFileBase + ".d";
 
+var tsProject = ts.createProject('tsconfig.json');
+
 const plumberConf = {};
 
-gulp.task('mkdirs', function () {
-  mkdirp.sync("build");
-  mkdirp.sync("dist");
-});
-
-gulp.task('ts-compile', ["mkdirs"], function () {
+gulp.task('ts-compile', function () {
   var tsResult = gulp.src('src/main/ts/**/*.ts')
-    .pipe(ts({
-        out: outputFileJs,
-        target: "ES5",
-        declarationFiles: true
-    }));
+    .pipe(ts(tsProject));
   tsResult.js
       .pipe(insert.append('if (module) module.exports = convergence;'))
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest('.'));
 
-  return tsResult.dts
-    .pipe(rename({
-      basename: outputFileDts
-    }))
-    .pipe(gulp.dest('build'));
+  return tsResult.dts.pipe(gulp.dest('.'));
 });
 
 gulp.task('tslint', function(){
@@ -68,6 +57,7 @@ gulp.task('istanbul', function (cb) {
 });
 
 gulp.task('dist', ["ts-compile"], function() {
+    mkdirp.sync("dist");
   return gulp.src('build/*.js')
     .pipe(uglify())
     .pipe(rename({
@@ -86,13 +76,6 @@ gulp.task('clean', function (cb) {
 // The default task (called when you run `gulp`)
 gulp.task('default', ["ts-compile"]);
 gulp.task('test2', ["istanbul"]);
-
-
-gulp.task('build', ['ts-compile'], function(){
-    return gulp.src('build/' + outputFileJs)
-        .pipe(insert.append('if (module) module.exports = convergence;'))
-        .pipe(gulp.dest('build/' + outputFileJs));
-});
 
 gulp.task('test', function (done) {
     new Server({

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "preserveConstEnums": true,
+    "out": "build/convergence-client.js",
+    "sourceMap": true,
+    "declaration": true
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "bower_components"
+  ]
+}
