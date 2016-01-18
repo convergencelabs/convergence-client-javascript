@@ -1,18 +1,18 @@
 module convergence.util {
   export class EventEmitter {
 
-    static defaultMaxListeners = 10;
-    
-    private _events:any;
-    private _maxListeners;
+    static defaultMaxListeners: number = 10;
+
+    private _events: any;
+    private _maxListeners: number;
 
     constructor() {
       this._events = {};
       this._maxListeners = EventEmitter.defaultMaxListeners;
     }
 
-    addListener(event:string, listener:Function):EventEmitter {
-      var listeners:Function[] = this.listeners(event);
+    addListener(event: string, listener: Function): EventEmitter {
+      var listeners: Function[] = this.listeners(event);
       if (!listeners) {
         listeners = [];
         this._events[event] = listeners;
@@ -26,27 +26,27 @@ module convergence.util {
       return this;
     }
 
-    on(event:string, listener:Function):EventEmitter {
+    on(event: string, listener: Function): EventEmitter {
       return this.addListener(event, listener);
     }
 
-    once(event, listener):EventEmitter {
-      var self = this;
-      var wrapper = function () {
+    once(event: string, listener: Function): EventEmitter {
+      var self: EventEmitter = this;
+      var wrapper: Function = function (): void {
         self.removeListener(event, wrapper);
         listener();
       };
       return this.addListener(event, wrapper);
     }
 
-    removeAllListeners(event:string):EventEmitter {
+    removeAllListeners(event: string): EventEmitter {
       delete this._events[event];
       return this;
     }
 
-    removeListener(event:string, listener:Function):EventEmitter {
-      var listeners = this.listeners(event);
-      var index = listeners.indexOf(listener);
+    removeListener(event: string, listener: Function): EventEmitter {
+      var listeners: Function[] = this.listeners(event);
+      var index: number = listeners.indexOf(listener);
       if (index !== -1) {
         listeners.splice(index, 1);
       }
@@ -54,15 +54,15 @@ module convergence.util {
       return this;
     }
 
-    off(event:string, listener:Function):EventEmitter {
+    off(event: string, listener: Function): EventEmitter {
       return this.removeListener(event, listener);
     }
 
-    listeners(event:string):Function[] {
+    listeners(event: string): Function[] {
       return this._events[event] || [];
     }
 
-    listenerCount(event:string):number {
+    listenerCount(event: string): number {
       return this.listeners(event).length;
     }
 
@@ -74,9 +74,9 @@ module convergence.util {
       this._maxListeners = n;
     }
 
-    emit(event:string, ... args: any[]):EventEmitter {
-      var listeners = this.listeners(event);
-      listeners.forEach(function(listener: Function) {
+    emit(event: string, ...args: any[]): EventEmitter {
+      var listeners: Function[] = this.listeners(event);
+      listeners.forEach(function (listener: Function): void {
         listener.apply(this, args || []);
       });
       return this;

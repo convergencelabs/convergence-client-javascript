@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArrayMoveRemoveOTF implements OperationTransformationFunction<ArrayMoveOperation, ArrayRemoveOperation> {
-    transform(s:ArrayMoveOperation, c:ArrayRemoveOperation):OperationPair {
+    transform(s: ArrayMoveOperation, c: ArrayRemoveOperation): OperationPair {
       switch (ArrayMoveHelper.getMoveDirection(s)) {
         case MoveDirection.Forward:
           return this.transformAgainstForwardMove(s, c);
@@ -13,7 +13,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstForwardMove(s:ArrayMoveOperation, c:ArrayRemoveOperation):OperationPair {
+    private transformAgainstForwardMove(s: ArrayMoveOperation, c: ArrayRemoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
           // A-MR-1
@@ -31,7 +31,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstBackwardMove(s:ArrayMoveOperation, c:ArrayRemoveOperation):OperationPair {
+    private transformAgainstBackwardMove(s: ArrayMoveOperation, c: ArrayRemoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
           // A-MR-6
@@ -49,7 +49,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstIdentityMove(s:ArrayMoveOperation, c:ArrayRemoveOperation):OperationPair {
+    private transformAgainstIdentityMove(s: ArrayMoveOperation, c: ArrayRemoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
           // A-MR-11

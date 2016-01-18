@@ -2,6 +2,6 @@
 
 module convergence.ot {
   export interface OperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation> {
-    transform(s:S, c:C): OperationPair
+    transform(s: S, c: C): OperationPair;
   }
 }

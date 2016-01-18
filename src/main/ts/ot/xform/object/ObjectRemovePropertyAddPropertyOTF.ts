@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ObjectRemovePropertyAddPropertyOTF implements OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectAddPropertyOperation> {
-    transform(s:ObjectRemovePropertyOperation, c:ObjectAddPropertyOperation):OperationPair {
+    transform(s: ObjectRemovePropertyOperation, c: ObjectAddPropertyOperation): OperationPair {
       if (s.prop != c.prop) {
         // O-RA-1
         return new OperationPair(s, c)

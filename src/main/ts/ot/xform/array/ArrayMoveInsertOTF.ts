@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArrayMoveInsertOTF implements OperationTransformationFunction<ArrayMoveOperation, ArrayInsertOperation> {
-    transform(s:ArrayMoveOperation, c:ArrayInsertOperation):OperationPair {
+    transform(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
       switch (ArrayMoveHelper.getMoveDirection(s)) {
         case MoveDirection.Forward:
           return this.transformAgainstForwardMove(s, c);
@@ -13,7 +13,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstForwardMove(s:ArrayMoveOperation, c:ArrayInsertOperation):OperationPair {
+    private transformAgainstForwardMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.Start:
@@ -29,7 +29,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstBackwardMove(s:ArrayMoveOperation, c:ArrayInsertOperation):OperationPair {
+    private transformAgainstBackwardMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.Start:
@@ -45,14 +45,14 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstIdentityMove(s:ArrayMoveOperation, c:ArrayInsertOperation):OperationPair {
+    private transformAgainstIdentityMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.After:
           // A-MI-13
           return new OperationPair(s, c);
         default:
           // A-MI-11 and A-MI-12
-          return new OperationPair(s.copy({fromIndex: s.fromIndex + 1, toIndex: s.toIndex + 1}), c)
+          return new OperationPair(s.copy({fromIndex: s.fromIndex + 1, toIndex: s.toIndex + 1}), c);
       }
     }
   }

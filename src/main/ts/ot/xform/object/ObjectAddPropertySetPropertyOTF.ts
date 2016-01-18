@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ObjectAddPropertySetPropertyOTF implements OperationTransformationFunction<ObjectAddPropertyOperation, ObjectSetPropertyOperation> {
-    transform(s:ObjectAddPropertyOperation, c:ObjectSetPropertyOperation):OperationPair {
+    transform(s: ObjectAddPropertyOperation, c: ObjectSetPropertyOperation): OperationPair {
       if (s.prop != c.prop) {
         // O-AT-1
         return new OperationPair(s, c);

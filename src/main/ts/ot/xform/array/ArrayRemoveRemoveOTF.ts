@@ -2,8 +2,8 @@
 
 module convergence.ot {
   export class ArrayRemoveRemoveOTF implements OperationTransformationFunction<ArrayRemoveOperation, ArrayRemoveOperation> {
-    transform(s:ArrayRemoveOperation, c:ArrayRemoveOperation):OperationPair {
-      if (s.index == c.index) {
+    transform(s: ArrayRemoveOperation, c: ArrayRemoveOperation): OperationPair {
+      if (s.index === c.index) {
         // A-RR-2
         return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
       } else if (s.index < c.index) {

@@ -5,11 +5,11 @@
 
 module convergence.ot {
   export class TransformationFunctionRegistry {
-    otfs:any = {};
-    ptfs:any = {};
+    otfs: any = {};
+    ptfs: any = {};
 
     constructor() {
-      // String Functions
+      // string Functions
       this.registerOtf(StringInsertOperation.TYPE, StringInsertOperation.TYPE, new StringInsertInsertOTF());
       this.registerOtf(StringInsertOperation.TYPE, StringRemoveOperation.TYPE, new StringInsertRemoveOTF());
       this.registerOtf(StringInsertOperation.TYPE, StringSetOperation.TYPE, new StringInsertSetOTF());
@@ -22,7 +22,7 @@ module convergence.ot {
       this.registerOtf(StringSetOperation.TYPE, StringRemoveOperation.TYPE, new StringSetRemoveOTF());
       this.registerOtf(StringSetOperation.TYPE, StringSetOperation.TYPE, new StringSetSetOTF());
 
-      // Object Functions
+      // object Functions
       this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectAddPropertyOperation.TYPE, new ObjectAddPropertyAddPropertyOTF());
       this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectSetPropertyOperation.TYPE, new ObjectAddPropertySetPropertyOTF());
       this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectAddPropertyRemovePropertyOTF());
@@ -43,7 +43,7 @@ module convergence.ot {
       this.registerOtf(ObjectSetOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectSetRemovePropertyOTF());
       this.registerOtf(ObjectSetOperation.TYPE, ObjectSetOperation.TYPE, new ObjectSetSetOTF());
 
-      // Array Functions
+      // array Functions
       this.registerOtf(ArrayInsertOperation.TYPE, ArrayInsertOperation.TYPE, new ArrayInsertInsertOTF());
       this.registerOtf(ArrayInsertOperation.TYPE, ArrayRemoveOperation.TYPE, new ArrayInsertRemoveOTF());
       this.registerOtf(ArrayInsertOperation.TYPE, ArrayReplaceOperation.TYPE, new ArrayInsertReplaceOTF());
@@ -74,19 +74,19 @@ module convergence.ot {
       this.registerOtf(ArraySetOperation.TYPE, ArrayMoveOperation.TYPE, new ArraySetMoveOTF());
       this.registerOtf(ArraySetOperation.TYPE, ArraySetOperation.TYPE, new ArraySetSetOTF());
 
-      // Number Functions
+      // number Functions
       this.registerOtf(NumberAddOperation.TYPE, NumberAddOperation.TYPE, new NumberAddAddOTF());
       this.registerOtf(NumberAddOperation.TYPE, NumberSetOperation.TYPE, new NumberAddSetOTF());
 
       this.registerOtf(NumberSetOperation.TYPE, NumberAddOperation.TYPE, new NumberSetAddOTF());
       this.registerOtf(NumberSetOperation.TYPE, NumberSetOperation.TYPE, new NumberSetSetOTF());
 
-      // Boolean Functions
+      // boolean Functions
       this.registerOtf(BooleanSetOperation.TYPE, BooleanSetOperation.TYPE, new BooleanSetSetOTF());
 
 
       //
-      // Path Transformation Functions
+      // path Transformation Functions
       //
 
       this.ptfs[ArrayInsertOperation.TYPE] = new ArrayInsertPTF();
@@ -100,8 +100,8 @@ module convergence.ot {
       this.ptfs[ObjectSetOperation.TYPE] = new ObjectSetPTF();
     }
 
-    registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>(s:string, c:string, otf:OperationTransformationFunction<S, C>):void {
-      var key:string = s + c;
+    registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>(s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
+      var key: string = s + c;
       if (this.otfs[key]) {
         throw new Error("Transformation function already registered for " + s + ", " + c);
       } else {
@@ -109,13 +109,13 @@ module convergence.ot {
       }
     }
 
-    getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s:S, c:C):OperationTransformationFunction<S, C> {
-      var key:string = s.type() + c.type();
-      return this.otfs[key]
+    getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s: S, c: C): OperationTransformationFunction<S, C> {
+      var key: string = s.type() + c.type();
+      return this.otfs[key];
     }
 
-    getPathTransformationFunction<A extends DiscreteOperation>(a:A):PathTransformationFunction<A> {
-      return this.ptfs[a.type()]
+    getPathTransformationFunction<A extends DiscreteOperation>(a: A): PathTransformationFunction<A> {
+      return this.ptfs[a.type()];
     }
   }
 }

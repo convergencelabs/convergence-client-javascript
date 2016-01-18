@@ -5,12 +5,34 @@
     {
       "id": "A-SM-1",
       "input": {
-        "serverOp": {"type": "ArraySet", "noOp": false, "value": ["X"]},
-        "clientOp": {"type": "ArrayMove", "noOp": false, "fromIndex": 3, "toIndex": 5}
+        "serverOp": {
+          "type": "ArraySet",
+          "noOp": false,
+          "value": [
+            "X"
+          ]
+        },
+        "clientOp": {
+          "type": "ArrayMove",
+          "noOp": false,
+          "fromIndex": 3,
+          "toIndex": 5
+        }
       },
       "output": {
-        "serverOp": {"type": "ArraySet", "noOp": false, "value": ["X"]},
-        "clientOp": {"type": "ArrayMove", "noOp": true, "fromIndex": 3, "toIndex": 5}
+        "serverOp": {
+          "type": "ArraySet",
+          "noOp": false,
+          "value": [
+            "X"
+          ]
+        },
+        "clientOp": {
+          "type": "ArrayMove",
+          "noOp": true,
+          "fromIndex": 3,
+          "toIndex": 5
+        }
       }
     }
   ]

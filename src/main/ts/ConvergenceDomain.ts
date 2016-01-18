@@ -8,11 +8,11 @@ module convergence {
      * @param url
      *            The url of the convergence domain to connect to.
      */
-    constructor(url:String) {
+    constructor(url: String) {
 
     }
 
-    dispose() {
+    dispose(): void {
 
     }
   }

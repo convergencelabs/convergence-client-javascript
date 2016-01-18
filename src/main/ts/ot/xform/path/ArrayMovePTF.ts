@@ -2,10 +2,10 @@
 
 module convergence.ot {
   export class ArrayMovePTF implements PathTransformationFunction<ArrayMoveOperation> {
-    transformDescendantPath(ancestor:ArrayMoveOperation, descendantPath:Array<string | number>):PathTransformation {
+    transformDescendantPath(ancestor: ArrayMoveOperation, descendantPath: Array<string | number>): PathTransformation {
       var ancestorPathLength = ancestor.path.length;
       var descendantArrayIndex = <number>descendantPath[ancestorPathLength];
-      
+
       if (ancestor.fromIndex < descendantArrayIndex && ancestor.toIndex > descendantArrayIndex) {
         // moved from before to after.  Decrement the index
         var newPath = descendantPath.slice(0);
@@ -16,7 +16,7 @@ module convergence.ot {
         var newPath = descendantPath.slice(0);
         newPath[ancestorPathLength] = descendantArrayIndex + 1;
         return new PathTransformation(PathTransformationResult.PathUpdated, newPath);
-      } else if (ancestor.fromIndex == descendantArrayIndex) {
+      } else if (ancestor.fromIndex === descendantArrayIndex) {
         // The descendant path is being moved.
         var newPath = descendantPath.slice(0);
         newPath[ancestorPathLength] = ancestor.toIndex;

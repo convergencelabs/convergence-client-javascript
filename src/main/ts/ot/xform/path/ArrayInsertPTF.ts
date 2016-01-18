@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArrayInsertPTF implements PathTransformationFunction<ArrayInsertOperation> {
-    transformDescendantPath(ancestor:ArrayInsertOperation, descendantPath:Array<string | number>):PathTransformation {
+    transformDescendantPath(ancestor: ArrayInsertOperation, descendantPath: Array<string | number>): PathTransformation {
       var ancestorPathLength = ancestor.path.length;
       var descendantPathIndex = <number>descendantPath[ancestorPathLength];
       if (ancestor.index <= descendantPathIndex) {

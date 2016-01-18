@@ -2,30 +2,30 @@
 
 module convergence.ot {
   export class ArrayMoveMoveOTF implements OperationTransformationFunction<ArrayMoveOperation, ArrayMoveOperation> {
-    transform(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
-      var sMoveType = ArrayMoveHelper.getMoveDirection(s);
-      var cMoveType = ArrayMoveHelper.getMoveDirection(c);
+    transform(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
+      var sMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(s);
+      var cMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(c);
 
-      if (sMoveType == MoveDirection.Forward) {
-        if (cMoveType == MoveDirection.Forward) {
+      if (sMoveType === MoveDirection.Forward) {
+        if (cMoveType === MoveDirection.Forward) {
           return this.transformServerForwardMoveWithClientForwardMove(s, c);
-        } else if (cMoveType == MoveDirection.Backward) {
+        } else if (cMoveType === MoveDirection.Backward) {
           return this.transformServerForwardMoveWithClientBackwardMove(s, c);
         } else { // MoveDirection.Identity
           return this.transformServerForwardMoveWithClientIdentityMove(s, c);
         }
-      } else if (sMoveType == MoveDirection.Backward) {
-        if (cMoveType == MoveDirection.Forward) {
+      } else if (sMoveType === MoveDirection.Backward) {
+        if (cMoveType === MoveDirection.Forward) {
           return this.transformServerBackwardMoveWithClientForwardMove(s, c);
-        } else if (cMoveType == MoveDirection.Backward) {
+        } else if (cMoveType === MoveDirection.Backward) {
           return this.transformServerBackwardMoveWithClientBackwardMove(s, c);
         } else { // MoveDirection.Identity
           return this.transformServerBackwardMoveWithClientIdentityMove(s, c);
         }
       } else {
-        if (cMoveType == MoveDirection.Forward) {
+        if (cMoveType === MoveDirection.Forward) {
           return this.transformServerIdentityMoveWithClientForwardMove(s, c);
-        } else if (cMoveType == MoveDirection.Backward) {
+        } else if (cMoveType === MoveDirection.Backward) {
           return this.transformServerIdentityMoveWithClientBackwardMove(s, c);
         } else { // MoveDirection.Identity
           return this.transformServerIdentityMoveWithClientIdentityMove(s, c);
@@ -33,7 +33,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerForwardMoveWithClientForwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerForwardMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
         case RangeRangeRelationship.Precedes:
           // A-MM-FF-1
@@ -77,7 +77,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerForwardMoveWithClientBackwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerForwardMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
         case RangeRangeRelationship.Precedes:
           // A-MM-FB-1
@@ -121,7 +121,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerForwardMoveWithClientIdentityMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerForwardMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.fromIndex)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -129,15 +129,15 @@ module convergence.ot {
           return new OperationPair(s, c);
         case RangeIndexRelationship.Start:
           // A-MM-FI-2
-          return new OperationPair(s, c.copy({fromIndex: s.toIndex, toIndex: s.toIndex}))
+          return new OperationPair(s, c.copy({fromIndex: s.toIndex, toIndex: s.toIndex}));
         case RangeIndexRelationship.Within:
         case RangeIndexRelationship.End:
           // A-MM-FI-3 and A-MM-FI-4
-          return new OperationPair(s, c.copy({fromIndex: c.fromIndex - 1, toIndex: c.toIndex - 1}))
+          return new OperationPair(s, c.copy({fromIndex: c.fromIndex - 1, toIndex: c.toIndex - 1}));
       }
     }
 
-    private transformServerBackwardMoveWithClientForwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerBackwardMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
         case RangeRangeRelationship.Precedes:
           // A-MM-BF-1
@@ -147,7 +147,7 @@ module convergence.ot {
           return new OperationPair(s, c);
         case RangeRangeRelationship.Meets:
           // A-MM-BF-3
-          return new OperationPair(s.copy({fromIndex: c.toIndex}), c.copy({noOp: true}))
+          return new OperationPair(s.copy({fromIndex: c.toIndex}), c.copy({noOp: true}));
         case RangeRangeRelationship.MetBy:
           // A-MM-BF-4
           return new OperationPair(s.copy({toIndex: s.toIndex - 1}), c.copy({toIndex: c.toIndex + 1}));
@@ -181,7 +181,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerBackwardMoveWithClientBackwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerBackwardMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
         case RangeRangeRelationship.Precedes:
           // A-MM-BB-1
@@ -225,7 +225,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerBackwardMoveWithClientIdentityMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerBackwardMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.fromIndex)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -241,7 +241,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerIdentityMoveWithClientForwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerIdentityMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.fromIndex)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -257,7 +257,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerIdentityMoveWithClientBackwardMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerIdentityMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.fromIndex)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -273,7 +273,7 @@ module convergence.ot {
       }
     }
 
-    private transformServerIdentityMoveWithClientIdentityMove(s:ArrayMoveOperation, c:ArrayMoveOperation):OperationPair {
+    private transformServerIdentityMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
       // A-MM-II-1
       return new OperationPair(s, c);
     }

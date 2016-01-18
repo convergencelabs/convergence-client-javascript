@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class StringInsertRemoveOTF implements OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> {
-    transform(s:StringInsertOperation, c:StringRemoveOperation):OperationPair {
+    transform(s: StringInsertOperation, c: StringRemoveOperation): OperationPair {
       if (s.index <= c.index) {
         // S-IR-1 and S-IR-2
         return new OperationPair(s, c.copy({index: c.index + s.value.length}));

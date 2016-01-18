@@ -9,8 +9,8 @@ module convergence.ot {
      *
      * @return True if the two path lists represent the same path, false otherwise.
      */
-    static areEqual(p1:Array<string | number>, p2:Array<string | number>):boolean {
-      return (p1.length == p2.length) && p1.every(function (element, index) {
+    static areEqual(p1: Array<string | number>, p2: Array<string | number>): boolean {
+      return (p1.length === p2.length) && p1.every(function (element: any, index: number): boolean {
           return element === p2[index];
         });
     }
@@ -27,12 +27,12 @@ module convergence.ot {
      *
      * @return True if the p1 is a direct child of p2
      */
-    static isChildOf(p1:Array<string | number>, p2:Array<string | number>):boolean {
-      if (p1.length != p2.length + 1) {
+    static isChildOf(p1: Array<string | number>, p2: Array<string | number>): boolean {
+      if (p1.length !== p2.length + 1) {
         return false;
       } else {
         // parent is shorter by one.
-        return p2.every(function (element, index) {
+        return p2.every(function (element: any, index: number): boolean {
           return element === p1[index];
         });
       }
@@ -50,8 +50,8 @@ module convergence.ot {
      *
      * @return True if the p1 is a direct parent of p2
      */
-    static isParentOf(p1:Array<string | number>, p2:Array<string | number>):boolean {
-      return this.isChildOf(p2, p1)
+    static isParentOf(p1: Array<string | number>, p2: Array<string | number>): boolean {
+      return this.isChildOf(p2, p1);
     }
 
     /**
@@ -65,12 +65,12 @@ module convergence.ot {
      *
      * @return True if the p1 is a descendant of p2
      */
-    static isDescendantOf(p1:Array<string | number>, p2:Array<string | number>):boolean {
+    static isDescendantOf(p1: Array<string | number>, p2: Array<string | number>): boolean {
       if (p1.length <= p2.length) {
         return false;
       } else {
         // descendant is longer, so the ancestor length is the potentially common length.
-        return p2.every(function (element, index) {
+        return p2.every(function (element: any, index: number): boolean {
           return element === p1[index];
         });
       }
@@ -87,7 +87,7 @@ module convergence.ot {
      *
      * @return True if the p1 is a ancestor of p2
      */
-    static isAncestorOf(p1:Array<string | number>, p2:Array<string | number>):boolean {
+    static isAncestorOf(p1: Array<string | number>, p2: Array<string | number>): boolean {
       return this.isDescendantOf(p2, p1);
     }
 
@@ -102,17 +102,17 @@ module convergence.ot {
      *
      * @return True if the paths are siblings, false otherwise.
      */
-    static areSiblings(p1:Array<string | number>, p2:Array<string | number>):boolean {
-      if (p1.length != p2.length) {
+    static areSiblings(p1: Array<string | number>, p2: Array<string | number>): boolean {
+      if (p1.length !== p2.length) {
         return false;
-      } else if (p1.length == 0) {
+      } else if (p1.length === 0) {
         return false;
-      } else if (p1[p1.length - 1] == p2[p2.length - 1]) {
+      } else if (p1[p1.length - 1] === p2[p2.length - 1]) {
         return false;
       } else {
-        p1.every(function (element, index) {
-          return index == p2.length - 1 || element === p1[index];
-        })
+        p1.every(function (element: any, index: number): boolean {
+          return index === p2.length - 1 || element === p1[index];
+        });
       }
     }
   }

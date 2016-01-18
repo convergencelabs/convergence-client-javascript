@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArraySetReplaceOTF implements OperationTransformationFunction<ArraySetOperation, ArrayReplaceOperation> {
-    transform(s:ArraySetOperation, c:ArrayReplaceOperation):OperationPair {
+    transform(s: ArraySetOperation, c: ArrayReplaceOperation): OperationPair {
       // A-SP-1
       return new OperationPair(s, c.copy({noOp: true}));
     }

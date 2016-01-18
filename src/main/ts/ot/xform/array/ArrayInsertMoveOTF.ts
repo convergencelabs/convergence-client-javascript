@@ -4,7 +4,7 @@
 module convergence.ot {
 
   export class ArrayInsertMoveOTF implements OperationTransformationFunction<ArrayInsertOperation, ArrayMoveOperation> {
-    transform(s:ArrayInsertOperation, c:ArrayMoveOperation):OperationPair {
+    transform(s: ArrayInsertOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getMoveDirection(c)) {
         case MoveDirection.Forward:
           return this.transformAgainstForwardMove(s, c);
@@ -15,7 +15,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstForwardMove(s:ArrayInsertOperation, c:ArrayMoveOperation):OperationPair {
+    private transformAgainstForwardMove(s: ArrayInsertOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.Start:
@@ -31,7 +31,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstBackwardMove(s:ArrayInsertOperation, c:ArrayMoveOperation):OperationPair {
+    private transformAgainstBackwardMove(s: ArrayInsertOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.Start:
@@ -40,21 +40,21 @@ module convergence.ot {
         case RangeIndexRelationship.Within:
         case RangeIndexRelationship.End:
           // A-IM-8 and A-IM-9
-          return new OperationPair(s.copy({index: s.index + 1}), c.copy({fromIndex: c.fromIndex + 1}))
+          return new OperationPair(s.copy({index: s.index + 1}), c.copy({fromIndex: c.fromIndex + 1}));
         case RangeIndexRelationship.After:
           // A-IM-10
           return new OperationPair(s, c);
       }
     }
 
-    private transformAgainstIdentityMove(s:ArrayInsertOperation, c:ArrayMoveOperation):OperationPair {
+    private transformAgainstIdentityMove(s: ArrayInsertOperation, c: ArrayMoveOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
         case RangeIndexRelationship.After:
           // A-IM-13
           return new OperationPair(s, c);
         default:
           // A-IM-11 and A-IM-12
-          return new OperationPair(s, c.copy({fromIndex: c.fromIndex + 1, toIndex: c.toIndex + 1}))
+          return new OperationPair(s, c.copy({fromIndex: c.fromIndex + 1, toIndex: c.toIndex + 1}));
       }
     }
   }

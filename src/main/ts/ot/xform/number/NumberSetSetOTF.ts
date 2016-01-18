@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class NumberSetSetOTF implements OperationTransformationFunction<NumberSetOperation, NumberSetOperation> {
-    transform(s:NumberSetOperation, c:NumberSetOperation):OperationPair {
+    transform(s: NumberSetOperation, c: NumberSetOperation): OperationPair {
       if (s.value == c.value) {
         // N-SS-1
         return new OperationPair(s.copy({noOp: true}), s.copy({noOp: true}));

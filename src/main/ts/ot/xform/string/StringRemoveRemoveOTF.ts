@@ -3,7 +3,7 @@
 
 module convergence.ot {
   export class StringRemoveRemoveOTF implements OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> {
-    transform(s:StringRemoveOperation, c:StringRemoveOperation):OperationPair {
+    transform(s: StringRemoveOperation, c: StringRemoveOperation): OperationPair {
       var cStart = c.index;
       var cEnd = c.index + c.value.length;
 

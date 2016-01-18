@@ -4,20 +4,20 @@ module convergence.ot {
 
   export class StringInsertOperation extends StringOperation {
 
-    static TYPE:string = "StringInsert";
+    static TYPE: string = "StringInsert";
 
-    protected _index:number;
+    protected _index: number;
 
-    constructor(path:Array<string | number>, noOp:boolean, index:number, value:string) {
+    constructor(path: Array<string | number>, noOp: boolean, index: number, value: string) {
       super(path, noOp, value);
       this._index = index;
     }
 
-    get index():number {
+    get index(): number {
       return this._index;
     }
 
-    copy(properties:any):StringInsertOperation {
+    copy(properties: any): StringInsertOperation {
       return new StringInsertOperation(
         properties.path || this._path,
         properties.noOp || this._noOp,
@@ -25,7 +25,7 @@ module convergence.ot {
         properties.value || this._value);
     }
 
-    type():string {
+    type(): string {
       return StringInsertOperation.TYPE;
     }
   }

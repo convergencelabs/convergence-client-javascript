@@ -5,11 +5,10 @@ module convergence.ot {
     private _timestamp: number;
     private _operation: Operation;
 
-    constructor(
-      clientId: string,
-      contextVersion: number,
-      timestamp: number,
-      operation: Operation) {
+    constructor(clientId: string,
+                contextVersion: number,
+                timestamp: number,
+                operation: Operation) {
       this._clientId = clientId;
       this._contextVersion = contextVersion;
       this._timestamp = timestamp;

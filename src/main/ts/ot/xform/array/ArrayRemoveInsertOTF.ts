@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArrayRemoveInsertOTF implements OperationTransformationFunction<ArrayRemoveOperation, ArrayInsertOperation> {
-    transform(s:ArrayRemoveOperation, c:ArrayInsertOperation):OperationPair {
+    transform(s: ArrayRemoveOperation, c: ArrayInsertOperation): OperationPair {
       if (s.index < c.index) {
         // A-RI-1
         return new OperationPair(s, c.copy({index: c.index - 1}));

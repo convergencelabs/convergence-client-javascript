@@ -2,19 +2,19 @@
 
 module convergence.ot {
   export class OperationPair {
-    _serverOp:DiscreteOperation;
-    _clientOp:DiscreteOperation;
+    _serverOp: Operation;
+    _clientOp: Operation;
 
-    constructor(serverOp:DiscreteOperation, clientOp:DiscreteOperation) {
+    constructor(serverOp: Operation, clientOp: Operation) {
       this._serverOp = serverOp;
-      this._clientOp = clientOp
+      this._clientOp = clientOp;
     }
 
-    get serverOp():DiscreteOperation {
+    get serverOp(): Operation {
       return this._serverOp;
     }
 
-    get clientOp():DiscreteOperation {
+    get clientOp(): Operation {
       return this._clientOp;
     }
   }

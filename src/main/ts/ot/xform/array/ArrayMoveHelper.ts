@@ -18,8 +18,8 @@ module convergence.ot {
      *            The op to evaluate
      * @return true if fromIndex < toIndex, false otherwise.
      */
-    static isForwardMove(op:ArrayMoveOperation):boolean {
-      return op.fromIndex < op.toIndex
+    static isForwardMove(op: ArrayMoveOperation): boolean {
+      return op.fromIndex < op.toIndex;
     }
 
     /**
@@ -30,8 +30,8 @@ module convergence.ot {
      *            The op to evaluate
      * @return true if fromIndex > toIndex, false otherwise.
      */
-    static isBackwardMoveMove(op:ArrayMoveOperation):boolean {
-      return op.fromIndex > op.toIndex
+    static isBackwardMoveMove(op: ArrayMoveOperation): boolean {
+      return op.fromIndex > op.toIndex;
     }
 
     /**
@@ -42,8 +42,8 @@ module convergence.ot {
      *            The op to evaluate
      * @return true if fromIndex == toIndex, false otherwise.
      */
-    static isIdentityMove(op:ArrayMoveOperation):boolean {
-      return op.fromIndex == op.toIndex
+    static isIdentityMove(op: ArrayMoveOperation): boolean {
+      return op.fromIndex === op.toIndex;
     }
 
     /**
@@ -53,13 +53,13 @@ module convergence.ot {
      *
      * @return The direction of the move.
      */
-    static getMoveDirection(op:ArrayMoveOperation):MoveDirection {
+    static getMoveDirection(op: ArrayMoveOperation): MoveDirection {
       if (this.isForwardMove(op)) {
-        return MoveDirection.Forward
+        return MoveDirection.Forward;
       } else if (this.isBackwardMoveMove(op)) {
-        return MoveDirection.Backward
+        return MoveDirection.Backward;
       } else {
-        return MoveDirection.Identity
+        return MoveDirection.Identity;
       }
     }
 
@@ -72,8 +72,8 @@ module convergence.ot {
      *            The index to evaluate
      * @return True if index < min(fromIndex, toIndex), false otherwise.
      */
-    static indexBeforeRange(op:ArrayMoveOperation, index:number):boolean {
-      return index < this.getRangeMin(op)
+    static indexBeforeRange(op: ArrayMoveOperation, index: number): boolean {
+      return index < this.getRangeMin(op);
     }
 
     /**
@@ -85,8 +85,8 @@ module convergence.ot {
      *            The index to evaluate
      * @return True if index > max(fromIndex, toIndex), false otherwise.
      */
-    static indexAfterRange(op:ArrayMoveOperation, index:number):boolean {
-      return index > this.getRangeMax(op)
+    static indexAfterRange(op: ArrayMoveOperation, index: number): boolean {
+      return index > this.getRangeMax(op);
     }
 
     /**
@@ -100,12 +100,12 @@ module convergence.ot {
      * @return True if index < max(fromIndex, toIndex) && index > min(fromIndex, toIndex), false
      *         otherwise.
      */
-    static indexWithinRange(op:ArrayMoveOperation, index:number):boolean {
-      return index > this.getRangeMin(op) && index < this.getRangeMax(op)
+    static indexWithinRange(op: ArrayMoveOperation, index: number): boolean {
+      return index > this.getRangeMin(op) && index < this.getRangeMax(op);
     }
 
-    static getRangeIndexRelationship(op:ArrayMoveOperation, index:number):RangeIndexRelationship {
-      return RangeRelationshipUtil.getRangeIndexRelationship(this.getRangeMin(op), this.getRangeMax(op), index)
+    static getRangeIndexRelationship(op: ArrayMoveOperation, index: number): RangeIndexRelationship {
+      return RangeRelationshipUtil.getRangeIndexRelationship(this.getRangeMin(op), this.getRangeMax(op), index);
     }
 
     /**
@@ -118,7 +118,7 @@ module convergence.ot {
      *
      * @return The interval that matched op1 <verb> op2
      */
-    static getRangeRelationship(op1:ArrayMoveOperation, op2:ArrayMoveOperation):RangeRangeRelationship {
+    static getRangeRelationship(op1: ArrayMoveOperation, op2: ArrayMoveOperation): RangeRangeRelationship {
       return RangeRelationshipUtil.getRangeRangeRelationship(
         this.getRangeMin(op1), this.getRangeMax(op1), this.getRangeMin(op2), this.getRangeMax(op2));
     }
@@ -130,8 +130,8 @@ module convergence.ot {
      *            The op to get the minimum index for
      * @return min(fromIndex, toIndex)
      */
-    static getRangeMin(op:ArrayMoveOperation):number {
-      return Math.min(op.fromIndex, op.toIndex)
+    static getRangeMin(op: ArrayMoveOperation): number {
+      return Math.min(op.fromIndex, op.toIndex);
     }
 
     /**
@@ -141,8 +141,8 @@ module convergence.ot {
      *            The op to get the minimum index for
      * @return max(fromIndex, toIndex)
      */
-    static getRangeMax(op:ArrayMoveOperation):number {
-      return Math.max(op.fromIndex, op.toIndex)
+    static getRangeMax(op: ArrayMoveOperation): number {
+      return Math.max(op.fromIndex, op.toIndex);
     }
   }
 

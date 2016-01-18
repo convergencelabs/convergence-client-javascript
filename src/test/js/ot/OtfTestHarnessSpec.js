@@ -44,7 +44,7 @@ var commonPath = [];
 
 function json2Operation(opData) {
 
-    switch(opData.type) {
+    switch (opData.type) {
         case "StringInsert":
             return new convergence.ot.StringInsertOperation(commonPath, opData.noOp, opData.index, opData.value);
         case "StringRemove":

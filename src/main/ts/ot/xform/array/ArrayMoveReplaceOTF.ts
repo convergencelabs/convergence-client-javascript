@@ -2,7 +2,7 @@
 
 module convergence.ot {
   export class ArrayMoveReplaceOTF implements OperationTransformationFunction<ArrayMoveOperation, ArrayReplaceOperation> {
-    transform(s:ArrayMoveOperation, c:ArrayReplaceOperation):OperationPair {
+    transform(s: ArrayMoveOperation, c: ArrayReplaceOperation): OperationPair {
       switch (ArrayMoveHelper.getMoveDirection(s)) {
         case MoveDirection.Forward:
           return this.transformAgainstForwardMove(s, c);
@@ -13,7 +13,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstForwardMove(s:ArrayMoveOperation, c:ArrayReplaceOperation):OperationPair {
+    private transformAgainstForwardMove(s: ArrayMoveOperation, c: ArrayReplaceOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -29,7 +29,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstBackwardMove(s:ArrayMoveOperation, c:ArrayReplaceOperation):OperationPair {
+    private transformAgainstBackwardMove(s: ArrayMoveOperation, c: ArrayReplaceOperation): OperationPair {
       switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
         case RangeIndexRelationship.Before:
         case RangeIndexRelationship.After:
@@ -45,7 +45,7 @@ module convergence.ot {
       }
     }
 
-    private transformAgainstIdentityMove(s:ArrayMoveOperation, c:ArrayReplaceOperation):OperationPair {
+    private transformAgainstIdentityMove(s: ArrayMoveOperation, c: ArrayReplaceOperation): OperationPair {
       // A-MP-11, A-MP-12, A-MP-13
       return new OperationPair(s, c);
     }
