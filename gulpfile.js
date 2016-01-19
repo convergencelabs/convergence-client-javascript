@@ -25,7 +25,7 @@ var tsProject = ts.createProject('tsconfig.json');
 const plumberConf = {};
 
 gulp.task('ts-compile', function () {
-  var tsResult = gulp.src('src/main/ts/**/*.ts')
+  var tsResult = gulp.src(['src/main/ts/**/*.ts', 'typings/**.ts'])
     .pipe(ts(tsProject));
   tsResult.js
       .pipe(insert.append('if (module) module.exports = convergence;'))
