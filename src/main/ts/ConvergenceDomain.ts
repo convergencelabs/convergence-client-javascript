@@ -35,8 +35,8 @@ module convergence {
     }
 
     /**
-     * Gets the session of the local client.
-     * @return {convergence.Session} The local session.
+     * Gets the session of the connected user.
+     * @return {convergence.Session} The users session.
      */
     getSession(): Session {
       return null;
