@@ -18,8 +18,8 @@ module convergence.model {
 
       this._children = new Array<Model>();
 
-      for (var i = 0; i < data.length; i++) {
-        this._children.push(Model.createModel(data[i], this, i))
+      for (var i: number = 0; i < data.length; i++) {
+        this._children.push(Model.createModel(data[i], this, i));
       }
     }
 
@@ -29,7 +29,7 @@ module convergence.model {
      * @param {Object|number|string|boolean} value - The value to insert
      */
     insert(index: number, value: any): void {
-      //TODO: Add integer check
+      // TODO: Add integer check
       if (this._children.length < index || index < 0) {
         throw new Error("Index out of bounds!");
       }
@@ -41,7 +41,7 @@ module convergence.model {
       var operation = new ArrayInsertOperation(this.path(), false, index, value);
       this._children.splice(index, 0, (Model.createModel(value, this, index)));
       this.updateFieldInParent(index);
-      //TODO: send operation
+      // TODO: send operation
     }
 
     /**
@@ -50,16 +50,16 @@ module convergence.model {
      * @returns {Object|number|string|boolean} The removed value, if any
      */
     remove(index: number): any {
-      //TODO: Add integer check
+      // TODO: Add integer check
       if (this._children.length <= index || index < 0) {
         throw new Error("Index out of bounds!");
       }
 
       var operation = new ArrayRemoveOperation(this.path(), false, index);
-      var child = this._children[index];
+      var child: Model = this._children[index];
       this._children.splice(index, 1);
-      //TODO: detach
-      //TODO: send operation
+      // TODO: detach
+      // TODO: send operation
       return child.value();
     }
 
@@ -68,8 +68,8 @@ module convergence.model {
      * @param {number} index The index to replace
      * @param {Object|number|string|boolean} value The new value
      */
-    replace(index, value): void {
-      //TODO: Add integer check
+    replace(index: number, value: Object|number|string|boolean): void {
+      // TODO: Add integer check
       if (this._children.length <= index || index < 0) {
         throw new Error("Index out of bounds!");
       }
@@ -81,8 +81,8 @@ module convergence.model {
       var operation = new ArrayReplaceOperation(this.path(), false, index, value);
       this._children[index] = Model.createModel(value, this, index);
       this.updateFieldInParent(index);
-      //TODO: detach
-      //TODO: send operation
+      // TODO: detach
+      // TODO: send operation
     }
 
     /**
@@ -90,20 +90,20 @@ module convergence.model {
      * @param {number} fromIndex The index to move the value from.
      * @param {number} toIndex The index to move the value to.
      */
-    move(fromIndex, toIndex): void {
-      //TODO: Add integer check
+    move(fromIndex: number, toIndex: number): void {
+      // TODO: Add integer check
       if (this._children.length <= fromIndex || fromIndex < 0 || this._children.length <= toIndex || toIndex < 0) {
         throw new Error("Index out of bounds!");
       }
 
       var operation = new ArrayMoveOperation(this.path(), false, fromIndex, toIndex);
 
-      var child = this._children[fromIndex];
+      var child: Model = this._children[fromIndex];
       this._children.splice(fromIndex, 1);
       this._children.splice(toIndex, 0, child);
 
       this.updateFieldInParent(Math.min(fromIndex, toIndex));
-      //TODO: send operation
+      // TODO: send operation
     }
 
     /**
@@ -116,12 +116,12 @@ module convergence.model {
       }
 
       var operation = new ArraySetOperation(this.path(), false, values);
-      //TODO: detach
+      // TODO: detach
       this._children = new Array<Model>();
-      for (var i = 0; i < values.length; i++) {
-        this._children.push(Model.createModel(values[i], this, i))
+      for (var i: number = 0; i < values.length; i++) {
+        this._children.push(Model.createModel(values[i], this, i));
       }
-      //TODO: send operation
+      // TODO: send operation
     }
 
     /**
@@ -160,8 +160,8 @@ module convergence.model {
      * Performs the specified action for each element in an array.
      * @param callback  A function that accepts a Model. forEach calls the callback function one time for each element in the array.
      */
-    forEach(callback): void {
-      this._children.forEach(callback)
+    forEach(callback: (value: Model, index: number) => void): void {
+      this._children.forEach(callback);
     }
 
     /**
@@ -180,21 +180,22 @@ module convergence.model {
      * @param {...string|number} pathArgs Array of path arguments.
      * @returns {convergence.model.Model}
      */
-    child(pathArgs): Model {
+    // TODO: Determine correct parameter
+    child(pathArgs: any): Model {
       // We're letting them pass in individual path arguments or a single array of path arguments
-      var pathArgsForReal = Array.isArray(pathArgs) ? pathArgs : arguments;
+      var pathArgsForReal: Array<string|number> = Array.isArray(pathArgs) ? pathArgs : arguments;
       if (pathArgsForReal.length === 0) {
         throw new Error("Must at least specify the child index in the path");
       }
-      var index = pathArgsForReal[0];
-      var child = this._children[index];
+      var index: number = <number> pathArgsForReal[0];
+      var child: Model = this._children[index];
       if (pathArgsForReal.length > 1) {
         if (child.getType() === ModelType.Object) {
           return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else if (child.getType() === ModelType.Array) {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
-          //TODO: Determine correct way to handle undefined
+          // TODO: Determine correct way to handle undefined
           return Model.createModel(undefined, null, null);
         }
       } else {
@@ -203,16 +204,18 @@ module convergence.model {
     }
 
 
+    // Should be module protected
 
+
+    // Private Functions
     /**
      * Update fieldInParent for all children.
      * @param {number} start
      */
-    private updateFieldInParent(start): void {
-      var child;
-      for (var i = start; i < this._children.length; i++) {
-        child = this._children[i];
-        child.setParentField(i);
+    private updateFieldInParent(start: number): void {
+      for (var i: number = start; i < this._children.length; i++) {
+        var child: Model = this._children[i];
+        child.fieldInParent = i;
       }
     }
   }

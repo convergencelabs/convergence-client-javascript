@@ -1,13 +1,12 @@
 module convergence.model {
   import EventEmitter = convergence.util.EventEmitter;
-  import Session = convergence.Session;
 
   export enum ModelType {Object, Array, String, Number, Boolean, Null, Undefined}
 
   export class Model extends EventEmitter {
 
     public static createModel(data: any, parent: Model, fieldInParent: any): Model {
-      var type = typeof data;
+      var type: string = typeof data;
       if (data === null) {
         return new RealTimeNull(parent, fieldInParent);
       } else if (type === "string") {
@@ -16,9 +15,9 @@ module convergence.model {
         return new RealTimeArray(data, parent, fieldInParent);
       } else if (type === "object") {
         return new RealTimeObject(data, parent, fieldInParent);
-      } else if (type == "number") {
+      } else if (type === "number") {
         return new RealTimeNumber(data, parent, fieldInParent);
-      } else if (type == "boolean") {
+      } else if (type === "boolean") {
         return new RealTimeBoolean(data, parent, fieldInParent);
       }
     }
@@ -26,7 +25,7 @@ module convergence.model {
     /**
      * Constructs a new Model.
      */
-    constructor(private modelType, private parent: Model, public fieldInParent: any) {
+    constructor(private modelType: ModelType, private parent: Model, public fieldInParent: any) {
       super();
     }
 
@@ -35,12 +34,13 @@ module convergence.model {
     }
 
     value(): any {
-      //TODO: Implement
+      // TODO: Implement
     }
 
     path(): Array<string | number> {
-      //TODO: Implement
-      return [];
+      var path: Array<string | number> = this.parent.path();
+      path.push(this.fieldInParent);
+      return path;
     }
   }
 }

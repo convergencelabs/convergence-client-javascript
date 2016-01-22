@@ -8,6 +8,5 @@ module convergence.model {
     constructor(parent, fieldInParent) {
       super(ModelType.Undefined, parent, fieldInParent);
     }
-
   }
 }

@@ -11,5 +11,9 @@ module convergence.model {
     get collectionId(): string {
       return this._collectionId;
     }
+
+    get modelId(): string {
+      return this._modelId;
+    }
   }
 }
