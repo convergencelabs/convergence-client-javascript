@@ -1,4 +1,4 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="ArrayOperation.ts" />
 
 module convergence.ot {
 

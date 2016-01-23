@@ -1,3 +1,5 @@
+/// <reference path="../util/EventEmitter.ts" />
+
 module convergence.ot {
   import EventEmitter = convergence.util.EventEmitter;
 
