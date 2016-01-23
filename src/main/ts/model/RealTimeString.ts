@@ -7,7 +7,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeString.
      */
-    constructor(private data: string, parent: Model, fieldInParent: any) {
+    constructor(private data: string, parent: Model, fieldInParent: string|number) {
       super(ModelType.String, parent, fieldInParent);
     }
 

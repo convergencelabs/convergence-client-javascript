@@ -12,7 +12,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeObject.
      */
-    constructor(data: any, parent: Model, fieldInParent: any) {
+    constructor(data: any, parent: Model, fieldInParent: string|number) {
       super(ModelType.Object, parent, fieldInParent);
 
       this._children = {};

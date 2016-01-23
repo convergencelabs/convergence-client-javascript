@@ -5,7 +5,7 @@ module convergence.model {
 
   export class Model extends EventEmitter {
 
-    public static createModel(data: any, parent: Model, fieldInParent: any): Model {
+    public static createModel(data: any, parent: Model, fieldInParent: string|number): Model {
       var type: string = typeof data;
       if (data === null) {
         return new RealTimeNull(parent, fieldInParent);

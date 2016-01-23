@@ -7,7 +7,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeBoolean.
      */
-    constructor(private data: boolean, parent: Model, fieldInParent: any) {
+    constructor(private data: boolean, parent: Model, fieldInParent: string|number) {
       super(ModelType.Boolean, parent, fieldInParent);
     }
 

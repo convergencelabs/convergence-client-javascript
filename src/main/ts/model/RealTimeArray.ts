@@ -13,7 +13,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeArray.
      */
-    constructor(data: Array<any>, parent: Model, fieldInParent: any) {
+    constructor(data: Array<any>, parent: Model, fieldInParent: string|number) {
       super(ModelType.Array, parent, fieldInParent);
 
       this._children = new Array<Model>();
