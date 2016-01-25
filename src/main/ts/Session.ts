@@ -1,4 +1,5 @@
 module convergence {
+  "use strict";
 
   export interface Session {
     /**

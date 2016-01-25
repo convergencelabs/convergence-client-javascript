@@ -1,13 +1,9 @@
-
 module convergence.message {
 
-  export class HandshakeRequest implements OutgoingProtocolRequestMessage {
-    constructor(public reconnect: boolean, public reconnectToken: string, public options: any) {
-    }
-
-    type(): string {
-      return MessageType.HANDSHAKE;
-    }
+  export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
+    reconnect: boolean;
+    reconnectToken: string;
+    options: any;
   }
 
   export class HandshakeRequestSerializer {
@@ -20,26 +16,26 @@ module convergence.message {
     }
   }
 
-  export class HandshakeResponse implements IncomingProtocolResponseMessage {
-    constructor(public success: boolean,
-                public clientId: string,
-                public reconnectToken: string,
-                public protocolConfig: any, // todo make interface
-                public error: any,
-                public retryOk: boolean) {
-    }
+  export interface HandshakeResponse extends IncomingProtocolResponseMessage {
+    success: boolean;
+    clientId: string;
+    reconnectToken: string;
+    protocolConfig: any; // todo make interface
+    error: any;
+    retryOk: boolean;
   }
 
   export class HandshakeResponseDeserializer {
     static deserialize(body: any): HandshakeResponse {
-      return new HandshakeResponse(
-        body.success,
-        body.sessionId,
-        body.reconnectToken,
-        {},
-        body.error,
-        false
-      );
+      return {
+        success: body.success,
+        clientId: body.sessionId,
+        reconnectToken: body.reconnectToken,
+        protocolConfig: {},
+        error: body.error,
+        retryOk: false,
+        type: MessageType.HANDSHAKE
+      };
     }
   }
 }

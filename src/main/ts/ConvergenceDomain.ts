@@ -1,4 +1,10 @@
+/// <reference path="util/EventEmitter.ts" />
+
 module convergence {
+
+  "use strict";
+
+  import RealTimeModelService = convergence.model.RealTimeModelService;
   import EventEmitter = convergence.util.EventEmitter;
   import Session = convergence.Session;
 
@@ -11,7 +17,7 @@ module convergence {
      * @param url
      *            The url of the convergence domain to connect to.
      */
-    constructor(url: String) {
+    constructor(url: string) {
       super();
     }
 
@@ -21,7 +27,7 @@ module convergence {
      * @param {string} password - The password of the user
      * @return {Q.Promise} A promise
      */
-    authenticateWithPassword(username, password): Q.Promise<void> {
+    authenticateWithPassword(username: string, password: string): Q.Promise<void> {
       return Q.resolve<void>(null);
     }
 
@@ -30,8 +36,12 @@ module convergence {
      * @param {string} token - The identifier of the participant
      * @return {Q.Promise} A promise
      */
-    authenticateWithToken(token): Q.Promise<void> {
+    authenticateWithToken(token: string): Q.Promise<void> {
       return Q.resolve<void>(null);
+    }
+
+    isAuthenticated(): boolean {
+      return false;
     }
 
     /**
@@ -43,10 +53,9 @@ module convergence {
     }
 
     /**
-     * Gets the MessageService
-     * @returns {convergence.SharedModelService}
+     * Gets the ModelService
      */
-    getSharedModelService(): void {
+    getModelService(): RealTimeModelService {
       return null;
     }
 
@@ -63,7 +72,5 @@ module convergence {
     isDisposed(): boolean {
       return false;
     }
-
-
   }
 }

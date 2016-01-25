@@ -236,7 +236,7 @@ module convergence.connection {
       return this._protocolConnection.request(message);
     }
 
-    handshake(reconnect: boolean): Q.Promise<HandshakeResponse> {
+    private handshake(reconnect: boolean): Q.Promise<HandshakeResponse> {
       var self: ConvergenceConnection = this;
       var promise: Q.Promise<HandshakeResponse>;
       if (reconnect) {

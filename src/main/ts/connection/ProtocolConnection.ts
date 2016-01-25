@@ -1,6 +1,8 @@
 /// <reference path="../message/messages.ts" />
 /// <reference path="../message/handhsake.ts" />
 /// <reference path="../message/MessageSerializer.ts" />
+/// <reference path="../message/MessageType.ts" />
+
 
 module convergence.connection {
   import HandshakeRequest = convergence.message.HandshakeRequest;
@@ -44,7 +46,7 @@ module convergence.connection {
           self.onSocketError(error);
         },
         onClose(reason: string): void {
-          self.onSocketClosed();
+          self.onSocketClosed(reason);
         }
       };
 
@@ -57,7 +59,13 @@ module convergence.connection {
     }
 
     handshake(reconnect: boolean, reconnectToken?: string, options?: any): Q.Promise<HandshakeResponse> {
-      var request: HandshakeRequest = new HandshakeRequest(reconnect, reconnectToken, options);
+      var request: HandshakeRequest = {
+        reconnect: reconnect,
+        reconnectToken: reconnectToken,
+        options: options,
+        type: MessageType.HANDSHAKE
+      };
+
       var self: ProtocolConnection = this;
 
       return this.request(request).then(function (response: HandshakeResponse): HandshakeResponse {
@@ -86,7 +94,7 @@ module convergence.connection {
 
 
     send(message: OutgoingProtocolNormalMessage): void {
-      var type: string = message.type();
+      var type: string = message.type;
       var body: any = MessageSerializer.serialize(message);
       var envelope: MessageEnvelope = new MessageEnvelope(OpCode.NORMAL, undefined, type, body);
       this.sendMessage(envelope);
@@ -96,7 +104,7 @@ module convergence.connection {
       var requestId: number = this._nextRequestId;
       this._nextRequestId++;
 
-      var replyDeferred: Q.Deferred<IncomingProtocolResponseMessage> = Q.defer();
+      var replyDeferred: Q.Deferred<IncomingProtocolResponseMessage> = Q.defer<IncomingProtocolResponseMessage>();
 
       var timeout: number = this._protocolConfig.defaultRequestTimeout;
       var timeoutTask: number = setTimeout(
@@ -108,7 +116,7 @@ module convergence.connection {
         },
         timeout);
 
-      var type: string = message.type();
+      var type: string = message.type;
       var body: any = MessageSerializer.serialize(message);
       var sent: MessageEnvelope = new MessageEnvelope(OpCode.REQUEST, requestId, type, body);
       this.sendMessage(sent);
@@ -172,8 +180,8 @@ module convergence.connection {
       }
     }
 
-    private onSocketClosed(): void {
-      console.log("Socket closed");
+    private onSocketClosed(reason: string): void {
+      console.log("Socket closed: " + reason);
       if (this._heartbeatHelper && this._heartbeatHelper.started) {
         this._heartbeatHelper.stop();
       }

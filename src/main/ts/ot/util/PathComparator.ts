@@ -110,7 +110,7 @@ module convergence.ot {
       } else if (p1[p1.length - 1] === p2[p2.length - 1]) {
         return false;
       } else {
-        p1.every(function (element: any, index: number): boolean {
+        return p1.every(function (element: any, index: number): boolean {
           return index === p2.length - 1 || element === p1[index];
         });
       }

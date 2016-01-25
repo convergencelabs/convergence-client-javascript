@@ -1,3 +1,9 @@
+/// <reference path="../ot/ops/ArrayInsertOperation.ts" />
+/// <reference path="../ot/ops/ArrayRemoveOperation.ts" />
+/// <reference path="../ot/ops/ArrayReplaceOperation.ts" />
+/// <reference path="../ot/ops/ArrayMoveOperation.ts" />
+/// <reference path="../ot/ops/ArraySetOperation.ts" />
+
 module convergence.model {
 
   import ArrayInsertOperation = convergence.ot.ArrayInsertOperation;

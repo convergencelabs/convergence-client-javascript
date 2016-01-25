@@ -13,7 +13,7 @@ module convergence.message {
     }
 
     static serialize(body: OutgoingProtocolMessage): any {
-      var type: string = body.type();
+      var type: string = body.type;
       switch (type) {
         case MessageType.ERROR:
           return ErrorMessageSerializer.serialize(<ErrorMessage>body);

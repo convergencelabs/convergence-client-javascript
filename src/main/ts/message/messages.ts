@@ -1,9 +1,9 @@
 module convergence.message {
   export interface ProtocolMessage {
+    type: string;
   }
 
   export interface OutgoingProtocolMessage extends ProtocolMessage {
-    type(): string;
   }
   export interface OutgoingProtocolNormalMessage extends OutgoingProtocolMessage {
   }

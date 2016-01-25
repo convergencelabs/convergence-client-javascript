@@ -1,13 +1,28 @@
 module convergence {
+
   'use strict';
 
+  import ConvergenceConnection = convergence.connection.ConvergenceConnection;
   import Session = convergence.Session;
   class SessionImpl implements Session {
+
+    _domain: ConvergenceDomain;
+    _connection: ConvergenceConnection;
+    _sessionId: string;
+    _userame: string;
+
+    constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
+      this._domain = domain;
+      this._sessionId = sessionId;
+      this._userame = username;
+      this._connection = connection;
+    }
+
     /**
      * @return The ConvergenceDomain for this session
      */
     getConvergenceDomain(): ConvergenceDomain {
-      return null;
+      return this._domain;
     }
 
 
@@ -15,28 +30,28 @@ module convergence {
      * @return The sessionId of the connected client
      */
     getSessionId(): string {
-      return null;
+      return this._sessionId;
     }
 
     /**
      * @return The username of the authenticated client or null if not authenticated
      */
     getUsername(): string {
-      return null;
+      return this._userame;
     }
 
     /**
      * @return True if the client is connected to the domain
      */
     isConnected(): boolean {
-      return false;
+      return this._connection.isConnected();
     }
 
     /**
      * @return True if the client is authenticated
      */
     isAuthenticated(): boolean {
-      return false;
+      return this._domain.isAuthenticated();
     }
   }
 }
