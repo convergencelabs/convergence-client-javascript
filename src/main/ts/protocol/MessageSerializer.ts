@@ -8,7 +8,7 @@ module convergence.message {
         case MessageType.HANDSHAKE:
           return HandshakeResponseDeserializer.deserialize(body);
         default:
-          throw new Error("Unexpected message type: " + type);
+          throw new Error("Unexpected protocol type: " + type);
       }
     }
 
@@ -20,7 +20,7 @@ module convergence.message {
         case MessageType.HANDSHAKE:
           return HandshakeRequestSerializer.serialize(<HandshakeRequest>body);
         default:
-          throw new Error("Unexpected message type: " + type);
+          throw new Error("Unexpected protocol type: " + type);
       }
     }
   }

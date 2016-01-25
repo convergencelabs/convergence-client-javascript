@@ -113,7 +113,7 @@ module convergence.connection {
 
     send(message: any): void {
       if (!this.isOpen()) {
-        throw new Error("Can't send message while socket is not open.");
+        throw new Error("Can't send protocol while socket is not open.");
       }
 
       var encodedMessage: string = JSON.stringify(message);
@@ -164,7 +164,7 @@ module convergence.connection {
             console.log("Web Socket error.", evt);
           }
           try {
-            // fixme get the error message
+            // fixme get the error protocol
             self.fireOnError("error");
           } catch (e) {
             console.error("Error handling WebSocket error.", e);

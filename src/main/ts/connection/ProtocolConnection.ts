@@ -1,7 +1,7 @@
-/// <reference path="../message/messages.ts" />
-/// <reference path="../message/handhsake.ts" />
-/// <reference path="../message/MessageSerializer.ts" />
-/// <reference path="../message/MessageType.ts" />
+/// <reference path="../protocol/messages.ts" />
+/// <reference path="../protocol/handhsake.ts" />
+/// <reference path="../protocol/MessageSerializer.ts" />
+/// <reference path="../protocol/MessageType.ts" />
 
 
 module convergence.connection {

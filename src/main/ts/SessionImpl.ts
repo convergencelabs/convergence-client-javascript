@@ -4,6 +4,7 @@ module convergence {
 
   import ConvergenceConnection = convergence.connection.ConvergenceConnection;
   import Session = convergence.Session;
+
   class SessionImpl implements Session {
 
     _domain: ConvergenceDomain;
