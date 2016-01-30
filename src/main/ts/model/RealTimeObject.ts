@@ -5,6 +5,12 @@ module convergence.model {
   import Operation = convergence.ot.Operation;
   import ObjectRemovePropertyOperation = convergence.ot.ObjectRemovePropertyOperation;
   import ObjectSetOperation = convergence.ot.ObjectSetOperation;
+  import ObjectSetPropertyEvent = convergence.model.event.ObjectSetPropertyEvent;
+  import ObjectSetEvent = convergence.model.event.ObjectSetEvent;
+  import ObjectRemovePropertyEvent = convergence.model.event.ObjectRemovePropertyEvent;
+
+  enum Events {SetProperty, RemoveProperty, Set}
+
   export class RealTimeObject extends RealTimeData {
 
     private _children: Object;
@@ -67,7 +73,7 @@ module convergence.model {
         throw new Error("Value must be an object and cannot be null or undefined!")
       }
 
-      var operation = new ObjectSetOperation(this.path(), false, value);
+      var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
 
       // TODO: detach all children
 
@@ -130,6 +136,117 @@ module convergence.model {
         }
       }
     }
+
+
+    // Handlers for incoming operations
+
+    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+      var type: string = operationEvent.operation.type;
+      if (type === ObjectAddPropertyOperation.TYPE) {
+        this._handleAddPropertyOperation(operationEvent);
+      } else if (type === ObjectSetPropertyOperation.TYPE) {
+        this._handleSetPropertyOperation(operationEvent);
+      } else if (type === ObjectRemovePropertyOperation.TYPE) {
+        this._handleRemovePropertyOperation(operationEvent);
+      } else if (type === ObjectSetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
+    }
+
+    private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
+      var property: string = operation.prop;
+      var value: Object|number|string|boolean = operation.value;
+
+      var child: RealTimeData = this._children[property];
+      if (child) {
+        // TODO: handle detached
+      }
+
+      this._children[property] = RealTimeData.createModel(value, this, property);
+
+      var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        property,
+        value);
+      this.emit(Events[Events.SetProperty], event);
+    }
+
+    private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
+      var property: string = operation.prop;
+      var value: Object|number|string|boolean = operation.value;
+
+      var child: RealTimeData = this._children[property];
+      if (child) {
+        // TODO: handle detached
+      }
+
+      this._children[property] = RealTimeData.createModel(value, this, property);
+
+      var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        property,
+        value);
+      this.emit(Events[Events.SetProperty], event);
+    }
+
+    private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
+      var property: string = operation.prop;
+
+      var child: RealTimeData = this._children[property];
+      if (child) {
+        // TODO: handle detached
+
+        delete this._children[property];
+
+        var event: ObjectRemovePropertyEvent = new ObjectRemovePropertyEvent(
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          property);
+        this.emit(Events[Events.SetProperty], event);
+      }
+    }
+
+    private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
+      var value: Object = operation.value;
+
+      // TODO: detach all children
+
+      this._children = {};
+
+      for (var prop in value) {
+        if (value.hasOwnProperty(prop)) {
+          this._children[prop] = RealTimeData.createModel(value[prop], this, prop);
+        }
+      }
+
+      var event: ObjectSetEvent = new ObjectSetEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        value);
+      this.emit(Events[Events.Set], event);
+    }
+
+
   }
 }
 

@@ -42,5 +42,10 @@ module convergence.model {
       path.push(this.fieldInParent);
       return path;
     }
+
+    // TODO: make this abstract
+    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+
+    }
   }
 }

@@ -8,5 +8,9 @@ module convergence.model {
     constructor(parent: RealTimeData, fieldInParent: string|number) {
       super(DataType.Null, parent, fieldInParent);
     }
+
+    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+      throw new Error("Method not implemented exception!");
+    }
   }
 }
