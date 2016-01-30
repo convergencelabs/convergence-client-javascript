@@ -1,7 +1,14 @@
+/// <reference path="RealTimeData.ts" />
+/// <reference path="../ot/ops/NumberAddOperation.ts" />
+/// <reference path="../ot/ops/NumberSetOperation.ts" />
+/// <reference path="events/NumberSetEvent.ts" />
+/// <reference path="events/NumberAddEvent.ts" />
+
 module convergence.model {
 
   import NumberAddOperation = convergence.ot.NumberAddOperation;
   import NumberSetOperation = convergence.ot.NumberSetOperation;
+
   import NumberSetEvent = convergence.model.event.NumberSetEvent;
   import NumberAddEvent = convergence.model.event.NumberAddEvent;
 

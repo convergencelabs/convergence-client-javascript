@@ -1,3 +1,5 @@
+/// <reference path="RealTimeData.ts" />
+
 module convergence.model {
 
   export class RealTimeNull extends RealTimeData {

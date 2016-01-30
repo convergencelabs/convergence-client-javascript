@@ -7,10 +7,10 @@ module convergence {
 
   class SessionImpl implements Session {
 
-    _domain: ConvergenceDomain;
-    _connection: ConvergenceConnection;
-    _sessionId: string;
-    _userame: string;
+    private _domain: ConvergenceDomain;
+    private _connection: ConvergenceConnection;
+    private _sessionId: string;
+    private _userame: string;
 
     constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
       this._domain = domain;

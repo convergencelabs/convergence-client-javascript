@@ -1,7 +1,12 @@
+/// <reference path="RealTimeData.ts" />
+/// <reference path="../ot/ops/StringInsertOperation.ts" />
+/// <reference path="../ot/ops/StringRemoveOperation.ts" />
+
 module convergence.model {
 
   import StringInsertOperation = convergence.ot.StringInsertOperation;
   import StringRemoveOperation = convergence.ot.StringRemoveOperation;
+
   export class RealTimeString extends RealTimeData {
 
     /**

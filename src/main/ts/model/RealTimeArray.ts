@@ -1,8 +1,14 @@
+/// <reference path="RealTimeData.ts" />
 /// <reference path="../ot/ops/ArrayInsertOperation.ts" />
 /// <reference path="../ot/ops/ArrayRemoveOperation.ts" />
 /// <reference path="../ot/ops/ArrayReplaceOperation.ts" />
 /// <reference path="../ot/ops/ArrayMoveOperation.ts" />
 /// <reference path="../ot/ops/ArraySetOperation.ts" />
+/// <reference path="events/ArrayInsertEvent.ts" />
+/// <reference path="events/ArrayRemoveEvent.ts" />
+/// <reference path="events/ArrayMoveEvent.ts" />
+/// <reference path="events/ArrayReplaceEvent.ts" />
+/// <reference path="events/ArraySetEvent.ts" />
 
 module convergence.model {
 
@@ -11,6 +17,7 @@ module convergence.model {
   import ArraySetOperation = convergence.ot.ArraySetOperation;
   import ArrayReplaceOperation = convergence.ot.ArrayReplaceOperation;
   import ArrayMoveOperation = convergence.ot.ArrayMoveOperation;
+
   import ArrayInsertEvent = convergence.model.event.ArrayInsertEvent;
   import ArrayRemoveEvent = convergence.model.event.ArrayRemoveEvent;
   import ArrayMoveEvent = convergence.model.event.ArrayMoveEvent;

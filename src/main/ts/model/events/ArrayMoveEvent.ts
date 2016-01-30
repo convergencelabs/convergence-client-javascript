@@ -1,3 +1,5 @@
+/// <reference path="ModelChangeEvent.ts" />
+
 module convergence.model.event {
 
   export class ArrayMoveEvent extends ModelChangeEvent {

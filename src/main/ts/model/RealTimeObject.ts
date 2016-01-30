@@ -1,13 +1,24 @@
+/// <reference path="RealTimeData.ts" />
+/// <reference path="../ot/ops/ObjectSetPropertyOperation.ts" />
+/// <reference path="../ot/ops/ObjectAddPropertyOperation.ts" />
+/// <reference path="../ot/ops/ObjectRemovePropertyOperation.ts" />
+/// <reference path="../ot/ops/ObjectSetOperation.ts" />
+/// <reference path="events/ObjectSetPropertyEvent.ts" />
+/// <reference path="events/ObjectRemovePropertyEvent.ts" />
+/// <reference path="events/ObjectSetEvent.ts" />
+
 module convergence.model {
 
   import ObjectSetPropertyOperation = convergence.ot.ObjectSetPropertyOperation;
   import ObjectAddPropertyOperation = convergence.ot.ObjectAddPropertyOperation;
-  import Operation = convergence.ot.Operation;
   import ObjectRemovePropertyOperation = convergence.ot.ObjectRemovePropertyOperation;
   import ObjectSetOperation = convergence.ot.ObjectSetOperation;
+
+  import Operation = convergence.ot.Operation;
+
   import ObjectSetPropertyEvent = convergence.model.event.ObjectSetPropertyEvent;
-  import ObjectSetEvent = convergence.model.event.ObjectSetEvent;
   import ObjectRemovePropertyEvent = convergence.model.event.ObjectRemovePropertyEvent;
+  import ObjectSetEvent = convergence.model.event.ObjectSetEvent;
 
   enum Events {SetProperty, RemoveProperty, Set}
 

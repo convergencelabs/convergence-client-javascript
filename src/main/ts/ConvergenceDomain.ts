@@ -63,7 +63,6 @@ module convergence {
      * Closes the connection to the server and disposes of the ConvergenceDomain
      */
     dispose(): void {
-
     }
 
     /**

@@ -1,3 +1,5 @@
+/// <reference path="ModelChangeEvent.ts" />
+
 module convergence.model.event {
 
   export class NumberAddEvent extends ModelChangeEvent {

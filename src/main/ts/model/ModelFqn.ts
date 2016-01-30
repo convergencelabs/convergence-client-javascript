@@ -3,17 +3,10 @@ module convergence.model {
   export class ModelFqn {
 
     /**
-     * Constructs a new RealTimeModel.
+     * Constructs a new ModelFqn.
      */
-    constructor(private _collectionId: string, private _modelId: string) {
-    }
-
-    get collectionId(): string {
-      return this._collectionId;
-    }
-
-    get modelId(): string {
-      return this._modelId;
+    constructor(public collectionId: string, public modelId: string) {
+      Object.freeze(this);
     }
   }
 }

@@ -28,7 +28,7 @@ module convergence.model {
      *            The modelId
      * @return {Q.Promise} A promise that resolves with a RealTimeModel
      */
-    open(collectionId, modelId): Q.Promise<convergence.model.RealTimeModel> {
+    open(collectionId: string, modelId: string): Q.Promise<convergence.model.RealTimeModel> {
       return null;
     }
 
@@ -43,7 +43,7 @@ module convergence.model {
      *            The initial value
      * @return {Q.Promise} A Promise that resolves when the model is finished being created
      */
-    create(collectionId, modelId, data): Q.Promise<void> {
+    create(collectionId: string, modelId: string, data: any): Q.Promise<void> {
       return null;
     }
 
@@ -56,7 +56,7 @@ module convergence.model {
      *            The id of the model to remove
      * @return {Q.Promise} A Promise that resolves when the model is finished being deleted
      */
-    remove(collectionId, modelId): Q.Promise<void> {
+    remove(collectionId: string, modelId: string): Q.Promise<void> {
       return null;
     }
   }
