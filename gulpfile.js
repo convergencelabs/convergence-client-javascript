@@ -28,7 +28,7 @@ gulp.task('ts-compile', function () {
   var tsResult = gulp.src(['src/main/ts/**/*.ts', 'typings/**.ts'])
     .pipe(ts(tsProject));
   tsResult.js
-    .pipe(insert.append('if (module !== undefined) module.exports = convergence;'))
+    .pipe(insert.append('if (typeof module === "object" && module.exports) module.exports = convergence;'))
     .pipe(gulp.dest('.'));
 
   return tsResult.dts.pipe(gulp.dest('.'));
