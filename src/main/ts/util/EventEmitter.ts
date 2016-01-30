@@ -74,7 +74,7 @@ module convergence.util {
       this._maxListeners = n;
     }
 
-    emit(event: string, ...args: any[]): EventEmitter {
+    protected emit(event: string, ...args: any[]): EventEmitter {
       var listeners: Function[] = this.listeners(event);
       listeners.forEach(function (listener: Function): void {
         listener.apply(this, args || []);
