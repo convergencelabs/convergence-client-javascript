@@ -5,21 +5,21 @@ module convergence.model {
   import Operation = convergence.ot.Operation;
   import ObjectRemovePropertyOperation = convergence.ot.ObjectRemovePropertyOperation;
   import ObjectSetOperation = convergence.ot.ObjectSetOperation;
-  export class RealTimeObject extends Model {
+  export class RealTimeObject extends RealTimeData {
 
     private _children: Object;
 
     /**
      * Constructs a new RealTimeObject.
      */
-    constructor(data: any, parent: Model, fieldInParent: string|number) {
-      super(ModelType.Object, parent, fieldInParent);
+    constructor(data: any, parent: RealTimeData, fieldInParent: string|number) {
+      super(DataType.Object, parent, fieldInParent);
 
       this._children = {};
 
       for (var prop in data) {
         if (data.hasOwnProperty(prop)) {
-          this._children[prop] = Model.createModel(data[prop], this, prop);
+          this._children[prop] = RealTimeData.createModel(data[prop], this, prop);
         }
       }
     }
@@ -39,7 +39,7 @@ module convergence.model {
         operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
       }
 
-      this._children[property] = Model.createModel(value, this, property);
+      this._children[property] = RealTimeData.createModel(value, this, property);
       // TODO: send operation
     }
 
@@ -75,7 +75,7 @@ module convergence.model {
 
       for (var prop in value) {
         if (value.hasOwnProperty(prop)) {
-          this._children[prop] = Model.createModel(value[prop], this, prop);
+          this._children[prop] = RealTimeData.createModel(value[prop], this, prop);
         }
       }
     }
@@ -90,29 +90,29 @@ module convergence.model {
     }
 
     /**
-     * Returns a Model representing the child of this object at the path specified by
+     * Returns a RealTimeData representing the child of this object at the path specified by
      * pathArgs. Because this class represents an object, the first instance of pathArgs
      * must be a string. All arguments must be either  strings or integers, dependent
-     * on whether the model at that path level is an RealTimeObject or an RealTimeArray.
+     * on whether the RealTimeData at that path level is an RealTimeObject or an RealTimeArray.
      * @param {...string|number} pathArgs Array of path arguments.
-     * @returns {convergence.model.Model}
+     * @returns {convergence.model.RealTimeData}
      */
-    child(pathArgs: any): Model {
+    child(pathArgs: any): RealTimeData {
       // We're letting them pass in individual path arguments or a single array of path arguments
       var pathArgsForReal: Array<string|number> = Array.isArray(pathArgs) ? pathArgs : arguments;
       if (pathArgsForReal.length === 0) {
         throw new Error("Must at least specify the child index in the path");
       }
       var prop: string = <string> pathArgsForReal[0];
-      var child: Model = this._children[prop];
+      var child: RealTimeData = this._children[prop];
       if (pathArgsForReal.length > 1) {
-        if (child.getType() === ModelType.Object) {
+        if (child.getType() === DataType.Object) {
           return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
-        } else if (child.getType() === ModelType.Array) {
+        } else if (child.getType() === DataType.Array) {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return Model.createModel(undefined, null, null);
+          return RealTimeData.createModel(undefined, null, null);
         }
       } else {
         return child;
@@ -121,9 +121,9 @@ module convergence.model {
 
     /**
      * Performs the specified action for each property in the RealTimeObject.
-     * @param callback  A function that accepts a Model. forEach calls the callback function one time for each property.
+     * @param callback  A function that accepts a RealTimeData. forEach calls the callback function one time for each property.
      */
-    forEach(callback: (model: Model) => void): void {
+    forEach(callback: (model: RealTimeData) => void): void {
       for (var property in this._children) {
         if (this._children.hasOwnProperty(property)) {
           callback(this._children[property]);

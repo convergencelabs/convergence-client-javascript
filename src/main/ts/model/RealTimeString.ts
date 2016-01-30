@@ -2,13 +2,13 @@ module convergence.model {
 
   import StringInsertOperation = convergence.ot.StringInsertOperation;
   import StringRemoveOperation = convergence.ot.StringRemoveOperation;
-  export class RealTimeString extends Model {
+  export class RealTimeString extends RealTimeData {
 
     /**
      * Constructs a new RealTimeString.
      */
-    constructor(private data: string, parent: Model, fieldInParent: string|number) {
-      super(ModelType.String, parent, fieldInParent);
+    constructor(private data: string, parent: RealTimeData, fieldInParent: string|number) {
+      super(DataType.String, parent, fieldInParent);
     }
 
     /**

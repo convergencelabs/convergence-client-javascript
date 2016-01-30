@@ -11,21 +11,29 @@ module convergence.model {
   import ArraySetOperation = convergence.ot.ArraySetOperation;
   import ArrayReplaceOperation = convergence.ot.ArrayReplaceOperation;
   import ArrayMoveOperation = convergence.ot.ArrayMoveOperation;
+  import ArrayInsertEvent = convergence.model.event.ArrayInsertEvent;
+  import ArrayRemoveEvent = convergence.model.event.ArrayRemoveEvent;
+  import ArrayMoveEvent = convergence.model.event.ArrayMoveEvent;
+  import ArrayReplaceEvent = convergence.model.event.ArrayReplaceEvent;
+  import ArraySetEvent = convergence.model.event.ArraySetEvent;
 
-  export class RealTimeArray extends Model {
+  enum Events {Insert, Move, Remove, Replace, Set}
 
-    private _children: Array<Model>;
+
+  export class RealTimeArray extends RealTimeData {
+
+    private _children: Array<RealTimeData>;
 
     /**
      * Constructs a new RealTimeArray.
      */
-    constructor(data: Array<any>, parent: Model, fieldInParent: string|number) {
-      super(ModelType.Array, parent, fieldInParent);
+    constructor(data: Array<any>, parent: RealTimeData, fieldInParent: string|number) {
+      super(DataType.Array, parent, fieldInParent);
 
-      this._children = new Array<Model>();
+      this._children = new Array<RealTimeData>();
 
       for (var i: number = 0; i < data.length; i++) {
-        this._children.push(Model.createModel(data[i], this, i));
+        this._children.push(RealTimeData.createModel(data[i], this, i));
       }
     }
 
@@ -34,18 +42,11 @@ module convergence.model {
      * @param {number} index - The index to insert
      * @param {Object|number|string|boolean} value - The value to insert
      */
-    insert(index: number, value: any): void {
-      // TODO: Add integer check
-      if (this._children.length < index || index < 0) {
-        throw new Error("Index out of bounds!");
-      }
+    insert(index: number, value: Object|number|string|boolean): void {
+      this._validateInsert(index, value);
 
-      if (typeof value === 'undefined' || typeof value === 'function') {
-        throw new Error("Illegal argument!");
-      }
-
-      var operation = new ArrayInsertOperation(this.path(), false, index, value);
-      this._children.splice(index, 0, (Model.createModel(value, this, index)));
+      var operation: ArrayInsertOperation = new ArrayInsertOperation(this.path(), false, index, value);
+      this._children.splice(index, 0, (RealTimeData.createModel(value, this, index)));
       this.updateFieldInParent(index);
       // TODO: send operation
     }
@@ -55,15 +56,13 @@ module convergence.model {
      * @param {number} index The index of the value to remove.
      * @returns {Object|number|string|boolean} The removed value, if any
      */
-    remove(index: number): any {
-      // TODO: Add integer check
-      if (this._children.length <= index || index < 0) {
-        throw new Error("Index out of bounds!");
-      }
+    remove(index: number): Object|number|string|boolean {
+      this._validateRemove(index);
 
-      var operation = new ArrayRemoveOperation(this.path(), false, index);
-      var child: Model = this._children[index];
+      var operation: ArrayRemoveOperation = new ArrayRemoveOperation(this.path(), false, index);
+      var child: RealTimeData = this._children[index];
       this._children.splice(index, 1);
+      this.updateFieldInParent(index);
       // TODO: detach
       // TODO: send operation
       return child.value();
@@ -75,17 +74,10 @@ module convergence.model {
      * @param {Object|number|string|boolean} value The new value
      */
     replace(index: number, value: Object|number|string|boolean): void {
-      // TODO: Add integer check
-      if (this._children.length <= index || index < 0) {
-        throw new Error("Index out of bounds!");
-      }
+      this._validateReplace(index, value);
 
-      if (typeof value === 'undefined' || typeof value === 'function') {
-        throw new Error("Illegal argument!");
-      }
-
-      var operation = new ArrayReplaceOperation(this.path(), false, index, value);
-      this._children[index] = Model.createModel(value, this, index);
+      var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.path(), false, index, value);
+      this._children[index] = RealTimeData.createModel(value, this, index);
       this.updateFieldInParent(index);
       // TODO: detach
       // TODO: send operation
@@ -97,14 +89,11 @@ module convergence.model {
      * @param {number} toIndex The index to move the value to.
      */
     move(fromIndex: number, toIndex: number): void {
-      // TODO: Add integer check
-      if (this._children.length <= fromIndex || fromIndex < 0 || this._children.length <= toIndex || toIndex < 0) {
-        throw new Error("Index out of bounds!");
-      }
+      this._validateMove(fromIndex, toIndex);
 
-      var operation = new ArrayMoveOperation(this.path(), false, fromIndex, toIndex);
+      var operation: ArrayMoveOperation = new ArrayMoveOperation(this.path(), false, fromIndex, toIndex);
 
-      var child: Model = this._children[fromIndex];
+      var child: RealTimeData = this._children[fromIndex];
       this._children.splice(fromIndex, 1);
       this._children.splice(toIndex, 0, child);
 
@@ -116,16 +105,14 @@ module convergence.model {
      * Replaces all children in the RealTimeArray with the new values.
      * @param {Array} values The new values for the RealTimeArray.
      */
-    setValue(values: Array<any>): void {
-      if (!Array.isArray(values)) {
-        throw new Error("Illegal argument!");
-      }
+    setValue(values: Array<Object|number|string|boolean>): void {
+      this._validateSet(values);
 
-      var operation = new ArraySetOperation(this.path(), false, values);
+      var operation: ArraySetOperation = new ArraySetOperation(this.path(), false, values);
       // TODO: detach
-      this._children = new Array<Model>();
+      this._children = new Array<RealTimeData>();
       for (var i: number = 0; i < values.length; i++) {
-        this._children.push(Model.createModel(values[i], this, i));
+        this._children.push(RealTimeData.createModel(values[i], this, i));
       }
       // TODO: send operation
     }
@@ -164,9 +151,9 @@ module convergence.model {
 
     /**
      * Performs the specified action for each element in an array.
-     * @param callback  A function that accepts a Model. forEach calls the callback function one time for each element in the array.
+     * @param callback  A function that accepts RealTimeData. forEach calls the callback function one time for each element in the array.
      */
-    forEach(callback: (value: Model, index: number) => void): void {
+    forEach(callback: (value: RealTimeData, index: number) => void): void {
       this._children.forEach(callback);
     }
 
@@ -179,30 +166,30 @@ module convergence.model {
     }
 
     /**
-     * Returns a Model representing the child of this array at the path specified by
+     * Returns a RealTimeData representing the child of this array at the path specified by
      * pathArgs. Because this class represents an array, the first instance of pathArgs
      * must be an integer. All arguments must be either  strings or integers, dependent
-     * on whether the model at that path level is an RealTimeObject or an RealTimeArray.
+     * on whether the RealTimeData at that path level is a RealTimeObject or a RealTimeArray.
      * @param {...string|number} pathArgs Array of path arguments.
-     * @returns {convergence.model.Model}
+     * @returns {convergence.model.RealTimeData}
      */
     // TODO: Determine correct parameter
-    child(pathArgs: any): Model {
+    child(pathArgs: any): RealTimeData {
       // We're letting them pass in individual path arguments or a single array of path arguments
       var pathArgsForReal: Array<string|number> = Array.isArray(pathArgs) ? pathArgs : arguments;
       if (pathArgsForReal.length === 0) {
         throw new Error("Must at least specify the child index in the path");
       }
       var index: number = <number> pathArgsForReal[0];
-      var child: Model = this._children[index];
+      var child: RealTimeData = this._children[index];
       if (pathArgsForReal.length > 1) {
-        if (child.getType() === ModelType.Object) {
+        if (child.getType() === DataType.Object) {
           return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
-        } else if (child.getType() === ModelType.Array) {
+        } else if (child.getType() === DataType.Array) {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return Model.createModel(undefined, null, null);
+          return RealTimeData.createModel(undefined, null, null);
         }
       } else {
         return child;
@@ -210,8 +197,178 @@ module convergence.model {
     }
 
 
-    // Should be module protected
+    // Handlers for incoming operations
 
+    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+      var type: string = operationEvent.operation.type;
+      if (type === ArrayInsertOperation.TYPE) {
+        this._handleInsertOperation(operationEvent);
+      } else if (type === ArrayMoveOperation.TYPE) {
+        this._handleMoveOperation(operationEvent);
+      } else if (type === ArrayRemoveOperation.TYPE) {
+        this._handleRemoveOperation(operationEvent);
+      } else if (type === ArrayReplaceOperation.TYPE) {
+        this._handleReplaceOperation(operationEvent);
+      } else if (type === ArraySetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
+    }
+
+    private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ArrayInsertOperation = <ArrayInsertOperation> operationEvent.operation;
+      var index: number = operation.index;
+      var value: Object|number|string|boolean = operation.value;
+
+      this._validateInsert(index, value);
+
+      this._children.splice(index, 0, (RealTimeData.createModel(value, this, index)));
+      this.updateFieldInParent(index);
+
+      var event: ArrayInsertEvent = new ArrayInsertEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        index,
+        value);
+      this.emit(Events[Events.Insert], event);
+    }
+
+    private _handleMoveOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ArrayMoveOperation = <ArrayMoveOperation> operationEvent.operation;
+      var fromIndex: number = operation.fromIndex;
+      var toIndex: number = operation.toIndex;
+
+      this._validateMove(fromIndex, toIndex);
+
+      var child: RealTimeData = this._children[fromIndex];
+      this._children.splice(fromIndex, 1);
+      this._children.splice(toIndex, 0, child);
+
+      this.updateFieldInParent(Math.min(fromIndex, toIndex));
+
+      var event: ArrayMoveEvent = new ArrayMoveEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        fromIndex,
+        toIndex);
+      this.emit(Events[Events.Move], event);
+    }
+
+    private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ArrayRemoveOperation = <ArrayRemoveOperation> operationEvent.operation;
+      var index: number = operation.index;
+
+      this._validateRemove(index);
+
+      var child: RealTimeData = this._children[index];
+      this._children.splice(index, 1);
+      this.updateFieldInParent(index);
+      // TODO: detach
+
+      var event: ArrayRemoveEvent = new ArrayRemoveEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        index);
+      this.emit(Events[Events.Remove], event);
+    }
+
+    private _handleReplaceOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ArrayReplaceOperation = <ArrayReplaceOperation> operationEvent.operation;
+      var index: number = operation.index;
+      var value: Object|number|string|boolean = operation.value;
+
+      this._validateReplace(index, value);
+
+      this._children[index] = RealTimeData.createModel(value, this, index);
+      this.updateFieldInParent(index);
+      // TODO: detach
+
+      var event: ArrayReplaceEvent = new ArrayReplaceEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        index,
+        value);
+      this.emit(Events[Events.Replace], event);
+    }
+
+    private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+      var operation: ArraySetOperation = <ArraySetOperation> operationEvent.operation;
+      var values: Array<Object|number|string|boolean> = operation.value;
+
+      this._validateSet(values);
+
+      // TODO: detach
+      this._children = new Array<RealTimeData>();
+      for (var i: number = 0; i < values.length; i++) {
+        this._children.push(RealTimeData.createModel(values[i], this, i));
+      }
+
+      var event: ArraySetEvent = new ArraySetEvent(
+        operationEvent.sessionId,
+        operationEvent.username,
+        operationEvent.version,
+        operationEvent.timestamp,
+        this,
+        values);
+      this.emit(Events[Events.Set], event);
+    }
+
+    // Private Validation Methods
+
+    private _validateInsert(index: number, value: Object|number|string|boolean): void {
+      // TODO: Add integer check
+      if (this._children.length < index || index < 0) {
+        throw new Error("Index out of bounds!");
+      }
+
+      if (typeof value === 'undefined' || typeof value === 'function') {
+        throw new Error("Invalid value for insert!");
+      }
+    }
+
+    private _validateMove(fromIndex: number, toIndex: number): void {
+      // TODO: Add integer check
+      if (this._children.length <= fromIndex || fromIndex < 0 || this._children.length <= toIndex || toIndex < 0) {
+        throw new Error("Index out of bounds!");
+      }
+    }
+
+    private _validateRemove(index: number): void {
+      // TODO: Add integer check
+      if (this._children.length <= index || index < 0) {
+        throw new Error("Index out of bounds!");
+      }
+    }
+
+    private _validateReplace(index: number, value: Object|number|string|boolean): void {
+      // TODO: Add integer check
+      if (this._children.length <= index || index < 0) {
+        throw new Error("Index out of bounds!");
+      }
+
+      if (typeof value === 'undefined' || typeof value === 'function') {
+        throw new Error("Illegal argument!");
+      }
+    }
+
+    private _validateSet(values: Array<Object|number|string|boolean>): void {
+      if (!Array.isArray(values)) {
+        throw new Error("Illegal argument!");
+      }
+    }
 
     // Private Functions
     /**
@@ -220,7 +377,7 @@ module convergence.model {
      */
     private updateFieldInParent(start: number): void {
       for (var i: number = start; i < this._children.length; i++) {
-        var child: Model = this._children[i];
+        var child: RealTimeData = this._children[i];
         child.fieldInParent = i;
       }
     }

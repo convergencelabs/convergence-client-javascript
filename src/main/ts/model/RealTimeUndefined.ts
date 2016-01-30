@@ -1,12 +1,12 @@
 module convergence.model {
 
-  export class RealTimeUndefined extends Model {
+  export class RealTimeUndefined extends RealTimeData {
 
     /**
-     * Constructs a new RealTimeNull.
+     * Constructs a new RealTimeUndefined.
      */
-    constructor(parent: Model, fieldInParent: string|number) {
-      super(ModelType.Undefined, parent, fieldInParent);
+    constructor(parent: RealTimeData, fieldInParent: string|number) {
+      super(DataType.Undefined, parent, fieldInParent);
     }
   }
 }

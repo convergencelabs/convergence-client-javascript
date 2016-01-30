@@ -1,11 +1,11 @@
 module convergence.model {
   import EventEmitter = convergence.util.EventEmitter;
 
-  export enum ModelType {Object, Array, String, Number, Boolean, Null, Undefined}
+  export enum DataType {Object, Array, String, Number, Boolean, Null, Undefined}
 
-  export class Model extends EventEmitter {
+  export class RealTimeData extends EventEmitter {
 
-    public static createModel(data: any, parent: Model, fieldInParent: string|number): Model {
+    public static createModel(data: any, parent: RealTimeData, fieldInParent: string|number): RealTimeData {
       var type: string = typeof data;
       if (data === null) {
         return new RealTimeNull(parent, fieldInParent);
@@ -23,13 +23,13 @@ module convergence.model {
     }
 
     /**
-     * Constructs a new Model.
+     * Constructs a new RealTimeData.
      */
-    constructor(private modelType: ModelType, private parent: Model, public fieldInParent: any) {
+    constructor(private modelType: DataType, private parent: RealTimeData, public fieldInParent: any) {
       super();
     }
 
-    getType(): ModelType {
+    getType(): DataType {
       return this.modelType;
     }
 
