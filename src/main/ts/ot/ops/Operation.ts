@@ -1,6 +1,8 @@
 module convergence.ot {
-  export interface Operation {
-    copy(properties: any): Operation;
-    type(): string;
+  export abstract class Operation {
+    constructor(public type: string) {
+    }
+
+    abstract copy(properties: any): Operation;
   }
 }

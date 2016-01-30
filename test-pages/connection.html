@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="../build/convergence-client.js"></script>
+<script src="../bower_components/q/q.js"></script>
+<script type="text/javascript">
+
+    var listener = {
+        onConnected: function () {
+        },
+        onInterrupted: function () {
+        },
+        onReconnected: function () {
+        },
+        onDisconnected: function () {
+        },
+        onError: function (error) {
+        },
+        onMessage: function (message) {
+        },
+        onRequest: function (message, replyCallback) {
+        }
+    };
+
+    var connection = new convergence.connection.ConvergenceConnection(
+            "ws://localhost:8080/domain/namespace1/domain1",
+            1000,
+            2,
+            1000,
+            true,
+            listener);
+    connection.connect().then(function() {
+        console.log("connected");
+    });
+
+</script>
+</body>
+</html>

@@ -1,23 +1,21 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
-  export class StringSetOperation extends StringOperation {
+  import Immutable = convergence.util.Immutable;
+  export class StringSetOperation extends DiscreteOperation {
 
     static TYPE: string = "StringSet";
 
-    constructor(path: Array<string | number>, noOp: boolean, value: string) {
-      super(path, noOp, value);
+    constructor(path: Array<string | number>, public noOp: boolean, public value: string) {
+      super(StringSetOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    copy(properties: any): StringSetOperation {
+    copy(updates: any): StringSetOperation {
       return new StringSetOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.value || this._value);
-    }
-
-    type(): string {
-      return StringSetOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.value, updates.value));
     }
   }
 }

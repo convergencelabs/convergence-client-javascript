@@ -1,31 +1,23 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
 
-  export class ArraySetOperation extends DiscreteOperation implements ArrayOperation {
+  import Immutable = convergence.util.Immutable;
+
+  export class ArraySetOperation extends DiscreteOperation {
 
     static TYPE: string = "ArraySet";
 
-    protected _value: any;
-
-    constructor(path: Array<string | number>, noOp: boolean, value: any[]) {
-      super(path, noOp);
-      this._value = value;
+    constructor(path: Array<string | number>, noOp: boolean, public value: any[]) {
+      super(ArraySetOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    get value(): any[] {
-      return this._value;
-    }
-
-    copy(properties: any): ArraySetOperation {
+    copy(updates: any): ArraySetOperation {
       return new ArraySetOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.value || this._value);
-    }
-
-    type(): string {
-      return ArraySetOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.value, updates.value));
     }
   }
 }

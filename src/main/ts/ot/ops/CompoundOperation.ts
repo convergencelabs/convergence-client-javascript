@@ -1,27 +1,19 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="Operation.ts" />
 
 module convergence.ot {
 
-  export class CompoundOperation implements Operation {
+  import Immutable = convergence.util.Immutable;
+  export class CompoundOperation extends Operation {
 
     static TYPE: string = "Compound";
 
-    protected _ops: DiscreteOperation[];
-
-    constructor(ops: DiscreteOperation[]) {
-      this._ops = ops;
+    constructor(public ops: DiscreteOperation[]) {
+      super(CompoundOperation.TYPE);
+      Object.freeze(this);
     }
 
-    get ops(): DiscreteOperation[] {
-      return this._ops;
-    }
-
-    copy(properties: any): CompoundOperation {
-      return new CompoundOperation(properties.ops || this._ops);
-    }
-
-    type(): string {
-      return CompoundOperation.TYPE;
+    copy(updates: any): CompoundOperation {
+      return new CompoundOperation(Immutable.update(this.ops, updates.ops));
     }
   }
 }

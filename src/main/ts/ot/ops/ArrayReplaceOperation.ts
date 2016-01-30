@@ -1,38 +1,23 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
 
-  export class ArrayReplaceOperation extends DiscreteOperation implements ArrayOperation {
+  import Immutable = convergence.util.Immutable;
+  export class ArrayReplaceOperation extends DiscreteOperation {
 
     static TYPE: string = "ArrayReplace";
 
-    protected _index: number;
-    protected _value: any;
-
-    constructor(path: Array<string | number>, noOp: boolean, index: number, value: any) {
-      super(path, noOp);
-      this._index = index;
-      this._value = value;
+    constructor(path: Array<string | number>, noOp: boolean, public index: number, public value: any) {
+      super(ArrayReplaceOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    get index(): number {
-      return this._index;
-    }
-
-    get value(): any {
-      return this._value;
-    }
-
-    copy(properties: any): ArrayReplaceOperation {
+    copy(updates: any): ArrayReplaceOperation {
       return new ArrayReplaceOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.index || this._index,
-        properties.value || this._value);
-    }
-
-    type(): string {
-      return ArrayReplaceOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.index, updates.index),
+        Immutable.update(this.value, updates.value));
     }
   }
 }

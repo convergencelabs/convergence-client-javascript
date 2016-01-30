@@ -1,4 +1,4 @@
-module convergence.ot {
+module convergence.util {
 
   export class EqualsUtil {
     static deepEquals(x: any, y: any): boolean {

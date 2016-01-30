@@ -1,31 +1,24 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
 
-  export class ObjectRemovePropertyOperation extends DiscreteOperation implements ObjectOperation {
+  import Immutable = convergence.util.Immutable;
+  export class ObjectRemovePropertyOperation extends DiscreteOperation {
 
     static TYPE: string = "ObjectRemoveProperty";
 
     protected _prop: string;
 
-    constructor(path: Array<string | number>, noOp: boolean, prop: string) {
-      super(path, noOp);
-      this._prop = prop;
+    constructor(path: Array<string | number>, noOp: boolean, public prop: string) {
+      super(ObjectRemovePropertyOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    get prop(): string {
-      return this._prop;
-    }
-
-    copy(properties: any): ObjectRemovePropertyOperation {
+    copy(updates: any): ObjectRemovePropertyOperation {
       return new ObjectRemovePropertyOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.prop || this._prop);
-    }
-
-    type(): string {
-      return ObjectRemovePropertyOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.prop, updates.prop));
     }
   }
 }

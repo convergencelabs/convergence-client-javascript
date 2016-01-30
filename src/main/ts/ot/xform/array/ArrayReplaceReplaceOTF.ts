@@ -1,6 +1,8 @@
 /// <reference path="../OperationTransformationFunction.ts" />
+/// <reference path="../../../util/EqualsUtil.ts" />
 
 module convergence.ot {
+  import EqualsUtil = convergence.util.EqualsUtil;
   export class ArrayReplaceReplaceOTF implements OperationTransformationFunction<ArrayReplaceOperation, ArrayReplaceOperation> {
     transform(s: ArrayReplaceOperation, c: ArrayReplaceOperation): OperationPair {
       if (s.index !== c.index) {

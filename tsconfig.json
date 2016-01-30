@@ -1,4 +1,5 @@
 {
+  "version": "1.7.5",
   "compilerOptions": {
     "target": "es5",
     "preserveConstEnums": true,

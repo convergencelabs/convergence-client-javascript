@@ -1,31 +1,24 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
 
-  export class NumberAddOperation extends DiscreteOperation implements NumberOperation {
+  import Immutable = convergence.util.Immutable;
+  export class NumberAddOperation extends DiscreteOperation {
 
     static TYPE: string = "NumberAdd";
 
     protected _value: number;
 
-    constructor(path: Array<string | number>, noOp: boolean, value: number) {
-      super(path, noOp);
-      this._value = value;
+    constructor(path: Array<string | number>, noOp: boolean, public value: number) {
+      super(NumberAddOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    get value(): number {
-      return this._value;
-    }
-
-    copy(properties: any): NumberAddOperation {
+    copy(updates: any): NumberAddOperation {
       return new NumberAddOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.value || this._value);
-    }
-
-    type(): string {
-      return NumberAddOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.value, updates.value));
     }
   }
 }

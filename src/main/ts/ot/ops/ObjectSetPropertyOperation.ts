@@ -1,39 +1,23 @@
-/// <reference path="StringOperation.ts" />
+/// <reference path="DiscreteOperation.ts" />
 
 module convergence.ot {
 
-  export class ObjectSetPropertyOperation extends DiscreteOperation implements ObjectOperation {
+  import Immutable = convergence.util.Immutable;
+  export class ObjectSetPropertyOperation extends DiscreteOperation {
 
     static TYPE: string = "ObjectSetProperty";
 
-    // fixme this should be an object
-    protected _value: any;
-    protected _prop: string;
-
-    constructor(path: Array<string | number>, noOp: boolean, prop: string, value: any) {
-      super(path, noOp);
-      this._prop = prop;
-      this._value = value;
+    constructor(path: Array<string | number>, noOp: boolean, public prop: string, public value: any) {
+      super(ObjectSetPropertyOperation.TYPE, path, noOp);
+      Object.freeze(this);
     }
 
-    get prop(): string {
-      return this._prop;
-    }
-
-    get value(): any {
-      return this._value;
-    }
-
-    copy(properties: any): ObjectSetPropertyOperation {
+    copy(updates: any): ObjectSetPropertyOperation {
       return new ObjectSetPropertyOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.prop || this._prop,
-        properties.value || this._value);
-    }
-
-    type(): string {
-      return ObjectSetPropertyOperation.TYPE;
+        Immutable.update(this.path, updates.path),
+        Immutable.update(this.noOp, updates.noOp),
+        Immutable.update(this.prop, updates.prop),
+        Immutable.update(this.value, updates.value));
     }
   }
 }

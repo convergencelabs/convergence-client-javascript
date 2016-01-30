@@ -110,12 +110,12 @@ module convergence.ot {
     }
 
     getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s: S, c: C): OperationTransformationFunction<S, C> {
-      var key: string = s.type() + c.type();
+      var key: string = s.type + c.type;
       return this.otfs[key];
     }
 
     getPathTransformationFunction<A extends DiscreteOperation>(a: A): PathTransformationFunction<A> {
-      return this.ptfs[a.type()];
+      return this.ptfs[a.type];
     }
   }
 }
