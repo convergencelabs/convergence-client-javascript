@@ -1,4 +1,5 @@
 /// <reference path="DiscreteOperation.ts" />
+/// <reference path="../../util/Immutable.ts" />
 
 module convergence.ot {
 
@@ -13,7 +14,7 @@ module convergence.ot {
     }
 
     copy(updates: any): StringRemoveOperation {
-      return new StringInsertOperation(
+      return new StringRemoveOperation(
         Immutable.update(this.path, updates.path),
         Immutable.update(this.noOp, updates.noOp),
         Immutable.update(this.index, updates.index),

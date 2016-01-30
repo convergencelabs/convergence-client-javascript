@@ -1,4 +1,5 @@
 /// <reference path="DiscreteOperation.ts" />
+/// <reference path="../../util/Immutable.ts" />
 
 module convergence.ot {
 

@@ -28,13 +28,13 @@ gulp.task('ts-compile', function () {
   var tsResult = gulp.src(['src/main/ts/**/*.ts', 'typings/**.ts'])
     .pipe(ts(tsProject));
   tsResult.js
-      .pipe(insert.append('if (Window.module) module.exports = convergence;'))
+    .pipe(insert.append('if (module !== undefined) module.exports = convergence;'))
     .pipe(gulp.dest('.'));
 
   return tsResult.dts.pipe(gulp.dest('.'));
 });
 
-gulp.task('tslint', function(){
+gulp.task('tslint', function () {
   return gulp.src('src/main/ts/**/*.ts')
     .pipe(tslint())
     .pipe(tslint.report('prose'));
@@ -49,15 +49,15 @@ gulp.task('istanbul', function (cb) {
         .pipe(plumber(plumberConf))
         .pipe(mocha())
         .pipe(istanbul.writeReports()) // Creating the reports after tests run
-        .on('finish', function() {
+        .on('finish', function () {
           process.chdir(__dirname);
           cb();
         });
     });
 });
 
-gulp.task('dist', ["ts-compile"], function() {
-    mkdirp.sync("dist");
+gulp.task('dist', ["ts-compile"], function () {
+  mkdirp.sync("dist");
   return gulp.src('build/*.js')
     .pipe(uglify())
     .pipe(rename({
@@ -78,8 +78,8 @@ gulp.task('default', ["ts-compile"]);
 gulp.task('test2', ["istanbul"]);
 
 gulp.task('test', function (done) {
-    new Server({
-        configFile: __dirname + '/karma.conf.js',
-        singleRun: true
-    }, done).start();
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
 });

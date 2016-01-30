@@ -2,7 +2,7 @@ var convergence = require("../../../../../build/convergence-client");
 var expect = require('chai').expect;
 
 describe('EqualUtil', function () {
-    var EqualsUtil = convergence.ot.EqualsUtil;
+    var EqualsUtil = convergence.util.EqualsUtil;
 
     it('NaN and NaN are equal', function () {
         expect(EqualsUtil.deepEquals(NaN, NaN)).to.be.true;
