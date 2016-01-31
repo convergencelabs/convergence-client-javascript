@@ -13,16 +13,14 @@ module convergence.util {
 
     addListener(event: string, listener: Function): EventEmitter {
       var listeners: Function[] = this.listeners(event);
-      if (!listeners) {
-        listeners = [];
-        this._events[event] = listeners;
-      }
 
       if (listeners.length >= this._maxListeners) {
         throw new Error("Max listeners exceeded for event: " + event);
       }
 
       listeners.push(listener);
+
+      this._events[event] = listeners;
       return this;
     }
 

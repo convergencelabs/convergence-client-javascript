@@ -292,6 +292,7 @@ module convergence.model {
       var child: RealTimeData = this._children[index];
       this._children.splice(index, 1);
       this.updateFieldInParent(index);
+
       // TODO: detach
 
       var event: ArrayRemoveEvent = new ArrayRemoveEvent(

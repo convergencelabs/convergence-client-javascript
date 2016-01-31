@@ -8,6 +8,8 @@ module convergence.model {
 
   export abstract class RealTimeData extends EventEmitter {
 
+    protected _detached: boolean = false;
+
     public static create(data: any,
                          parent: RealTimeContainer,
                          fieldInParent: PathElement,
@@ -47,9 +49,13 @@ module convergence.model {
     abstract value(): any;
 
     path(): Path {
-      var path: Path = this.parent.path();
-      path.push(this.fieldInParent);
-      return path;
+      if (this.parent == null) {
+        return [];
+      } else {
+        var path: Path = this.parent.path();
+        path.push(this.fieldInParent);
+        return path;
+      }
     }
 
     protected abstract _handleIncomingOperation(operationEvent: ModelOperationEvent): void;

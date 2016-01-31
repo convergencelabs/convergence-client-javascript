@@ -118,7 +118,7 @@ module convergence.model {
       var value: number = operation.value;
 
       this._validateNumber(value);
-      this.data += value;
+      this.data = value;
 
       var event: NumberSetEvent = new NumberSetEvent(
           operationEvent.sessionId,
