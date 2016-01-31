@@ -29,7 +29,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeObject.
      */
-    constructor(data: any, parent: RealTimeData, fieldInParent: PathElement) {
+    constructor(data: any, parent: RealTimeContainer, fieldInParent: PathElement) {
       super(DataType.Object, parent, fieldInParent);
 
       this._children = {};

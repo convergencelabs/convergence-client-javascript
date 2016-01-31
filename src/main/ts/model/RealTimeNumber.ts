@@ -21,7 +21,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeNumber.
      */
-    constructor(private data: number, parent: RealTimeData, fieldInParent: PathElement) {
+    constructor(private data: number, parent: RealTimeContainer, fieldInParent: PathElement) {
       super(DataType.Number, parent, fieldInParent);
     }
 

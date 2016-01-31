@@ -34,7 +34,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeArray.
      */
-    constructor(data: Array<any>, parent: RealTimeData, fieldInParent: PathElement) {
+    constructor(data: Array<any>, parent: RealTimeContainer, fieldInParent: PathElement) {
       super(DataType.Array, parent, fieldInParent);
 
       this._children = new Array<RealTimeData>();

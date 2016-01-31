@@ -7,7 +7,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeUndefined.
      */
-    constructor(parent: RealTimeData, fieldInParent: PathElement) {
+    constructor(parent: RealTimeContainer, fieldInParent: PathElement) {
       super(DataType.Undefined, parent, fieldInParent);
     }
 
