@@ -13,7 +13,7 @@ module convergence.model.event {
                 target: RealTimeBoolean,
                 public value: boolean) {
       super(sessionId, username, version, timestamp, target);
-      // TODO: Freeze???
+      Object.freeze(this);
     }
   }
 }

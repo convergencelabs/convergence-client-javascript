@@ -160,7 +160,7 @@ module convergence.model {
      * Performs the specified action for each element in an array.
      * @param callback  A function that accepts RealTimeData. forEach calls the callback function one time for each element in the array.
      */
-    forEach(callback: (value: RealTimeData, index: number) => void): void {
+    forEach(callback: (value: RealTimeData, index?: number) => void): void {
       this._children.forEach(callback);
     }
 
@@ -204,9 +204,17 @@ module convergence.model {
     }
 
 
+    value(): Array<any> {
+      var returnVal: Array<any> = [];
+      this.forEach((child: RealTimeData) => {
+        returnVal.push(child.value());
+      });
+      return returnVal;
+    }
+
     // Handlers for incoming operations
 
-    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+    protected _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
       var type: string = operationEvent.operation.type;
       if (type === ArrayInsertOperation.TYPE) {
         this._handleInsertOperation(operationEvent);

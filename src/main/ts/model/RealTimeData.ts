@@ -5,7 +5,7 @@ module convergence.model {
 
   export enum DataType {Object, Array, String, Number, Boolean, Null, Undefined}
 
-  export class RealTimeData extends EventEmitter {
+  export abstract class RealTimeData extends EventEmitter {
 
     public static createModel(data: any, parent: RealTimeData, fieldInParent: string|number): RealTimeData {
       var type: string = typeof data;
@@ -35,9 +35,7 @@ module convergence.model {
       return this.modelType;
     }
 
-    value(): any {
-      // TODO: Implement
-    }
+    abstract value(): any;
 
     path(): Array<string | number> {
       var path: Array<string | number> = this.parent.path();
@@ -45,9 +43,7 @@ module convergence.model {
       return path;
     }
 
-    // TODO: make this abstract
-    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+    protected abstract _handleIncomingOperation(operationEvent: ModelOperationEvent): void;
 
-    }
   }
 }

@@ -2,16 +2,16 @@
 
 module convergence.model.event {
 
-  export class ObjectRemovePropertyEvent extends ModelChangeEvent {
+  export class StringSetEvent extends ModelChangeEvent {
     /**
-     * Constructs a new ObjectRemovePropertyEvent.
+     * Constructs a new StringSetEvent.
      */
     constructor(sessionId: string,
                 username: string,
                 version: number,
                 timestamp: number,
-                target: RealTimeObject,
-                public property: string) {
+                target: RealTimeString,
+                public value: string) {
       super(sessionId, username, version, timestamp, target);
       Object.freeze(this);
     }

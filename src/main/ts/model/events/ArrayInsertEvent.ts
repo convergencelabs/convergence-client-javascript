@@ -14,7 +14,7 @@ module convergence.model.event {
                 public index: number,
                 public value: Object|number|string|boolean) {
       super(sessionId, username, version, timestamp, target);
-      // TODO: Freeze???
+      Object.freeze(this);
     }
   }
 }

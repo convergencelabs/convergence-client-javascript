@@ -75,6 +75,10 @@ module convergence.model {
       // TODO: send operation
     }
 
+    value(): number {
+      return this.data;
+    }
+
     // Handlers for incoming operations
 
     _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
@@ -96,12 +100,12 @@ module convergence.model {
       this.data += value;
 
       var event: NumberAddEvent = new NumberAddEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        value);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          value);
       this.emit(Events[Events.Add], event);
     }
 
@@ -113,12 +117,12 @@ module convergence.model {
       this.data += value;
 
       var event: NumberSetEvent = new NumberSetEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        value);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          value);
       this.emit(Events[Events.Set], event);
     }
 

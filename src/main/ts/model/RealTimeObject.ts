@@ -140,14 +140,21 @@ module convergence.model {
      * Performs the specified action for each property in the RealTimeObject.
      * @param callback  A function that accepts a RealTimeData. forEach calls the callback function one time for each property.
      */
-    forEach(callback: (model: RealTimeData) => void): void {
+    forEach(callback: (model: RealTimeData, property?: string) => void): void {
       for (var property in this._children) {
         if (this._children.hasOwnProperty(property)) {
-          callback(this._children[property]);
+          callback(this._children[property], property);
         }
       }
     }
 
+    value(): Object {
+      var returnObject: Object = {};
+      this.forEach((model: RealTimeData, property: string) => {
+        returnObject[property] = model.value();
+      });
+      return returnObject;
+    }
 
     // Handlers for incoming operations
 

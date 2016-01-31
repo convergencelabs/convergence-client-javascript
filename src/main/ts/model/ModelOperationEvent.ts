@@ -12,7 +12,7 @@ module convergence.model {
       public timestamp: number,
       public operation: DiscreteOperation) {
 
-      //TODO: Freeze???
+      Object.freeze(this);
     }
   }
 }

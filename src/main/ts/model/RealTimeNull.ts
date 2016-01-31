@@ -11,6 +11,10 @@ module convergence.model {
       super(DataType.Null, parent, fieldInParent);
     }
 
+    value(): any {
+      return null;
+    }
+
     _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
       throw new Error("Method not implemented exception!");
     }

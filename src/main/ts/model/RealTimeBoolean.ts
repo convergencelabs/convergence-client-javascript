@@ -28,6 +28,9 @@ module convergence.model {
       // TODO: send operation
     }
 
+    value(): boolean {
+      return this.data;
+    }
 
     // Handlers for incoming operations
 
