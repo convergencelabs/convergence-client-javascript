@@ -1,4 +1,4 @@
-/// <reference path="RealTimeData.ts" />
+/// <reference path="RealTimeContainer.ts" />
 /// <reference path="../ot/ops/ObjectSetPropertyOperation.ts" />
 /// <reference path="../ot/ops/ObjectAddPropertyOperation.ts" />
 /// <reference path="../ot/ops/ObjectRemovePropertyOperation.ts" />
@@ -22,7 +22,7 @@ module convergence.model {
 
   enum Events {SetProperty, RemoveProperty, Set}
 
-  export class RealTimeObject extends RealTimeData {
+  export class RealTimeObject extends RealTimeContainer {
 
     private _children: Object;
 

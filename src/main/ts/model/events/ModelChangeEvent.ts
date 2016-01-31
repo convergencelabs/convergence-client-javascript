@@ -1,6 +1,6 @@
 module convergence.model.event {
 
-  export class ModelChangeEvent {
+  export abstract class ModelChangeEvent {
     /**
      * Constructs a new ModelChangeEvent.
      */

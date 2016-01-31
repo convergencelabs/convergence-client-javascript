@@ -1,4 +1,4 @@
-/// <reference path="RealTimeData.ts" />
+/// <reference path="RealTimeContainer.ts" />
 /// <reference path="../ot/ops/ArrayInsertOperation.ts" />
 /// <reference path="../ot/ops/ArrayRemoveOperation.ts" />
 /// <reference path="../ot/ops/ArrayReplaceOperation.ts" />
@@ -27,7 +27,7 @@ module convergence.model {
   enum Events {Insert, Move, Remove, Replace, Set}
 
 
-  export class RealTimeArray extends RealTimeData {
+  export class RealTimeArray extends RealTimeContainer {
 
     private _children: Array<RealTimeData>;
 
@@ -203,6 +203,9 @@ module convergence.model {
       }
     }
 
+    get(index: number): RealTimeData {
+      return this._children[index];
+    }
 
     value(): Array<any> {
       var returnVal: Array<any> = [];

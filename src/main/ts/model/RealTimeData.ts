@@ -7,7 +7,7 @@ module convergence.model {
 
   export abstract class RealTimeData extends EventEmitter {
 
-    public static create(data: any, parent: RealTimeData, fieldInParent: PathElement): RealTimeData {
+    public static create(data: any, parent: RealTimeContainer, fieldInParent: PathElement): RealTimeData {
       var type: string = typeof data;
       if (data === null) {
         return new RealTimeNull(parent, fieldInParent);
