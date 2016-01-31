@@ -1,6 +1,10 @@
 /// <reference path="RealTimeData.ts" />
 /// <reference path="../ot/ops/StringInsertOperation.ts" />
 /// <reference path="../ot/ops/StringRemoveOperation.ts" />
+/// <reference path="../ot/ops/StringSetOperation.ts" />
+/// <reference path="events/StringSetEvent.ts" />
+/// <reference path="events/StringInsertEvent.ts" />
+/// <reference path="events/StringRemoveEvent.ts" />
 
 module convergence.model {
 
@@ -45,7 +49,7 @@ module convergence.model {
      * @param {number} length - The number of characters to remove
      */
     remove(index: number, length: number): void {
-      this._validateRemove(index);
+      this._validateRemove(index, length);
 
       var operation: StringRemoveOperation = new StringRemoveOperation(this.path(), false, index, this.data.substr(index, length));
       this.data = this.data.slice(0, index) + this.data.slice(index + length, this.data.length);
@@ -110,9 +114,9 @@ module convergence.model {
       var index: number = operation.index;
       var value: string = operation.value;
 
-      this._validateRemove(index);
+      this._validateRemove(index, value.length);
 
-      this.data = this.data.slice(0, index) + this.data.slice(index + length, this.data.length);
+      this.data = this.data.slice(0, index) + this.data.slice(index + value.length, this.data.length);
 
       var event: StringRemoveEvent = new StringRemoveEvent(
           operationEvent.sessionId,
@@ -153,7 +157,7 @@ module convergence.model {
       }
     }
 
-    private _validateRemove(index: number): void {
+    private _validateRemove(index: number, length: number): void {
       // TODO: Add integer check
       if (this.data.length <= index + length || index < 0) {
         throw new Error("Index out of bounds!");
