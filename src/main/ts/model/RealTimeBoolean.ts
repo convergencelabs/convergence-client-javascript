@@ -1,4 +1,6 @@
 /// <reference path="RealTimeData.ts" />
+/// <reference path="../ot/ops/BooleanSetOperation.ts" />
+/// <reference path="events/BooleanSetEvent.ts" />
 
 module convergence.model {
 
