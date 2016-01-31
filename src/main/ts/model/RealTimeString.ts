@@ -18,7 +18,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeString.
      */
-    constructor(private data: string, parent: RealTimeData, fieldInParent: string|number) {
+    constructor(private data: string, parent: RealTimeData, fieldInParent: PathElement) {
       super(DataType.String, parent, fieldInParent);
     }
 

@@ -7,7 +7,7 @@ module convergence.model {
 
   export abstract class RealTimeData extends EventEmitter {
 
-    public static createModel(data: any, parent: RealTimeData, fieldInParent: string|number): RealTimeData {
+    public static create(data: any, parent: RealTimeData, fieldInParent: PathElement): RealTimeData {
       var type: string = typeof data;
       if (data === null) {
         return new RealTimeNull(parent, fieldInParent);
@@ -27,18 +27,18 @@ module convergence.model {
     /**
      * Constructs a new RealTimeData.
      */
-    constructor(private modelType: DataType, private parent: RealTimeData, public fieldInParent: any) {
+    constructor(private modelType: DataType, private parent: RealTimeData, public fieldInParent: PathElement) {
       super();
     }
 
-    getType(): DataType {
+    type(): DataType {
       return this.modelType;
     }
 
     abstract value(): any;
 
-    path(): Array<string | number> {
-      var path: Array<string | number> = this.parent.path();
+    path(): Path {
+      var path: Path = this.parent.path();
       path.push(this.fieldInParent);
       return path;
     }

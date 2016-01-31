@@ -29,14 +29,14 @@ module convergence.model {
     /**
      * Constructs a new RealTimeObject.
      */
-    constructor(data: any, parent: RealTimeData, fieldInParent: string|number) {
+    constructor(data: any, parent: RealTimeData, fieldInParent: PathElement) {
       super(DataType.Object, parent, fieldInParent);
 
       this._children = {};
 
       for (var prop in data) {
         if (data.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.createModel(data[prop], this, prop);
+          this._children[prop] = RealTimeData.create(data[prop], this, prop);
         }
       }
     }
@@ -56,7 +56,7 @@ module convergence.model {
         operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
       }
 
-      this._children[property] = RealTimeData.createModel(value, this, property);
+      this._children[property] = RealTimeData.create(value, this, property);
       // TODO: send operation
     }
 
@@ -92,7 +92,7 @@ module convergence.model {
 
       for (var prop in value) {
         if (value.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.createModel(value[prop], this, prop);
+          this._children[prop] = RealTimeData.create(value[prop], this, prop);
         }
       }
     }
@@ -116,20 +116,20 @@ module convergence.model {
      */
     child(pathArgs: any): RealTimeData {
       // We're letting them pass in individual path arguments or a single array of path arguments
-      var pathArgsForReal: Array<string|number> = Array.isArray(pathArgs) ? pathArgs : arguments;
+      var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
       if (pathArgsForReal.length === 0) {
         throw new Error("Must at least specify the child index in the path");
       }
       var prop: string = <string> pathArgsForReal[0];
       var child: RealTimeData = this._children[prop];
       if (pathArgsForReal.length > 1) {
-        if (child.getType() === DataType.Object) {
+        if (child.type() === DataType.Object) {
           return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
-        } else if (child.getType() === DataType.Array) {
+        } else if (child.type() === DataType.Array) {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return RealTimeData.createModel(undefined, null, null);
+          return RealTimeData.create(undefined, null, null);
         }
       } else {
         return child;
@@ -183,7 +183,7 @@ module convergence.model {
         // TODO: handle detached
       }
 
-      this._children[property] = RealTimeData.createModel(value, this, property);
+      this._children[property] = RealTimeData.create(value, this, property);
 
       var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
         operationEvent.sessionId,
@@ -206,7 +206,7 @@ module convergence.model {
         // TODO: handle detached
       }
 
-      this._children[property] = RealTimeData.createModel(value, this, property);
+      this._children[property] = RealTimeData.create(value, this, property);
 
       var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
         operationEvent.sessionId,
@@ -250,7 +250,7 @@ module convergence.model {
 
       for (var prop in value) {
         if (value.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.createModel(value[prop], this, prop);
+          this._children[prop] = RealTimeData.create(value[prop], this, prop);
         }
       }
 

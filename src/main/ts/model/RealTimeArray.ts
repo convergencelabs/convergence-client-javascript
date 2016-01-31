@@ -34,13 +34,13 @@ module convergence.model {
     /**
      * Constructs a new RealTimeArray.
      */
-    constructor(data: Array<any>, parent: RealTimeData, fieldInParent: string|number) {
+    constructor(data: Array<any>, parent: RealTimeData, fieldInParent: PathElement) {
       super(DataType.Array, parent, fieldInParent);
 
       this._children = new Array<RealTimeData>();
 
       for (var i: number = 0; i < data.length; i++) {
-        this._children.push(RealTimeData.createModel(data[i], this, i));
+        this._children.push(RealTimeData.create(data[i], this, i));
       }
     }
 
@@ -53,7 +53,7 @@ module convergence.model {
       this._validateInsert(index, value);
 
       var operation: ArrayInsertOperation = new ArrayInsertOperation(this.path(), false, index, value);
-      this._children.splice(index, 0, (RealTimeData.createModel(value, this, index)));
+      this._children.splice(index, 0, (RealTimeData.create(value, this, index)));
       this.updateFieldInParent(index);
       // TODO: send operation
     }
@@ -84,7 +84,7 @@ module convergence.model {
       this._validateReplace(index, value);
 
       var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.path(), false, index, value);
-      this._children[index] = RealTimeData.createModel(value, this, index);
+      this._children[index] = RealTimeData.create(value, this, index);
       this.updateFieldInParent(index);
       // TODO: detach
       // TODO: send operation
@@ -119,7 +119,7 @@ module convergence.model {
       // TODO: detach
       this._children = new Array<RealTimeData>();
       for (var i: number = 0; i < values.length; i++) {
-        this._children.push(RealTimeData.createModel(values[i], this, i));
+        this._children.push(RealTimeData.create(values[i], this, i));
       }
       // TODO: send operation
     }
@@ -183,20 +183,20 @@ module convergence.model {
     // TODO: Determine correct parameter
     child(pathArgs: any): RealTimeData {
       // We're letting them pass in individual path arguments or a single array of path arguments
-      var pathArgsForReal: Array<string|number> = Array.isArray(pathArgs) ? pathArgs : arguments;
+      var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
       if (pathArgsForReal.length === 0) {
         throw new Error("Must at least specify the child index in the path");
       }
       var index: number = <number> pathArgsForReal[0];
       var child: RealTimeData = this._children[index];
       if (pathArgsForReal.length > 1) {
-        if (child.getType() === DataType.Object) {
+        if (child.type() === DataType.Object) {
           return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
-        } else if (child.getType() === DataType.Array) {
+        } else if (child.type() === DataType.Array) {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return RealTimeData.createModel(undefined, null, null);
+          return RealTimeData.create(undefined, null, null);
         }
       } else {
         return child;
@@ -238,7 +238,7 @@ module convergence.model {
 
       this._validateInsert(index, value);
 
-      this._children.splice(index, 0, (RealTimeData.createModel(value, this, index)));
+      this._children.splice(index, 0, (RealTimeData.create(value, this, index)));
       this.updateFieldInParent(index);
 
       var event: ArrayInsertEvent = new ArrayInsertEvent(
@@ -304,7 +304,7 @@ module convergence.model {
 
       this._validateReplace(index, value);
 
-      this._children[index] = RealTimeData.createModel(value, this, index);
+      this._children[index] = RealTimeData.create(value, this, index);
       this.updateFieldInParent(index);
       // TODO: detach
 
@@ -328,7 +328,7 @@ module convergence.model {
       // TODO: detach
       this._children = new Array<RealTimeData>();
       for (var i: number = 0; i < values.length; i++) {
-        this._children.push(RealTimeData.createModel(values[i], this, i));
+        this._children.push(RealTimeData.create(values[i], this, i));
       }
 
       var event: ArraySetEvent = new ArraySetEvent(

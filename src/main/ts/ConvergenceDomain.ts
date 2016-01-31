@@ -1,15 +1,17 @@
 /// <reference path="util/EventEmitter.ts" />
+/// <reference path="model/ModelService.ts" />
 
 module convergence {
 
   "use strict";
 
-  import RealTimeModelService = convergence.model.RealTimeModelService;
+  import ModelService = convergence.model.ModelService;
   import EventEmitter = convergence.util.EventEmitter;
   import Session = convergence.Session;
 
   export class ConvergenceDomain extends EventEmitter {
 
+    private _modelService: ModelService;
 
     /**
      * Constructs a new ConvergenceDomain using the default options.
@@ -19,6 +21,8 @@ module convergence {
      */
     constructor(url: string) {
       super();
+      // TODO: Pass in Session
+      this._modelService = new ModelService(null);
     }
 
     /**
@@ -48,15 +52,16 @@ module convergence {
      * Gets the session of the connected user.
      * @return {convergence.Session} The users session.
      */
-    getSession(): Session {
+    session(): Session {
+      // TODO: implement this
       return null;
     }
 
     /**
      * Gets the ModelService
      */
-    getModelService(): RealTimeModelService {
-      return null;
+    modelService(): ModelService {
+      return this._modelService;
     }
 
     /**

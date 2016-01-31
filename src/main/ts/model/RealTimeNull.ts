@@ -7,7 +7,7 @@ module convergence.model {
     /**
      * Constructs a new RealTimeNull.
      */
-    constructor(parent: RealTimeData, fieldInParent: string|number) {
+    constructor(parent: RealTimeData, fieldInParent: PathElement) {
       super(DataType.Null, parent, fieldInParent);
     }
 

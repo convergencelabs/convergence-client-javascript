@@ -2,10 +2,10 @@ module convergence.model {
   import EventEmitter = convergence.util.EventEmitter;
   import Session = convergence.Session;
 
-  export class RealTimeModelService extends EventEmitter {
+  export class ModelService extends EventEmitter {
 
     /**
-     * Constructs a new RealTimeModelService.
+     * Constructs a new ModelService.
      */
     constructor(private _session: Session) {
       super();
