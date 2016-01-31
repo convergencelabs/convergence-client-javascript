@@ -13,12 +13,10 @@ module convergence.model {
   import ObjectAddPropertyOperation = convergence.ot.ObjectAddPropertyOperation;
   import ObjectRemovePropertyOperation = convergence.ot.ObjectRemovePropertyOperation;
   import ObjectSetOperation = convergence.ot.ObjectSetOperation;
-
-  import Operation = convergence.ot.Operation;
-
   import ObjectSetPropertyEvent = convergence.model.event.ObjectSetPropertyEvent;
   import ObjectRemovePropertyEvent = convergence.model.event.ObjectRemovePropertyEvent;
   import ObjectSetEvent = convergence.model.event.ObjectSetEvent;
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
 
   enum Events {SetProperty, RemoveProperty, Set}
 
@@ -29,14 +27,16 @@ module convergence.model {
     /**
      * Constructs a new RealTimeObject.
      */
-    constructor(data: any, parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.Object, parent, fieldInParent);
+    constructor(data: any, parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.Object, parent, fieldInParent, sendOpCallback);
 
       this._children = {};
 
       for (var prop in data) {
         if (data.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.create(data[prop], this, prop);
+          this._children[prop] = RealTimeData.create(data[prop], this, prop, this.sendOpCallback);
         }
       }
     }
@@ -48,7 +48,7 @@ module convergence.model {
      */
     setProperty(property: string, value: Object|number|string|boolean): void {
 
-      var operation: Operation;
+      var operation: DiscreteOperation;
       if (this._children.hasOwnProperty(property)) {
         operation = new ObjectSetPropertyOperation(this.path(), false, property, value);
         // TODO: detach
@@ -56,8 +56,8 @@ module convergence.model {
         operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
       }
 
-      this._children[property] = RealTimeData.create(value, this, property);
-      // TODO: send operation
+      this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -68,11 +68,11 @@ module convergence.model {
       if (!this._children.hasOwnProperty(property)) {
         throw new Error("Cannot remove property that is undefined!");
       }
-      var operation = new ObjectRemovePropertyOperation(this.path(), false, property);
+      var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.path(), false, property);
 
       // TODO: detach
       delete this._children[property];
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -81,7 +81,7 @@ module convergence.model {
      */
     setValue(value: Object): void {
       if (!value || typeof value !== "object") {
-        throw new Error("Value must be an object and cannot be null or undefined!")
+        throw new Error("Value must be an object and cannot be null or undefined!");
       }
 
       var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
@@ -92,9 +92,10 @@ module convergence.model {
 
       for (var prop in value) {
         if (value.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.create(value[prop], this, prop);
+          this._children[prop] = RealTimeData.create(value[prop], this, prop, this.sendOpCallback);
         }
       }
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -129,7 +130,7 @@ module convergence.model {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return RealTimeData.create(undefined, null, null);
+          return RealTimeData.create(undefined, null, null, this.sendOpCallback);
         }
       } else {
         return child;
@@ -183,7 +184,7 @@ module convergence.model {
         // TODO: handle detached
       }
 
-      this._children[property] = RealTimeData.create(value, this, property);
+      this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
 
       var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
         operationEvent.sessionId,
@@ -206,7 +207,7 @@ module convergence.model {
         // TODO: handle detached
       }
 
-      this._children[property] = RealTimeData.create(value, this, property);
+      this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
 
       var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
         operationEvent.sessionId,
@@ -250,7 +251,7 @@ module convergence.model {
 
       for (var prop in value) {
         if (value.hasOwnProperty(prop)) {
-          this._children[prop] = RealTimeData.create(value[prop], this, prop);
+          this._children[prop] = RealTimeData.create(value[prop], this, prop, this.sendOpCallback);
         }
       }
 

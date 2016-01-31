@@ -23,6 +23,7 @@ module convergence.model {
   import ArrayMoveEvent = convergence.model.event.ArrayMoveEvent;
   import ArrayReplaceEvent = convergence.model.event.ArrayReplaceEvent;
   import ArraySetEvent = convergence.model.event.ArraySetEvent;
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
 
   enum Events {Insert, Move, Remove, Replace, Set}
 
@@ -34,13 +35,16 @@ module convergence.model {
     /**
      * Constructs a new RealTimeArray.
      */
-    constructor(data: Array<any>, parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.Array, parent, fieldInParent);
+    constructor(data: Array<any>,
+                parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.Array, parent, fieldInParent, sendOpCallback);
 
       this._children = new Array<RealTimeData>();
 
       for (var i: number = 0; i < data.length; i++) {
-        this._children.push(RealTimeData.create(data[i], this, i));
+        this._children.push(RealTimeData.create(data[i], this, i, this.sendOpCallback));
       }
     }
 
@@ -53,9 +57,9 @@ module convergence.model {
       this._validateInsert(index, value);
 
       var operation: ArrayInsertOperation = new ArrayInsertOperation(this.path(), false, index, value);
-      this._children.splice(index, 0, (RealTimeData.create(value, this, index)));
+      this._children.splice(index, 0, (RealTimeData.create(value, this, index, this.sendOpCallback)));
       this.updateFieldInParent(index);
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -71,7 +75,7 @@ module convergence.model {
       this._children.splice(index, 1);
       this.updateFieldInParent(index);
       // TODO: detach
-      // TODO: send operation
+      this.sendOpCallback(operation);
       return child.value();
     }
 
@@ -84,10 +88,10 @@ module convergence.model {
       this._validateReplace(index, value);
 
       var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.path(), false, index, value);
-      this._children[index] = RealTimeData.create(value, this, index);
+      this._children[index] = RealTimeData.create(value, this, index, this.sendOpCallback);
       this.updateFieldInParent(index);
       // TODO: detach
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -105,7 +109,7 @@ module convergence.model {
       this._children.splice(toIndex, 0, child);
 
       this.updateFieldInParent(Math.min(fromIndex, toIndex));
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -119,9 +123,9 @@ module convergence.model {
       // TODO: detach
       this._children = new Array<RealTimeData>();
       for (var i: number = 0; i < values.length; i++) {
-        this._children.push(RealTimeData.create(values[i], this, i));
+        this._children.push(RealTimeData.create(values[i], this, i, this.sendOpCallback));
       }
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -196,7 +200,7 @@ module convergence.model {
           return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
         } else {
           // TODO: Determine correct way to handle undefined
-          return RealTimeData.create(undefined, null, null);
+          return RealTimeData.create(undefined, null, null, this.sendOpCallback);
         }
       } else {
         return child;
@@ -241,17 +245,17 @@ module convergence.model {
 
       this._validateInsert(index, value);
 
-      this._children.splice(index, 0, (RealTimeData.create(value, this, index)));
+      this._children.splice(index, 0, (RealTimeData.create(value, this, index, this.sendOpCallback)));
       this.updateFieldInParent(index);
 
       var event: ArrayInsertEvent = new ArrayInsertEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        index,
-        value);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          index,
+          value);
       this.emit(Events[Events.Insert], event);
     }
 
@@ -269,13 +273,13 @@ module convergence.model {
       this.updateFieldInParent(Math.min(fromIndex, toIndex));
 
       var event: ArrayMoveEvent = new ArrayMoveEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        fromIndex,
-        toIndex);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          fromIndex,
+          toIndex);
       this.emit(Events[Events.Move], event);
     }
 
@@ -291,12 +295,12 @@ module convergence.model {
       // TODO: detach
 
       var event: ArrayRemoveEvent = new ArrayRemoveEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        index);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          index);
       this.emit(Events[Events.Remove], event);
     }
 
@@ -307,18 +311,18 @@ module convergence.model {
 
       this._validateReplace(index, value);
 
-      this._children[index] = RealTimeData.create(value, this, index);
+      this._children[index] = RealTimeData.create(value, this, index, this.sendOpCallback);
       this.updateFieldInParent(index);
       // TODO: detach
 
       var event: ArrayReplaceEvent = new ArrayReplaceEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        index,
-        value);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          index,
+          value);
       this.emit(Events[Events.Replace], event);
     }
 
@@ -331,16 +335,16 @@ module convergence.model {
       // TODO: detach
       this._children = new Array<RealTimeData>();
       for (var i: number = 0; i < values.length; i++) {
-        this._children.push(RealTimeData.create(values[i], this, i));
+        this._children.push(RealTimeData.create(values[i], this, i, this.sendOpCallback));
       }
 
       var event: ArraySetEvent = new ArraySetEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        values);
+          operationEvent.sessionId,
+          operationEvent.username,
+          operationEvent.version,
+          operationEvent.timestamp,
+          this,
+          values);
       this.emit(Events[Events.Set], event);
     }
 

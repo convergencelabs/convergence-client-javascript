@@ -4,6 +4,7 @@ module convergence.model {
 
   import BooleanSetOperation = convergence.ot.BooleanSetOperation;
   import BooleanSetEvent = convergence.model.event.BooleanSetEvent;
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
 
   enum Events {Set}
 
@@ -12,8 +13,11 @@ module convergence.model {
     /**
      * Constructs a new RealTimeBoolean.
      */
-    constructor(private data: boolean, parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.Boolean, parent, fieldInParent);
+    constructor(private data: boolean,
+                parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.Boolean, parent, fieldInParent, sendOpCallback);
     }
 
     /**
@@ -25,7 +29,7 @@ module convergence.model {
 
       var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
       this.data = value;
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     value(): boolean {
@@ -60,7 +64,7 @@ module convergence.model {
       this.emit(Events[Events.Set], event);
     }
 
-    private _validateSet(value: boolean) {
+    private _validateSet(value: boolean): void {
       if (typeof value !== "boolean") {
         throw new Error("Value must be a boolean");
       }

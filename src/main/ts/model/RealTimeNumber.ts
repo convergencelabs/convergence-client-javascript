@@ -11,6 +11,7 @@ module convergence.model {
 
   import NumberSetEvent = convergence.model.event.NumberSetEvent;
   import NumberAddEvent = convergence.model.event.NumberAddEvent;
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
 
 
   // TODO: Decide what events we want for numbers.
@@ -21,8 +22,11 @@ module convergence.model {
     /**
      * Constructs a new RealTimeNumber.
      */
-    constructor(private data: number, parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.Number, parent, fieldInParent);
+    constructor(private data: number,
+                parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.Number, parent, fieldInParent, sendOpCallback);
     }
 
     /**
@@ -35,7 +39,7 @@ module convergence.model {
       if (value !== 0) {
         var operation: NumberAddOperation = new NumberAddOperation(this.path(), false, value);
         this.data += value;
-        // TODO: send operation
+        this.sendOpCallback(operation);
       }
     }
 
@@ -72,7 +76,7 @@ module convergence.model {
 
       var operation: NumberSetOperation = new NumberSetOperation(this.path(), false, value);
       this.data = value;
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     value(): number {

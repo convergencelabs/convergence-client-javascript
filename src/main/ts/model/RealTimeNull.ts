@@ -2,13 +2,16 @@
 
 module convergence.model {
 
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
   export class RealTimeNull extends RealTimeData {
 
     /**
      * Constructs a new RealTimeNull.
      */
-    constructor(parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.Null, parent, fieldInParent);
+    constructor(parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.Null, parent, fieldInParent, sendOpCallback);
     }
 
     value(): any {

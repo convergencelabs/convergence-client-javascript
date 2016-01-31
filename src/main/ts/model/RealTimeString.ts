@@ -10,6 +10,7 @@ module convergence.model {
   import StringInsertEvent = convergence.model.event.StringInsertEvent;
   import StringRemoveEvent = convergence.model.event.StringRemoveEvent;
   import StringSetEvent = convergence.model.event.StringSetEvent;
+  import DiscreteOperation = convergence.ot.DiscreteOperation;
 
   enum Events {Insert, Remove, Set}
 
@@ -18,8 +19,11 @@ module convergence.model {
     /**
      * Constructs a new RealTimeString.
      */
-    constructor(private data: string, parent: RealTimeContainer, fieldInParent: PathElement) {
-      super(DataType.String, parent, fieldInParent);
+    constructor(private data: string,
+                parent: RealTimeContainer,
+                fieldInParent: PathElement,
+                sendOpCallback: (operation: DiscreteOperation) => void) {
+      super(DataType.String, parent, fieldInParent, sendOpCallback);
     }
 
     /**
@@ -32,7 +36,7 @@ module convergence.model {
 
       var operation: StringInsertOperation = new StringInsertOperation(this.path(), false, index, value);
       this.data = this.data.slice(0, index) + value + this.data.slice(index, this.data.length);
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     /**
@@ -45,7 +49,7 @@ module convergence.model {
 
       var operation: StringRemoveOperation = new StringRemoveOperation(this.path(), false, index, this.data.substr(index, length));
       this.data = this.data.slice(0, index) + this.data.slice(index + length, this.data.length);
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
     setValue(value: string): void {
@@ -53,7 +57,7 @@ module convergence.model {
 
       this.data = value;
       var operation: StringSetOperation = new StringSetOperation(this.path(), false, value);
-      // TODO: send operation
+      this.sendOpCallback(operation);
     }
 
 
