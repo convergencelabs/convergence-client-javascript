@@ -1,17 +1,32 @@
 /// <reference path="util/EventEmitter.ts" />
 /// <reference path="model/ModelService.ts" />
+/// <reference path="connection/ConvergenceConnection.ts" />
+/// <reference path="protocol/MessageType.ts" />
 
 module convergence {
-
+  import ConvergenceConnectionListener = convergence.connection.ConvergenceConnectionListener;
   "use strict";
 
   import ModelService = convergence.model.ModelService;
   import EventEmitter = convergence.util.EventEmitter;
   import Session = convergence.Session;
+  import ConvergenceConnection = convergence.connection.ConvergenceConnection;
+  import IncomingProtocolNormalMessage = convergence.message.IncomingProtocolNormalMessage;
+  import IncomingProtocolRequestMessage = convergence.message.IncomingProtocolRequestMessage;
+  import ReplyCallback = convergence.connection.ReplyCallback;
+  import HandshakeResponse = convergence.message.HandshakeResponse;
+  import AuthRequest = convergence.message.AuthRequest;
+  import TokenAuthRequest = convergence.message.TokenAuthRequest;
+  import MessageType = convergence.message.MessageType;
+  import PasswordAuthRequest = convergence.message.PasswordAuthRequest;
+  import AuthenticationResponseMessage = convergence.message.AuthenticationResponseMessage;
 
   export class ConvergenceDomain extends EventEmitter {
 
     private _modelService: ModelService;
+    private _connection: ConvergenceConnection;
+    private _session: SessionImpl;
+    private _connectPromise: Q.Promise<HandshakeResponse>;
 
     /**
      * Constructs a new ConvergenceDomain using the default options.
@@ -21,8 +36,43 @@ module convergence {
      */
     constructor(url: string) {
       super();
-      // TODO: Pass in Session
-      this._modelService = new ModelService(null);
+
+      // todo make this optional params
+      this._connection = new ConvergenceConnection(url,
+        5, // connection timeout in seconds
+        -1, // max retries,
+        1, // reconnection interval in seconds
+        true, // retry on open
+        {
+          onConnected: function (): void {
+          },
+          onInterrupted: function (): void {
+          },
+          onReconnected: function (): void {
+          },
+          onDisconnected: function (): void {
+          },
+          onError: function (error: string): void {
+          },
+          onMessage: function (message: IncomingProtocolNormalMessage): void {
+          },
+          onRequest: function (message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void {
+          }
+        }
+      );
+
+      this._session = new SessionImpl(this, this._connection, null, null);
+      this._modelService = new ModelService(this._session);
+
+      var self = this;
+      this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
+        self._session.setSessionId(response.clientId);
+        return response;
+      }).fail<HandshakeResponse>(function (reason: Error): Q.Promise<HandshakeResponse> {
+        self._connection = null;
+        console.debug("Error connecting to domain: " + reason);
+        return this;
+      });
     }
 
     /**
@@ -32,7 +82,12 @@ module convergence {
      * @return {Q.Promise} A promise
      */
     authenticateWithPassword(username: string, password: string): Q.Promise<void> {
-      return Q.resolve<void>(null);
+      var authRequest: PasswordAuthRequest =  {
+        type: MessageType.AUTH_PASSWORD,
+        username: username,
+        password: password
+      };
+      return this._authenticate(authRequest);
     }
 
     /**
@@ -41,7 +96,11 @@ module convergence {
      * @return {Q.Promise} A promise
      */
     authenticateWithToken(token: string): Q.Promise<void> {
-      return Q.resolve<void>(null);
+      var authRequest: TokenAuthRequest =  {
+        type: MessageType.AUTH_TOKEN,
+        token: token
+      };
+      return this._authenticate(authRequest);
     }
 
     isAuthenticated(): boolean {
@@ -68,13 +127,56 @@ module convergence {
      * Closes the connection to the server and disposes of the ConvergenceDomain
      */
     dispose(): void {
+      this._connection.disconnect();
+      this._connection = undefined;
     }
 
     /**
      * @returns {boolean} True if this ConvergenceDomain is disposed.
      */
     isDisposed(): boolean {
-      return false;
+      return this._connection === undefined;
     }
+
+    private _authenticate(authRequest: AuthRequest): Q.Promise<void> {
+      if (this._session.isAuthenticated()) {
+        // The user is only allowed to authenticate once.
+        return Q.reject<void>(new Error("User already authenticated."));
+      } else if (this._connection.isConnected()) {
+        // We are connected already so we can just send the request.
+        return this.sendAuthRequest(authRequest);
+      } else if (this._connectPromise != null) {
+        var self = this;
+        // We are connecting so defer this until after we connect.
+        return this._connectPromise.then(function () {
+          return self.sendAuthRequest(authRequest);
+        });
+      } else {
+        // We are not connecting and are not trying to connect.
+        return Q.reject<void>(new Error("Must be connected or connecting to authenticate."));
+      }
+    }
+
+    private sendAuthRequest(authRequest: AuthRequest): Q.Promise<void> {
+      var self: ConvergenceDomain = this;
+      return this._connection.request(authRequest).then(function(response: AuthenticationResponseMessage): void {
+        if (response.success === true) {
+          self._session.setUsername(response.username);
+          return;
+        } else {
+          throw new Error("Authentication failed");
+        }
+      });
+    }
+  }
+
+  export interface ConnectionListener extends ConvergenceConnectionListener {
+    onConnected(): void;
+    onInterrupted(): void;
+    onReconnected(): void;
+    onDisconnected(): void;
+    onError(error: string): void;
+    onMessage(message: IncomingProtocolNormalMessage): void;
+    onRequest(message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void;
   }
 }

@@ -5,7 +5,7 @@ module convergence {
   import ConvergenceConnection = convergence.connection.ConvergenceConnection;
   import Session = convergence.Session;
 
-  class SessionImpl implements Session {
+  export class SessionImpl implements Session {
 
     private _domain: ConvergenceDomain;
     private _connection: ConvergenceConnection;
@@ -26,6 +26,9 @@ module convergence {
       return this._domain;
     }
 
+    setSessionId(sessionId: string): void {
+      this._sessionId = sessionId;
+    }
 
     /**
      * @return The sessionId of the connected client
@@ -39,6 +42,10 @@ module convergence {
      */
     getUsername(): string {
       return this._userame;
+    }
+
+    setUsername(username: string): void {
+      this._userame = username;
     }
 
     /**

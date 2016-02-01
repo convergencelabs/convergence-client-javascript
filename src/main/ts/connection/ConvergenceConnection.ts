@@ -9,12 +9,12 @@ module convergence.connection {
   export class ConvergenceConnection {
 
     private _connectionDeferred: Q.Deferred<HandshakeResponse>;
-    private _connectionTimeout: number;
+    private _connectionTimeout: number;  // seconds
     private _maxReconnectAttempts: number;
     private _connectionAttempts: number;
     private _connectionAttemptTask: number;
     private _connectionTimeoutTask: number;
-    private _reconnectInterval: number;
+    private _reconnectInterval: number; // seconds
     private _retryOnOpen: boolean;
 
     private _protocolConfig: ProtocolConfiguration;
@@ -29,6 +29,15 @@ module convergence.connection {
     private _url: string;
     private _eventHandler: ProtocolEventHandler;
 
+    /**
+     *
+     * @param url
+     * @param connectionTimeout in seconds
+     * @param maxReconnectAttempts -1 for unlimited
+     * @param reconnectInterval in seconds
+     * @param retryOnOpen
+     * @param listener
+     */
     constructor(url: string,
                 connectionTimeout: number,
                 maxReconnectAttempts: number,
@@ -143,12 +152,12 @@ module convergence.connection {
         }
 
         self._protocolConnection.handshake(reconnect).then(function (handshakeResponse: HandshakeResponse): void {
+          clearTimeout(self._connectionTimeoutTask);
           if (handshakeResponse.success) {
             self._connectionDeferred.resolve(handshakeResponse);
           } else {
             // todo: Can we reuse this connection???
             self._protocolConnection.close();
-            clearTimeout(self._connectionTimeoutTask);
             if ((reconnect || self._retryOnOpen) && handshakeResponse.retryOk) {
               // todo if this is a timeout, we would like to shorten
               // the reconnect interval by the timeout period.
@@ -167,7 +176,7 @@ module convergence.connection {
       }).fail(function (reason: Error): void {
         console.log("Connection failed: " + reason);
         clearTimeout(self._connectionTimeoutTask);
-        if (self.reconnect || self._retryOnOpen) {
+        if (reconnect || self._retryOnOpen) {
           self.scheduleReconnect(Math.max(self._reconnectInterval, 0), reconnect);
         } else {
           self._connectionDeferred.reject(reason);
