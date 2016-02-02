@@ -11,27 +11,26 @@ const mocha = require('gulp-mocha');
 const plumber = require('gulp-plumber');
 var insert = require('gulp-insert');
 var del = require('del');
-var Server = require('karma').Server;
-var insert = require('gulp-insert');
 
-var version = "1.0.0-M1-SNAPSHOT";
-
-var outputFileBase = "convergence-client";
-var outputFileJs = outputFileBase + ".js";
-var outputFileDts = outputFileBase + ".d";
-
-var tsProject = ts.createProject('tsconfig.json');
+var sourcemaps = require('gulp-sourcemaps');
+var rollup = require('gulp-rollup');
+var rollupTypescript = require('rollup-plugin-typescript');
 
 const plumberConf = {};
 
-gulp.task('ts-compile', function () {
-  var tsResult = gulp.src(['src/main/ts/**/*.ts', 'typings/**.ts'])
-    .pipe(ts(tsProject));
-  tsResult.js
-    .pipe(insert.append('if (typeof module === "object" && module.exports) module.exports = convergence;'))
-    .pipe(gulp.dest('.'));
-
-  return tsResult.dts.pipe(gulp.dest('.'));
+gulp.task('build', function () {
+  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+    .pipe(rollup({
+      format: 'iife',
+      moduleName: 'ConvergenceDomain',
+      sourceMap: true,
+      plugins: [
+        rollupTypescript()
+      ]
+    }))
+    .pipe(rename("convergence-client.js"))
+    .pipe(sourcemaps.write("."))
+    .pipe(gulp.dest("build"));
 });
 
 gulp.task('tslint', function () {
@@ -41,7 +40,7 @@ gulp.task('tslint', function () {
 });
 
 gulp.task('istanbul', function (cb) {
-  gulp.src("build/**/*.js")
+  return gulp.src("build/**/*.js")
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
     .on('finish', function () {
@@ -56,7 +55,7 @@ gulp.task('istanbul', function (cb) {
     });
 });
 
-gulp.task('dist', ["ts-compile"], function () {
+gulp.task('dist', ["build"], function () {
   mkdirp.sync("dist");
   return gulp.src('build/*.js')
     .pipe(uglify())
@@ -74,12 +73,5 @@ gulp.task('clean', function (cb) {
 });
 
 // The default task (called when you run `gulp`)
-gulp.task('default', ["ts-compile"]);
-gulp.task('test2', ["istanbul"]);
-
-gulp.task('test', function (done) {
-  new Server({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: true
-  }, done).start();
-});
+gulp.task('default', ["build"]);
+gulp.task('test', ["istanbul"]);

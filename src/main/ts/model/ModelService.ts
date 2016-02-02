@@ -1,6 +1,7 @@
 import EventEmitter from "../util/EventEmitter";
 import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
+import ModelFqn from "./ModelFqn";
 
 export default class ModelService extends EventEmitter {
 
@@ -29,7 +30,8 @@ export default class ModelService extends EventEmitter {
    * @return {Q.Promise} A promise that resolves with a RealTimeModel
    */
   open(collectionId:string, modelId:string):Q.Promise<RealTimeModel> {
-    return null;
+    // fixme not real.
+    return Q.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._session));
   }
 
   /**

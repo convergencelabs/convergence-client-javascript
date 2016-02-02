@@ -2,14 +2,22 @@ import EventEmitter from "../util/EventEmitter";
 import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";
+import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
+import OperationTransformer from "../ot/xform/OperationTransformer";
+import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
 
 export default class RealTimeModel extends EventEmitter {
+
+  private _concurencyControl: ClientConcurrencyControl;
 
   /**
    * Constructs a new RealTimeModel.
    */
   constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
     super();
+    var xformer = new OperationTransformer(new TransformationFunctionRegistry());
+    // fixme
+    this._concurencyControl = new ClientConcurrencyControl("", 0, [], xformer);
   }
 
   collectionId(): string {
