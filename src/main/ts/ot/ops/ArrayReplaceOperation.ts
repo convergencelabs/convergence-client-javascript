@@ -1,11 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
 export default class ArrayReplaceOperation extends DiscreteOperation {
 
   static TYPE: string = "ArrayReplace";
 
-  constructor(path: Array<string | number>, noOp: boolean, public index: number, public value: any) {
+  constructor(path: Path, noOp: boolean, public index: number, public value: any) {
     super(ArrayReplaceOperation.TYPE, path, noOp);
     Object.freeze(this);
   }

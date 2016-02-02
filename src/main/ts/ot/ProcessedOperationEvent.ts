@@ -1,6 +1,6 @@
 import Operation from "./ops/Operation";
 
-export class ProcessedOperationEvent {
+export default class ProcessedOperationEvent {
   private _clientId: string;
   private _contextVersion: number;
   private _timestamp: number;

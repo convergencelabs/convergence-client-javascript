@@ -1,14 +1,15 @@
 import DiscreteOperation from "../ops/DiscreteOperation";
+import {Path} from "../Path";
 
 export interface PathTransformationFunction<A extends DiscreteOperation> {
-  transformDescendantPath(ancestorOp: A, descendantPath: Array<string | number>): PathTransformation;
+  transformDescendantPath(ancestorOp: A, descendantPath: Path): PathTransformation;
 }
 
 export class PathTransformation {
   _result: PathTransformationResult;
-  _path: Array<string | number>;
+  _path: Path;
 
-  constructor(result: PathTransformationResult, path: Array<string | number>) {
+  constructor(result: PathTransformationResult, path: Path) {
     this._result = result;
     this._path = path;
   }
@@ -17,7 +18,7 @@ export class PathTransformation {
     return this._result;
   }
 
-  get path(): Array<string | number> {
+  get path(): Path {
     return this._path;
   }
 }

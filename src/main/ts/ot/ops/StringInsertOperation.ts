@@ -1,11 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
 export default class StringInsertOperation extends DiscreteOperation {
 
   static TYPE: string = "StringInsert";
 
-  constructor(path: Array<string | number>, noOp: boolean, public index: number, public value: string) {
+  constructor(path: Path, noOp: boolean, public index: number, public value: string) {
     super(StringInsertOperation.TYPE, path, noOp);
     Object.freeze(this);
   }

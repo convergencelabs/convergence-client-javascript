@@ -1,5 +1,6 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
 export default class ObjectRemovePropertyOperation extends DiscreteOperation {
 
@@ -7,7 +8,7 @@ export default class ObjectRemovePropertyOperation extends DiscreteOperation {
 
   protected _prop: string;
 
-  constructor(path: Array<string | number>, noOp: boolean, public prop: string) {
+  constructor(path: Path, noOp: boolean, public prop: string) {
     super(ObjectRemovePropertyOperation.TYPE, path, noOp);
     Object.freeze(this);
   }

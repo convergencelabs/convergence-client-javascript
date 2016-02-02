@@ -1,6 +1,6 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
+import OperationPair from "../OperationPair";
 import ArrayInsertOperation from "../../ops/ArrayInsertOperation";
-import {OperationPair} from "../OperationPair";
 
 export default class ArrayInsertInsertOTF implements OperationTransformationFunction<ArrayInsertOperation, ArrayInsertOperation> {
   transform(s: ArrayInsertOperation, c: ArrayInsertOperation): OperationPair {

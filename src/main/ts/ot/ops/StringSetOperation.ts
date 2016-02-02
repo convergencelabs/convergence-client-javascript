@@ -1,11 +1,12 @@
 import DiscreteOperation from "./DiscreteOperation";
 import Immutable from "../../util/Immutable";
+import {Path} from "../Path";
 
 export default class StringSetOperation extends DiscreteOperation {
 
   static TYPE: string = "StringSet";
 
-  constructor(path: Array<string | number>, public noOp: boolean, public value: string) {
+  constructor(path: Path, public noOp: boolean, public value: string) {
     super(StringSetOperation.TYPE, path, noOp);
     Object.freeze(this);
   }
