@@ -1,4 +1,15 @@
 import RealTimeData from "./RealTimeData";
+import RealTimeContainer from "./RealTimeContainer";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {DataType} from "./RealTimeData";
+import StringInsertOperation from "../ot/ops/StringInsertOperation";
+import StringRemoveOperation from "../ot/ops/StringRemoveOperation";
+import StringSetOperation from "../ot/ops/StringSetOperation";
+import ModelOperationEvent from "./ModelOperationEvent";
+import StringInsertEvent from "./events/StringInsertEvent";
+import StringRemoveEvent from "./events/StringRemoveEvent";
+import StringSetEvent from "./events/StringSetEvent";
 
 enum Events {Insert, Remove, Set}
 

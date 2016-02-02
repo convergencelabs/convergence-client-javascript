@@ -1,4 +1,21 @@
 import RealTimeContainer from "./RealTimeContainer";
+import RealTimeData from "./RealTimeData";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import ArrayInsertOperation from "../ot/ops/ArrayInsertOperation";
+import ArrayRemoveOperation from "../ot/ops/ArrayRemoveOperation";
+import ArrayReplaceOperation from "../ot/ops/ArrayReplaceOperation";
+import ArrayMoveOperation from "../ot/ops/ArrayMoveOperation";
+import ArraySetOperation from "../ot/ops/ArraySetOperation";
+import {Path} from "../ot/Path";
+import RealTimeObject from "./RealTimeObject";
+import ArrayInsertEvent from "./events/ArrayInsertEvent";
+import ArrayMoveEvent from "./events/ArrayMoveEvent";
+import ArrayRemoveEvent from "./events/ArrayRemoveEvent";
+import ArrayReplaceEvent from "./events/ArrayReplaceEvent";
+import ArraySetEvent from "./events/ArraySetEvent";
+import ModelOperationEvent from "./ModelOperationEvent";
+import {DataType} from "./RealTimeData";
 
 enum Events {Insert, Move, Remove, Replace, Set}
 

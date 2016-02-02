@@ -1,4 +1,9 @@
-export class RealTimeModel extends EventEmitter {
+import EventEmitter from "../util/EventEmitter";
+import ModelFqn from "./ModelFqn";
+import RealTimeObject from "./RealTimeObject";
+import Session from "../Session";
+
+export default class RealTimeModel extends EventEmitter {
 
   /**
    * Constructs a new RealTimeModel.

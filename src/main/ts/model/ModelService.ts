@@ -1,4 +1,6 @@
 import EventEmitter from "../util/EventEmitter";
+import Session from "../Session";
+import RealTimeModel from "./RealTimeModel";
 
 export default class ModelService extends EventEmitter {
 
@@ -26,7 +28,7 @@ export default class ModelService extends EventEmitter {
    *            The modelId
    * @return {Q.Promise} A promise that resolves with a RealTimeModel
    */
-  open(collectionId:string, modelId:string):Q.Promise<convergence.model.RealTimeModel> {
+  open(collectionId:string, modelId:string):Q.Promise<RealTimeModel> {
     return null;
   }
 

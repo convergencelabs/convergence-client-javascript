@@ -1,5 +1,14 @@
 // TODO: Decide what events we want for numbers.
 import RealTimeData from "./RealTimeData";
+import RealTimeContainer from "./RealTimeContainer";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {DataType} from "./RealTimeData";
+import NumberAddOperation from "../ot/ops/NumberAddOperation";
+import NumberSetOperation from "../ot/ops/NumberSetOperation";
+import ModelOperationEvent from "./ModelOperationEvent";
+import NumberAddEvent from "./events/NumberAddEvent";
+import NumberSetEvent from "./events/NumberSetEvent";
 
 enum Events {Add, Set}
 

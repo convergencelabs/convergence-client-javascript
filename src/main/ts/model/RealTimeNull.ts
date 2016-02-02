@@ -1,25 +1,26 @@
-/// <reference path="RealTimeData.ts" />
+import RealTimeData from "./RealTimeData";
+import RealTimeContainer from "./RealTimeContainer";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import ModelOperationEvent from "./ModelOperationEvent";
+import {DataType} from "./RealTimeData";
 
-module convergence.model {
+export default class RealTimeNull extends RealTimeData {
 
-  import DiscreteOperation = convergence.ot.DiscreteOperation;
-  export class RealTimeNull extends RealTimeData {
+  /**
+   * Constructs a new RealTimeNull.
+   */
+  constructor(parent: RealTimeContainer,
+              fieldInParent: PathElement,
+              sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(DataType.Null, parent, fieldInParent, sendOpCallback);
+  }
 
-    /**
-     * Constructs a new RealTimeNull.
-     */
-    constructor(parent: RealTimeContainer,
-                fieldInParent: PathElement,
-                sendOpCallback: (operation: DiscreteOperation) => void) {
-      super(DataType.Null, parent, fieldInParent, sendOpCallback);
-    }
+  value(): any {
+    return null;
+  }
 
-    value(): any {
-      return null;
-    }
-
-    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-      throw new Error("Method not implemented exception!");
-    }
+  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+    throw new Error("Method not implemented exception!");
   }
 }

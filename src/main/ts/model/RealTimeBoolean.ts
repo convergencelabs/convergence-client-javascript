@@ -1,4 +1,11 @@
 import RealTimeData from "./RealTimeData";
+import RealTimeContainer from "./RealTimeContainer";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
+import ModelOperationEvent from "./ModelOperationEvent";
+import BooleanSetEvent from "./events/BooleanSetEvent";
+import {DataType} from "./RealTimeData";
 
 enum Events {Set}
 

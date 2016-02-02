@@ -1,5 +1,17 @@
 
 import EventEmitter from "../util/EventEmitter";
+import RealTimeContainer from "./RealTimeContainer";
+import {PathElement} from "../ot/Path";
+import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import RealTimeNull from "./RealTimeNull";
+import RealTimeUndefined from "./RealTimeUndefined";
+import RealTimeString from "./RealTimeString";
+import RealTimeArray from "./RealTimeArray";
+import RealTimeObject from "./RealTimeObject";
+import RealTimeNumber from "./RealTimeNumber";
+import RealTimeBoolean from "./RealTimeBoolean";
+import {Path} from "../ot/Path";
+import ModelOperationEvent from "./ModelOperationEvent";
 
 export enum DataType {Object, Array, String, Number, Boolean, Null, Undefined}
 
