@@ -99,6 +99,7 @@ export class ProtocolConnection {
   }
 
   request(message: OutgoingProtocolRequestMessage): Q.Promise<IncomingProtocolResponseMessage> {
+    var self: ProtocolConnection = this;
     var requestId: number = this._nextRequestId;
     this._nextRequestId++;
 
@@ -107,7 +108,7 @@ export class ProtocolConnection {
     var timeout: number = this._protocolConfig.defaultRequestTimeout;
     var timeoutTask: number = setTimeout(
       function (): void {
-        var req: RequestRecord = this._requests[requestId];
+        var req: RequestRecord = self._requests[requestId];
         if (req) {
           req.replyDeferred.reject(new Error("Response timeout"));
         }
