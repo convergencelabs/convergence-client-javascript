@@ -1,6 +1,6 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
 import ObjectSetPropertyOperation from "../../ops/ObjectSetPropertyOperation";
-import {OperationPair} from "../OperationPair";
+import OperationPair from "../OperationPair";
 
 export default class ObjectSetPropertySetPropertyOTF implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectSetPropertyOperation> {
   transform(s: ObjectSetPropertyOperation, c: ObjectSetPropertyOperation): OperationPair {

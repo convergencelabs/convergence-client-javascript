@@ -1,6 +1,6 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
 import ObjectSetOperation from "../../ops/ObjectSetOperation";
-import {OperationPair} from "../OperationPair";
+import OperationPair from "../OperationPair";
 import EqualsUtil from "../../../util/EqualsUtil";
 
 export default class ObjectSetSetOTF implements OperationTransformationFunction<ObjectSetOperation, ObjectSetOperation> {

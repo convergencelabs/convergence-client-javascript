@@ -1,7 +1,7 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
 import ObjectSetPropertyOperation from "../../ops/ObjectSetPropertyOperation";
 import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperation";
-import {OperationPair} from "../OperationPair";
+import OperationPair from "../OperationPair";
 import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
 
 export default class ObjectSetPropertyRemovePropertyOTF implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> {

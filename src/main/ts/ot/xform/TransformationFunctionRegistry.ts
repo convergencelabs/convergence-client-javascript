@@ -55,6 +55,30 @@ import NumberAddSetOTF from "./number/NumberAddSetOTF";
 import NumberSetAddOTF from "./number/NumberSetAddOTF";
 import NumberSetSetOTF from "./number/NumberSetSetOTF";
 import BooleanSetSetOTF from "./bool/BooleanSetSetOTF";
+import ArrayInsertPTF from "./path/ArrayInsertPTF";
+import ObjectAddPropertyAddPropertyOTF from "./object/ObjectAddPropertyAddPropertyOTF";
+import ObjectAddPropertySetPropertyOTF from "./object/ObjectAddPropertySetPropertyOTF";
+import ObjectAddPropertyRemovePropertyOTF from "./object/ObjectAddPropertyRemovePropertyOTF";
+import ObjectRemovePropertyAddPropertyOTF from "./object/ObjectRemovePropertyAddPropertyOTF";
+import ObjectRemovePropertySetPropertyOTF from "./object/ObjectRemovePropertySetPropertyOTF";
+import ObjectRemovePropertyRemovePropertyOTF from "./object/ObjectRemovePropertyRemovePropertyOTF";
+import ObjectAddPropertySetOTF from "./object/ObjectAddPropertySetOTF";
+import ObjectRemovePropertySetOTF from "./object/ObjectRemovePropertySetOTF";
+import ObjectSetPropertyAddPropertyOTF from "./object/ObjectSetPropertyAddPropertyOTF";
+import ObjectSetPropertySetPropertyOTF from "./object/ObjectSetPropertySetPropertyOTF";
+import ObjectSetPropertyRemovePropertyOTF from "./object/ObjectSetPropertyRemovePropertyOTF";
+import ObjectSetPropertySetOTF from "./object/ObjectSetPropertySetOTF";
+import ObjectSetAddPropertyOTF from "./object/ObjectSetAddPropertyOTF";
+import ObjectSetSetPropertyOTF from "./object/ObjectSetSetPropertyOTF";
+import ObjectSetRemovePropertyOTF from "./object/ObjectSetRemovePropertyOTF";
+import ObjectSetSetOTF from "./object/ObjectSetSetOTF";
+import ArrayRemovePTF from "./path/ArrayRemovePTF";
+import ArrayReplacePTF from "./path/ArrayReplacePTF";
+import ArrayMovePTF from "./path/ArrayMovePTF";
+import ArraySetPTF from "./path/ArraySetPTF";
+import ObjectSetPropertyPTF from "./path/ObjectSetPropertyPTF";
+import ObjectRemovePropertyPTF from "./path/ObjectRemovePropertyPTF";
+import ObjectSetPTF from "./path/ObjectSetPTF";
 
 
 export default class TransformationFunctionRegistry {

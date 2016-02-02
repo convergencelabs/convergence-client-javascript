@@ -1,7 +1,7 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
 import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperation";
 import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
-import {OperationPair} from "../OperationPair";
+import OperationPair from "../OperationPair";
 
 export default class ObjectRemovePropertyAddPropertyOTF implements OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectAddPropertyOperation> {
   transform(s: ObjectRemovePropertyOperation, c: ObjectAddPropertyOperation): OperationPair {
