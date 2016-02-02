@@ -1,125 +1,122 @@
-module convergence.connection {
+export interface HeartbeatHandler {
+  sendPing(): void;
+  onTimeout(): void;
+}
 
-  export interface HeartbeatHandler {
-    sendPing(): void;
-    onTimeout(): void;
+export class HeartbeatHelper {
+
+  private _pingFuture: number;
+  private _timeoutFuture: number;
+
+  private _handler: HeartbeatHandler;
+  private _pingInterval: number;
+  private _pongTimeout: number;
+  private _started: boolean;
+  private _debugFlags: any;
+
+  constructor(handler: HeartbeatHandler, pingInterval: number, pongTimeout: number) {
+    this._handler = handler;
+    this._pingInterval = pingInterval;
+    this._pongTimeout = pongTimeout;
+    this._debugFlags = {}; // fixme
+    this._started = false;
   }
 
-  export class HeartbeatHelper {
+  set pingInterval(pingInterval: number) {
+    this._pingInterval = pingInterval;
+  }
 
-    private _pingFuture: number;
-    private _timeoutFuture: number;
+  get pingInterval(): number {
+    return this._pingInterval;
+  }
 
-    private _handler: HeartbeatHandler;
-    private _pingInterval: number;
-    private _pongTimeout: number;
-    private _started: boolean;
-    private _debugFlags: any;
+  set pongTimeout(pongTimeout: number) {
+    this._pongTimeout = pongTimeout;
+  }
 
-    constructor(handler: HeartbeatHandler, pingInterval: number, pongTimeout: number) {
-      this._handler = handler;
-      this._pingInterval = pingInterval;
-      this._pongTimeout = pongTimeout;
-      this._debugFlags = {}; // fixme
-      this._started = false;
-    }
+  get pongTimeout(): number {
+    return this._pongTimeout;
+  }
 
-    set pingInterval(pingInterval: number) {
-      this._pingInterval = pingInterval;
-    }
-
-    get pingInterval(): number {
-      return this._pingInterval;
-    }
-
-    set pongTimeout(pongTimeout: number) {
-      this._pongTimeout = pongTimeout;
-    }
-
-    get pongTimeout(): number {
-      return this._pongTimeout;
-    }
-
-    messageReceived(): void {
-      if (this._started) {
-        this.cancelPongTimeout();
-        this.restartPingTimeout();
-      }
-    }
-
-    start(): void {
-      if (this._handler == null) {
-        throw "Can't start the HeartbeatManager unless the callback is set.";
-      }
-
-      if (this._debugFlags.heartbeatHelper) {
-        console.log(
-          "HeartbeatHelper started with Ping Interval " + this.pingInterval +
-          " and Pong Timeout " + this.pongTimeout);
-      }
-
-      this._started = true;
-      this.messageReceived();
-    }
-
-    stop(): void {
-      this._started = false;
-      this.stopPingTimer();
+  messageReceived(): void {
+    if (this._started) {
       this.cancelPongTimeout();
+      this.restartPingTimeout();
+    }
+  }
 
-      if (this._debugFlags.heartbeatHelper) {
-        console.log("HeartbeatHelper stopped.");
-      }
+  start(): void {
+    if (this._handler == null) {
+      throw "Can't start the HeartbeatManager unless the callback is set.";
     }
 
-    get started(): boolean {
-      return this._started;
+    if (this._debugFlags.heartbeatHelper) {
+      console.log(
+        "HeartbeatHelper started with Ping Interval " + this.pingInterval +
+        " and Pong Timeout " + this.pongTimeout);
     }
 
-    get stopped(): boolean {
-      return !this._started;
-    }
+    this._started = true;
+    this.messageReceived();
+  }
 
-    dispose(): void {
-      this.stop();
-    }
+  stop(): void {
+    this._started = false;
+    this.stopPingTimer();
+    this.cancelPongTimeout();
 
-    private sendPing(): void {
-      this._handler.sendPing();
-      this.schedulePongTimeout();
+    if (this._debugFlags.heartbeatHelper) {
+      console.log("HeartbeatHelper stopped.");
     }
+  }
 
-    private schedulePongTimeout(): void {
-      var self: HeartbeatHelper = this;
-      this._timeoutFuture = setTimeout(
-        function (): void {
-          self._handler.onTimeout();
-        },
-        this._pongTimeout * 1000);
-    }
+  get started(): boolean {
+    return this._started;
+  }
 
-    private cancelPongTimeout(): void {
-      if (this._timeoutFuture != null) {
-        clearTimeout(this._timeoutFuture);
-        this._timeoutFuture = null;
-      }
-    }
+  get stopped(): boolean {
+    return !this._started;
+  }
 
-    private stopPingTimer(): void {
-      if (this._pingFuture != null) {
-        clearTimeout(this._pingFuture);
-        this._pingFuture = null;
-      }
-    }
+  dispose(): void {
+    this.stop();
+  }
 
-    private restartPingTimeout(): void {
-      this.stopPingTimer();
-      var self: HeartbeatHelper = this;
-      this._pingFuture = setTimeout(
-        function (): void {
-          self.sendPing();
-        },
-        this._pingInterval * 1000);
+  private sendPing(): void {
+    this._handler.sendPing();
+    this.schedulePongTimeout();
+  }
+
+  private schedulePongTimeout(): void {
+    var self: HeartbeatHelper = this;
+    this._timeoutFuture = setTimeout(
+      function (): void {
+        self._handler.onTimeout();
+      },
+      this._pongTimeout * 1000);
+  }
+
+  private cancelPongTimeout(): void {
+    if (this._timeoutFuture != null) {
+      clearTimeout(this._timeoutFuture);
+      this._timeoutFuture = null;
     }
+  }
+
+  private stopPingTimer(): void {
+    if (this._pingFuture != null) {
+      clearTimeout(this._pingFuture);
+      this._pingFuture = null;
+    }
+  }
+
+  private restartPingTimeout(): void {
+    this.stopPingTimer();
+    var self: HeartbeatHelper = this;
+    this._pingFuture = setTimeout(
+      function (): void {
+        self.sendPing();
+      },
+      this._pingInterval * 1000);
   }
 }

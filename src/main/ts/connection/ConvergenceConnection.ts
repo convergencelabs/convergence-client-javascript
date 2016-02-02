@@ -1,3 +1,16 @@
+import {HandshakeResponse} from "../protocol/handhsake";
+import {ProtocolConfiguration} from "./ProtocolConfiguration";
+import {ProtocolConnection} from "./ProtocolConnection";
+import {ProtocolEventHandler} from "./ProtocolConnection";
+import Debug from "../Debug";
+import ConvergenceSocket from "./ConvergenceSocket";
+import {OutgoingProtocolMessage} from "../protocol/protocol";
+import {OutgoingProtocolRequestMessage} from "../protocol/protocol";
+import {IncomingProtocolResponseMessage} from "../protocol/protocol";
+import {IncomingProtocolNormalMessage} from "../protocol/protocol";
+import {IncomingProtocolRequestMessage} from "../protocol/protocol";
+import {ReplyCallback} from "./ProtocolConnection";
+
 
 export default class ConvergenceConnection {
 
@@ -117,11 +130,11 @@ export default class ConvergenceConnection {
     this._connectionAttempts++;
 
     if (reconnect) {
-      if (convergence.Debug.flags.serverConnection) {
+      if (Debug.flags.serverConnection) {
         console.log("Attempting reconnection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
       }
     } else {
-      if (convergence.Debug.flags.serverConnection) {
+      if (Debug.flags.serverConnection) {
         console.log("Attempting connection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
       }
     }
@@ -140,7 +153,7 @@ export default class ConvergenceConnection {
       this._eventHandler);
 
     this._protocolConnection.connect().then(function (): void {
-      if (convergence.Debug.flags.connection) {
+      if (Debug.flags.connection) {
         console.log("Connection succeeded, handshaking.");
       }
 

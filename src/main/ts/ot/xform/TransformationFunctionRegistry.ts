@@ -1,4 +1,21 @@
 import StringInsertOperation from "../ops/StringInsertOperation";
+import StringRemoveOperation from "../ops/StringRemoveOperation";
+import StringSetOperation from "../ops/StringSetOperation";
+import ObjectAddPropertyOperation from "../ops/ObjectAddPropertyOperation";
+import ObjectRemovePropertyOperation from "../ops/ObjectRemovePropertyOperation";
+import ObjectSetPropertyOperation from "../ops/ObjectSetPropertyOperation";
+import ObjectSetOperation from "../ops/ObjectSetOperation";
+import ArrayInsertOperation from "../ops/ArrayInsertOperation";
+import ArrayRemoveOperation from "../ops/ArrayRemoveOperation";
+import ArrayReplaceOperation from "../ops/ArrayReplaceOperation";
+import ArrayMoveOperation from "../ops/ArrayMoveOperation";
+import ArraySetOperation from "../ops/ArraySetOperation";
+import NumberAddOperation from "../ops/NumberAddOperation";
+import NumberSetOperation from "../ops/NumberSetOperation";
+import BooleanSetOperation from "../ops/BooleanSetOperation";
+import DiscreteOperation from "../ops/DiscreteOperation";
+import OperationTransformationFunction from "./OperationTransformationFunction";
+import {PathTransformationFunction} from "./PathTransformationFunction";
 
 export default class TransformationFunctionRegistry {
   otfs: any = {};
@@ -114,4 +131,3 @@ export default class TransformationFunctionRegistry {
     return this.ptfs[a.type];
   }
 }
-
