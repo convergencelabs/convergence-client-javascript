@@ -1,4 +1,4 @@
-/// <reference path="../protocol/messages.ts" />
+/// <reference path="../protocol/protocol.ts" />
 /// <reference path="../protocol/handhsake.ts" />
 /// <reference path="../protocol/MessageSerializer.ts" />
 /// <reference path="../protocol/MessageType.ts" />

@@ -1,23 +1,19 @@
-/// <reference path="DiscreteOperation.ts" />
-/// <reference path="../../util/Immutable.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
 
-module convergence.ot {
+export default class ObjectSetOperation extends DiscreteOperation {
 
-  import Immutable = convergence.util.Immutable;
-  export class ObjectSetOperation extends DiscreteOperation {
+  static TYPE: string = "ObjectSet";
 
-    static TYPE: string = "ObjectSet";
+  constructor(path: Array<string | number>, noOp: boolean, public value: any) {
+    super(ObjectSetOperation.TYPE, path, noOp);
+    Object.freeze(this);
+  }
 
-    constructor(path: Array<string | number>, noOp: boolean, public value: any) {
-      super(ObjectSetOperation.TYPE, path, noOp);
-      Object.freeze(this);
-    }
-
-    copy(updates: any): ObjectSetOperation {
-      return new ObjectSetOperation(
-        Immutable.update(this.path, updates.path),
-        Immutable.update(this.noOp, updates.noOp),
-        Immutable.update(this.value, updates.value));
-    }
+  copy(updates: any): ObjectSetOperation {
+    return new ObjectSetOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.value, updates.value));
   }
 }

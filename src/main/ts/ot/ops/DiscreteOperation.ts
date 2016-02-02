@@ -1,9 +1,9 @@
-/// <reference path="Operation.ts" />
+import Operation from "./Operation";
+import {Path} from "../Path";
 
-module convergence.ot {
-  export abstract class DiscreteOperation extends Operation {
-    constructor(type: string, public path: Path, public noOp: boolean) {
-      super(type);
-    }
+export default abstract class DiscreteOperation extends Operation {
+  constructor(type: string, public path: Path, public noOp: boolean) {
+    super(type);
   }
 }
+
