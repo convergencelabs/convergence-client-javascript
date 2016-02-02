@@ -5,20 +5,20 @@
 
 
 module convergence.connection {
-  import HandshakeRequest = convergence.message.HandshakeRequest;
-  import OutgoingProtocolRequestMessage = convergence.message.OutgoingProtocolRequestMessage;
-  import OutgoingProtocolResponseMessage = convergence.message.OutgoingProtocolResponseMessage;
-  import HandshakeResponse = convergence.message.HandshakeResponse;
-  import ProtocolMessage = convergence.message.ProtocolMessage;
-  import MessageEnvelope = convergence.message.MessageEnvelope;
-  import IncomingProtocolResponseMessage = convergence.message.IncomingProtocolResponseMessage;
-  import OutgoingProtocolNormalMessage = convergence.message.OutgoingProtocolNormalMessage;
-  import IncomingProtocolRequestMessage = convergence.message.IncomingProtocolRequestMessage;
-  import ErrorMessage = convergence.message.ErrorMessage;
-  import MessageSerializer = convergence.message.MessageSerializer;
-  import ErrorMessageDeserializer = convergence.message.ErrorMessageDeserializer;
-  import IncomingProtocolNormalMessage = convergence.message.IncomingProtocolNormalMessage;
-  import MessageType = convergence.message.MessageType;
+  import HandshakeRequest = convergence.protocol.HandshakeRequest;
+  import OutgoingProtocolRequestMessage = convergence.protocol.OutgoingProtocolRequestMessage;
+  import OutgoingProtocolResponseMessage = convergence.protocol.OutgoingProtocolResponseMessage;
+  import HandshakeResponse = convergence.protocol.HandshakeResponse;
+  import ProtocolMessage = convergence.protocol.ProtocolMessage;
+  import MessageEnvelope = convergence.protocol.MessageEnvelope;
+  import IncomingProtocolResponseMessage = convergence.protocol.IncomingProtocolResponseMessage;
+  import OutgoingProtocolNormalMessage = convergence.protocol.OutgoingProtocolNormalMessage;
+  import IncomingProtocolRequestMessage = convergence.protocol.IncomingProtocolRequestMessage;
+  import ErrorMessage = convergence.protocol.ErrorMessage;
+  import MessageSerializer = convergence.protocol.MessageSerializer;
+  import ErrorMessageDeserializer = convergence.protocol.ErrorMessageDeserializer;
+  import IncomingProtocolNormalMessage = convergence.protocol.IncomingProtocolNormalMessage;
+  import MessageType = convergence.protocol.MessageType;
 
   export class ProtocolConnection {
 

@@ -11,15 +11,15 @@ module convergence {
   import EventEmitter = convergence.util.EventEmitter;
   import Session = convergence.Session;
   import ConvergenceConnection = convergence.connection.ConvergenceConnection;
-  import IncomingProtocolNormalMessage = convergence.message.IncomingProtocolNormalMessage;
-  import IncomingProtocolRequestMessage = convergence.message.IncomingProtocolRequestMessage;
+  import IncomingProtocolNormalMessage = convergence.protocol.IncomingProtocolNormalMessage;
+  import IncomingProtocolRequestMessage = convergence.protocol.IncomingProtocolRequestMessage;
   import ReplyCallback = convergence.connection.ReplyCallback;
-  import HandshakeResponse = convergence.message.HandshakeResponse;
-  import AuthRequest = convergence.message.AuthRequest;
-  import TokenAuthRequest = convergence.message.TokenAuthRequest;
-  import MessageType = convergence.message.MessageType;
-  import PasswordAuthRequest = convergence.message.PasswordAuthRequest;
-  import AuthenticationResponseMessage = convergence.message.AuthenticationResponseMessage;
+  import HandshakeResponse = convergence.protocol.HandshakeResponse;
+  import AuthRequest = convergence.protocol.AuthRequest;
+  import TokenAuthRequest = convergence.protocol.TokenAuthRequest;
+  import MessageType = convergence.protocol.MessageType;
+  import PasswordAuthRequest = convergence.protocol.PasswordAuthRequest;
+  import AuthenticationResponseMessage = convergence.protocol.AuthenticationResponseMessage;
 
   export class ConvergenceDomain extends EventEmitter {
 
@@ -83,7 +83,8 @@ module convergence {
      */
     authenticateWithPassword(username: string, password: string): Q.Promise<void> {
       var authRequest: PasswordAuthRequest =  {
-        type: MessageType.AUTH_PASSWORD,
+        type: MessageType.AUTHENTICATE,
+        method: "password",
         username: username,
         password: password
       };
@@ -97,7 +98,8 @@ module convergence {
      */
     authenticateWithToken(token: string): Q.Promise<void> {
       var authRequest: TokenAuthRequest =  {
-        type: MessageType.AUTH_TOKEN,
+        type: MessageType.AUTHENTICATE,
+        method: "token",
         token: token
       };
       return this._authenticate(authRequest);

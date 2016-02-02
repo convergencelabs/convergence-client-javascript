@@ -1,4 +1,4 @@
-module convergence.message {
+module convergence.protocol {
 
   export interface ErrorMessage extends ProtocolMessage, OutgoingProtocolMessage, IncomingProtocolMessage {
     code: string;

@@ -1,4 +1,4 @@
-module convergence.message {
+module convergence.protocol {
   export interface ProtocolMessage {
     type: string;
   }

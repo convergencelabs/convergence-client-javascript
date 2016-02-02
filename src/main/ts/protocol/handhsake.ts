@@ -1,4 +1,4 @@
-module convergence.message {
+module convergence.protocol {
 
   export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
     reconnect: boolean;

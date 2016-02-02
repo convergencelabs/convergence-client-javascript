@@ -1,10 +1,10 @@
 module convergence.connection {
-  import OutgoingProtocolMessage = convergence.message.OutgoingProtocolMessage;
-  import OutgoingProtocolRequestMessage = convergence.message.OutgoingProtocolRequestMessage;
-  import IncomingProtocolResponseMessage = convergence.message.IncomingProtocolResponseMessage;
-  import IncomingProtocolRequestMessage = convergence.message.IncomingProtocolRequestMessage;
-  import IncomingProtocolNormalMessage = convergence.message.IncomingProtocolNormalMessage;
-  import HandshakeResponse = convergence.message.HandshakeResponse;
+  import OutgoingProtocolMessage = convergence.protocol.OutgoingProtocolMessage;
+  import OutgoingProtocolRequestMessage = convergence.protocol.OutgoingProtocolRequestMessage;
+  import IncomingProtocolResponseMessage = convergence.protocol.IncomingProtocolResponseMessage;
+  import IncomingProtocolRequestMessage = convergence.protocol.IncomingProtocolRequestMessage;
+  import IncomingProtocolNormalMessage = convergence.protocol.IncomingProtocolNormalMessage;
+  import HandshakeResponse = convergence.protocol.HandshakeResponse;
 
   export class ConvergenceConnection {
 
