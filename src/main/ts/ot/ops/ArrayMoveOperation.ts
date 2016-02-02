@@ -1,11 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
 export default class ArrayMoveOperation extends DiscreteOperation {
 
   static TYPE: string = "ArrayMove";
 
-  constructor(path: Array<string | number>, noOp: boolean, public fromIndex: number, public toIndex: number) {
+  constructor(path: Path, noOp: boolean, public fromIndex: number, public toIndex: number) {
     super(ArrayMoveOperation.TYPE, path, noOp);
     Object.freeze(this);
   }

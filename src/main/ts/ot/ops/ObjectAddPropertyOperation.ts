@@ -1,11 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
 export default class ObjectAddPropertyOperation extends DiscreteOperation {
 
   static TYPE: string = "ObjectAddProperty";
 
-  constructor(path: Array<string | number>, noOp: boolean, public prop: string, public value: any) {
+  constructor(path: Path, noOp: boolean, public prop: string, public value: any) {
     super(ObjectAddPropertyOperation.TYPE, path, noOp);
     Object.freeze(this);
   }
