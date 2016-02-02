@@ -1,16 +1,17 @@
-/// <reference path="../OperationTransformationFunction.ts" />
+import {PathTransformationFunction} from "../PathTransformationFunction";
+import ArrayReplaceOperation from "../../ops/ArrayReplaceOperation";
+import {PathTransformation} from "../PathTransformationFunction";
+import {PathTransformationResult} from "../PathTransformationFunction";
 
-module convergence.ot {
-  export class ArrayReplacePTF implements PathTransformationFunction<ArrayReplaceOperation> {
-    transformDescendantPath(ancestor: ArrayReplaceOperation, descendantPath: Array<string | number>): PathTransformation {
-      var ancestorPathLength = ancestor.path.length;
-      var descendantArrayIndex = <number>descendantPath[ancestorPathLength];
+export default class ArrayReplacePTF implements PathTransformationFunction<ArrayReplaceOperation> {
+  transformDescendantPath(ancestor: ArrayReplaceOperation, descendantPath: Array<string | number>): PathTransformation {
+    var ancestorPathLength = ancestor.path.length;
+    var descendantArrayIndex = <number>descendantPath[ancestorPathLength];
 
-      if (ancestor.index === descendantArrayIndex) {
-        return new PathTransformation(PathTransformationResult.PathObsoleted, null);
-      } else {
-        return new PathTransformation(PathTransformationResult.NoTransformation, null);
-      }
+    if (ancestor.index === descendantArrayIndex) {
+      return new PathTransformation(PathTransformationResult.PathObsoleted, null);
+    } else {
+      return new PathTransformation(PathTransformationResult.NoTransformation, null);
     }
   }
 }
