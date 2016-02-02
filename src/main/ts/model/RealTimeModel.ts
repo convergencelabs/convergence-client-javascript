@@ -1,49 +1,41 @@
-/// <reference path="../util/EventEmitter.ts" />
-/// <reference path="RealTimeObject.ts" />
+export class RealTimeModel extends EventEmitter {
 
-module convergence.model {
-  import EventEmitter = convergence.util.EventEmitter;
-  import Session = convergence.Session;
+  /**
+   * Constructs a new RealTimeModel.
+   */
+  constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
+    super();
+  }
 
-  export class RealTimeModel extends EventEmitter {
+  collectionId(): string {
+    return this._modelFqn.collectionId;
+  }
 
-    /**
-     * Constructs a new RealTimeModel.
-     */
-    constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
-      super();
-    }
+  modelId(): string {
+    return this._modelFqn.modelId;
+  }
 
-    collectionId(): string {
-      return this._modelFqn.collectionId;
-    }
+  version(): number {
+    return 0;
+  }
 
-    modelId(): string {
-      return this._modelFqn.modelId;
-    }
+  createdTime(): Date {
+    return new Date();
+  }
 
-    version(): number {
-      return 0;
-    }
+  modifiedTime(): Date {
+    return new Date();
+  }
 
-    createdTime(): Date {
-      return new Date();
-    }
+  data(): RealTimeObject {
+    return this._data;
+  }
 
-    modifiedTime(): Date {
-      return new Date();
-    }
-
-    data(): RealTimeObject {
-      return this._data;
-    }
-
-    /**
-     * Gets the session of the connected user.
-     * @return {convergence.Session} The users session.
-     */
-    session(): Session {
-      return this._session;
-    }
+  /**
+   * Gets the session of the connected user.
+   * @return {convergence.Session} The users session.
+   */
+  session(): Session {
+    return this._session;
   }
 }

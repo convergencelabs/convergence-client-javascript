@@ -1,77 +1,66 @@
-/// <reference path="RealTimeData.ts" />
-/// <reference path="../ot/ops/BooleanSetOperation.ts" />
-/// <reference path="events/BooleanSetEvent.ts" />
+import RealTimeData from "./RealTimeData";
 
-module convergence.model {
+enum Events {Set}
 
-  import BooleanSetOperation = convergence.ot.BooleanSetOperation;
-  import BooleanSetEvent = convergence.model.event.BooleanSetEvent;
-  import DiscreteOperation = convergence.ot.DiscreteOperation;
+export default class RealTimeBoolean extends RealTimeData {
 
-  enum Events {Set}
+  /**
+   * Constructs a new RealTimeBoolean.
+   */
+  constructor(private data: boolean,
+              parent: RealTimeContainer,
+              fieldInParent: PathElement,
+              sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(DataType.Boolean, parent, fieldInParent, sendOpCallback);
+  }
 
-  export class RealTimeBoolean extends RealTimeData {
+  /**
+   * Sets the value of the RealTimeBoolean
+   * @param {boolean} value The new value.
+   */
+  setValue(value: boolean): void {
+    this._validateSet(value);
 
-    /**
-     * Constructs a new RealTimeBoolean.
-     */
-    constructor(private data: boolean,
-                parent: RealTimeContainer,
-                fieldInParent: PathElement,
-                sendOpCallback: (operation: DiscreteOperation) => void) {
-      super(DataType.Boolean, parent, fieldInParent, sendOpCallback);
+    var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
+    this.data = value;
+    this.sendOpCallback(operation);
+  }
+
+  value(): boolean {
+    return this.data;
+  }
+
+  // Handlers for incoming operations
+
+  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+    var type: string = operationEvent.operation.type;
+    if (type === BooleanSetOperation.TYPE) {
+      this._handleSetOperation(operationEvent);
+    } else {
+      throw new Error("Invalid operation!");
     }
+  }
 
-    /**
-     * Sets the value of the RealTimeBoolean
-     * @param {boolean} value The new value.
-     */
-    setValue(value: boolean): void {
-      this._validateSet(value);
+  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+    var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
+    var value: boolean = operation.value;
 
-      var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
-      this.data = value;
-      this.sendOpCallback(operation);
+    this._validateSet(value);
+    this.data = value;
+
+    var event: BooleanSetEvent = new BooleanSetEvent(
+      operationEvent.sessionId,
+      operationEvent.username,
+      operationEvent.version,
+      operationEvent.timestamp,
+      this,
+      value);
+    this.emit(Events[Events.Set], event);
+  }
+
+  private _validateSet(value: boolean): void {
+    if (typeof value !== "boolean") {
+      throw new Error("Value must be a boolean");
     }
-
-    value(): boolean {
-      return this.data;
-    }
-
-    // Handlers for incoming operations
-
-    _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-      var type: string = operationEvent.operation.type;
-      if (type === BooleanSetOperation.TYPE) {
-        this._handleSetOperation(operationEvent);
-      } else {
-        throw new Error("Invalid operation!");
-      }
-    }
-
-    private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-      var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
-      var value: boolean = operation.value;
-
-      this._validateSet(value);
-      this.data = value;
-
-      var event: BooleanSetEvent = new BooleanSetEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        value);
-      this.emit(Events[Events.Set], event);
-    }
-
-    private _validateSet(value: boolean): void {
-      if (typeof value !== "boolean") {
-        throw new Error("Value must be a boolean");
-      }
-    }
-
-
   }
 }
