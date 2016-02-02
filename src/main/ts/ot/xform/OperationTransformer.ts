@@ -2,10 +2,10 @@ import Operation from "../ops/Operation";
 import CompoundOperation from "../ops/CompoundOperation";
 import OperationPair from "./OperationPair";
 import DiscreteOperation from "../ops/DiscreteOperation";
-import PathComparator = convergence.ot.PathComparator;
 import {PathTransformationResult} from "./PathTransformationFunction";
 import {PathTransformationFunction} from "./PathTransformationFunction";
 import TransformationFunctionRegistry from "./TransformationFunctionRegistry";
+import PathComparator from "../util/PathComparator";
 
 export default class OperationTransformer {
   private _tfr: TransformationFunctionRegistry;
