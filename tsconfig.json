@@ -14,7 +14,6 @@
     "dist",
     "bower_components",
     "typings/browser.d.ts",
-    "typings/browser",
-    "node_modules"
+    "typings/browser"
   ]
 }

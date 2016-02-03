@@ -1,15 +1,11 @@
 var gulp = require('gulp');
-var mkdirp = require('mkdirp');
-var path = require('path');
 var ts = require('gulp-typescript');
-var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 const tslint = require('gulp-tslint');
 const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
 const plumber = require('gulp-plumber');
-var insert = require('gulp-insert');
 var del = require('del');
 
 var sourcemaps = require('gulp-sourcemaps');
@@ -20,8 +16,8 @@ const plumberConf = {};
 
 var tsProject = ts.createProject('tsconfig.json');
 
-gulp.task('build', ["tslint"], function () {
-  return gulp.src(['src/**/*.ts', "typings/**/*.ts"])
+gulp.task('build', [], function () {
+  return gulp.src(['src/**/*.ts', "typings/browser.d.ts"])
     .pipe(ts(tsProject));
 });
 
