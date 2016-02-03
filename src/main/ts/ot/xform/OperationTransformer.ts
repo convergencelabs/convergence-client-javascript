@@ -6,6 +6,8 @@ import {PathTransformationResult} from "./PathTransformationFunction";
 import {PathTransformationFunction} from "./PathTransformationFunction";
 import TransformationFunctionRegistry from "./TransformationFunctionRegistry";
 import PathComparator from "../util/PathComparator";
+import OperationTransformationFunction from "./OperationTransformationFunction";
+import {PathTransformation} from "./PathTransformationFunction";
 
 export default class OperationTransformer {
   private _tfr: TransformationFunctionRegistry;
@@ -26,18 +28,18 @@ export default class OperationTransformer {
 
   private transformClientCompoundOperation(s: Operation, c: CompoundOperation): OperationPair {
     var xFormedS: Operation = s;
-    var newOps = c.ops.map(function (o) {
-      var opPair = this.transform(xFormedS, o);
+    var newOps: DiscreteOperation[] = c.ops.map(function (o: DiscreteOperation): DiscreteOperation {
+      var opPair: OperationPair = this.transform(xFormedS, o);
       xFormedS = opPair.serverOp;
       return <DiscreteOperation>opPair.clientOp;
     });
     return new OperationPair(xFormedS, new CompoundOperation(newOps));
   }
 
-  private transformServerCompoundOperation(s: CompoundOperation, c: Operation) {
+  private transformServerCompoundOperation(s: CompoundOperation, c: Operation): OperationPair {
     var xFormedC: Operation = c;
-    var newOps = s.ops.map(function (o) {
-      var opPair = this.transform(o, xFormedC);
+    var newOps: DiscreteOperation[] = s.ops.map(function (o: DiscreteOperation): DiscreteOperation {
+      var opPair: OperationPair = this.transform(o, xFormedC);
       xFormedC = opPair.clientOp;
       return <DiscreteOperation>opPair.serverOp;
     });
@@ -60,7 +62,7 @@ export default class OperationTransformer {
   }
 
   private transformIdenticalPathOperations(s: DiscreteOperation, c: DiscreteOperation): OperationPair {
-    var tf = this._tfr.getOperationTransformationFunction(s, c);
+    var tf: OperationTransformationFunction<any> = this._tfr.getOperationTransformationFunction(s, c);
     if (tf) {
       return tf.transform(s, c);
     } else {
@@ -72,7 +74,7 @@ export default class OperationTransformer {
   private transformHierarchicalOperations(a: DiscreteOperation, d: DiscreteOperation): OperationPair {
     var ptf: PathTransformationFunction<any> = this._tfr.getPathTransformationFunction(a);
     if (ptf) {
-      var result = ptf.transformDescendantPath(a, d.path);
+      var result: PathTransformation = ptf.transformDescendantPath(a, d.path);
       switch (result.result) {
         case PathTransformationResult.NoTransformation:
           return new OperationPair(a, d);
@@ -80,6 +82,8 @@ export default class OperationTransformer {
           return new OperationPair(a, d.copy({noOp: true}));
         case PathTransformationResult.PathUpdated:
           return new OperationPair(a, d.copy({path: result.path}));
+        default:
+          throw new Error("Invalid pat transofrmation result");
       }
     } else {
       throw new Error("No path transformation function found for ancestor operation: ${a.getClass.getName}");

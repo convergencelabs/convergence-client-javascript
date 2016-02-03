@@ -6,20 +6,19 @@ import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 
 export default class StringRemoveRemoveOTF implements OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> {
   transform(s: StringRemoveOperation, c: StringRemoveOperation): OperationPair {
-    var cStart = c.index;
-    var cEnd = c.index + c.value.length;
+    var cStart: number = c.index;
+    var cEnd: number = c.index + c.value.length;
 
-    var sStart = s.index;
-    var sEnd = s.index + s.value.length;
+    var sStart: number = s.index;
+    var sEnd: number = s.index + s.value.length;
 
-    var rr = RangeRelationshipUtil.getRangeRangeRelationship(sStart, sEnd, cStart, cEnd);
+    var rr: RangeRangeRelationship = RangeRelationshipUtil.getRangeRangeRelationship(sStart, sEnd, cStart, cEnd);
     switch (rr) {
       case RangeRangeRelationship.Precedes:
         // S-RR-1
         return new OperationPair(
           s,
           c.copy({index: c.index - s.value.length}));
-        break;
       case RangeRangeRelationship.PrecededBy:
         // S-RR-2
         return new OperationPair(
@@ -28,14 +27,14 @@ export default class StringRemoveRemoveOTF implements OperationTransformationFun
       case RangeRangeRelationship.Meets:
       case RangeRangeRelationship.Overlaps:
         // S-RR-3 and S-RR-5
-        var offsetDelta = c.index - s.index;
+        var offsetDelta: number = c.index - s.index;
         return new OperationPair(
           s.copy({value: s.value.substring(0, offsetDelta)}),
           c.copy({index: s.index, value: c.value.substring(s.value.length - offsetDelta, c.value.length)}));
       case RangeRangeRelationship.MetBy:
       case RangeRangeRelationship.OverlappedBy:
         // S-RR-4 and S-RR-6
-        var offsetDelta = s.index - c.index;
+        offsetDelta = s.index - c.index;
         return new OperationPair(
           s.copy({index: c.index, value: s.value.substring(c.value.length - offsetDelta, s.value.length)}),
           c.copy({value: c.value.substring(0, offsetDelta)}));
@@ -51,15 +50,15 @@ export default class StringRemoveRemoveOTF implements OperationTransformationFun
           c.copy({noOp: true}));
       case RangeRangeRelationship.Contains:
         // S-RR-9
-        var overlapStart = c.index - s.index;
-        var overlapEnd = overlapStart + c.value.length;
+        var overlapStart: number = c.index - s.index;
+        var overlapEnd: number = overlapStart + c.value.length;
         return new OperationPair(
           s.copy({value: s.value.substring(0, overlapStart) + s.value.substring(overlapEnd, s.value.length)}),
           c.copy({noOp: true}));
       case RangeRangeRelationship.ContainedBy:
         // S-RR-10
-        var overlapStart = s.index - c.index;
-        var overlapEnd = overlapStart + s.value.length;
+        overlapStart = s.index - c.index;
+        overlapEnd = overlapStart + s.value.length;
         return new OperationPair(
           s.copy({noOp: true}),
           c.copy({value: c.value.substring(0, overlapStart) + c.value.substring(overlapEnd, c.value.length)}));
@@ -76,6 +75,8 @@ export default class StringRemoveRemoveOTF implements OperationTransformationFun
       case RangeRangeRelationship.EqualTo:
         // S-RR-13
         return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
+      default:
+        throw new Error("invalid range range relationship");
     }
   }
 }

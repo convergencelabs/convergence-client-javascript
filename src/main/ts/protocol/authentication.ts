@@ -10,7 +10,7 @@ export class AuthRequestSerializer {
   static serialize(request: AuthRequest): any {
     if (request.method === "password") {
       return PasswordAuthRequestSerializer.serialize(<PasswordAuthRequest>request);
-    } else if (request.method == "token") {
+    } else if (request.method === "token") {
       return TokenAuthRequestSerializer.serialize(<TokenAuthRequest>request);
     } else {
       throw new Error("invalid auth method");
@@ -47,8 +47,8 @@ export class TokenAuthRequestSerializer {
 }
 
 export interface AuthenticationResponseMessage extends IncomingProtocolResponseMessage {
-  success: boolean,
-  username: string
+  success: boolean;
+  username: string;
 }
 
 export class AuthenticationResponseDeserializer {

@@ -4,9 +4,11 @@ import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperati
 import OperationPair from "../OperationPair";
 import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
 
-export default class ObjectSetPropertyRemovePropertyOTF implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> {
+export default class ObjectSetPropertyRemovePropertyOTF
+  implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> {
+
   transform(s: ObjectSetPropertyOperation, c: ObjectRemovePropertyOperation): OperationPair {
-    if (s.prop != c.prop) {
+    if (s.prop !== c.prop) {
       // O-TR-1
       return new OperationPair(s, c);
     } else {

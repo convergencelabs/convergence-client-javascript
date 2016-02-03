@@ -8,15 +8,15 @@ export default class ModelService extends EventEmitter {
   /**
    * Constructs a new ModelService.
    */
-  constructor(private _session:Session) {
+  constructor(private _session: Session) {
     super();
   }
 
   /**
    * Gets the session of the connected user.
-   * @return {convergence.Session} The users session.
+   * @return {Session} The users session.
    */
-  get session():Session {
+  get session(): Session {
     return this._session;
   }
 
@@ -29,7 +29,7 @@ export default class ModelService extends EventEmitter {
    *            The modelId
    * @return {Q.Promise} A promise that resolves with a RealTimeModel
    */
-  open(collectionId:string, modelId:string):Q.Promise<RealTimeModel> {
+  open(collectionId: string, modelId: string): Q.Promise<RealTimeModel> {
     // fixme not real.
     return Q.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._session));
   }
@@ -45,7 +45,7 @@ export default class ModelService extends EventEmitter {
    *            The initial value
    * @return {Q.Promise} A Promise that resolves when the model is finished being created
    */
-  create(collectionId:string, modelId:string, data:any):Q.Promise<void> {
+  create(collectionId: string, modelId: string, data: any): Q.Promise<void> {
     return null;
   }
 
@@ -58,7 +58,7 @@ export default class ModelService extends EventEmitter {
    *            The id of the model to remove
    * @return {Q.Promise} A Promise that resolves when the model is finished being deleted
    */
-  remove(collectionId:string, modelId:string):Q.Promise<void> {
+  remove(collectionId: string, modelId: string): Q.Promise<void> {
     return null;
   }
 }

@@ -177,7 +177,8 @@ export default class TransformationFunctionRegistry {
     this.ptfs[ObjectSetOperation.TYPE] = new ObjectSetPTF();
   }
 
-  registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>(s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
+  registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
+    (s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
     var key: string = s + c;
     if (this.otfs[key]) {
       throw new Error("Transformation function already registered for " + s + ", " + c);
@@ -186,7 +187,8 @@ export default class TransformationFunctionRegistry {
     }
   }
 
-  getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s: S, c: C): OperationTransformationFunction<S, C> {
+  getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>
+    (s: S, c: C): OperationTransformationFunction<S, C> {
     var key: string = s.type + c.type;
     return this.otfs[key];
   }

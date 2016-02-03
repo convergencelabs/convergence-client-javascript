@@ -31,25 +31,33 @@ export default class ConvergenceDomain extends EventEmitter {
     super();
 
     // todo make this optional params
-    this._connection = new ConvergenceConnection(url,
+    this._connection = new ConvergenceConnection(
+      url,
       5, // connection timeout in seconds
       -1, // max retries,
       1, // reconnection interval in seconds
       true, // retry on open
       {
         onConnected: function (): void {
+          // todo
         },
         onInterrupted: function (): void {
+          // todo
         },
         onReconnected: function (): void {
+          // todo
         },
         onDisconnected: function (): void {
+          // todo
         },
         onError: function (error: string): void {
+          // todo
         },
         onMessage: function (message: IncomingProtocolNormalMessage): void {
+          // todo
         },
         onRequest: function (message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void {
+          // todo
         }
       }
     );
@@ -57,13 +65,13 @@ export default class ConvergenceDomain extends EventEmitter {
     this._session = new SessionImpl(this, this._connection, null, null);
     this._modelService = new ModelService(this._session);
 
-    var self = this;
+    var self: ConvergenceDomain = this;
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       self._session.setSessionId(response.clientId);
       return response;
     }).fail<HandshakeResponse>(function (reason: Error): Q.Promise<HandshakeResponse> {
       self._connection = null;
-      console.debug("Error connecting to domain: " + reason);
+      console.log("Error connecting to domain: " + reason);
       return this;
     });
   }
@@ -141,9 +149,9 @@ export default class ConvergenceDomain extends EventEmitter {
       // We are connected already so we can just send the request.
       return this.sendAuthRequest(authRequest);
     } else if (this._connectPromise != null) {
-      var self = this;
+      var self: ConvergenceDomain = this;
       // We are connecting so defer this until after we connect.
-      return this._connectPromise.then(function () {
+      return this._connectPromise.then(function (): Q.Promise<void> {
         return self.sendAuthRequest(authRequest);
       });
     } else {

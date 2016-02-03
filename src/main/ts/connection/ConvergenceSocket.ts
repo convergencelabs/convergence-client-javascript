@@ -17,7 +17,7 @@ export default class ConvergenceSocket {
   }
 
   onMessageReceived(encodedMessage: string): void {
-
+    // fixme
   }
 
   open(): Q.Promise<void> {

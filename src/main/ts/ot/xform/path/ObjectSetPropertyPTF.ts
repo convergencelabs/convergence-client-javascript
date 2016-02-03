@@ -5,8 +5,8 @@ import {PathTransformationResult} from "../PathTransformationFunction";
 
 export default class ObjectSetPropertyPTF implements PathTransformationFunction<ObjectSetPropertyOperation> {
   transformDescendantPath(ancestor: ObjectSetPropertyOperation, descendantPath: Array<string | number>): PathTransformation {
-    var ancestorPathLength = ancestor.path.length;
-    var commonProperty = descendantPath[ancestorPathLength];
+    var ancestorPathLength: number = ancestor.path.length;
+    var commonProperty: string = <string>descendantPath[ancestorPathLength];
 
     if (ancestor.prop === commonProperty) {
       return new PathTransformation(PathTransformationResult.PathObsoleted, null);

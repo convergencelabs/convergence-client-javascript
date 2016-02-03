@@ -46,7 +46,7 @@ export default class ArrayReplaceMoveOTF implements OperationTransformationFunct
       case RangeIndexRelationship.Within:
       case RangeIndexRelationship.Start:
         // A-PM-8 and A-PM-9
-        return new OperationPair(s.copy({index: s.index + 1}), c)
+        return new OperationPair(s.copy({index: s.index + 1}), c);
     }
   }
 

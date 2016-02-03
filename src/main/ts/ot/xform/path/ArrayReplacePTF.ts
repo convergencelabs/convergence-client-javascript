@@ -5,8 +5,8 @@ import {PathTransformationResult} from "../PathTransformationFunction";
 
 export default class ArrayReplacePTF implements PathTransformationFunction<ArrayReplaceOperation> {
   transformDescendantPath(ancestor: ArrayReplaceOperation, descendantPath: Array<string | number>): PathTransformation {
-    var ancestorPathLength = ancestor.path.length;
-    var descendantArrayIndex = <number>descendantPath[ancestorPathLength];
+    var ancestorPathLength: number = ancestor.path.length;
+    var descendantArrayIndex: number = <number>descendantPath[ancestorPathLength];
 
     if (ancestor.index === descendantArrayIndex) {
       return new PathTransformation(PathTransformationResult.PathObsoleted, null);

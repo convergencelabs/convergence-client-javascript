@@ -13,8 +13,9 @@ export default class StringRemoveInsertOTF implements OperationTransformationFun
       return new OperationPair(s, c.copy({index: c.index - s.value.length}));
     } else {
       // S-RI-3 and S-RI-4
-      var offsetDelta = c.index - s.index;
-      return new OperationPair(s.copy({
+      var offsetDelta: number = c.index - s.index;
+      return new OperationPair(
+        s.copy({
           value: s.value.substring(0, offsetDelta) +
           c.value +
           s.value.substring(offsetDelta, s.value.length)

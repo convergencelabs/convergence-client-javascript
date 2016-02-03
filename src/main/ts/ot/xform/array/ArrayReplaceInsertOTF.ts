@@ -1,5 +1,5 @@
 import OperationTransformationFunction from "../OperationTransformationFunction";
-import OperationPair from "../OperationPair";;
+import OperationPair from "../OperationPair";
 import ArrayReplaceOperation from "../../ops/ArrayReplaceOperation";
 import ArrayInsertOperation from "../../ops/ArrayInsertOperation";
 

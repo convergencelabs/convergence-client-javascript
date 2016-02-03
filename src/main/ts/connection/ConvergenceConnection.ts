@@ -161,6 +161,8 @@ export default class ConvergenceConnection {
         clearTimeout(self._connectionTimeoutTask);
         if (handshakeResponse.success) {
           self._connectionDeferred.resolve(handshakeResponse);
+          self._clientId = handshakeResponse.clientId;
+          self._reconnectToken = handshakeResponse.reconnectToken;
         } else {
           // todo: Can we reuse this connection???
           self._protocolConnection.close();
@@ -249,23 +251,6 @@ export default class ConvergenceConnection {
 
   request(message: OutgoingProtocolRequestMessage): Q.Promise<IncomingProtocolResponseMessage> {
     return this._protocolConnection.request(message);
-  }
-
-  private handshake(reconnect: boolean): Q.Promise<HandshakeResponse> {
-    var self: ConvergenceConnection = this;
-    var promise: Q.Promise<HandshakeResponse>;
-    if (reconnect) {
-      promise = this._protocolConnection.handshake(reconnect);
-    } else {
-      promise = this._protocolConnection.handshake(reconnect, this._reconnectToken, {});
-    }
-
-    return promise.then(function (response: HandshakeResponse): HandshakeResponse {
-      self._clientId = response.clientId;
-      self._reconnectToken = response.reconnectToken;
-      self._connectionState = ConnectionState.CONNECTED;
-      return response;
-    });
   }
 }
 
