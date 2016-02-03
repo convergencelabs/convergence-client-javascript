@@ -62,7 +62,7 @@ export default class OperationTransformer {
   }
 
   private transformIdenticalPathOperations(s: DiscreteOperation, c: DiscreteOperation): OperationPair {
-    var tf: OperationTransformationFunction<any> = this._tfr.getOperationTransformationFunction(s, c);
+    var tf: OperationTransformationFunction<any, any> = this._tfr.getOperationTransformationFunction(s, c);
     if (tf) {
       return tf.transform(s, c);
     } else {
