@@ -1,6 +1,3 @@
-/// <reference path="../../../typings/mocha/mocha.d.ts" />
-/// <reference path="../../../typings/chai/chai.d.ts" />
-
 import ModelFqn from "../../main/ts/model/ModelFqn";
 import * as chai from "chai"
 

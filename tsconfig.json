@@ -12,6 +12,9 @@
     "node_modules",
     "build",
     "dist",
-    "bower_components"
+    "bower_components",
+    "typings/browser.d.ts",
+    "typings/browser",
+    "node_modules"
   ]
 }
