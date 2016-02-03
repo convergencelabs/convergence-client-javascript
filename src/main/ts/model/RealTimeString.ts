@@ -2,7 +2,6 @@ import RealTimeData from "./RealTimeData";
 import RealTimeContainer from "./RealTimeContainer";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import {DataType} from "./RealTimeData";
 import StringInsertOperation from "../ot/ops/StringInsertOperation";
 import StringRemoveOperation from "../ot/ops/StringRemoveOperation";
 import StringSetOperation from "../ot/ops/StringSetOperation";
@@ -10,6 +9,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import StringInsertEvent from "./events/StringInsertEvent";
 import StringRemoveEvent from "./events/StringRemoveEvent";
 import StringSetEvent from "./events/StringSetEvent";
+import DataType from "./DataType";
 
 enum Events {Insert, Remove, Set}
 
@@ -71,7 +71,7 @@ export default class RealTimeString extends RealTimeData {
     return this.data;
   }
 
-  protected _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
     var type: string = operationEvent.operation.type;
     if (type === StringInsertOperation.TYPE) {
       this._handleInsertOperation(operationEvent);

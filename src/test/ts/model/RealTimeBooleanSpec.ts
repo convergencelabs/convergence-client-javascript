@@ -1,0 +1,74 @@
+import DiscreteOperation from "../../../main/ts/ot/ops/DiscreteOperation";
+import ModelChangeEvent from "../../../main/ts/model/events/ModelChangeEvent";
+import RealTimeBoolean from "../../../main/ts/model/RealTimeBoolean";
+import BooleanSetOperation from "../../../main/ts/ot/ops/BooleanSetOperation";
+import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
+import BooleanSetEvent from "../../../main/ts/model/events/BooleanSetEvent";
+
+import * as chai from "chai";
+var expect: any = chai.expect;
+
+describe('RealTimeBoolean', () => {
+
+  var sessionId: string = "mySession";
+  var username: string = "myUser";
+  var version: number = 1;
+  var timestamp: number = 100;
+
+  var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+  };
+
+  var lastOp: DiscreteOperation = null;
+  var lastOpCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+    lastOp = op;
+  };
+
+  var lastEvent: ModelChangeEvent = null;
+  var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
+    lastEvent = event;
+  };
+
+  it('Value is correct after creation', () => {
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+    expect(myBoolean.value()).to.equal(true);
+  });
+
+  it('Value is correct after set', () => {
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, ignoreCallback);
+    myBoolean.setValue(false);
+    expect(myBoolean.value()).to.equal(false);
+  });
+
+  it('Correct operation is sent after set', () => {
+    lastOp = null;
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, lastOpCallback);
+    myBoolean.setValue(false);
+
+    var expectedOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
+    expect(lastOp).to.deep.equal(expectedOp);
+  });
+
+  it('Value is correct after BooleanSetOperation', () => {
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+
+    var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
+    var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+    myBoolean._handleIncomingOperation(incomingEvent);
+
+    expect(myBoolean.value()).to.equal(false);
+  });
+
+  it('Correct Event is fired after BooleanSetOperation', () => {
+    lastEvent = null;
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+    myBoolean.on("Set", lastEventCallback);
+
+    var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
+    var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+    myBoolean._handleIncomingOperation(incomingEvent);
+
+    var expectedEvent: BooleanSetEvent = new BooleanSetEvent(sessionId, username, version, timestamp, myBoolean, false);
+    expect(lastEvent).to.deep.equal(expectedEvent);
+  });
+
+});

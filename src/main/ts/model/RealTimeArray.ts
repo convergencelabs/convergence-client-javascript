@@ -15,7 +15,8 @@ import ArrayRemoveEvent from "./events/ArrayRemoveEvent";
 import ArrayReplaceEvent from "./events/ArrayReplaceEvent";
 import ArraySetEvent from "./events/ArraySetEvent";
 import ModelOperationEvent from "./ModelOperationEvent";
-import {DataType} from "./RealTimeData";
+import DataType from "./DataType";
+import RealTimeDataFactory from "./RealTimeDataFactory";
 
 enum Events {Insert, Move, Remove, Replace, Set}
 
@@ -36,7 +37,7 @@ export default class RealTimeArray extends RealTimeContainer {
     this._children = new Array<RealTimeData>();
 
     for (var i: number = 0; i < data.length; i++) {
-      this._children.push(RealTimeData.create(data[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeDataFactory.create(data[i], this, i, this.sendOpCallback));
     }
   }
 
@@ -49,7 +50,7 @@ export default class RealTimeArray extends RealTimeContainer {
     this._validateInsert(index, value);
 
     var operation: ArrayInsertOperation = new ArrayInsertOperation(this.path(), false, index, value);
-    this._children.splice(index, 0, (RealTimeData.create(value, this, index, this.sendOpCallback)));
+    this._children.splice(index, 0, (RealTimeDataFactory.create(value, this, index, this.sendOpCallback)));
     this.updateFieldInParent(index);
     this.sendOpCallback(operation);
   }
@@ -80,7 +81,7 @@ export default class RealTimeArray extends RealTimeContainer {
     this._validateReplace(index, value);
 
     var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.path(), false, index, value);
-    this._children[index] = RealTimeData.create(value, this, index, this.sendOpCallback);
+    this._children[index] = RealTimeDataFactory.create(value, this, index, this.sendOpCallback);
     this.updateFieldInParent(index);
     // TODO: detach
     this.sendOpCallback(operation);
@@ -115,7 +116,7 @@ export default class RealTimeArray extends RealTimeContainer {
     // TODO: detach
     this._children = new Array<RealTimeData>();
     for (var i: number = 0; i < values.length; i++) {
-      this._children.push(RealTimeData.create(values[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeDataFactory.create(values[i], this, i, this.sendOpCallback));
     }
     this.sendOpCallback(operation);
   }
@@ -192,7 +193,7 @@ export default class RealTimeArray extends RealTimeContainer {
         return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeData.create(undefined, null, null, this.sendOpCallback);
+        return RealTimeDataFactory.create(undefined, null, null, this.sendOpCallback);
       }
     } else {
       return child;
@@ -213,7 +214,7 @@ export default class RealTimeArray extends RealTimeContainer {
 
   // Handlers for incoming operations
 
-  protected _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
+  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
     var type: string = operationEvent.operation.type;
     if (type === ArrayInsertOperation.TYPE) {
       this._handleInsertOperation(operationEvent);
@@ -237,7 +238,7 @@ export default class RealTimeArray extends RealTimeContainer {
 
     this._validateInsert(index, value);
 
-    this._children.splice(index, 0, (RealTimeData.create(value, this, index, this.sendOpCallback)));
+    this._children.splice(index, 0, (RealTimeDataFactory.create(value, this, index, this.sendOpCallback)));
     this.updateFieldInParent(index);
 
     var event: ArrayInsertEvent = new ArrayInsertEvent(
@@ -304,7 +305,7 @@ export default class RealTimeArray extends RealTimeContainer {
 
     this._validateReplace(index, value);
 
-    this._children[index] = RealTimeData.create(value, this, index, this.sendOpCallback);
+    this._children[index] = RealTimeDataFactory.create(value, this, index, this.sendOpCallback);
     this.updateFieldInParent(index);
     // TODO: detach
 
@@ -328,7 +329,7 @@ export default class RealTimeArray extends RealTimeContainer {
     // TODO: detach
     this._children = new Array<RealTimeData>();
     for (var i: number = 0; i < values.length; i++) {
-      this._children.push(RealTimeData.create(values[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeDataFactory.create(values[i], this, i, this.sendOpCallback));
     }
 
     var event: ArraySetEvent = new ArraySetEvent(

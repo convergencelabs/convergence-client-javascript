@@ -5,7 +5,7 @@ import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import BooleanSetEvent from "./events/BooleanSetEvent";
-import {DataType} from "./RealTimeData";
+import DataType from "./DataType";
 
 enum Events {Set}
 

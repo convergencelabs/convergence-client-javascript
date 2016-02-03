@@ -3,7 +3,7 @@ import RealTimeContainer from "./RealTimeContainer";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import {DataType} from "./RealTimeData";
+import DataType from "./DataType";
 
 export default class RealTimeNull extends RealTimeData {
 

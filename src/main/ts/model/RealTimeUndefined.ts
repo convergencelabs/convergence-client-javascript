@@ -2,8 +2,8 @@ import RealTimeData from "./RealTimeData";
 import RealTimeContainer from "./RealTimeContainer";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import {DataType} from "./RealTimeData";
 import ModelOperationEvent from "./ModelOperationEvent";
+import DataType from "./DataType";
 
 export default class RealTimeUndefined extends RealTimeData {
 

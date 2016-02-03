@@ -1,5 +1,4 @@
 import RealTimeContainer from "./RealTimeContainer";
-import {DataType} from "./RealTimeData";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import RealTimeData from "./RealTimeData";
@@ -13,6 +12,8 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import ObjectSetPropertyEvent from "./events/ObjectSetPropertyEvent";
 import ObjectRemovePropertyEvent from "./events/ObjectRemovePropertyEvent";
 import ObjectSetEvent from "./events/ObjectSetEvent";
+import DataType from "./DataType";
+import RealTimeDataFactory from "./RealTimeDataFactory";
 
 
 enum Events {SetProperty, RemoveProperty, Set}
@@ -33,7 +34,7 @@ export default class RealTimeObject extends RealTimeContainer {
 
     for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeData.create(data[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeDataFactory.create(data[prop], this, prop, this.sendOpCallback);
       }
     }
   }
@@ -53,7 +54,7 @@ export default class RealTimeObject extends RealTimeContainer {
       operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
     }
 
-    this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
+    this._children[property] = RealTimeDataFactory.create(value, this, property, this.sendOpCallback);
     this.sendOpCallback(operation);
   }
 
@@ -89,7 +90,7 @@ export default class RealTimeObject extends RealTimeContainer {
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeData.create(value[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeDataFactory.create(value[prop], this, prop, this.sendOpCallback);
       }
     }
     this.sendOpCallback(operation);
@@ -127,7 +128,7 @@ export default class RealTimeObject extends RealTimeContainer {
         return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeData.create(undefined, null, null, this.sendOpCallback);
+        return RealTimeDataFactory.create(undefined, null, null, this.sendOpCallback);
       }
     } else {
       return child;
@@ -181,7 +182,7 @@ export default class RealTimeObject extends RealTimeContainer {
       // TODO: handle detached
     }
 
-    this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
+    this._children[property] = RealTimeDataFactory.create(value, this, property, this.sendOpCallback);
 
     var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
       operationEvent.sessionId,
@@ -204,7 +205,7 @@ export default class RealTimeObject extends RealTimeContainer {
       // TODO: handle detached
     }
 
-    this._children[property] = RealTimeData.create(value, this, property, this.sendOpCallback);
+    this._children[property] = RealTimeDataFactory.create(value, this, property, this.sendOpCallback);
 
     var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
       operationEvent.sessionId,
@@ -248,7 +249,7 @@ export default class RealTimeObject extends RealTimeContainer {
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeData.create(value[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeDataFactory.create(value[prop], this, prop, this.sendOpCallback);
       }
     }
 
