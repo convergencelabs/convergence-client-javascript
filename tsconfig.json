@@ -2,8 +2,9 @@
   "version": "1.7.5",
   "compilerOptions": {
     "target": "es5",
+    "module": "commonjs",
     "preserveConstEnums": true,
-    "out": "build/convergence-client.js",
+    "outDir": "build",
     "sourceMap": true,
     "declaration": true
   },
