@@ -106,7 +106,7 @@ export class ProtocolConnection {
     var replyDeferred: Q.Deferred<IncomingProtocolResponseMessage> = Q.defer<IncomingProtocolResponseMessage>();
 
     var timeout: number = this._protocolConfig.defaultRequestTimeout;
-    var timeoutTask: number = setTimeout(
+    var timeoutTask: any = setTimeout(
       function (): void {
         var req: RequestRecord = self._requests[requestId];
         if (req) {
@@ -246,7 +246,7 @@ export class ProtocolConnection {
 interface RequestRecord {
   reqId: number;
   replyDeferred: Q.Deferred<IncomingProtocolResponseMessage>;
-  timeoutTask: number;
+  timeoutTask: any;
   requestType: string;
 }
 

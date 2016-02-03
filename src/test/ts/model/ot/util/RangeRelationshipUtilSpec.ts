@@ -1,10 +1,9 @@
-var convergence = require("../../../../../build/convergence-client");
-var expect = require('chai').expect;
+import {RangeRelationshipUtil} from "../../../../../main/ts/ot/util/RangeRelationshipUtil";
+import {RangeRangeRelationship} from "../../../../../main/ts/ot/util/RangeRelationshipUtil";
+import * as chai from "chai"
+var expect = chai.expect;
 
 describe('RangeRelationshipUtil', function () {
-    var RangeRelationshipUtil = convergence.ot.RangeRelationshipUtil;
-    var RangeRangeRelationship = convergence.ot.RangeRangeRelationship;
-
     it('Correctly identify a precedes relationship ', function () {
         var rel = RangeRelationshipUtil.getRangeRangeRelationship(0, 2, 3, 5);
         expect(rel).to.equal(RangeRangeRelationship.Precedes);

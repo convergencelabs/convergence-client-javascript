@@ -1,8 +1,9 @@
-var convergence = require("../../../../../build/convergence-client");
-var expect = require('chai').expect;
+import EqualsUtil from "../../../main/ts/util/EqualsUtil";
+import * as chai from "chai"
+
+var expect = chai.expect;
 
 describe('EqualUtil', function () {
-    var EqualsUtil = convergence.util.EqualsUtil;
 
     it('NaN and NaN are equal', function () {
         expect(EqualsUtil.deepEquals(NaN, NaN)).to.be.true;

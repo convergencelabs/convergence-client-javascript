@@ -5,8 +5,8 @@ export interface HeartbeatHandler {
 
 export class HeartbeatHelper {
 
-  private _pingFuture: number;
-  private _timeoutFuture: number;
+  private _pingFuture: any;
+  private _timeoutFuture: any;
 
   private _handler: HeartbeatHandler;
   private _pingInterval: number;
