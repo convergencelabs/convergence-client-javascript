@@ -18,7 +18,8 @@ var tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('build', [], function () {
   return gulp.src(['src/**/*.ts', "typings/browser.d.ts"])
-    .pipe(ts(tsProject));
+    .pipe(ts(tsProject))
+    .pipe(gulp.dest("build"));
 });
 
 gulp.task('tslint', function () {
@@ -27,7 +28,7 @@ gulp.task('tslint', function () {
     .pipe(tslint.report('prose'));
 });
 
-gulp.task('test', function (cb) {
+gulp.task('test', ["build"], function (cb) {
   return gulp.src("build/**/*.js")
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
@@ -38,7 +39,6 @@ gulp.task('test', function (cb) {
         .pipe(istanbul.writeReports()) // Creating the reports after tests run
         .on('finish', function () {
           process.chdir(__dirname);
-          cb();
         });
     });
 });
