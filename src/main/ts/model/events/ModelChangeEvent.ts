@@ -1,14 +1,13 @@
-module convergence.model.event {
+import RealTimeData from "../RealTimeData";
 
-  export abstract class ModelChangeEvent {
-    /**
-     * Constructs a new ModelChangeEvent.
-     */
-    constructor(public sessionId: string,
-                public username: string,
-                public version: number,
-                public timestamp: number,
-                public target: RealTimeData) {
-    }
+export default abstract class ModelChangeEvent {
+  /**
+   * Constructs a new ModelChangeEvent.
+   */
+  constructor(public sessionId: string,
+              public username: string,
+              public version: number,
+              public timestamp: number,
+              public target: RealTimeData) {
   }
 }

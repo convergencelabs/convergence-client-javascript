@@ -1,7 +1,3 @@
-module convergence {
-  "use strict";
-
-  export class Debug {
-    static flags: any = {};
-  }
+export default class Debug {
+  static flags: any = {};
 }

@@ -30,7 +30,9 @@
     "gulp-mocha": "^1.1.0",
     "gulp-plumber": "^0.6.5",
     "gulp-rename": "^1.2.2",
+    "gulp-rollup": "^1.7.0",
     "gulp-shell": "^0.3.0",
+    "gulp-sourcemaps": "^1.6.0",
     "gulp-tslint": "^3.1.0-beta",
     "gulp-typescript": "2.10.0",
     "gulp-uglify": "^1.2.0",
@@ -45,6 +47,7 @@
     "mkdirp": "^0.5.0",
     "mocha": "^2.3.4",
     "phantomjs": "^1.9.19",
+    "rollup-plugin-typescript": "^0.5.0",
     "socket.io": "^1.4.4",
     "uglify-js": "^2.4.16",
     "tsd": "^0.6.4"

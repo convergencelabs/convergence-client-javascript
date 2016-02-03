@@ -1,10 +1,11 @@
-/// <reference path="../OperationTransformationFunction.ts" />
+import OperationPair from "../OperationPair";
+import OperationTransformationFunction from "../OperationTransformationFunction";
+import NumberSetOperation from "../../ops/NumberSetOperation";
+import NumberAddOperation from "../../ops/NumberAddOperation";
 
-module convergence.ot {
-  export class NumberSetAddOTF implements OperationTransformationFunction<NumberSetOperation, NumberAddOperation> {
-    transform(s: NumberSetOperation, c: NumberAddOperation): OperationPair {
-      // N-SA-1
-      return new OperationPair(s, c.copy({noOp: true}));
-    }
+export default class NumberSetAddOTF implements OperationTransformationFunction<NumberSetOperation, NumberAddOperation> {
+  transform(s: NumberSetOperation, c: NumberAddOperation): OperationPair {
+    // N-SA-1
+    return new OperationPair(s, c.copy({noOp: true}));
   }
 }

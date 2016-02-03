@@ -1,23 +1,21 @@
-/// <reference path="DiscreteOperation.ts" />
-/// <reference path="../../util/Immutable.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
 
-module convergence.ot {
+export default class ArrayRemoveOperation extends DiscreteOperation {
 
-  import Immutable = convergence.util.Immutable;
-  export class ArrayRemoveOperation extends DiscreteOperation {
+  static TYPE: string = "ArrayRemove";
 
-    static TYPE: string = "ArrayRemove";
+  constructor(path: Path, noOp: boolean, public index: number) {
+    super(ArrayRemoveOperation.TYPE, path, noOp);
+    Object.freeze(this);
+  }
 
-    constructor(path: Array<string | number>, noOp: boolean, public index: number) {
-      super(ArrayRemoveOperation.TYPE, path, noOp);
-      Object.freeze(this);
-    }
-
-    copy(updates: any): ArrayRemoveOperation {
-      return new ArrayRemoveOperation(
-        Immutable.update(this.path, updates.path),
-        Immutable.update(this.noOp, updates.noOp),
-        Immutable.update(this.index, updates.index));
-    }
+  copy(updates: any): ArrayRemoveOperation {
+    return new ArrayRemoveOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.index, updates.index));
   }
 }
+

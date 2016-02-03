@@ -1,19 +1,17 @@
-/// <reference path="ModelChangeEvent.ts" />
+import ModelChangeEvent from "./ModelChangeEvent";
+import RealTimeArray from "../RealTimeArray";
 
-module convergence.model.event {
-
-  export class ArraySetEvent extends ModelChangeEvent {
-    /**
-     * Constructs a new ArraySetEvent.
-     */
-    constructor(sessionId: string,
-                username: string,
-                version: number,
-                timestamp: number,
-                target: RealTimeArray,
-                public value: Array<Object|number|string|boolean>) {
-      super(sessionId, username, version, timestamp, target);
-      Object.freeze(this);
-    }
+export default class ArraySetEvent extends ModelChangeEvent {
+  /**
+   * Constructs a new ArraySetEvent.
+   */
+  constructor(sessionId: string,
+              username: string,
+              version: number,
+              timestamp: number,
+              target: RealTimeArray,
+              public value: Array<Object|number|string|boolean>) {
+    super(sessionId, username, version, timestamp, target);
+    Object.freeze(this);
   }
 }

@@ -1,49 +1,54 @@
-/// <reference path="../util/EventEmitter.ts" />
-/// <reference path="RealTimeObject.ts" />
+import EventEmitter from "../util/EventEmitter";
+import ModelFqn from "./ModelFqn";
+import RealTimeObject from "./RealTimeObject";
+import Session from "../Session";
+import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
+import OperationTransformer from "../ot/xform/OperationTransformer";
+import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
 
-module convergence.model {
-  import EventEmitter = convergence.util.EventEmitter;
-  import Session = convergence.Session;
+export default class RealTimeModel extends EventEmitter {
 
-  export class RealTimeModel extends EventEmitter {
+  private _concurencyControl: ClientConcurrencyControl;
 
-    /**
-     * Constructs a new RealTimeModel.
-     */
-    constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
-      super();
-    }
+  /**
+   * Constructs a new RealTimeModel.
+   */
+  constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
+    super();
+    var xformer = new OperationTransformer(new TransformationFunctionRegistry());
+    // fixme
+    this._concurencyControl = new ClientConcurrencyControl("", 0, [], xformer);
+  }
 
-    collectionId(): string {
-      return this._modelFqn.collectionId;
-    }
+  collectionId(): string {
+    return this._modelFqn.collectionId;
+  }
 
-    modelId(): string {
-      return this._modelFqn.modelId;
-    }
+  modelId(): string {
+    return this._modelFqn.modelId;
+  }
 
-    version(): number {
-      return 0;
-    }
+  version(): number {
+    return 0;
+  }
 
-    createdTime(): Date {
-      return new Date();
-    }
+  createdTime(): Date {
+    return new Date();
+  }
 
-    modifiedTime(): Date {
-      return new Date();
-    }
+  modifiedTime(): Date {
+    return new Date();
+  }
 
-    data(): RealTimeObject {
-      return this._data;
-    }
+  data(): RealTimeObject {
+    return this._data;
+  }
 
-    /**
-     * Gets the session of the connected user.
-     * @return {convergence.Session} The users session.
-     */
-    session(): Session {
-      return this._session;
-    }
+  /**
+   * Gets the session of the connected user.
+   * @return {convergence.Session} The users session.
+   */
+  session(): Session {
+    return this._session;
   }
 }
