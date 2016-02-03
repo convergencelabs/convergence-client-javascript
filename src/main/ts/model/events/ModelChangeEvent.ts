@@ -1,6 +1,6 @@
 import RealTimeData from "../RealTimeData";
 
-export default abstract class ModelChangeEvent {
+abstract class ModelChangeEvent {
   /**
    * Constructs a new ModelChangeEvent.
    */
@@ -11,3 +11,5 @@ export default abstract class ModelChangeEvent {
               public target: RealTimeData) {
   }
 }
+
+export default ModelChangeEvent;

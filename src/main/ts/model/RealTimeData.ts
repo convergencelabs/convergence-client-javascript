@@ -1,4 +1,3 @@
-
 import EventEmitter from "../util/EventEmitter";
 import RealTimeContainer from "./RealTimeContainer";
 import {PathElement} from "../ot/Path";
@@ -15,7 +14,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 
 export enum DataType {Object, Array, String, Number, Boolean, Null, Undefined}
 
-export default abstract class RealTimeData extends EventEmitter {
+abstract class RealTimeData extends EventEmitter {
 
   protected _detached: boolean = false;
 
@@ -70,3 +69,5 @@ export default abstract class RealTimeData extends EventEmitter {
   protected abstract _handleIncomingOperation(operationEvent: ModelOperationEvent): void;
 
 }
+
+export default RealTimeData;

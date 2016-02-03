@@ -18,19 +18,11 @@ var rollupTypescript = require('rollup-plugin-typescript');
 
 const plumberConf = {};
 
-gulp.task('build', function () {
-  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(rollup({
-      format: 'iife',
-      moduleName: 'ConvergenceDomain',
-      sourceMap: true,
-      plugins: [
-        rollupTypescript()
-      ]
-    }))
-    .pipe(rename("convergence-client.js"))
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest("build"));
+var tsProject = ts.createProject('tsconfig.json');
+
+gulp.task('build', ["tslint"], function () {
+  return gulp.src(['src/**/*.ts', "typings/**/*.ts"])
+    .pipe(ts(tsProject));
 });
 
 gulp.task('tslint', function () {
@@ -39,12 +31,12 @@ gulp.task('tslint', function () {
     .pipe(tslint.report('prose'));
 });
 
-gulp.task('istanbul', function (cb) {
+gulp.task('test', function (cb) {
   return gulp.src("build/**/*.js")
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
     .on('finish', function () {
-      gulp.src("src/test/**/*.js")
+      gulp.src("build/test/**/*.js")
         .pipe(plumber(plumberConf))
         .pipe(mocha())
         .pipe(istanbul.writeReports()) // Creating the reports after tests run
@@ -56,13 +48,22 @@ gulp.task('istanbul', function (cb) {
 });
 
 gulp.task('dist', ["build"], function () {
-  mkdirp.sync("dist");
-  return gulp.src('build/*.js')
+  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+    .pipe(rollup({
+      format: 'iife',
+      moduleName: 'ConvergenceDomain',
+      sourceMap: true,
+      plugins: [
+        rollupTypescript()
+      ]
+    }))
+    .pipe(rename("convergence-client.js"))
     .pipe(uglify())
     .pipe(rename({
       extname: '.min.js'
     }))
-    .pipe(gulp.dest('dist'));
+    .pipe(sourcemaps.write("."))
+    .pipe(gulp.dest("dist"));
 });
 
 gulp.task('clean', function (cb) {
@@ -72,6 +73,5 @@ gulp.task('clean', function (cb) {
   ], cb);
 });
 
-// The default task (called when you run `gulp`)
 gulp.task('default', ["build"]);
-gulp.task('test', ["istanbul"]);
+

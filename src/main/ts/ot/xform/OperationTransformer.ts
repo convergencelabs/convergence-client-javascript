@@ -70,7 +70,7 @@ export default class OperationTransformer {
   }
 
   private transformHierarchicalOperations(a: DiscreteOperation, d: DiscreteOperation): OperationPair {
-    var ptf: PathTransformationFunction = this._tfr.getPathTransformationFunction(a);
+    var ptf: PathTransformationFunction<any> = this._tfr.getPathTransformationFunction(a);
     if (ptf) {
       var result = ptf.transformDescendantPath(a, d.path);
       switch (result.result) {

@@ -3,7 +3,7 @@ import {DataType} from "./RealTimeData";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 
-export default abstract class RealTimeContainer extends RealTimeData {
+abstract class RealTimeContainer extends RealTimeData {
 
   /**
    * Constructs a new RealTimeContainer.
@@ -14,5 +14,6 @@ export default abstract class RealTimeContainer extends RealTimeData {
               sendOpCallback: (operation: DiscreteOperation) => void) {
     super(modelType, parent, fieldInParent, sendOpCallback);
   }
-
 }
+
+export default RealTimeContainer;

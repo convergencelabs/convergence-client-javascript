@@ -9,10 +9,10 @@ import {IncomingProtocolNormalMessage} from "./protocol/protocol";
 import {IncomingProtocolRequestMessage} from "./protocol/protocol";
 import {HandshakeResponse} from "./protocol/handhsake";
 import {PasswordAuthRequest} from "./protocol/authentication";
-import ReplyCallback = convergence.connection.ReplyCallback;
 import {AuthRequest} from "./protocol/authentication";
 import {AuthenticationResponseMessage} from "./protocol/authentication";
 import ConvergenceConnectionListener from "./connection/ConvergenceConnection";
+import {ReplyCallback} from "./connection/ProtocolConnection";
 
 export default class ConvergenceDomain extends EventEmitter {
 
