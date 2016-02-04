@@ -16,7 +16,7 @@ export default class RealTimeModel extends EventEmitter {
    */
   constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _connection: ConvergenceConnection) {
     super();
-    var xformer = new OperationTransformer(new TransformationFunctionRegistry());
+    var xformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
     // fixme
     this._concurencyControl = new ClientConcurrencyControl("", 0, [], xformer);
   }
