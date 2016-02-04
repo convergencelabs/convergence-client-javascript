@@ -44,18 +44,20 @@ export default class RealTimeObject extends RealTimeContainer {
    * @param {string} property - The property to set
    * @param {Object|number|string|boolean} value - The value of the property
    */
-  setProperty(property: string, value: Object|number|string|boolean): void {
+  setProperty(property: string, value: Object|number|string|boolean): RealTimeValue {
 
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(property)) {
       operation = new ObjectSetPropertyOperation(this.path(), false, property, value);
-      // TODO: detach
+      this._children[property]._setDetached();
     } else {
       operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
     }
 
-    this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    var child: RealTimeValue = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    this._children[property] = child;
     this.sendOpCallback(operation);
+    return child;
   }
 
   /**
@@ -68,7 +70,7 @@ export default class RealTimeObject extends RealTimeContainer {
     }
     var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.path(), false, property);
 
-    // TODO: detach
+    this._children[property]._setDetached();
     delete this._children[property];
     this.sendOpCallback(operation);
   }
@@ -84,8 +86,7 @@ export default class RealTimeObject extends RealTimeContainer {
 
     var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
 
-    // TODO: detach all children
-
+    this.forEach((oldChild: RealTimeValue) => oldChild._setDetached());
     this._children = {};
 
     for (var prop in value) {
@@ -147,12 +148,22 @@ export default class RealTimeObject extends RealTimeContainer {
     }
   }
 
+  getProperty(property: string): RealTimeValue {
+    return this._children[property];
+  }
+
   value(): Object {
     var returnObject: Object = {};
     this.forEach((model: RealTimeValue, property: string) => {
       returnObject[property] = model.value();
     });
     return returnObject;
+  }
+
+  protected _detachChildren(): void {
+    this.forEach((child: RealTimeValue) => {
+      child._setDetached();
+    });
   }
 
   // Handlers for incoming operations
@@ -177,10 +188,8 @@ export default class RealTimeObject extends RealTimeContainer {
     var property: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
 
-    var child: RealTimeValue = this._children[property];
-    if (child) {
-      // TODO: handle detached
-    }
+    var oldChild: RealTimeValue = this._children[property];
+
 
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
 
@@ -193,6 +202,10 @@ export default class RealTimeObject extends RealTimeContainer {
       property,
       value);
     this.emit(Events[Events.SetProperty], event);
+
+    if (oldChild) {
+      oldChild._setDetached();
+    }
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
@@ -200,10 +213,7 @@ export default class RealTimeObject extends RealTimeContainer {
     var property: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
 
-    var child: RealTimeValue = this._children[property];
-    if (child) {
-      // TODO: handle detached
-    }
+    var oldChild: RealTimeValue = this._children[property];
 
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
 
@@ -216,16 +226,19 @@ export default class RealTimeObject extends RealTimeContainer {
       property,
       value);
     this.emit(Events[Events.SetProperty], event);
+
+    if (oldChild) {
+      oldChild._setDetached();
+    }
   }
 
   private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
     var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
     var property: string = operation.prop;
 
-    var child: RealTimeValue = this._children[property];
-    if (child) {
-      // TODO: handle detached
+    var oldChild: RealTimeValue = this._children[property];
 
+    if (oldChild) {
       delete this._children[property];
 
       var event: ObjectRemovePropertyEvent = new ObjectRemovePropertyEvent(
@@ -236,6 +249,8 @@ export default class RealTimeObject extends RealTimeContainer {
         this,
         property);
       this.emit(Events[Events.SetProperty], event);
+
+      oldChild._setDetached();
     }
   }
 
@@ -243,7 +258,7 @@ export default class RealTimeObject extends RealTimeContainer {
     var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
     var value: Object = operation.value;
 
-    // TODO: detach all children
+    var oldChildren: Object = this._children;
 
     this._children = {};
 
@@ -261,7 +276,12 @@ export default class RealTimeObject extends RealTimeContainer {
       this,
       value);
     this.emit(Events[Events.Set], event);
-  }
 
+    for (var property in oldChildren) {
+      if (oldChildren.hasOwnProperty(property)) {
+        oldChildren[property]._setDetached();
+      }
+    }
+  }
 }
 

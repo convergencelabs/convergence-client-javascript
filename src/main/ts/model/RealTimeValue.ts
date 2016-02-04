@@ -1,4 +1,3 @@
-
 import EventEmitter from "../util/EventEmitter";
 import DataType from "./DataType";
 import {PathElement, Path} from "./Path";
@@ -7,7 +6,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 
 abstract class RealTimeValue extends EventEmitter {
 
-  protected _detached: boolean = false;
+  private _detached: boolean = false;
 
   /**
    * Constructs a new RealTimeValue.
@@ -23,8 +22,6 @@ abstract class RealTimeValue extends EventEmitter {
     return this.modelType;
   }
 
-  abstract value(): any;
-
   path(): Path {
     if (this.parent == null) {
       return [];
@@ -34,6 +31,22 @@ abstract class RealTimeValue extends EventEmitter {
       return path;
     }
   }
+
+  isDetached(): boolean {
+    return this._detached;
+  }
+
+  _setDetached(): void {
+    this.parent = null;
+    this._detached = true;
+    this.emit("detached");
+  }
+
+  _exceptionIfDetached(): void {
+    throw Error("Detached Exception: RealTimeValue is no longer a part of the data model.");
+  }
+
+  abstract value(): any;
 
   abstract _handleIncomingOperation(operationEvent: ModelOperationEvent): void;
 
