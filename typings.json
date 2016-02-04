@@ -1,11 +1,11 @@
 {
   "ambientDependencies": {
-    "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#93bae1bb4c887c1375a4c1f0c3bb849ff06b8ac6",
     "assertion-error": "github:DefinitelyTyped/DefinitelyTyped/assertion-error/assertion-error.d.ts#e69fe60f2d6377ea4fae539493997b098f52cad1",
     "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#e69fe60f2d6377ea4fae539493997b098f52cad1",
     "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#e69fe60f2d6377ea4fae539493997b098f52cad1",
-    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81"
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
+    "sinon": "github:DefinitelyTyped/DefinitelyTyped/sinon/sinon.d.ts#6e7d83167d86d857817bd492786f8304f5c4a0e4",
+    "sinon-chai": "github:DefinitelyTyped/DefinitelyTyped/sinon-chai/sinon-chai.d.ts#ceedbb35506c4b20867ddb495e8626ea04f38969"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
