@@ -1,5 +1,5 @@
-import RealTimeData from "./RealTimeData";
-import RealTimeContainer from "./RealTimeContainer";
+import RealTimeValue from "./RealTimeValue";
+import RealTimeContainer from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import StringInsertOperation from "../ot/ops/StringInsertOperation";
@@ -13,7 +13,7 @@ import DataType from "./DataType";
 
 enum Events {Insert, Remove, Set}
 
-export default class RealTimeString extends RealTimeData {
+export default class RealTimeString extends RealTimeValue {
 
   /**
    * Constructs a new RealTimeString.

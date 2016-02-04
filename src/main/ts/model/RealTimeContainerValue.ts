@@ -1,9 +1,9 @@
-import RealTimeData from "./RealTimeData";
+import RealTimeValue from "./RealTimeValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import DataType from "./DataType";
 
-abstract class RealTimeContainer extends RealTimeData {
+abstract class RealTimeContainer extends RealTimeValue {
 
   /**
    * Constructs a new RealTimeContainer.

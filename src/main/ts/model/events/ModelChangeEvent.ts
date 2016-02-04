@@ -1,4 +1,4 @@
-import RealTimeData from "../RealTimeData";
+import RealTimeValue from "../RealTimeValue";
 
 abstract class ModelChangeEvent {
   /**
@@ -8,7 +8,7 @@ abstract class ModelChangeEvent {
               public username: string,
               public version: number,
               public timestamp: number,
-              public target: RealTimeData) {
+              public target: RealTimeValue) {
   }
 }
 

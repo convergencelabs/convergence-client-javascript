@@ -1,5 +1,5 @@
-import RealTimeData from "./RealTimeData";
-import RealTimeContainer from "./RealTimeContainer";
+import RealTimeValue from "./RealTimeValue";
+import RealTimeContainer from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
@@ -9,7 +9,7 @@ import DataType from "./DataType";
 
 enum Events {Set}
 
-export default class RealTimeBoolean extends RealTimeData {
+export default class RealTimeBoolean extends RealTimeValue {
 
   /**
    * Constructs a new RealTimeBoolean.

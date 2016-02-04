@@ -5,15 +5,15 @@ import {PathElement, Path} from "./Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 
-abstract class RealTimeData extends EventEmitter {
+abstract class RealTimeValue extends EventEmitter {
 
   protected _detached: boolean = false;
 
   /**
-   * Constructs a new RealTimeData.
+   * Constructs a new RealTimeValue.
    */
   constructor(private modelType: DataType,
-              private parent: RealTimeData,
+              private parent: RealTimeValue,
               public fieldInParent: PathElement,
               protected sendOpCallback: (operation: DiscreteOperation) => void) {
     super();
@@ -39,4 +39,4 @@ abstract class RealTimeData extends EventEmitter {
 
 }
 
-export default RealTimeData;
+export default RealTimeValue;

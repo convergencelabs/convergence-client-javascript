@@ -1,21 +1,21 @@
-import RealTimeData from "./RealTimeData";
+import RealTimeValue from "./RealTimeValue";
 import RealTimeNull from "./RealTimeNull";
 import RealTimeUndefined from "./RealTimeUndefined";
 import RealTimeString from "./RealTimeString";
 import RealTimeArray from "./RealTimeArray";
 import RealTimeObject from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
-import RealTimeContainer from "./RealTimeContainer";
+import RealTimeContainer from "./RealTimeContainerValue";
 import {PathElement} from "./Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import RealTimeBoolean from "./RealTimeBoolean";
 
-export default class RealTimeDataFactory {
+export default class RealTimeValueFactory {
 
   public static create(data: any,
                        parent: RealTimeContainer,
                        fieldInParent: PathElement,
-                       sendOpCallback: (operation: DiscreteOperation) => void): RealTimeData {
+                       sendOpCallback: (operation: DiscreteOperation) => void): RealTimeValue {
     var type: string = typeof data;
     if (data === null) {
       return new RealTimeNull(parent, fieldInParent, sendOpCallback);
