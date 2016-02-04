@@ -15,7 +15,7 @@ import MessageType from "../protocol/MessageType";
 import {TokenAuthRequest} from "../protocol/authentication";
 import {AuthRequest} from "../protocol/authentication";
 import {AuthenticationResponseMessage} from "../protocol/authentication";
-
+import Deferred from "../util/Deferred";
 
 export default class ConvergenceConnection extends EventEmitter {
 
@@ -23,11 +23,12 @@ export default class ConvergenceConnection extends EventEmitter {
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
-    DISCONNECTED: "disconnected"
+    DISCONNECTED: "disconnected",
+    ERROR: "error"
   };
 
   private _session: SessionImpl;
-  private _connectionDeferred: Q.Deferred<HandshakeResponse>;
+  private _connectionDeferred: Deferred<HandshakeResponse>;
   private _connectionTimeout: number;  // seconds
   private _maxReconnectAttempts: number;
   private _connectionAttempts: number;
@@ -88,23 +89,23 @@ export default class ConvergenceConnection extends EventEmitter {
     return this._session;
   }
 
-  connect(): Q.Promise<HandshakeResponse> {
+  connect(): Promise<HandshakeResponse> {
     if (this._connectionState !== ConnectionState.DISCONNECTED) {
       throw new Error("Can only call connect on a disconnected connection.");
     }
 
     this._connectionAttempts = 0;
-    this._connectionDeferred = Q.defer<HandshakeResponse>();
+    this._connectionDeferred = new Deferred<HandshakeResponse>();
     this._connectionState = ConnectionState.CONNECTING;
 
     this.attemptConnection(false);
 
-    return this._connectionDeferred.promise;
+    return this._connectionDeferred.promise();
   }
 
   reconnect(): void {
     this._connectionAttempts = 0;
-    this._connectionDeferred = Q.defer<HandshakeResponse>();
+    this._connectionDeferred = new Deferred<HandshakeResponse>();
     this.attemptConnection(true);
   }
 
@@ -147,15 +148,16 @@ export default class ConvergenceConnection extends EventEmitter {
     this._protocolConnection.on(ProtocolConnection.Events.MESSAGE, (message: any) =>
       this.emit(ConvergenceConnection.Events.MESSAGE, message));
 
-    this._protocolConnection.connect().then(function (): void {
+    this._protocolConnection.connect().then(() => {
       if (Debug.flags.connection) {
         console.log("Connection succeeded, handshaking.");
       }
 
-      self._protocolConnection.handshake(reconnect).then(function (handshakeResponse: HandshakeResponse): void {
+      self._protocolConnection.handshake(reconnect).then((handshakeResponse: HandshakeResponse) => {
         clearTimeout(self._connectionTimeoutTask);
         if (handshakeResponse.success) {
           self._connectionDeferred.resolve(handshakeResponse);
+          self._connectionDeferred = null;
           self._clientId = handshakeResponse.clientId;
           self._session.setSessionId(handshakeResponse.clientId);
           self._reconnectToken = handshakeResponse.reconnectToken;
@@ -174,23 +176,26 @@ export default class ConvergenceConnection extends EventEmitter {
           } else {
             self.emit(ConvergenceConnection.Events.DISCONNECTED);
             self._connectionDeferred.reject(new Error("Server rejected handshake request."));
+            self._connectionDeferred = null;
           }
         }
-      }).fail(function (e: Error): void {
+      }).catch((e: Error) => {
         console.error("Handshake failed: ", e);
         self._protocolConnection.close();
         self._protocolConnection = null;
+        self._connectionDeferred = null;
         clearTimeout(self._connectionTimeoutTask);
         self.scheduleReconnect(self._reconnectInterval, reconnect);
         self.emit(ConvergenceConnection.Events.DISCONNECTED);
       });
-    }).fail(function (reason: Error): void {
+    }).catch((reason: Error) => {
       console.log("Connection failed: " + reason);
       clearTimeout(self._connectionTimeoutTask);
       if (reconnect || self._retryOnOpen) {
         self.scheduleReconnect(Math.max(self._reconnectInterval, 0), reconnect);
       } else {
         self._connectionDeferred.reject(reason);
+        self._connectionDeferred = null;
         self.emit(ConvergenceConnection.Events.DISCONNECTED);
       }
     });
@@ -208,10 +213,9 @@ export default class ConvergenceConnection extends EventEmitter {
     }
   }
 
-  disconnect(): Q.Promise<void> {
+  disconnect(): Promise<void> {
     // todo we might not need this.  refactor.
-    var deferred: Q.Deferred<void> = Q.defer<void>();
-    var self: ConvergenceConnection = this;
+    var deferred: Deferred<void> = new Deferred<void>();
 
     if (this._connectionTimeoutTask != null) {
       clearTimeout(this._connectionTimeoutTask);
@@ -224,22 +228,20 @@ export default class ConvergenceConnection extends EventEmitter {
     }
 
     if (this._connectionDeferred != null) {
-      if (this._connectionDeferred.promise.isPending()) {
-        this._connectionDeferred.reject("Connection canceled by user");
-      }
+      this._connectionDeferred.reject(new Error("Connection canceled by user"));
       this._connectionDeferred = null;
     }
 
     if (this._connectionState === ConnectionState.DISCONNECTED) {
-      deferred.reject("Connection is already disconnected.");
+      deferred.reject(new Error("Connection is already disconnected."));
     }
 
     this._connectionState = ConnectionState.DISCONNECTING;
 
-    return this._protocolConnection.close().then(function (): void {
-      self._connectionState = ConnectionState.DISCONNECTED;
-    }).fail(function (reason: Error): void {
-      self._connectionState = ConnectionState.INTERRUPTED;
+    return this._protocolConnection.close().then(() => {
+      this._connectionState = ConnectionState.DISCONNECTED;
+    }).catch((reason: Error) => {
+      this._connectionState = ConnectionState.INTERRUPTED;
     });
   }
 
@@ -251,7 +253,7 @@ export default class ConvergenceConnection extends EventEmitter {
     this._protocolConnection.send(message);
   }
 
-  request(message: OutgoingProtocolRequestMessage): Q.Promise<IncomingProtocolResponseMessage> {
+  request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
     return this._protocolConnection.request(message);
   }
 
@@ -259,9 +261,9 @@ export default class ConvergenceConnection extends EventEmitter {
    * Authenticates the user with the given username and password.
    * @param {string} username - The username of the user
    * @param {string} password - The password of the user
-   * @return {Q.Promise} A promise
+   * @return {Promise} A promise
    */
-  authenticateWithPassword(username: string, password: string): Q.Promise<void> {
+  authenticateWithPassword(username: string, password: string): Promise<void> {
     var authRequest: PasswordAuthRequest = {
       type: MessageType.AUTHENTICATE,
       method: "password",
@@ -274,9 +276,9 @@ export default class ConvergenceConnection extends EventEmitter {
   /**
    * Authenticates the user with the given username.
    * @param {string} token - The identifier of the participant
-   * @return {Q.Promise} A promise
+   * @return {Promise} A promise
    */
-  authenticateWithToken(token: string): Q.Promise<void> {
+  authenticateWithToken(token: string): Promise<void> {
     var authRequest: TokenAuthRequest = {
       type: MessageType.AUTHENTICATE,
       method: "token",
@@ -285,26 +287,26 @@ export default class ConvergenceConnection extends EventEmitter {
     return this._authenticate(authRequest);
   }
 
-  private _authenticate(authRequest: AuthRequest): Q.Promise<void> {
+  private _authenticate(authRequest: AuthRequest): Promise<void> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Q.reject<void>(new Error("User already authenticated."));
+      return Promise.reject<void>(new Error("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
     } else if (this._connectionDeferred != null) {
       var self: ConvergenceConnection = this;
       // We are connecting so defer this until after we connect.
-      return this._connectionDeferred.promise.then(function (): Q.Promise<void> {
+      return this._connectionDeferred.promise().then(function (): Promise<void> {
         return self._sendAuthRequest(authRequest);
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Q.reject<void>(new Error("Must be connected or connecting to authenticate."));
+      return Promise.reject<void>(new Error("Must be connected or connecting to authenticate."));
     }
   }
 
-  private _sendAuthRequest(authRequest: AuthRequest): Q.Promise<void> {
+  private _sendAuthRequest(authRequest: AuthRequest): Promise<void> {
     var self: ConvergenceConnection = this;
     return this.request(authRequest).then(function (response: AuthenticationResponseMessage): void {
       if (response.success === true) {

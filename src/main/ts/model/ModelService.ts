@@ -30,9 +30,9 @@ export default class ModelService extends EventEmitter {
    *            The modelId
    * @return {Q.Promise} A promise that resolves with a RealTimeModel
    */
-  open(collectionId: string, modelId: string): Q.Promise<RealTimeModel> {
+  open(collectionId: string, modelId: string): Promise<RealTimeModel> {
     // fixme not real.
-    return Q.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._connection));
+    return Promise.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._connection));
   }
 
   /**
@@ -46,8 +46,8 @@ export default class ModelService extends EventEmitter {
    *            The initial value
    * @return {Q.Promise} A Promise that resolves when the model is finished being created
    */
-  create(collectionId: string, modelId: string, data: any): Q.Promise<void> {
-    return null;
+  create(collectionId: string, modelId: string, data: any): Promise<void> {
+    return Promise.resolve();
   }
 
   /**
@@ -59,7 +59,7 @@ export default class ModelService extends EventEmitter {
    *            The id of the model to remove
    * @return {Q.Promise} A Promise that resolves when the model is finished being deleted
    */
-  remove(collectionId: string, modelId: string): Q.Promise<void> {
-    return null;
+  remove(collectionId: string, modelId: string): Promise<void> {
+    return Promise.resolve();
   }
 }

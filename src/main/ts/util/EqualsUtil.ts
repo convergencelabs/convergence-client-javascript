@@ -42,7 +42,9 @@ export default class EqualsUtil {
       }
     }
 
+    /* tslint:disable */
     for (p in x) {
+      /* tslint:enable */
       if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
         return false;
       } else if (typeof y[p] !== typeof x[p]) {

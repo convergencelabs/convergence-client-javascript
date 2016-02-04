@@ -16,6 +16,8 @@ export default class ArrayMoveReplaceOTF implements OperationTransformationFunct
         return this.transformAgainstBackwardMove(s, c);
       case MoveDirection.Identity:
         return this.transformAgainstIdentityMove(s, c);
+      default:
+        throw new Error("Invalid move direction");
     }
   }
 
@@ -32,6 +34,8 @@ export default class ArrayMoveReplaceOTF implements OperationTransformationFunct
       case RangeIndexRelationship.End:
         // A-MP-3 and A-MP-4
         return new OperationPair(s, c.copy({index: c.index - 1}));
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 
@@ -48,6 +52,8 @@ export default class ArrayMoveReplaceOTF implements OperationTransformationFunct
       case RangeIndexRelationship.Within:
         // A-MP-8 and A-MP-9
         return new OperationPair(s, c.copy({index: c.index + 1}));
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 
