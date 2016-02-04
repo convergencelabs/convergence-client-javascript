@@ -1,5 +1,6 @@
 import Debug from "../Debug";
 import EventEmitter from "../util/EventEmitter";
+import Deferred from "../util/Deferred";
 
 export default class ConvergenceSocket extends EventEmitter {
 
@@ -11,8 +12,8 @@ export default class ConvergenceSocket extends EventEmitter {
 
   private _url: string;
   private _socket: WebSocket;
-  private _openDeferred: Q.Deferred<void>;
-  private _closeDeferred: Q.Deferred<void>;
+  private _openDeferred: Deferred<void>;
+  private _closeDeferred: Deferred<void>;
 
   constructor(url: string) {
     super();
@@ -22,8 +23,8 @@ export default class ConvergenceSocket extends EventEmitter {
     this._url = tmp;
   }
 
-  open(): Q.Promise<void> {
-    this._openDeferred = Q.defer<void>();
+  open(): Promise<void> {
+    this._openDeferred = new Deferred<void>();
 
     if (this._socket && this._socket.readyState === WebSocket.CONNECTING) {
       throw new Error("Connection already in the process of opening.");
@@ -36,30 +37,30 @@ export default class ConvergenceSocket extends EventEmitter {
       this.attachToSocket(this._socket);
     }
 
-    return this._openDeferred.promise;
+    return this._openDeferred.promise();
   }
 
-  close(): Q.Promise<void> {
+  close(): Promise<void> {
     return this.doClose(true);
   }
 
-  terminate(reason: string): Q.Promise<void> {
+  terminate(reason: string): Promise<void> {
     return this.doClose(false);
   }
 
-  doClose(clean: boolean, reason?: string): Q.Promise<void> {
-    var localDeferred: Q.Deferred<void> = Q.defer<void>();
+  doClose(clean: boolean, reason?: string): Promise<void> {
+    var localDeferred: Deferred<void> = new Deferred<void>();
 
     if (!this._socket || this._socket.readyState === WebSocket.CLOSED) {
       if (Debug.flags.socketConnection) {
         console.log("Can't close a closed Web Socket.");
       }
-      localDeferred.reject("Can not call disconnect on a client that is not connected.");
+      localDeferred.reject(new Error("Can not call disconnect on a client that is not connected."));
     } else if (this._socket.readyState === WebSocket.CLOSING) {
       if (Debug.flags.socketConnection) {
         console.log("Attempted to close a WebSocket that was already closing.");
       }
-      localDeferred.reject("Connection is already closing.");
+      localDeferred.reject(new Error("Connection is already closing."));
     } else if (this._socket.readyState === WebSocket.CONNECTING) {
       if (Debug.flags.socketConnection) {
         console.log("Closing a connecting Web Socket.");
@@ -75,7 +76,7 @@ export default class ConvergenceSocket extends EventEmitter {
       this._socket.close();
       this._socket = null;
 
-      var tmp: Q.Deferred<void> = this._openDeferred;
+      var tmp: Deferred<void> = this._openDeferred;
       this._openDeferred = null;
 
       tmp.reject(new Error("Web Socket connection aborted while opening"));
@@ -108,7 +109,7 @@ export default class ConvergenceSocket extends EventEmitter {
       }
     }
 
-    return localDeferred.promise;
+    return localDeferred.promise();
   }
 
   isOpen(): boolean {
@@ -188,7 +189,7 @@ export default class ConvergenceSocket extends EventEmitter {
           if (Debug.flags.socketConnection) {
             console.log("Web Socket connection failed: ", evt);
           }
-          self._openDeferred.reject("unable to connect");
+          self._openDeferred.reject(new Error("unable to connect"));
           self._openDeferred = null;
         } else if (self._closeDeferred) {
           // if the connection deferred is no null, we MUST

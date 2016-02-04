@@ -18,6 +18,7 @@ import {IncomingProtocolNormalMessage} from "../protocol/protocol";
 import {OutgoingProtocolResponseMessage} from "../protocol/protocol";
 import OpCode from "./OpCode";
 import EventEmitter from "../util/EventEmitter";
+import Deferred from "../util/Deferred";
 
 export class ProtocolConnection extends EventEmitter {
 
@@ -56,11 +57,11 @@ export class ProtocolConnection extends EventEmitter {
     this._requests = {};
   }
 
-  connect(): Q.Promise<void> {
+  connect(): Promise<void> {
     return this._socket.open();
   }
 
-  handshake(reconnect: boolean, reconnectToken?: string, options?: any): Q.Promise<HandshakeResponse> {
+  handshake(reconnect: boolean, reconnectToken?: string, options?: any): Promise<HandshakeResponse> {
     var request: HandshakeRequest = {
       reconnect: reconnect,
       reconnectToken: reconnectToken,
@@ -102,12 +103,12 @@ export class ProtocolConnection extends EventEmitter {
     this.sendMessage(envelope);
   }
 
-  request(message: OutgoingProtocolRequestMessage): Q.Promise<IncomingProtocolResponseMessage> {
+  request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
     var self: ProtocolConnection = this;
     var requestId: number = this._nextRequestId;
     this._nextRequestId++;
 
-    var replyDeferred: Q.Deferred<IncomingProtocolResponseMessage> = Q.defer<IncomingProtocolResponseMessage>();
+    var replyDeferred: Deferred<IncomingProtocolResponseMessage> = new Deferred<IncomingProtocolResponseMessage>();
 
     var timeout: number = this._protocolConfig.defaultRequestTimeout;
     var timeoutTask: any = setTimeout(
@@ -131,7 +132,7 @@ export class ProtocolConnection extends EventEmitter {
       requestType: sent.type
     };
 
-    return replyDeferred.promise;
+    return replyDeferred.promise();
   }
 
   abort(reason: string): void {
@@ -143,7 +144,7 @@ export class ProtocolConnection extends EventEmitter {
     this.onSocketDropped();
   }
 
-  close(): Q.Promise<void> {
+  close(): Promise<void> {
     console.log("Closing connection");
     this.removeAllListenersForAllEvents();
     if (this._heartbeatHelper.started) {
@@ -253,7 +254,7 @@ export class ProtocolConnection extends EventEmitter {
 
 interface RequestRecord {
   reqId: number;
-  replyDeferred: Q.Deferred<IncomingProtocolResponseMessage>;
+  replyDeferred: Deferred<IncomingProtocolResponseMessage>;
   timeoutTask: any;
   requestType: string;
 }

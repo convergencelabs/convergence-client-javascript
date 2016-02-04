@@ -79,6 +79,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeRangeRelationship.EqualTo:
         // A-MM-FF-13
         return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
+      default:
+        throw new Error("Invalid range-range relationship");
     }
   }
 
@@ -123,6 +125,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeRangeRelationship.EqualTo:
         // A-MM-FB-13
         return new OperationPair(s.copy({fromIndex: s.fromIndex + 1}), c.copy({fromIndex: c.fromIndex - 1}));
+      default:
+        throw new Error("Invalid range-range relationship");
     }
   }
 
@@ -139,6 +143,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeIndexRelationship.End:
         // A-MM-FI-3 and A-MM-FI-4
         return new OperationPair(s, c.copy({fromIndex: c.fromIndex - 1, toIndex: c.toIndex - 1}));
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 
@@ -183,6 +189,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeRangeRelationship.EqualTo:
         // A-MM-BF-13
         return new OperationPair(s.copy({fromIndex: s.fromIndex - 1}), c.copy({fromIndex: c.fromIndex + 1}));
+      default:
+        throw new Error("Invalid range-range relationship");
     }
   }
 
@@ -227,6 +235,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeRangeRelationship.EqualTo:
         // A-MM-BB-13
         return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
+      default:
+        throw new Error("Invalid range-range relationship");
     }
   }
 
@@ -243,6 +253,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeIndexRelationship.End:
         // A-MM-BI-4
         return new OperationPair(s, c.copy({fromIndex: s.toIndex, toIndex: s.toIndex}));
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 
@@ -259,6 +271,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeIndexRelationship.End:
         // A-MM-IF-3 and A-MM-IF-4
         return new OperationPair(s.copy({fromIndex: s.fromIndex - 1, toIndex: s.toIndex - 1}), c);
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 
@@ -275,6 +289,8 @@ export default class ArrayMoveMoveOTF implements OperationTransformationFunction
       case RangeIndexRelationship.End:
         // A-MM-IB-4
         return new OperationPair(s.copy({fromIndex: c.toIndex, toIndex: c.toIndex}), c);
+      default:
+        throw new Error("Invalid range-index relationship");
     }
   }
 

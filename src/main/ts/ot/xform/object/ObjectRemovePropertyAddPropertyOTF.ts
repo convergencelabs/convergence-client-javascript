@@ -12,7 +12,7 @@ export default class ObjectRemovePropertyAddPropertyOTF
       return new OperationPair(s, c);
     } else {
       // O-RA-2
-      throw new Error("Remove property and add property can not target the same property")
+      throw new Error("Remove property and add property can not target the same property");
     }
   }
 }

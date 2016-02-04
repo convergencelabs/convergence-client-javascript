@@ -4,7 +4,6 @@ import Session from "./Session";
 import ModelService from "./model/ModelService";
 import {HandshakeResponse} from "./protocol/handhsake";
 
-
 export default class ConvergenceDomain extends EventEmitter {
 
   static Events: any = {
@@ -16,7 +15,7 @@ export default class ConvergenceDomain extends EventEmitter {
 
   private _modelService: ModelService;
   private _connection: ConvergenceConnection;
-  private _connectPromise: Q.Promise<HandshakeResponse>;
+  private _connectPromise: Promise<HandshakeResponse>;
 
   /**
    * Constructs a new ConvergenceDomain using the default options.
@@ -55,23 +54,22 @@ export default class ConvergenceDomain extends EventEmitter {
       // todo what to do?
     });
 
-
     this._modelService = new ModelService(this._connection);
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
-    }).fail<HandshakeResponse>(function (reason: Error): Q.Promise<HandshakeResponse> {
+    }).catch<HandshakeResponse>(function (reason: Error): Promise<HandshakeResponse> {
       self._connection = null;
       console.log("Error connecting to domain: " + reason);
       return this;
     });
   }
 
-  authenticateWithPassword(username: string, password: string): Q.Promise<void> {
+  authenticateWithPassword(username: string, password: string): Promise<void> {
     return this._connection.authenticateWithPassword(username, password);
   }
 
-  authenticateWithToken(token: string): Q.Promise<void> {
+  authenticateWithToken(token: string): Promise<void> {
     return this._connection.authenticateWithToken(token);
   }
 
