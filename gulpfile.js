@@ -1,37 +1,46 @@
-var gulp = require('gulp');
-var ts = require('gulp-typescript');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-const tslint = require('gulp-tslint');
+const gulp = require('gulp');
+const rename = require('gulp-rename');
+const del = require('del');
+
+const ts = require('gulp-typescript');
+const tsLint = require('gulp-tslint');
+
 const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
-var del = require('del');
 
-var sourcemaps = require('gulp-sourcemaps');
-var rollup = require('gulp-rollup');
-var rollupTypescript = require('rollup-plugin-typescript');
+const rollup = require('gulp-rollup');
+const rollupTypescript = require('rollup-plugin-typescript');
+const sourceMaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
 
 
-var tsProject = ts.createProject('tsconfig.json');
+gulp.task('default', ["build"]);
 
+/**
+ * Converts Typescript w/ ES6 modules to ES5 w/ commonjs modules using the
+ * Typescript compiler.  This builds both the main source and the test sources.
+ */
 gulp.task('build', [], function () {
+  const tsProject = ts.createProject('tsconfig.json');
   return gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
     .pipe(ts(tsProject))
     .pipe(gulp.dest("build"));
 });
 
-gulp.task('lint', function () {
-  return gulp.src('src/main/ts/**/*.ts')
-    .pipe(tslint())
-    .pipe(tslint.report('prose'));
-});
 
-gulp.task('test', ["build"], function (cb) {
+/**
+ * Test the code using the ES5 output from the build command.
+ */
+gulp.task('test', ["build"], function () {
   return gulp.src("build/test/**/*.js")
     .pipe(mocha({reporter: 'progress'}));
 });
 
-gulp.task('coverage', ["build"], function (cb) {
+
+/**
+ * Runs the tests and produces a coverage report.
+ */
+gulp.task('coverage', ["build"], function () {
   return gulp.src("build/**/*.js")
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
@@ -45,7 +54,24 @@ gulp.task('coverage', ["build"], function (cb) {
     });
 });
 
-gulp.task('dist', ["lint", "build", "test"], function () {
+
+/**
+ * Checks the code for stylistic and design errors as defined in the
+ * tslint.config file.
+ */
+gulp.task('lint', function () {
+  return gulp.src('src/main/ts/**/*.ts')
+    .pipe(tsLint())
+    .pipe(tsLint.report('prose'));
+});
+
+
+/**
+ * Creates a single file build in ES5 using RollupJS.  Both a minified and
+ * non minified version is created using UglifyJS.  The code will be linted
+ * and tested before being rolled up and minified.
+ */
+gulp.task('dist', ["lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(rollup({
       format: 'iife',
@@ -60,16 +86,13 @@ gulp.task('dist', ["lint", "build", "test"], function () {
     .pipe(rename({
       extname: '.min.js'
     }))
-    .pipe(sourcemaps.write("."))
+    .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('clean', function (cb) {
-  del([
-    'dist/',
-    "build"
-  ], cb);
+/**
+ * Removes all build artifacts.
+ */
+gulp.task('clean', function () {
+  return del(['dist/', "build"]);
 });
-
-gulp.task('default', ["build"]);
-
