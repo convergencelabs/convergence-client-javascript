@@ -11,10 +11,16 @@ export default class EventEmitter {
   }
 
   addListener(event: string, listener: Function): EventEmitter {
+    event = event.toLowerCase();
     var listeners: Function[] = this._events[event];
     if (listeners === undefined) {
       listeners = [];
       this._events[event] = listeners;
+    }
+
+    if (listeners.indexOf(listener) >= 0) {
+      // we don't add duplicates.
+      return;
     }
 
     if (listeners.length >= this._maxListeners) {
@@ -45,11 +51,13 @@ export default class EventEmitter {
   }
 
   removeAllListeners(event: string): EventEmitter {
+    event = event.toLowerCase();
     delete this._events[event];
     return this;
   }
 
   removeListener(event: string, listener: Function): EventEmitter {
+    event = event.toLowerCase();
     var listeners: Function[] = this.listeners(event);
     var index: number = listeners.indexOf(listener);
     if (index !== -1) {
@@ -64,10 +72,12 @@ export default class EventEmitter {
   }
 
   listeners(event: string): Function[] {
+    event = event.toLowerCase();
     return this._events[event] || [];
   }
 
   listenerCount(event: string): number {
+    event = event.toLowerCase();
     return this.listeners(event).length;
   }
 
@@ -80,6 +90,7 @@ export default class EventEmitter {
   }
 
   protected emit(event: string, ...args: any[]): EventEmitter {
+    event = event.toLowerCase();
     var listeners: Function[] = this.listeners(event);
     listeners.forEach(function (listener: Function): void {
       listener.apply(this, args || []);
