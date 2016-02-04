@@ -39,6 +39,11 @@ export default class EventEmitter {
     return this.addListener(event, wrapper);
   }
 
+  removeAllListenersForAllEvents(): EventEmitter {
+    this._events = {};
+    return this;
+  }
+
   removeAllListeners(event: string): EventEmitter {
     delete this._events[event];
     return this;

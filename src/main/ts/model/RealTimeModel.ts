@@ -5,6 +5,7 @@ import Session from "../Session";
 import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
 import OperationTransformer from "../ot/xform/OperationTransformer";
 import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
+import ConvergenceConnection from "../connection/ConvergenceConnection";
 
 export default class RealTimeModel extends EventEmitter {
 
@@ -13,7 +14,7 @@ export default class RealTimeModel extends EventEmitter {
   /**
    * Constructs a new RealTimeModel.
    */
-  constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _session: Session) {
+  constructor(private _modelFqn: ModelFqn, private _data: RealTimeObject, private _connection: ConvergenceConnection) {
     super();
     var xformer = new OperationTransformer(new TransformationFunctionRegistry());
     // fixme
@@ -49,6 +50,6 @@ export default class RealTimeModel extends EventEmitter {
    * @return {convergence.Session} The users session.
    */
   session(): Session {
-    return this._session;
+    return this._connection.session();
   }
 }

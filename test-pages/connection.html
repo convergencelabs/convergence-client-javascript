@@ -5,18 +5,15 @@
     <title>Title</title>
 </head>
 <body>
-<script src="../build/convergence-client.js"></script>
+<script src="../dist/convergence-client.min.js"></script>
 <script src="../bower_components/q/q.js"></script>
 <script type="text/javascript">
-
     var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
-
     domain.authenticateWithPassword("test1", "pa1ssword").then(function(username) {
         console.log("success");
     }).fail(function(reason) {
         console.log("error");
-    })
-
+    });
 </script>
 </body>
 </html>

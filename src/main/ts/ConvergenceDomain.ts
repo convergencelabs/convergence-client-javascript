@@ -1,24 +1,21 @@
 import EventEmitter from "./util/EventEmitter";
 import ConvergenceConnection from "./connection/ConvergenceConnection";
-import SessionImpl from "./SessionImpl";
-import MessageType from "./protocol/MessageType";
-import {TokenAuthRequest} from "./protocol/authentication";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
-import {IncomingProtocolNormalMessage} from "./protocol/protocol";
-import {IncomingProtocolRequestMessage} from "./protocol/protocol";
 import {HandshakeResponse} from "./protocol/handhsake";
-import {PasswordAuthRequest} from "./protocol/authentication";
-import {AuthRequest} from "./protocol/authentication";
-import {AuthenticationResponseMessage} from "./protocol/authentication";
-import ConvergenceConnectionListener from "./connection/ConvergenceConnection";
-import {ReplyCallback} from "./connection/ProtocolConnection";
+
 
 export default class ConvergenceDomain extends EventEmitter {
 
+  static Events: any = {
+    CONNECTED: "connected",
+    INTERRUPTED: "interrupted",
+    RECONNECTED: "reconnected",
+    DISCONNECTED: "disconnected"
+  };
+
   private _modelService: ModelService;
   private _connection: ConvergenceConnection;
-  private _session: SessionImpl;
   private _connectPromise: Q.Promise<HandshakeResponse>;
 
   /**
@@ -30,44 +27,38 @@ export default class ConvergenceDomain extends EventEmitter {
   constructor(url: string) {
     super();
 
+    var self: ConvergenceDomain = this;
+
     // todo make this optional params
     this._connection = new ConvergenceConnection(
       url,
       5, // connection timeout in seconds
       -1, // max retries,
       1, // reconnection interval in seconds
-      true, // retry on open
-      {
-        onConnected: function (): void {
-          // todo
-        },
-        onInterrupted: function (): void {
-          // todo
-        },
-        onReconnected: function (): void {
-          // todo
-        },
-        onDisconnected: function (): void {
-          // todo
-        },
-        onError: function (error: string): void {
-          // todo
-        },
-        onMessage: function (message: IncomingProtocolNormalMessage): void {
-          // todo
-        },
-        onRequest: function (message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void {
-          // todo
-        }
-      }
+      true,
+      this
     );
 
-    this._session = new SessionImpl(this, this._connection, null, null);
-    this._modelService = new ModelService(this._session);
+    this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
+      this.emit(ConvergenceDomain.Events.CONNECTED));
 
-    var self: ConvergenceDomain = this;
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
+      this.emit(ConvergenceDomain.Events.INTERRUPTED));
+
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
+      this.emit(ConvergenceDomain.Events.DISCONNECTED));
+
+    this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
+      this.emit(ConvergenceDomain.Events.RECONNECTED));
+
+    this._connection.on(ConvergenceConnection.Events.ERROR, () => {
+      // todo what to do?
+    });
+
+
+    this._modelService = new ModelService(this._connection);
+
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
-      self._session.setSessionId(response.clientId);
       return response;
     }).fail<HandshakeResponse>(function (reason: Error): Q.Promise<HandshakeResponse> {
       self._connection = null;
@@ -76,47 +67,24 @@ export default class ConvergenceDomain extends EventEmitter {
     });
   }
 
-  /**
-   * Authenticates the user with the given username and password.
-   * @param {string} username - The username of the user
-   * @param {string} password - The password of the user
-   * @return {Q.Promise} A promise
-   */
   authenticateWithPassword(username: string, password: string): Q.Promise<void> {
-    var authRequest: PasswordAuthRequest = {
-      type: MessageType.AUTHENTICATE,
-      method: "password",
-      username: username,
-      password: password
-    };
-    return this._authenticate(authRequest);
+    return this._connection.authenticateWithPassword(username, password);
   }
 
-  /**
-   * Authenticates the user with the given username.
-   * @param {string} token - The identifier of the participant
-   * @return {Q.Promise} A promise
-   */
   authenticateWithToken(token: string): Q.Promise<void> {
-    var authRequest: TokenAuthRequest = {
-      type: MessageType.AUTHENTICATE,
-      method: "token",
-      token: token
-    };
-    return this._authenticate(authRequest);
+    return this._connection.authenticateWithToken(token);
   }
 
   isAuthenticated(): boolean {
-    return false;
+    return this._connection.session().isAuthenticated();
   }
 
   /**
    * Gets the session of the connected user.
-   * @return {convergence.Session} The users session.
+   * @return The users session.
    */
   session(): Session {
-    // TODO: implement this
-    return null;
+    return this._connection.session();
   }
 
   /**
@@ -140,45 +108,4 @@ export default class ConvergenceDomain extends EventEmitter {
   isDisposed(): boolean {
     return this._connection === undefined;
   }
-
-  private _authenticate(authRequest: AuthRequest): Q.Promise<void> {
-    if (this._session.isAuthenticated()) {
-      // The user is only allowed to authenticate once.
-      return Q.reject<void>(new Error("User already authenticated."));
-    } else if (this._connection.isConnected()) {
-      // We are connected already so we can just send the request.
-      return this.sendAuthRequest(authRequest);
-    } else if (this._connectPromise != null) {
-      var self: ConvergenceDomain = this;
-      // We are connecting so defer this until after we connect.
-      return this._connectPromise.then(function (): Q.Promise<void> {
-        return self.sendAuthRequest(authRequest);
-      });
-    } else {
-      // We are not connecting and are not trying to connect.
-      return Q.reject<void>(new Error("Must be connected or connecting to authenticate."));
-    }
-  }
-
-  private sendAuthRequest(authRequest: AuthRequest): Q.Promise<void> {
-    var self: ConvergenceDomain = this;
-    return this._connection.request(authRequest).then(function (response: AuthenticationResponseMessage): void {
-      if (response.success === true) {
-        self._session.setUsername(response.username);
-        return;
-      } else {
-        throw new Error("Authentication failed");
-      }
-    });
-  }
-}
-
-export interface ConnectionListener extends ConvergenceConnectionListener {
-  onConnected(): void;
-  onInterrupted(): void;
-  onReconnected(): void;
-  onDisconnected(): void;
-  onError(error: string): void;
-  onMessage(message: IncomingProtocolNormalMessage): void;
-  onRequest(message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void;
 }

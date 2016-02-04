@@ -8,12 +8,14 @@ export default class SessionImpl implements Session {
   private _connection: ConvergenceConnection;
   private _sessionId: string;
   private _userame: string;
+  private _authenticated: boolean;
 
   constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
     this._domain = domain;
     this._sessionId = sessionId;
     this._userame = username;
     this._connection = connection;
+    this._authenticated = false;
   }
 
   /**
@@ -52,10 +54,14 @@ export default class SessionImpl implements Session {
     return this._connection.isConnected();
   }
 
+  setAuthenticated(authenticated: boolean): void {
+    this._authenticated = authenticated;
+  }
+
   /**
    * @return True if the client is authenticated
    */
   isAuthenticated(): boolean {
-    return this._domain.isAuthenticated();
+    return this._authenticated;
   }
 }

@@ -17,38 +17,42 @@ import {IncomingProtocolRequestMessage} from "../protocol/protocol";
 import {IncomingProtocolNormalMessage} from "../protocol/protocol";
 import {OutgoingProtocolResponseMessage} from "../protocol/protocol";
 import OpCode from "./OpCode";
+import EventEmitter from "../util/EventEmitter";
 
-export class ProtocolConnection {
+export class ProtocolConnection extends EventEmitter {
+
+  static Events: any = {
+    MESSAGE: "message",
+    ERROR: "error",
+    CLOSED: "close",
+    DROPPED: "dropped"
+  };
 
   private _heartbeatHelper: HeartbeatHelper;
   private _socket: ConvergenceSocket;
   private _protocolConfig: ProtocolConfiguration;
   private _nextRequestId: number = 0;
   private _requests: any;
-  private _eventHandler: ProtocolEventHandler;
 
-  constructor(socket: ConvergenceSocket,
-              protocolConfig: ProtocolConfiguration,
-              eventHandler: ProtocolEventHandler) {
-
+  constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
+    super();
     var self: ProtocolConnection = this;
 
     this._protocolConfig = protocolConfig;
     this._socket = socket;
 
-    this._socket.listener = {
-      onMessage(message: any): void {
-        self.onSocketMessage(message);
-      },
-      onError(error: string): void {
-        self.onSocketError(error);
-      },
-      onClose(reason: string): void {
-        self.onSocketClosed(reason);
-      }
-    };
+    this._socket.on(ConvergenceSocket.Events.MESSAGE, (message: any) => {
+      self.onSocketMessage(message);
+    });
 
-    this._eventHandler = eventHandler;
+    this._socket.on(ConvergenceSocket.Events.ERROR, (error: string) => {
+      self.onSocketError(error);
+    });
+
+    this._socket.on(ConvergenceSocket.Events.CLOSE, (reason: string) => {
+      self.onSocketClosed(reason);
+    });
+
     this._requests = {};
   }
 
@@ -141,7 +145,7 @@ export class ProtocolConnection {
 
   close(): Q.Promise<void> {
     console.log("Closing connection");
-    this._eventHandler = null;
+    this.removeAllListenersForAllEvents();
     if (this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -180,12 +184,10 @@ export class ProtocolConnection {
   }
 
   private onSocketClosed(reason: string): void {
-    console.log("Socket closed: " + reason);
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-
-    this._eventHandler.onConnectionClosed();
+    this.emit(ProtocolConnection.Events.CLOSED, reason);
   }
 
   private onSocketDropped(): void {
@@ -193,22 +195,28 @@ export class ProtocolConnection {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-    this._eventHandler.onConnectionDropped();
+    this.emit(ProtocolConnection.Events.DROPPED);
   }
 
   private onSocketError(error: string): void {
-    // logger.debug("Socket error");
-    this._eventHandler.onConnectionError(error);
+    this.emit(ProtocolConnection.Events.ERROR, error);
   }
 
   private onNormalMessage(envelope: any): void {
     var message: ProtocolMessage = MessageSerializer.deserialize(envelope.body, envelope.type);
-    this._eventHandler.onMessageMessage(message);
+    this.emit(ProtocolConnection.Events.MESSAGE, {
+      request: false,
+      message: message
+    });
   }
 
   private onRequest(envelope: MessageEnvelope): void {
     var message: ProtocolMessage = MessageSerializer.deserialize(envelope.body, envelope.type);
-    this._eventHandler.onRequestReceived(message, new ReplyCallbackImpl(envelope.reqId, this));
+    this.emit(ProtocolConnection.Events.MESSAGE, {
+      request: true,
+      callback: new ReplyCallbackImpl(envelope.reqId, this),
+      message: message
+    });
   }
 
   private onReply(envelope: MessageEnvelope): void {
@@ -239,7 +247,7 @@ export class ProtocolConnection {
   private handleInvalidMessage(error: string): void {
     console.error(error);
     this.abort(error);
-    this._eventHandler.onConnectionError(error);
+    this.emit(ProtocolConnection.Events.ERROR, error);
   }
 }
 

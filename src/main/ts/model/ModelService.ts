@@ -2,13 +2,14 @@ import EventEmitter from "../util/EventEmitter";
 import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
+import ConvergenceConnection from "../connection/ConvergenceConnection";
 
 export default class ModelService extends EventEmitter {
 
   /**
    * Constructs a new ModelService.
    */
-  constructor(private _session: Session) {
+  constructor(private _connection: ConvergenceConnection) {
     super();
   }
 
@@ -17,7 +18,7 @@ export default class ModelService extends EventEmitter {
    * @return {Session} The users session.
    */
   get session(): Session {
-    return this._session;
+    return this._connection.session();
   }
 
   /**
@@ -31,7 +32,7 @@ export default class ModelService extends EventEmitter {
    */
   open(collectionId: string, modelId: string): Q.Promise<RealTimeModel> {
     // fixme not real.
-    return Q.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._session));
+    return Q.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._connection));
   }
 
   /**

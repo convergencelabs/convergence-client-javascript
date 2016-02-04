@@ -1,23 +1,25 @@
-import ConvergenceSocketListener from "./ConvergenceSocketListener";
 import Debug from "../Debug";
+import EventEmitter from "../util/EventEmitter";
 
-export default class ConvergenceSocket {
+export default class ConvergenceSocket extends EventEmitter {
 
-  private _listener: ConvergenceSocketListener;
+  static Events: any = {
+    MESSAGE: "message",
+    ERROR: "error",
+    CLOSE: "close"
+  };
+
   private _url: string;
   private _socket: WebSocket;
   private _openDeferred: Q.Deferred<void>;
   private _closeDeferred: Q.Deferred<void>;
 
   constructor(url: string) {
+    super();
     var tmp: string = url;
     tmp = tmp.replace(/https:/i, "wss:");
     tmp = tmp.replace(/http:/i, "ws:");
     this._url = tmp;
-  }
-
-  onMessageReceived(encodedMessage: string): void {
-    // fixme
   }
 
   open(): Q.Promise<void> {
@@ -135,7 +137,7 @@ export default class ConvergenceSocket {
     socket.onmessage = function (evt: MessageEvent): void {
       try {
         console.log(evt.data);
-        self.fireOnMessage(JSON.parse(evt.data));
+        self.emit(ConvergenceSocket.Events.MESSAGE, JSON.parse(evt.data));
       } catch (e) {
         console.error("Error processing Web Socket Message.", e);
       }
@@ -154,11 +156,11 @@ export default class ConvergenceSocket {
         self._openDeferred = null;
       } else {
         // TODO what else to do here?
-        self.fireOnError("Received onOpen event while in state: " + self._socket.readyState);
+        self.emit(ConvergenceSocket.Events.ERROR, "Received onOpen event while in state: " + self._socket.readyState);
       }
     };
 
-    socket.onerror = function (evt: Event): void {
+    socket.onerror = function (evt: any): void {
       if (self._socket.readyState === WebSocket.CONNECTING) {
         // We don't want to handle errors during connection here, because
         // the close event will give us more information.
@@ -167,7 +169,7 @@ export default class ConvergenceSocket {
         }
         try {
           // fixme get the error protocol
-          self.fireOnError("error");
+          self.emit(ConvergenceSocket.Events.ERROR, evt.data);
         } catch (e) {
           console.error("Error handling WebSocket error.", e);
         }
@@ -203,7 +205,7 @@ export default class ConvergenceSocket {
           if (Debug.flags.socketConnection) {
             console.log("Web Socket connection unexpectedly closed: ", evt);
           }
-          self.fireOnClose("unexpected Web Socket closure.");
+          self.emit(ConvergenceSocket.Events.CLOSE, "unexpected Web Socket closure.");
         }
       } catch (e) {
         console.error("Error handling web socket close event.", e);
@@ -213,30 +215,5 @@ export default class ConvergenceSocket {
 
   get url(): string {
     return this._url;
-  }
-
-  //
-  // Events
-  //
-  set listener(listener: ConvergenceSocketListener) {
-    this._listener = listener;
-  }
-
-  protected fireOnError(error: string): void {
-    if (this._listener) {
-      this._listener.onError(error);
-    }
-  }
-
-  protected fireOnClose(reason: string): void {
-    if (this._listener) {
-      this._listener.onClose(reason);
-    }
-  }
-
-  protected fireOnMessage(message: any): void {
-    if (this._listener) {
-      this._listener.onMessage(message);
-    }
   }
 }
