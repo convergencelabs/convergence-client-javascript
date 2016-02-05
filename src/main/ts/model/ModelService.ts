@@ -9,6 +9,7 @@ import MessageType from "../protocol/MessageType";
 import OperationTransformer from "../ot/xform/OperationTransformer";
 import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
 import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
+import {CreateRealTimeModelRequest} from "../protocol/model/createRealtimeModel";
 
 
 export default class ModelService extends EventEmitter {
@@ -39,8 +40,9 @@ export default class ModelService extends EventEmitter {
    */
   open(collectionId: string, modelId: string): Promise<RealTimeModel> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    var request: OpenRealTimeModelRequest = <OpenRealTimeModelRequest>{
+    var request: OpenRealTimeModelRequest = {
       modelFqn: fqn,
+      initializerProvided: false,
       type: MessageType.OPEN_REAL_TIME_MODEL
     };
 
@@ -73,7 +75,16 @@ export default class ModelService extends EventEmitter {
    * @return {Q.Promise} A Promise that resolves when the model is finished being created
    */
   create(collectionId: string, modelId: string, data: any): Promise<void> {
-    return Promise.resolve();
+    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    var request: CreateRealTimeModelRequest = {
+      modelFqn: fqn,
+      data: data,
+      type: MessageType.CREATE_REAL_TIME_MODEL
+    };
+
+    return this._connection.request(request).then(() => {
+      // convert to void
+    });
   }
 
   /**

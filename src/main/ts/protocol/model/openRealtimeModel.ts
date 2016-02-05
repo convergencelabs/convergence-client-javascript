@@ -6,6 +6,7 @@ import MessageType from "../MessageType";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
+  initializerProvided: boolean;
 }
 
 export class OpenRealTimeModelRequestSerializer {
@@ -14,7 +15,8 @@ export class OpenRealTimeModelRequestSerializer {
       fqn: {
         cId: request.modelFqn.collectionId,
         mId: request.modelFqn.modelId
-      }
+      },
+      init: request.initializerProvided
     };
   }
 }

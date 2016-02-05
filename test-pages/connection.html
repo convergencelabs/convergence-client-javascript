@@ -11,9 +11,12 @@
     var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
     domain.authenticateWithPassword("test1", "password").then(function(username) {
         console.log("Auth success");
+        return domain.modelService().create("foo", "bar", {num: 10});
+    }).then(function() {
+        console.log("create success");
         return domain.modelService().open("foo", "bar");
     }).then(function(model) {
-        console.log("open success");
+        console.log("open success: " + model.data().value());
     }).catch(function(reason) {
         console.log(" error: " + reason);
     });

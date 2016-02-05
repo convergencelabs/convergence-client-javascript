@@ -13,6 +13,8 @@ import {AuthRequest} from "./authentication";
 import {OpenRealTimeModelRequest} from "./model/openRealtimeModel";
 import {OpenRealTimeModelResponseMessageDeserializer} from "./model/openRealtimeModel";
 import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
+import {CreateRealTimeModelRequestSerializer} from "./model/createRealtimeModel";
+import {CreateRealTimeModelRequest} from "./model/createRealtimeModel";
 
 export class MessageSerializer {
 
@@ -26,6 +28,12 @@ export class MessageSerializer {
         return AuthenticationResponseDeserializer.deserialize(body);
       case MessageType.OPEN_REAL_TIME_MODEL:
         return OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
+      case MessageType.CREATE_REAL_TIME_MODEL:
+        // These messages don't have any message that comes back.  Basically,
+        // this is a success message.
+        return {
+          type: type
+        };
       default:
         throw new Error("Unexpected protocol type: " + type);
     }
@@ -42,6 +50,8 @@ export class MessageSerializer {
         return AuthRequestSerializer.serialize(<AuthRequest>body);
       case MessageType.OPEN_REAL_TIME_MODEL:
         return OpenRealTimeModelRequestSerializer.serialize(<OpenRealTimeModelRequest>body);
+      case MessageType.CREATE_REAL_TIME_MODEL:
+        return CreateRealTimeModelRequestSerializer.serialize(<CreateRealTimeModelRequest>body);
       default:
         throw new Error("Unexpected protocol type: " + type);
     }

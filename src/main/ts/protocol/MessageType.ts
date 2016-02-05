@@ -4,5 +4,5 @@ export default class MessageType {
   static AUTHENTICATE: string = "authenticate";
 
   static OPEN_REAL_TIME_MODEL: string = "openRealTimeModel";
+  static CREATE_REAL_TIME_MODEL: string = "createRealTimeModel";
 }
-
