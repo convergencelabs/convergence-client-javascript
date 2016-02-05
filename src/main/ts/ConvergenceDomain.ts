@@ -10,7 +10,8 @@ export default class ConvergenceDomain extends EventEmitter {
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
-    DISCONNECTED: "disconnected"
+    DISCONNECTED: "disconnected",
+    ERROR: "error"
   };
 
   private _modelService: ModelService;
@@ -50,8 +51,8 @@ export default class ConvergenceDomain extends EventEmitter {
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
       this.emit(ConvergenceDomain.Events.RECONNECTED));
 
-    this._connection.on(ConvergenceConnection.Events.ERROR, () => {
-      // todo what to do?
+    this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
+      this.emit(ConvergenceDomain.Events.ERROR, error);
     });
 
     this._modelService = new ModelService(this._connection);
