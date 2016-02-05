@@ -3,10 +3,7 @@ import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";
 import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
-import OperationTransformer from "../ot/xform/OperationTransformer";
-import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
-import RealTimeValueFactory from "./RealTimeValueFactory";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import UnprocessedOperationEvent from "../ot/UnprocessedOperationEvent";
 import ProcessedOperationEvent from "../ot/ProcessedOperationEvent";
@@ -71,7 +68,7 @@ export default class RealTimeModel extends EventEmitter {
   }
 
   close(): void {
-    //TODO: Implement Close
+    // todo: Implement Close
   };
 
   beginCompoundOperation(): void {
@@ -89,11 +86,11 @@ export default class RealTimeModel extends EventEmitter {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
-  _handleMessage(message) {
+  _handleMessage(message: any): void {
     // Handle Messages
   }
 
-  _processOperationEvent(operationEvent: ProcessedOperationEvent) {
+  _processOperationEvent(operationEvent: ProcessedOperationEvent): void {
 
     var operation: Operation = operationEvent.operation;
     var clientId: string = operationEvent.clientId;
@@ -111,7 +108,8 @@ export default class RealTimeModel extends EventEmitter {
         this._value._handleIncomingOperation(modelEvent);
       });
     } else {
-      var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
+      var modelEvent: ModelOperationEvent =
+        new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
       this._value._handleIncomingOperation(modelEvent);
     }
 
