@@ -3,6 +3,8 @@ import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {OpenRealTimeModelRequest} from "../protocol/model/openRealtimeModel";
+import {OpenRealTimeModelResponse} from "../protocol/model/openRealtimeModel";
 
 export default class ModelService extends EventEmitter {
 
@@ -28,11 +30,18 @@ export default class ModelService extends EventEmitter {
    *            The collectionId of the model
    * @param {string} modelId
    *            The modelId
-   * @return {Q.Promise} A promise that resolves with a RealTimeModel
+   * @return {Promise} A promise that resolves with a RealTimeModel
    */
   open(collectionId: string, modelId: string): Promise<RealTimeModel> {
-    // fixme not real.
-    return Promise.resolve(new RealTimeModel(new ModelFqn(collectionId, modelId), null, this._connection));
+    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    var request: OpenRealTimeModelRequest = <OpenRealTimeModelRequest>{
+      modelFqn: fqn
+    };
+
+    return this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
+      // fixme, the model needs more stuff in the constructor.
+      return new RealTimeModel(fqn, response.data, this._connection);
+    });
   }
 
   /**
