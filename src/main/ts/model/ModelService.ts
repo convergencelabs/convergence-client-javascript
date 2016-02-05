@@ -5,6 +5,7 @@ import ModelFqn from "./ModelFqn";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../protocol/model/openRealtimeModel";
 import {OpenRealTimeModelResponse} from "../protocol/model/openRealtimeModel";
+import MessageType from "../protocol/MessageType";
 
 export default class ModelService extends EventEmitter {
 
@@ -35,7 +36,8 @@ export default class ModelService extends EventEmitter {
   open(collectionId: string, modelId: string): Promise<RealTimeModel> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var request: OpenRealTimeModelRequest = <OpenRealTimeModelRequest>{
-      modelFqn: fqn
+      modelFqn: fqn,
+      type: MessageType.OPEN_REAL_TIME_MODEL
     };
 
     return this._connection.request(request).then((response: OpenRealTimeModelResponse) => {

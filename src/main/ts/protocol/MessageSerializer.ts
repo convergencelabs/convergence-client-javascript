@@ -10,6 +10,9 @@ import {AuthRequestSerializer} from "./authentication";
 import {ErrorMessage} from "./ErrorMessage";
 import {HandshakeRequest} from "./handhsake";
 import {AuthRequest} from "./authentication";
+import {OpenRealTimeModelRequest} from "./model/openRealtimeModel";
+import {OpenRealTimeModelResponseMessageDeserializer} from "./model/openRealtimeModel";
+import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
 
 export class MessageSerializer {
 
@@ -21,6 +24,8 @@ export class MessageSerializer {
         return HandshakeResponseDeserializer.deserialize(body);
       case MessageType.AUTHENTICATE:
         return AuthenticationResponseDeserializer.deserialize(body);
+      case MessageType.OPEN_REAL_TIME_MODEL:
+        return OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
       default:
         throw new Error("Unexpected protocol type: " + type);
     }
@@ -35,6 +40,8 @@ export class MessageSerializer {
         return HandshakeRequestSerializer.serialize(<HandshakeRequest>body);
       case MessageType.AUTHENTICATE:
         return AuthRequestSerializer.serialize(<AuthRequest>body);
+      case MessageType.OPEN_REAL_TIME_MODEL:
+        return OpenRealTimeModelRequestSerializer.serialize(<OpenRealTimeModelRequest>body);
       default:
         throw new Error("Unexpected protocol type: " + type);
     }
