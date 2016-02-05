@@ -11,7 +11,10 @@ export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage
 export class OpenRealTimeModelRequestSerializer {
   static serialize(request: OpenRealTimeModelRequest): any {
     return {
-      fqn: request.modelFqn
+      fqn: {
+        cId: request.modelFqn.collectionId,
+        mId: request.modelFqn.modelId
+      }
     };
   }
 }
