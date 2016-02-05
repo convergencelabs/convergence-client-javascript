@@ -6,6 +6,10 @@ import ConvergenceConnection from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../protocol/model/openRealtimeModel";
 import {OpenRealTimeModelResponse} from "../protocol/model/openRealtimeModel";
 import MessageType from "../protocol/MessageType";
+import OperationTransformer from "../ot/xform/OperationTransformer";
+import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
+import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
+
 
 export default class ModelService extends EventEmitter {
 
@@ -41,8 +45,19 @@ export default class ModelService extends EventEmitter {
     };
 
     return this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
-      // fixme, the model needs more stuff in the constructor.
-      return new RealTimeModel(fqn, response.data, this._connection);
+      var transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
+      // todo: Is unapplied operation still relevent???
+      var clientConcurrencyControl: ClientConcurrencyControl =
+        new ClientConcurrencyControl(this.session.getSessionId(), response.version, [], transformer);
+      var model: RealTimeModel = new RealTimeModel(
+        response.data,
+        response.version,
+        new Date(response.createdTime),
+        new Date(response.modifiedTime),
+        fqn,
+        clientConcurrencyControl,
+        this._connection);
+      return model;
     });
   }
 

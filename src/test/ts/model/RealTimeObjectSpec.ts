@@ -6,8 +6,6 @@ import ObjectSetEvent from "../../../main/ts/model/events/ObjectSetEvent";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
-import "sinon-chai";
-
 import SinonSpy = Sinon.SinonSpy;
 
 var expect: any = chai.expect;
@@ -18,11 +16,6 @@ describe('RealTimeObject', () => {
   var username: string = "myUser";
   var version: number = 1;
   var timestamp: number = 100;
-
-  var lastEvent: ModelChangeEvent = null;
-  var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
-    lastEvent = event;
-  };
 
   it('Value is correct after creation', () => {
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
@@ -62,16 +55,16 @@ describe('RealTimeObject', () => {
   });
 
   it('Correct Event is fired after ObjectSetOperation', () => {
-    lastEvent = null;
+    var eventCallback: SinonSpy = sinon.spy();
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
-    myObject.on("Set", lastEventCallback);
+    myObject.on("Set", eventCallback);
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myObject._handleIncomingOperation(incomingEvent);
 
     var expectedEvent: ObjectSetEvent = new ObjectSetEvent(sessionId, username, version, timestamp, myObject, {"string": "test"});
-    expect(lastEvent).to.deep.equal(expectedEvent);
+    expect(eventCallback.lastCall.args[0]).to.deep.equal(expectedEvent);
   });
 
 });
