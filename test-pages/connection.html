@@ -8,19 +8,21 @@
 <script src="../node_modules/es6-promise-polyfill/promise.js"></script>
 <script src="../dist/convergence-client.min.js"></script>
 <script type="text/javascript">
+    var modelId = new Date().getTime();
     var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
     domain.authenticateWithPassword("test1", "password").then(function(username) {
         console.log("Auth success");
-        return domain.modelService().create("foo", "bar", {num: 10});
+        return domain.modelService().create("foo", modelId, {num: 10});
     }).then(function() {
         console.log("create success");
-        return domain.modelService().open("foo", "bar");
+        return domain.modelService().open("foo", modelId);
     }).then(function(model) {
         console.log("open success: " + model.data().value());
         model.on("closed", function(reason) {
            console.log("mode closed: " + reason);
         });
-        return domain.modelService().remove("foo", "bar");
+        //return domain.modelService().remove("foo", "bar");
+        return model.close();
     }).then(function() {
         console.log("remove success" );
     }).catch(function(reason) {

@@ -13,6 +13,7 @@ import {CreateRealTimeModelRequest} from "../protocol/model/createRealtimeModel"
 import {DeleteRealTimeModelRequest} from "../protocol/model/deleteRealtimeModel";
 import Deferred from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
+import {CloseRealTimeModelRequest} from "../protocol/model/closeRealtimeModel";
 
 
 export default class ModelService extends EventEmitter {
@@ -69,13 +70,16 @@ export default class ModelService extends EventEmitter {
       var clientConcurrencyControl: ClientConcurrencyControl =
         new ClientConcurrencyControl(this._connection.session().getSessionId(), response.version, transformer);
       var model: RealTimeModel = new RealTimeModel(
+        response.resourceId,
         response.data,
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),
         fqn,
         clientConcurrencyControl,
-        this._connection);
+        this._connection,
+        this
+      );
 
       this._openModelsByFqn[k] = model;
       this._openModelsByRid[response.resourceId] = model;
@@ -113,6 +117,17 @@ export default class ModelService extends EventEmitter {
     var request: DeleteRealTimeModelRequest = {
       modelFqn: fqn,
       type: MessageType.DELETE_REAL_TIME_MODEL
+    };
+
+    return this._connection.request(request).then(() => {
+      // convert to void
+    });
+  }
+
+  _close(resourceId: string): Promise<void> {
+    var request: CloseRealTimeModelRequest = {
+      resourceId: resourceId,
+      type: MessageType.CLOSE_REAL_TIME_MODEL
     };
 
     return this._connection.request(request).then(() => {

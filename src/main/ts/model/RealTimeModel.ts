@@ -13,6 +13,7 @@ import Operation from "../ot/ops/Operation";
 import MessageType from "../protocol/MessageType";
 import {ForceCloseRealTimeModel} from "../protocol/model/forceCloseRealtimeModel";
 import {MessageEvent} from "../connection/ConvergenceConnection";
+import ModelService from "./ModelService";
 
 export default class RealTimeModel extends EventEmitter {
 
@@ -27,20 +28,22 @@ export default class RealTimeModel extends EventEmitter {
   /**
    * Constructs a new RealTimeModel.
    */
-  constructor(data: Object,
+  constructor(private _resourceId: string,
+              _data: Object,
               private _version: number,
               private _createdTime: Date,
               private _modifiedTime: Date,
               private _modelFqn: ModelFqn,
               private _concurrencyControl: ClientConcurrencyControl,
-              private _connection: ConvergenceConnection) {
+              private _connection: ConvergenceConnection,
+              private _modelService: ModelService) {
     super();
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this.emit(RealTimeModel.Events.COMMIT_STATE_CHANGED, committed);
     });
 
-    this._value = new RealTimeObject(data, null, null, (operation: DiscreteOperation) => {
+    this._value = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
       var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
       if (opEvent) {
         // this._connection.send()
@@ -76,8 +79,10 @@ export default class RealTimeModel extends EventEmitter {
     return this._connection.session();
   }
 
-  close(): void {
-    this._close(true);
+  close(): Promise<void> {
+    return this._modelService._close(this._resourceId).then(() => {
+      this.emit(RealTimeModel.Events.CLOSED);
+    });
   }
 
   beginCompoundOperation(): void {
@@ -95,10 +100,6 @@ export default class RealTimeModel extends EventEmitter {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
-  private _close(local: boolean, reason?: string): void {
-    this.emit(RealTimeModel.Events.CLOSED, reason);
-  }
-
   _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
       case MessageType.FORCE_CLOSE_REAL_TIME_MODEL:
@@ -113,7 +114,7 @@ export default class RealTimeModel extends EventEmitter {
   }
 
   private _handleForceClose(message: ForceCloseRealTimeModel): void {
-    this._close(false, message.reason);
+    this.emit(RealTimeModel.Events.CLOSED, message.reason);
   }
 
   private _handleRemoteOperation(message: any): void {
