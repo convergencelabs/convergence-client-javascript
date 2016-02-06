@@ -12,15 +12,30 @@ import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
 import {CreateRealTimeModelRequest} from "../protocol/model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "../protocol/model/deleteRealtimeModel";
 import Deferred from "../util/Deferred";
+import {MessageEvent} from "../connection/ConvergenceConnection";
 
 
 export default class ModelService extends EventEmitter {
 
   private _openRequests: { [key: string]: OpenRequest; } = {};
-  private _openModels: { [key: string]: RealTimeModel; } = {};
+  private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};
+  private _openModelsByRid: { [key: string]: RealTimeModel; } = {};
 
   constructor(private _connection: ConvergenceConnection) {
     super();
+
+    this._connection.addMultipleMessageListener(
+      [MessageType.FORCE_CLOSE_REAL_TIME_MODEL],
+      (message: MessageEvent) => this._handleMessage(message));
+  }
+
+  private _handleMessage(messageEvent: MessageEvent): void {
+    var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+    if (model !== undefined) {
+      model._handleMessage(messageEvent);
+    } else {
+      // todo erro.
+    }
   }
 
   session(): Session {
@@ -31,7 +46,7 @@ export default class ModelService extends EventEmitter {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var k: string = ModelService._createModelKey(fqn);
 
-    var openModel: RealTimeModel = this._openModels[k];
+    var openModel: RealTimeModel = this._openModelsByFqn[k];
     if (openModel !== undefined) {
       return Promise.resolve(openModel);
     }
@@ -62,7 +77,8 @@ export default class ModelService extends EventEmitter {
         clientConcurrencyControl,
         this._connection);
 
-      this._openModels[k] = model;
+      this._openModelsByFqn[k] = model;
+      this._openModelsByRid[response.resourceId] = model;
       delete this._openRequests[k];
 
       deferred.resolve(model);
@@ -93,17 +109,6 @@ export default class ModelService extends EventEmitter {
 
   remove(collectionId: string, modelId: string): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    var k: string = ModelService._createModelKey(fqn);
-
-    var openModel: RealTimeModel = this._openModels[k];
-    if (openModel !== undefined) {
-       openModel.close();
-    }
-
-    var openRequest: OpenRequest = this._openRequests[k];
-    if (openRequest !== undefined) {
-      openRequest.deferred.reject(new Error("Model deleted by this client while opening."));
-    }
 
     var request: DeleteRealTimeModelRequest = {
       modelFqn: fqn,

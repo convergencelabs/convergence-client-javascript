@@ -9,9 +9,9 @@ import OperationPair from "./xform/OperationPair";
 
 export default class ClientConcurrencyControl extends EventEmitter {
 
-  static get CommitState(): string {
-    return "commitState";
-  }
+  static Events: any = {
+    COMMIT_STATE_CHANGED: "commitStateChanged"
+  };
 
   private _clientId: string;
 
@@ -110,7 +110,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had no inflight ops or compound ops before. Now we have one.
       // so now we have uncommitted operations.
-      this.emit(ClientConcurrencyControl.CommitState, false);
+      this.emit(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, false);
     }
 
     if (this._compoundOpInProgress) {
@@ -142,7 +142,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had inflight ops before. Now we have none. So now we have
       // changed commit state.
-      this.emit(ClientConcurrencyControl.CommitState, true);
+      this.emit(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, true);
     }
   }
 

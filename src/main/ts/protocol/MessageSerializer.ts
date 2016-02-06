@@ -17,7 +17,8 @@ import {CreateRealTimeModelRequestSerializer} from "./model/createRealtimeModel"
 import {CreateRealTimeModelRequest} from "./model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "./model/deleteRealtimeModel";
 import {DeleteRealTimeModelRequestSerializer} from "./model/deleteRealtimeModel";
-import {ForceCloseRealTimeModelResponseMessageDeserializer} from "./model/forceCloseRealtimeModel";
+import {} from "./model/forceCloseRealtimeModel";
+import {ForceCloseRealTimeModelMessageDeserializer} from "./model/forceCloseRealtimeModel";
 
 export class MessageSerializer {
 
@@ -32,7 +33,7 @@ export class MessageSerializer {
       case MessageType.OPEN_REAL_TIME_MODEL:
         return OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
       case MessageType.FORCE_CLOSE_REAL_TIME_MODEL:
-        return ForceCloseRealTimeModelResponseMessageDeserializer.deserialize(body);
+        return ForceCloseRealTimeModelMessageDeserializer.deserialize(body);
       case MessageType.CREATE_REAL_TIME_MODEL:
       case MessageType.DELETE_REAL_TIME_MODEL:
         // These messages don't have any message that comes back.  Basically,

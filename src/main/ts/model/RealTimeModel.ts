@@ -10,12 +10,16 @@ import ProcessedOperationEvent from "../ot/ProcessedOperationEvent";
 import ModelOperationEvent from "./ModelOperationEvent";
 import CompoundOperation from "../ot/ops/CompoundOperation";
 import Operation from "../ot/ops/Operation";
+import MessageType from "../protocol/MessageType";
+import {ForceCloseRealTimeModel} from "../protocol/model/forceCloseRealtimeModel";
+import {MessageEvent} from "../connection/ConvergenceConnection";
 
 export default class RealTimeModel extends EventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
-    DELETED: "deleted"
+    DELETED: "deleted",
+    COMMIT_STATE_CHANGED: "commitStateChanged"
   };
 
   private _value: RealTimeObject;
@@ -31,6 +35,10 @@ export default class RealTimeModel extends EventEmitter {
               private _concurrencyControl: ClientConcurrencyControl,
               private _connection: ConvergenceConnection) {
     super();
+
+    this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
+      this.emit(RealTimeModel.Events.COMMIT_STATE_CHANGED, committed);
+    });
 
     this._value = new RealTimeObject(data, null, null, (operation: DiscreteOperation) => {
       var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
@@ -64,17 +72,13 @@ export default class RealTimeModel extends EventEmitter {
     return this._value;
   }
 
-  /**
-   * Gets the session of the connected user.
-   * @return {convergence.Session} The users session.
-   */
   session(): Session {
     return this._connection.session();
   }
 
   close(): void {
-    // todo: Implement Close
-  };
+    this._close(true);
+  }
 
   beginCompoundOperation(): void {
     this._concurrencyControl.startCompoundOperation();
@@ -91,16 +95,43 @@ export default class RealTimeModel extends EventEmitter {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
-  _handleMessage(message: any): void {
-    // Handle Messages
+  private _close(local: boolean, reason?: string): void {
+    this.emit(RealTimeModel.Events.CLOSED, reason);
   }
 
-  _processOperationEvent(operationEvent: ProcessedOperationEvent): void {
+  _handleMessage(messageEvent: MessageEvent): void {
+    switch (messageEvent.message.type) {
+      case MessageType.FORCE_CLOSE_REAL_TIME_MODEL:
+        this._handleForceClose(<ForceCloseRealTimeModel>messageEvent.message);
+        break;
+      case MessageType.REMOTE_OPERATION:
+        this._handleRemoteOperation(<any>messageEvent.message);
+        break;
+      default:
+        throw new Error("Unexpected message");
+    }
+  }
 
-    var operation: Operation = operationEvent.operation;
-    var clientId: string = operationEvent.clientId;
-    var contextVersion: number = operationEvent.contextVersion;
-    var timestamp: number = operationEvent.timestamp;
+  private _handleForceClose(message: ForceCloseRealTimeModel): void {
+    this._close(false, message.reason);
+  }
+
+  private _handleRemoteOperation(message: any): void {
+    // FIXME
+    var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
+      message.clientId,
+      0,
+      0,
+      null
+    );
+
+    this._concurrencyControl.processIncomingOperation(unprocessed);
+    var processed: ProcessedOperationEvent = this._concurrencyControl.getNextIncomingOperation();
+
+    var operation: Operation = processed.operation;
+    var clientId: string = processed.clientId;
+    var contextVersion: number = processed.contextVersion;
+    var timestamp: number = processed.timestamp;
 
     this._version = contextVersion;
     this._modifiedTime = new Date(timestamp);
@@ -117,6 +148,5 @@ export default class RealTimeModel extends EventEmitter {
         new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
       this._value._handleIncomingOperation(modelEvent);
     }
-
   }
 }

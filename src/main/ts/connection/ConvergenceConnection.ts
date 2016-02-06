@@ -16,6 +16,7 @@ import {TokenAuthRequest} from "../protocol/authentication";
 import {AuthRequest} from "../protocol/authentication";
 import {AuthenticationResponseMessage} from "../protocol/authentication";
 import Deferred from "../util/Deferred";
+import {ReplyCallback} from "./ProtocolConnection";
 
 export default class ConvergenceConnection extends EventEmitter {
 
@@ -24,7 +25,6 @@ export default class ConvergenceConnection extends EventEmitter {
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
     DISCONNECTED: "disconnected",
-    MESSAGE: "message",
     ERROR: "error"
   };
 
@@ -47,6 +47,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
   private _protocolConnection: ProtocolConnection;
   private _url: string;
+  private _messageEmitter: EventEmitter;
 
   /**
    *
@@ -83,6 +84,8 @@ export default class ConvergenceConnection extends EventEmitter {
       }
     };
 
+    this._messageEmitter = new EventEmitter();
+
     this._session = new SessionImpl(domain, this, null, null);
   }
 
@@ -99,119 +102,9 @@ export default class ConvergenceConnection extends EventEmitter {
     this._connectionDeferred = new Deferred<HandshakeResponse>();
     this._connectionState = ConnectionState.CONNECTING;
 
-    this.attemptConnection(false);
+    this._attemptConnection(false);
 
     return this._connectionDeferred.promise();
-  }
-
-  reconnect(): void {
-    this._connectionAttempts = 0;
-    this._connectionDeferred = new Deferred<HandshakeResponse>();
-    this.attemptConnection(true);
-  }
-
-  private attemptConnection(reconnect: boolean): void {
-    var self: ConvergenceConnection = this;
-
-    this._connectionAttempts++;
-
-    if (reconnect) {
-      if (Debug.flags.serverConnection) {
-        console.log("Attempting reconnection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
-      }
-    } else {
-      if (Debug.flags.serverConnection) {
-        console.log("Attempting connection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
-      }
-    }
-
-    var timeoutTask: Function = function (): void {
-      console.log("connection timeout exceeded, terminating connection");
-      self._protocolConnection.abort("connection timeout exceeded");
-    };
-
-    this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
-
-    var socket: ConvergenceSocket = new ConvergenceSocket(this._url);
-    this._protocolConnection = new ProtocolConnection(
-      socket,
-      this._protocolConfig);
-
-    this._protocolConnection.on(ProtocolConnection.Events.ERROR, (error: string) =>
-      this.emit(ConvergenceConnection.Events.ERROR, error));
-
-    this._protocolConnection.on(ProtocolConnection.Events.DROPPED, () =>
-      this.emit(ConvergenceConnection.Events.INTERRUPTED));
-
-    this._protocolConnection.on(ProtocolConnection.Events.CLOSED, () =>
-      this.emit(ConvergenceConnection.Events.DISCONNECTED));
-
-    this._protocolConnection.on(ProtocolConnection.Events.MESSAGE, (message: any) =>
-      this.emit(ConvergenceConnection.Events.MESSAGE, message));
-
-    this._protocolConnection.connect().then(() => {
-      if (Debug.flags.connection) {
-        console.log("Connection succeeded, handshaking.");
-      }
-
-      self._protocolConnection.handshake(reconnect).then((handshakeResponse: HandshakeResponse) => {
-        clearTimeout(self._connectionTimeoutTask);
-        if (handshakeResponse.success) {
-          self._connectionDeferred.resolve(handshakeResponse);
-          self._connectionDeferred = null;
-          self._clientId = handshakeResponse.clientId;
-          self._session.setSessionId(handshakeResponse.clientId);
-          self._reconnectToken = handshakeResponse.reconnectToken;
-          if (reconnect) {
-            self.emit(ConvergenceConnection.Events.RECONNECTED);
-          } else {
-            self.emit(ConvergenceConnection.Events.CONNECTED);
-          }
-        } else {
-          // todo: Can we reuse this connection???
-          self._protocolConnection.close();
-          if ((reconnect || self._retryOnOpen) && handshakeResponse.retryOk) {
-            // todo if this is a timeout, we would like to shorten
-            // the reconnect interval by the timeout period.
-            self.scheduleReconnect(self._reconnectInterval, reconnect);
-          } else {
-            self.emit(ConvergenceConnection.Events.DISCONNECTED);
-            self._connectionDeferred.reject(new Error("Server rejected handshake request."));
-            self._connectionDeferred = null;
-          }
-        }
-      }).catch((e: Error) => {
-        console.error("Handshake failed: ", e);
-        self._protocolConnection.close();
-        self._protocolConnection = null;
-        self._connectionDeferred = null;
-        clearTimeout(self._connectionTimeoutTask);
-        self.scheduleReconnect(self._reconnectInterval, reconnect);
-        self.emit(ConvergenceConnection.Events.DISCONNECTED);
-      });
-    }).catch((reason: Error) => {
-      console.log("Connection failed: " + reason);
-      clearTimeout(self._connectionTimeoutTask);
-      if (reconnect || self._retryOnOpen) {
-        self.scheduleReconnect(Math.max(self._reconnectInterval, 0), reconnect);
-      } else {
-        self._connectionDeferred.reject(reason);
-        self._connectionDeferred = null;
-        self.emit(ConvergenceConnection.Events.DISCONNECTED);
-      }
-    });
-  }
-
-  private scheduleReconnect(delay: number, reconnect: boolean): void {
-    if (this._connectionAttempts < this._maxReconnectAttempts || this._maxReconnectAttempts < 0) {
-      var self: ConvergenceConnection = this;
-      var reconnectTask: Function = function (): void {
-        self.attemptConnection(reconnect);
-      };
-      this._connectionAttemptTask = setTimeout(reconnectTask, delay * 1000);
-    } else {
-      this._connectionDeferred.reject(new Error("Maximum connection attempts exceeded"));
-    }
   }
 
   disconnect(): Promise<void> {
@@ -258,12 +151,6 @@ export default class ConvergenceConnection extends EventEmitter {
     return this._protocolConnection.request(message);
   }
 
-  /**
-   * Authenticates the user with the given username and password.
-   * @param {string} username - The username of the user
-   * @param {string} password - The password of the user
-   * @return {Promise} A promise
-   */
   authenticateWithPassword(username: string, password: string): Promise<void> {
     var authRequest: PasswordAuthRequest = {
       type: MessageType.AUTHENTICATE,
@@ -274,11 +161,6 @@ export default class ConvergenceConnection extends EventEmitter {
     return this._authenticate(authRequest);
   }
 
-  /**
-   * Authenticates the user with the given username.
-   * @param {string} token - The identifier of the participant
-   * @return {Promise} A promise
-   */
   authenticateWithToken(token: string): Promise<void> {
     var authRequest: TokenAuthRequest = {
       type: MessageType.AUTHENTICATE,
@@ -286,6 +168,20 @@ export default class ConvergenceConnection extends EventEmitter {
       token: token
     };
     return this._authenticate(authRequest);
+  }
+
+  addMessageListener(type: string, listener: (message: any) => void): void {
+    this._messageEmitter.on(type, listener);
+  }
+
+  addMultipleMessageListener(types: string[], listener: (message: any) => void): void {
+    types.forEach((type: string) => {
+      this._messageEmitter.on(type, listener);
+    });
+  }
+
+  removeMessageListener(type: string, listener: (message: any) => void): void {
+    this._messageEmitter.off(type, listener);
   }
 
   private _authenticate(authRequest: AuthRequest): Promise<void> {
@@ -319,8 +215,118 @@ export default class ConvergenceConnection extends EventEmitter {
       }
     });
   }
+
+  private _attemptConnection(reconnect: boolean): void {
+    var self: ConvergenceConnection = this;
+
+    this._connectionAttempts++;
+
+    if (reconnect) {
+      if (Debug.flags.serverConnection) {
+        console.log("Attempting reconnection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
+      }
+    } else {
+      if (Debug.flags.serverConnection) {
+        console.log("Attempting connection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
+      }
+    }
+
+    var timeoutTask: Function = () => {
+      self._protocolConnection.abort("connection timeout exceeded");
+    };
+
+    this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
+
+    var socket: ConvergenceSocket = new ConvergenceSocket(this._url);
+    this._protocolConnection = new ProtocolConnection(
+      socket,
+      this._protocolConfig);
+
+    this._protocolConnection.on(ProtocolConnection.Events.ERROR, (error: string) =>
+      this.emit(ConvergenceConnection.Events.ERROR, error));
+
+    this._protocolConnection.on(ProtocolConnection.Events.DROPPED, () =>
+      this.emit(ConvergenceConnection.Events.INTERRUPTED));
+
+    this._protocolConnection.on(ProtocolConnection.Events.CLOSED, () =>
+      this.emit(ConvergenceConnection.Events.DISCONNECTED));
+
+    this._protocolConnection.on(ProtocolConnection.Events.MESSAGE, (event: MessageEvent) => {
+      this._messageEmitter.emit(event.message.type, event);
+    });
+
+    this._protocolConnection.connect().then(() => {
+      if (Debug.flags.connection) {
+        console.log("Connection succeeded, handshaking.");
+      }
+
+      this._protocolConnection.handshake(reconnect).then((handshakeResponse: HandshakeResponse) => {
+        clearTimeout(self._connectionTimeoutTask);
+        if (handshakeResponse.success) {
+          self._connectionDeferred.resolve(handshakeResponse);
+          self._connectionDeferred = null;
+          self._clientId = handshakeResponse.clientId;
+          self._session.setSessionId(handshakeResponse.clientId);
+          self._reconnectToken = handshakeResponse.reconnectToken;
+          if (reconnect) {
+            self.emit(ConvergenceConnection.Events.RECONNECTED);
+          } else {
+            self.emit(ConvergenceConnection.Events.CONNECTED);
+          }
+        } else {
+          // todo: Can we reuse this connection???
+          self._protocolConnection.close();
+          if ((reconnect || self._retryOnOpen) && handshakeResponse.retryOk) {
+            // todo if this is a timeout, we would like to shorten
+            // the reconnect interval by the timeout period.
+            self._scheduleReconnect(self._reconnectInterval, reconnect);
+          } else {
+            self.emit(ConvergenceConnection.Events.DISCONNECTED);
+            self._connectionDeferred.reject(new Error("Server rejected handshake request."));
+            self._connectionDeferred = null;
+          }
+        }
+      }).catch((e: Error) => {
+        console.error("Handshake failed: ", e);
+        self._protocolConnection.close();
+        self._protocolConnection = null;
+        self._connectionDeferred = null;
+        clearTimeout(self._connectionTimeoutTask);
+        self._scheduleReconnect(self._reconnectInterval, reconnect);
+        self.emit(ConvergenceConnection.Events.DISCONNECTED);
+      });
+    }).catch((reason: Error) => {
+      console.log("Connection failed: " + reason);
+      clearTimeout(self._connectionTimeoutTask);
+      if (reconnect || self._retryOnOpen) {
+        self._scheduleReconnect(Math.max(self._reconnectInterval, 0), reconnect);
+      } else {
+        self._connectionDeferred.reject(reason);
+        self._connectionDeferred = null;
+        self.emit(ConvergenceConnection.Events.DISCONNECTED);
+      }
+    });
+  }
+
+  private _scheduleReconnect(delay: number, reconnect: boolean): void {
+    if (this._connectionAttempts < this._maxReconnectAttempts || this._maxReconnectAttempts < 0) {
+      var reconnectTask: Function = () => {
+        this._attemptConnection(reconnect);
+      };
+      this._connectionAttemptTask = setTimeout(reconnectTask, delay * 1000);
+    } else {
+      this._connectionDeferred.reject(new Error("Maximum connection attempts exceeded"));
+    }
+  }
 }
 
-export enum ConnectionState {
+export interface MessageEvent {
+  message: any; // Model Message??
+  request: boolean;
+  callback?: ReplyCallback;
+}
+
+
+enum ConnectionState {
   DISCONNECTED, CONNECTING, CONNECTED, INTERRUPTED, DISCONNECTING
 }

@@ -17,6 +17,9 @@
         return domain.modelService().open("foo", "bar");
     }).then(function(model) {
         console.log("open success: " + model.data().value());
+        model.on("closed", function(reason) {
+           console.log("mode closed: " + reason);
+        });
         return domain.modelService().remove("foo", "bar");
     }).then(function() {
         console.log("remove success" );

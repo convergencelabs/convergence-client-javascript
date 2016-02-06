@@ -89,7 +89,7 @@ export default class EventEmitter {
     this._maxListeners = n;
   }
 
-  protected emit(event: string, ...args: any[]): EventEmitter {
+  emit(event: string, ...args: any[]): EventEmitter {
     event = event.toLowerCase();
     var listeners: Function[] = this.listeners(event);
     listeners.forEach(function (listener: Function): void {
