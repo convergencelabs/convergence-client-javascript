@@ -21,8 +21,10 @@
         model.on("closed", function(reason) {
            console.log("mode closed: " + reason);
         });
-        //return domain.modelService().remove("foo", "bar");
         return model.close();
+    }).then(function() {
+        console.log("close success" );
+        return domain.modelService().remove("foo", modelId);
     }).then(function() {
         console.log("remove success" );
     }).catch(function(reason) {
