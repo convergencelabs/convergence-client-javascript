@@ -13,6 +13,11 @@ import Operation from "../ot/ops/Operation";
 
 export default class RealTimeModel extends EventEmitter {
 
+  static Events: any = {
+    CLOSED: "closed",
+    DELETED: "deleted"
+  };
+
   private _value: RealTimeObject;
 
   /**

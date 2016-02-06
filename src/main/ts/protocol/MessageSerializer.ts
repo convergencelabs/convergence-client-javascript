@@ -15,6 +15,9 @@ import {OpenRealTimeModelResponseMessageDeserializer} from "./model/openRealtime
 import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
 import {CreateRealTimeModelRequestSerializer} from "./model/createRealtimeModel";
 import {CreateRealTimeModelRequest} from "./model/createRealtimeModel";
+import {DeleteRealTimeModelRequest} from "./model/deleteRealtimeModel";
+import {DeleteRealTimeModelRequestSerializer} from "./model/deleteRealtimeModel";
+import {ForceCloseRealTimeModelResponseMessageDeserializer} from "./model/forceCloseRealtimeModel";
 
 export class MessageSerializer {
 
@@ -28,14 +31,17 @@ export class MessageSerializer {
         return AuthenticationResponseDeserializer.deserialize(body);
       case MessageType.OPEN_REAL_TIME_MODEL:
         return OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
+      case MessageType.FORCE_CLOSE_REAL_TIME_MODEL:
+        return ForceCloseRealTimeModelResponseMessageDeserializer.deserialize(body);
       case MessageType.CREATE_REAL_TIME_MODEL:
+      case MessageType.DELETE_REAL_TIME_MODEL:
         // These messages don't have any message that comes back.  Basically,
         // this is a success message.
         return {
           type: type
         };
       default:
-        throw new Error("Unexpected protocol type: " + type);
+        throw new Error("Unexpected message type: " + type);
     }
   }
 
@@ -52,6 +58,8 @@ export class MessageSerializer {
         return OpenRealTimeModelRequestSerializer.serialize(<OpenRealTimeModelRequest>body);
       case MessageType.CREATE_REAL_TIME_MODEL:
         return CreateRealTimeModelRequestSerializer.serialize(<CreateRealTimeModelRequest>body);
+      case MessageType.DELETE_REAL_TIME_MODEL:
+        return DeleteRealTimeModelRequestSerializer.serialize(<DeleteRealTimeModelRequest>body);
       default:
         throw new Error("Unexpected protocol type: " + type);
     }

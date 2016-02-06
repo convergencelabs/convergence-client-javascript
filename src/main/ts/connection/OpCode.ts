@@ -16,6 +16,6 @@ export default class OpCode {
   }
 
   static get NORMAL(): string {
-    return "nrml";
+    return "norm";
   }
 }

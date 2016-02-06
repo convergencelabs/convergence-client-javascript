@@ -24,6 +24,7 @@ export default class ConvergenceConnection extends EventEmitter {
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
     DISCONNECTED: "disconnected",
+    MESSAGE: "message",
     ERROR: "error"
   };
 

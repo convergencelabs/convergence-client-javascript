@@ -26,13 +26,12 @@ export default class ClientConcurrencyControl extends EventEmitter {
 
   constructor(clientId: string,
               contextVersion: number,
-              unappliedOperations: ProcessedOperationEvent[],
               transformer: OperationTransformer) {
     super();
 
     this._clientId = clientId;
     this._contextVersion = contextVersion;
-    this._unappliedOperations = unappliedOperations;
+    this._unappliedOperations = [];
     this._inflightOperations = [];
 
     this._transformer = transformer;
