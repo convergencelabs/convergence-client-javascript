@@ -71,8 +71,8 @@ gulp.task('lint', function () {
  * non minified version is created using UglifyJS.  The code will be linted
  * and tested before being rolled up and minified.
  */
-gulp.task('dist', ["lint", "test"], function () {
-  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+gulp.task('dist-build', ["lint", "test"], function () {
+  gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(rollup({
       format: 'iife',
       moduleName: 'ConvergenceDomain',
@@ -82,6 +82,18 @@ gulp.task('dist', ["lint", "test"], function () {
       ]
     }))
     .pipe(rename("convergence-client.js"))
+    .pipe(sourceMaps.write("."))
+    .pipe(gulp.dest("dist"));
+});
+
+/**
+ * Creates a single file build in ES5 using RollupJS.  Both a minified and
+ * non minified version is created using UglifyJS.  The code will be linted
+ * and tested before being rolled up and minified.
+ */
+gulp.task('dist-min', ["dist-build"], function () {
+  gulp.src("dist/convergence-client.js")
+    .pipe(sourceMaps.init())
     .pipe(uglify())
     .pipe(rename({
       extname: '.min.js'
@@ -89,6 +101,8 @@ gulp.task('dist', ["lint", "test"], function () {
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
 });
+
+
 
 /**
  * Removes all build artifacts.

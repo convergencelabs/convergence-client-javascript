@@ -17,8 +17,7 @@
     "build": "gulp",
     "test": "mocha test"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "^3.4.1",
     "del": "^1.2.0",
@@ -34,9 +33,11 @@
     "gulp-uglify": "^1.2.0",
     "mkdirp": "^0.5.0",
     "mocha": "^2.3.4",
+    "rollup-plugin-typescript": "^0.5.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "rollup-plugin-typescript": "^0.5.0",
-    "uglify-js": "^2.4.16"
+    "uglify-js": "^2.4.16",
+    "websocket": "^1.0.22",
+    "ws": "^1.0.1"
   }
 }

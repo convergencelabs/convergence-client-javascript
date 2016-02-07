@@ -24,8 +24,8 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   clientId: string;
   reconnectToken: string;
   protocolConfig: any; // todo make interface
-  error: any;
-  retryOk: boolean;
+  error?: any;
+  retryOk?: boolean;
 }
 
 export class HandshakeResponseDeserializer {
