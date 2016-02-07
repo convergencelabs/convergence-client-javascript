@@ -1,41 +1,40 @@
-
 import {MessageEnvelope} from "../main/ts/protocol/protocol";
 import OpCode from "../main/ts/connection/OpCode";
 import Deferred from "../main/ts/util/Deferred";
 import MessageType from "../main/ts/protocol/MessageType";
 import {HandshakeResponse} from "../main/ts/protocol/handhsake";
 
-import ws = require("ws");
-
+/* tslint:disable */
+var mockSocket = require('mock-socket');
 if (typeof global['WebSocket'] === "undefined") {
-  global['WebSocket'] = require('websocket').w3cwebsocket;
+  global['WebSocket'] = mockSocket.WebSocket;
 }
+/* tslint:enable */
 
 export default class MockServer {
-  private _server: ws.Server;
+  private _server: any;
 
   private _incoming: MessageEnvelope[];
   private _expects: ExpectRecord[];
   private _connection: any;
-  private _port: number;
+
   private _reqId: number;
 
-  constructor(port: number) {
+  constructor(url: string) {
     this._incoming = [];
     this._expects = [];
-    this._port = port;
     this._reqId = 0;
 
-    this._server = new ws.Server({ port: port });
+    this._server = new mockSocket.Server(url);
 
-    this._server.on("connection", (ws: any) => {
+    this._server.on("connection", (server: any, ws: any) => {
       this._connection = ws;
 
-      ws.on("message", (message: string) => {
+      server.on("message", (message: string) => {
         this._handleMessage(message);
       });
 
-      ws.on("close", (code: number, reason: string) => {
+      server.on("close", (code: number, reason: string) => {
         console.log("Connection closed");
       });
     });
@@ -56,6 +55,7 @@ export default class MockServer {
         this._incoming.push(envelope);
       } else {
         var expect: ExpectRecord = this._expects.shift();
+        clearTimeout(expect.timeout);
         if (expect.type === envelope.type) {
           expect.deferred.resolve(envelope);
         } else {
@@ -101,7 +101,7 @@ export default class MockServer {
       type,
       body
     );
-    this._connection.send(JSON.stringify(envelope));
+    this._send(envelope);
   }
 
   sendRequest(type: string, body: any): void {
@@ -125,13 +125,17 @@ export default class MockServer {
   }
 
   _send(envelope: MessageEnvelope): void {
-    var json = JSON.stringify(envelope);
+    var json: string = JSON.stringify(envelope);
     console.log("Sending: " + json);
-    this._connection.send(json);
+    this._server.send(json);
   }
 
   stop(): void {
     this._server.close();
+    this._expects.forEach((expect: ExpectRecord) => {
+      clearTimeout(expect.timeout);
+    });
+    this._expects = [];
   }
 
   expectMessage(timeout: number, type: string): Promise<MessageEnvelope> {
@@ -143,9 +147,12 @@ export default class MockServer {
         timeout: {}
       };
 
-      //setTimeout(timeout, () => {
-      //  this._handleTimeout(expect);
-      //})
+      setTimeout(
+        () => {
+          this._handleTimeout(expect);
+        },
+        timeout);
+
       this._expects.push(expect);
       return def.promise();
     } else {
@@ -158,9 +165,9 @@ export default class MockServer {
     }
   }
 
-  //private _handleTimeout(expect: ExpectRecord): void {
-  //  expect.deferred.reject(new Error("Timeout waiting for: " + expect.type));
-  //}
+  private _handleTimeout(expect: ExpectRecord): void {
+    expect.deferred.reject(new Error("Timeout waiting for: " + expect.type));
+  }
 }
 
 interface ExpectRecord {

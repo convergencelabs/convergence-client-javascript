@@ -177,36 +177,36 @@ export default class ConvergenceSocket extends EventEmitter {
       }
     };
 
-    socket.onclose = function (evt: CloseEvent): void {
-      self.detachFromSocket(socket);
+    socket.onclose = (evt: CloseEvent) => {
+      this.detachFromSocket(socket);
       socket.onclose = null;
-      self._socket = null;
+      this._socket = null;
       try {
-        if (self._openDeferred) {
+        if (this._openDeferred) {
           // if the connection deferred is no null, we MUST
           // have been in the process of connecting.  Therefore
           // we reject the promise, and then set it to null.
           if (Debug.flags.socketConnection) {
             console.log("Web Socket connection failed: ", evt);
           }
-          self._openDeferred.reject(new Error("unable to connect"));
-          self._openDeferred = null;
-        } else if (self._closeDeferred) {
+          this._openDeferred.reject(new Error("unable to connect"));
+          this._openDeferred = null;
+        } else if (this._closeDeferred) {
           // if the connection deferred is no null, we MUST
           // have been in the process of closing.  Therefore
           // we resolve the promise.
           if (Debug.flags.socketConnection) {
             console.log("Web Socket onClose received while closing: ", evt);
           }
-          self._closeDeferred.resolve();
-          self._closeDeferred = null;
+          this._closeDeferred.resolve();
+          this._closeDeferred = null;
         } else {
           // We were just open, which means that we did not request this closure.
           // This means the other end terminated the connection.
           if (Debug.flags.socketConnection) {
             console.log("Web Socket connection unexpectedly closed: ", evt);
           }
-          self.emit(ConvergenceSocket.Events.CLOSE, "unexpected Web Socket closure.");
+          this.emit(ConvergenceSocket.Events.CLOSE, "unexpected Web Socket closure.");
         }
       } catch (e) {
         console.error("Error handling web socket close event.", e);
