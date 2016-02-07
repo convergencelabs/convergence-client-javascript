@@ -3,6 +3,7 @@ import OpCode from "../main/ts/connection/OpCode";
 import Deferred from "../main/ts/util/Deferred";
 import MessageType from "../main/ts/protocol/MessageType";
 import {HandshakeResponse} from "../main/ts/protocol/handhsake";
+import EqualsUtil from "../main/ts/util/EqualsUtil";
 
 /* tslint:disable */
 var mockSocket = require('mock-socket');
@@ -15,7 +16,7 @@ export default class MockServer {
   private _server: any;
 
   private _incoming: MessageEnvelope[];
-  private _expects: ExpectRecord[];
+  private _expects: Expectation[];
   private _connection: any;
 
   private _reqId: number;
@@ -31,6 +32,7 @@ export default class MockServer {
       this._connection = ws;
 
       server.on("message", (message: string) => {
+        console.log("Receive: " + message);
         this._handleMessage(message);
       });
 
@@ -38,31 +40,6 @@ export default class MockServer {
         console.log("Connection closed");
       });
     });
-  }
-
-  private _handleMessage(json: string): void {
-    var parsed: any = JSON.parse(json);
-    var envelope: MessageEnvelope = new MessageEnvelope(
-      parsed.opCode,
-      parsed.reqId,
-      parsed.type,
-      parsed.body);
-
-    if (envelope.opCode === OpCode.PING) {
-      this._connection.sendText(JSON.stringify({opCode: OpCode.PONG}));
-    } else {
-      if (this._expects.length === 0) {
-        this._incoming.push(envelope);
-      } else {
-        var expect: ExpectRecord = this._expects.shift();
-        clearTimeout(expect.timeout);
-        if (expect.type === envelope.type) {
-          expect.deferred.resolve(envelope);
-        } else {
-          expect.deferred.reject(new Error("Invalid message type"));
-        }
-      }
-    }
   }
 
   handshake(timeout: number, response?: HandshakeResponse): Promise<MessageEnvelope> {
@@ -77,7 +54,7 @@ export default class MockServer {
       };
     }
 
-    return this.expectMessage(timeout, MessageType.HANDSHAKE).then((request: MessageEnvelope) => {
+    return this.expectRequestMessage(timeout, MessageType.HANDSHAKE).then((request: MessageEnvelope) => {
       var body: any = {
         success: response.success,
         sessionId: response.clientId,
@@ -124,54 +101,136 @@ export default class MockServer {
     this._send(envelope);
   }
 
-  _send(envelope: MessageEnvelope): void {
+  stop(): void {
+    this._server.close();
+    this._expects.forEach((expectation: Expectation) => {
+      clearTimeout(expectation.timer);
+    });
+    this._expects = [];
+  }
+
+  expectMessage(timeout: number, messageExpectation?: MessageExpectation): Promise<MessageEnvelope> {
+    if (!messageExpectation) {
+      messageExpectation = {};
+    }
+
+    var expectation: Expectation = {
+      timeout: timeout,
+      opCode: messageExpectation.opCode,
+      type: messageExpectation.type,
+      body: messageExpectation.body,
+      deferred: new Deferred<MessageEnvelope>()
+    };
+
+    return this._expect(expectation);
+  }
+
+  expectNormalMessage(timeout: number, type?: string, body?: any): Promise<MessageEnvelope> {
+    return this.expectMessage(timeout, {
+      type: type,
+      body: body,
+      opCode: OpCode.NORMAL
+    });
+  }
+
+  expectRequestMessage(timeout: number, type?: string, body?: any): Promise<MessageEnvelope> {
+    return this.expectMessage(timeout, {
+      type: type,
+      body: body,
+      opCode: OpCode.REQUEST
+    });
+  }
+
+  expectResponseMessage(timeout: number, type?: string, body?: any): Promise<MessageEnvelope> {
+    return this.expectMessage(timeout, {
+      type: type,
+      body: body,
+      opCode: OpCode.REPLY
+    });
+  }
+
+  private _expect(expectation: Expectation): Promise<MessageEnvelope> {
+    if (this._incoming.length === 0) {
+      this._deferExpect(expectation);
+    } else {
+      var message: MessageEnvelope = this._incoming.shift();
+      this._evaluateMessage(expectation, message);
+    }
+
+    return expectation.deferred.promise();
+  }
+
+  private _evaluateMessage(expectation: Expectation, envelope: MessageEnvelope): void {
+    if (expectation.opCode !== undefined && envelope.opCode !== expectation.opCode) {
+      expectation.deferred.reject(new Error(`Expected opCode '${expectation.opCode}, but received '${envelope.opCode}'.`));
+    } else if (expectation.type !== undefined && envelope.type !== expectation.type) {
+      expectation.deferred.reject(new Error(`Expected type '${expectation.type}, but received '${envelope.type}'.`));
+    } else if (expectation.body !== undefined && !EqualsUtil.deepEquals(envelope.body, expectation.body)) {
+      expectation.deferred.reject(new Error(`Expected body '${expectation.body}, but received '${envelope.body}'.`));
+    } else {
+      expectation.deferred.resolve(envelope);
+    }
+  }
+
+  private _deferExpect(expectation: Expectation): void {
+    var t: any = setTimeout(
+      () => {
+        this._handleTimeout(expectation);
+      },
+      expectation.timeout);
+
+    expectation.timer = t;
+
+    this._expects.push(expectation);
+  }
+
+  private _handleTimeout(expectation: Expectation): void {
+    expectation.deferred.reject(new Error("Timeout waiting for: " + expectation.type));
+  }
+
+  private _send(envelope: MessageEnvelope): void {
     var json: string = JSON.stringify(envelope);
     console.log("Sending: " + json);
     this._server.send(json);
   }
 
-  stop(): void {
-    this._server.close();
-    this._expects.forEach((expect: ExpectRecord) => {
-      clearTimeout(expect.timeout);
-    });
-    this._expects = [];
-  }
+  private _handleMessage(json: string): void {
+    var parsed: any = JSON.parse(json);
+    var envelope: MessageEnvelope = new MessageEnvelope(
+      parsed.opCode,
+      parsed.reqId,
+      parsed.type,
+      parsed.body);
 
-  expectMessage(timeout: number, type: string): Promise<MessageEnvelope> {
-    if (this._incoming.length === 0) {
-      var def: Deferred<MessageEnvelope> = new Deferred<MessageEnvelope>();
-      var expect: ExpectRecord = {
-        type: type,
-        deferred: def,
-        timeout: {}
-      };
-
-      setTimeout(
-        () => {
-          this._handleTimeout(expect);
-        },
-        timeout);
-
-      this._expects.push(expect);
-      return def.promise();
+    if (envelope.opCode === OpCode.PING) {
+      this._connection.sendText(JSON.stringify({opCode: OpCode.PONG}));
     } else {
-      var message: MessageEnvelope = this._incoming.shift();
-      if (message.type === type) {
-        return Promise.resolve(message);
+      if (this._expects.length === 0) {
+        this._incoming.push(envelope);
       } else {
-        return Promise.reject(new Error("Wrong message type"));
+        var expectation: Expectation = this._expects.shift();
+        clearTimeout(expectation.timer);
+        if (expectation.type === envelope.type) {
+          expectation.deferred.resolve(envelope);
+        } else {
+          expectation.deferred.reject(new Error("Invalid message type"));
+        }
       }
     }
   }
-
-  private _handleTimeout(expect: ExpectRecord): void {
-    expect.deferred.reject(new Error("Timeout waiting for: " + expect.type));
-  }
 }
 
-interface ExpectRecord {
-  type: string;
+export interface MessageExpectation {
+  opCode?: string;
+  type?: string;
+  body?: any;
+}
+
+interface Expectation {
+  opCode?: string;
+  type?: string;
+  body?: any;
+  timeout?: number;
+  timer?: any;
   deferred: Deferred<MessageEnvelope>;
-  timeout: any;
 }
