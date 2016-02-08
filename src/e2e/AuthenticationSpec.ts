@@ -25,12 +25,12 @@ describe('Authentication E2E', () => {
       done(error);
     });
 
-// set up the server's behavior
+    // set up the server's behavior
     var authExpected: any = {method: "password", username: "test", password: "password"};
     mockServer.expectRequestMessage(1000, MessageType.AUTHENTICATE, authExpected).then((envelope: MessageEnvelope) => {
       mockServer.sendReply(envelope.reqId, {success: true, username: "test"});
     }).then(() => {
-      var expectedOpen: any = {method: "password", username: "test", password: "password"};
+      var expectedOpen: any = {fqn: {cId: "collection", mId: "model"}, init: false};
       return mockServer.expectRequestMessage(1000, MessageType.OPEN_REAL_TIME_MODEL, expectedOpen);
     }).then((envelope: MessageEnvelope) => {
       mockServer.sendReply(envelope.reqId, {

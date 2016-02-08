@@ -8,8 +8,7 @@ export interface CloseRealTimeModelRequest extends OutgoingProtocolRequestMessag
 export class CloseRealTimeModelRequestSerializer {
   static serialize(request: CloseRealTimeModelRequest): any {
     return {
-      rId: request.resourceId,
-      type: MessageType.CLOSE_REAL_TIME_MODEL
+      rId: request.resourceId
     };
   }
 }

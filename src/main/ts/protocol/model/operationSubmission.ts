@@ -17,8 +17,7 @@ export class OperationSubmissionSerializer {
       rId: submission.resourceId,
       seq: submission.seqNo,
       v: submission.version,
-      op: OperationSerializer.serialize(submission.operation),
-      type: MessageType.OPERATION_SUBMISSION
+      op: OperationSerializer.serialize(submission.operation)
     };
   }
 }

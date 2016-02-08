@@ -110,7 +110,7 @@ export default class MockServer {
   }
 
   expectMessage(timeout: number, messageExpectation?: MessageExpectation): Promise<MessageEnvelope> {
-    if (!messageExpectation) {
+    if (messageExpectation === undefined) {
       messageExpectation = {};
     }
 
@@ -166,7 +166,8 @@ export default class MockServer {
     } else if (expectation.type !== undefined && envelope.type !== expectation.type) {
       expectation.deferred.reject(new Error(`Expected type '${expectation.type}, but received '${envelope.type}'.`));
     } else if (expectation.body !== undefined && !EqualsUtil.deepEquals(envelope.body, expectation.body)) {
-      expectation.deferred.reject(new Error(`Expected body '${expectation.body}, but received '${envelope.body}'.`));
+      expectation.deferred.reject(new Error(
+        `Expected body '${JSON.stringify(expectation.body)}, but received '${JSON.stringify(envelope.body)}'.`));
     } else {
       expectation.deferred.resolve(envelope);
     }
@@ -210,11 +211,7 @@ export default class MockServer {
       } else {
         var expectation: Expectation = this._expects.shift();
         clearTimeout(expectation.timer);
-        if (expectation.type === envelope.type) {
-          expectation.deferred.resolve(envelope);
-        } else {
-          expectation.deferred.reject(new Error("Invalid message type"));
-        }
+        this._evaluateMessage(expectation, envelope);
       }
     }
   }
