@@ -7,9 +7,12 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import BooleanSetEvent from "./events/BooleanSetEvent";
 import DataType from "./DataType";
 
-enum Events {Set}
 
 export default class RealTimeBoolean extends RealTimeValue {
+
+  static Events: any = {
+    SET: "set"
+  };
 
   /**
    * Constructs a new RealTimeBoolean.
@@ -62,7 +65,7 @@ export default class RealTimeBoolean extends RealTimeValue {
       operationEvent.timestamp,
       this,
       value);
-    this.emit(Events[Events.Set], event);
+    this.emit(RealTimeBoolean.Events.SET, event);
   }
 
   private _validateSet(value: boolean): void {

@@ -11,9 +11,14 @@ import StringRemoveEvent from "./events/StringRemoveEvent";
 import StringSetEvent from "./events/StringSetEvent";
 import DataType from "./DataType";
 
-enum Events {Insert, Remove, Set}
 
 export default class RealTimeString extends RealTimeValue {
+
+  static Events: any = {
+    INSERT: "insert",
+    REMOVE: "remove",
+    SET: "set"
+  };
 
   /**
    * Constructs a new RealTimeString.
@@ -101,7 +106,7 @@ export default class RealTimeString extends RealTimeValue {
       this,
       index,
       value);
-    this.emit(Events[Events.Insert], event);
+    this.emit(RealTimeString.Events.INSERT, event);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
@@ -121,7 +126,7 @@ export default class RealTimeString extends RealTimeValue {
       this,
       index,
       value);
-    this.emit(Events[Events.Remove], event);
+    this.emit(RealTimeString.Events.REMOVE, event);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -138,7 +143,7 @@ export default class RealTimeString extends RealTimeValue {
       operationEvent.timestamp,
       this,
       value);
-    this.emit(Events[Events.Set], event);
+    this.emit(RealTimeString.Events.SET, event);
   }
 
   private _validateInsert(index: number, value: string): void {

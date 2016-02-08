@@ -16,7 +16,8 @@ export class OpenRealTimeModelRequestSerializer {
         cId: request.modelFqn.collectionId,
         mId: request.modelFqn.modelId
       },
-      init: request.initializerProvided
+      init: request.initializerProvided,
+      type: MessageType.OPEN_REAL_TIME_MODEL
     };
   }
 }

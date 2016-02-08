@@ -18,10 +18,16 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import DataType from "./DataType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 
-enum Events {Insert, Move, Remove, Replace, Set}
-
 
 export default class RealTimeArray extends RealTimeContainer {
+
+  static Events: any = {
+    INSERT: "insert",
+    REMOVE: "remove",
+    REPLACE: "replace",
+    MOVE: "move",
+    SET: "set"
+  };
 
   private _children: Array<RealTimeValue>;
 
@@ -258,7 +264,7 @@ export default class RealTimeArray extends RealTimeContainer {
       this,
       index,
       value);
-    this.emit(Events[Events.Insert], event);
+    this.emit(RealTimeArray.Events.INSERT, event);
   }
 
   private _handleMoveOperation(operationEvent: ModelOperationEvent): void {
@@ -282,7 +288,7 @@ export default class RealTimeArray extends RealTimeContainer {
       this,
       fromIndex,
       toIndex);
-    this.emit(Events[Events.Move], event);
+    this.emit(RealTimeArray.Events.MOVE, event);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
@@ -302,7 +308,7 @@ export default class RealTimeArray extends RealTimeContainer {
       operationEvent.timestamp,
       this,
       index);
-    this.emit(Events[Events.Remove], event);
+    this.emit(RealTimeArray.Events.REMOVE, event);
     child._setDetached();
   }
 
@@ -325,7 +331,7 @@ export default class RealTimeArray extends RealTimeContainer {
       this,
       index,
       value);
-    this.emit(Events[Events.Replace], event);
+    this.emit(RealTimeArray.Events.REPLACE, event);
     child._setDetached();
   }
 
@@ -348,7 +354,7 @@ export default class RealTimeArray extends RealTimeContainer {
       operationEvent.timestamp,
       this,
       values);
-    this.emit(Events[Events.Set], event);
+    this.emit(RealTimeArray.Events.SET, event);
     oldChildren.forEach((oldChild: RealTimeValue) => oldChild._setDetached());
   }
 

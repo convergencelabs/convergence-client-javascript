@@ -14,6 +14,9 @@ import MessageType from "../protocol/MessageType";
 import {ForceCloseRealTimeModel} from "../protocol/model/forceCloseRealtimeModel";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import ModelService from "./ModelService";
+import {OperationSubmission} from "../protocol/model/operationSubmission";
+import {RemoteOperation} from "../protocol/model/removeOperation";
+import {OperationAck} from "../protocol/model/operationAck";
 
 export default class RealTimeModel extends EventEmitter {
 
@@ -45,9 +48,7 @@ export default class RealTimeModel extends EventEmitter {
 
     this._value = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
       var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
-      if (opEvent) {
-        // this._connection.send()
-      }
+      this._sendOperation(opEvent);
     });
   }
 
@@ -91,9 +92,7 @@ export default class RealTimeModel extends EventEmitter {
 
   completeCompoundOperation(): void {
     var opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
-    if (opEvent) {
-      // this._connection.send()
-    }
+    this._sendOperation(opEvent);
   }
 
   isCompoundOperationInProgress(): boolean {
@@ -106,7 +105,10 @@ export default class RealTimeModel extends EventEmitter {
         this._handleForceClose(<ForceCloseRealTimeModel>messageEvent.message);
         break;
       case MessageType.REMOTE_OPERATION:
-        this._handleRemoteOperation(<any>messageEvent.message);
+        this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
+        break;
+      case MessageType.OPERATION_ACK:
+        this._handelOperationAck(<OperationAck>messageEvent.message);
         break;
       default:
         throw new Error("Unexpected message");
@@ -117,21 +119,26 @@ export default class RealTimeModel extends EventEmitter {
     this.emit(RealTimeModel.Events.CLOSED, message.reason);
   }
 
-  private _handleRemoteOperation(message: any): void {
-    // FIXME
+  private _handelOperationAck(message: OperationAck): void {
+    // todo in theory we could pass the operation in to verify it as well.
+    this._concurrencyControl.processAcknowledgementOperation(message.seqNo, message.version);
+  }
+
+  private _handleRemoteOperation(message: RemoteOperation): void {
     var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       message.clientId,
-      0,
-      0,
-      null
+      -1, // not needed
+      message.version,
+      message.timestamp,
+      message.operation
     );
 
-    this._concurrencyControl.processIncomingOperation(unprocessed);
+    this._concurrencyControl.processRemoteOperation(unprocessed);
     var processed: ProcessedOperationEvent = this._concurrencyControl.getNextIncomingOperation();
 
     var operation: Operation = processed.operation;
     var clientId: string = processed.clientId;
-    var contextVersion: number = processed.contextVersion;
+    var contextVersion: number = processed.version;
     var timestamp: number = processed.timestamp;
 
     this._version = contextVersion;
@@ -149,5 +156,16 @@ export default class RealTimeModel extends EventEmitter {
         new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
       this._value._handleIncomingOperation(modelEvent);
     }
+  }
+
+  private _sendOperation(opEvent: UnprocessedOperationEvent): void {
+    var opSubmission: OperationSubmission = {
+      resourceId: this._resourceId,
+      seqNo: opEvent.seqNo,
+      version: opEvent.contextVersion,
+      operation: opEvent.operation,
+      type: MessageType.OPERATION_SUBMISSION
+    };
+    this._connection.send(opSubmission);
   }
 }

@@ -16,9 +16,13 @@ import DataType from "./DataType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 
 
-enum Events {SetProperty, RemoveProperty, Set}
-
 export default class RealTimeObject extends RealTimeContainer {
+
+  static Events: any = {
+    SET_PROPERTY: "setProperty",
+    REMOVE_PROPERTY: "removeProperty",
+    SET: "set"
+  };
 
   private _children: Object;
 
@@ -201,7 +205,7 @@ export default class RealTimeObject extends RealTimeContainer {
       this,
       property,
       value);
-    this.emit(Events[Events.SetProperty], event);
+    this.emit(RealTimeObject.Events.SET_PROPERTY, event);
 
     if (oldChild) {
       oldChild._setDetached();
@@ -225,7 +229,7 @@ export default class RealTimeObject extends RealTimeContainer {
       this,
       property,
       value);
-    this.emit(Events[Events.SetProperty], event);
+    this.emit(RealTimeObject.Events.SET_PROPERTY, event);
 
     if (oldChild) {
       oldChild._setDetached();
@@ -248,7 +252,7 @@ export default class RealTimeObject extends RealTimeContainer {
         operationEvent.timestamp,
         this,
         property);
-      this.emit(Events[Events.SetProperty], event);
+      this.emit(RealTimeObject.Events.REMOVE_PROPERTY, event);
 
       oldChild._setDetached();
     }
@@ -275,7 +279,7 @@ export default class RealTimeObject extends RealTimeContainer {
       operationEvent.timestamp,
       this,
       value);
-    this.emit(Events[Events.Set], event);
+    this.emit(RealTimeObject.Events.SET, event);
 
     for (var property in oldChildren) {
       if (oldChildren.hasOwnProperty(property)) {

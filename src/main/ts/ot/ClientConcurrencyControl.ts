@@ -14,6 +14,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
   };
 
   private _clientId: string;
+  private _seqNo: number;
 
   private _compoundOpInProgress: boolean;
   private _pendingCompoundOperation: DiscreteOperation[];
@@ -30,6 +31,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     super();
 
     this._clientId = clientId;
+    this._seqNo = 0;
     this._contextVersion = contextVersion;
     this._unappliedOperations = [];
     this._inflightOperations = [];
@@ -37,14 +39,6 @@ export default class ClientConcurrencyControl extends EventEmitter {
     this._transformer = transformer;
     this._compoundOpInProgress = false;
     this._pendingCompoundOperation = [];
-  }
-
-  processIncomingOperation(incomingOperation: UnprocessedOperationEvent): void {
-    if (incomingOperation.clientId === this._clientId) {
-      this.processAcknowledgementOperation(incomingOperation);
-    } else {
-      this.processRemoteOperation(incomingOperation);
-    }
   }
 
   hasNextIncomingOperation(): boolean {
@@ -84,6 +78,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
 
       var event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
         this._clientId,
+        this._seqNo++,
         this._contextVersion,
         new Date().getTime(),
         compoundOp);
@@ -123,6 +118,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
       this._inflightOperations.push(outgoingOperation);
       return new UnprocessedOperationEvent(
         this._clientId,
+        this._seqNo++,
         this._contextVersion,
         new Date().getTime(),
         outgoingOperation);
@@ -133,12 +129,20 @@ export default class ClientConcurrencyControl extends EventEmitter {
     // todo
   }
 
-  private processAcknowledgementOperation(incomingOperation: UnprocessedOperationEvent): void {
+  processAcknowledgementOperation(seqNo: number, version: number): void {
     if (this._inflightOperations.length === 0) {
       throw new Error("Received an operation from this site, but with no operations in flight.");
     }
+
+    if (this._contextVersion !== version) {
+      throw new Error("Acknowledgement did not meet expected context version of " + this._contextVersion + ":" + version);
+    }
+
+    this._contextVersion++;
+
     this._inflightOperations.shift();
-    // todo any verification to do?
+
+    // fixme we need to store an unprocessed event so we can verify te seqNo
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had inflight ops before. Now we have none. So now we have
       // changed commit state.
@@ -146,7 +150,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  private processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
+  processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
     if (incomingOperation.contextVersion > this._contextVersion) {
       throw new Error("Invalid context version.");
     }
@@ -165,6 +169,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     // add the processed operation to the incoming operations.
     this._unappliedOperations.push(new ProcessedOperationEvent(
       incomingOperation.clientId,
+      incomingOperation.seqNo,
       incomingOperation.contextVersion,
       incomingOperation.timestamp,
       remoteOperation));
@@ -186,7 +191,8 @@ export default class ClientConcurrencyControl extends EventEmitter {
       var opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
       serverOps[i] = new ProcessedOperationEvent(
         serverOps[i].clientId,
-        serverOps[i].contextVersion,
+        serverOps[i].seqNo,
+        serverOps[i].version,
         serverOps[i].timestamp,
         opPair.serverOp
       );

@@ -1,4 +1,3 @@
-// TODO: Decide what events we want for numbers.
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainer from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
@@ -10,14 +9,17 @@ import NumberAddEvent from "./events/NumberAddEvent";
 import NumberSetEvent from "./events/NumberSetEvent";
 import DataType from "./DataType";
 
-enum Events {Add, Set}
-
 export default class RealTimeNumber extends RealTimeValue {
+
+  static Events: any = {
+    ADD: "add",
+    SET: "set"
+  };
 
   /**
    * Constructs a new RealTimeNumber.
    */
-  constructor(private data: number,
+  constructor(private _data: number,
               parent: RealTimeContainer,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
@@ -33,7 +35,7 @@ export default class RealTimeNumber extends RealTimeValue {
 
     if (value !== 0) {
       var operation: NumberAddOperation = new NumberAddOperation(this.path(), false, value);
-      this.data += value;
+      this._data += value;
       this.sendOpCallback(operation);
     }
   }
@@ -70,12 +72,12 @@ export default class RealTimeNumber extends RealTimeValue {
     }
 
     var operation: NumberSetOperation = new NumberSetOperation(this.path(), false, value);
-    this.data = value;
+    this._data = value;
     this.sendOpCallback(operation);
   }
 
   value(): number {
-    return this.data;
+    return this._data;
   }
 
   // Handlers for incoming operations
@@ -96,7 +98,7 @@ export default class RealTimeNumber extends RealTimeValue {
     var value: number = operation.value;
 
     this._validateNumber(value);
-    this.data += value;
+    this._data += value;
 
     var event: NumberAddEvent = new NumberAddEvent(
       operationEvent.sessionId,
@@ -105,7 +107,7 @@ export default class RealTimeNumber extends RealTimeValue {
       operationEvent.timestamp,
       this,
       value);
-    this.emit(Events[Events.Add], event);
+    this.emit(RealTimeNumber.Events.ADD, event);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -113,7 +115,7 @@ export default class RealTimeNumber extends RealTimeValue {
     var value: number = operation.value;
 
     this._validateNumber(value);
-    this.data = value;
+    this._data = value;
 
     var event: NumberSetEvent = new NumberSetEvent(
       operationEvent.sessionId,
@@ -122,7 +124,7 @@ export default class RealTimeNumber extends RealTimeValue {
       operationEvent.timestamp,
       this,
       value);
-    this.emit(Events[Events.Set], event);
+    this.emit(RealTimeNumber.Events.SET, event);
   }
 
   private _validateNumber(value: number): void {

@@ -9,4 +9,6 @@ export default class MessageType {
   static CLOSE_REAL_TIME_MODEL: string = "closeRealTimeModel";
   static FORCE_CLOSE_REAL_TIME_MODEL: string = "forceCloseRealTimeModel";
   static REMOTE_OPERATION: string = "remoteOp";
+  static OPERATION_SUBMISSION: string = "opSubmit";
+  static OPERATION_ACK: string = "opAck";
 }

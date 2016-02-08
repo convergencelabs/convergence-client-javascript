@@ -26,7 +26,9 @@ export default class ModelService extends EventEmitter {
     super();
 
     this._connection.addMultipleMessageListener(
-      [MessageType.FORCE_CLOSE_REAL_TIME_MODEL],
+      [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
+        MessageType.REMOTE_OPERATION,
+        MessageType.OPERATION_ACK],
       (message: MessageEvent) => this._handleMessage(message));
   }
 
@@ -35,7 +37,7 @@ export default class ModelService extends EventEmitter {
     if (model !== undefined) {
       model._handleMessage(messageEvent);
     } else {
-      // todo erro.
+      // todo error.
     }
   }
 

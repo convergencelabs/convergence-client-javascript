@@ -18,9 +18,17 @@
         return domain.modelService().open("foo", modelId);
     }).then(function(model) {
         console.log("open success: " + model.data().value());
+
         model.on("closed", function(reason) {
            console.log("mode closed: " + reason);
         });
+
+        model.on("commitStateChanged", function(state) {
+           console.log("committed: " + state);
+        });
+
+        model.data().setProperty("foo", "bar");
+
         return model.close();
     }).then(function() {
         console.log("close success" );
