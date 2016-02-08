@@ -122,7 +122,6 @@ export default class ConvergenceSocket extends EventEmitter {
     }
 
     var encodedMessage: string = JSON.stringify(message);
-    console.log(encodedMessage);
     this._socket.send(encodedMessage);
   }
 
@@ -137,7 +136,6 @@ export default class ConvergenceSocket extends EventEmitter {
     var self: ConvergenceSocket = this;
     socket.onmessage = function (evt: MessageEvent): void {
       try {
-        console.log(evt.data);
         self.emit(ConvergenceSocket.Events.MESSAGE, JSON.parse(evt.data));
       } catch (e) {
         console.error("Error processing Web Socket Message.", e);

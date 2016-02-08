@@ -136,7 +136,6 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   abort(reason: string): void {
-    console.log("Aborting connection: " + reason);
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -145,7 +144,6 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   close(): Promise<void> {
-    console.log("Closing connection");
     this.removeAllListenersForAllEvents();
     if (this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();

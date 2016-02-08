@@ -32,7 +32,7 @@ export default class MockServer {
       this._connection = ws;
 
       server.on("message", (message: string) => {
-        console.log("Receive: " + message);
+        console.log("Server Receive: " + message);
         this._handleMessage(message);
       });
 
@@ -190,7 +190,7 @@ export default class MockServer {
 
   private _send(envelope: MessageEnvelope): void {
     var json: string = JSON.stringify(envelope);
-    console.log("Sending: " + json);
+    console.log("Server Sending: " + json);
     this._server.send(json);
   }
 
