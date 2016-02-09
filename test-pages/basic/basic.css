@@ -21,3 +21,9 @@ div#console {
 select#arrayVal {
   width: 300px;
 }
+
+#objectVal {
+  width: 300px;
+  border: 1px solid black;
+  margin-bottom: 15px;
+}
