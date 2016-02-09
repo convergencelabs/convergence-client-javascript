@@ -14,11 +14,14 @@ import {DeleteRealTimeModelRequest} from "../protocol/model/deleteRealtimeModel"
 import Deferred from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import {CloseRealTimeModelRequest} from "../protocol/model/closeRealtimeModel";
+import {ModelDataRequest} from "../protocol/model/modelDataRequest";
+import {ReplyCallback} from "../connection/ProtocolConnection";
+import {ModelDataResponse} from "../protocol/model/modelDataRequest";
 
 
 export default class ModelService extends EventEmitter {
 
-  private _openRequests: { [key: string]: OpenRequest; } = {};
+  private _openRequestsByFqn: { [key: string]: OpenRequest; } = {};
   private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};
   private _openModelsByRid: { [key: string]: RealTimeModel; } = {};
 
@@ -28,16 +31,41 @@ export default class ModelService extends EventEmitter {
     this._connection.addMultipleMessageListener(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
-        MessageType.OPERATION_ACK],
+        MessageType.OPERATION_ACK,
+        MessageType.MODEL_DATA_REQUEST],
       (message: MessageEvent) => this._handleMessage(message));
   }
 
   private _handleMessage(messageEvent: MessageEvent): void {
-    var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
-    if (model !== undefined) {
-      model._handleMessage(messageEvent);
+    switch (messageEvent.message.type) {
+      case MessageType.MODEL_DATA_REQUEST:
+        this._handleModelDataRequest(
+          <ModelDataRequest>messageEvent.message,
+          messageEvent.callback);
+        break;
+      default:
+        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+        if (model !== undefined) {
+          model._handleMessage(messageEvent);
+        } else {
+          // todo error.
+        }
+    }
+  }
+
+  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
+    var fqn: ModelFqn = request.modelFqn;
+    var openReq: OpenRequest = this._openRequestsByFqn[ModelService._createModelKey(fqn)];
+    if (openReq === undefined) {
+      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
+    } else if (openReq.initializer === undefined) {
+      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
     } else {
-      // todo error.
+      var response: ModelDataResponse = {
+        data: openReq.initializer(),
+        type: MessageType.MODEL_DATA_REQUEST
+      };
+      replyCallback.reply(response);
     }
   }
 
@@ -54,7 +82,7 @@ export default class ModelService extends EventEmitter {
       return Promise.resolve(openModel);
     }
 
-    var openRequest: OpenRequest = this._openRequests[k];
+    var openRequest: OpenRequest = this._openRequestsByFqn[k];
     if (openRequest !== undefined) {
       return openRequest.deferred.promise();
     }
@@ -85,14 +113,14 @@ export default class ModelService extends EventEmitter {
 
       this._openModelsByFqn[k] = model;
       this._openModelsByRid[response.resourceId] = model;
-      delete this._openRequests[k];
+      delete this._openRequestsByFqn[k];
 
       deferred.resolve(model);
     }).catch((error: Error) => {
       deferred.reject(error);
     });
 
-    this._openRequests[k] = {
+    this._openRequestsByFqn[k] = {
       deferred: deferred,
       initializer: initializer
     };

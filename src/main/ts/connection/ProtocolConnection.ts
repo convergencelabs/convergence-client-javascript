@@ -13,12 +13,11 @@ import {OutgoingProtocolRequestMessage} from "../protocol/protocol";
 import {ProtocolMessage} from "../protocol/protocol";
 import {ErrorMessage} from "../protocol/ErrorMessage";
 import {ErrorMessageDeserializer} from "../protocol/ErrorMessage";
-import {IncomingProtocolRequestMessage} from "../protocol/protocol";
-import {IncomingProtocolNormalMessage} from "../protocol/protocol";
 import {OutgoingProtocolResponseMessage} from "../protocol/protocol";
 import OpCode from "./OpCode";
 import EventEmitter from "../util/EventEmitter";
 import Deferred from "../util/Deferred";
+import {debugFlags} from "../Debug";
 
 export class ProtocolConnection extends EventEmitter {
 
@@ -152,6 +151,12 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   sendMessage(envelope: MessageEnvelope): void {
+    if ((debugFlags.protocol.messages &&
+      envelope.opCode !== OpCode.PING &&
+      envelope.opCode !== OpCode.PONG) ||
+      debugFlags.protocol.pings) {
+      console.log("S: " + JSON.stringify(envelope));
+    }
     this._socket.send(envelope);
   }
 
@@ -160,6 +165,13 @@ export class ProtocolConnection extends EventEmitter {
 
     if (this._protocolConfig.heartbeatConfig.enabled && this._heartbeatHelper) {
       this._heartbeatHelper.messageReceived();
+    }
+
+    if ((debugFlags.protocol.messages &&
+      message.opCode !== OpCode.PING &&
+      message.opCode !== OpCode.PONG) ||
+      debugFlags.protocol.pings) {
+      console.log("R: " + JSON.stringify(message));
     }
 
     switch (envelope.opCode) {
@@ -257,13 +269,6 @@ interface RequestRecord {
   requestType: string;
 }
 
-export interface ProtocolEventHandler {
-  onConnectionError(error: string): void;
-  onConnectionDropped(): void;
-  onConnectionClosed(): void;
-  onRequestReceived(message: IncomingProtocolRequestMessage, replyCallback: ReplyCallback): void;
-  onMessageMessage(message: IncomingProtocolNormalMessage): void;
-}
 
 export interface ReplyCallback {
   reply(message: OutgoingProtocolResponseMessage): void;

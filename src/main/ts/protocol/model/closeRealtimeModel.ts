@@ -1,5 +1,4 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import MessageType from "../MessageType";
 
 export interface CloseRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   resourceId: string;

@@ -11,4 +11,5 @@ export default class MessageType {
   static REMOTE_OPERATION: string = "remoteOp";
   static OPERATION_SUBMISSION: string = "opSubmit";
   static OPERATION_ACK: string = "opAck";
+  static MODEL_DATA_REQUEST: string = "modelData";
 }

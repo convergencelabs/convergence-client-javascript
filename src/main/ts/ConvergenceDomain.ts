@@ -3,8 +3,12 @@ import ConvergenceConnection from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
 import {HandshakeResponse} from "./protocol/handhsake";
+import {debugFlags as flags} from "./Debug";
+
 
 export default class ConvergenceDomain extends EventEmitter {
+
+  static debugFlags: any = flags;
 
   static Events: any = {
     CONNECTED: "connected",

@@ -24,6 +24,9 @@ import {RemoteOperationDeserializer} from "./model/removeOperation";
 import {OperationSubmissionSerializer} from "./model/operationSubmission";
 import {OperationSubmission} from "./model/operationSubmission";
 import {OperationAckDeserializer} from "./model/operationAck";
+import {ModelDataRequestDeserializer} from "./model/modelDataRequest";
+import {ModelDataResponse} from "./model/modelDataRequest";
+import {ModelDataResponseSerializer} from "./model/modelDataRequest";
 
 export class MessageSerializer {
 
@@ -43,6 +46,8 @@ export class MessageSerializer {
         return RemoteOperationDeserializer.deserialize(body);
       case MessageType.OPERATION_ACK:
         return OperationAckDeserializer.deserialize(body);
+      case MessageType.MODEL_DATA_REQUEST:
+        return ModelDataRequestDeserializer.deserialize(body);
       case MessageType.CREATE_REAL_TIME_MODEL:
       case MessageType.DELETE_REAL_TIME_MODEL:
       case MessageType.CLOSE_REAL_TIME_MODEL:
@@ -75,6 +80,8 @@ export class MessageSerializer {
         return CloseRealTimeModelRequestSerializer.serialize(<CloseRealTimeModelRequest>body);
       case MessageType.OPERATION_SUBMISSION:
         return OperationSubmissionSerializer.serialize(<OperationSubmission>body);
+      case MessageType.MODEL_DATA_REQUEST:
+        return ModelDataResponseSerializer.serialize(<ModelDataResponse>body);
       default:
         throw new Error("Unexpected protocol type: " + type);
     }

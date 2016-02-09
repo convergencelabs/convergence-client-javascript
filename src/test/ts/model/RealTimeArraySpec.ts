@@ -68,7 +68,7 @@ describe('RealTimeArray', () => {
 
   it('Value is correct after move', () => {
     var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
-    myArray.move(1, 2);
+    myArray.reorder(1, 2);
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
@@ -111,7 +111,7 @@ describe('RealTimeArray', () => {
   it('Correct operation is sent after move', () => {
     lastOp = null;
     var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
-    myArray.move(1, 2);
+    myArray.reorder(1, 2);
 
     var expectedOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
     expect(lastOp).to.deep.equal(expectedOp);
@@ -223,7 +223,7 @@ describe('RealTimeArray', () => {
   it('Correct event is fired after ArrayMoveOperation', () => {
     lastEvent = null;
     var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
-    myArray.on("Move", lastEventCallback);
+    myArray.on(RealTimeArray.Events.REORDER, lastEventCallback);
 
     var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);

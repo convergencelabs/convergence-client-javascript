@@ -1,0 +1,23 @@
+div.dt {
+  margin-bottom: 15px;
+}
+
+div.dt label {
+  display: block;
+  font-weight: bold;
+}
+
+textarea.string {
+  height: 100px;
+  width: 300px;
+}
+
+div#console {
+  border: 1px solid black;
+  width: 100%;
+  height: 300px;
+}
+
+select#arrayVal {
+  width: 300px;
+}

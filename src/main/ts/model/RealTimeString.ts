@@ -149,7 +149,7 @@ export default class RealTimeString extends RealTimeValue {
   private _validateInsert(index: number, value: string): void {
     // TODO: Add integer check
     if (this.data.length < index || index < 0) {
-      throw new Error("Index out of bounds!");
+      throw new Error("Index out of bounds: " + index);
     }
 
     if (typeof value !== "string") {
@@ -159,7 +159,7 @@ export default class RealTimeString extends RealTimeValue {
 
   private _validateRemove(index: number, length: number): void {
     // TODO: Add integer check
-    if (this.data.length <= index + length || index < 0) {
+    if (this.data.length < index + length || index < 0) {
       throw new Error("Index out of bounds!");
     }
   }

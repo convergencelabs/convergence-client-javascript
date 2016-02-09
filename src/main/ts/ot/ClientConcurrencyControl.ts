@@ -166,6 +166,8 @@ export default class ClientConcurrencyControl extends EventEmitter {
     // flight ops so we do this after handling the in flight.
     remoteOperation = this.transformIncoming(remoteOperation, this._pendingCompoundOperation);
 
+    this._contextVersion++;
+
     // add the processed operation to the incoming operations.
     this._unappliedOperations.push(new ProcessedOperationEvent(
       incomingOperation.clientId,

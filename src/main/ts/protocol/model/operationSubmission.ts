@@ -1,4 +1,3 @@
-import MessageType from "../MessageType";
 import {OutgoingProtocolNormalMessage} from "../protocol";
 import Operation from "../../ot/ops/Operation";
 import {OperationSerializer} from "./operationData";

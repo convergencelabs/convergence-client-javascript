@@ -25,7 +25,7 @@ export default class RealTimeArray extends RealTimeContainer {
     INSERT: "insert",
     REMOVE: "remove",
     REPLACE: "replace",
-    MOVE: "move",
+    REORDER: "reorder",
     SET: "set"
   };
 
@@ -100,7 +100,7 @@ export default class RealTimeArray extends RealTimeContainer {
    * @param {number} fromIndex The index to move the value from.
    * @param {number} toIndex The index to move the value to.
    */
-  move(fromIndex: number, toIndex: number): void {
+  reorder(fromIndex: number, toIndex: number): void {
     this._validateMove(fromIndex, toIndex);
 
     var operation: ArrayMoveOperation = new ArrayMoveOperation(this.path(), false, fromIndex, toIndex);
@@ -288,7 +288,7 @@ export default class RealTimeArray extends RealTimeContainer {
       this,
       fromIndex,
       toIndex);
-    this.emit(RealTimeArray.Events.MOVE, event);
+    this.emit(RealTimeArray.Events.REORDER, event);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
