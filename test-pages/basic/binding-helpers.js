@@ -4,7 +4,6 @@
 function bindToTextInput(textArea, rtString) {
   var events = ['input'];
   textArea.value = rtString.value();
-  var oldVal = rtString.value();
 
   for (var i = 0; i < events.length; i++) {
     var event = events[i];
@@ -12,9 +11,7 @@ function bindToTextInput(textArea, rtString) {
   }
 
   function handleTextAreaEvent() {
-    var newValue = textArea.value;
-    processEvent(oldVal, newValue);
-    oldVal = newValue;
+    processEvent(rtString.value(), textArea.value);
   }
 
   function processEvent(oldval, newval) {
