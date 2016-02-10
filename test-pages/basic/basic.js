@@ -173,6 +173,7 @@ function bindSelectList(selectInput, arrayModel) {
 
   arrayModel.on("replace", function (evt) {
     selectInput.options[evt.index].textContent = evt.value;
+    selectInput.options[evt.index].value = evt.value;
   });
 
   arrayModel.on("reorder", function (evt) {
