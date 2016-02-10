@@ -5,17 +5,17 @@ import RealTimeString from "./RealTimeString";
 import RealTimeArray from "./RealTimeArray";
 import RealTimeObject from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
-import RealTimeContainer from "./RealTimeContainerValue";
-import {PathElement} from "./Path";
+import RealTimeContainerValue from "./RealTimeContainerValue";
+import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import RealTimeBoolean from "./RealTimeBoolean";
 
 export default class RealTimeValueFactory {
 
   public static create(data: any,
-                       parent: RealTimeContainer,
+                       parent: RealTimeContainerValue<any>,
                        fieldInParent: PathElement,
-                       sendOpCallback: (operation: DiscreteOperation) => void): RealTimeValue {
+                       sendOpCallback: (operation: DiscreteOperation) => void): RealTimeValue<any> {
     var type: string = typeof data;
     if (data === null) {
       return new RealTimeNull(parent, fieldInParent, sendOpCallback);

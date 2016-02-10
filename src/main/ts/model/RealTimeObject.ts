@@ -1,4 +1,4 @@
-import RealTimeContainer from "./RealTimeContainerValue";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import RealTimeValue from "./RealTimeValue";
@@ -12,11 +12,11 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import ObjectSetPropertyEvent from "./events/ObjectSetPropertyEvent";
 import ObjectRemovePropertyEvent from "./events/ObjectRemovePropertyEvent";
 import ObjectSetEvent from "./events/ObjectSetEvent";
-import DataType from "./DataType";
+import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 
 
-export default class RealTimeObject extends RealTimeContainer {
+export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
   static Events: any = {
     SET_PROPERTY: "setProperty",
@@ -24,15 +24,15 @@ export default class RealTimeObject extends RealTimeContainer {
     SET: "set"
   };
 
-  private _children: Object;
+  private _children: { [key: string]: RealTimeValue<any>; };
 
   /**
    * Constructs a new RealTimeObject.
    */
-  constructor(data: any, parent: RealTimeContainer,
+  constructor(data: any, parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(DataType.Object, parent, fieldInParent, sendOpCallback);
+    super(RealTimeValueType.Object, parent, fieldInParent, sendOpCallback);
 
     this._children = {};
 
@@ -43,12 +43,7 @@ export default class RealTimeObject extends RealTimeContainer {
     }
   }
 
-  /**
-   * Sets a property for the RealTimeObject
-   * @param {string} property - The property to set
-   * @param {Object|number|string|boolean} value - The value of the property
-   */
-  setProperty(property: string, value: Object|number|string|boolean): RealTimeValue {
+  setProperty(property: string, value: Object|number|string|boolean): RealTimeValue<any> {
 
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(property)) {
@@ -58,16 +53,12 @@ export default class RealTimeObject extends RealTimeContainer {
       operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
     }
 
-    var child: RealTimeValue = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
     this._children[property] = child;
     this.sendOpCallback(operation);
     return child;
   }
 
-  /**
-   * Removes a property from the RealTimeObject
-   * @param {string} property - The property
-   */
   removeProperty(property: string): void {
     if (!this._children.hasOwnProperty(property)) {
       throw new Error("Cannot remove property that is undefined!");
@@ -79,10 +70,6 @@ export default class RealTimeObject extends RealTimeContainer {
     this.sendOpCallback(operation);
   }
 
-  /**
-   * Sets the value of the RealTimeObject.
-   * @param {Object} value Must be an Object.
-   */
   setValue(value: Object): void {
     if (!value || typeof value !== "object") {
       throw new Error("Value must be an object and cannot be null or undefined!");
@@ -90,7 +77,7 @@ export default class RealTimeObject extends RealTimeContainer {
 
     var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
 
-    this.forEach((oldChild: RealTimeValue) => oldChild._setDetached());
+    this.forEach((oldChild: RealTimeValue<any>) => oldChild._setDetached());
     this._children = {};
 
     for (var prop in value) {
@@ -101,36 +88,26 @@ export default class RealTimeObject extends RealTimeContainer {
     this.sendOpCallback(operation);
   }
 
-  /**
-   * Checks for the existence of a property.
-   * @param {string} property The propety.
-   * @returns {boolean} true if the property exists, false otherwise.
-   */
+  properties(): string[] {
+    return Object.getOwnPropertyNames(this._children);
+  }
+
   hasProperty(property: string): boolean {
     return this._children.hasOwnProperty(property);
   }
 
-  /**
-   * Returns a RealTimeValue representing the child of this object at the path specified by
-   * pathArgs. Because this class represents an object, the first instance of pathArgs
-   * must be a string. All arguments must be either  strings or integers, dependent
-   * on whether the RealTimeValue at that path level is an RealTimeObject or an RealTimeArray.
-   * @param {...string|number} pathArgs Array of path arguments.
-   * @returns {convergence.model.RealTimeValue}
-   */
-  child(pathArgs: any): RealTimeValue {
-    // We're letting them pass in individual path arguments or a single array of path arguments
-    var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
-    if (pathArgsForReal.length === 0) {
-      throw new Error("Must at least specify the child index in the path");
+  _path(pathArgs: Path): RealTimeValue<any> {
+    if (pathArgs.length === 0) {
+      return this;
     }
-    var prop: string = <string> pathArgsForReal[0];
-    var child: RealTimeValue = this._children[prop];
-    if (pathArgsForReal.length > 1) {
-      if (child.type() === DataType.Object) {
-        return (<RealTimeObject> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
-      } else if (child.type() === DataType.Array) {
-        return (<RealTimeArray> child).child(pathArgsForReal.slice(1, pathArgsForReal.length));
+
+    var prop: string = <string> pathArgs[0];
+    var child: RealTimeValue<any> = this._children[prop];
+    if (pathArgs.length > 1) {
+      if (child.type() === RealTimeValueType.Object) {
+        return (<RealTimeObject> child).child(pathArgs.slice(1, pathArgs.length));
+      } else if (child.type() === RealTimeValueType.Array) {
+        return (<RealTimeArray> child).child(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
         return RealTimeValueFactory.create(undefined, null, null, this.sendOpCallback);
@@ -140,11 +117,7 @@ export default class RealTimeObject extends RealTimeContainer {
     }
   }
 
-  /**
-   * Performs the specified action for each property in the RealTimeObject.
-   * @param callback  A function that accepts a RealTimeValue. forEach calls the callback function one time for each property.
-   */
-  forEach(callback: (model: RealTimeValue, property?: string) => void): void {
+  forEach(callback: (model: RealTimeValue<any>, property?: string) => void): void {
     for (var property in this._children) {
       if (this._children.hasOwnProperty(property)) {
         callback(this._children[property], property);
@@ -152,38 +125,52 @@ export default class RealTimeObject extends RealTimeContainer {
     }
   }
 
-  getProperty(property: string): RealTimeValue {
+  getProperty(property: string): RealTimeValue<any> {
     return this._children[property];
   }
 
-  value(): Object {
+  value(): { [key: string]: any; } {
     var returnObject: Object = {};
-    this.forEach((model: RealTimeValue, property: string) => {
+    this.forEach((model: RealTimeValue<any>, property: string) => {
       returnObject[property] = model.value();
     });
     return returnObject;
   }
 
   protected _detachChildren(): void {
-    this.forEach((child: RealTimeValue) => {
+    this.forEach((child: RealTimeValue<any>) => {
       child._setDetached();
     });
   }
 
   // Handlers for incoming operations
 
-  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === ObjectAddPropertyOperation.TYPE) {
-      this._handleAddPropertyOperation(operationEvent);
-    } else if (type === ObjectSetPropertyOperation.TYPE) {
-      this._handleSetPropertyOperation(operationEvent);
-    } else if (type === ObjectRemovePropertyOperation.TYPE) {
-      this._handleRemovePropertyOperation(operationEvent);
-    } else if (type === ObjectSetOperation.TYPE) {
-      this._handleSetOperation(operationEvent);
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+    if (relativePath.length === 0) {
+      var type: string = operationEvent.operation.type;
+      if (type === ObjectAddPropertyOperation.TYPE) {
+        this._handleAddPropertyOperation(operationEvent);
+      } else if (type === ObjectSetPropertyOperation.TYPE) {
+        this._handleSetPropertyOperation(operationEvent);
+      } else if (type === ObjectRemovePropertyOperation.TYPE) {
+        this._handleRemovePropertyOperation(operationEvent);
+      } else if (type === ObjectSetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
     } else {
-      throw new Error("Invalid operation!");
+      var childPath: any = relativePath[0];
+      if (typeof childPath !== "string") {
+        throw new Error("Invalid path element, object properties must be a string");
+      }
+      var child: RealTimeValue<any> = this._children[childPath];
+      if (child === undefined) {
+        throw new Error("Invalid path element, child does not exist");
+      }
+      var subPath: Path = relativePath.slice(0);
+      subPath.shift();
+      child._handleRemoteOperation(subPath, operationEvent);
     }
   }
 
@@ -192,7 +179,7 @@ export default class RealTimeObject extends RealTimeContainer {
     var property: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
 
-    var oldChild: RealTimeValue = this._children[property];
+    var oldChild: RealTimeValue<any> = this._children[property];
 
 
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
@@ -217,7 +204,7 @@ export default class RealTimeObject extends RealTimeContainer {
     var property: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
 
-    var oldChild: RealTimeValue = this._children[property];
+    var oldChild: RealTimeValue<any> = this._children[property];
 
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
 
@@ -240,7 +227,7 @@ export default class RealTimeObject extends RealTimeContainer {
     var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
     var property: string = operation.prop;
 
-    var oldChild: RealTimeValue = this._children[property];
+    var oldChild: RealTimeValue<any> = this._children[property];
 
     if (oldChild) {
       delete this._children[property];
@@ -288,4 +275,3 @@ export default class RealTimeObject extends RealTimeContainer {
     }
   }
 }
-

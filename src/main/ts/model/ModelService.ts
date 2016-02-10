@@ -55,7 +55,7 @@ export default class ModelService extends EventEmitter {
 
   private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
     var fqn: ModelFqn = request.modelFqn;
-    var openReq: OpenRequest = this._openRequestsByFqn[ModelService._createModelKey(fqn)];
+    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
     if (openReq === undefined) {
       replyCallback.expectedError("unknown_model", "the requested model is not being opened");
     } else if (openReq.initializer === undefined) {
@@ -75,7 +75,7 @@ export default class ModelService extends EventEmitter {
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    var k: string = ModelService._createModelKey(fqn);
+    var k: string = fqn.hash();
 
     var openModel: RealTimeModel = this._openModelsByFqn[k];
     if (openModel !== undefined) {
@@ -163,10 +163,6 @@ export default class ModelService extends EventEmitter {
     return this._connection.request(request).then(() => {
       // convert to void
     });
-  }
-
-  private static _createModelKey(fqn: ModelFqn): string {
-    return fqn.collectionId + "/" + fqn.modelId;
   }
 }
 

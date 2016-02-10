@@ -18,6 +18,7 @@ import {OperationSubmission} from "../protocol/model/operationSubmission";
 import {RemoteOperation} from "../protocol/model/removeOperation";
 import {OperationAck} from "../protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
+import {Path} from "../ot/Path";
 
 export default class RealTimeModel extends EventEmitter {
 
@@ -75,6 +76,11 @@ export default class RealTimeModel extends EventEmitter {
 
   data(): RealTimeObject {
     return this._value;
+  }
+
+  dataAt(path: any): RealTimeValue<any> {
+    var pathArgs: Path = Array.isArray(path) ? path : arguments;
+    return this._value._path(pathArgs);
   }
 
   session(): Session {
@@ -150,14 +156,12 @@ export default class RealTimeModel extends EventEmitter {
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         // TODO: Determine where to get userId
         var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, "user", contextVersion, timestamp, op);
-        var rtv: RealTimeValue = this._value.child(modelEvent.operation.path);
-        rtv._handleIncomingOperation(modelEvent);
+        this._value._handleRemoteOperation(modelEvent.operation.path, modelEvent);
       });
     } else {
       var modelEvent: ModelOperationEvent =
         new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
-      var rtv: RealTimeValue = this._value.child(modelEvent.operation.path);
-      rtv._handleIncomingOperation(modelEvent);
+      this._value._handleRemoteOperation(modelEvent.operation.path, modelEvent);
     }
   }
 

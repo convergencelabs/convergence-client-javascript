@@ -1,5 +1,5 @@
 import RealTimeValue from "./RealTimeValue";
-import RealTimeContainer from "./RealTimeContainerValue";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import NumberAddOperation from "../ot/ops/NumberAddOperation";
@@ -7,9 +7,10 @@ import NumberSetOperation from "../ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import NumberAddEvent from "./events/NumberAddEvent";
 import NumberSetEvent from "./events/NumberSetEvent";
-import DataType from "./DataType";
+import RealTimeValueType from "./RealTimeValueType";
+import {Path} from "../ot/Path";
 
-export default class RealTimeNumber extends RealTimeValue {
+export default class RealTimeNumber extends RealTimeValue<number> {
 
   static Events: any = {
     ADD: "add",
@@ -20,10 +21,10 @@ export default class RealTimeNumber extends RealTimeValue {
    * Constructs a new RealTimeNumber.
    */
   constructor(private _data: number,
-              parent: RealTimeContainer,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(DataType.Number, parent, fieldInParent, sendOpCallback);
+    super(RealTimeValueType.Number, parent, fieldInParent, sendOpCallback);
   }
 
   /**
@@ -82,14 +83,18 @@ export default class RealTimeNumber extends RealTimeValue {
 
   // Handlers for incoming operations
 
-  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === NumberAddOperation.TYPE) {
-      this._handleAddOperation(operationEvent);
-    } else if (type === NumberSetOperation.TYPE) {
-      this._handleSetOperation(operationEvent);
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+    if (relativePath.length === 0) {
+      var type: string = operationEvent.operation.type;
+      if (type === NumberAddOperation.TYPE) {
+        this._handleAddOperation(operationEvent);
+      } else if (type === NumberSetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid path: number values do not have children");
     }
   }
 

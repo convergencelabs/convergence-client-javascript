@@ -87,7 +87,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myString.value()).to.equal("AnotherString");
   });
@@ -97,7 +97,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myString.value()).to.equal("MyEditedString");
   });
@@ -107,7 +107,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myString.value()).to.equal("String");
   });
@@ -119,7 +119,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: StringSetEvent = new StringSetEvent(sessionId, username, version, timestamp, myString, "AnotherString");
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -132,7 +132,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: StringInsertEvent = new StringInsertEvent(sessionId, username, version, timestamp, myString, 2, "Edited");
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -145,7 +145,7 @@ describe('RealTimeString', () => {
 
     var incomingOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myString._handleIncomingOperation(incomingEvent);
+    myString._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: StringRemoveEvent = new StringRemoveEvent(sessionId, username, version, timestamp, myString, 0, "My");
     expect(lastEvent).to.deep.equal(expectedEvent);

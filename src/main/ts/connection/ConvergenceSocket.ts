@@ -166,8 +166,8 @@ export default class ConvergenceSocket extends EventEmitter {
       }
     };
 
-    socket.onerror = function (evt: any): void {
-      if (this._socket.readyState === WebSocket.CONNECTING) {
+    socket.onerror = (evt: any) => {
+      if (this._socket === undefined || this._socket.readyState === WebSocket.CONNECTING) {
         // We don't want to handle errors during connection here, because
         // the close event will give us more information.
         if (debugFlags.socket.connection) {

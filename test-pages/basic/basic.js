@@ -175,21 +175,20 @@ function addTableRow(prop, val) {
 
 function bindToModel(realTimeModel) {
   model = realTimeModel;
-  var root = model.data();
 
-  var rtString = root.child("string");
+  var rtString = model.dataAt("string");
   bindToTextInput(stringInput, rtString);
 
-  var rtBoolean = root.child("boolean");
+  var rtBoolean = model.dataAt("boolean");
   bindCheckboxInput(booleanInput, rtBoolean);
 
-  var rtNumber = root.child("number");
+  var rtNumber = model.dataAt("number");
   bindNumberInput(numberInput, rtNumber);
 
-  var rtArray = root.child("array");
+  var rtArray = model.dataAt("array");
   bindSelectList(arrayInput, rtArray);
 
-  renderTable(model.data().child("object"));
+  renderTable(model.dataAt("object"));
   bindTableButtons();
   bindTableEvents();
 }

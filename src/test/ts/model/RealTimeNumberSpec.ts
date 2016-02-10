@@ -85,7 +85,7 @@ describe('RealTimeNumber', () => {
 
     var incomingOp: NumberAddOperation = new NumberAddOperation([], false, 5);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myNumber._handleIncomingOperation(incomingEvent);
+    myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myNumber.value()).to.equal(15);
   });
@@ -95,7 +95,7 @@ describe('RealTimeNumber', () => {
 
     var incomingOp: NumberSetOperation = new NumberSetOperation([], false, 20);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myNumber._handleIncomingOperation(incomingEvent);
+    myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myNumber.value()).to.equal(20);
   });
@@ -107,7 +107,7 @@ describe('RealTimeNumber', () => {
 
     var incomingOp: NumberAddOperation = new NumberAddOperation([], false, 5);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myNumber._handleIncomingOperation(incomingEvent);
+    myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: NumberAddEvent = new NumberAddEvent(sessionId, username, version, timestamp, myNumber, 5);
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -120,7 +120,7 @@ describe('RealTimeNumber', () => {
 
     var incomingOp: NumberSetOperation = new NumberSetOperation([], false, 20);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myNumber._handleIncomingOperation(incomingEvent);
+    myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: NumberSetEvent = new NumberSetEvent(sessionId, username, version, timestamp, myNumber, 20);
     expect(lastEvent).to.deep.equal(expectedEvent);

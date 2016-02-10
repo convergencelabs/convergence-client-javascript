@@ -53,7 +53,7 @@ describe('RealTimeBoolean', () => {
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myBoolean._handleIncomingOperation(incomingEvent);
+    myBoolean._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myBoolean.value()).to.equal(false);
   });
@@ -65,7 +65,7 @@ describe('RealTimeBoolean', () => {
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myBoolean._handleIncomingOperation(incomingEvent);
+    myBoolean._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: BooleanSetEvent = new BooleanSetEvent(sessionId, username, version, timestamp, myBoolean, false);
     expect(lastEvent).to.deep.equal(expectedEvent);

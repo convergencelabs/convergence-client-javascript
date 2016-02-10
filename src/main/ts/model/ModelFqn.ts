@@ -6,4 +6,8 @@ export default class ModelFqn {
   constructor(public collectionId: string, public modelId: string) {
     Object.freeze(this);
   }
+
+  hash(): string {
+    return this.collectionId + "/" + this.modelId;
+  }
 }

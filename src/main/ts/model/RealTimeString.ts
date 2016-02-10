@@ -1,5 +1,5 @@
 import RealTimeValue from "./RealTimeValue";
-import RealTimeContainer from "./RealTimeContainerValue";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import StringInsertOperation from "../ot/ops/StringInsertOperation";
@@ -9,10 +9,11 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import StringInsertEvent from "./events/StringInsertEvent";
 import StringRemoveEvent from "./events/StringRemoveEvent";
 import StringSetEvent from "./events/StringSetEvent";
-import DataType from "./DataType";
+import RealTimeValueType from "./RealTimeValueType";
+import {Path} from "../ot/Path";
 
 
-export default class RealTimeString extends RealTimeValue {
+export default class RealTimeString extends RealTimeValue<String> {
 
   static Events: any = {
     INSERT: "insert",
@@ -24,10 +25,10 @@ export default class RealTimeString extends RealTimeValue {
    * Constructs a new RealTimeString.
    */
   constructor(private data: string,
-              parent: RealTimeContainer,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(DataType.String, parent, fieldInParent, sendOpCallback);
+    super(RealTimeValueType.String, parent, fieldInParent, sendOpCallback);
   }
 
   /**
@@ -76,16 +77,20 @@ export default class RealTimeString extends RealTimeValue {
     return this.data;
   }
 
-  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === StringInsertOperation.TYPE) {
-      this._handleInsertOperation(operationEvent);
-    } else if (type === StringRemoveOperation.TYPE) {
-      this._handleRemoveOperation(operationEvent);
-    } else if (type === StringSetOperation.TYPE) {
-      this._handleSetOperation(operationEvent);
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+    if (relativePath.length === 0) {
+      var type: string = operationEvent.operation.type;
+      if (type === StringInsertOperation.TYPE) {
+        this._handleInsertOperation(operationEvent);
+      } else if (type === StringRemoveOperation.TYPE) {
+        this._handleRemoveOperation(operationEvent);
+      } else if (type === StringSetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid path: string values do not have children");
     }
   }
 

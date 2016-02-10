@@ -8,7 +8,7 @@ abstract class ModelChangeEvent {
               public username: string,
               public version: number,
               public timestamp: number,
-              public target: RealTimeValue) {
+              public target: RealTimeValue<any>) {
   }
 }
 

@@ -49,7 +49,7 @@ describe('RealTimeObject', () => {
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myObject._handleIncomingOperation(incomingEvent);
+    myObject._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myObject.value()).to.deep.equal({"string": "test"});
   });
@@ -61,7 +61,7 @@ describe('RealTimeObject', () => {
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myObject._handleIncomingOperation(incomingEvent);
+    myObject._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ObjectSetEvent = new ObjectSetEvent(sessionId, username, version, timestamp, myObject, {"string": "test"});
     expect(eventCallback.lastCall.args[0]).to.deep.equal(expectedEvent);

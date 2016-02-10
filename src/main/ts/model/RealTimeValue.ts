@@ -1,10 +1,11 @@
 import EventEmitter from "../util/EventEmitter";
-import DataType from "./DataType";
-import {PathElement, Path} from "./Path";
+import DataType from "./RealTimeValueType";
+import {PathElement, Path} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 
-abstract class RealTimeValue extends EventEmitter {
+abstract class RealTimeValue<T> extends EventEmitter {
 
   private _detached: boolean = false;
 
@@ -12,7 +13,7 @@ abstract class RealTimeValue extends EventEmitter {
    * Constructs a new RealTimeValue.
    */
   constructor(private modelType: DataType,
-              private parent: RealTimeValue,
+              private parent: RealTimeContainerValue<any>,
               public fieldInParent: PathElement,
               protected sendOpCallback: (operation: DiscreteOperation) => void) {
     super();
@@ -46,9 +47,9 @@ abstract class RealTimeValue extends EventEmitter {
     throw Error("Detached Exception: RealTimeValue is no longer a part of the data model.");
   }
 
-  abstract value(): any;
+  abstract value(): T;
 
-  abstract _handleIncomingOperation(operationEvent: ModelOperationEvent): void;
+  abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
 
 }
 

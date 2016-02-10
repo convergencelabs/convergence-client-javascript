@@ -123,7 +123,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
@@ -133,7 +133,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
@@ -143,7 +143,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
@@ -153,7 +153,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
@@ -163,7 +163,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
@@ -175,7 +175,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ArraySetEvent = new ArraySetEvent(sessionId, username, version, timestamp, myArray, ["X", "Y", "Z"]);
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -188,7 +188,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ArrayInsertEvent = new ArrayInsertEvent(sessionId, username, version, timestamp, myArray, 2, "X");
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -201,7 +201,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ArrayRemoveEvent = new ArrayRemoveEvent(sessionId, username, version, timestamp, myArray, 1);
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -214,7 +214,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ArrayReplaceEvent = new ArrayReplaceEvent(sessionId, username, version, timestamp, myArray, 1, "X");
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -227,7 +227,7 @@ describe('RealTimeArray', () => {
 
     var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleIncomingOperation(incomingEvent);
+    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
 
     var expectedEvent: ArrayMoveEvent = new ArrayMoveEvent(sessionId, username, version, timestamp, myArray, 1, 2);
     expect(lastEvent).to.deep.equal(expectedEvent);

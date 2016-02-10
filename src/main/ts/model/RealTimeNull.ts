@@ -1,26 +1,31 @@
 import RealTimeValue from "./RealTimeValue";
-import RealTimeContainer from "./RealTimeContainerValue";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import DataType from "./DataType";
+import RealTimeValueType from "./RealTimeValueType";
+import {Path} from "../ot/Path";
 
-export default class RealTimeNull extends RealTimeValue {
+export default class RealTimeNull extends RealTimeValue<any> {
 
   /**
    * Constructs a new RealTimeNull.
    */
-  constructor(parent: RealTimeContainer,
+  constructor(parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(DataType.Null, parent, fieldInParent, sendOpCallback);
+    super(RealTimeValueType.Null, parent, fieldInParent, sendOpCallback);
   }
 
   value(): any {
     return null;
   }
 
-  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-    throw new Error("Method not implemented exception!");
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+    if (relativePath.length === 0) {
+      throw new Error("Null values do not process operations");
+    } else {
+      throw new Error("Invalid path: null values do not have children");
+    }
   }
 }

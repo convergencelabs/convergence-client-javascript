@@ -1,14 +1,15 @@
 import RealTimeValue from "./RealTimeValue";
-import RealTimeContainer from "./RealTimeContainerValue";
+import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import BooleanSetEvent from "./events/BooleanSetEvent";
-import DataType from "./DataType";
+import RealTimeValueType from "./RealTimeValueType";
+import {Path} from "../ot/Path";
 
 
-export default class RealTimeBoolean extends RealTimeValue {
+export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   static Events: any = {
     SET: "set"
@@ -18,10 +19,10 @@ export default class RealTimeBoolean extends RealTimeValue {
    * Constructs a new RealTimeBoolean.
    */
   constructor(private data: boolean,
-              parent: RealTimeContainer,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(DataType.Boolean, parent, fieldInParent, sendOpCallback);
+    super(RealTimeValueType.Boolean, parent, fieldInParent, sendOpCallback);
   }
 
   /**
@@ -42,12 +43,16 @@ export default class RealTimeBoolean extends RealTimeValue {
 
   // Handlers for incoming operations
 
-  _handleIncomingOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === BooleanSetOperation.TYPE) {
-      this._handleSetOperation(operationEvent);
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+    if (relativePath.length === 0) {
+      var type: string = operationEvent.operation.type;
+      if (type === BooleanSetOperation.TYPE) {
+        this._handleSetOperation(operationEvent);
+      } else {
+        throw new Error("Invalid operation!");
+      }
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid path: boolean values do not have children");
     }
   }
 
@@ -66,6 +71,7 @@ export default class RealTimeBoolean extends RealTimeValue {
       this,
       value);
     this.emit(RealTimeBoolean.Events.SET, event);
+
   }
 
   private _validateSet(value: boolean): void {
