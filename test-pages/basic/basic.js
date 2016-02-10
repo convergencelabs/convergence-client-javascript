@@ -1,25 +1,27 @@
+// These are the various inputs in the example page.
 var stringInput = document.getElementById("stringVal");
 var booleanInput = document.getElementById("booleanVal");
 var numberInput = document.getElementById("numberVal");
 var arrayInput = document.getElementById("arrayVal");
 var objectTable = document.getElementById("objectVal");
+
+// This is where we send events to.
 var consoleDiv = document.getElementById("console");
 
-ConvergenceDomain.debugFlags.protocol.messages = true;
 
-var modelId = "basic-example";
+// The realTimeModel.
 var model;
 
-appendToConsole("connecting...");
+// Connect to the domain.
+ConvergenceDomain.debugFlags.protocol.messages = true;
 var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
 domain.on("connected", function () {
-  appendToConsole("connected")
+  console.log("connected");
 });
 
-appendToConsole("authenticating...");
+// Now authenticate.  This is deferred unti connection is successful.
 domain.authenticateWithPassword("test1", "password").then(function (username) {
-  appendToConsole("authenticated.");
-  return domain.modelService().open("foo", modelId, function (collectionId, modelId) {
+  return domain.modelService().open("foo", "basic-example", function (collectionId, modelId) {
     return {
       "string": "test value",
       "number": 10,
@@ -42,6 +44,32 @@ domain.authenticateWithPassword("test1", "password").then(function (username) {
   bindToModel(model);
 });
 
+
+// Set up all the events on all the models.
+function bindToModel(realTimeModel) {
+  model = realTimeModel;
+
+  var rtString = model.dataAt("string");
+  bindToTextInput(stringInput, rtString);
+
+  var rtBoolean = model.dataAt("boolean");
+  bindCheckboxInput(booleanInput, rtBoolean);
+
+  var rtNumber = model.dataAt("number");
+  bindNumberInput(numberInput, rtNumber);
+
+  var rtArray = model.dataAt("array");
+  bindSelectList(arrayInput, rtArray);
+
+  renderTable(model.dataAt("object"));
+  bindTableButtons();
+  bindTableEvents();
+}
+
+//
+// Handle the number increment / decrement buttons.
+//
+
 function numberIncrement() {
   numberInput.value = Number(numberInput.value) + 1;
   var rtNumber = model.data().child("number");
@@ -54,6 +82,10 @@ function numberDecrement() {
   rtNumber.decrement();
 }
 
+
+//
+// Handle the array buttons.
+//
 var arrayRemoveButton = document.getElementById("arrayRemoveButton");
 arrayRemoveButton.onclick = function () {
   var selected = Number(arrayInput.selectedIndex);
@@ -115,6 +147,46 @@ arrayReorderButton.onclick = function () {
   }
 };
 
+function bindSelectList(selectInput, arrayModel) {
+  var values = arrayModel.value();
+
+  // clear anything that might be there.
+  while (selectInput.firstChild) {
+    selectInput.removeChild(selectInput.firstChild);
+  }
+
+  values.forEach(function (item) {
+    var option = document.createElement('option');
+    option.value = option.textContent = item;
+    selectInput.appendChild(option);
+  });
+
+  arrayModel.on("remove", function (evt) {
+    selectInput.remove(evt.index);
+  });
+
+  arrayModel.on("insert", function (evt) {
+    var option = document.createElement("option");
+    option.textContent = evt.value;
+    selectInput.add(option, evt.index)
+  });
+
+  arrayModel.on("replace", function (evt) {
+    selectInput.options[evt.index].textContent = evt.value;
+  });
+
+  arrayModel.on("reorder", function (evt) {
+    var option = selectInput.options[evt.fromIndex];
+    selectInput.remove(evt.fromIndex);
+    selectInput.add(option, evt.toIndex);
+  });
+}
+
+
+//
+// Handle the object buttons.
+//
+
 var objectRemoveButton = document.getElementById("objectRemoveButton");
 var objectRemoveProp = document.getElementById("objectRemoveProp");
 
@@ -171,59 +243,4 @@ function addTableRow(prop, val) {
   row.appendChild(valElement);
 
   objectTable.tBodies[0].appendChild(row);
-}
-
-function bindToModel(realTimeModel) {
-  model = realTimeModel;
-
-  var rtString = model.dataAt("string");
-  bindToTextInput(stringInput, rtString);
-
-  var rtBoolean = model.dataAt("boolean");
-  bindCheckboxInput(booleanInput, rtBoolean);
-
-  var rtNumber = model.dataAt("number");
-  bindNumberInput(numberInput, rtNumber);
-
-  var rtArray = model.dataAt("array");
-  bindSelectList(arrayInput, rtArray);
-
-  renderTable(model.dataAt("object"));
-  bindTableButtons();
-  bindTableEvents();
-}
-
-function bindSelectList(selectInput, arrayModel) {
-  var values = arrayModel.value();
-
-  // clear anything that might be there.
-  while (selectInput.firstChild) {
-    selectInput.removeChild(selectInput.firstChild);
-  }
-
-  values.forEach(function (item) {
-    var option = document.createElement('option');
-    option.value = option.textContent = item;
-    selectInput.appendChild(option);
-  });
-
-  arrayModel.on("remove", function (evt) {
-    selectInput.remove(evt.index);
-  });
-
-  arrayModel.on("insert", function (evt) {
-    var option = document.createElement("option");
-    option.textContent = evt.value;
-    selectInput.add(option, evt.index)
-  });
-
-  arrayModel.on("replace", function (evt) {
-    selectInput.options[evt.index].textContent = evt.value;
-  });
-
-  arrayModel.on("reorder", function (evt) {
-    var option = selectInput.options[evt.fromIndex];
-    selectInput.remove(evt.fromIndex);
-    selectInput.add(option, evt.toIndex);
-  });
 }

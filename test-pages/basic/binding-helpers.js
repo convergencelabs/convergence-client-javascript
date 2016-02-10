@@ -1,3 +1,6 @@
+// This file contains some basic bindings between models ad HTML input
+// elements.
+
 function bindToTextInput(textArea, rtString) {
   var events = ['input'];
   textArea.value = rtString.value();
@@ -59,9 +62,6 @@ function bindToTextInput(textArea, rtString) {
     textArea.value = event.value;
   });
 }
-//
-// Input Element Bindings
-//
 
 function bindNumberInput(numberInput, numberModel) {
   numberInput.value = numberModel.value();
@@ -87,11 +87,4 @@ function bindCheckboxInput(checkboxInput, booleanModel) {
   booleanModel.on("set", function (evt) {
     booleanInput.checked = evt.value;
   });
-}
-
-
-function appendToConsole(message) {
-  var line = document.createElement("div");
-  line.innerText = message;
-  consoleDiv.appendChild(line);
 }
