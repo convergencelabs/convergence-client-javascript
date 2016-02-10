@@ -1,9 +1,8 @@
-import ConvergenceDomain from "../main/ts/ConvergenceDomain";
-import MockServer from "../mock/MockServer";
-import MessageType from "../main/ts/protocol/MessageType";
-import {MessageEnvelope} from "../main/ts/protocol/protocol";
-
-import RealTimeModel from "../main/ts/model/RealTimeModel";
+import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
+import MockServer from "./MockServer";
+import MessageType from "../../main/ts/protocol/MessageType";
+import {MessageEnvelope} from "../../main/ts/protocol/protocol";
+import RealTimeModel from "../../main/ts/model/RealTimeModel";
 
 describe('Authentication E2E', () => {
 
