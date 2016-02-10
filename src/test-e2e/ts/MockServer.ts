@@ -1,9 +1,9 @@
-import {MessageEnvelope} from "../main/ts/protocol/protocol";
-import OpCode from "../main/ts/connection/OpCode";
-import Deferred from "../main/ts/util/Deferred";
-import MessageType from "../main/ts/protocol/MessageType";
-import {HandshakeResponse} from "../main/ts/protocol/handhsake";
-import EqualsUtil from "../main/ts/util/EqualsUtil";
+import {MessageEnvelope} from "../../main/ts/protocol/protocol";
+import OpCode from "../../main/ts/connection/OpCode";
+import Deferred from "../../main/ts/util/Deferred";
+import MessageType from "../../main/ts/protocol/MessageType";
+import {HandshakeResponse} from "../../main/ts/protocol/handhsake";
+import EqualsUtil from "../../main/ts/util/EqualsUtil";
 
 /* tslint:disable */
 var mockSocket = require('mock-socket');
