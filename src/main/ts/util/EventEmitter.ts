@@ -1,3 +1,4 @@
+import Event from "./Event";
 export default class EventEmitter {
 
   static defaultMaxListeners: number = 10;
@@ -96,5 +97,10 @@ export default class EventEmitter {
       listener.apply(this, args || []);
     });
     return this;
+  }
+
+  emitEvent(event: Event): EventEmitter {
+    Object.freeze(event);
+    return this.emit(event.name, event);
   }
 }

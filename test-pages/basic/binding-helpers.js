@@ -55,7 +55,7 @@ function bindToTextInput(textArea, rtString) {
       oldVal.substring(event.index + event.value.length, oldVal.length);
   });
 
-  rtString.on("set", function (event) {
+  rtString.on("value", function (event) {
     textArea.value = event.value;
   });
 }
@@ -63,10 +63,10 @@ function bindToTextInput(textArea, rtString) {
 function bindNumberInput(numberInput, numberModel) {
   numberInput.value = numberModel.value();
   numberInput.onchange = function (e) {
-    numberModel.setValue(Number(numberInput.value));
+    numberModel.value(Number(numberInput.value));
   };
 
-  numberModel.on("set", function (evt) {
+  numberModel.on("value", function (evt) {
     numberInput.value = evt.value;
   });
 
@@ -78,10 +78,10 @@ function bindNumberInput(numberInput, numberModel) {
 function bindCheckboxInput(checkboxInput, booleanModel) {
   booleanInput.checked = booleanModel.value();
   booleanInput.onchange = function (e) {
-    booleanModel.setValue(booleanInput.checked);
+    booleanModel.value(booleanInput.checked);
   };
 
-  booleanModel.on("set", function (evt) {
+  booleanModel.on("value", function (evt) {
     booleanInput.checked = evt.value;
   });
 }

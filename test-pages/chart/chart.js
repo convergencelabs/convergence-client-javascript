@@ -31,10 +31,10 @@ function bindToModel(realTimeModel) {
 
 // Creates a new slider control and binds events to it.
 function createControl(segment, index) {
-  var enabled = segment.getProperty("enabled").value();
-  var id = segment.getProperty("label").value();
-  var color = segment.getProperty("color").value();
-  var value = segment.getProperty("value").value();
+  var enabled = segment.get("enabled").value();
+  var id = segment.get("label").value();
+  var color = segment.get("color").value();
+  var value = segment.get("value").value();
 
   var controlsDiv = document.getElementById("controls");
 
@@ -73,13 +73,13 @@ function createControl(segment, index) {
 
   sliderDiv.noUiSlider.on('slide', function () {
     var val = Math.round(sliderDiv.noUiSlider.get());
-    segment.child("value").setValue(val);
+    segment.child("value").value(val);
     valueInput.value = val;
     pieChart.segments[index].value = val;
     pieChart.update();
   });
 
-  segment.getProperty("value").on("set", function (e) {
+  segment.get("value").on("value  ", function (e) {
     pieChart.segments[index].value = e.value;
     pieChart.update();
     sliderDiv.noUiSlider.set(e.value);

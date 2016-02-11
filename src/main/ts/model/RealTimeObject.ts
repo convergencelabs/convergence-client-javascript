@@ -9,19 +9,17 @@ import ObjectSetOperation from "../ot/ops/ObjectSetOperation";
 import {Path} from "../ot/Path";
 import RealTimeArray from "./RealTimeArray";
 import ModelOperationEvent from "./ModelOperationEvent";
-import ObjectSetPropertyEvent from "./events/ObjectSetPropertyEvent";
-import ObjectRemovePropertyEvent from "./events/ObjectRemovePropertyEvent";
-import ObjectSetEvent from "./events/ObjectSetEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
-
+import {ModelChangeEvent} from "./events";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
   static Events: any = {
-    SET_PROPERTY: "setProperty",
-    REMOVE_PROPERTY: "removeProperty",
-    SET: "set"
+    SET: "set",
+    REMOVE: "remove",
+    VALUE: "value",
+    DETACHED: RealTimeValue.Events.DETACHED
   };
 
   private _children: { [key: string]: RealTimeValue<any>; };
@@ -43,7 +41,11 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     }
   }
 
-  setProperty(property: string, value: Object|number|string|boolean): RealTimeValue<any> {
+  get(key: string): RealTimeValue<any> {
+    return this._children[key];
+  }
+
+  set(property: string, value: any): RealTimeValue<any> {
 
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(property)) {
@@ -59,7 +61,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     return child;
   }
 
-  removeProperty(property: string): void {
+  remove(property: string): void {
     if (!this._children.hasOwnProperty(property)) {
       throw new Error("Cannot remove property that is undefined!");
     }
@@ -70,7 +72,35 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     this.sendOpCallback(operation);
   }
 
-  setValue(value: Object): void {
+  keys(): string[] {
+    return Object.getOwnPropertyNames(this._children);
+  }
+
+  hasKey(property: string): boolean {
+    return this._children.hasOwnProperty(property);
+  }
+
+  forEach(callback: (model: RealTimeValue<any>, property?: string) => void): void {
+    for (var property in this._children) {
+      if (this._children.hasOwnProperty(property)) {
+        callback(this._children[property], property);
+      }
+    }
+  }
+
+  //
+  // private / protected methods.
+  //
+
+  protected _getValue(): { [key: string]: any; } {
+    var returnObject: Object = {};
+    this.forEach((model: RealTimeValue<any>, property: string) => {
+      returnObject[property] = model.value();
+    });
+    return returnObject;
+  }
+
+  protected _setValue(value?: { [key: string]: any; }): void {
     if (!value || typeof value !== "object") {
       throw new Error("Value must be an object and cannot be null or undefined!");
     }
@@ -86,14 +116,6 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       }
     }
     this.sendOpCallback(operation);
-  }
-
-  properties(): string[] {
-    return Object.getOwnPropertyNames(this._children);
-  }
-
-  hasProperty(property: string): boolean {
-    return this._children.hasOwnProperty(property);
   }
 
   _path(pathArgs: Path): RealTimeValue<any> {
@@ -115,26 +137,6 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     } else {
       return child;
     }
-  }
-
-  forEach(callback: (model: RealTimeValue<any>, property?: string) => void): void {
-    for (var property in this._children) {
-      if (this._children.hasOwnProperty(property)) {
-        callback(this._children[property], property);
-      }
-    }
-  }
-
-  getProperty(property: string): RealTimeValue<any> {
-    return this._children[property];
-  }
-
-  value(): { [key: string]: any; } {
-    var returnObject: Object = {};
-    this.forEach((model: RealTimeValue<any>, property: string) => {
-      returnObject[property] = model.value();
-    });
-    return returnObject;
   }
 
   protected _detachChildren(): void {
@@ -181,18 +183,20 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var oldChild: RealTimeValue<any> = this._children[property];
 
-
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
 
-    var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      property,
-      value);
-    this.emit(RealTimeObject.Events.SET_PROPERTY, event);
+    var event: ObjectSetEvent = {
+      src: this,
+      name: RealTimeObject.Events.SET,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      key: property,
+      value: value
+    };
+
+    this.emitEvent(event);
 
     if (oldChild) {
       oldChild._setDetached();
@@ -208,15 +212,18 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
 
-    var event: ObjectSetPropertyEvent = new ObjectSetPropertyEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      property,
-      value);
-    this.emit(RealTimeObject.Events.SET_PROPERTY, event);
+    var event: ObjectSetEvent = {
+      src: this,
+      name: RealTimeObject.Events.SET,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      key: property,
+      value: value
+    };
+
+    this.emitEvent(event);
 
     if (oldChild) {
       oldChild._setDetached();
@@ -232,14 +239,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     if (oldChild) {
       delete this._children[property];
 
-      var event: ObjectRemovePropertyEvent = new ObjectRemovePropertyEvent(
-        operationEvent.sessionId,
-        operationEvent.username,
-        operationEvent.version,
-        operationEvent.timestamp,
-        this,
-        property);
-      this.emit(RealTimeObject.Events.REMOVE_PROPERTY, event);
+      var event: ObjectRemoveEvent = {
+        src: this,
+        name: RealTimeObject.Events.SET,
+        sessionId: operationEvent.sessionId,
+        userId: operationEvent.username,
+        version: operationEvent.version,
+        timestamp: operationEvent.timestamp,
+        key: property
+      };
+
+      this.emitEvent(event);
 
       oldChild._setDetached();
     }
@@ -259,14 +269,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       }
     }
 
-    var event: ObjectSetEvent = new ObjectSetEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      value);
-    this.emit(RealTimeObject.Events.SET, event);
+    var event: ObjectSetValueEvent = {
+      src: this,
+      name: RealTimeObject.Events.VALUE,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      value: value
+    };
+
+    this.emitEvent(event);
 
     for (var property in oldChildren) {
       if (oldChildren.hasOwnProperty(property)) {
@@ -274,4 +287,20 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       }
     }
   }
+}
+
+export interface ObjectSetEvent extends ModelChangeEvent {
+  src: RealTimeObject;
+  key: string;
+  value: any;
+}
+
+export interface ObjectRemoveEvent extends ModelChangeEvent {
+  src: RealTimeObject;
+  key: string;
+}
+
+export interface ObjectSetValueEvent extends ModelChangeEvent {
+  src: RealTimeObject;
+  value:  { [key: string]: any; };
 }

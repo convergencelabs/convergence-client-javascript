@@ -4,15 +4,16 @@ import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import BooleanSetEvent from "./events/BooleanSetEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
+import {ModelChangeEvent} from "./events";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   static Events: any = {
-    SET: "set"
+    VALUE: "VALUE",
+    DETACHED: RealTimeValue.Events.DETACHED
   };
 
   /**
@@ -25,11 +26,12 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     super(RealTimeValueType.Boolean, parent, fieldInParent, sendOpCallback);
   }
 
-  /**
-   * Sets the value of the RealTimeBoolean
-   * @param {boolean} value The new value.
-   */
-  setValue(value: boolean): void {
+
+  //
+  // private and protected methods
+  //
+
+  protected _setValue(value: boolean): void {
     this._validateSet(value);
 
     var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
@@ -37,7 +39,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     this.sendOpCallback(operation);
   }
 
-  value(): boolean {
+  protected _getValue(): boolean {
     return this.data;
   }
 
@@ -63,15 +65,16 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     this._validateSet(value);
     this.data = value;
 
-    var event: BooleanSetEvent = new BooleanSetEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      value);
-    this.emit(RealTimeBoolean.Events.SET, event);
-
+    var event: BooleanSetValueEvent = {
+      src: this,
+      name: RealTimeBoolean.Events.VALUE,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _validateSet(value: boolean): void {
@@ -79,4 +82,9 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
       throw new Error("Value must be a boolean");
     }
   }
+}
+
+export interface BooleanSetValueEvent extends ModelChangeEvent {
+  src: RealTimeBoolean;
+  value:  boolean;
 }

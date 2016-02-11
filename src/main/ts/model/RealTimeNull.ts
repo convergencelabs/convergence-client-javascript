@@ -8,6 +8,10 @@ import {Path} from "../ot/Path";
 
 export default class RealTimeNull extends RealTimeValue<any> {
 
+  static Events: any = {
+    DETACHED: RealTimeValue.Events.DETACHED
+  };
+
   /**
    * Constructs a new RealTimeNull.
    */
@@ -17,8 +21,12 @@ export default class RealTimeNull extends RealTimeValue<any> {
     super(RealTimeValueType.Null, parent, fieldInParent, sendOpCallback);
   }
 
-  value(): any {
+  protected _getValue(): any {
     return null;
+  }
+
+  protected _setValue(any: any): void {
+    throw new Error("Can not set the value on a Null type.");
   }
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
