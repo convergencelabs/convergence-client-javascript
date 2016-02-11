@@ -1,13 +1,14 @@
 import DiscreteOperation from "../../../main/ts/ot/ops/DiscreteOperation";
-import ModelChangeEvent from "../../../main/ts/model/events/ModelChangeEvent";
 import RealTimeNumber from "../../../main/ts/model/RealTimeNumber";
 import NumberAddOperation from "../../../main/ts/ot/ops/NumberAddOperation";
 import NumberSetOperation from "../../../main/ts/ot/ops/NumberSetOperation";
 import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
-import NumberAddEvent from "../../../main/ts/model/events/NumberAddEvent";
-import NumberSetEvent from "../../../main/ts/model/events/NumberSetEvent";
+import {NumberSetValueEvent} from "../../../main/ts/model/RealTimeNumber";
+import {NumberAddEvent} from "../../../main/ts/model/RealTimeNumber";
+import {ModelChangeEvent} from "../../../main/ts/model/events";
 
 import * as chai from "chai";
+
 var expect: any = chai.expect;
 
 describe('RealTimeNumber', () => {
@@ -49,7 +50,7 @@ describe('RealTimeNumber', () => {
 
   it('Returned value is correct after set', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback);
-    myNumber.setValue(20);
+    myNumber.value(20);
     expect(myNumber.value()).to.equal(20);
   });
 
@@ -74,7 +75,7 @@ describe('RealTimeNumber', () => {
   it('Correct operation is sent after set', () => {
     lastOp = null;
     var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback);
-    myNumber.setValue(20);
+    myNumber.value(20);
 
     var expectedOp: NumberSetOperation = new NumberSetOperation([], false, 20);
     expect(lastOp).to.deep.equal(expectedOp);
@@ -103,26 +104,42 @@ describe('RealTimeNumber', () => {
   it('Correct Event is fired after NumberAddOperation', () => {
     lastEvent = null;
     var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
-    myNumber.on("Add", lastEventCallback);
+    myNumber.on(RealTimeNumber.Events.ADD, lastEventCallback);
 
     var incomingOp: NumberAddOperation = new NumberAddOperation([], false, 5);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
-    var expectedEvent: NumberAddEvent = new NumberAddEvent(sessionId, username, version, timestamp, myNumber, 5);
+    var expectedEvent: NumberAddEvent = {
+      src: myNumber,
+      name: RealTimeNumber.Events.ADD,
+      sessionId: sessionId,
+      userId: username,
+      version: version,
+      timestamp: timestamp,
+      value: 5
+    };
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
   it('Correct Event is fired after NumberSetOperation', () => {
     lastEvent = null;
     var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
-    myNumber.on("Set", lastEventCallback);
+    myNumber.on(RealTimeNumber.Events.VALUE, lastEventCallback);
 
     var incomingOp: NumberSetOperation = new NumberSetOperation([], false, 20);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myNumber._handleRemoteOperation(incomingOp.path, incomingEvent);
 
-    var expectedEvent: NumberSetEvent = new NumberSetEvent(sessionId, username, version, timestamp, myNumber, 20);
+    var expectedEvent: NumberSetValueEvent = {
+      src: myNumber,
+      name: RealTimeNumber.Events.VALUE,
+      sessionId: sessionId,
+      userId: username,
+      version: version,
+      timestamp: timestamp,
+      value: 20
+    };
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 

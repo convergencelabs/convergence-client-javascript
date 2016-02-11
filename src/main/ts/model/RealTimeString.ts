@@ -6,11 +6,9 @@ import StringInsertOperation from "../ot/ops/StringInsertOperation";
 import StringRemoveOperation from "../ot/ops/StringRemoveOperation";
 import StringSetOperation from "../ot/ops/StringSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import StringInsertEvent from "./events/StringInsertEvent";
-import StringRemoveEvent from "./events/StringRemoveEvent";
-import StringSetEvent from "./events/StringSetEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
+import {ModelChangeEvent} from "./events";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -18,7 +16,8 @@ export default class RealTimeString extends RealTimeValue<String> {
   static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
-    SET: "set"
+    VALUE: "value",
+    DETACHED: RealTimeValue.Events.DETACHED
   };
 
   /**
@@ -31,11 +30,6 @@ export default class RealTimeString extends RealTimeValue<String> {
     super(RealTimeValueType.String, parent, fieldInParent, sendOpCallback);
   }
 
-  /**
-   * Inserts characters into the RealTimeString
-   * @param {number} index - The index to insert at
-   * @param {string} value - The value to insert
-   */
   insert(index: number, value: string): void {
     this._validateInsert(index, value);
 
@@ -44,11 +38,6 @@ export default class RealTimeString extends RealTimeValue<String> {
     this.sendOpCallback(operation);
   }
 
-  /**
-   * Removes characters from the RealTimeString
-   * @param {number} index - The start index of the characters to remove
-   * @param {number} length - The number of characters to remove
-   */
   remove(index: number, length: number): void {
     this._validateRemove(index, length);
 
@@ -57,7 +46,15 @@ export default class RealTimeString extends RealTimeValue<String> {
     this.sendOpCallback(operation);
   }
 
-  setValue(value: string): void {
+  length(): number {
+    return this.data.length;
+  }
+
+  //
+  // private and protected methods.
+  //
+
+  protected _setValue(value: string): void {
     this._validateSet(value);
 
     this.data = value;
@@ -65,15 +62,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     this.sendOpCallback(operation);
   }
 
-
-  /**
-   * @return {number} The length of the RealTimeString
-   */
-  length(): number {
-    return this.data.length;
-  }
-
-  value(): string {
+  protected _getValue(): string {
     return this.data;
   }
 
@@ -103,15 +92,17 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this.data = this.data.slice(0, index) + value + this.data.slice(index, this.data.length);
 
-    var event: StringInsertEvent = new StringInsertEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      index,
-      value);
-    this.emit(RealTimeString.Events.INSERT, event);
+    var event: StringInsertEvent = {
+      src: this,
+      name: RealTimeString.Events.INSERT,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      index: index,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
@@ -123,15 +114,17 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this.data = this.data.slice(0, index) + this.data.slice(index + value.length, this.data.length);
 
-    var event: StringRemoveEvent = new StringRemoveEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      index,
-      value);
-    this.emit(RealTimeString.Events.REMOVE, event);
+    var event: StringRemoveEvent = {
+      src: this,
+      name: RealTimeString.Events.REMOVE,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      index: index,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -141,14 +134,16 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._validateSet(value);
     this.data = value;
 
-    var event: StringSetEvent = new StringSetEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      value);
-    this.emit(RealTimeString.Events.SET, event);
+    var event: StringSetValueEvent = {
+      src: this,
+      name: RealTimeString.Events.VALUE,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _validateInsert(index: number, value: string): void {
@@ -174,4 +169,21 @@ export default class RealTimeString extends RealTimeValue<String> {
       throw new Error("Value must be a string");
     }
   }
+}
+
+export interface StringInsertEvent extends ModelChangeEvent {
+  src: RealTimeString;
+  index: number;
+  value:  string;
+}
+
+export interface StringRemoveEvent extends ModelChangeEvent {
+  src: RealTimeString;
+  index: number;
+  value:  string;
+}
+
+export interface StringSetValueEvent extends ModelChangeEvent {
+  src: RealTimeString;
+  value:  string;
 }

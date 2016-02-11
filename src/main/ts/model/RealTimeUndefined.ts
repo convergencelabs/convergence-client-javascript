@@ -8,6 +8,10 @@ import {Path} from "../ot/Path";
 
 export default class RealTimeUndefined extends RealTimeValue<void> {
 
+  static Events: any = {
+    DETACHED: RealTimeValue.Events.DETACHED
+  };
+
   /**
    * Constructs a new RealTimeUndefined.
    */
@@ -17,8 +21,12 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
     super(RealTimeValueType.Undefined, parent, fieldInParent, sendOpCallback);
   }
 
-  value(): void {
+  protected _getValue(): void {
     return undefined;
+  }
+
+  protected _setValue(any: any): void {
+    throw new Error("Can not set the value on a Undefined type.");
   }
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
