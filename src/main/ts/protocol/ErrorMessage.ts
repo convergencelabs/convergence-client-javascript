@@ -9,10 +9,10 @@ export interface ErrorMessage extends ProtocolMessage, OutgoingProtocolMessage, 
 }
 
 export class ErrorMessageDeserializer {
-  static deserialize(json: any): ErrorMessage {
+  static deserialize(body: any): ErrorMessage {
     return {
-      code: json.code,
-      details: json.details,
+      code: body.c,
+      details: body.d,
       type: MessageType.ERROR
     };
   }
@@ -21,8 +21,8 @@ export class ErrorMessageDeserializer {
 export class ErrorMessageSerializer {
   static serialize(message: ErrorMessage): any {
     return {
-      code: message.code,
-      details: message.details
+      c: message.code,
+      d: message.details
     };
   }
 }
