@@ -21,6 +21,6 @@ export interface IncomingProtocolResponseMessage extends IncomingProtocolMessage
 }
 
 export class MessageEnvelope {
-  constructor(public body: any, public requestId?: number, public responseId?: number) {
+  constructor(public body: ProtocolMessage, public requestId?: number, public responseId?: number) {
   }
 }

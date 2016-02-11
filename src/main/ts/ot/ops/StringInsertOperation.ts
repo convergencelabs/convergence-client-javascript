@@ -1,13 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
 export default class StringInsertOperation extends DiscreteOperation {
 
-  static TYPE: string = "StringInsert";
-
   constructor(path: Path, noOp: boolean, public index: number, public value: string) {
-    super(StringInsertOperation.TYPE, path, noOp);
+    super(OperationType.STRING_INSERT, path, noOp);
     Object.freeze(this);
   }
 

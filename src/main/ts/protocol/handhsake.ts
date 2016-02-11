@@ -12,16 +12,16 @@ export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
 export class HandshakeRequestSerializer {
   static serialize(request: HandshakeRequest): any {
     return {
-      reconnect: request.reconnect,
-      reconnectToken: request.reconnectToken,
-      options: request.options
+      t: MessageType.HANDSHAKE_REQUEST,
+      r: request.reconnect,
+      k: request.reconnectToken
     };
   }
 }
 
 export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
-  clientId: string;
+  sessionId: string;
   reconnectToken: string;
   protocolConfig: any; // todo make interface
   error?: any;
@@ -31,13 +31,13 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
 export class HandshakeResponseDeserializer {
   static deserialize(body: any): HandshakeResponse {
     return {
-      success: body.success,
-      clientId: body.sessionId,
-      reconnectToken: body.reconnectToken,
-      protocolConfig: {},
-      error: body.error,
-      retryOk: false,
-      type: MessageType.HANDSHAKE
+      type: MessageType.HANDSHAKE_RESPONSE,
+      success: body.s,
+      sessionId: body.i,
+      reconnectToken: body.k,
+      protocolConfig: body.c,
+      error: body.e,
+      retryOk: body.r
     };
   }
 }

@@ -1,13 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
 export default class ArraySetOperation extends DiscreteOperation {
 
-  static TYPE: string = "ArraySet";
-
   constructor(path: Path, noOp: boolean, public value: any[]) {
-    super(ArraySetOperation.TYPE, path, noOp);
+    super(OperationType.ARRAY_SET, path, noOp);
     Object.freeze(this);
   }
 

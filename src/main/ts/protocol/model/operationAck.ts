@@ -10,10 +10,10 @@ export interface OperationAck extends IncomingProtocolNormalMessage {
 export class OperationAckDeserializer {
   static deserialize(body: any): OperationAck {
     return {
-      resourceId: body.rId,
-      seqNo: body.seq,
-      version: body.v,
-      type: MessageType.OPERATION_ACK
+      type: MessageType.OPERATION_ACKNOWLEDGEMENT,
+      resourceId: body.r,
+      seqNo: body.s,
+      version: body.v
     };
   }
 }

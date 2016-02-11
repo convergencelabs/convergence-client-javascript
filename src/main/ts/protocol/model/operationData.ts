@@ -16,6 +16,7 @@ import StringInsertOperation from "../../ot/ops/StringInsertOperation";
 import StringRemoveOperation from "../../ot/ops/StringRemoveOperation";
 import StringSetOperation from "../../ot/ops/StringSetOperation";
 import DiscreteOperation from "../../ot/ops/DiscreteOperation";
+import OperationType from "./OperationType";
 
 export class OperationSerializer {
   static serialize(operation: Operation): any {
@@ -30,7 +31,7 @@ export class OperationSerializer {
 export class OperationDeserializer {
   static deserialize(body: any): Operation {
     switch (body.t) {
-      case "C":
+      case OperationType.COMPOUND:
         return CompoundDeserializer.deserialize(body);
       default:
         return DiscreteOperationDeserializer.deserialize(body);
@@ -40,6 +41,9 @@ export class OperationDeserializer {
 
 export class DiscreteOperationSerializer {
   static serialize(operation: DiscreteOperation): any {
+    switch(operation.type) {
+
+    }
     if (operation instanceof ArrayInsertOperation) {
       return ArrayInsertOperationSerializer.serialize(operation);
     } else if (operation instanceof ArrayMoveOperation) {

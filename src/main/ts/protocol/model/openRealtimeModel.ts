@@ -12,11 +12,10 @@ export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage
 export class OpenRealTimeModelRequestSerializer {
   static serialize(request: OpenRealTimeModelRequest): any {
     return {
-      fqn: {
-        cId: request.modelFqn.collectionId,
-        mId: request.modelFqn.modelId
-      },
-      init: request.initializerProvided
+      t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
+      c: request.modelFqn.collectionId,
+      m: request.modelFqn.modelId,
+      i: request.initializerProvided
     };
   }
 }
@@ -32,12 +31,12 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
 export class OpenRealTimeModelResponseMessageDeserializer {
   static deserialize(body: any): OpenRealTimeModelResponse {
     return {
-      resourceId: body.rId,
+      type: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE,
+      resourceId: body.r,
       version: body.v,
-      createdTime: body.created,
-      modifiedTime: body.modified,
-      data: body.data,
-      type: MessageType.OPEN_REAL_TIME_MODEL
+      createdTime: body.c,
+      modifiedTime: body.m,
+      data: body.d
     };
   }
 }

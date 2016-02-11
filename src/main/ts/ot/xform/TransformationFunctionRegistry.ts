@@ -1,18 +1,3 @@
-import StringInsertOperation from "../ops/StringInsertOperation";
-import StringRemoveOperation from "../ops/StringRemoveOperation";
-import StringSetOperation from "../ops/StringSetOperation";
-import ObjectAddPropertyOperation from "../ops/ObjectAddPropertyOperation";
-import ObjectRemovePropertyOperation from "../ops/ObjectRemovePropertyOperation";
-import ObjectSetPropertyOperation from "../ops/ObjectSetPropertyOperation";
-import ObjectSetOperation from "../ops/ObjectSetOperation";
-import ArrayInsertOperation from "../ops/ArrayInsertOperation";
-import ArrayRemoveOperation from "../ops/ArrayRemoveOperation";
-import ArrayReplaceOperation from "../ops/ArrayReplaceOperation";
-import ArrayMoveOperation from "../ops/ArrayMoveOperation";
-import ArraySetOperation from "../ops/ArraySetOperation";
-import NumberAddOperation from "../ops/NumberAddOperation";
-import NumberSetOperation from "../ops/NumberSetOperation";
-import BooleanSetOperation from "../ops/BooleanSetOperation";
 import DiscreteOperation from "../ops/DiscreteOperation";
 import OperationTransformationFunction from "./OperationTransformationFunction";
 import {PathTransformationFunction} from "./PathTransformationFunction";
@@ -79,6 +64,7 @@ import ArraySetPTF from "./path/ArraySetPTF";
 import ObjectSetPropertyPTF from "./path/ObjectSetPropertyPTF";
 import ObjectRemovePropertyPTF from "./path/ObjectRemovePropertyPTF";
 import ObjectSetPTF from "./path/ObjectSetPTF";
+import OperationType from "../../protocol/model/OperationType";
 
 
 export default class TransformationFunctionRegistry {
@@ -87,99 +73,102 @@ export default class TransformationFunctionRegistry {
 
   constructor() {
     // string Functions
-    this.registerOtf(StringInsertOperation.TYPE, StringInsertOperation.TYPE, new StringInsertInsertOTF());
-    this.registerOtf(StringInsertOperation.TYPE, StringRemoveOperation.TYPE, new StringInsertRemoveOTF());
-    this.registerOtf(StringInsertOperation.TYPE, StringSetOperation.TYPE, new StringInsertSetOTF());
+    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_INSERT, new StringInsertInsertOTF());
+    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_REMOVE, new StringInsertRemoveOTF());
+    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_SET, new StringInsertSetOTF());
 
-    this.registerOtf(StringRemoveOperation.TYPE, StringInsertOperation.TYPE, new StringRemoveInsertOTF());
-    this.registerOtf(StringRemoveOperation.TYPE, StringRemoveOperation.TYPE, new StringRemoveRemoveOTF());
-    this.registerOtf(StringRemoveOperation.TYPE, StringSetOperation.TYPE, new StringRemoveSetOTF());
+    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_INSERT, new StringRemoveInsertOTF());
+    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_REMOVE, new StringRemoveRemoveOTF());
+    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_SET, new StringRemoveSetOTF());
 
-    this.registerOtf(StringSetOperation.TYPE, StringInsertOperation.TYPE, new StringSetInsertOTF());
-    this.registerOtf(StringSetOperation.TYPE, StringRemoveOperation.TYPE, new StringSetRemoveOTF());
-    this.registerOtf(StringSetOperation.TYPE, StringSetOperation.TYPE, new StringSetSetOTF());
+    this.registerOtf(OperationType.STRING_SET, OperationType.STRING_INSERT, new StringSetInsertOTF());
+    this.registerOtf(OperationType.STRING_SET, OperationType.STRING_REMOVE, new StringSetRemoveOTF());
+    this.registerOtf(OperationType.STRING_SET, OperationType.STRING_SET, new StringSetSetOTF());
 
     // object Functions
-    this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectAddPropertyOperation.TYPE, new ObjectAddPropertyAddPropertyOTF());
-    this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectSetPropertyOperation.TYPE, new ObjectAddPropertySetPropertyOTF());
-    this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectAddPropertyRemovePropertyOTF());
-    this.registerOtf(ObjectAddPropertyOperation.TYPE, ObjectSetOperation.TYPE, new ObjectAddPropertySetOTF());
+    this.registerOtf(OperationType.OBJECT_ADD_PROPERTY, OperationType.OBJECT_ADD_PROPERTY, new ObjectAddPropertyAddPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_ADD_PROPERTY, OperationType.OBJECT_SET_PROPERTY, new ObjectAddPropertySetPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_ADD_PROPERTY, OperationType.OBJECT_REMOVE_PROPERTY, new ObjectAddPropertyRemovePropertyOTF());
+    this.registerOtf(OperationType.OBJECT_ADD_PROPERTY, OperationType.OBJECT_SET, new ObjectAddPropertySetOTF());
 
-    this.registerOtf(ObjectRemovePropertyOperation.TYPE, ObjectAddPropertyOperation.TYPE, new ObjectRemovePropertyAddPropertyOTF());
-    this.registerOtf(ObjectRemovePropertyOperation.TYPE, ObjectSetPropertyOperation.TYPE, new ObjectRemovePropertySetPropertyOTF());
-    this.registerOtf(ObjectRemovePropertyOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectRemovePropertyRemovePropertyOTF());
-    this.registerOtf(ObjectRemovePropertyOperation.TYPE, ObjectSetOperation.TYPE, new ObjectRemovePropertySetOTF());
+    this.registerOtf(OperationType.OBJECT_REMOVE_PROPERTY, OperationType.OBJECT_ADD_PROPERTY, new ObjectRemovePropertyAddPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_REMOVE_PROPERTY, OperationType.OBJECT_SET_PROPERTY, new ObjectRemovePropertySetPropertyOTF());
+    this.registerOtf(
+      OperationType.OBJECT_REMOVE_PROPERTY,
+      OperationType.OBJECT_REMOVE_PROPERTY,
+      new ObjectRemovePropertyRemovePropertyOTF());
+    this.registerOtf(OperationType.OBJECT_REMOVE_PROPERTY, OperationType.OBJECT_SET, new ObjectRemovePropertySetOTF());
 
-    this.registerOtf(ObjectSetPropertyOperation.TYPE, ObjectAddPropertyOperation.TYPE, new ObjectSetPropertyAddPropertyOTF());
-    this.registerOtf(ObjectSetPropertyOperation.TYPE, ObjectSetPropertyOperation.TYPE, new ObjectSetPropertySetPropertyOTF());
-    this.registerOtf(ObjectSetPropertyOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectSetPropertyRemovePropertyOTF());
-    this.registerOtf(ObjectSetPropertyOperation.TYPE, ObjectSetOperation.TYPE, new ObjectSetPropertySetOTF());
+    this.registerOtf(OperationType.OBJECT_SET_PROPERTY, OperationType.OBJECT_ADD_PROPERTY, new ObjectSetPropertyAddPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET_PROPERTY, OperationType.OBJECT_SET_PROPERTY, new ObjectSetPropertySetPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET_PROPERTY, OperationType.OBJECT_REMOVE_PROPERTY, new ObjectSetPropertyRemovePropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET_PROPERTY, OperationType.OBJECT_SET, new ObjectSetPropertySetOTF());
 
-    this.registerOtf(ObjectSetOperation.TYPE, ObjectAddPropertyOperation.TYPE, new ObjectSetAddPropertyOTF());
-    this.registerOtf(ObjectSetOperation.TYPE, ObjectSetPropertyOperation.TYPE, new ObjectSetSetPropertyOTF());
-    this.registerOtf(ObjectSetOperation.TYPE, ObjectRemovePropertyOperation.TYPE, new ObjectSetRemovePropertyOTF());
-    this.registerOtf(ObjectSetOperation.TYPE, ObjectSetOperation.TYPE, new ObjectSetSetOTF());
+    this.registerOtf(OperationType.OBJECT_SET, OperationType.OBJECT_ADD_PROPERTY, new ObjectSetAddPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET, OperationType.OBJECT_SET_PROPERTY, new ObjectSetSetPropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET, OperationType.OBJECT_REMOVE_PROPERTY, new ObjectSetRemovePropertyOTF());
+    this.registerOtf(OperationType.OBJECT_SET, OperationType.OBJECT_SET, new ObjectSetSetOTF());
 
     // array Functions
-    this.registerOtf(ArrayInsertOperation.TYPE, ArrayInsertOperation.TYPE, new ArrayInsertInsertOTF());
-    this.registerOtf(ArrayInsertOperation.TYPE, ArrayRemoveOperation.TYPE, new ArrayInsertRemoveOTF());
-    this.registerOtf(ArrayInsertOperation.TYPE, ArrayReplaceOperation.TYPE, new ArrayInsertReplaceOTF());
-    this.registerOtf(ArrayInsertOperation.TYPE, ArrayMoveOperation.TYPE, new ArrayInsertMoveOTF());
-    this.registerOtf(ArrayInsertOperation.TYPE, ArraySetOperation.TYPE, new ArrayInsertSetOTF());
+    this.registerOtf(OperationType.ARRAY_INSERT, OperationType.ARRAY_INSERT, new ArrayInsertInsertOTF());
+    this.registerOtf(OperationType.ARRAY_INSERT, OperationType.ARRAY_REMOVE, new ArrayInsertRemoveOTF());
+    this.registerOtf(OperationType.ARRAY_INSERT, OperationType.ARRAY_REPLACE, new ArrayInsertReplaceOTF());
+    this.registerOtf(OperationType.ARRAY_INSERT, OperationType.ARRAY_MOVE, new ArrayInsertMoveOTF());
+    this.registerOtf(OperationType.ARRAY_INSERT, OperationType.ARRAY_SET, new ArrayInsertSetOTF());
 
-    this.registerOtf(ArrayRemoveOperation.TYPE, ArrayInsertOperation.TYPE, new ArrayRemoveInsertOTF());
-    this.registerOtf(ArrayRemoveOperation.TYPE, ArrayRemoveOperation.TYPE, new ArrayRemoveRemoveOTF());
-    this.registerOtf(ArrayRemoveOperation.TYPE, ArrayReplaceOperation.TYPE, new ArrayRemoveReplaceOTF());
-    this.registerOtf(ArrayRemoveOperation.TYPE, ArrayMoveOperation.TYPE, new ArrayRemoveMoveOTF());
-    this.registerOtf(ArrayRemoveOperation.TYPE, ArraySetOperation.TYPE, new ArrayRemoveSetOTF());
+    this.registerOtf(OperationType.ARRAY_REMOVE, OperationType.ARRAY_INSERT, new ArrayRemoveInsertOTF());
+    this.registerOtf(OperationType.ARRAY_REMOVE, OperationType.ARRAY_REMOVE, new ArrayRemoveRemoveOTF());
+    this.registerOtf(OperationType.ARRAY_REMOVE, OperationType.ARRAY_REPLACE, new ArrayRemoveReplaceOTF());
+    this.registerOtf(OperationType.ARRAY_REMOVE, OperationType.ARRAY_MOVE, new ArrayRemoveMoveOTF());
+    this.registerOtf(OperationType.ARRAY_REMOVE, OperationType.ARRAY_SET, new ArrayRemoveSetOTF());
 
-    this.registerOtf(ArrayReplaceOperation.TYPE, ArrayInsertOperation.TYPE, new ArrayReplaceInsertOTF());
-    this.registerOtf(ArrayReplaceOperation.TYPE, ArrayRemoveOperation.TYPE, new ArrayReplaceRemoveOTF());
-    this.registerOtf(ArrayReplaceOperation.TYPE, ArrayReplaceOperation.TYPE, new ArrayReplaceReplaceOTF());
-    this.registerOtf(ArrayReplaceOperation.TYPE, ArrayMoveOperation.TYPE, new ArrayReplaceMoveOTF());
-    this.registerOtf(ArrayReplaceOperation.TYPE, ArraySetOperation.TYPE, new ArrayReplaceSetOTF());
+    this.registerOtf(OperationType.ARRAY_REPLACE, OperationType.ARRAY_INSERT, new ArrayReplaceInsertOTF());
+    this.registerOtf(OperationType.ARRAY_REPLACE, OperationType.ARRAY_REMOVE, new ArrayReplaceRemoveOTF());
+    this.registerOtf(OperationType.ARRAY_REPLACE, OperationType.ARRAY_REPLACE, new ArrayReplaceReplaceOTF());
+    this.registerOtf(OperationType.ARRAY_REPLACE, OperationType.ARRAY_MOVE, new ArrayReplaceMoveOTF());
+    this.registerOtf(OperationType.ARRAY_REPLACE, OperationType.ARRAY_SET, new ArrayReplaceSetOTF());
 
-    this.registerOtf(ArrayMoveOperation.TYPE, ArrayInsertOperation.TYPE, new ArrayMoveInsertOTF());
-    this.registerOtf(ArrayMoveOperation.TYPE, ArrayRemoveOperation.TYPE, new ArrayMoveRemoveOTF());
-    this.registerOtf(ArrayMoveOperation.TYPE, ArrayReplaceOperation.TYPE, new ArrayMoveReplaceOTF());
-    this.registerOtf(ArrayMoveOperation.TYPE, ArrayMoveOperation.TYPE, new ArrayMoveMoveOTF());
-    this.registerOtf(ArrayMoveOperation.TYPE, ArraySetOperation.TYPE, new ArrayMoveSetOTF());
+    this.registerOtf(OperationType.ARRAY_MOVE, OperationType.ARRAY_INSERT, new ArrayMoveInsertOTF());
+    this.registerOtf(OperationType.ARRAY_MOVE, OperationType.ARRAY_REMOVE, new ArrayMoveRemoveOTF());
+    this.registerOtf(OperationType.ARRAY_MOVE, OperationType.ARRAY_REPLACE, new ArrayMoveReplaceOTF());
+    this.registerOtf(OperationType.ARRAY_MOVE, OperationType.ARRAY_MOVE, new ArrayMoveMoveOTF());
+    this.registerOtf(OperationType.ARRAY_MOVE, OperationType.ARRAY_SET, new ArrayMoveSetOTF());
 
-    this.registerOtf(ArraySetOperation.TYPE, ArrayInsertOperation.TYPE, new ArraySetInsertOTF());
-    this.registerOtf(ArraySetOperation.TYPE, ArrayRemoveOperation.TYPE, new ArraySetRemoveOTF());
-    this.registerOtf(ArraySetOperation.TYPE, ArrayReplaceOperation.TYPE, new ArraySetReplaceOTF());
-    this.registerOtf(ArraySetOperation.TYPE, ArrayMoveOperation.TYPE, new ArraySetMoveOTF());
-    this.registerOtf(ArraySetOperation.TYPE, ArraySetOperation.TYPE, new ArraySetSetOTF());
+    this.registerOtf(OperationType.ARRAY_SET, OperationType.ARRAY_INSERT, new ArraySetInsertOTF());
+    this.registerOtf(OperationType.ARRAY_SET, OperationType.ARRAY_REMOVE, new ArraySetRemoveOTF());
+    this.registerOtf(OperationType.ARRAY_SET, OperationType.ARRAY_REPLACE, new ArraySetReplaceOTF());
+    this.registerOtf(OperationType.ARRAY_SET, OperationType.ARRAY_MOVE, new ArraySetMoveOTF());
+    this.registerOtf(OperationType.ARRAY_SET, OperationType.ARRAY_SET, new ArraySetSetOTF());
 
     // number Functions
-    this.registerOtf(NumberAddOperation.TYPE, NumberAddOperation.TYPE, new NumberAddAddOTF());
-    this.registerOtf(NumberAddOperation.TYPE, NumberSetOperation.TYPE, new NumberAddSetOTF());
+    this.registerOtf(OperationType.NUMBER_ADD, OperationType.NUMBER_ADD, new NumberAddAddOTF());
+    this.registerOtf(OperationType.NUMBER_ADD, OperationType.NUMBER_SET, new NumberAddSetOTF());
 
-    this.registerOtf(NumberSetOperation.TYPE, NumberAddOperation.TYPE, new NumberSetAddOTF());
-    this.registerOtf(NumberSetOperation.TYPE, NumberSetOperation.TYPE, new NumberSetSetOTF());
+    this.registerOtf(OperationType.NUMBER_SET, OperationType.NUMBER_ADD, new NumberSetAddOTF());
+    this.registerOtf(OperationType.NUMBER_SET, OperationType.NUMBER_SET, new NumberSetSetOTF());
 
     // boolean Functions
-    this.registerOtf(BooleanSetOperation.TYPE, BooleanSetOperation.TYPE, new BooleanSetSetOTF());
+    this.registerOtf(OperationType.BOOLEAN_SET, OperationType.BOOLEAN_SET, new BooleanSetSetOTF());
 
 
     //
     // path Transformation Functions
     //
 
-    this.ptfs[ArrayInsertOperation.TYPE] = new ArrayInsertPTF();
-    this.ptfs[ArrayRemoveOperation.TYPE] = new ArrayRemovePTF();
-    this.ptfs[ArrayReplaceOperation.TYPE] = new ArrayReplacePTF();
-    this.ptfs[ArrayMoveOperation.TYPE] = new ArrayMovePTF();
-    this.ptfs[ArraySetOperation.TYPE] = new ArraySetPTF();
+    this.ptfs[OperationType.ARRAY_INSERT] = new ArrayInsertPTF();
+    this.ptfs[OperationType.ARRAY_REMOVE] = new ArrayRemovePTF();
+    this.ptfs[OperationType.ARRAY_REPLACE] = new ArrayReplacePTF();
+    this.ptfs[OperationType.ARRAY_MOVE] = new ArrayMovePTF();
+    this.ptfs[OperationType.ARRAY_SET] = new ArraySetPTF();
 
-    this.ptfs[ObjectSetPropertyOperation.TYPE] = new ObjectSetPropertyPTF();
-    this.ptfs[ObjectRemovePropertyOperation.TYPE] = new ObjectRemovePropertyPTF();
-    this.ptfs[ObjectSetOperation.TYPE] = new ObjectSetPTF();
+    this.ptfs[OperationType.OBJECT_SET_PROPERTY] = new ObjectSetPropertyPTF();
+    this.ptfs[OperationType.OBJECT_REMOVE_PROPERTY] = new ObjectRemovePropertyPTF();
+    this.ptfs[OperationType.OBJECT_SET] = new ObjectSetPTF();
   }
 
   registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
-    (s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
-    var key: string = s + c;
+  (s: number, c: number, otf: OperationTransformationFunction<S, C>): void {
+    var key: string = "" + s + c;
     if (this.otfs[key]) {
       throw new Error("Transformation function already registered for " + s + ", " + c);
     } else {
@@ -188,8 +177,8 @@ export default class TransformationFunctionRegistry {
   }
 
   getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>
-    (s: S, c: C): OperationTransformationFunction<S, C> {
-    var key: string = s.type + c.type;
+  (s: S, c: C): OperationTransformationFunction<S, C> {
+    var key: string = "" + s.type + c.type;
     return this.otfs[key];
   }
 

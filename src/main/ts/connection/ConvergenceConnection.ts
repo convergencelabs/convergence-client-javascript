@@ -153,8 +153,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
   authenticateWithPassword(username: string, password: string): Promise<void> {
     var authRequest: PasswordAuthRequest = {
-      type: MessageType.AUTHENTICATE,
-      method: "password",
+      type: MessageType.PASSWORD_AUTH_REQUEST,
       username: username,
       password: password
     };
@@ -163,8 +162,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
   authenticateWithToken(token: string): Promise<void> {
     var authRequest: TokenAuthRequest = {
-      type: MessageType.AUTHENTICATE,
-      method: "token",
+      type: MessageType.TOKEN_AUTH_REQUEST,
       token: token
     };
     return this._authenticate(authRequest);
@@ -265,8 +263,8 @@ export default class ConvergenceConnection extends EventEmitter {
         if (handshakeResponse.success) {
           self._connectionDeferred.resolve(handshakeResponse);
           self._connectionDeferred = null;
-          self._clientId = handshakeResponse.clientId;
-          self._session.setSessionId(handshakeResponse.clientId);
+          self._clientId = handshakeResponse.sessionId;
+          self._session.setSessionId(handshakeResponse.sessionId);
           self._reconnectToken = handshakeResponse.reconnectToken;
           if (reconnect) {
             self.emit(ConvergenceConnection.Events.RECONNECTED);

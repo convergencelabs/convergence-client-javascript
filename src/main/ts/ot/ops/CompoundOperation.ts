@@ -1,13 +1,12 @@
 import Operation from "./Operation";
 import DiscreteOperation from "./DiscreteOperation";
 import Immutable from "../../util/Immutable";
+import OperationType from "../../protocol/model/OperationType";
 
 export default class CompoundOperation extends Operation {
 
-  static TYPE: string = "Compound";
-
   constructor(public ops: DiscreteOperation[]) {
-    super(CompoundOperation.TYPE);
+    super(OperationType.COMPOUND);
     Object.freeze(this);
   }
 

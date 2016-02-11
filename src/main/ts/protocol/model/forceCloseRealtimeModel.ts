@@ -9,9 +9,10 @@ export interface ForceCloseRealTimeModel extends IncomingProtocolNormalMessage {
 export class ForceCloseRealTimeModelMessageDeserializer {
   static deserialize(body: any): ForceCloseRealTimeModel {
     return {
-      resourceId: body.rId,
-      reason: body.reason,
-      type: MessageType.FORCE_CLOSE_REAL_TIME_MODEL
+      type: MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
+      resourceId: body.r,
+      reason: body.s
+
     };
   }
 }

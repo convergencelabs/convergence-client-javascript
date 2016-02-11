@@ -41,9 +41,10 @@ export interface AuthenticationResponseMessage extends IncomingProtocolResponseM
 export class AuthenticationResponseDeserializer {
   static deserialize(body: any): AuthenticationResponseMessage {
     return {
+      type: MessageType.AUTHENTICATE_RESPONSE,
       success: body.s,
-      username: body.u,
-      type: body.t
+      username: body.u
+
     };
   }
 }

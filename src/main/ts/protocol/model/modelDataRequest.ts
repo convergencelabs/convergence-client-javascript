@@ -10,8 +10,8 @@ export interface ModelDataRequest extends IncomingProtocolRequestMessage {
 export class ModelDataRequestDeserializer {
   static deserialize(body: any): ModelDataRequest {
     return {
-      modelFqn: new ModelFqn(body.fqn.cId, body.fqn.mId),
-      type: MessageType.MODEL_DATA_REQUEST
+      type: MessageType.MODEL_DATA_REQUEST,
+      modelFqn: new ModelFqn(body.cd, body.m)
     };
   }
 }
@@ -23,7 +23,8 @@ export interface ModelDataResponse extends OutgoingProtocolResponseMessage {
 export class ModelDataResponseSerializer {
   static serialize(response: ModelDataResponse): any {
     return {
-      data: response.data
+      t: MessageType.MODEL_DATA_RESPONSE,
+      d: response.data
     };
   }
 }

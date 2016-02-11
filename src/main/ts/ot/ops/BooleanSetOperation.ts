@@ -1,13 +1,12 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
 export default class BooleanSetOperation extends DiscreteOperation {
 
-  static TYPE: string = "BooleanSet";
-
   constructor(path: Path, noOp: boolean, public value: boolean) {
-    super(BooleanSetOperation.TYPE, path, noOp);
+    super(OperationType.BOOLEAN_SET, path, noOp);
     Object.freeze(this);
   }
 

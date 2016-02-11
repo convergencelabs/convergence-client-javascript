@@ -6,10 +6,8 @@ import {AuthenticationResponseDeserializer} from "./authentication";
 import {OutgoingProtocolMessage} from "./protocol";
 import {ErrorMessageSerializer} from "./ErrorMessage";
 import {HandshakeRequestSerializer} from "./handhsake";
-import {AuthRequestSerializer} from "./authentication";
 import {ErrorMessage} from "./ErrorMessage";
 import {HandshakeRequest} from "./handhsake";
-import {AuthRequest} from "./authentication";
 import {OpenRealTimeModelRequest} from "./model/openRealtimeModel";
 import {OpenRealTimeModelResponseMessageDeserializer} from "./model/openRealtimeModel";
 import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
@@ -27,64 +25,113 @@ import {OperationAckDeserializer} from "./model/operationAck";
 import {ModelDataRequestDeserializer} from "./model/modelDataRequest";
 import {ModelDataResponse} from "./model/modelDataRequest";
 import {ModelDataResponseSerializer} from "./model/modelDataRequest";
+import {TokenAuthRequestSerializer} from "./authentication";
+import {PasswordAuthRequestSerializer} from "./authentication";
+import {PasswordAuthRequest} from "./authentication";
+import {TokenAuthRequest} from "./authentication";
+import {MessageEnvelope} from "./protocol";
 
 export class MessageSerializer {
 
-  static deserialize(body: any, type: string): IncomingProtocolMessage {
+  static deserialize(message: any): MessageEnvelope {
+
+    var body: any = message.b;
+    var type: number = body.t;
+    var requestId: number = message.q;
+    var responseId: number = message.p;
+
+    var incomingMessage: IncomingProtocolMessage;
+
     switch (type) {
       case MessageType.ERROR:
-        return ErrorMessageDeserializer.deserialize(body);
-      case MessageType.HANDSHAKE:
-        return HandshakeResponseDeserializer.deserialize(body);
-      case MessageType.AUTHENTICATE:
-        return AuthenticationResponseDeserializer.deserialize(body);
-      case MessageType.OPEN_REAL_TIME_MODEL:
-        return OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
+        incomingMessage = ErrorMessageDeserializer.deserialize(body);
+        break;
+      case MessageType.HANDSHAKE_RESPONSE:
+        incomingMessage = HandshakeResponseDeserializer.deserialize(body);
+        break;
+      case MessageType.AUTHENTICATE_RESPONSE:
+        incomingMessage = AuthenticationResponseDeserializer.deserialize(body);
+        break;
+      case MessageType.OPEN_REAL_TIME_MODEL_RESPONSE:
+        incomingMessage = OpenRealTimeModelResponseMessageDeserializer.deserialize(body);
+        break;
       case MessageType.FORCE_CLOSE_REAL_TIME_MODEL:
-        return ForceCloseRealTimeModelMessageDeserializer.deserialize(body);
+        incomingMessage = ForceCloseRealTimeModelMessageDeserializer.deserialize(body);
+        break;
       case MessageType.REMOTE_OPERATION:
-        return RemoteOperationDeserializer.deserialize(body);
-      case MessageType.OPERATION_ACK:
-        return OperationAckDeserializer.deserialize(body);
+        incomingMessage = RemoteOperationDeserializer.deserialize(body);
+        break;
+      case MessageType.OPERATION_ACKNOWLEDGEMENT:
+        incomingMessage = OperationAckDeserializer.deserialize(body);
+        break;
       case MessageType.MODEL_DATA_REQUEST:
-        return ModelDataRequestDeserializer.deserialize(body);
-      case MessageType.CREATE_REAL_TIME_MODEL:
-      case MessageType.DELETE_REAL_TIME_MODEL:
-      case MessageType.CLOSE_REAL_TIME_MODEL:
+        incomingMessage = ModelDataRequestDeserializer.deserialize(body);
+        break;
+      case MessageType.CREATE_REAL_TIME_MODEL_RESPONSE:
+      case MessageType.DELETE_REAL_TIME_MODEL_RESPONSE:
+      case MessageType.CLOSE_REAL_TIME_MODEL_RESPONSE:
         // These messages don't have any message that comes back.  Basically,
         // this is a success message.
-        return {
+        incomingMessage = {
           type: type
         };
+        break;
       default:
-        throw new Error("Unexpected message type: " + type);
+        throw new Error("Unexpected message type: " + body.t);
     }
+
+    return {
+      body: incomingMessage,
+      requestId: requestId,
+      responseId: responseId
+    };
   }
 
-  static serialize(body: OutgoingProtocolMessage): any {
-    var type: string = body.type;
+  static serialize(envelope: MessageEnvelope): any {
+    var body: OutgoingProtocolMessage = envelope.body;
+    var type: number = body.type;
+    var outgoingMessage: OutgoingProtocolMessage;
+
     switch (type) {
       case MessageType.ERROR:
-        return ErrorMessageSerializer.serialize(<ErrorMessage>body);
-      case MessageType.HANDSHAKE:
-        return HandshakeRequestSerializer.serialize(<HandshakeRequest>body);
-      case MessageType.AUTHENTICATE:
-        return AuthRequestSerializer.serialize(<AuthRequest>body);
-      case MessageType.OPEN_REAL_TIME_MODEL:
-        return OpenRealTimeModelRequestSerializer.serialize(<OpenRealTimeModelRequest>body);
-      case MessageType.CREATE_REAL_TIME_MODEL:
-        return CreateRealTimeModelRequestSerializer.serialize(<CreateRealTimeModelRequest>body);
-      case MessageType.DELETE_REAL_TIME_MODEL:
-        return DeleteRealTimeModelRequestSerializer.serialize(<DeleteRealTimeModelRequest>body);
-      case MessageType.CLOSE_REAL_TIME_MODEL:
-        return CloseRealTimeModelRequestSerializer.serialize(<CloseRealTimeModelRequest>body);
+        outgoingMessage = ErrorMessageSerializer.serialize(<ErrorMessage>body);
+        break;
+      case MessageType.HANDSHAKE_REQUEST:
+        outgoingMessage = HandshakeRequestSerializer.serialize(<HandshakeRequest>body);
+        break;
+      case MessageType.PASSWORD_AUTH_REQUEST:
+        outgoingMessage = PasswordAuthRequestSerializer.serialize(<PasswordAuthRequest>body);
+        break;
+      case MessageType.TOKEN_AUTH_REQUEST:
+        outgoingMessage = TokenAuthRequestSerializer.serialize(<TokenAuthRequest>body);
+        break;
+      case MessageType.OPEN_REAL_TIME_MODEL_REQUEST:
+        outgoingMessage = OpenRealTimeModelRequestSerializer.serialize(<OpenRealTimeModelRequest>body);
+        break;
+      case MessageType.CREATE_REAL_TIME_MODEL_REQUEST:
+        outgoingMessage = CreateRealTimeModelRequestSerializer.serialize(<CreateRealTimeModelRequest>body);
+        break;
+      case MessageType.DELETE_REAL_TIME_MODEL_REQUEST:
+        outgoingMessage = DeleteRealTimeModelRequestSerializer.serialize(<DeleteRealTimeModelRequest>body);
+        break;
+      case MessageType.CLOSES_REAL_TIME_MODEL_REQUEST:
+        outgoingMessage = CloseRealTimeModelRequestSerializer.serialize(<CloseRealTimeModelRequest>body);
+        break;
       case MessageType.OPERATION_SUBMISSION:
-        return OperationSubmissionSerializer.serialize(<OperationSubmission>body);
+        outgoingMessage = OperationSubmissionSerializer.serialize(<OperationSubmission>body);
+        break;
       case MessageType.MODEL_DATA_REQUEST:
-        return ModelDataResponseSerializer.serialize(<ModelDataResponse>body);
+        outgoingMessage = ModelDataResponseSerializer.serialize(<ModelDataResponse>body);
+        break;
       default:
         throw new Error("Unexpected protocol type: " + type);
     }
+
+    return {
+      b: outgoingMessage,
+      q: envelope.requestId,
+      p: envelope.responseId
+    };
   }
 }
 

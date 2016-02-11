@@ -1,15 +1,14 @@
 import Immutable from "../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
 export default class ObjectRemovePropertyOperation extends DiscreteOperation {
-
-  static TYPE: string = "ObjectRemoveProperty";
 
   protected _prop: string;
 
   constructor(path: Path, noOp: boolean, public prop: string) {
-    super(ObjectRemovePropertyOperation.TYPE, path, noOp);
+    super(OperationType.OBJECT_REMOVE_PROPERTY, path, noOp);
     Object.freeze(this);
   }
 
