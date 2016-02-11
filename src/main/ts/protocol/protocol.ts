@@ -22,5 +22,6 @@ export interface IncomingProtocolResponseMessage extends IncomingProtocolMessage
 
 export class MessageEnvelope {
   constructor(public body: ProtocolMessage, public requestId?: number, public responseId?: number) {
+    Object.freeze(this);
   }
 }

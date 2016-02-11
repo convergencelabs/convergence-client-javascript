@@ -124,7 +124,7 @@ export class MessageSerializer {
         outgoingMessage = ModelDataResponseSerializer.serialize(<ModelDataResponse>body);
         break;
       default:
-        throw new Error("Unexpected protocol type: " + type);
+        throw new Error("Unexpected message type: " + type);
     }
 
     return {
