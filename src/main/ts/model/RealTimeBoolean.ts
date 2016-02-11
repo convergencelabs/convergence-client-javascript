@@ -7,6 +7,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../protocol/model/OperationType";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
@@ -47,8 +48,8 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === BooleanSetOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.BOOLEAN_SET) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

@@ -12,6 +12,8 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../protocol/model/OperationType";
+import Operation from "../ot/ops/Operation";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -149,14 +151,14 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === ObjectAddPropertyOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.OBJECT_ADD_PROPERTY) {
         this._handleAddPropertyOperation(operationEvent);
-      } else if (type === ObjectSetPropertyOperation.TYPE) {
+      } else if (type === OperationType.OBJECT_SET_PROPERTY) {
         this._handleSetPropertyOperation(operationEvent);
-      } else if (type === ObjectRemovePropertyOperation.TYPE) {
+      } else if (type === OperationType.OBJECT_REMOVE_PROPERTY) {
         this._handleRemovePropertyOperation(operationEvent);
-      } else if (type === ObjectSetOperation.TYPE) {
+      } else if (type === OperationType.OBJECT_SET) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

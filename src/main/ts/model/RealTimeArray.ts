@@ -13,6 +13,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../protocol/model/OperationType";
 
 
 export default class RealTimeArray extends RealTimeContainerValue<any[]> {
@@ -174,16 +175,16 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === ArrayInsertOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.ARRAY_INSERT) {
         this._handleInsertOperation(operationEvent);
-      } else if (type === ArrayMoveOperation.TYPE) {
+      } else if (type === OperationType.ARRAY_MOVE) {
         this._handleReorderOperation(operationEvent);
-      } else if (type === ArrayRemoveOperation.TYPE) {
+      } else if (type === OperationType.ARRAY_REMOVE) {
         this._handleRemoveOperation(operationEvent);
-      } else if (type === ArrayReplaceOperation.TYPE) {
+      } else if (type === OperationType.ARRAY_REPLACE) {
         this._handleSetOperation(operationEvent);
-      } else if (type === ArraySetOperation.TYPE) {
+      } else if (type === OperationType.ARRAY_SET) {
         this._handleSetValueOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

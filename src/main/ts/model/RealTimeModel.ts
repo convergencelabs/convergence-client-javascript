@@ -20,6 +20,7 @@ import {OperationAck} from "../protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
 import {Path} from "../ot/Path";
 import Event from "../util/Event";
+import OperationType from "../protocol/model/OperationType";
 
 export default class RealTimeModel extends EventEmitter {
 
@@ -137,7 +138,7 @@ export default class RealTimeModel extends EventEmitter {
       case MessageType.REMOTE_OPERATION:
         this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
         break;
-      case MessageType.OPERATION_ACK:
+      case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
         break;
       default:
@@ -180,7 +181,7 @@ export default class RealTimeModel extends EventEmitter {
     this._version = contextVersion;
     this._modifiedTime = new Date(timestamp);
 
-    if (operation.type === CompoundOperation.TYPE) {
+    if (operation.type === OperationType.COMPOUND) {
       var compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         // TODO: Determine where to get userId

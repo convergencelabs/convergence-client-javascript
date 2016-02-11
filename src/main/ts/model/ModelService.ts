@@ -31,7 +31,7 @@ export default class ModelService extends EventEmitter {
     this._connection.addMultipleMessageListener(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
-        MessageType.OPERATION_ACK,
+        MessageType.OPERATION_ACKNOWLEDGEMENT,
         MessageType.MODEL_DATA_REQUEST],
       (message: MessageEvent) => this._handleMessage(message));
   }
@@ -88,9 +88,9 @@ export default class ModelService extends EventEmitter {
     }
 
     var request: OpenRealTimeModelRequest = {
+      type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
-      initializerProvided: initializer !== undefined,
-      type: MessageType.OPEN_REAL_TIME_MODEL
+      initializerProvided: initializer !== undefined
     };
 
     var deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
@@ -131,9 +131,10 @@ export default class ModelService extends EventEmitter {
   create(collectionId: string, modelId: string, data: any): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var request: CreateRealTimeModelRequest = {
+      type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
-      data: data,
-      type: MessageType.CREATE_REAL_TIME_MODEL
+      data: data
+
     };
 
     return this._connection.request(request).then(() => {
@@ -145,8 +146,9 @@ export default class ModelService extends EventEmitter {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
 
     var request: DeleteRealTimeModelRequest = {
-      modelFqn: fqn,
-      type: MessageType.DELETE_REAL_TIME_MODEL
+      type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
+      modelFqn: fqn
+
     };
 
     return this._connection.request(request).then(() => {
@@ -156,8 +158,8 @@ export default class ModelService extends EventEmitter {
 
   _close(resourceId: string): Promise<void> {
     var request: CloseRealTimeModelRequest = {
-      resourceId: resourceId,
-      type: MessageType.CLOSE_REAL_TIME_MODEL
+      type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
+      resourceId: resourceId
     };
 
     return this._connection.request(request).then(() => {

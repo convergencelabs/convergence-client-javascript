@@ -9,6 +9,7 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../protocol/model/OperationType";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -68,12 +69,12 @@ export default class RealTimeString extends RealTimeValue<String> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === StringInsertOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.STRING_INSERT) {
         this._handleInsertOperation(operationEvent);
-      } else if (type === StringRemoveOperation.TYPE) {
+      } else if (type === OperationType.STRING_REMOVE) {
         this._handleRemoveOperation(operationEvent);
-      } else if (type === StringSetOperation.TYPE) {
+      } else if (type === OperationType.STRING_SET) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
