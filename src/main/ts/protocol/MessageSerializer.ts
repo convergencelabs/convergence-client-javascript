@@ -1,5 +1,4 @@
 import MessageType from "./MessageType";
-
 import {MessageEnvelope} from "./protocol";
 import {IncomingProtocolMessage} from "./protocol";
 import {OutgoingProtocolMessage} from "./protocol";
@@ -11,6 +10,10 @@ export class MessageSerializer {
 
   private static _serializers: {[key: number]: MessageBodySerializer};
   private static _deserializers: {[key: number]: MessageBodyDeserializer};
+
+  private static _defaultBodyDeserializer: MessageBodyDeserializer = (message: any) => {
+    return {};
+  };
 
   static registerMessageBodySerializer(type: MessageType, serializer: MessageBodySerializer): void {
     if (this._serializers[type] === undefined) {
@@ -26,6 +29,9 @@ export class MessageSerializer {
     this._deserializers[type] = deserializer;
   }
 
+  static registerDefaultMessageBodyDeserializer(type: MessageType): void {
+    this.registerMessageBodyDeserializer(type, this._defaultBodyDeserializer);
+  }
 
   static serialize(envelope: MessageEnvelope): any {
     var body: OutgoingProtocolMessage = envelope.body;
@@ -33,7 +39,7 @@ export class MessageSerializer {
 
     var serializer: MessageBodySerializer = this._serializers[type];
     if (serializer === undefined) {
-      throw new Error("Unexpected message type: " + MessageType[type]);
+      throw new Error(`No serializer set for message type: ${type}`);
     }
 
     var b: any = serializer(body);
@@ -55,7 +61,7 @@ export class MessageSerializer {
 
     var deserializer: MessageBodyDeserializer = this._deserializers[type];
     if (deserializer === undefined) {
-      throw new Error("Unexpected message type: " + body.t);
+      throw new Error(`No deserializer set for message type: ${type}`);
     }
 
     var incomingMessage: IncomingProtocolMessage = deserializer(body);

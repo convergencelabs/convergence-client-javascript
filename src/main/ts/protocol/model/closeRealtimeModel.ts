@@ -11,3 +11,5 @@ MessageSerializer.registerMessageBodySerializer(MessageType.CLOSES_REAL_TIME_MOD
     r: request.resourceId
   };
 });
+
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CLOSE_REAL_TIME_MODEL_RESPONSE);

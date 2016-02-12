@@ -13,3 +13,5 @@ MessageSerializer.registerMessageBodySerializer(MessageType.DELETE_REAL_TIME_MOD
     m: request.modelFqn.modelId
   };
 });
+
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.DELETE_REAL_TIME_MODEL_RESPONSE);

@@ -15,3 +15,5 @@ MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_REAL_TIME_MOD
     d: request.data
   };
 });
+
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_MODEL_RESPONSE);
