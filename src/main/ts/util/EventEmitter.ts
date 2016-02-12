@@ -103,7 +103,7 @@ export default class EventEmitter {
 
   private _resolveEventKey(event: EventKey): EventKey {
     if (typeof event === "string") {
-      return this._resolveEventKey(event);
+      return event.toLowerCase();
     } else if ((<number>event) >= 0) {
       return event;
     } else {
