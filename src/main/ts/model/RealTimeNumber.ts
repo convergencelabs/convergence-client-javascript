@@ -5,16 +5,16 @@ import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import NumberAddOperation from "../ot/ops/NumberAddOperation";
 import NumberSetOperation from "../ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import NumberAddEvent from "./events/NumberAddEvent";
-import NumberSetEvent from "./events/NumberSetEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
+import {ModelChangeEvent} from "./events";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
   static Events: any = {
     ADD: "add",
-    SET: "set"
+    VALUE: "value",
+    DETACHED: RealTimeValue.Events.DETACHED
   };
 
   /**
@@ -27,10 +27,6 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     super(RealTimeValueType.Number, parent, fieldInParent, sendOpCallback);
   }
 
-  /**
-   * Adds the value to the RealTimeNumber.
-   * @param {number} a number to add
-   */
   add(value: number): void {
     this._validateNumber(value);
 
@@ -41,33 +37,19 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     }
   }
 
-  /**
-   * Subtracts the value from the RealTimeNumber.
-   * @param {number} a number to subtract
-   */
   subtract(value: number): void {
     this.add(-value);
   }
 
-  /**
-   * Increments the value of this RealTimeNumber by 1.
-   */
   increment(): void {
     this.add(1);
   }
 
-  /**
-   * Decrements the value of this RealTimeNumber by 1.
-   */
   decrement(): void {
     this.add(-1);
   }
 
-  /**
-   * Sets the value of the RealTimeNumber
-   * @param {Number} value The new value.
-   */
-  setValue(value: number): void {
+  protected _setValue(value: number): void {
     if (isNaN(value)) {
       throw new Error("Value is NaN");
     }
@@ -77,7 +59,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     this.sendOpCallback(operation);
   }
 
-  value(): number {
+  protected _getValue(): number {
     return this._data;
   }
 
@@ -105,14 +87,16 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     this._validateNumber(value);
     this._data += value;
 
-    var event: NumberAddEvent = new NumberAddEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      value);
-    this.emit(RealTimeNumber.Events.ADD, event);
+    var event: NumberAddEvent = {
+      src: this,
+      name: RealTimeNumber.Events.ADD,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -122,14 +106,16 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     this._validateNumber(value);
     this._data = value;
 
-    var event: NumberSetEvent = new NumberSetEvent(
-      operationEvent.sessionId,
-      operationEvent.username,
-      operationEvent.version,
-      operationEvent.timestamp,
-      this,
-      value);
-    this.emit(RealTimeNumber.Events.SET, event);
+    var event: NumberSetValueEvent = {
+      src: this,
+      name: RealTimeNumber.Events.VALUE,
+      sessionId: operationEvent.sessionId,
+      userId: operationEvent.username,
+      version: operationEvent.version,
+      timestamp: operationEvent.timestamp,
+      value: value
+    };
+    this.emitEvent(event);
   }
 
   private _validateNumber(value: number): void {
@@ -137,4 +123,14 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       throw new Error("Value is NaN");
     }
   }
+}
+
+export interface NumberSetValueEvent extends ModelChangeEvent {
+  src: RealTimeNumber;
+  value:  number;
+}
+
+export interface NumberAddEvent extends ModelChangeEvent {
+  src: RealTimeNumber;
+  value:  number;
 }

@@ -1,8 +1,7 @@
-import ModelChangeEvent from "../../../main/ts/model/events/ModelChangeEvent";
 import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
 import RealTimeObject from "../../../main/ts/model/RealTimeObject";
 import ObjectSetOperation from "../../../main/ts/ot/ops/ObjectSetOperation";
-import ObjectSetEvent from "../../../main/ts/model/events/ObjectSetEvent";
+import {ObjectSetValueEvent} from "../../../main/ts/model/RealTimeObject";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
@@ -24,21 +23,21 @@ describe('RealTimeObject', () => {
 
   it('Value is correct after set', () => {
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy());
-    myObject.setValue({"string": "test"});
+    myObject.value({"string": "test"});
     expect(myObject.value()).to.deep.equal({"string": "test"});
   });
 
   it('Value is correct after setProperty', () => {
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy());
-    myObject.setProperty("num", 10);
-    expect(myObject.getProperty("num").value()).to.deep.equal(10);
+    myObject.set("num", 10);
+    expect(myObject.get("num").value()).to.deep.equal(10);
   });
 
   it('Correct operation is sent after set', () => {
 
     var sendOpCallback: SinonSpy = sinon.spy();
     var myObject: RealTimeObject = new RealTimeObject({num: 5}, null, null, sendOpCallback);
-    myObject.setValue({string: "test"});
+    myObject.value({string: "test"});
 
     var expectedOp: ObjectSetOperation = new ObjectSetOperation([], false, {string: "test"});
     expect(sendOpCallback.lastCall.args[0]).to.be.deep.equal(expectedOp);
@@ -57,14 +56,21 @@ describe('RealTimeObject', () => {
   it('Correct Event is fired after ObjectSetOperation', () => {
     var eventCallback: SinonSpy = sinon.spy();
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
-    myObject.on("Set", eventCallback);
+    myObject.on(RealTimeObject.Events.VALUE, eventCallback);
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myObject._handleRemoteOperation(incomingOp.path, incomingEvent);
 
-    var expectedEvent: ObjectSetEvent = new ObjectSetEvent(sessionId, username, version, timestamp, myObject, {"string": "test"});
+    var expectedEvent: ObjectSetValueEvent = {
+      src: myObject,
+      name: RealTimeObject.Events.VALUE,
+      sessionId: sessionId,
+      userId: username,
+      version: version,
+      timestamp: timestamp,
+      value: {"string": "test"}
+    };
     expect(eventCallback.lastCall.args[0]).to.deep.equal(expectedEvent);
   });
-
 });

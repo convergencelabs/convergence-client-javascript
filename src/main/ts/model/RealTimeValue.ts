@@ -4,8 +4,13 @@ import {PathElement, Path} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeContainerValue from "./RealTimeContainerValue";
+import {ModelDetachedEvent} from "./events";
 
 abstract class RealTimeValue<T> extends EventEmitter {
+
+  static Events: any = {
+    DETACHED: "detached"
+  };
 
   private _detached: boolean = false;
 
@@ -40,14 +45,31 @@ abstract class RealTimeValue<T> extends EventEmitter {
   _setDetached(): void {
     this.parent = null;
     this._detached = true;
-    this.emit("detached");
+    var event: ModelDetachedEvent = {
+      src: this,
+      name: RealTimeValue.Events.DETACHED
+    };
+
+    this.emitEvent(event);
   }
 
   _exceptionIfDetached(): void {
     throw Error("Detached Exception: RealTimeValue is no longer a part of the data model.");
   }
 
-  abstract value(): T;
+  value(): T
+  value(value: T): void
+  value(value?: T): any {
+    if (arguments.length === 0) {
+      return this._getValue();
+    } else {
+      this._setValue(value);
+      return;
+    }
+  }
+
+  protected abstract _getValue(): T;
+  protected abstract _setValue(value: T): void;
 
   abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
 

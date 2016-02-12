@@ -1,11 +1,11 @@
 import DiscreteOperation from "../../../main/ts/ot/ops/DiscreteOperation";
-import ModelChangeEvent from "../../../main/ts/model/events/ModelChangeEvent";
 import RealTimeBoolean from "../../../main/ts/model/RealTimeBoolean";
-import BooleanSetOperation from "../../../main/ts/ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
-import BooleanSetEvent from "../../../main/ts/model/events/BooleanSetEvent";
+import BooleanSetOperation from "../../../main/ts/ot/ops/BooleanSetOperation";
+import {BooleanSetValueEvent} from "../../../main/ts/model/RealTimeBoolean";
 
 import * as chai from "chai";
+import {ModelChangeEvent} from "../../../main/ts/model/events";
 var expect: any = chai.expect;
 
 describe('RealTimeBoolean', () => {
@@ -35,14 +35,14 @@ describe('RealTimeBoolean', () => {
 
   it('Value is correct after set', () => {
     var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, ignoreCallback);
-    myBoolean.setValue(false);
+    myBoolean.value(false);
     expect(myBoolean.value()).to.equal(false);
   });
 
   it('Correct operation is sent after set', () => {
     lastOp = null;
     var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, lastOpCallback);
-    myBoolean.setValue(false);
+    myBoolean.value(false);
 
     var expectedOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
     expect(lastOp).to.deep.equal(expectedOp);
@@ -61,13 +61,21 @@ describe('RealTimeBoolean', () => {
   it('Correct Event is fired after BooleanSetOperation', () => {
     lastEvent = null;
     var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
-    myBoolean.on("Set", lastEventCallback);
+    myBoolean.on(RealTimeBoolean.Events.VALUE, lastEventCallback);
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myBoolean._handleRemoteOperation(incomingOp.path, incomingEvent);
 
-    var expectedEvent: BooleanSetEvent = new BooleanSetEvent(sessionId, username, version, timestamp, myBoolean, false);
+    var expectedEvent: BooleanSetValueEvent = {
+      src: myBoolean,
+      name: RealTimeBoolean.Events.VALUE,
+      sessionId: sessionId,
+      userId: username,
+      version: version,
+      timestamp: timestamp,
+      value: false
+    };
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 

@@ -19,16 +19,20 @@ import {RemoteOperation} from "../protocol/model/removeOperation";
 import {OperationAck} from "../protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
 import {Path} from "../ot/Path";
+import Event from "../util/Event";
 
 export default class RealTimeModel extends EventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
     DELETED: "deleted",
-    COMMIT_STATE_CHANGED: "commitStateChanged"
+    MODIFIED: "modified",
+    COMMITTED: "committed"
   };
 
-  private _value: RealTimeObject;
+  private _data: RealTimeObject;
+  private _open: boolean;
+  private _committed: boolean;
 
   /**
    * Constructs a new RealTimeModel.
@@ -45,13 +49,19 @@ export default class RealTimeModel extends EventEmitter {
     super();
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
-      this.emit(RealTimeModel.Events.COMMIT_STATE_CHANGED, committed);
+      this._committed = committed;
+      var name: string = this._committed ? RealTimeModel.Events.COMMITTED : RealTimeModel.Events.MODIFIED;
+      var evt: RealTimeModelEvent = {src: this, name: name};
+      this.emit(name, evt);
     });
 
-    this._value = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
+    this._data = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
       var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
       this._sendOperation(opEvent);
     });
+
+    this._open = true;
+    this._committed = true;
   }
 
   collectionId(): string {
@@ -75,36 +85,49 @@ export default class RealTimeModel extends EventEmitter {
   }
 
   data(): RealTimeObject {
-    return this._value;
+    return this._data;
   }
 
   dataAt(path: any): RealTimeValue<any> {
     var pathArgs: Path = Array.isArray(path) ? path : arguments;
-    return this._value._path(pathArgs);
+    return this._data._path(pathArgs);
   }
 
   session(): Session {
     return this._connection.session();
   }
 
+  isOpen(): boolean {
+    return this._open;
+  }
+
   close(): Promise<void> {
     return this._modelService._close(this._resourceId).then(() => {
-      this.emit(RealTimeModel.Events.CLOSED);
+      var event: RealTimeModelClosedEvent = {
+        src: this,
+        name: RealTimeModel.Events.CLOSED,
+        local: true};
+      this.emit(event.name, event);
+      this._open = false;
     });
   }
 
-  beginCompoundOperation(): void {
+  startCompound(): void {
     this._concurrencyControl.startCompoundOperation();
   }
 
-  completeCompoundOperation(): void {
+  endCompound(): void {
     var opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
     this._sendOperation(opEvent);
   }
 
-  isCompoundOperationInProgress(): boolean {
+  isCompoundStarted(): boolean {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
+
+  //
+  // Private API
+  //
 
   _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
@@ -123,7 +146,13 @@ export default class RealTimeModel extends EventEmitter {
   }
 
   private _handleForceClose(message: ForceCloseRealTimeModel): void {
-    this.emit(RealTimeModel.Events.CLOSED, message.reason);
+    var event: RealTimeModelClosedEvent = {
+      src: this,
+      name: RealTimeModel.Events.CLOSED,
+      local: false,
+      reason: message.reason
+    };
+    this.emit(RealTimeModel.Events.CLOSED, event);
   }
 
   private _handelOperationAck(message: OperationAck): void {
@@ -156,12 +185,12 @@ export default class RealTimeModel extends EventEmitter {
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         // TODO: Determine where to get userId
         var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, "user", contextVersion, timestamp, op);
-        this._value._handleRemoteOperation(modelEvent.operation.path, modelEvent);
+        this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
       });
     } else {
       var modelEvent: ModelOperationEvent =
         new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
-      this._value._handleRemoteOperation(modelEvent.operation.path, modelEvent);
+      this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
     }
   }
 
@@ -175,4 +204,13 @@ export default class RealTimeModel extends EventEmitter {
     };
     this._connection.send(opSubmission);
   }
+}
+
+interface RealTimeModelEvent extends Event {
+  src: RealTimeModel;
+}
+
+interface RealTimeModelClosedEvent extends RealTimeModelEvent {
+  local: boolean;
+  reason?: string;
 }

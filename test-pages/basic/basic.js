@@ -128,7 +128,7 @@ arraySetButton.onclick = function () {
   if (index >= 0) {
     arrayInput.options[index].textContent = arraySetValue.value;
     var rtArray = model.data().child("array");
-    rtArray.replace(index, arraySetValue.value);
+    rtArray.set(index, arraySetValue.value);
   }
 };
 
@@ -171,7 +171,7 @@ function bindSelectList(selectInput, arrayModel) {
     selectInput.add(option, evt.index)
   });
 
-  arrayModel.on("replace", function (evt) {
+  arrayModel.on("set", function (evt) {
     selectInput.options[evt.index].textContent = evt.value;
     selectInput.options[evt.index].value = evt.value;
   });
@@ -199,23 +199,23 @@ function bindTableButtons() {
   var rtObject = model.data().child("object");
 
   objectRemoveButton.onclick = function() {
-    rtObject.removeProperty(objectRemoveProp.value);
+    rtObject.remove(objectRemoveProp.value);
     renderTable(rtObject);
   };
 
   objectSetButton.onclick = function() {
-    rtObject.setProperty(objectSetProp.value, objectSetValue.value);
+    rtObject.set(objectSetProp.value, objectSetValue.value);
     renderTable(rtObject);
   };
 }
 
 function bindTableEvents() {
   var rtObject = model.data().child("object");
-  rtObject.on("removeProperty", function(evt) {
+  rtObject.on("remove", function(evt) {
     renderTable(rtObject);
   });
 
-  rtObject.on("setProperty", function(evt) {
+  rtObject.on("set", function(evt) {
     renderTable(rtObject);
   });
 }
