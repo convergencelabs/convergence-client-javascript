@@ -1,12 +1,12 @@
-import EventEmitter from "../util/EventEmitter";
-import DataType from "./RealTimeValueType";
+import RealTimeValueType from "./RealTimeValueType";
 import {PathElement, Path} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {ModelDetachedEvent} from "./events";
+import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 
-abstract class RealTimeValue<T> extends EventEmitter {
+abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
     DETACHED: "detached"
@@ -17,14 +17,14 @@ abstract class RealTimeValue<T> extends EventEmitter {
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(private modelType: DataType,
+  constructor(private modelType: RealTimeValueType,
               private parent: RealTimeContainerValue<any>,
               public fieldInParent: PathElement,
               protected sendOpCallback: (operation: DiscreteOperation) => void) {
     super();
   }
 
-  type(): DataType {
+  type(): RealTimeValueType {
     return this.modelType;
   }
 

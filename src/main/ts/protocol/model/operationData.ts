@@ -41,7 +41,7 @@ export class OperationDeserializer {
 
 export class DiscreteOperationSerializer {
   static serialize(operation: DiscreteOperation): any {
-    switch(operation.type) {
+    switch (operation.type) {
 
     }
     if (operation instanceof ArrayInsertOperation) {
@@ -126,7 +126,7 @@ export class CompoundOperationSerializer {
     for (op of operation.ops) {
       ops.push(DiscreteOperationSerializer.serialize(op));
     }
-    return  {
+    return {
       t: "C",
       ops: ops
 

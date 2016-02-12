@@ -1,7 +1,7 @@
-import Event from "../util/Event";
+import ConvergenceEvent from "../util/ConvergenceEvent";
 import RealTimeValue from "./RealTimeValue";
 
-export interface ModelChangeEvent extends Event {
+export interface ModelChangeEvent extends ConvergenceEvent {
   src: RealTimeValue<any>;
   sessionId: string;
   userId: string;
@@ -9,6 +9,6 @@ export interface ModelChangeEvent extends Event {
   timestamp: number;
 }
 
-export interface ModelDetachedEvent extends Event {
+export interface ModelDetachedEvent extends ConvergenceEvent {
   src: RealTimeValue<any>;
 }

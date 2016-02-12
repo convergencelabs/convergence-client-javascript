@@ -19,7 +19,7 @@ import {RemoteOperation} from "../protocol/model/removeOperation";
 import {OperationAck} from "../protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
 import {Path} from "../ot/Path";
-import Event from "../util/Event";
+import ConvergenceEvent from "../util/ConvergenceEvent";
 import OperationType from "../protocol/model/OperationType";
 
 export default class RealTimeModel extends EventEmitter {
@@ -207,7 +207,7 @@ export default class RealTimeModel extends EventEmitter {
   }
 }
 
-interface RealTimeModelEvent extends Event {
+interface RealTimeModelEvent extends ConvergenceEvent {
   src: RealTimeModel;
 }
 

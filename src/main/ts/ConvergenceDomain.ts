@@ -1,12 +1,13 @@
-import EventEmitter from "./util/EventEmitter";
 import ConvergenceConnection from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
 import {HandshakeResponse} from "./protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
+import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
+import ConvergenceEvent from "./util/ConvergenceEvent";
 
 
-export default class ConvergenceDomain extends EventEmitter {
+export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static debugFlags: any = flags;
 
@@ -44,19 +45,20 @@ export default class ConvergenceDomain extends EventEmitter {
     );
 
     this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.CONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.CONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
-      this.emit(ConvergenceDomain.Events.INTERRUPTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.INTERRUPTED}));
 
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.DISCONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.DISCONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.RECONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
-      this.emit(ConvergenceDomain.Events.ERROR, error);
+      var evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error: error};
+      this.emitEvent(evt);
     });
 
     this._modelService = new ModelService(this._connection);
@@ -111,4 +113,8 @@ export default class ConvergenceDomain extends EventEmitter {
   isDisposed(): boolean {
     return this._connection === undefined;
   }
+}
+
+export interface ConvergenceErrorEvent extends ConvergenceEvent {
+  error: string;
 }

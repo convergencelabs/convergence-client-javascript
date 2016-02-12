@@ -13,7 +13,6 @@ import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../protocol/model/OperationType";
-import Operation from "../ot/ops/Operation";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 

@@ -1,4 +1,4 @@
-import EventEmitter from "../util/EventEmitter";
+import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
@@ -18,8 +18,7 @@ import {ModelDataRequest} from "../protocol/model/modelDataRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ModelDataResponse} from "../protocol/model/modelDataRequest";
 
-
-export default class ModelService extends EventEmitter {
+export default class ModelService extends ConvergenceEventEmitter {
 
   private _openRequestsByFqn: { [key: string]: OpenRequest; } = {};
   private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};

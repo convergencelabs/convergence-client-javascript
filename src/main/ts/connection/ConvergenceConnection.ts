@@ -17,6 +17,7 @@ import {AuthRequest} from "../protocol/authentication";
 import {AuthenticationResponseMessage} from "../protocol/authentication";
 import Deferred from "../util/Deferred";
 import {ReplyCallback} from "./ProtocolConnection";
+import {EventKey} from "../util/EventEmitter";
 
 export default class ConvergenceConnection extends EventEmitter {
 
@@ -168,17 +169,17 @@ export default class ConvergenceConnection extends EventEmitter {
     return this._authenticate(authRequest);
   }
 
-  addMessageListener(type: string, listener: (message: any) => void): void {
+  addMessageListener(type: EventKey, listener: (message: any) => void): void {
     this._messageEmitter.on(type, listener);
   }
 
-  addMultipleMessageListener(types: string[], listener: (message: any) => void): void {
+  addMultipleMessageListener(types: EventKey[], listener: (message: any) => void): void {
     types.forEach((type: string) => {
       this._messageEmitter.on(type, listener);
     });
   }
 
-  removeMessageListener(type: string, listener: (message: any) => void): void {
+  removeMessageListener(type: EventKey, listener: (message: any) => void): void {
     this._messageEmitter.off(type, listener);
   }
 
