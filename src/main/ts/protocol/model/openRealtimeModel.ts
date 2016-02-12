@@ -2,23 +2,20 @@ import {IncomingProtocolResponseMessage} from "../protocol";
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import ModelFqn from "../../model/ModelFqn";
 import MessageType from "../MessageType";
-
+import {MessageSerializer} from "../MessageSerializer";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
   initializerProvided: boolean;
 }
 
-export class OpenRealTimeModelRequestSerializer {
-  static serialize(request: OpenRealTimeModelRequest): any {
-    return {
-      t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      c: request.modelFqn.collectionId,
-      m: request.modelFqn.modelId,
-      i: request.initializerProvided
-    };
-  }
-}
+MessageSerializer.registerMessageBodySerializer(MessageType.OPEN_REAL_TIME_MODEL_REQUEST, (request: OpenRealTimeModelRequest) => {
+  return {
+    c: request.modelFqn.collectionId,
+    m: request.modelFqn.modelId,
+    i: request.initializerProvided
+  };
+});
 
 export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessage {
   resourceId: string;
@@ -28,15 +25,12 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   data: any;
 }
 
-export class OpenRealTimeModelResponseMessageDeserializer {
-  static deserialize(body: any): OpenRealTimeModelResponse {
-    return {
-      type: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE,
-      resourceId: body.r,
-      version: body.v,
-      createdTime: body.c,
-      modifiedTime: body.m,
-      data: body.d
-    };
-  }
-}
+MessageSerializer.registerMessageBodyDeserializer(MessageType.OPEN_REAL_TIME_MODEL_RESPONSE, (body: any) => {
+  return {
+    resourceId: body.r,
+    version: body.v,
+    createdTime: body.c,
+    modifiedTime: body.m,
+    data: body.d
+  };
+});

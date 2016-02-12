@@ -1,7 +1,7 @@
 import MessageType from "./MessageType";
 
 export interface ProtocolMessage {
-  type: MessageType;
+  type?: MessageType;
 }
 export interface OutgoingProtocolMessage extends ProtocolMessage {
 }

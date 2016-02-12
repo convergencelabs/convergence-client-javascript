@@ -41,9 +41,6 @@ export class OperationDeserializer {
 
 export class DiscreteOperationSerializer {
   static serialize(operation: DiscreteOperation): any {
-    switch (operation.type) {
-
-    }
     if (operation instanceof ArrayInsertOperation) {
       return ArrayInsertOperationSerializer.serialize(operation);
     } else if (operation instanceof ArrayMoveOperation) {

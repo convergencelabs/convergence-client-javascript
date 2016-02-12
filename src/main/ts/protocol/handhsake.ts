@@ -1,7 +1,7 @@
 import MessageType from "./MessageType";
 import {IncomingProtocolResponseMessage} from "./protocol";
 import {OutgoingProtocolRequestMessage} from "./protocol";
-
+import {MessageSerializer} from "./MessageSerializer";
 
 export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   reconnect: boolean;
@@ -9,15 +9,12 @@ export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   options: any;
 }
 
-export class HandshakeRequestSerializer {
-  static serialize(request: HandshakeRequest): any {
-    return {
-      t: MessageType.HANDSHAKE_REQUEST,
-      r: request.reconnect,
-      k: request.reconnectToken
-    };
-  }
-}
+MessageSerializer.registerMessageBodySerializer(MessageType.HANDSHAKE_REQUEST, (request: HandshakeRequest) => {
+  return {
+    r: request.reconnect,
+    k: request.reconnectToken
+  };
+});
 
 export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
@@ -28,16 +25,13 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   retryOk?: boolean;
 }
 
-export class HandshakeResponseDeserializer {
-  static deserialize(body: any): HandshakeResponse {
-    return {
-      type: MessageType.HANDSHAKE_RESPONSE,
-      success: body.s,
-      sessionId: body.i,
-      reconnectToken: body.k,
-      protocolConfig: body.c,
-      error: body.e,
-      retryOk: body.r
-    };
-  }
-}
+MessageSerializer.registerMessageBodyDeserializer(MessageType.HANDSHAKE_RESPONSE, (body: any) => {
+  return {
+    success: body.s,
+    sessionId: body.i,
+    reconnectToken: body.k,
+    protocolConfig: body.c,
+    error: body.e,
+    retryOk: body.r
+  };
+});

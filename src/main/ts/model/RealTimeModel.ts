@@ -15,7 +15,7 @@ import {ForceCloseRealTimeModel} from "../protocol/model/forceCloseRealtimeModel
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import ModelService from "./ModelService";
 import {OperationSubmission} from "../protocol/model/operationSubmission";
-import {RemoteOperation} from "../protocol/model/removeOperation";
+import {RemoteOperation} from "../protocol/model/remoteOperation";
 import {OperationAck} from "../protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
 import {Path} from "../ot/Path";

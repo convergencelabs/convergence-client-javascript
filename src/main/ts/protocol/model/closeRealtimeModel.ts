@@ -1,15 +1,13 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import MessageType from "../MessageType";
+import {MessageSerializer} from "../MessageSerializer";
 
 export interface CloseRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   resourceId: string;
 }
 
-export class CloseRealTimeModelRequestSerializer {
-  static serialize(request: CloseRealTimeModelRequest): any {
-    return {
-      t: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
-      r: request.resourceId
-    };
-  }
-}
+MessageSerializer.registerMessageBodySerializer(MessageType.CLOSES_REAL_TIME_MODEL_REQUEST, (request: CloseRealTimeModelRequest) => {
+  return {
+    r: request.resourceId
+  };
+});

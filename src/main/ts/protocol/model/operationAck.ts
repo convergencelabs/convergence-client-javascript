@@ -1,5 +1,6 @@
 import MessageType from "../MessageType";
 import {IncomingProtocolNormalMessage} from "../protocol";
+import {MessageSerializer} from "../MessageSerializer";
 
 export interface OperationAck extends IncomingProtocolNormalMessage {
   resourceId: string;
@@ -7,13 +8,10 @@ export interface OperationAck extends IncomingProtocolNormalMessage {
   version: number;
 }
 
-export class OperationAckDeserializer {
-  static deserialize(body: any): OperationAck {
-    return {
-      type: MessageType.OPERATION_ACKNOWLEDGEMENT,
-      resourceId: body.r,
-      seqNo: body.s,
-      version: body.v
-    };
-  }
-}
+MessageSerializer.registerMessageBodyDeserializer(MessageType.OPERATION_ACKNOWLEDGEMENT, (body: any) => {
+  return {
+    resourceId: body.r,
+    seqNo: body.s,
+    version: body.v
+  };
+});
