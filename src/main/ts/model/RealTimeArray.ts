@@ -35,13 +35,13 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
   constructor(data: Array<any>,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Array, parent, fieldInParent, sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Array, parent, fieldInParent, _sendOpCallback);
 
     this._children = [];
 
     for (var i: number = 0; i < data.length; i++) {
-      this._children.push(RealTimeValueFactory.create(data[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeValueFactory.create(data[i], this, i, this._sendOpCallback));
     }
   }
 
@@ -54,19 +54,19 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
     var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.path(), false, index, value);
     var child: RealTimeValue<any> = this._children[index];
-    this._children[index] = RealTimeValueFactory.create(value, this, index, this.sendOpCallback);
+    this._children[index] = RealTimeValueFactory.create(value, this, index, this._sendOpCallback);
     this.updateFieldInParent(index);
-    child._setDetached();
-    this.sendOpCallback(operation);
+    child._detach();
+    this._sendOperation(operation);
   }
 
   insert(index: number, value: Object|number|string|boolean): void {
     this._validateInsert(index, value);
 
     var operation: ArrayInsertOperation = new ArrayInsertOperation(this.path(), false, index, value);
-    this._children.splice(index, 0, (RealTimeValueFactory.create(value, this, index, this.sendOpCallback)));
+    this._children.splice(index, 0, (RealTimeValueFactory.create(value, this, index, this._sendOpCallback)));
     this.updateFieldInParent(index);
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   remove(index: number): Object|number|string|boolean {
@@ -77,8 +77,8 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     var removeValue: Object|number|string|boolean = child.value();
     this._children.splice(index, 1);
     this.updateFieldInParent(index);
-    child._setDetached();
-    this.sendOpCallback(operation);
+    child._detach();
+    this._sendOperation(operation);
     return removeValue;
   }
 
@@ -92,7 +92,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     this._children.splice(toIndex, 0, child);
 
     this.updateFieldInParent(Math.min(fromIndex, toIndex));
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   push(value: any): void {
@@ -139,14 +139,14 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
     this._children = [];
     for (var i: number = 0; i < values.length; i++) {
-      this._children.push(RealTimeValueFactory.create(values[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeValueFactory.create(values[i], this, i, this._sendOpCallback));
     }
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   protected _detachChildren(): void {
     this.forEach((child: RealTimeValue<any>) => {
-      child._setDetached();
+      child._detach();
     });
   }
 
@@ -164,7 +164,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
         return (<RealTimeArray> child).child(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeValueFactory.create(undefined, null, null, this.sendOpCallback);
+        return RealTimeValueFactory.create(undefined, null, null, this._sendOperation);
       }
     } else {
       return child;
@@ -211,7 +211,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
     this._validateInsert(index, value);
 
-    this._children.splice(index, 0, (RealTimeValueFactory.create(value, this, index, this.sendOpCallback)));
+    this._children.splice(index, 0, (RealTimeValueFactory.create(value, this, index, this._sendOperation)));
     this.updateFieldInParent(index);
 
     var event: ArrayInsertEvent = {
@@ -263,6 +263,8 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     this._children.splice(index, 1);
     this.updateFieldInParent(index);
 
+    child._detach();
+
     var event: ArrayRemoveEvent = {
       src: this,
       name: RealTimeArray.Events.REMOVE,
@@ -273,7 +275,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       index: index
     };
     this.emitEvent(event);
-    child._setDetached();
+
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -284,8 +286,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     this._validateReplace(index, value);
 
     var child: RealTimeValue<any> = this._children[index];
-    this._children[index] = RealTimeValueFactory.create(value, this, index, this.sendOpCallback);
+    this._children[index] = RealTimeValueFactory.create(value, this, index, this._sendOperation);
     this.updateFieldInParent(index);
+
+    child._detach();
 
     var event: ArraySetEvent = {
       src: this,
@@ -298,7 +302,6 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: value
     };
     this.emitEvent(event);
-    child._setDetached();
   }
 
   private _handleSetValueOperation(operationEvent: ModelOperationEvent): void {
@@ -310,8 +313,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     var oldChildren: Array<RealTimeValue<any>> = this._children;
     this._children = [];
     for (var i: number = 0; i < values.length; i++) {
-      this._children.push(RealTimeValueFactory.create(values[i], this, i, this.sendOpCallback));
+      this._children.push(RealTimeValueFactory.create(values[i], this, i, this._sendOperation));
     }
+
+    oldChildren.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
 
     var event: ArraySetValueEvent = {
       src: this,
@@ -323,7 +328,6 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: values
     };
     this.emitEvent(event);
-    oldChildren.forEach((oldChild: RealTimeValue<any>) => oldChild._setDetached());
   }
 
   // Private Validation Methods

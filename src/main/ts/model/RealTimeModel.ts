@@ -1,4 +1,3 @@
-import EventEmitter from "../util/EventEmitter";
 import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";
@@ -21,8 +20,9 @@ import RealTimeValue from "./RealTimeValue";
 import {Path} from "../ot/Path";
 import ConvergenceEvent from "../util/ConvergenceEvent";
 import OperationType from "../protocol/model/OperationType";
+import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 
-export default class RealTimeModel extends EventEmitter {
+export default class RealTimeModel extends ConvergenceEventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
@@ -108,8 +108,7 @@ export default class RealTimeModel extends EventEmitter {
         src: this,
         name: RealTimeModel.Events.CLOSED,
         local: true};
-      this.emit(event.name, event);
-      this._open = false;
+      this._close(event);
     });
   }
 
@@ -153,7 +152,14 @@ export default class RealTimeModel extends EventEmitter {
       local: false,
       reason: message.reason
     };
-    this.emit(RealTimeModel.Events.CLOSED, event);
+    this._close(event);
+  }
+
+  private _close(event: RealTimeModelClosedEvent): void {
+    this._data._detach();
+    this._open = false;
+    this._connection = null;
+    this.emitEvent(event);
   }
 
   private _handelOperationAck(message: OperationAck): void {

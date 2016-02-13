@@ -16,9 +16,9 @@ abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
     super(modelType, parent, fieldInParent, sendOpCallback);
   }
 
-  _setDetached(): void {
+  _detach(): void {
     this._detachChildren();
-    super._setDetached();
+    super._detach();
   }
 
   child(pathArgs: any): RealTimeValue<any> {

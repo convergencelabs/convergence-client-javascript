@@ -24,8 +24,8 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   constructor(private _data: number,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Number, parent, fieldInParent, sendOpCallback);
+              _sendOperation: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Number, parent, fieldInParent, _sendOperation);
   }
 
   add(value: number): void {
@@ -34,7 +34,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     if (value !== 0) {
       var operation: NumberAddOperation = new NumberAddOperation(this.path(), false, value);
       this._data += value;
-      this.sendOpCallback(operation);
+      this._sendOperation(operation);
     }
   }
 
@@ -57,7 +57,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
     var operation: NumberSetOperation = new NumberSetOperation(this.path(), false, value);
     this._data = value;
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   protected _getValue(): number {

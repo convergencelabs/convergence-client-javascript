@@ -17,22 +17,22 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(private modelType: RealTimeValueType,
-              private parent: RealTimeContainerValue<any>,
+  constructor(private _modelType: RealTimeValueType,
+              private _parent: RealTimeContainerValue<any>,
               public fieldInParent: PathElement,
-              protected sendOpCallback: (operation: DiscreteOperation) => void) {
+              protected _sendOpCallback: (operation: DiscreteOperation) => void) {
     super();
   }
 
   type(): RealTimeValueType {
-    return this.modelType;
+    return this._modelType;
   }
 
   path(): Path {
-    if (this.parent == null) {
+    if (this._parent == null) {
       return [];
     } else {
-      var path: Path = this.parent.path();
+      var path: Path = this._parent.path();
       path.push(this.fieldInParent);
       return path;
     }
@@ -42,19 +42,16 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     return this._detached;
   }
 
-  _setDetached(): void {
-    this.parent = null;
+  _detach(): void {
+    this._parent = null;
     this._detached = true;
+    this._sendOpCallback = null;
     var event: ModelDetachedEvent = {
       src: this,
       name: RealTimeValue.Events.DETACHED
     };
 
     this.emitEvent(event);
-  }
-
-  _exceptionIfDetached(): void {
-    throw Error("Detached Exception: RealTimeValue is no longer a part of the data model.");
   }
 
   value(): T
@@ -68,11 +65,21 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     }
   }
 
+  private _exceptionIfDetached(): void {
+    if (this._detached) {
+      throw Error("Can not perform actions on a detached RealTimeValue.");
+    }
+  }
+
+  protected _sendOperation(operation: DiscreteOperation): void {
+    this._exceptionIfDetached();
+    this._sendOpCallback(operation);
+  }
+
   protected abstract _getValue(): T;
   protected abstract _setValue(value: T): void;
 
   abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
-
 }
 
 export default RealTimeValue;

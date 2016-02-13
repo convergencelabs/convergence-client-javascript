@@ -20,11 +20,11 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(private data: boolean,
+  constructor(private _data: boolean,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Boolean, parent, fieldInParent, sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Boolean, parent, fieldInParent, _sendOpCallback);
   }
 
 
@@ -36,12 +36,12 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     this._validateSet(value);
 
     var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
-    this.data = value;
-    this.sendOpCallback(operation);
+    this._data = value;
+    this._sendOpCallback(operation);
   }
 
   protected _getValue(): boolean {
-    return this.data;
+    return this._data;
   }
 
   // Handlers for incoming operations
@@ -64,7 +64,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     var value: boolean = operation.value;
 
     this._validateSet(value);
-    this.data = value;
+    this._data = value;
 
     var event: BooleanSetValueEvent = {
       src: this,

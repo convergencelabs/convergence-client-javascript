@@ -24,31 +24,31 @@ export default class RealTimeString extends RealTimeValue<String> {
   /**
    * Constructs a new RealTimeString.
    */
-  constructor(private data: string,
+  constructor(private _data: string,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.String, parent, fieldInParent, sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.String, parent, fieldInParent, _sendOpCallback);
   }
 
   insert(index: number, value: string): void {
     this._validateInsert(index, value);
 
     var operation: StringInsertOperation = new StringInsertOperation(this.path(), false, index, value);
-    this.data = this.data.slice(0, index) + value + this.data.slice(index, this.data.length);
-    this.sendOpCallback(operation);
+    this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
+    this._sendOperation(operation);
   }
 
   remove(index: number, length: number): void {
     this._validateRemove(index, length);
 
-    var operation: StringRemoveOperation = new StringRemoveOperation(this.path(), false, index, this.data.substr(index, length));
-    this.data = this.data.slice(0, index) + this.data.slice(index + length, this.data.length);
-    this.sendOpCallback(operation);
+    var operation: StringRemoveOperation = new StringRemoveOperation(this.path(), false, index, this._data.substr(index, length));
+    this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
+    this._sendOperation(operation);
   }
 
   length(): number {
-    return this.data.length;
+    return this._data.length;
   }
 
   //
@@ -58,13 +58,13 @@ export default class RealTimeString extends RealTimeValue<String> {
   protected _setValue(value: string): void {
     this._validateSet(value);
 
-    this.data = value;
+    this._data = value;
     var operation: StringSetOperation = new StringSetOperation(this.path(), false, value);
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   protected _getValue(): string {
-    return this.data;
+    return this._data;
   }
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
@@ -91,7 +91,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._validateInsert(index, value);
 
-    this.data = this.data.slice(0, index) + value + this.data.slice(index, this.data.length);
+    this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
 
     var event: StringInsertEvent = {
       src: this,
@@ -113,7 +113,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._validateRemove(index, value.length);
 
-    this.data = this.data.slice(0, index) + this.data.slice(index + value.length, this.data.length);
+    this._data = this._data.slice(0, index) + this._data.slice(index + value.length, this._data.length);
 
     var event: StringRemoveEvent = {
       src: this,
@@ -133,7 +133,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     var value: string = operation.value;
 
     this._validateSet(value);
-    this.data = value;
+    this._data = value;
 
     var event: StringSetValueEvent = {
       src: this,
@@ -149,7 +149,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
   private _validateInsert(index: number, value: string): void {
     // TODO: Add integer check
-    if (this.data.length < index || index < 0) {
+    if (this._data.length < index || index < 0) {
       throw new Error("Index out of bounds: " + index);
     }
 
@@ -160,7 +160,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
   private _validateRemove(index: number, length: number): void {
     // TODO: Add integer check
-    if (this.data.length < index + length || index < 0) {
+    if (this._data.length < index + length || index < 0) {
       throw new Error("Index out of bounds!");
     }
   }

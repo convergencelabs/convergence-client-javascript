@@ -30,14 +30,14 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
    */
   constructor(data: any, parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Object, parent, fieldInParent, sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Object, parent, fieldInParent, _sendOpCallback);
 
     this._children = {};
 
     for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this._sendOpCallback);
       }
     }
   }
@@ -51,14 +51,14 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(property)) {
       operation = new ObjectSetPropertyOperation(this.path(), false, property, value);
-      this._children[property]._setDetached();
+      this._children[property]._detach();
     } else {
       operation = new ObjectAddPropertyOperation(this.path(), false, property, value);
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, property, this._sendOpCallback);
     this._children[property] = child;
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
     return child;
   }
 
@@ -68,9 +68,9 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     }
     var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.path(), false, property);
 
-    this._children[property]._setDetached();
+    this._children[property]._detach();
     delete this._children[property];
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   keys(): string[] {
@@ -106,17 +106,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       throw new Error("Value must be an object and cannot be null or undefined!");
     }
 
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
-
-    this.forEach((oldChild: RealTimeValue<any>) => oldChild._setDetached());
+    this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
     this._children = {};
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOpCallback);
       }
     }
-    this.sendOpCallback(operation);
+
+    var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
+    this._sendOperation(operation);
   }
 
   _path(pathArgs: Path): RealTimeValue<any> {
@@ -133,7 +133,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         return (<RealTimeArray> child).child(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeValueFactory.create(undefined, null, null, this.sendOpCallback);
+        return RealTimeValueFactory.create(undefined, null, null, this._sendOperation);
       }
     } else {
       return child;
@@ -142,7 +142,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
   protected _detachChildren(): void {
     this.forEach((child: RealTimeValue<any>) => {
-      child._setDetached();
+      child._detach();
     });
   }
 
@@ -184,7 +184,11 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var oldChild: RealTimeValue<any> = this._children[property];
 
-    this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    this._children[property] = RealTimeValueFactory.create(value, this, property, this._sendOperation);
+
+    if (oldChild) {
+      oldChild._detach();
+    }
 
     var event: ObjectSetEvent = {
       src: this,
@@ -198,10 +202,6 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     };
 
     this.emitEvent(event);
-
-    if (oldChild) {
-      oldChild._setDetached();
-    }
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
@@ -211,7 +211,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var oldChild: RealTimeValue<any> = this._children[property];
 
-    this._children[property] = RealTimeValueFactory.create(value, this, property, this.sendOpCallback);
+    this._children[property] = RealTimeValueFactory.create(value, this, property, this._sendOperation);
 
     var event: ObjectSetEvent = {
       src: this,
@@ -227,7 +227,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     this.emitEvent(event);
 
     if (oldChild) {
-      oldChild._setDetached();
+      oldChild._detach();
     }
   }
 
@@ -252,7 +252,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
       this.emitEvent(event);
 
-      oldChild._setDetached();
+      oldChild._detach();
     }
   }
 
@@ -266,7 +266,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this.sendOpCallback);
+        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOperation);
       }
     }
 
@@ -284,7 +284,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     for (var property in oldChildren) {
       if (oldChildren.hasOwnProperty(property)) {
-        oldChildren[property]._setDetached();
+        oldChildren[property]._detach();
       }
     }
   }
