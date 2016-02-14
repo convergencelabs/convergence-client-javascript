@@ -4,10 +4,19 @@ import {MessageEnvelope} from "../../main/ts/protocol/protocol";
 import EqualsUtil from "../../main/ts/util/EqualsUtil";
 import {HandshakeResponse} from "../../main/ts/protocol/handhsake";
 var mockSocket = require('mock-socket');
+
 if (typeof global['WebSocket'] === "undefined") {
   global['WebSocket'] = mockSocket.WebSocket;
 }
 /* tslint:enable */
+
+export interface IMockServerOptions {
+  url: string;
+  doneType: DoneType;
+  mochaDone?: MochaDone;
+  successCallback?: () => void;
+  failureCallback?: (error: Error) => void;
+}
 
 export class MockServer {
   private _doneManager: AbstractDoneManager;
@@ -15,8 +24,8 @@ export class MockServer {
   private _mockSocketServer: any;
   private _connection: any;
 
-  private _incoming: MessageEnvelope[];
-  private _expects: Expectation[];
+  private _incomingMessageQueue: MessageEnvelope[];
+  private _receiveExpectations: ReceiveExpectation[];
 
   private _reqId: number;
 
@@ -55,8 +64,8 @@ export class MockServer {
       });
     });
 
-    this._incoming = [];
-    this._expects = [];
+    this._incomingMessageQueue = [];
+    this._receiveExpectations = [];
     this._reqId = 0;
 
     this._autoWait = false;
@@ -66,10 +75,10 @@ export class MockServer {
     return this._doneManager;
   }
 
-  private _findNextWaitingExpectation(): Expectation {
-    var expect: Expectation;
-    for (var i: number = 0; i < this._expects.length; i++) {
-      var tmp: Expectation = this._expects[i];
+  private _findNextWaitingExpectation(): ReceiveExpectation {
+    var expect: ReceiveExpectation;
+    for (var i: number = 0; i < this._receiveExpectations.length; i++) {
+      var tmp: ReceiveExpectation = this._receiveExpectations[i];
       if (tmp.timeout !== undefined) {
         expect = tmp;
         break;
@@ -79,7 +88,7 @@ export class MockServer {
   }
 
   waitForNext(): void {
-    var expect: Expectation = this._findNextWaitingExpectation();
+    var expect: ReceiveExpectation = this._findNextWaitingExpectation();
 
     if (expect === undefined) {
       this._doneManager.testFailure(new Error("Cannot wait for next because no more  expectations have timeouts"));
@@ -130,63 +139,72 @@ export class MockServer {
       timeout);
   }
 
-  send(type: string, body: any): void {
+  send(body: any, timeout?: number): ISendExpectationCallback {
     var envelope: any = {
       b: body
     };
+
     this._send(envelope);
+
+    return new SendExpectationCallback(this, timeout, body);
   }
 
-  sendRequest(type: string, body: any): void {
+  sendRequest(body: any, timeout?: number): ISendExpectationCallback {
     var envelope: any = {
       b: body,
       q: this._reqId++
     };
+
     this._send(envelope);
+
+    return new SendExpectationCallback(this, timeout, body);
   }
 
-  sendReply(reqId: number, body: any): void {
+  sendReply(reqId: number, body: any, timeout?: number): ISendExpectationCallback {
     var envelope: any = {
       b: body,
       p: reqId
     };
+
     this._send(envelope);
+
+    return new SendExpectationCallback(this, timeout, body);
   }
 
   private _expectMessage(messageExpectation: MessageExpectation, timeout?: number): IExpectationCallbacks {
-    var expectation: Expectation = {
+    var expectation: ReceiveExpectation = {
       timeout: timeout,
       inclination: messageExpectation.inclination,
       type: messageExpectation.type,
       body: messageExpectation.body,
-      callbacks: new ExpectationCallbacks(this)
+      callbacks: new ReceiveExpectationCallbacks(this)
     };
 
     return this._expect(expectation);
   }
 
-  private _expect(expectation: Expectation): IExpectationCallbacks {
-    if (this._incoming.length === 0) {
-      this._expects.push(expectation);
+  private _expect(expectation: ReceiveExpectation): IExpectationCallbacks {
+    if (this._incomingMessageQueue.length === 0) {
+      this._receiveExpectations.push(expectation);
     } else {
-      var message: MessageEnvelope = this._incoming.shift();
+      var message: MessageEnvelope = this._incomingMessageQueue.shift();
       this._processMessage(expectation, message);
     }
     return expectation.callbacks;
   }
 
   private _handleTimeout(): void {
-    var expectation: Expectation = this._expects[0];
+    var expectation: ReceiveExpectation = this._receiveExpectations[0];
     this._doneManager.testFailure(new Error("Timeout waiting for: " + MessageType[expectation.type]));
     this.stop();
   }
 
   stop(): void {
     this._mockSocketServer.close();
-    this._expects.forEach((expectation: Expectation) => {
+    this._receiveExpectations.forEach((expectation: ReceiveExpectation) => {
       clearTimeout(expectation.timer);
     });
-    this._expects = [];
+    this._receiveExpectations = [];
   }
 
   handshake(response?: any, timeout?: number): void {
@@ -207,10 +225,10 @@ export class MockServer {
     if (envelope.b.t === MessageType.PING) {
       this._mockSocketServer.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
     } else {
-      if (this._expects.length === 0) {
-        this._incoming.push(envelope);
+      if (this._receiveExpectations.length === 0) {
+        this._incomingMessageQueue.push(envelope);
       } else {
-        var expectation: Expectation = this._expects.shift();
+        var expectation: ReceiveExpectation = this._receiveExpectations.shift();
         setTimeout(
           () => {
             this._processMessage(expectation, envelope);
@@ -220,7 +238,7 @@ export class MockServer {
     }
   }
 
-  private _processMessage(expectation: Expectation, envelope: any): void {
+  private _processMessage(expectation: ReceiveExpectation, envelope: any): void {
     if (expectation.inclination === MessageInclination.Normal && (envelope.q !== undefined || envelope.p !== undefined)) {
       this._doneManager.testFailure(new Error("Normal messages must not have a request or response id set"));
     } else if (expectation.inclination === MessageInclination.Request && (envelope.q === undefined || envelope.p !== undefined)) {
@@ -236,7 +254,7 @@ export class MockServer {
 
     if (expectation.timer !== undefined) {
       clearTimeout(expectation.timer);
-      if (this._autoWait && this._expects.length !== 0) {
+      if (this._autoWait && this._receiveExpectations.length !== 0) {
         this.waitForNext();
       }
     }
@@ -247,7 +265,7 @@ export class MockServer {
       this._doneManager.testFailure(e);
     }
 
-    if (this._expects.length === 0) {
+    if (this._receiveExpectations.length === 0) {
       this._doneManager.serverDone();
     }
   }
@@ -264,7 +282,7 @@ export interface IExpectationCallbacks {
   thenCall(callback: (envelope: MessageEnvelope) => void): void;
 }
 
-class ExpectationCallbacks {
+class ReceiveExpectationCallbacks {
   private _replyMessage: any;
   private _thenCallback: any;
 
@@ -286,6 +304,36 @@ class ExpectationCallbacks {
 
     if (this._replyMessage !== undefined) {
       this._mockServer.sendReply(expectedMessage.q, this._replyMessage);
+    }
+  }
+}
+
+interface ISendExpectationCallback {
+  acknowledgeReception(): void;
+}
+
+class SendExpectationCallback implements ISendExpectationCallback {
+  private _timer: any;
+
+  constructor(private _server: MockServer, timeout: number, private _message: any) {
+    if (timeout !== undefined) {
+      this._timer = setTimeout(
+        () => {
+          this._timer = undefined;
+          _server.stop();
+          _server.doneManager().testFailure(
+            new Error("A message sent by the mock server was not acknowledged within the specified timeout: " +
+              JSON.stringify(_message))
+          );
+        },
+        timeout);
+    }
+  }
+
+  acknowledgeReception(): void {
+    if (this._timer !== undefined) {
+      clearTimeout(this._timer);
+      this._timer = undefined;
     }
   }
 }
@@ -357,13 +405,6 @@ export enum DoneType {
   MOCHA, CALLBACK
 }
 
-export interface IMockServerOptions {
-  url: string;
-  doneType: DoneType;
-  mochaDone?: MochaDone;
-  successCallback?: () => void;
-  failureCallback?: (error: Error) => void;
-}
 
 interface MessageExpectation {
   inclination: MessageInclination;
@@ -371,13 +412,13 @@ interface MessageExpectation {
   body?: any;
 }
 
-interface Expectation {
+interface ReceiveExpectation {
   inclination: MessageInclination;
   type?: MessageType;
   body?: any;
   timeout?: number;
   timer?: any;
-  callbacks: ExpectationCallbacks;
+  callbacks: ReceiveExpectationCallbacks;
 }
 
 enum MessageInclination {
