@@ -178,13 +178,13 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       var type: OperationType = operationEvent.operation.type;
       if (type === OperationType.ARRAY_INSERT) {
         this._handleInsertOperation(operationEvent);
-      } else if (type === OperationType.ARRAY_MOVE) {
+      } else if (type === OperationType.ARRAY_REORDER) {
         this._handleReorderOperation(operationEvent);
       } else if (type === OperationType.ARRAY_REMOVE) {
         this._handleRemoveOperation(operationEvent);
-      } else if (type === OperationType.ARRAY_REPLACE) {
-        this._handleSetOperation(operationEvent);
       } else if (type === OperationType.ARRAY_SET) {
+        this._handleSetOperation(operationEvent);
+      } else if (type === OperationType.ARRAY_VALUE) {
         this._handleSetValueOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

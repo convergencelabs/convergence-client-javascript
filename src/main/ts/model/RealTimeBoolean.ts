@@ -49,7 +49,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
       var type: OperationType = operationEvent.operation.type;
-      if (type === OperationType.BOOLEAN_SET) {
+      if (type === OperationType.BOOLEAN_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

@@ -6,7 +6,7 @@ import OperationType from "../../protocol/model/OperationType";
 export default class ArrayReplaceOperation extends DiscreteOperation {
 
   constructor(path: Path, noOp: boolean, public index: number, public value: any) {
-    super(OperationType.ARRAY_REPLACE, path, noOp);
+    super(OperationType.ARRAY_SET, path, noOp);
     Object.freeze(this);
   }
 

@@ -6,7 +6,7 @@ import OperationType from "../../protocol/model/OperationType";
 export default class StringSetOperation extends DiscreteOperation {
 
   constructor(path: Path, public noOp: boolean, public value: string) {
-    super(OperationType.STRING_SET, path, noOp);
+    super(OperationType.STRING_VALUE, path, noOp);
     Object.freeze(this);
   }
 

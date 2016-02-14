@@ -6,7 +6,7 @@ import OperationType from "../../protocol/model/OperationType";
 export default class ObjectAddPropertyOperation extends DiscreteOperation {
 
   constructor(path: Path, noOp: boolean, public prop: string, public value: any) {
-    super(OperationType.OBJECT_ADD_PROPERTY, path, noOp);
+    super(OperationType.OBJECT_ADD, path, noOp);
     Object.freeze(this);
   }
 

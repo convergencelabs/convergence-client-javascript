@@ -8,7 +8,7 @@ export default class ObjectRemovePropertyOperation extends DiscreteOperation {
   protected _prop: string;
 
   constructor(path: Path, noOp: boolean, public prop: string) {
-    super(OperationType.OBJECT_REMOVE_PROPERTY, path, noOp);
+    super(OperationType.OBJECT_REMOVE, path, noOp);
     Object.freeze(this);
   }
 

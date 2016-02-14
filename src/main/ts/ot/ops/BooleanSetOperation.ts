@@ -6,7 +6,7 @@ import OperationType from "../../protocol/model/OperationType";
 export default class BooleanSetOperation extends DiscreteOperation {
 
   constructor(path: Path, noOp: boolean, public value: boolean) {
-    super(OperationType.BOOLEAN_SET, path, noOp);
+    super(OperationType.BOOLEAN_VALUE, path, noOp);
     Object.freeze(this);
   }
 

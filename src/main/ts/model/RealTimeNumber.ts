@@ -71,7 +71,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       var type: OperationType = operationEvent.operation.type;
       if (type === OperationType.NUMBER_ADD) {
         this._handleAddOperation(operationEvent);
-      } else if (type === OperationType.NUMBER_SET) {
+      } else if (type === OperationType.NUMBER_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

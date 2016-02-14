@@ -80,33 +80,33 @@ export class DiscreteOperationDeserializer {
     switch (body.t) {
       case OperationType.ARRAY_INSERT:
         return ArrayInsertOperationDeserializer.deserialize(body);
-      case OperationType.ARRAY_MOVE:
+      case OperationType.ARRAY_REORDER:
         return ArrayMoveOperationDeserializer.deserialize(body);
       case OperationType.ARRAY_REMOVE:
         return ArrayRemoveOperationDeserializer.deserialize(body);
-      case OperationType.ARRAY_REPLACE:
-        return ArrayReplaceOperationDeserializer.deserialize(body);
       case OperationType.ARRAY_SET:
+        return ArrayReplaceOperationDeserializer.deserialize(body);
+      case OperationType.ARRAY_VALUE:
         return ArraySetOperationDeserializer.deserialize(body);
-      case OperationType.BOOLEAN_SET:
+      case OperationType.BOOLEAN_VALUE:
         return BooleanSetOperationDeserializer.deserialize(body);
       case OperationType.NUMBER_ADD:
         return NumberAddOperationDeserializer.deserialize(body);
-      case OperationType.NUMBER_SET:
+      case OperationType.NUMBER_VALUE:
         return NumberSetOperationDeserializer.deserialize(body);
-      case OperationType.OBJECT_ADD_PROPERTY:
+      case OperationType.OBJECT_ADD:
         return ObjectAddPropertyOperationDeserializer.deserialize(body);
-      case OperationType.OBJECT_REMOVE_PROPERTY:
+      case OperationType.OBJECT_REMOVE:
         return ObjectRemovePropertyOperationDeserializer.deserialize(body);
-      case OperationType.OBJECT_SET_PROPERTY:
-        return ObjectSetPropertyOperationDeserializer.deserialize(body);
       case OperationType.OBJECT_SET:
+        return ObjectSetPropertyOperationDeserializer.deserialize(body);
+      case OperationType.OBJECT_VALUE:
         return ObjectSetOperationDeserializer.deserialize(body);
       case OperationType.STRING_INSERT:
         return StringInsertOperationDeserializer.deserialize(body);
       case OperationType.STRING_REMOVE:
         return StringRemoveOperationDeserializer.deserialize(body);
-      case OperationType.STRING_SET:
+      case OperationType.STRING_VALUE:
         return StringSetOperationDeserializer.deserialize(body);
       default:
         throw new Error("Can't deserialize operation:  unknown operation type");
@@ -162,7 +162,7 @@ export class ArrayInsertOperationDeserializer {
 export class ArrayMoveOperationSerializer {
   static serialize(operation: ArrayMoveOperation): any {
     return {
-      t: OperationType.ARRAY_MOVE,
+      t: OperationType.ARRAY_REORDER,
       p: operation.path,
       n: operation.noOp,
       f: operation.fromIndex,
@@ -197,7 +197,7 @@ export class ArrayRemoveOperationDeserializer {
 export class ArrayReplaceOperationSerializer {
   static serialize(operation: ArrayReplaceOperation): any {
     return {
-      t: OperationType.ARRAY_REPLACE,
+      t: OperationType.ARRAY_SET,
       p: operation.path,
       n: operation.noOp,
       i: operation.index,
@@ -215,7 +215,7 @@ export class ArrayReplaceOperationDeserializer {
 export class ArraySetOperationSerializer {
   static serialize(operation: ArraySetOperation): any {
     return {
-      t: OperationType.ARRAY_SET,
+      t: OperationType.ARRAY_VALUE,
       p: operation.path,
       n: operation.noOp,
       v: operation.value
@@ -232,7 +232,7 @@ export class ArraySetOperationDeserializer {
 export class BooleanSetOperationSerializer {
   static serialize(operation: BooleanSetOperation): any {
     return {
-      t: OperationType.BOOLEAN_SET,
+      t: OperationType.BOOLEAN_VALUE,
       p: operation.path,
       n: operation.noOp,
       v: operation.value
@@ -266,7 +266,7 @@ export class NumberAddOperationDeserializer {
 export class NumberSetOperationSerializer {
   static serialize(operation: NumberSetOperation): any {
     return {
-      t: OperationType.NUMBER_SET,
+      t: OperationType.NUMBER_VALUE,
       p: operation.path,
       n: operation.noOp,
       v: operation.value
@@ -283,7 +283,7 @@ export class NumberSetOperationDeserializer {
 export class ObjectAddPropertyOperationSerializer {
   static serialize(operation: ObjectAddPropertyOperation): any {
     return {
-      t: OperationType.OBJECT_ADD_PROPERTY,
+      t: OperationType.OBJECT_ADD,
       p: operation.path,
       n: operation.noOp,
       k: operation.prop,
@@ -301,7 +301,7 @@ export class ObjectAddPropertyOperationDeserializer {
 export class ObjectRemovePropertyOperationSerializer {
   static serialize(operation: ObjectRemovePropertyOperation): any {
     return {
-      t: OperationType.OBJECT_REMOVE_PROPERTY,
+      t: OperationType.OBJECT_REMOVE,
       p: operation.path,
       n: operation.noOp,
       k: operation.prop
@@ -318,7 +318,7 @@ export class ObjectRemovePropertyOperationDeserializer {
 export class ObjectSetPropertyOperationSerializer {
   static serialize(operation: ObjectSetPropertyOperation): any {
     return {
-      t: OperationType.OBJECT_SET_PROPERTY,
+      t: OperationType.OBJECT_SET,
       p: operation.path,
       n: operation.noOp,
       k: operation.prop,
@@ -336,7 +336,7 @@ export class ObjectSetPropertyOperationDeserializer {
 export class ObjectSetOperationSerializer {
   static serialize(operation: ObjectSetOperation): any {
     return {
-      t: OperationType.OBJECT_SET,
+      t: OperationType.OBJECT_VALUE,
       p: operation.path,
       n: operation.noOp,
       v: operation.value
@@ -389,7 +389,7 @@ export class StringRemoveOperationDeserializer {
 export class StringSetOperationSerializer {
   static serialize(operation: StringSetOperation): any {
     return {
-      t: OperationType.STRING_SET,
+      t: OperationType.STRING_VALUE,
       p: operation.path,
       n: operation.noOp,
       v: operation.value

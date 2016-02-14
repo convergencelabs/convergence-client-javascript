@@ -74,7 +74,7 @@ export default class RealTimeString extends RealTimeValue<String> {
         this._handleInsertOperation(operationEvent);
       } else if (type === OperationType.STRING_REMOVE) {
         this._handleRemoveOperation(operationEvent);
-      } else if (type === OperationType.STRING_SET) {
+      } else if (type === OperationType.STRING_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

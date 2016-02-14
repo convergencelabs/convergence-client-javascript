@@ -6,7 +6,7 @@ import OperationType from "../../protocol/model/OperationType";
 export default class ArraySetOperation extends DiscreteOperation {
 
   constructor(path: Path, noOp: boolean, public value: any[]) {
-    super(OperationType.ARRAY_SET, path, noOp);
+    super(OperationType.ARRAY_VALUE, path, noOp);
     Object.freeze(this);
   }
 

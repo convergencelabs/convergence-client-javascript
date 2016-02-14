@@ -151,13 +151,13 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
       var type: OperationType = operationEvent.operation.type;
-      if (type === OperationType.OBJECT_ADD_PROPERTY) {
+      if (type === OperationType.OBJECT_ADD) {
         this._handleAddPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_SET_PROPERTY) {
-        this._handleSetPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_REMOVE_PROPERTY) {
-        this._handleRemovePropertyOperation(operationEvent);
       } else if (type === OperationType.OBJECT_SET) {
+        this._handleSetPropertyOperation(operationEvent);
+      } else if (type === OperationType.OBJECT_REMOVE) {
+        this._handleRemovePropertyOperation(operationEvent);
+      } else if (type === OperationType.OBJECT_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
