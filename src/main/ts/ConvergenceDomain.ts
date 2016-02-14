@@ -84,32 +84,19 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     return this._connection.session().isAuthenticated();
   }
 
-  /**
-   * Gets the session of the connected user.
-   * @return The users session.
-   */
   session(): Session {
     return this._connection.session();
   }
 
-  /**
-   * Gets the ModelService
-   */
   modelService(): ModelService {
     return this._modelService;
   }
 
-  /**
-   * Closes the connection to the server and disposes of the ConvergenceDomain
-   */
   dispose(): void {
     this._connection.disconnect();
     this._connection = undefined;
   }
 
-  /**
-   * @returns {boolean} True if this ConvergenceDomain is disposed.
-   */
   isDisposed(): boolean {
     return this._connection === undefined;
   }

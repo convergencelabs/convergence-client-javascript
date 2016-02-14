@@ -35,39 +35,6 @@ export default class ModelService extends ConvergenceEventEmitter {
       (message: MessageEvent) => this._handleMessage(message));
   }
 
-  private _handleMessage(messageEvent: MessageEvent): void {
-    switch (messageEvent.message.type) {
-      case MessageType.MODEL_DATA_REQUEST:
-        this._handleModelDataRequest(
-          <ModelDataRequest>messageEvent.message,
-          messageEvent.callback);
-        break;
-      default:
-        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
-        if (model !== undefined) {
-          model._handleMessage(messageEvent);
-        } else {
-          // todo error.
-        }
-    }
-  }
-
-  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
-    var fqn: ModelFqn = request.modelFqn;
-    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
-    if (openReq === undefined) {
-      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
-    } else if (openReq.initializer === undefined) {
-      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
-    } else {
-      var response: ModelDataResponse = {
-        data: openReq.initializer(),
-        type: MessageType.MODEL_DATA_RESPONSE
-      };
-      replyCallback.reply(response);
-    }
-  }
-
   session(): Session {
     return this._connection.session();
   }
@@ -127,7 +94,7 @@ export default class ModelService extends ConvergenceEventEmitter {
     return deferred.promise();
   }
 
-  create(collectionId: string, modelId: string, data: any): Promise<void> {
+  create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
@@ -162,6 +129,39 @@ export default class ModelService extends ConvergenceEventEmitter {
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
     });
+  }
+
+  private _handleMessage(messageEvent: MessageEvent): void {
+    switch (messageEvent.message.type) {
+      case MessageType.MODEL_DATA_REQUEST:
+        this._handleModelDataRequest(
+          <ModelDataRequest>messageEvent.message,
+          messageEvent.callback);
+        break;
+      default:
+        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+        if (model !== undefined) {
+          model._handleMessage(messageEvent);
+        } else {
+          // todo error.
+        }
+    }
+  }
+
+  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
+    var fqn: ModelFqn = request.modelFqn;
+    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
+    if (openReq === undefined) {
+      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
+    } else if (openReq.initializer === undefined) {
+      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
+    } else {
+      var response: ModelDataResponse = {
+        data: openReq.initializer(),
+        type: MessageType.MODEL_DATA_RESPONSE
+      };
+      replyCallback.reply(response);
+    }
   }
 }
 

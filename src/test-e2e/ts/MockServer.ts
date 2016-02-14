@@ -1,226 +1,347 @@
-//import {MessageEnvelope} from "../../main/ts/protocol/protocol";
-//import OpCode from "../../main/ts/connection/OpCode";
-//import Deferred from "../../main/ts/util/Deferred";
-//import MessageType from "../../main/ts/protocol/MessageType";
-//import {HandshakeResponse} from "../../main/ts/protocol/handhsake";
-//import EqualsUtil from "../../main/ts/util/EqualsUtil";
-//
-///* tslint:disable */
-//var mockSocket = require('mock-socket');
-//if (typeof global['WebSocket'] === "undefined") {
-//  global['WebSocket'] = mockSocket.WebSocket;
-//}
-///* tslint:enable */
-//
-//export default class MockServer {
-//  private _server: any;
-//
-//  private _incoming: MessageEnvelope[];
-//  private _expects: Expectation[];
-//  private _connection: any;
-//
-//  private _reqId: number;
-//
-//  constructor(url: string) {
-//    this._incoming = [];
-//    this._expects = [];
-//    this._reqId = 0;
-//
-//    this._server = new mockSocket.Server(url);
-//
-//    this._server.on("connection", (server: any, ws: any) => {
-//      this._connection = ws;
-//
-//      server.on("message", (message: string) => {
-//        console.log("Server Receive: " + message);
-//        this._handleMessage(message);
-//      });
-//
-//      server.on("close", (code: number, reason: string) => {
-//        console.log("Connection closed");
-//      });
-//    });
-//  }
-//
-//  handshake(timeout: number, response?: HandshakeResponse): Promise<MessageEnvelope> {
-//
-//    if (response === undefined) {
-//      response = {
-//        success: true,
-//        sessionId: "1",
-//        reconnectToken: "s",
-//        protocolConfig: {},
-//        type: MessageType.HANDSHAKE_RESPONSE
-//      };
-//    }
-//
-//    return this.expectRequestMessage(timeout, MessageType.HANDSHAKE_RESPONSE).then((request: MessageEnvelope) => {
-//      var body: any = {
-//        success: response.success,
-//        sessionId: response.sessionId,
-//        reconnectToken: response.reconnectToken,
-//        protocolConfig: response.protocolConfig,
-//        error: response.error,
-//        retryOk: response.retryOk,
-//        type: MessageType.HANDSHAKE_RESPONSE
-//      };
-//
-//      this.sendReply(request.reqId, body);
-//
-//      return request;
-//    });
-//  }
-//
-//  sendNormal(type: string, body: any): void {
-//    var envelope: MessageEnvelope = new MessageEnvelope(
-//      OpCode.NORMAL,
-//      undefined,
-//      type,
-//      body
-//    );
-//    this._send(envelope);
-//  }
-//
-//  sendRequest(type: string, body: any): void {
-//    var envelope: MessageEnvelope = new MessageEnvelope(
-//      OpCode.REQUEST,
-//      this._reqId++,
-//      type,
-//      body
-//    );
-//    this._send(envelope);
-//  }
-//
-//  sendReply(reqId: number, body: any): void {
-//    var envelope: MessageEnvelope = new MessageEnvelope(
-//      OpCode.REPLY,
-//      reqId,
-//      undefined,
-//      body
-//    );
-//    this._send(envelope);
-//  }
-//
-//  stop(): void {
-//    this._server.close();
-//    this._expects.forEach((expectation: Expectation) => {
-//      clearTimeout(expectation.timer);
-//    });
-//    this._expects = [];
-//  }
-//
-//  expectMessage(timeout: number, messageExpectation?: MessageExpectation): Promise<MessageEnvelope> {
-//    if (messageExpectation === undefined) {
-//      messageExpectation = {};
-//    }
-//
-//    var expectation: Expectation = {
-//      timeout: timeout,
-//      opCode: messageExpectation.opCode,
-//      type: messageExpectation.type,
-//      body: messageExpectation.body,
-//      deferred: new Deferred<MessageEnvelope>()
-//    };
-//
-//    return this._expect(expectation);
-//  }
-//
-//  expectNormalMessage(timeout: number, type?: MessageType, body?: any): Promise<MessageEnvelope> {
-//    return this.expectMessage(timeout, {
-//      type: type,
-//      body: body,
-//      opCode: OpCode.NORMAL
-//    });
-//  }
-//
-//  expectRequestMessage(timeout: number, type?: MessageType, body?: any): Promise<MessageEnvelope> {
-//    return this.expectMessage(timeout, {
-//      type: type,
-//      body: body,
-//      opCode: OpCode.REQUEST
-//    });
-//  }
-//
-//  expectResponseMessage(timeout: number, type?: MessageType, body?: any): Promise<MessageEnvelope> {
-//    return this.expectMessage(timeout, {
-//      type: type,
-//      body: body,
-//      opCode: OpCode.REPLY
-//    });
-//  }
-//
-//  private _expect(expectation: Expectation): Promise<MessageEnvelope> {
-//    if (this._incoming.length === 0) {
-//      this._deferExpect(expectation);
-//    } else {
-//      var message: MessageEnvelope = this._incoming.shift();
-//      this._evaluateMessage(expectation, message);
-//    }
-//
-//    return expectation.deferred.promise();
-//  }
-//
-//  private _evaluateMessage(expectation: Expectation, envelope: MessageEnvelope): void {
-//    if (expectation.opCode !== undefined && envelope.opCode !== expectation.opCode) {
-//      expectation.deferred.reject(new Error(`Expected opCode '${expectation.opCode}, but received '${envelope.opCode}'.`));
-//    } else if (expectation.type !== undefined && envelope.type !== expectation.type) {
-//      expectation.deferred.reject(new Error(`Expected type '${expectation.type}, but received '${envelope.type}'.`));
-//    } else if (expectation.body !== undefined && !EqualsUtil.deepEquals(envelope.body, expectation.body)) {
-//      expectation.deferred.reject(new Error(
-//        `Expected body '${JSON.stringify(expectation.body)}, but received '${JSON.stringify(envelope.body)}'.`));
-//    } else {
-//      expectation.deferred.resolve(envelope);
-//    }
-//  }
-//
-//  private _deferExpect(expectation: Expectation): void {
-//    var t: any = setTimeout(
-//      () => {
-//        this._handleTimeout(expectation);
-//      },
-//      expectation.timeout);
-//
-//    expectation.timer = t;
-//
-//    this._expects.push(expectation);
-//  }
-//
-//  private _handleTimeout(expectation: Expectation): void {
-//    expectation.deferred.reject(new Error("Timeout waiting for: " + expectation.type));
-//  }
-//
-//  private _send(envelope: MessageEnvelope): void {
-//    var json: string = JSON.stringify(envelope);
-//    console.log("Server Sending: " + json);
-//    this._server.send(json);
-//  }
-//
-//  private _handleMessage(json: string): void {
-//    var envelope: any = JSON.parse(json);
-//
-//    if (envelope.b.t === MessageType.PING) {
-//      this._connection.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
-//    } else {
-//      if (this._expects.length === 0) {
-//        this._incoming.push(envelope);
-//      } else {
-//        var expectation: Expectation = this._expects.shift();
-//        clearTimeout(expectation.timer);
-//        this._evaluateMessage(expectation, envelope);
-//      }
-//    }
-//  }
-//}
-//
-//export interface MessageExpectation {
-//  type?: MessageType;
-//  body?: any;
-//}
-//
-//interface Expectation {
-//  type?: MessageType;
-//  body?: any;
-//  timeout?: number;
-//  timer?: any;
-//  deferred: Deferred<MessageEnvelope>;
-//}
+/* tslint:disable */
+import MessageType from "../../main/ts/protocol/MessageType";
+import {MessageEnvelope} from "../../main/ts/protocol/protocol";
+import EqualsUtil from "../../main/ts/util/EqualsUtil";
+import {HandshakeResponse} from "../../main/ts/protocol/handhsake";
+var mockSocket = require('mock-socket');
+if (typeof global['WebSocket'] === "undefined") {
+  global['WebSocket'] = mockSocket.WebSocket;
+}
+/* tslint:enable */
+
+export class MockServer {
+  private _doneManager: AbstractDoneManager;
+
+  private _mockSocketServer: any;
+  private _connection: any;
+
+  private _incoming: MessageEnvelope[];
+  private _expects: Expectation[];
+
+  private _reqId: number;
+
+  constructor(options: IMockServerOptions) {
+    this._mockSocketServer = new mockSocket.Server(options.url);
+
+    switch (options.doneType) {
+      case DoneType.MOCHA:
+        if (options.mochaDone === undefined) {
+          throw new Error("Must specify 'mochaDone' for a doneType of 'mocha'");
+        }
+        this._doneManager = new MochaDoneManager(options.mochaDone);
+        break;
+      case DoneType.CALLBACK:
+        if (options.successCallback === undefined || options.failureCallback === undefined) {
+          throw new Error("Must specify both 'successCallback' and 'customOnFailure' for a doneType of 'custom'");
+        }
+        this._doneManager = new CallbackDoneManager(options.successCallback, options.failureCallback);
+        break;
+      default:
+        throw new Error("Invalid 'doneType");
+    }
+
+    this._mockSocketServer.on("connection", (server: any, ws: any) => {
+      this._connection = ws;
+
+      server.on("message", (message: string) => {
+        console.log("Server Receive: " + message);
+        this._handleMessage(message);
+      });
+
+      server.on("close", (code: number, reason: string) => {
+        console.log("Connection closed");
+      });
+    });
+
+    this._incoming = [];
+    this._expects = [];
+    this._reqId = 0;
+  }
+
+  doneManager(): IDoneManager {
+    return this._doneManager;
+  }
+
+  step(): void {
+    var expect: Expectation = this._expects[0];
+    var t: any = setTimeout(
+      () => {
+        this._handleTimeout(expect);
+      },
+      expect.timeout);
+    expect.timer = t;
+  }
+
+  expect(timeout: number, body: any): IExpectationCallbacks {
+    return this._expectMessage(timeout, {
+      inclination: MessageInclination.Normal,
+      type: body.t,
+      body: body
+    });
+  }
+
+  expectRequest(timeout: number, body: any): IExpectationCallbacks {
+    return this._expectMessage(timeout, {
+      inclination: MessageInclination.Request,
+      type: body.t,
+      body: body
+    });
+  }
+
+  expectResponse(timeout: number, body: any): IExpectationCallbacks {
+    return this._expectMessage(timeout, {
+      inclination: MessageInclination.Response,
+      type: body.t,
+      body: body
+    });
+  }
+
+  send(type: string, body: any): void {
+    var envelope: any = {
+      b: body
+    };
+    this._send(envelope);
+  }
+
+  sendRequest(type: string, body: any): void {
+    var envelope: any = {
+      b: body,
+      q: this._reqId++
+    };
+    this._send(envelope);
+  }
+
+  sendReply(reqId: number, body: any): void {
+    var envelope: any = {
+      b: body,
+      p: reqId
+    };
+    this._send(envelope);
+  }
+
+  private _expectMessage(timeout: number, messageExpectation: MessageExpectation): IExpectationCallbacks {
+    var expectation: Expectation = {
+      timeout: timeout,
+      inclination: messageExpectation.inclination,
+      type: messageExpectation.type,
+      body: messageExpectation.body,
+      callbacks: new ExpectationCallbacks(this)
+    };
+
+    return this._expect(expectation);
+  }
+
+  private _expect(expectation: Expectation): IExpectationCallbacks {
+    if (this._incoming.length === 0) {
+      this._queueExpectation(expectation);
+    } else {
+      var message: MessageEnvelope = this._incoming.shift();
+      this._processMessage(expectation, message);
+    }
+
+    return expectation.callbacks;
+  }
+
+  private _queueExpectation(expectation: Expectation): void {
+
+
+    this._expects.push(expectation);
+  }
+
+  private _handleTimeout(expectation: Expectation): void {
+    this._doneManager.testFailure(new Error("Timeout waiting for: " + MessageType[expectation.type]));
+    // fixme probably something else we need to do to kill the server.
+  }
+
+  stop(): void {
+    this._mockSocketServer.close();
+    this._expects.forEach((expectation: Expectation) => {
+      clearTimeout(expectation.timer);
+    });
+    this._expects = [];
+  }
+
+  handshake(timeout: number, response?: any): void {
+    if (response === undefined) {
+      response = {
+        s: true,
+        i: "1",
+        k: "s",
+        c: {},
+        t: MessageType.HANDSHAKE_RESPONSE
+      };
+    }
+    this.expectRequest(timeout, {t: MessageType.HANDSHAKE_REQUEST, r: false}).thenReply(response);
+  }
+
+  private _handleMessage(json: string): void {
+    var envelope: any = JSON.parse(json);
+    if (envelope.b.t === MessageType.PING) {
+      this._mockSocketServer.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
+    } else {
+      if (this._expects.length === 0) {
+        this._incoming.push(envelope);
+      } else {
+        var expectation: Expectation = this._expects.shift();
+        setTimeout(
+          () => {
+            this._processMessage(expectation, envelope)
+          },
+          0);
+      }
+    }
+  }
+
+  private _processMessage(expectation: Expectation, envelope: any): void {
+    if (expectation.inclination === MessageInclination.Normal && (envelope.q !== undefined || envelope.p !== undefined)) {
+      this._doneManager.testFailure(new Error("Normal messages must not have a request or response id set"));
+    } else if (expectation.inclination === MessageInclination.Request && (envelope.q === undefined || envelope.p !== undefined)) {
+      this._doneManager.testFailure(new Error("Request messages must have a request id and no response id set"));
+    } else if (expectation.inclination === MessageInclination.Response && (envelope.q !== undefined || envelope.p === undefined)) {
+      this._doneManager.testFailure(new Error("Response messages must have a response id and no request id set"));
+    } else if (expectation.type !== undefined && envelope.b.t !== expectation.type) {
+      this._doneManager.testFailure(new Error(`Expected type '${expectation.type}, but received '${envelope.body.type}'.`));
+    } else if (expectation.body !== undefined && !EqualsUtil.deepEquals(envelope.b, expectation.body)) {
+      this._doneManager.testFailure(new Error(
+        `Expected body '${JSON.stringify(expectation.body)}, but received '${JSON.stringify(envelope.b)}'.`));
+    }
+    clearTimeout(expectation.timer);
+    expectation.callbacks.resolve(envelope);
+
+    if (this._expects.length === 0) {
+      this._doneManager.serverDone();
+    }
+  }
+
+  private _send(envelope: any): void {
+    var json: string = JSON.stringify(envelope);
+    console.log("Server Sending: " + json);
+    this._mockSocketServer.send(json);
+  }
+}
+
+export interface IExpectationCallbacks {
+  thenReply(message: any): void;
+  thenCall(callback: (envelope: MessageEnvelope) => void): void;
+}
+
+class ExpectationCallbacks {
+  private _replyMessage: any;
+  private _thenCallback: any;
+
+  constructor(private _mockServer: MockServer) {
+  }
+
+  thenReply(message: any): void {
+    this._replyMessage = message;
+  }
+
+  thenCall(callback: (expectedMessage: any) => void): void {
+    this._thenCallback = callback;
+  }
+
+  resolve(expectedMessage: any): void {
+    if (this._thenCallback !== undefined) {
+      this._thenCallback(expectedMessage);
+    }
+
+    if (this._replyMessage !== undefined) {
+      this._mockServer.sendReply(expectedMessage.q, this._replyMessage);
+    }
+  }
+}
+
+abstract class AbstractDoneManager implements IDoneManager {
+  private _serverExpectationsMet: boolean;
+  private _resolved: boolean;
+
+  constructor() {
+    this._serverExpectationsMet = false;
+    this._resolved = false;
+  }
+
+  testSuccess(): void {
+    if (!this._resolved) {
+      if (!this._serverExpectationsMet) {
+        this.testFailure(new Error("Test completed without meeting all server expectations."));
+      } else {
+        this._resolved = true;
+        this._onSuccess();
+      }
+    }
+  }
+
+  testFailure(error?: Error): void {
+    if (!this._resolved) {
+      this._resolved = true;
+      this._onFailure(error);
+    }
+  }
+
+  serverDone(): void {
+    this._serverExpectationsMet = true;
+  }
+
+  protected abstract _onSuccess(): void;
+
+  protected abstract _onFailure(error: Error): void;
+}
+
+class CallbackDoneManager extends AbstractDoneManager {
+
+  constructor(private _successCallback: () => void, private _errorCallback: (error: Error) => void) {
+    super();
+  }
+
+  protected _onSuccess(): void {
+    this._successCallback();
+  }
+
+  protected _onFailure(error: Error): void {
+    this._errorCallback(error);
+  }
+}
+
+class MochaDoneManager extends CallbackDoneManager {
+  constructor(_mochaDone: MochaDone) {
+    super(_mochaDone, _mochaDone);
+  }
+}
+
+export interface IDoneManager {
+  testSuccess(): void;
+  testFailure(error?: Error): void;
+}
+
+
+export enum DoneType {
+  MOCHA, CALLBACK
+}
+
+export interface IMockServerOptions {
+  url: string;
+  doneType: DoneType;
+  mochaDone?: MochaDone;
+  successCallback?: () => void;
+  failureCallback?: (error: Error) => void;
+}
+
+interface MessageExpectation {
+  inclination: MessageInclination;
+  type?: MessageType;
+  body?: any;
+}
+
+interface Expectation {
+  inclination: MessageInclination;
+  type?: MessageType;
+  body?: any;
+  timeout?: number;
+  timer?: any;
+  callbacks: ExpectationCallbacks;
+}
+
+enum MessageInclination {
+  Normal, Request, Response
+}
+

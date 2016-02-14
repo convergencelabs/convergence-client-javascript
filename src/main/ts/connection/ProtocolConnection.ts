@@ -33,21 +33,20 @@ export class ProtocolConnection extends EventEmitter {
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
-    var self: ProtocolConnection = this;
 
     this._protocolConfig = protocolConfig;
     this._socket = socket;
 
     this._socket.on(ConvergenceSocket.Events.MESSAGE, (message: any) => {
-      self.onSocketMessage(message);
+      this.onSocketMessage(message);
     });
 
     this._socket.on(ConvergenceSocket.Events.ERROR, (error: string) => {
-      self.onSocketError(error);
+      this.onSocketError(error);
     });
 
     this._socket.on(ConvergenceSocket.Events.CLOSE, (reason: string) => {
-      self.onSocketClosed(reason);
+      this.onSocketClosed(reason);
     });
 
     this._requests = {};
@@ -88,7 +87,6 @@ export class ProtocolConnection extends EventEmitter {
     });
   }
 
-
   send(message: OutgoingProtocolNormalMessage): void {
     var envelope: MessageEnvelope = new MessageEnvelope(message);
     this.sendMessage(envelope);
@@ -111,14 +109,13 @@ export class ProtocolConnection extends EventEmitter {
       },
       timeout);
 
-    var sent: MessageEnvelope = new MessageEnvelope(message, requestId);
-    this.sendMessage(sent);
-
     this._requests[requestId] = <RequestRecord> {
       reqId: requestId,
       replyDeferred: replyDeferred,
       timeoutTask: timeoutTask
     };
+
+    this.sendMessage(new MessageEnvelope(message, requestId));
 
     return replyDeferred.promise();
   }
