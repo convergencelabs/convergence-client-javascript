@@ -159,9 +159,9 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     var child: RealTimeValue<any> = this._children[index];
     if (pathArgs.length > 1) {
       if (child.type() === RealTimeValueType.Object) {
-        return (<RealTimeObject> child).child(pathArgs.slice(1, pathArgs.length));
+        return (<RealTimeObject> child).dataAt(pathArgs.slice(1, pathArgs.length));
       } else if (child.type() === RealTimeValueType.Array) {
-        return (<RealTimeArray> child).child(pathArgs.slice(1, pathArgs.length));
+        return (<RealTimeArray> child).dataAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
         return RealTimeValueFactory.create(undefined, null, null, this._sendOperation);

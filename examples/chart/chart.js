@@ -73,7 +73,7 @@ function createControl(segment, index) {
 
   sliderDiv.noUiSlider.on('slide', function () {
     var val = Math.round(sliderDiv.noUiSlider.get());
-    segment.child("value").value(val);
+    segment.get("value").value(val);
     valueInput.value = val;
     pieChart.segments[index].value = val;
     pieChart.update();
