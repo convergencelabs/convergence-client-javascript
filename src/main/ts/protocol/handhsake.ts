@@ -6,7 +6,6 @@ import {MessageBodyDeserializer} from "./MessageSerializer";
 export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   reconnect: boolean;
   reconnectToken: string;
-  options: any;
 }
 
 export var HandshakeRequestSerializer: MessageBodySerializer = (request: HandshakeRequest) => {

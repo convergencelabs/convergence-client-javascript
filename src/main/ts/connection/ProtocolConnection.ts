@@ -57,34 +57,31 @@ export class ProtocolConnection extends EventEmitter {
     return this._socket.open();
   }
 
-  handshake(reconnect: boolean, reconnectToken?: string, options?: any): Promise<HandshakeResponse> {
+  handshake(reconnect: boolean, reconnectToken?: string): Promise<HandshakeResponse> {
     var request: HandshakeRequest = {
       type: MessageType.HANDSHAKE_REQUEST,
       reconnect: reconnect,
-      reconnectToken: reconnectToken,
-      options: options
+      reconnectToken: reconnectToken
     };
 
-    var self: ProtocolConnection = this;
-
-    return this.request(request).then(function (response: HandshakeResponse): HandshakeResponse {
+    return this.request(request).then((response: HandshakeResponse) => {
       var heartbeatHandler: HeartbeatHandler = {
         sendPing(): void {
-          self.onPing();
+          this.onPing();
         },
         onTimeout(): void {
-          self.abort("pong timeout");
+          this.abort("pong timeout");
         }
       };
 
       // todo handle protocol options that come back from server
-      self._heartbeatHelper = new HeartbeatHelper(
+      this._heartbeatHelper = new HeartbeatHelper(
         heartbeatHandler,
-        self._protocolConfig.heartbeatConfig.pingInterval,
-        self._protocolConfig.heartbeatConfig.pongTimeout);
+        this._protocolConfig.heartbeatConfig.pingInterval,
+        this._protocolConfig.heartbeatConfig.pongTimeout);
 
-      if (self._protocolConfig.heartbeatConfig.enabled) {
-        self._heartbeatHelper.start();
+      if (this._protocolConfig.heartbeatConfig.enabled) {
+        this._heartbeatHelper.start();
       }
 
       return response;

@@ -18,7 +18,7 @@ export var RemoteOperationDesrializer: MessageBodyDeserializer =  (body: any) =>
     userId: body.u,
     clientId: body.s,
     version: body.v,
-    timestamp: body.t,
+    timestamp: body.p,
     operation: OperationDeserializer.deserialize(body.o)
   };
 };

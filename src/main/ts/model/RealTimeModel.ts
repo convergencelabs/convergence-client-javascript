@@ -183,6 +183,7 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
     var clientId: string = processed.clientId;
     var contextVersion: number = processed.version;
     var timestamp: number = processed.timestamp;
+    var userId: string = "userId"; // fixme
 
     this._version = contextVersion;
     this._modifiedTime = new Date(timestamp);
@@ -191,12 +192,12 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
       var compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         // TODO: Determine where to get userId
-        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, "user", contextVersion, timestamp, op);
+        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, userId, contextVersion, timestamp, op);
         this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
       });
     } else {
       var modelEvent: ModelOperationEvent =
-        new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
+        new ModelOperationEvent(clientId, userId, contextVersion, timestamp, <DiscreteOperation> operation);
       this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
     }
   }

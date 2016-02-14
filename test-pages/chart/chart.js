@@ -79,7 +79,7 @@ function createControl(segment, index) {
     pieChart.update();
   });
 
-  segment.get("value").on("value  ", function (e) {
+  segment.get("value").on("value", function (e) {
     pieChart.segments[index].value = e.value;
     pieChart.update();
     sliderDiv.noUiSlider.set(e.value);
