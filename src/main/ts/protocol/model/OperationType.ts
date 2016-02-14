@@ -1,0 +1,20 @@
+enum OperationType {
+  COMPOUND = 0,
+  ARRAY_INSERT = 1,
+  ARRAY_REORDER = 2,
+  ARRAY_REMOVE = 3,
+  ARRAY_SET = 4,
+  ARRAY_VALUE = 5,
+  BOOLEAN_VALUE = 6,
+  NUMBER_ADD = 7,
+  NUMBER_VALUE = 8,
+  OBJECT_ADD = 9,
+  OBJECT_REMOVE = 10,
+  OBJECT_SET = 11,
+  OBJECT_VALUE = 12,
+  STRING_INSERT = 13,
+  STRING_REMOVE = 14,
+  STRING_VALUE = 15
+}
+
+export default OperationType;

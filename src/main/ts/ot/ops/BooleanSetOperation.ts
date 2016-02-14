@@ -1,31 +1,19 @@
-/// <reference path="StringOperation.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
-module convergence.ot {
+export default class BooleanSetOperation extends DiscreteOperation {
 
-  export class BooleanSetOperation extends DiscreteOperation {
+  constructor(path: Path, noOp: boolean, public value: boolean) {
+    super(OperationType.BOOLEAN_VALUE, path, noOp);
+    Object.freeze(this);
+  }
 
-    static TYPE:string = "BooleanSet";
-
-    protected _value:boolean;
-
-    constructor(path:Array<string | number>, noOp:boolean, value:boolean) {
-      super(path, noOp);
-      this._value = value;
-    }
-
-    get value():boolean {
-      return this._value;
-    }
-
-    copy(properties:any):BooleanSetOperation {
-      return new BooleanSetOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.value || this._value);
-    }
-
-    type():string {
-      return BooleanSetOperation.TYPE;
-    }
+  copy(updates: any): BooleanSetOperation {
+    return new BooleanSetOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.value, updates.value));
   }
 }

@@ -1,21 +1,20 @@
-/// <reference path="../ops/DiscreteOperation.ts" />
+import Operation from "../ops/Operation";
 
-module convergence.ot {
-  export class OperationPair {
-    _serverOp:DiscreteOperation;
-    _clientOp:DiscreteOperation;
+export default class OperationPair {
+  _serverOp: Operation;
+  _clientOp: Operation;
 
-    constructor(serverOp:DiscreteOperation, clientOp:DiscreteOperation) {
-      this._serverOp = serverOp;
-      this._clientOp = clientOp
-    }
+  constructor(serverOp: Operation, clientOp: Operation) {
+    this._serverOp = serverOp;
+    this._clientOp = clientOp;
+  }
 
-    get serverOp():DiscreteOperation {
-      return this._serverOp;
-    }
+  get serverOp(): Operation {
+    return this._serverOp;
+  }
 
-    get clientOp():DiscreteOperation {
-      return this._clientOp;
-    }
+  get clientOp(): Operation {
+    return this._clientOp;
   }
 }
+

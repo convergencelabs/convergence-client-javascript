@@ -1,32 +1,22 @@
-/// <reference path="StringOperation.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
-module convergence.ot {
+export default class ObjectRemovePropertyOperation extends DiscreteOperation {
 
-  export class ObjectRemovePropertyOperation extends DiscreteOperation implements ObjectOperation {
+  protected _prop: string;
 
-    static TYPE:string = "ObjectRemoveProperty";
+  constructor(path: Path, noOp: boolean, public prop: string) {
+    super(OperationType.OBJECT_REMOVE, path, noOp);
+    Object.freeze(this);
+  }
 
-    // FIXME this should be an object
-    protected _prop:string;
-
-    constructor(path:Array<string | number>, noOp:boolean, prop:string) {
-      super(path, noOp);
-      this._prop = prop;
-    }
-
-    get prop():string {
-      return this._prop;
-    }
-
-    copy(properties:any):ObjectRemovePropertyOperation {
-      return new ObjectRemovePropertyOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.prop || this._prop);
-    }
-
-    type():string {
-      return ObjectRemovePropertyOperation.TYPE;
-    }
+  copy(updates: any): ObjectRemovePropertyOperation {
+    return new ObjectRemovePropertyOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.prop, updates.prop));
   }
 }
+

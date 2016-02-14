@@ -1,6 +1,9 @@
-module convergence.ot {
-  export interface Operation {
-    copy(properties:any): Operation
-    type(): string
+import OperationType from "../../protocol/model/OperationType";
+abstract class Operation {
+  constructor(public type: OperationType) {
   }
+
+  abstract copy(properties: any): Operation;
 }
+
+export default Operation;

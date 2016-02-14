@@ -1,32 +1,20 @@
-/// <reference path="StringOperation.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
-module convergence.ot {
+export default class StringInsertOperation extends DiscreteOperation {
 
-  export class StringInsertOperation extends StringOperation {
+  constructor(path: Path, noOp: boolean, public index: number, public value: string) {
+    super(OperationType.STRING_INSERT, path, noOp);
+    Object.freeze(this);
+  }
 
-    static TYPE:string = "StringInsert";
-
-    protected _index:number;
-
-    constructor(path:Array<string | number>, noOp:boolean, index:number, value:string) {
-      super(path, noOp, value);
-      this._index = index;
-    }
-
-    get index():number {
-      return this._index;
-    }
-
-    copy(properties:any):StringInsertOperation {
-      return new StringInsertOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.index || this._index,
-        properties.value || this._value);
-    }
-
-    type():string {
-      return StringInsertOperation.TYPE;
-    }
+  copy(updates: any): StringInsertOperation {
+    return new StringInsertOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.index, updates.index),
+      Immutable.update(this.value, updates.value));
   }
 }

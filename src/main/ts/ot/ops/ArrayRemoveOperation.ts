@@ -1,31 +1,20 @@
-/// <reference path="StringOperation.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
-module convergence.ot {
+export default class ArrayRemoveOperation extends DiscreteOperation {
 
-  export class ArrayRemoveOperation extends DiscreteOperation implements ArrayOperation {
+  constructor(path: Path, noOp: boolean, public index: number) {
+    super(OperationType.ARRAY_REMOVE, path, noOp);
+    Object.freeze(this);
+  }
 
-    static TYPE:string = "ArrayRemove";
-
-    protected _index:number;
-
-    constructor(path:Array<string | number>, noOp:boolean, index:number) {
-      super(path, noOp);
-      this._index = index;
-    }
-
-    get index():number {
-      return this._index;
-    }
-
-    copy(properties:any):ArrayRemoveOperation {
-      return new ArrayRemoveOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.index || this._index);
-    }
-
-    type():string {
-      return ArrayRemoveOperation.TYPE;
-    }
+  copy(updates: any): ArrayRemoveOperation {
+    return new ArrayRemoveOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.index, updates.index));
   }
 }
+

@@ -1,109 +1,112 @@
-var gulp = require('gulp');
-var mkdirp = require('mkdirp');
-var path = require('path');
-var ts = require('gulp-typescript');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-const tslint = require('gulp-tslint');
+const gulp = require('gulp');
+const rename = require('gulp-rename');
+const del = require('del');
+
+const ts = require('gulp-typescript');
+const tsLint = require('gulp-tslint');
+
 const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
-const plumber = require('gulp-plumber');
-var insert = require('gulp-insert');
-var del = require('del');
-var Server = require('karma').Server;
-var wrapCommonjs = require('gulp-wrap-commonjs');
 
-var version = "1.0.0-M1-SNAPSHOT";
+const rollup = require('gulp-rollup');
+const rollupTypescript = require('rollup-plugin-typescript');
+const sourceMaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
 
-var outputFileBase = "convergence-client-" + version;
-var outputFileJs = outputFileBase + ".js";
-var outputFileDts = outputFileBase + ".d";
 
-const plumberConf = {};
+gulp.task('default', ["build"]);
 
-gulp.task('mkdirs', function () {
-  mkdirp.sync("build");
-  mkdirp.sync("dist");
+/**
+ * Converts Typescript w/ ES6 modules to ES5 w/ commonjs modules using the
+ * Typescript compiler.  This builds both the main source and the test sources.
+ */
+gulp.task('build', [], function () {
+  const tsProject = ts.createProject('tsconfig.json');
+  return gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
+    .pipe(ts(tsProject))
+    .pipe(gulp.dest("build"));
 });
 
-gulp.task('ts-compile', ["mkdirs"], function () {
-  var tsResult = gulp.src('src/main/ts/**/*.ts')
-    .pipe(ts({
-        out: outputFileJs,
-        target: "ES5",
-        declarationFiles: true
-    }));
-  tsResult.js
-    .pipe(gulp.dest('build'));
 
-  return tsResult.dts
-    .pipe(rename({
-      basename: outputFileDts
-    }))
-    .pipe(gulp.dest('build'));
+/**
+ * Test the code using the ES5 output from the build command.
+ */
+gulp.task('test', ["build"], function () {
+  return gulp.src("build/test/**/*.js")
+    .pipe(mocha({reporter: 'progress'}));
 });
 
-gulp.task('tslint', function(){
-  return gulp.src('src/main/ts/**/*.ts')
-    .pipe(tslint())
-    .pipe(tslint.report('prose'));
-});
 
-gulp.task('istanbul', function (cb) {
-  gulp.src("build/**/*.js")
+/**
+ * Runs the tests and produces a coverage report.
+ */
+gulp.task('coverage', ["build"], function () {
+  return gulp.src("build/**/*.js")
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
     .on('finish', function () {
-      gulp.src("src/test/**/*.js")
-        .pipe(plumber(plumberConf))
-        .pipe(mocha())
+      gulp.src("build/test/**/*.js")
+        .pipe(mocha({reporter: 'progress'}))
         .pipe(istanbul.writeReports()) // Creating the reports after tests run
-        .on('finish', function() {
+        .on('finish', function () {
           process.chdir(__dirname);
-          cb();
         });
     });
 });
 
-gulp.task('dist', ["ts-compile"], function() {
-  return gulp.src('build/*.js')
+
+/**
+ * Checks the code for stylistic and design errors as defined in the
+ * tslint.config file.
+ */
+gulp.task('lint', function () {
+  return gulp.src('src/main/ts/**/*.ts')
+    .pipe(tsLint())
+    .pipe(tsLint.report('prose'));
+});
+
+
+/**
+ * Creates a single file build in ES5 using RollupJS.  Both a minified and
+ * non minified version is created using UglifyJS.  The code will be linted
+ * and tested before being rolled up and minified.
+ */
+gulp.task('dist-build', ["lint", "test"], function () {
+  gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+    .pipe(rollup({
+      format: 'iife',
+      moduleName: 'ConvergenceDomain',
+      sourceMap: true,
+      plugins: [
+        rollupTypescript()
+      ]
+    }))
+    .pipe(rename("convergence-client.js"))
+    .pipe(sourceMaps.write("."))
+    .pipe(gulp.dest("dist"));
+});
+
+/**
+ * Creates a single file build in ES5 using RollupJS.  Both a minified and
+ * non minified version is created using UglifyJS.  The code will be linted
+ * and tested before being rolled up and minified.
+ */
+gulp.task('dist-min', ["dist-build"], function () {
+  gulp.src("dist/convergence-client.js")
+    .pipe(sourceMaps.init())
     .pipe(uglify())
     .pipe(rename({
       extname: '.min.js'
     }))
-    .pipe(gulp.dest('dist'));
+    .pipe(sourceMaps.write("."))
+    .pipe(gulp.dest("dist"));
 });
 
-gulp.task('clean', function (cb) {
-  del([
-    'dist/',
-    "build"
-  ], cb);
-});
-
-// The default task (called when you run `gulp`)
-gulp.task('default', ["ts-compile"]);
-gulp.task('test2', ["istanbul"]);
 
 
-gulp.task('commonjs', ['ts-compile'], function(){
-    return gulp.src(['build/' + outputFileJs])
-        .pipe(wrapCommonjs({
-            pathModifier: function (path) {
-                return "convergence";
-            },
-            moduleExports: "{convergence: convergence}"
-        }))
-        .pipe(rename({
-            extname: '.commonjs.js'
-        }))
-        .pipe(gulp.dest('build/'));
-});
-
-gulp.task('test', function (done) {
-    new Server({
-        configFile: __dirname + '/karma.conf.js',
-        singleRun: true
-    }, done).start();
+/**
+ * Removes all build artifacts.
+ */
+gulp.task('clean', function () {
+  return del(['dist/', "build"]);
 });

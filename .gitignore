@@ -9,3 +9,5 @@ npm-debug.log
 src/ts/**/*.js
 src/ts/**/*.js.map
 bower_components
+typings
+/.project

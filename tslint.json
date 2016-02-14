@@ -7,8 +7,7 @@
     "ban": false,
     "class-name": true,
     "comment-format": [true,
-      "check-space",
-      "check-lowercase"
+      "check-space"
     ],
     "curly": true,
     "eofline": true,
@@ -20,8 +19,6 @@
     "label-undefined": true,
     "max-line-length": [true, 140],
     "member-ordering": [true,
-      "public-before-private",
-      "static-before-instance",
       "variables-before-functions"
     ],
     "no-any": false,
@@ -35,7 +32,7 @@
       "trace"
     ],
     "no-construct": true,
-    "no-constructor-vars": true,
+    "no-constructor-vars": false,
     "no-debugger": true,
     "no-duplicate-key": true,
     "no-shadowed-variable": true,

@@ -1,39 +1,20 @@
-/// <reference path="StringOperation.ts" />
+import Immutable from "../../util/Immutable";
+import DiscreteOperation from "./DiscreteOperation";
+import {Path} from "../Path";
+import OperationType from "../../protocol/model/OperationType";
 
-module convergence.ot {
+export default class ObjectSetPropertyOperation extends DiscreteOperation {
 
-  export class ObjectSetPropertyOperation extends DiscreteOperation implements ObjectOperation {
+  constructor(path: Path, noOp: boolean, public prop: string, public value: any) {
+    super(OperationType.OBJECT_SET, path, noOp);
+    Object.freeze(this);
+  }
 
-    static TYPE:string = "ObjectSetProperty";
-
-    // FIXME this should be an object
-    protected _value:any;
-    protected _prop:string;
-
-    constructor(path:Array<string | number>, noOp:boolean, prop:string, value:any) {
-      super(path, noOp);
-      this._prop = prop;
-      this._value = value;
-    }
-
-    get prop():string {
-      return this._prop;
-    }
-
-    get value():any {
-      return this._value;
-    }
-
-    copy(properties:any):ObjectSetPropertyOperation {
-      return new ObjectSetPropertyOperation(
-        properties.path || this._path,
-        properties.noOp || this._noOp,
-        properties.prop || this._prop,
-        properties.value || this._value);
-    }
-
-    type():string {
-      return ObjectSetPropertyOperation.TYPE;
-    }
+  copy(updates: any): ObjectSetPropertyOperation {
+    return new ObjectSetPropertyOperation(
+      Immutable.update(this.path, updates.path),
+      Immutable.update(this.noOp, updates.noOp),
+      Immutable.update(this.prop, updates.prop),
+      Immutable.update(this.value, updates.value));
   }
 }

@@ -1,0 +1,19 @@
+{
+  "version": "1.7.5",
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "preserveConstEnums": true,
+    "outDir": "build",
+    "sourceMap": true,
+    "declaration": true
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "bower_components",
+    "typings/browser.d.ts",
+    "typings/browser"
+  ]
+}

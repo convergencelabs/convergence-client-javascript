@@ -33,6 +33,5 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "commonjs-require": "~1.4.5"
   }
 }
