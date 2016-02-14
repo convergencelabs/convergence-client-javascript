@@ -14,14 +14,14 @@ describe('Authentication E2E', () => {
     var doneManager: IDoneManager = mockServer.doneManager();
 
     // set up the server's behavior
-    mockServer.handshake(1000);
+    mockServer.handshake();
 
     var authExpected: any = {t: MessageType.PASSWORD_AUTH_REQUEST, u: "test", p: "password"};
-    mockServer.expectRequest(1000, authExpected)
+    mockServer.expectRequest(authExpected)
       .thenReply({t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test"});
 
     var expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, c: "collection", m: "model", i: false};
-    mockServer.expectRequest(1000, expectedOpen)
+    mockServer.expectRequest(expectedOpen, 1000)
       .thenReply({
         r: "1",
         v: 0,
@@ -31,13 +31,12 @@ describe('Authentication E2E', () => {
         t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
       });
 
+    mockServer.autoWait();
+
     // Execute test code
     ConvergenceDomain.debugFlags.protocol.messages = true;
     var domain: ConvergenceDomain = new ConvergenceDomain(url);
-    mockServer.step();
-
     domain.authenticateWithPassword("test", "password").then(() => {
-      mockServer.step();
       return domain.modelService().open("collection", "model");
     }).then((model: RealTimeModel) => {
       doneManager.testSuccess();
