@@ -78,35 +78,35 @@ export class DiscreteOperationSerializer {
 export class DiscreteOperationDeserializer {
   static deserialize(body: any): DiscreteOperation {
     switch (body.t) {
-      case "AI":
+      case OperationType.ARRAY_INSERT:
         return ArrayInsertOperationDeserializer.deserialize(body);
-      case "AM":
+      case OperationType.ARRAY_MOVE:
         return ArrayMoveOperationDeserializer.deserialize(body);
-      case "AR":
+      case OperationType.ARRAY_REMOVE:
         return ArrayRemoveOperationDeserializer.deserialize(body);
-      case "AP":
+      case OperationType.ARRAY_REPLACE:
         return ArrayReplaceOperationDeserializer.deserialize(body);
-      case "AS":
+      case OperationType.ARRAY_SET:
         return ArraySetOperationDeserializer.deserialize(body);
-      case "BS":
+      case OperationType.BOOLEAN_SET:
         return BooleanSetOperationDeserializer.deserialize(body);
-      case "NA":
+      case OperationType.NUMBER_ADD:
         return NumberAddOperationDeserializer.deserialize(body);
-      case "NS":
+      case OperationType.NUMBER_SET:
         return NumberSetOperationDeserializer.deserialize(body);
-      case "OA":
+      case OperationType.OBJECT_ADD_PROPERTY:
         return ObjectAddPropertyOperationDeserializer.deserialize(body);
-      case "OR":
+      case OperationType.OBJECT_REMOVE_PROPERTY:
         return ObjectRemovePropertyOperationDeserializer.deserialize(body);
-      case "OP":
+      case OperationType.OBJECT_SET_PROPERTY:
         return ObjectSetPropertyOperationDeserializer.deserialize(body);
-      case "OS":
+      case OperationType.OBJECT_SET:
         return ObjectSetOperationDeserializer.deserialize(body);
-      case "SI":
+      case OperationType.STRING_INSERT:
         return StringInsertOperationDeserializer.deserialize(body);
-      case "SR":
+      case OperationType.STRING_REMOVE:
         return StringRemoveOperationDeserializer.deserialize(body);
-      case "SS":
+      case OperationType.STRING_SET:
         return StringSetOperationDeserializer.deserialize(body);
       default:
         throw new Error("Can't deserialize operation:  unknown operation type");
@@ -124,9 +124,8 @@ export class CompoundOperationSerializer {
       ops.push(DiscreteOperationSerializer.serialize(op));
     }
     return {
-      t: "C",
-      ops: ops
-
+      t: OperationType.COMPOUND,
+      o: ops
     };
   }
 }
@@ -145,261 +144,261 @@ export class CompoundDeserializer {
 export class ArrayInsertOperationSerializer {
   static serialize(operation: ArrayInsertOperation): any {
     return {
-      t: "AI",
-      path: operation.path,
-      noOp: operation.noOp,
-      idx: operation.index,
-      val: operation.value
+      t: OperationType.ARRAY_INSERT,
+      p: operation.path,
+      n: operation.noOp,
+      i: operation.index,
+      v: operation.value
     };
   }
 }
 
 export class ArrayInsertOperationDeserializer {
   static deserialize(body: any): ArrayInsertOperation {
-    return new ArrayInsertOperation(body.path, body.noOp, body.idx, body.val);
+    return new ArrayInsertOperation(body.p, body.n, body.i, body.v);
   }
 }
 
 export class ArrayMoveOperationSerializer {
   static serialize(operation: ArrayMoveOperation): any {
     return {
-      t: "AM",
-      path: operation.path,
-      noOp: operation.noOp,
-      fromIdx: operation.fromIndex,
-      toIdx: operation.toIndex
+      t: OperationType.ARRAY_MOVE,
+      p: operation.path,
+      n: operation.noOp,
+      f: operation.fromIndex,
+      o: operation.toIndex
     };
   }
 }
 
 export class ArrayMoveOperationDeserializer {
   static deserialize(body: any): ArrayMoveOperation {
-    return new ArrayMoveOperation(body.path, body.noOp, body.fromIdx, body.toIdx);
+    return new ArrayMoveOperation(body.p, body.n, body.f, body.o);
   }
 }
 
 export class ArrayRemoveOperationSerializer {
   static serialize(operation: ArrayRemoveOperation): any {
     return {
-      t: "AR",
-      path: operation.path,
-      noOp: operation.noOp,
-      idx: operation.index
+      t: OperationType.ARRAY_REMOVE,
+      p: operation.path,
+      n: operation.noOp,
+      i: operation.index
     };
   }
 }
 
 export class ArrayRemoveOperationDeserializer {
   static deserialize(body: any): ArrayRemoveOperation {
-    return new ArrayRemoveOperation(body.path, body.noOp, body.idx);
+    return new ArrayRemoveOperation(body.p, body.n, body.i);
   }
 }
 
 export class ArrayReplaceOperationSerializer {
   static serialize(operation: ArrayReplaceOperation): any {
     return {
-      t: "AP",
-      path: operation.path,
-      noOp: operation.noOp,
-      idx: operation.index,
-      val: operation.value
+      t: OperationType.ARRAY_REPLACE,
+      p: operation.path,
+      n: operation.noOp,
+      i: operation.index,
+      v: operation.value
     };
   }
 }
 
 export class ArrayReplaceOperationDeserializer {
   static deserialize(body: any): ArrayReplaceOperation {
-    return new ArrayReplaceOperation(body.path, body.noOp, body.idx, body.val);
+    return new ArrayReplaceOperation(body.p, body.n, body.i, body.v);
   }
 }
 
 export class ArraySetOperationSerializer {
   static serialize(operation: ArraySetOperation): any {
     return {
-      t: "AS",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.ARRAY_SET,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class ArraySetOperationDeserializer {
   static deserialize(body: any): ArraySetOperation {
-    return new ArraySetOperation(body.path, body.noOp, body.val);
+    return new ArraySetOperation(body.p, body.n, body.v);
   }
 }
 
 export class BooleanSetOperationSerializer {
   static serialize(operation: BooleanSetOperation): any {
     return {
-      t: "BS",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.BOOLEAN_SET,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class BooleanSetOperationDeserializer {
   static deserialize(body: any): BooleanSetOperation {
-    return new BooleanSetOperation(body.path, body.noOp, body.val);
+    return new BooleanSetOperation(body.p, body.n, body.v);
   }
 }
 
 export class NumberAddOperationSerializer {
   static serialize(operation: NumberAddOperation): any {
     return {
-      t: "NA",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.NUMBER_ADD,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class NumberAddOperationDeserializer {
   static deserialize(body: any): NumberAddOperation {
-    return new NumberAddOperation(body.path, body.noOp, body.val);
+    return new NumberAddOperation(body.p, body.n, body.v);
   }
 }
 
 export class NumberSetOperationSerializer {
   static serialize(operation: NumberSetOperation): any {
     return {
-      t: "NS",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.NUMBER_SET,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class NumberSetOperationDeserializer {
   static deserialize(body: any): NumberSetOperation {
-    return new NumberSetOperation(body.path, body.noOp, body.val);
+    return new NumberSetOperation(body.p, body.n, body.v);
   }
 }
 
 export class ObjectAddPropertyOperationSerializer {
   static serialize(operation: ObjectAddPropertyOperation): any {
     return {
-      t: "OA",
-      path: operation.path,
-      noOp: operation.noOp,
-      prop: operation.prop,
-      val: operation.value
+      t: OperationType.OBJECT_ADD_PROPERTY,
+      p: operation.path,
+      n: operation.noOp,
+      k: operation.prop,
+      v: operation.value
     };
   }
 }
 
 export class ObjectAddPropertyOperationDeserializer {
   static deserialize(body: any): ObjectAddPropertyOperation {
-    return new ObjectAddPropertyOperation(body.path, body.noOp, body.prop, body.val);
+    return new ObjectAddPropertyOperation(body.p, body.n, body.k, body.v);
   }
 }
 
 export class ObjectRemovePropertyOperationSerializer {
   static serialize(operation: ObjectRemovePropertyOperation): any {
     return {
-      t: "OR",
-      path: operation.path,
-      noOp: operation.noOp,
-      prop: operation.prop
+      t: OperationType.OBJECT_REMOVE_PROPERTY,
+      p: operation.path,
+      n: operation.noOp,
+      k: operation.prop
     };
   }
 }
 
 export class ObjectRemovePropertyOperationDeserializer {
   static deserialize(body: any): ObjectRemovePropertyOperation {
-    return new ObjectRemovePropertyOperation(body.path, body.noOp, body.prop);
+    return new ObjectRemovePropertyOperation(body.p, body.n, body.k);
   }
 }
 
 export class ObjectSetPropertyOperationSerializer {
   static serialize(operation: ObjectSetPropertyOperation): any {
     return {
-      t: "OP",
-      path: operation.path,
-      noOp: operation.noOp,
-      prop: operation.prop,
-      val: operation.value
+      t: OperationType.OBJECT_SET_PROPERTY,
+      p: operation.path,
+      n: operation.noOp,
+      k: operation.prop,
+      v: operation.value
     };
   }
 }
 
 export class ObjectSetPropertyOperationDeserializer {
   static deserialize(body: any): ObjectSetPropertyOperation {
-    return new ObjectSetPropertyOperation(body.path, body.noOp, body.prop, body.val);
+    return new ObjectSetPropertyOperation(body.p, body.n, body.k, body.v);
   }
 }
 
 export class ObjectSetOperationSerializer {
   static serialize(operation: ObjectSetOperation): any {
     return {
-      t: "OS",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.OBJECT_SET,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class ObjectSetOperationDeserializer {
   static deserialize(body: any): ObjectSetOperation {
-    return new ObjectSetOperation(body.path, body.noOp, body.val);
+    return new ObjectSetOperation(body.p, body.n, body.v);
   }
 }
 
 export class StringInsertOperationSerializer {
   static serialize(operation: StringInsertOperation): any {
     return {
-      t: "SI",
-      path: operation.path,
-      noOp: operation.noOp,
-      idx: operation.index,
-      val: operation.value
+      t: OperationType.STRING_INSERT,
+      p: operation.path,
+      n: operation.noOp,
+      i: operation.index,
+      v: operation.value
     };
   }
 }
 
 export class StringInsertOperationDeserializer {
   static deserialize(body: any): StringInsertOperation {
-    return new StringInsertOperation(body.path, body.noOp, body.idx, body.val);
+    return new StringInsertOperation(body.p, body.n, body.i, body.v);
   }
 }
 
 export class StringRemoveOperationSerializer {
   static serialize(operation: StringRemoveOperation): any {
     return {
-      t: "SR",
-      path: operation.path,
-      noOp: operation.noOp,
-      idx: operation.index,
-      val: operation.value
+      t: OperationType.STRING_REMOVE,
+      p: operation.path,
+      n: operation.noOp,
+      i: operation.index,
+      v: operation.value
     };
   }
 }
 
 export class StringRemoveOperationDeserializer {
   static deserialize(body: any): StringRemoveOperation {
-    return new StringRemoveOperation(body.path, body.noOp, body.idx, body.val);
+    return new StringRemoveOperation(body.p, body.n, body.i, body.v);
   }
 }
 
 export class StringSetOperationSerializer {
   static serialize(operation: StringSetOperation): any {
     return {
-      t: "SS",
-      path: operation.path,
-      noOp: operation.noOp,
-      val: operation.value
+      t: OperationType.STRING_SET,
+      p: operation.path,
+      n: operation.noOp,
+      v: operation.value
     };
   }
 }
 
 export class StringSetOperationDeserializer {
   static deserialize(body: any): StringSetOperation {
-    return new StringSetOperation(body.path, body.noOp, body.val);
+    return new StringSetOperation(body.p, body.n, body.v);
   }
 }

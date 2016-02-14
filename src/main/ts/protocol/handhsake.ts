@@ -1,7 +1,7 @@
-import MessageType from "./MessageType";
 import {IncomingProtocolResponseMessage} from "./protocol";
 import {OutgoingProtocolRequestMessage} from "./protocol";
-import {MessageSerializer} from "./MessageSerializer";
+import {MessageBodySerializer} from "./MessageSerializer";
+import {MessageBodyDeserializer} from "./MessageSerializer";
 
 export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   reconnect: boolean;
@@ -9,12 +9,12 @@ export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   options: any;
 }
 
-MessageSerializer.registerMessageBodySerializer(MessageType.HANDSHAKE_REQUEST, (request: HandshakeRequest) => {
+export var HandshakeRequestSerializer: MessageBodySerializer = (request: HandshakeRequest) => {
   return {
     r: request.reconnect,
     k: request.reconnectToken
   };
-});
+};
 
 export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
@@ -25,7 +25,7 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   retryOk?: boolean;
 }
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.HANDSHAKE_RESPONSE, (body: any) => {
+export var HandshakeResponseDeserializer: MessageBodyDeserializer = (body: any) => {
   return {
     success: body.s,
     sessionId: body.i,
@@ -34,4 +34,4 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.HANDSHAKE_RESPONSE
     error: body.e,
     retryOk: body.r
   };
-});
+};

@@ -295,7 +295,7 @@ export default class ConvergenceConnection extends EventEmitter {
         self.emit(ConvergenceConnection.Events.DISCONNECTED);
       });
     }).catch((reason: Error) => {
-      console.log("Connection failed: " + reason);
+      console.error("Connection failed: ", reason);
       clearTimeout(self._connectionTimeoutTask);
       if (reconnect || self._retryOnOpen) {
         self._scheduleReconnect(Math.max(self._reconnectInterval, 0), reconnect);

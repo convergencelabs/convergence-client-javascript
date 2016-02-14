@@ -166,16 +166,16 @@ export class ProtocolConnection extends EventEmitter {
       type !== MessageType.PING &&
       type !== MessageType.PONG) ||
       debugFlags.protocol.pings) {
-      console.log("R: " + JSON.stringify(message));
+      console.log("R: " + JSON.stringify(envelope));
     }
 
     if (type === MessageType.PING) {
       this.onPing();
     } else if (type === MessageType.PONG) {
       // TODO: Do we need to do anything here
-    } else if (envelope.requestId) {
+    } else if (envelope.requestId !== undefined) {
       this.onRequest(envelope);
-    } else if (envelope.responseId) {
+    } else if (envelope.responseId !== undefined) {
       this.onReply(envelope);
     } else {
       this.onNormalMessage(envelope);
@@ -218,7 +218,7 @@ export class ProtocolConnection extends EventEmitter {
 
   private onReply(envelope: MessageEnvelope): void {
 
-    var requestId: number = envelope.requestId;
+    var requestId: number = envelope.responseId;
 
     var record: RequestRecord = this._requests[requestId];
     delete this._requests[requestId];

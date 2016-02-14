@@ -1,8 +1,7 @@
 import {OutgoingProtocolNormalMessage} from "../protocol";
 import Operation from "../../ot/ops/Operation";
 import {OperationSerializer} from "./operationData";
-import MessageType from "../MessageType";
-import {MessageSerializer} from "../MessageSerializer";
+import {MessageBodySerializer} from "../MessageSerializer";
 
 export interface OperationSubmission extends OutgoingProtocolNormalMessage {
   resourceId: string;
@@ -11,11 +10,11 @@ export interface OperationSubmission extends OutgoingProtocolNormalMessage {
   operation: Operation;
 }
 
-MessageSerializer.registerMessageBodySerializer(MessageType.OPERATION_SUBMISSION, (submission: OperationSubmission) => {
+export var OperationSubmissionSerializer: MessageBodySerializer =  (submission: OperationSubmission) => {
   return {
     r: submission.resourceId,
     s: submission.seqNo,
     v: submission.version,
     o: OperationSerializer.serialize(submission.operation)
   };
-});
+};

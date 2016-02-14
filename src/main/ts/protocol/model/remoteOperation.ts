@@ -1,8 +1,7 @@
-import MessageType from "../MessageType";
 import {IncomingProtocolNormalMessage} from "../protocol";
 import Operation from "../../ot/ops/Operation";
 import {OperationDeserializer} from "./operationData";
-import {MessageSerializer} from "../MessageSerializer";
+import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface RemoteOperation extends IncomingProtocolNormalMessage {
   resourceId: string;
@@ -13,13 +12,13 @@ export interface RemoteOperation extends IncomingProtocolNormalMessage {
   operation: Operation;
 }
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_OPERATION, (body: any) => {
+export var RemoteOperationDesrializer: MessageBodyDeserializer =  (body: any) => {
   return {
-    resourceId: body.rId,
-    userId: body.uId,
-    clientId: body.sId,
+    resourceId: body.r,
+    userId: body.u,
+    clientId: body.s,
     version: body.v,
     timestamp: body.t,
-    operation: OperationDeserializer.deserialize(body.op)
+    operation: OperationDeserializer.deserialize(body.o)
   };
-});
+};

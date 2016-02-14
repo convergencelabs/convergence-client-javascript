@@ -1,26 +1,26 @@
 import {IncomingProtocolRequestMessage} from "../protocol";
 import {OutgoingProtocolResponseMessage} from "../protocol";
+import {MessageBodySerializer} from "../MessageSerializer";
+import {MessageBodyDeserializer} from "../MessageSerializer";
 import ModelFqn from "../../model/ModelFqn";
-import MessageType from "../MessageType";
-import {MessageSerializer} from "../MessageSerializer";
 
 export interface ModelDataRequest extends IncomingProtocolRequestMessage {
   modelFqn: ModelFqn;
 }
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_DATA_REQUEST, (body: any) => {
+export var ModelDataRequestDeserializer: MessageBodyDeserializer =  (body: any) => {
   return {
     modelFqn: new ModelFqn(body.c, body.m)
   };
-});
+};
 
 
 export interface ModelDataResponse extends OutgoingProtocolResponseMessage {
   data: any;
 }
 
-MessageSerializer.registerMessageBodySerializer(MessageType.MODEL_DATA_RESPONSE, (response: ModelDataResponse) => {
+export var ModelDataResponseSerializer: MessageBodySerializer = (response: ModelDataResponse) => {
   return {
     d: response.data
   };
-});
+};

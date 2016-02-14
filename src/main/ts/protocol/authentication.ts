@@ -1,7 +1,8 @@
 import MessageType from "./MessageType";
 import {OutgoingProtocolRequestMessage} from "./protocol";
 import {IncomingProtocolResponseMessage} from "./protocol";
-import {MessageSerializer} from "./MessageSerializer";
+import {MessageBodySerializer} from "./MessageSerializer";
+import {MessageBodyDeserializer} from "./MessageSerializer";
 
 export interface AuthRequest extends OutgoingProtocolRequestMessage {
 }
@@ -11,37 +12,34 @@ export interface PasswordAuthRequest extends AuthRequest {
   password: string;
 }
 
-MessageSerializer.registerMessageBodySerializer(MessageType.PASSWORD_AUTH_REQUEST, (request: PasswordAuthRequest) => {
+export var PasswordAuthRequestSerializer: MessageBodySerializer = (request: PasswordAuthRequest) => {
   return {
     u: request.username,
     p: request.password
   };
-});
+};
 
 
 export interface TokenAuthRequest extends AuthRequest {
   token: string;
 }
 
-MessageSerializer.registerMessageBodySerializer(MessageType.TOKEN_AUTH_REQUEST, (request: TokenAuthRequest) => {
-    return {
-      k: request.token
-    };
-  });
+export var TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAuthRequest) => {
+  return {
+    k: request.token
+  };
+};
 
 export interface AuthenticationResponseMessage extends IncomingProtocolResponseMessage {
   success: boolean;
   username: string;
 }
 
-export class AuthenticationResponseDeserializer {
-  static deserialize(body: any): AuthenticationResponseMessage {
-    return {
-      type: MessageType.AUTHENTICATE_RESPONSE,
-      success: body.s,
-      username: body.u
+export var AuthenticationResponseDeserializer: MessageBodyDeserializer = (body: any) => {
+  return {
+    type: MessageType.AUTHENTICATE_RESPONSE,
+    success: body.s,
+    username: body.u
 
-    };
-  }
-}
-
+  };
+};

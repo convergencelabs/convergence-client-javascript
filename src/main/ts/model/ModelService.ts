@@ -62,7 +62,7 @@ export default class ModelService extends ConvergenceEventEmitter {
     } else {
       var response: ModelDataResponse = {
         data: openReq.initializer(),
-        type: MessageType.MODEL_DATA_REQUEST
+        type: MessageType.MODEL_DATA_RESPONSE
       };
       replyCallback.reply(response);
     }
