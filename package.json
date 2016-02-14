@@ -1,12 +1,14 @@
 {
   "name": "convergence-client",
-  "version": "1.0.0-M1-SNAPSHOT",
+  "version": "1.0.0-M2",
   "description": "Convergence Javascript Client",
   "tags": [
-    "json",
-    "editor"
+    "Convergence",
+    "Client",
+    "Collaboration",
+    "Real Time"
   ],
-  "author": "",
+  "author": "Convergence Labs",
   "homepage": "",
   "repository": {
     "type": "",
