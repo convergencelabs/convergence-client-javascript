@@ -133,11 +133,10 @@ export default class ModelService extends ConvergenceEventEmitter {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
       data: data
-
     };
 
     return this._connection.request(request).then(() => {
-      // convert to void
+      return; // convert to Promise<void>
     });
   }
 
@@ -147,11 +146,10 @@ export default class ModelService extends ConvergenceEventEmitter {
     var request: DeleteRealTimeModelRequest = {
       type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn
-
     };
 
     return this._connection.request(request).then(() => {
-      // convert to void
+      return; // convert to Promise<void>
     });
   }
 
@@ -162,7 +160,7 @@ export default class ModelService extends ConvergenceEventEmitter {
     };
 
     return this._connection.request(request).then(() => {
-      // convert to void
+      return; // convert to Promise<void>
     });
   }
 }

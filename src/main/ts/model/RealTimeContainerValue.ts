@@ -1,7 +1,7 @@
 import RealTimeValue from "./RealTimeValue";
 import {PathElement} from "../ot/Path";
 import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import DataType from "./RealTimeValueType";
+import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "../ot/Path";
 
 abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
@@ -9,7 +9,7 @@ abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
   /**
    * Constructs a new RealTimeContainer.
    */
-  constructor(modelType: DataType,
+  constructor(modelType: RealTimeValueType,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               sendOpCallback: (operation: DiscreteOperation) => void) {
@@ -21,7 +21,7 @@ abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
     super._detach();
   }
 
-  child(pathArgs: any): RealTimeValue<any> {
+  dataAt(pathArgs: any): RealTimeValue<any> {
     // We're letting them pass in individual path arguments or a single array of path arguments
     var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
     if (pathArgsForReal.length === 0) {
