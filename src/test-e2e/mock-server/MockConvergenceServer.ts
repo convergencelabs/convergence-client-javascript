@@ -1,24 +1,51 @@
-/* tslint:disable */
 import MessageType from "../../main/ts/protocol/MessageType";
 import {MessageEnvelope} from "../../main/ts/protocol/protocol";
 import EqualsUtil from "../../main/ts/util/EqualsUtil";
-import {HandshakeResponse} from "../../main/ts/protocol/handhsake";
-var mockSocket = require('mock-socket');
 
+/* tslint:disable */
+var mockSocket = require('mock-socket');
 if (typeof global['WebSocket'] === "undefined") {
   global['WebSocket'] = mockSocket.WebSocket;
 }
 /* tslint:enable */
 
+/**
+ * Options to configure the behavior of the mock server.
+ */
 export interface IMockServerOptions {
   url: string;
+
+  autoHandshake?: boolean;
+  handshakeTimeout?: number;
+  handshakeResponse?: any;
+
+  autoTokenAuth?: boolean;
+  authTimeout?: number;
+  authResponse?: any;
+  authExpectedToken?: string;
+
   doneType: DoneType;
+
   mochaDone?: MochaDone;
-  successCallback?: () => void;
-  failureCallback?: (error: Error) => void;
+
+  successCallback?: SuccessCallback;
+  failureCallback?: FailureCallback;
+
+  immediateAutoWait?: boolean;
 }
 
-export class MockServer {
+export enum DoneType {
+  MOCHA, CALLBACK
+}
+
+export type SuccessCallback = () => void;
+export type FailureCallback = (e: any) => void;
+
+/**
+ * This is the main mock server class.
+ */
+export class MockConvergenceServer {
+  private _url: string;
   private _doneManager: AbstractDoneManager;
 
   private _mockSocketServer: any;
@@ -32,6 +59,7 @@ export class MockServer {
   private _autoWait: boolean;
 
   constructor(options: IMockServerOptions) {
+    this._url = options.url;
     this._mockSocketServer = new mockSocket.Server(options.url);
 
     switch (options.doneType) {
@@ -39,28 +67,34 @@ export class MockServer {
         if (options.mochaDone === undefined) {
           throw new Error("Must specify 'mochaDone' for a doneType of 'mocha'");
         }
-        this._doneManager = new MochaDoneManager(options.mochaDone);
+        this._doneManager = new MochaDoneManager(this, options.mochaDone);
         break;
       case DoneType.CALLBACK:
         if (options.successCallback === undefined || options.failureCallback === undefined) {
           throw new Error("Must specify both 'successCallback' and 'customOnFailure' for a doneType of 'custom'");
         }
-        this._doneManager = new CallbackDoneManager(options.successCallback, options.failureCallback);
+        this._doneManager = new CallbackDoneManager(this, options.successCallback, options.failureCallback);
         break;
       default:
         throw new Error("Invalid 'doneType");
     }
 
     this._mockSocketServer.on("connection", (server: any, ws: any) => {
+      console.log("Client connected to mock server");
       this._connection = ws;
 
       server.on("message", (message: string) => {
-        console.log("Server Receive: " + message);
-        this._handleMessage(message);
+        // this is needed to keep everything properly async.
+        setTimeout(
+          () => {
+            console.log("Server Receive: " + message);
+            this._handleMessage(message);
+          },
+          0);
       });
 
       server.on("close", (code: number, reason: string) => {
-        console.log("Connection closed");
+        console.log("Mock Server connection closed");
       });
     });
 
@@ -69,6 +103,22 @@ export class MockServer {
     this._reqId = 0;
 
     this._autoWait = false;
+
+    if (options.autoHandshake) {
+      this.handshake(options.handshakeResponse, options.handshakeTimeout);
+    }
+
+    if (options.autoTokenAuth) {
+      this.tokenAuth(options.authExpectedToken, options.authResponse, options.authTimeout);
+    }
+
+    if (options.immediateAutoWait) {
+      this.autoWait();
+    }
+  }
+
+  url(): string {
+    return this._url;
   }
 
   doneManager(): IDoneManager {
@@ -109,7 +159,7 @@ export class MockServer {
     this.waitForNext();
   }
 
-  expect(body: any, timeout?: number): IExpectationCallbacks {
+  expect(body: any, timeout?: number): IReceiveExpectationCallbacks {
     return this._expectMessage(
       {
         inclination: MessageInclination.Normal,
@@ -119,7 +169,7 @@ export class MockServer {
       timeout);
   }
 
-  expectRequest(body: any, timeout?: number): IExpectationCallbacks {
+  expectRequest(body: any, timeout?: number): IReceiveExpectationCallbacks {
     return this._expectMessage(
       {
         inclination: MessageInclination.Request,
@@ -129,7 +179,7 @@ export class MockServer {
       timeout);
   }
 
-  expectResponse(body: any, timeout?: number): IExpectationCallbacks {
+  expectResponse(body: any, timeout?: number): IReceiveExpectationCallbacks {
     return this._expectMessage(
       {
         inclination: MessageInclination.Response,
@@ -171,7 +221,7 @@ export class MockServer {
     return new SendExpectationCallback(this, timeout, body);
   }
 
-  private _expectMessage(messageExpectation: MessageExpectation, timeout?: number): IExpectationCallbacks {
+  private _expectMessage(messageExpectation: MessageExpectation, timeout?: number): IReceiveExpectationCallbacks {
     var expectation: ReceiveExpectation = {
       timeout: timeout,
       inclination: messageExpectation.inclination,
@@ -180,10 +230,6 @@ export class MockServer {
       callbacks: new ReceiveExpectationCallbacks(this)
     };
 
-    return this._expect(expectation);
-  }
-
-  private _expect(expectation: ReceiveExpectation): IExpectationCallbacks {
     if (this._incomingMessageQueue.length === 0) {
       this._receiveExpectations.push(expectation);
     } else {
@@ -218,6 +264,17 @@ export class MockServer {
       };
     }
     this.expectRequest({t: MessageType.HANDSHAKE_REQUEST, r: false}, timeout).thenReply(response);
+  }
+
+  tokenAuth(token: string, response?: any, timeout?: number): void {
+    if (response === undefined) {
+      response = {
+        s: true,
+        u: "userId",
+        t: MessageType.AUTHENTICATE_RESPONSE
+      };
+    }
+    this.expectRequest({t: MessageType.TOKEN_AUTH_REQUEST, k: token}, timeout).thenReply(response);
   }
 
   private _handleMessage(json: string): void {
@@ -277,16 +334,23 @@ export class MockServer {
   }
 }
 
-export interface IExpectationCallbacks {
+/**
+ * The interface returned by incoming message expectations.  Allows consumers to
+ * dictate the behavior when a message is received
+ */
+export interface IReceiveExpectationCallbacks {
   thenReply(message: any): void;
   thenCall(callback: (envelope: MessageEnvelope) => void): void;
 }
 
+/**
+ * Internal implementation of the IReceiveExpectationCallbacks interface.
+ */
 class ReceiveExpectationCallbacks {
   private _replyMessage: any;
   private _thenCallback: any;
 
-  constructor(private _mockServer: MockServer) {
+  constructor(private _mockServer: MockConvergenceServer) {
   }
 
   thenReply(message: any): void {
@@ -298,24 +362,32 @@ class ReceiveExpectationCallbacks {
   }
 
   resolve(expectedMessage: any): void {
-    if (this._thenCallback !== undefined) {
-      this._thenCallback(expectedMessage);
-    }
+    setTimeout(
+      () => {
+        if (this._thenCallback !== undefined) {
+          this._thenCallback(expectedMessage);
+        }
 
-    if (this._replyMessage !== undefined) {
-      this._mockServer.sendReply(expectedMessage.q, this._replyMessage);
-    }
+        if (this._replyMessage !== undefined) {
+          this._mockServer.sendReply(expectedMessage.q, this._replyMessage);
+        }
+      },
+      0);
   }
 }
 
-interface ISendExpectationCallback {
+/**
+ * Interface returned by the send methods that allow consumers to
+ * acknowledge that the send message was correctly processed.
+ */
+export interface ISendExpectationCallback {
   acknowledgeReception(): void;
 }
 
 class SendExpectationCallback implements ISendExpectationCallback {
   private _timer: any;
 
-  constructor(private _server: MockServer, timeout: number, private _message: any) {
+  constructor(private _server: MockConvergenceServer, timeout: number, private _message: any) {
     if (timeout !== undefined) {
       this._timer = setTimeout(
         () => {
@@ -338,11 +410,20 @@ class SendExpectationCallback implements ISendExpectationCallback {
   }
 }
 
+/**
+ * Exposes methods so the calling test framework can indicate success or failure
+ * of tests in a consistent manner.
+ */
+export interface IDoneManager {
+  testSuccess(): void;
+  testFailure(error?: Error): void;
+}
+
 abstract class AbstractDoneManager implements IDoneManager {
   private _serverExpectationsMet: boolean;
   private _resolved: boolean;
 
-  constructor() {
+  constructor(private _mockServer: MockConvergenceServer) {
     this._serverExpectationsMet = false;
     this._resolved = false;
   }
@@ -353,6 +434,7 @@ abstract class AbstractDoneManager implements IDoneManager {
         this.testFailure(new Error("Test completed without meeting all server expectations."));
       } else {
         this._resolved = true;
+        this._mockServer.stop();
         this._onSuccess();
       }
     }
@@ -361,6 +443,7 @@ abstract class AbstractDoneManager implements IDoneManager {
   testFailure(error?: Error): void {
     if (!this._resolved) {
       this._resolved = true;
+      this._mockServer.stop();
       this._onFailure(error);
     }
   }
@@ -376,8 +459,8 @@ abstract class AbstractDoneManager implements IDoneManager {
 
 class CallbackDoneManager extends AbstractDoneManager {
 
-  constructor(private _successCallback: () => void, private _errorCallback: (error: Error) => void) {
-    super();
+  constructor(_mockServer: MockConvergenceServer, private _successCallback: () => void, private _errorCallback: (error: Error) => void) {
+    super(_mockServer);
   }
 
   protected _onSuccess(): void {
@@ -390,19 +473,9 @@ class CallbackDoneManager extends AbstractDoneManager {
 }
 
 class MochaDoneManager extends CallbackDoneManager {
-  constructor(_mochaDone: MochaDone) {
-    super(_mochaDone, _mochaDone);
+  constructor(_mockServer: MockConvergenceServer, _mochaDone: MochaDone) {
+    super(_mockServer, _mochaDone, _mochaDone);
   }
-}
-
-export interface IDoneManager {
-  testSuccess(): void;
-  testFailure(error?: Error): void;
-}
-
-
-export enum DoneType {
-  MOCHA, CALLBACK
 }
 
 
@@ -424,4 +497,3 @@ interface ReceiveExpectation {
 enum MessageInclination {
   Normal, Request, Response
 }
-
