@@ -5,6 +5,7 @@ import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
 import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";
+import IdentityService from "./identity/IdentityService";
 
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
@@ -20,6 +21,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   };
 
   private _modelService: ModelService;
+  private _identityService: IdentityService;
   private _connection: ConvergenceConnection;
   private _connectPromise: Promise<HandshakeResponse>;
 
@@ -62,6 +64,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     });
 
     this._modelService = new ModelService(this._connection);
+    this._identityService = new IdentityService(this._connection);
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
@@ -90,6 +93,10 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   modelService(): ModelService {
     return this._modelService;
+  }
+
+  identityService(): IdentityService {
+    return this._identityService;
   }
 
   dispose(): void {
