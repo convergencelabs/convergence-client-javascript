@@ -1,8 +1,8 @@
 import RealTimeValue from "./RealTimeValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "../ot/Path";
+import {Path} from "./ot/Path";
 
 abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
 

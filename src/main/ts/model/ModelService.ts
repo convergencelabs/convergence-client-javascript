@@ -3,20 +3,20 @@ import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
-import {OpenRealTimeModelRequest} from "../protocol/model/openRealtimeModel";
-import {OpenRealTimeModelResponse} from "../protocol/model/openRealtimeModel";
-import MessageType from "../protocol/MessageType";
-import OperationTransformer from "../ot/xform/OperationTransformer";
-import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
-import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
-import {CreateRealTimeModelRequest} from "../protocol/model/createRealtimeModel";
-import {DeleteRealTimeModelRequest} from "../protocol/model/deleteRealtimeModel";
+import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
+import {OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
+import MessageType from "../connection/protocol/MessageType";
+import OperationTransformer from "./ot/xform/OperationTransformer";
+import TransformationFunctionRegistry from "./ot/xform/TransformationFunctionRegistry";
+import ClientConcurrencyControl from "./ot/ClientConcurrencyControl";
+import {CreateRealTimeModelRequest} from "../connection/protocol/model/createRealtimeModel";
+import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import Deferred from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
-import {CloseRealTimeModelRequest} from "../protocol/model/closeRealtimeModel";
-import {ModelDataRequest} from "../protocol/model/modelDataRequest";
+import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
+import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
-import {ModelDataResponse} from "../protocol/model/modelDataRequest";
+import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
 
 export default class ModelService extends ConvergenceEventEmitter {
 

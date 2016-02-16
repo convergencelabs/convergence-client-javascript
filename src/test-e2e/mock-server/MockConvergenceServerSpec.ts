@@ -1,4 +1,4 @@
-import MessageType from "../../main/ts/protocol/MessageType";
+import MessageType from "../../main/ts/connection/protocol/MessageType";
 import {MockConvergenceServer} from "./MockConvergenceServer";
 import {DoneType} from "./MockConvergenceServer";
 import {IMockServerOptions} from "./MockConvergenceServer";

@@ -1,14 +1,14 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import NumberAddOperation from "../ot/ops/NumberAddOperation";
-import NumberSetOperation from "../ot/ops/NumberSetOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import NumberAddOperation from "./ot/ops/NumberAddOperation";
+import NumberSetOperation from "./ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "../ot/Path";
+import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../protocol/model/OperationType";
+import OperationType from "../connection/protocol/model/OperationType";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 

@@ -1,5 +1,5 @@
-import MessageType from "../../main/ts/protocol/MessageType";
-import {MessageEnvelope} from "../../main/ts/protocol/protocol";
+import MessageType from "../../main/ts/connection/protocol/MessageType";
+import {MessageEnvelope} from "../../main/ts/connection/protocol/protocol";
 import EqualsUtil from "../../main/ts/util/EqualsUtil";
 
 /* tslint:disable */

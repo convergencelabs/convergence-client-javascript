@@ -1,18 +1,18 @@
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import RealTimeValue from "./RealTimeValue";
-import ObjectSetPropertyOperation from "../ot/ops/ObjectSetPropertyOperation";
-import ObjectAddPropertyOperation from "../ot/ops/ObjectAddPropertyOperation";
-import ObjectRemovePropertyOperation from "../ot/ops/ObjectRemovePropertyOperation";
-import ObjectSetOperation from "../ot/ops/ObjectSetOperation";
-import {Path} from "../ot/Path";
+import ObjectSetPropertyOperation from "./ot/ops/ObjectSetPropertyOperation";
+import ObjectAddPropertyOperation from "./ot/ops/ObjectAddPropertyOperation";
+import ObjectRemovePropertyOperation from "./ot/ops/ObjectRemovePropertyOperation";
+import ObjectSetOperation from "./ot/ops/ObjectSetOperation";
+import {Path} from "./ot/Path";
 import RealTimeArray from "./RealTimeArray";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../protocol/model/OperationType";
+import OperationType from "../connection/protocol/model/OperationType";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 

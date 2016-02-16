@@ -1,5 +1,5 @@
 import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
-import MessageType from "../../main/ts/protocol/MessageType";
+import MessageType from "../../main/ts/connection/protocol/MessageType";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";

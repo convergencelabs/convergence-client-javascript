@@ -1,15 +1,15 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import StringInsertOperation from "../ot/ops/StringInsertOperation";
-import StringRemoveOperation from "../ot/ops/StringRemoveOperation";
-import StringSetOperation from "../ot/ops/StringSetOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import StringInsertOperation from "./ot/ops/StringInsertOperation";
+import StringRemoveOperation from "./ot/ops/StringRemoveOperation";
+import StringSetOperation from "./ot/ops/StringSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "../ot/Path";
+import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../protocol/model/OperationType";
+import OperationType from "../connection/protocol/model/OperationType";
 
 
 export default class RealTimeString extends RealTimeValue<String> {

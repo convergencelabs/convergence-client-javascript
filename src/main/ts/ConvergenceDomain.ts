@@ -1,7 +1,7 @@
 import ConvergenceConnection from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
-import {HandshakeResponse} from "./protocol/handhsake";
+import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
 import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";

@@ -1,19 +1,19 @@
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import RealTimeValue from "./RealTimeValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import ArrayInsertOperation from "../ot/ops/ArrayInsertOperation";
-import ArrayRemoveOperation from "../ot/ops/ArrayRemoveOperation";
-import ArrayReplaceOperation from "../ot/ops/ArrayReplaceOperation";
-import ArrayMoveOperation from "../ot/ops/ArrayMoveOperation";
-import ArraySetOperation from "../ot/ops/ArraySetOperation";
-import {Path} from "../ot/Path";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import ArrayInsertOperation from "./ot/ops/ArrayInsertOperation";
+import ArrayRemoveOperation from "./ot/ops/ArrayRemoveOperation";
+import ArrayReplaceOperation from "./ot/ops/ArrayReplaceOperation";
+import ArrayMoveOperation from "./ot/ops/ArrayMoveOperation";
+import ArraySetOperation from "./ot/ops/ArraySetOperation";
+import {Path} from "./ot/Path";
 import RealTimeObject from "./RealTimeObject";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../protocol/model/OperationType";
+import OperationType from "../connection/protocol/model/OperationType";
 
 
 export default class RealTimeArray extends RealTimeContainerValue<any[]> {

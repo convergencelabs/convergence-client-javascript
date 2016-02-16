@@ -1,6 +1,6 @@
 import RealTimeValueType from "./RealTimeValueType";
-import {PathElement, Path} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {PathElement, Path} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {ModelDetachedEvent} from "./events";

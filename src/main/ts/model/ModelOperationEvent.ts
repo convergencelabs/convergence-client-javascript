@@ -1,4 +1,4 @@
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 
 export default class ModelOperationEvent {
   /**
