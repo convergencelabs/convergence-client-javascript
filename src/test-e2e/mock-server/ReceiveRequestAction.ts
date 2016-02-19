@@ -34,7 +34,7 @@ export default class ReceiveRequestAction extends AbstractReceiveAction {
       doneManager.testFailure(new Error("A request message must have a requestId set."));
     } else if (envelope.p !== undefined) {
       doneManager.testFailure(new Error("A request message must not have a responseId set."));
-    } else if (this._validateType(body, envelope.b, doneManager) &&  this._validateType(body, envelope.b, doneManager)) {
+    } else if (this._validateType(body, envelope.b, doneManager) && this._validateBody(body, envelope.b, doneManager)) {
       this._reqId = envelope.q;
       this._record.setMessage(envelope.b);
       this._record.setReceived();
