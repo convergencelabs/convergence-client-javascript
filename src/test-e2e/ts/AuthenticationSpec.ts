@@ -3,17 +3,18 @@ import MessageType from "../../main/ts/connection/protocol/MessageType";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
+import {IReceiveRequestRecord} from "../mock-server/records";
+
 
 describe('Authentication E2E', () => {
 
   it('Successful password authentication', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-
     var authExpected: any = {t: MessageType.PASSWORD_AUTH_REQUEST, u: "test", p: "password"};
-    mockServer.expectRequest(authExpected, 200)
-      .thenReply({t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test"});
+    var authRequest: IReceiveRequestRecord = mockServer.expectRequest(authExpected, 200);
+    mockServer.sendReplyTo(authRequest, {t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test"});
+    mockServer.start();
 
-    ConvergenceDomain.debugFlags.protocol.messages = true;
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithPassword("test", "password").then(() => {
       mockServer.doneManager().testSuccess();
@@ -24,12 +25,11 @@ describe('Authentication E2E', () => {
 
   it('Unsuccessful password authentication', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-
     var authExpected: any = {t: MessageType.PASSWORD_AUTH_REQUEST, u: "test", p: "password"};
-    mockServer.expectRequest(authExpected, 200)
-      .thenReply({t: MessageType.AUTHENTICATE_RESPONSE, s: false});
+    var authReq: IReceiveRequestRecord = mockServer.expectRequest(authExpected, 200);
+    mockServer.sendReplyTo(authReq, {t: MessageType.AUTHENTICATE_RESPONSE, s: false});
+    mockServer.start();
 
-    ConvergenceDomain.debugFlags.protocol.messages = true;
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithPassword("test", "password").then(() => {
       mockServer.doneManager().testFailure(new Error("Unexpected success"));
@@ -50,8 +50,7 @@ describe('Authentication E2E', () => {
       doneType: DoneType.MOCHA,
       mochaDone: done,
       autoHandshake: true,
-      handshakeTimeout: 200,
-      immediateAutoWait: true
+      handshakeTimeout: 200
     };
   }
 });

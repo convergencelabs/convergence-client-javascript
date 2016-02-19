@@ -5,7 +5,7 @@ import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
 import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";
-import IdentityService from "./identity/IdentityService";
+import IdentityService from "./user/IdentityService";
 
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {

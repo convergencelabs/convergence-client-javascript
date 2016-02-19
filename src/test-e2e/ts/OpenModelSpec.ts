@@ -4,6 +4,10 @@ import RealTimeModel from "../../main/ts/model/RealTimeModel";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
+import {IReceiveRequestRecord} from "../mock-server/records";
+import {ISendRequestRecord} from "../mock-server/records";
+import {IReceiveResponseRecord} from "../mock-server/records";
+
 
 describe('Open Real Time Model E2E', () => {
 
@@ -11,15 +15,16 @@ describe('Open Real Time Model E2E', () => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
 
     var expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, c: "collection", m: "model", i: false};
-    mockServer.expectRequest(expectedOpen, 300)
-      .thenReply({
-        r: "1",
-        v: 0,
-        c: new Date().getTime(),
-        m: new Date().getTime(),
-        d: {num: 10},
-        t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
-      });
+    var openReq: IReceiveRequestRecord = mockServer.expectRequest(expectedOpen, 300);
+    mockServer.sendReplyTo(openReq, {
+      r: "1",
+      v: 0,
+      c: new Date().getTime(),
+      m: new Date().getTime(),
+      d: {num: 10},
+      t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
+    });
+    mockServer.start();
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
@@ -33,21 +38,24 @@ describe('Open Real Time Model E2E', () => {
 
   it('Successful open of existing new model with initializer povided', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-
     var expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, c: "collection", m: "model", i: true};
-    mockServer.expectRequest(expectedOpen, 300).thenCall((openRequest: any) => {
+    var openReq: IReceiveRequestRecord =
+      mockServer.expectRequest(expectedOpen, 300);
+    var dataReq: ISendRequestRecord =
       mockServer.sendRequest({t: MessageType.MODEL_DATA_REQUEST, c: "collection", m: "model"});
-      mockServer.expectResponse({t: MessageType.MODEL_DATA_RESPONSE, d: {num: 10}}, 300).thenCall((dataResponse: any) => {
-        mockServer.sendReply(openRequest.q, {
-          r: "1",
-          v: 0,
-          c: new Date().getTime(),
-          m: new Date().getTime(),
-          d: dataResponse.d,
-          t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
-        });
-      });
+    var dataResp: IReceiveResponseRecord =
+      mockServer.expectResponseTo(dataReq, {t: MessageType.MODEL_DATA_RESPONSE, d: {num: 10}});
+    mockServer.sendReplyTo(openReq, () => {
+      return {
+        r: "1",
+        v: 0,
+        c: new Date().getTime(),
+        m: new Date().getTime(),
+        d: dataResp.message().d,
+        t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
+      };
     });
+    mockServer.start();
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
@@ -76,9 +84,7 @@ describe('Open Real Time Model E2E', () => {
       handshakeTimeout: 200,
 
       autoTokenAuth: true,
-      authExpectedToken: "token",
-
-      immediateAutoWait: true
+      authExpectedToken: "token"
     };
   }
 });
