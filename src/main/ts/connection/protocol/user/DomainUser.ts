@@ -1,4 +1,3 @@
-import {MessageBodyDeserializer} from "../MessageSerializer";
 import DomainUser from "../../../user/DomainUser";
 
 export var DomainUserDeserilizer: (user: any) => DomainUser =  (body: any) => {

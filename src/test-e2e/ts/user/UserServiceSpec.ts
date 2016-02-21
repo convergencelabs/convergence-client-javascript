@@ -7,6 +7,7 @@ import {IReceiveRequestRecord} from "../../mock-server/records";
 import DomainUser from "../../../main/ts/user/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
+import {UserField} from "../../../main/ts/user/UserService";
 
 var expect: ExpectStatic = chai.expect;
 
@@ -27,9 +28,9 @@ describe('UserService.getUser()', () => {
 
   it('must resolve with the correct user', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: [0], v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
     mockServer.sendReplyTo(req, {
-      t: MessageType.USER_LOOKUP_RESPONSE, u: [
+      t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"}
       ]
     });
@@ -52,8 +53,8 @@ describe('UserService.getUser()', () => {
 
   it('must resolve with undefined if no user is found', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: [0], v: ["u1"]});
-    mockServer.sendReplyTo(req, {t: MessageType.USER_LOOKUP_RESPONSE, u: []});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
+    mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
@@ -67,32 +68,11 @@ describe('UserService.getUser()', () => {
     });
   });
 
-  it('must reject if the wrong user was returned from the server', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: [0], v: ["u1"]});
-    mockServer.sendReplyTo(req, {
-      t: MessageType.USER_LOOKUP_RESPONSE, u: [
-        {i: "u2", n: "test1", f: "test", l: "user", e: "test@example.com"}
-      ]
-    });
-    mockServer.start();
-
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1");
-    }).then((user: DomainUser) => {
-      mockServer.doneManager().testFailure(
-        new Error("getUser() resolved, even though the wrong user was returned form the server"));
-    }).catch((error: Error) => {
-      mockServer.doneManager().testSuccess();
-    });
-  });
-
   it('must reject if more than one user is returned', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: [0], v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
     mockServer.sendReplyTo(req, {
-      t: MessageType.USER_LOOKUP_RESPONSE, u: [
+      t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"},
         {i: "u2", n: "test2", f: "test2", l: "user2", e: "test2@example.com"}
       ]
@@ -123,16 +103,48 @@ describe('UserService.getUser()', () => {
       mockServer.doneManager().testSuccess();
     });
   });
+
+  it('must send field code 1 if USERNAME is specified', (done: MochaDone) => {
+    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
+    mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
+    mockServer.start();
+
+    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
+    domain.authenticateWithToken("token").then(() => {
+      return domain.userService().getUser("u1", UserField.USERNAME);
+    }).then((user: DomainUser) => {
+      mockServer.doneManager().testSuccess();
+    }).catch((error: Error) => {
+      mockServer.doneManager().testFailure(error);
+    });
+  });
+
+  it('must send field code 4 if USERNAME is specified', (done: MochaDone) => {
+    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 4, v: ["u1"]});
+    mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
+    mockServer.start();
+
+    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
+    domain.authenticateWithToken("token").then(() => {
+      return domain.userService().getUser("u1", UserField.EMAIL);
+    }).then((user: DomainUser) => {
+      mockServer.doneManager().testSuccess();
+    }).catch((error: Error) => {
+      mockServer.doneManager().testFailure(error);
+    });
+  });
 });
 
-describe('UserService.findUsers()', () => {
+describe('UserService.searchUsers()', () => {
   it('must resolve with the proper users that were returned', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     var req: IReceiveRequestRecord = mockServer.expectRequest(
-      {t: MessageType.USER_LOOKUP_REQUEST, f: [2, 3], v: ["keyword"]});
+      {t: MessageType.USER_SEARCH_REQUEST, f: [2, 3], v: "keyword"});
 
     mockServer.sendReplyTo(req, {
-      t: MessageType.USER_LOOKUP_RESPONSE, u: [
+      t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"},
         {i: "u2", n: "test2", f: "test2", l: "user2", e: "test2@example.com"}
       ]
@@ -141,7 +153,7 @@ describe('UserService.findUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().findUsers(["firstName", "lastName"], "keyword");
+      return domain.userService().searchUsers(["firstName", "lastName"], "keyword");
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(2);
 
@@ -168,13 +180,13 @@ describe('UserService.findUsers()', () => {
   it('must resolve with an empty array if no users are returned', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     var req: IReceiveRequestRecord = mockServer.expectRequest(
-      {t: MessageType.USER_LOOKUP_REQUEST, f: [2, 3], v: ["keyword"]});
-    mockServer.sendReplyTo(req, {t: MessageType.USER_LOOKUP_RESPONSE, u: []});
+      {t: MessageType.USER_SEARCH_REQUEST, f: [2, 3], v: "keyword"});
+    mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().findUsers(["firstName", "lastName"], "keyword");
+      return domain.userService().searchUsers([UserField.FIRST_NAME, UserField.LAST_NAME], "keyword");
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(0);
       mockServer.doneManager().testSuccess();
@@ -189,7 +201,7 @@ describe('UserService.findUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().findUsers([], "keyword");
+      return domain.userService().searchUsers([], "keyword");
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {
@@ -197,13 +209,13 @@ describe('UserService.findUsers()', () => {
     });
   });
 
-  it('must reject the promise if no keywords are specified', (done: MochaDone) => {
+  it('must reject the promise if no value is specified', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().findUsers("username", []);
+      return domain.userService().searchUsers("username", null);
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {

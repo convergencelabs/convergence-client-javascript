@@ -130,7 +130,7 @@ export class ProtocolConnection extends EventEmitter {
 
   close(): Promise<void> {
     this.removeAllListenersForAllEvents();
-    if (this._heartbeatHelper.started) {
+    if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
     return this._socket.close();

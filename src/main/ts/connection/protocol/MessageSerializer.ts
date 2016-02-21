@@ -21,8 +21,9 @@ import {ForceCloseRealTimeModelDesrializer} from "./model/forceCloseRealtimeMode
 import {DeleteRealTimeModelRequestSerializer} from "./model/deleteRealtimeModel";
 import {CreateRealTimeModelRequestSerializer} from "./model/createRealtimeModel";
 import {CloseRealTimeModelRequestSerializer} from "./model/closeRealtimeModel";
-import {UserLookUpRequestSerializer} from "./user/UserLookUpRequest";
-import {UserLookUpResponseDesrializer} from "./user/UserLookUpRequest";
+import {UserLookUpRequestSerializer} from "./user/userLookUps";
+import {UserSearchRequestSerializer} from "./user/userLookUps";
+import {UserListResponseDesrializer} from "./user/userLookUps";
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
 export type MessageBodyDeserializer = (message: any) => IncomingProtocolMessage;
@@ -42,7 +43,7 @@ export class MessageSerializer {
 
   static registerMessageBodySerializer(type: MessageType, serializer: MessageBodySerializer): void {
     if (this._serializers[type] !== undefined) {
-      throw new Error(`Serializer for type ${MessageType[type]}`);
+      throw new Error(`No serializer for type ${MessageType[type]}`);
     }
     this._serializers[type] = serializer;
   }
@@ -53,7 +54,7 @@ export class MessageSerializer {
 
   static registerMessageBodyDeserializer(type: MessageType, deserializer: MessageBodyDeserializer): void {
     if (this._deserializers[type] !== undefined) {
-      throw new Error(`Deserializer for type ${MessageType[type]}`);
+      throw new Error(`No deserializer for type ${MessageType[type]}`);
     }
     this._deserializers[type] = deserializer;
   }
@@ -124,6 +125,7 @@ MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_REAL_TIME_MOD
 MessageSerializer.registerMessageBodySerializer(MessageType.CLOSES_REAL_TIME_MODEL_REQUEST, CloseRealTimeModelRequestSerializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.USER_LOOKUP_REQUEST, UserLookUpRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_SEARCH_REQUEST, UserSearchRequestSerializer);
 
 // Deserializers
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PING);
@@ -142,4 +144,4 @@ MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.DELETE_REAL
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_MODEL_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CLOSE_REAL_TIME_MODEL_RESPONSE);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LOOKUP_RESPONSE, UserLookUpResponseDesrializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDesrializer);
