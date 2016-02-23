@@ -1,6 +1,6 @@
 // Connect to the domain.
 ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
+var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
 domain.on("connected", function () {
   console.log("connected");
 });
