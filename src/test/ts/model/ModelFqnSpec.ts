@@ -1,11 +1,10 @@
-
-import * as chai from "chai";
 import ModelFqn from "../../../main/ts/model/ModelFqn";
+import * as chai from "chai";
+import ExpectStatic = Chai.ExpectStatic;
 
 
-var expect = chai.expect;
-var fail = chai.assert.fail;
-
+var expect: ExpectStatic = chai.expect;
+var fail: Function = chai.assert.fail;
 
 describe('ModelFqn', () => {
 
@@ -25,6 +24,7 @@ describe('ModelFqn', () => {
       fqn.collectionId = "foo";
       fail();
     } catch (e) {
+      // no op
     }
   });
 });

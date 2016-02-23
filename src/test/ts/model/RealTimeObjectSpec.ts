@@ -1,6 +1,6 @@
 import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
 import RealTimeObject from "../../../main/ts/model/RealTimeObject";
-import ObjectSetOperation from "../../../main/ts/ot/ops/ObjectSetOperation";
+import ObjectSetOperation from "../../../main/ts/model/ot/ops/ObjectSetOperation";
 import {ObjectSetValueEvent} from "../../../main/ts/model/RealTimeObject";
 
 import * as chai from "chai";

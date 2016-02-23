@@ -1,10 +1,12 @@
 {
   "name": "convergence-client",
-  "version": "1.0.0-M1-SNAPSHOT",
+  "version": "1.0.0-M3-SNAPSHOT",
   "description": "Convergence Javascript Client",
   "tags": [
-    "json",
-    "editor"
+    "Convergence",
+    "Client",
+    "Collaboration",
+    "Real Time"
   ],
   "homepage": "",
   "repository": {
@@ -12,8 +14,7 @@
     "url": ""
   },
   "main": [
-    "./dist/sapphire.min.js",
-    "./dist/sapphire.min.css"
+    "./dist/convergence-client.min.js"
   ],
   "bugs": "",
   "ignore": [
@@ -31,7 +32,8 @@
     "build",
     "karma.conf.js"
   ],
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
   }
 }

@@ -1,12 +1,14 @@
-import EventEmitter from "./util/EventEmitter";
 import ConvergenceConnection from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
-import {HandshakeResponse} from "./protocol/handhsake";
+import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
+import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
+import ConvergenceEvent from "./util/ConvergenceEvent";
+import UserService from "./user/UserService";
 
 
-export default class ConvergenceDomain extends EventEmitter {
+export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static debugFlags: any = flags;
 
@@ -19,6 +21,7 @@ export default class ConvergenceDomain extends EventEmitter {
   };
 
   private _modelService: ModelService;
+  private _identityService: UserService;
   private _connection: ConvergenceConnection;
   private _connectPromise: Promise<HandshakeResponse>;
 
@@ -44,22 +47,24 @@ export default class ConvergenceDomain extends EventEmitter {
     );
 
     this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.CONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.CONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
-      this.emit(ConvergenceDomain.Events.INTERRUPTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.INTERRUPTED}));
 
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.DISCONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.DISCONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
-      this.emit(ConvergenceDomain.Events.RECONNECTED));
+      this.emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
-      this.emit(ConvergenceDomain.Events.ERROR, error);
+      var evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error: error};
+      this.emitEvent(evt);
     });
 
     this._modelService = new ModelService(this._connection);
+    this._identityService = new UserService(this._connection);
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
@@ -82,33 +87,28 @@ export default class ConvergenceDomain extends EventEmitter {
     return this._connection.session().isAuthenticated();
   }
 
-  /**
-   * Gets the session of the connected user.
-   * @return The users session.
-   */
   session(): Session {
     return this._connection.session();
   }
 
-  /**
-   * Gets the ModelService
-   */
   modelService(): ModelService {
     return this._modelService;
   }
 
-  /**
-   * Closes the connection to the server and disposes of the ConvergenceDomain
-   */
+  userService(): UserService {
+    return this._identityService;
+  }
+
   dispose(): void {
     this._connection.disconnect();
     this._connection = undefined;
   }
 
-  /**
-   * @returns {boolean} True if this ConvergenceDomain is disposed.
-   */
   isDisposed(): boolean {
     return this._connection === undefined;
   }
+}
+
+export interface ConvergenceErrorEvent extends ConvergenceEvent {
+  error: string;
 }

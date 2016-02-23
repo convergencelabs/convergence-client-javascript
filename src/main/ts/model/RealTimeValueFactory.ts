@@ -6,8 +6,8 @@ import RealTimeArray from "./RealTimeArray";
 import RealTimeObject from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import RealTimeBoolean from "./RealTimeBoolean";
 
 export default class RealTimeValueFactory {

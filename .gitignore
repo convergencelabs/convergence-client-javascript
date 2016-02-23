@@ -11,3 +11,4 @@ src/ts/**/*.js.map
 bower_components
 typings
 /.project
+examples/connection.js

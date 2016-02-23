@@ -1,27 +1,28 @@
-import EventEmitter from "../util/EventEmitter";
 import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";
-import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
+import ClientConcurrencyControl from "./ot/ClientConcurrencyControl";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import UnprocessedOperationEvent from "../ot/UnprocessedOperationEvent";
-import ProcessedOperationEvent from "../ot/ProcessedOperationEvent";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import UnprocessedOperationEvent from "./ot/UnprocessedOperationEvent";
+import ProcessedOperationEvent from "./ot/ProcessedOperationEvent";
 import ModelOperationEvent from "./ModelOperationEvent";
-import CompoundOperation from "../ot/ops/CompoundOperation";
-import Operation from "../ot/ops/Operation";
-import MessageType from "../protocol/MessageType";
-import {ForceCloseRealTimeModel} from "../protocol/model/forceCloseRealtimeModel";
+import CompoundOperation from "./ot/ops/CompoundOperation";
+import Operation from "./ot/ops/Operation";
+import MessageType from "../connection/protocol/MessageType";
+import {ForceCloseRealTimeModel} from "../connection/protocol/model/forceCloseRealtimeModel";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import ModelService from "./ModelService";
-import {OperationSubmission} from "../protocol/model/operationSubmission";
-import {RemoteOperation} from "../protocol/model/removeOperation";
-import {OperationAck} from "../protocol/model/operationAck";
+import {OperationSubmission} from "../connection/protocol/model/operationSubmission";
+import {RemoteOperation} from "../connection/protocol/model/remoteOperation";
+import {OperationAck} from "../connection/protocol/model/operationAck";
 import RealTimeValue from "./RealTimeValue";
-import {Path} from "../ot/Path";
-import Event from "../util/Event";
+import {Path} from "./ot/Path";
+import ConvergenceEvent from "../util/ConvergenceEvent";
+import OperationType from "../connection/protocol/model/OperationType";
+import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 
-export default class RealTimeModel extends EventEmitter {
+export default class RealTimeModel extends ConvergenceEventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
@@ -107,8 +108,7 @@ export default class RealTimeModel extends EventEmitter {
         src: this,
         name: RealTimeModel.Events.CLOSED,
         local: true};
-      this.emit(event.name, event);
-      this._open = false;
+      this._close(event);
     });
   }
 
@@ -137,7 +137,7 @@ export default class RealTimeModel extends EventEmitter {
       case MessageType.REMOTE_OPERATION:
         this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
         break;
-      case MessageType.OPERATION_ACK:
+      case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
         break;
       default:
@@ -152,7 +152,14 @@ export default class RealTimeModel extends EventEmitter {
       local: false,
       reason: message.reason
     };
-    this.emit(RealTimeModel.Events.CLOSED, event);
+    this._close(event);
+  }
+
+  private _close(event: RealTimeModelClosedEvent): void {
+    this._data._detach();
+    this._open = false;
+    this._connection = null;
+    this.emitEvent(event);
   }
 
   private _handelOperationAck(message: OperationAck): void {
@@ -176,20 +183,21 @@ export default class RealTimeModel extends EventEmitter {
     var clientId: string = processed.clientId;
     var contextVersion: number = processed.version;
     var timestamp: number = processed.timestamp;
+    var userId: string = "userId"; // fixme
 
     this._version = contextVersion;
     this._modifiedTime = new Date(timestamp);
 
-    if (operation.type === CompoundOperation.TYPE) {
+    if (operation.type === OperationType.COMPOUND) {
       var compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         // TODO: Determine where to get userId
-        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, "user", contextVersion, timestamp, op);
+        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, userId, contextVersion, timestamp, op);
         this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
       });
     } else {
       var modelEvent: ModelOperationEvent =
-        new ModelOperationEvent(clientId, "user", contextVersion, timestamp, <DiscreteOperation> operation);
+        new ModelOperationEvent(clientId, userId, contextVersion, timestamp, <DiscreteOperation> operation);
       this._data._handleRemoteOperation(modelEvent.operation.path, modelEvent);
     }
   }
@@ -206,7 +214,7 @@ export default class RealTimeModel extends EventEmitter {
   }
 }
 
-interface RealTimeModelEvent extends Event {
+interface RealTimeModelEvent extends ConvergenceEvent {
   src: RealTimeModel;
 }
 

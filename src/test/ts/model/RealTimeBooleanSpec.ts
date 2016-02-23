@@ -1,7 +1,7 @@
-import DiscreteOperation from "../../../main/ts/ot/ops/DiscreteOperation";
+import DiscreteOperation from "../../../main/ts/model/ot/ops/DiscreteOperation";
 import RealTimeBoolean from "../../../main/ts/model/RealTimeBoolean";
 import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
-import BooleanSetOperation from "../../../main/ts/ot/ops/BooleanSetOperation";
+import BooleanSetOperation from "../../../main/ts/model/ot/ops/BooleanSetOperation";
 import {BooleanSetValueEvent} from "../../../main/ts/model/RealTimeBoolean";
 
 import * as chai from "chai";

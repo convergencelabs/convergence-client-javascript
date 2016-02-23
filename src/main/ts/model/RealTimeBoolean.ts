@@ -1,12 +1,13 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import BooleanSetOperation from "../ot/ops/BooleanSetOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import BooleanSetOperation from "./ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "../ot/Path";
+import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../connection/protocol/model/OperationType";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
@@ -19,11 +20,11 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(private data: boolean,
+  constructor(private _data: boolean,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Boolean, parent, fieldInParent, sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Boolean, parent, fieldInParent, _sendOpCallback);
   }
 
 
@@ -35,20 +36,20 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     this._validateSet(value);
 
     var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
-    this.data = value;
-    this.sendOpCallback(operation);
+    this._data = value;
+    this._sendOpCallback(operation);
   }
 
   protected _getValue(): boolean {
-    return this.data;
+    return this._data;
   }
 
   // Handlers for incoming operations
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === BooleanSetOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.BOOLEAN_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
@@ -63,7 +64,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     var value: boolean = operation.value;
 
     this._validateSet(value);
-    this.data = value;
+    this._data = value;
 
     var event: BooleanSetValueEvent = {
       src: this,

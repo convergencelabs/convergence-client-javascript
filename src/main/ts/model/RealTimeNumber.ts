@@ -1,13 +1,14 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import NumberAddOperation from "../ot/ops/NumberAddOperation";
-import NumberSetOperation from "../ot/ops/NumberSetOperation";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import NumberAddOperation from "./ot/ops/NumberAddOperation";
+import NumberSetOperation from "./ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "../ot/Path";
+import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
+import OperationType from "../connection/protocol/model/OperationType";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -23,8 +24,8 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   constructor(private _data: number,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Number, parent, fieldInParent, sendOpCallback);
+              _sendOperation: (operation: DiscreteOperation) => void) {
+    super(RealTimeValueType.Number, parent, fieldInParent, _sendOperation);
   }
 
   add(value: number): void {
@@ -33,7 +34,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     if (value !== 0) {
       var operation: NumberAddOperation = new NumberAddOperation(this.path(), false, value);
       this._data += value;
-      this.sendOpCallback(operation);
+      this._sendOperation(operation);
     }
   }
 
@@ -56,7 +57,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
     var operation: NumberSetOperation = new NumberSetOperation(this.path(), false, value);
     this._data = value;
-    this.sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   protected _getValue(): number {
@@ -67,10 +68,10 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === NumberAddOperation.TYPE) {
+      var type: OperationType = operationEvent.operation.type;
+      if (type === OperationType.NUMBER_ADD) {
         this._handleAddOperation(operationEvent);
-      } else if (type === NumberSetOperation.TYPE) {
+      } else if (type === OperationType.NUMBER_VALUE) {
         this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");

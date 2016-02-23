@@ -1,12 +1,12 @@
-import EventEmitter from "../util/EventEmitter";
-import DataType from "./RealTimeValueType";
-import {PathElement, Path} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import RealTimeValueType from "./RealTimeValueType";
+import {PathElement, Path} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {ModelDetachedEvent} from "./events";
+import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 
-abstract class RealTimeValue<T> extends EventEmitter {
+abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
     DETACHED: "detached"
@@ -17,22 +17,22 @@ abstract class RealTimeValue<T> extends EventEmitter {
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(private modelType: DataType,
-              private parent: RealTimeContainerValue<any>,
+  constructor(private _modelType: RealTimeValueType,
+              private _parent: RealTimeContainerValue<any>,
               public fieldInParent: PathElement,
-              protected sendOpCallback: (operation: DiscreteOperation) => void) {
+              protected _sendOpCallback: (operation: DiscreteOperation) => void) {
     super();
   }
 
-  type(): DataType {
-    return this.modelType;
+  type(): RealTimeValueType {
+    return this._modelType;
   }
 
   path(): Path {
-    if (this.parent == null) {
+    if (this._parent == null) {
       return [];
     } else {
-      var path: Path = this.parent.path();
+      var path: Path = this._parent.path();
       path.push(this.fieldInParent);
       return path;
     }
@@ -42,19 +42,16 @@ abstract class RealTimeValue<T> extends EventEmitter {
     return this._detached;
   }
 
-  _setDetached(): void {
-    this.parent = null;
+  _detach(): void {
+    this._parent = null;
     this._detached = true;
+    this._sendOpCallback = null;
     var event: ModelDetachedEvent = {
       src: this,
       name: RealTimeValue.Events.DETACHED
     };
 
     this.emitEvent(event);
-  }
-
-  _exceptionIfDetached(): void {
-    throw Error("Detached Exception: RealTimeValue is no longer a part of the data model.");
   }
 
   value(): T
@@ -68,11 +65,21 @@ abstract class RealTimeValue<T> extends EventEmitter {
     }
   }
 
+  private _exceptionIfDetached(): void {
+    if (this._detached) {
+      throw Error("Can not perform actions on a detached RealTimeValue.");
+    }
+  }
+
+  protected _sendOperation(operation: DiscreteOperation): void {
+    this._exceptionIfDetached();
+    this._sendOpCallback(operation);
+  }
+
   protected abstract _getValue(): T;
   protected abstract _setValue(value: T): void;
 
   abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
-
 }
 
 export default RealTimeValue;
