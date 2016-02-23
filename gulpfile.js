@@ -1,4 +1,6 @@
 const gulp = require('gulp');
+
+const concat = require('gulp-concat');
 const rename = require('gulp-rename');
 const del = require('del');
 
@@ -21,10 +23,12 @@ gulp.task('default', ["build"]);
  * Typescript compiler.  This builds both the main source and the test sources.
  */
 gulp.task('build', [], function () {
-  const tsProject = ts.createProject('tsconfig.json');
-  return gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
-    .pipe(ts(tsProject))
-    .pipe(gulp.dest("build"));
+  const tsProject = ts.createProject('tsconfig.json', { sortOutput: true });
+  var tsResult = gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
+    .pipe(ts(tsProject));
+    
+  tsResult.dts.pipe(concat('convergence-client.d.ts')).pipe(gulp.dest("dist"));
+  return tsResult.js.pipe(gulp.dest("build"));
 });
 
 
