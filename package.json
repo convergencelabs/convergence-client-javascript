@@ -11,14 +11,14 @@
   "author": "Convergence Labs",
   "homepage": "",
   "repository": {
-    "type": "",
-    "url": ""
+    "type": "github",
+    "url": "https://github.com/convergencelabs/convergence-client-javascript"
   },
-  "main": "src/main/ts/ConvergenceDomain.ts",
+  "main": "convergence-client.min.js",
   "bugs": "",
   "license": "",
   "scripts": {
-    "build": "gulp dist-min",
+    "build": "gulp",
     "test": "mocha test"
   },
   "dependencies": {},
@@ -27,6 +27,7 @@
     "del": "^1.2.0",
     "es6-promise-polyfill": "^1.2.0",
     "gulp": "^3.9.0",
+    "gulp-github-release": "^1.1.2",
     "gulp-istanbul": "^0.5.0",
     "gulp-mocha": "^1.1.0",
     "gulp-rename": "^1.2.2",

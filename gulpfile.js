@@ -2,6 +2,7 @@ const gulp = require('gulp');
 
 const rename = require('gulp-rename');
 const del = require('del');
+const release = require('gulp-github-release');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
@@ -13,7 +14,6 @@ const rollup = require('gulp-rollup');
 const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
-
 
 gulp.task('default', ["build"]);
 
@@ -103,7 +103,14 @@ gulp.task('dist-min', ["dist-build"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-
+gulp.task('release', ['dist-min'], function() {
+  // you will need to have the environment var GITHUB_TOKEN set to a personal access token from
+  // https://github.com/settings/tokens
+  gulp.src(["dist/convergence-client.min.js", "dist/convergence-client.d.ts"])
+    .pipe(release({
+      manifest: require('./package.json')
+    }));
+});
 
 /**
  * Removes all build artifacts.
