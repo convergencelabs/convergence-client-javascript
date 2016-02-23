@@ -15,10 +15,10 @@
     "url": ""
   },
   "main": "src/main/ts/ConvergenceDomain.ts",
-  "typings": "dist/convergence-client.d.ts",
   "bugs": "",
+  "license": "",
   "scripts": {
-    "build": "gulp",
+    "build": "gulp dist-min",
     "test": "mocha test"
   },
   "dependencies": {},
@@ -27,7 +27,6 @@
     "del": "^1.2.0",
     "es6-promise-polyfill": "^1.2.0",
     "gulp": "^3.9.0",
-    "gulp-concat": "^2.6.0",
     "gulp-istanbul": "^0.5.0",
     "gulp-mocha": "^1.1.0",
     "gulp-rename": "^1.2.2",

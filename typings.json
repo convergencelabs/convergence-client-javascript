@@ -1,4 +1,8 @@
 {
+  "name": "convergence-client",
+  "main": "dist/convergence-client.d.ts",
+  "author": "Convergence Labs",
+  "description": "The convergence client for typescript",
   "ambientDependencies": {
     "assertion-error": "github:DefinitelyTyped/DefinitelyTyped/assertion-error/assertion-error.d.ts#e69fe60f2d6377ea4fae539493997b098f52cad1",
     "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#e69fe60f2d6377ea4fae539493997b098f52cad1",
