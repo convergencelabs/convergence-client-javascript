@@ -11,10 +11,12 @@
   "author": "Convergence Labs",
   "homepage": "",
   "repository": {
-    "type": "github",
+    "type": "git",
     "url": "https://github.com/convergencelabs/convergence-client-javascript"
   },
+  "registry": "github",
   "main": "convergence-client.min.js",
+  "jsnext:main": "convergence-client.es2015.js",
   "bugs": "",
   "license": "",
   "scripts": {
