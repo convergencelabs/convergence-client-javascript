@@ -16,5 +16,14 @@
     "bower_components",
     "typings/main.d.ts",
     "typings/main"
-  ]
+  ],
+  "bundles": {
+    "app": {
+      "files": ["main/ts/**/*.ts"],
+      "config": {
+        "declaration": true,
+        "sourceMap": true
+      }
+    }
+  }
 }

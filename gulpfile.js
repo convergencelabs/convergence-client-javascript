@@ -80,12 +80,15 @@ gulp.task('lint', function () {
  * non minified version is created using UglifyJS.  The code will be linted
  * and tested before being rolled up and minified.
  */
-gulp.task('dist-build', ["dist-typings", "lint", "test"], function () {
+gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(rollup({
       format: 'iife',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
+      globals: {
+        'es6-promise': 'Promise'
+      },
       plugins: [
         rollupTypescript()
       ]
@@ -95,15 +98,15 @@ gulp.task('dist-build', ["dist-typings", "lint", "test"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('dist-typings', ["build"], function() {
+gulp.task('dist-ts', ["build"], function() {
   var dts = require('dts-bundle');
 
+  // TODO hook this up to gulp properly, find/replace erroneous 
+  // convergence-client/ConvergenceDomain imports
   dts.bundle({
     name: 'convergence-client',
     main: 'build/main/ts/ConvergenceDomain.d.ts',
-    out: '../../../dist/convergence-client.d.ts',
-    externals: true,
-    referenceExternals: true
+    out: '../../../dist/convergence-client.d.ts'
   });
 });
 

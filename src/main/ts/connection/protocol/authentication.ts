@@ -1,4 +1,3 @@
-import MessageType from "./MessageType";
 import {OutgoingProtocolRequestMessage} from "./protocol";
 import {IncomingProtocolResponseMessage} from "./protocol";
 import {MessageBodySerializer} from "./MessageSerializer";

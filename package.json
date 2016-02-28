@@ -15,7 +15,7 @@
     "url": "https://github.com/convergencelabs/convergence-client-javascript"
   },
   "registry": "github",
-  "main": "dist/convergence-client.min.js",
+  "main": "dist/convergence-client.js",
   "jsnext:main": "convergence-client.es2015.js",
   "bugs": "",
   "license": "",
