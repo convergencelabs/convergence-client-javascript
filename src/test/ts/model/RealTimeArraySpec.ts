@@ -26,6 +26,7 @@ describe('RealTimeArray', () => {
   var timestamp: number = 100;
 
   var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+    // No Op
   };
 
   var lastOp: DiscreteOperation = null;
@@ -39,43 +40,43 @@ describe('RealTimeArray', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     expect(myArray.value()).to.deep.equal(["A", "B", "C"]);
   });
 
   it('Value is correct after set', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback, null);
     myArray.value(["X", "Y", "Z"]);
     expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after insert', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback, null);
     myArray.insert(2, "X");
     expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after remove', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback, null);
     myArray.remove(1);
     expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after set', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback, null);
     myArray.set(1, "X");
     expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after move', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, ignoreCallback, null);
     myArray.reorder(1, 2);
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct operation is sent after set value', () => {
     lastOp = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback, null);
     myArray.value(["X", "Y", "Z"]);
 
     var expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
@@ -84,7 +85,7 @@ describe('RealTimeArray', () => {
 
   it('Correct operation is sent after insert', () => {
     lastOp = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback, null);
     myArray.insert(2, "X");
 
     var expectedOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
@@ -93,7 +94,7 @@ describe('RealTimeArray', () => {
 
   it('Correct operation is sent after remove', () => {
     lastOp = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback, null);
     myArray.remove(1);
 
     var expectedOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
@@ -102,7 +103,7 @@ describe('RealTimeArray', () => {
 
   it('Correct operation is sent after set', () => {
     lastOp = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback, null);
     myArray.set(1, "X");
 
     var expectedOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
@@ -111,7 +112,7 @@ describe('RealTimeArray', () => {
 
   it('Correct operation is sent after move', () => {
     lastOp = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, lastOpCallback, null);
     myArray.reorder(1, 2);
 
     var expectedOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
@@ -120,7 +121,7 @@ describe('RealTimeArray', () => {
 
 
   it('Value is correct after ArraySetOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
 
     var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -130,7 +131,7 @@ describe('RealTimeArray', () => {
   });
 
   it('Value is correct after ArrayInsertOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
 
     var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -140,7 +141,7 @@ describe('RealTimeArray', () => {
   });
 
   it('Value is correct after ArrayRemoveOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
 
     var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -150,7 +151,7 @@ describe('RealTimeArray', () => {
   });
 
   it('Value is correct after ArrayReplaceOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
 
     var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -160,7 +161,7 @@ describe('RealTimeArray', () => {
   });
 
   it('Value is correct after ArrayMoveOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
 
     var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -171,7 +172,7 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArraySetOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     myArray.on(RealTimeArray.Events.VALUE, lastEventCallback);
 
     var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
@@ -192,7 +193,7 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayInsertOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     myArray.on(RealTimeArray.Events.INSERT, lastEventCallback);
 
     var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
@@ -214,7 +215,7 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayRemoveOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     myArray.on(RealTimeArray.Events.REMOVE, lastEventCallback);
 
     var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
@@ -235,7 +236,7 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayReplaceOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     myArray.on(RealTimeArray.Events.SET, lastEventCallback);
 
     var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
@@ -257,7 +258,7 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayMoveOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
     myArray.on(RealTimeArray.Events.REORDER, lastEventCallback);
 
     var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);

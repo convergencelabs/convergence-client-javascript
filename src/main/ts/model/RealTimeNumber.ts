@@ -9,6 +9,7 @@ import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
+import RealTimeModel from "./RealTimeModel";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -24,8 +25,9 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   constructor(private _data: number,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              _sendOperation: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Number, parent, fieldInParent, _sendOperation);
+              _sendOperation: (operation: DiscreteOperation) => void,
+              model: RealTimeModel) {
+    super(RealTimeValueType.Number, parent, fieldInParent, _sendOperation, model);
   }
 
   add(value: number): void {

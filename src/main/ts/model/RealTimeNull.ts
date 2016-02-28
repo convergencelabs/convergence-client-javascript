@@ -5,6 +5,7 @@ import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
+import RealTimeModel from "./RealTimeModel";
 
 export default class RealTimeNull extends RealTimeValue<any> {
 
@@ -17,8 +18,9 @@ export default class RealTimeNull extends RealTimeValue<any> {
    */
   constructor(parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Null, parent, fieldInParent, sendOpCallback);
+              sendOpCallback: (operation: DiscreteOperation) => void,
+              model: RealTimeModel) {
+    super(RealTimeValueType.Null, parent, fieldInParent, sendOpCallback, model);
   }
 
   protected _getValue(): any {

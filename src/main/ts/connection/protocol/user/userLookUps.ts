@@ -58,7 +58,7 @@ export interface UserListResponse {
   users: DomainUser[];
 }
 
-export var UserListResponseDesrializer: MessageBodyDeserializer = (body: any) => {
+export var UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
   var users: DomainUser[] = (<any[]>body.u).map((u: any) => {
     return DomainUserDeserilizer(u);
   });

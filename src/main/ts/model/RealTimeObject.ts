@@ -13,6 +13,7 @@ import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
+import RealTimeModel from "./RealTimeModel";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -30,14 +31,15 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
    */
   constructor(data: any, parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              _sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Object, parent, fieldInParent, _sendOpCallback);
+              _sendOpCallback: (operation: DiscreteOperation) => void,
+              model: RealTimeModel) {
+    super(RealTimeValueType.Object, parent, fieldInParent, _sendOpCallback, model);
 
     this._children = {};
 
     for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this._sendOpCallback);
+        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this._sendOpCallback, this.model());
       }
     }
   }
@@ -56,7 +58,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       operation = new ObjectAddPropertyOperation(this.path(), false, key, value);
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._sendOpCallback);
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._sendOpCallback, this.model());
     this._children[key] = child;
     this._sendOperation(operation);
     return child;
@@ -111,7 +113,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOpCallback);
+        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOpCallback, this.model());
       }
     }
 
@@ -133,7 +135,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         return (<RealTimeArray> child).dataAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeValueFactory.create(undefined, null, null, this._sendOperation);
+        return RealTimeValueFactory.create(undefined, null, null, this._sendOperation, this.model());
       }
     } else {
       return child;
@@ -184,7 +186,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var oldChild: RealTimeValue<any> = this._children[key];
 
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation);
+    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation, this.model());
 
     if (oldChild) {
       oldChild._detach();
@@ -211,7 +213,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var oldChild: RealTimeValue<any> = this._children[key];
 
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation);
+    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation, this.model());
 
     var event: ObjectSetEvent = {
       src: this,
@@ -266,7 +268,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOperation);
+        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOperation, this.model());
       }
     }
 

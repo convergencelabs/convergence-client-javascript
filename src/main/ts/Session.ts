@@ -9,12 +9,17 @@ interface Session {
   /**
    * @return The sessionId of the connected client
    */
-  getSessionId(): string;
+  sessionId(): string;
+
+  /**
+   * @return The userId of the authenticated client or null if not authenticated
+   */
+  userId(): string;
 
   /**
    * @return The username of the authenticated client or null if not authenticated
    */
-  getUsername(): string;
+  username(): string;
 
   /**
    * @return True if the client is connected to the domain

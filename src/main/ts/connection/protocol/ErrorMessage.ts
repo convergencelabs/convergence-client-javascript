@@ -16,7 +16,7 @@ export var ErrorMessageSerializer: MessageBodySerializer = (message: ErrorMessag
   };
 };
 
-export var ErrorMessageDeserializer: MessageBodyDeserializer = (body: any) => {
+export var ErrorMessageDeserializer: MessageBodyDeserializer<ErrorMessage> = (body: any) => {
   return {
     code: body.c,
     details: body.d

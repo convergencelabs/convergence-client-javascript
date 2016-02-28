@@ -25,7 +25,7 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   data: any;
 }
 
-export var OpenRealTimeModelRequestDesrializer: MessageBodyDeserializer = (body: any) => {
+export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> = (body: any) => {
   return {
     resourceId: body.r,
     version: body.v,

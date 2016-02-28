@@ -10,30 +10,35 @@ import {TokenAuthRequestSerializer} from "./authentication";
 import {AuthenticationResponseDeserializer} from "./authentication";
 import {ErrorMessageSerializer} from "./ErrorMessage";
 import {ErrorMessageDeserializer} from "./ErrorMessage";
-import {OpenRealTimeModelRequestDesrializer} from "./model/openRealtimeModel";
 import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
 import {ModelDataRequestDeserializer} from "./model/modelDataRequest";
 import {ModelDataResponseSerializer} from "./model/modelDataRequest";
 import {OperationSubmissionSerializer} from "./model/operationSubmission";
-import {OperationAckDesrializer} from "./model/operationAck";
-import {RemoteOperationDesrializer} from "./model/remoteOperation";
-import {ForceCloseRealTimeModelDesrializer} from "./model/forceCloseRealtimeModel";
+import {OperationAckDeserializer} from "./model/operationAck";
+import {RemoteOperationDeserializer} from "./model/remoteOperation";
+import {ForceCloseRealTimeModelDeserializer} from "./model/forceCloseRealtimeModel";
 import {DeleteRealTimeModelRequestSerializer} from "./model/deleteRealtimeModel";
 import {CreateRealTimeModelRequestSerializer} from "./model/createRealtimeModel";
 import {CloseRealTimeModelRequestSerializer} from "./model/closeRealtimeModel";
 import {UserLookUpRequestSerializer} from "./user/userLookUps";
 import {UserSearchRequestSerializer} from "./user/userLookUps";
-import {UserListResponseDesrializer} from "./user/userLookUps";
+import {UserListResponseDeserializer} from "./user/userLookUps";
+import {OpenRealTimeModelResponseDeserializer} from "./model/openRealtimeModel";
+import {ReferenceValueDeserializer} from "./model/reference/ReferenceEvent";
+import {ReferenceMessageDeserializer} from "./model/reference/ReferenceEvent";
+import {CreateReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {SetReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {ReferenceMessageSerializer} from "./model/reference/ReferenceEvent";
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
-export type MessageBodyDeserializer = (message: any) => IncomingProtocolMessage;
+export type MessageBodyDeserializer<T> = (message: any) => T;
 
 export class MessageSerializer {
 
   private static _serializers: {[key: number]: MessageBodySerializer} = {};
-  private static _deserializers: {[key: number]: MessageBodyDeserializer} = {};
+  private static _deserializers: {[key: number]: MessageBodyDeserializer<any>} = {};
 
-  private static _defaultBodyDeserializer: MessageBodyDeserializer = (message: any) => {
+  private static _defaultBodyDeserializer: MessageBodyDeserializer<any> = (message: any) => {
     return {};
   };
 
@@ -52,7 +57,7 @@ export class MessageSerializer {
     this.registerMessageBodySerializer(type, this._defaultBodySerializer);
   }
 
-  static registerMessageBodyDeserializer(type: MessageType, deserializer: MessageBodyDeserializer): void {
+  static registerMessageBodyDeserializer(type: MessageType, deserializer: MessageBodyDeserializer<any>): void {
     if (this._deserializers[type] !== undefined) {
       throw new Error(`No deserializer for type ${MessageType[type]}`);
     }
@@ -88,7 +93,7 @@ export class MessageSerializer {
     var requestId: number = message.q;
     var responseId: number = message.p;
 
-    var deserializer: MessageBodyDeserializer = this._deserializers[type];
+    var deserializer: MessageBodyDeserializer<any> = this._deserializers[type];
     if (deserializer === undefined) {
       throw new Error(`No deserializer set for message type: ${MessageType[type]}`);
     }
@@ -124,6 +129,11 @@ MessageSerializer.registerMessageBodySerializer(MessageType.DELETE_REAL_TIME_MOD
 MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_REAL_TIME_MODEL_REQUEST, CreateRealTimeModelRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.CLOSES_REAL_TIME_MODEL_REQUEST, CloseRealTimeModelRequestSerializer);
 
+MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_REFERENCE, CreateReferenceSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.SET_REFERENCE, SetReferenceSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.CLEAR_REFERENCE, ReferenceMessageSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.REMOVE_REFERENCE, ReferenceMessageSerializer);
+
 MessageSerializer.registerMessageBodySerializer(MessageType.USER_LOOKUP_REQUEST, UserLookUpRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.USER_SEARCH_REQUEST, UserSearchRequestSerializer);
 
@@ -133,15 +143,20 @@ MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PONG);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.AUTHENTICATE_RESPONSE, AuthenticationResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ERROR, ErrorMessageDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.OPEN_REAL_TIME_MODEL_RESPONSE, OpenRealTimeModelRequestDesrializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.OPEN_REAL_TIME_MODEL_RESPONSE, OpenRealTimeModelResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_DATA_REQUEST, ModelDataRequestDeserializer);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.OPERATION_ACKNOWLEDGEMENT, OperationAckDesrializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_OPERATION, RemoteOperationDesrializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.OPERATION_ACKNOWLEDGEMENT, OperationAckDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_OPERATION, RemoteOperationDeserializer);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.FORCE_CLOSE_REAL_TIME_MODEL, ForceCloseRealTimeModelDesrializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.FORCE_CLOSE_REAL_TIME_MODEL, ForceCloseRealTimeModelDeserializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.DELETE_REAL_TIME_MODEL_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_MODEL_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CLOSE_REAL_TIME_MODEL_RESPONSE);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDesrializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_SET, ReferenceValueDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_CREATED, ReferenceValueDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_CLEARED, ReferenceMessageDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_REMOVED, ReferenceMessageDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDeserializer);
