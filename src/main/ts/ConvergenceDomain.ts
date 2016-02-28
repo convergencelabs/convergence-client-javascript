@@ -1,3 +1,5 @@
+import {Promise} from 'es6-promise';
+
 import ConvergenceConnection from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
@@ -6,7 +8,6 @@ import {debugFlags as flags} from "./Debug";
 import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";
 import UserService from "./user/UserService";
-
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 

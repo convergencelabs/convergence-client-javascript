@@ -1,3 +1,5 @@
+import {Promise} from 'es6-promise';
+
 import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";

@@ -6,14 +6,15 @@
     "preserveConstEnums": true,
     "outDir": "build",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "moduleResolution": "node"
   },
   "exclude": [
     "node_modules",
     "build",
     "dist",
     "bower_components",
-    "typings/browser.d.ts",
-    "typings/browser"
+    "typings/main.d.ts",
+    "typings/main"
   ]
 }

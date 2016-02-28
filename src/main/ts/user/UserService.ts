@@ -1,3 +1,5 @@
+import {Promise} from 'es6-promise';
+
 import Session from "../Session";
 import DomainUser from "./DomainUser";
 import ConvergenceConnection from "../connection/ConvergenceConnection";

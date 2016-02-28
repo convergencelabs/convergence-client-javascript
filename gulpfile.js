@@ -1,8 +1,10 @@
 const gulp = require('gulp');
 
-const rename = require('gulp-rename');
+const concat = require('gulp-concat');
 const del = require('del');
+const merge = require('merge2');
 const release = require('gulp-github-release');
+const rename = require('gulp-rename');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
@@ -22,10 +24,16 @@ gulp.task('default', ["build"]);
  * Typescript compiler.  This builds both the main source and the test sources.
  */
 gulp.task('build', [], function () {
-  const tsProject = ts.createProject('tsconfig.json', { sortOutput: true });
-  return gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
-    .pipe(ts(tsProject))
-    .pipe(gulp.dest("build"));
+  const tsProject = ts.createProject('tsconfig.json', { 
+    sortOutput: true
+  });
+  var tsResult = gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
+    .pipe(ts(tsProject));
+    
+  return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
+		tsResult.dts.pipe(gulp.dest('build')),
+		tsResult.js.pipe(gulp.dest('build'))
+	]);
 });
 
 
@@ -72,10 +80,10 @@ gulp.task('lint', function () {
  * non minified version is created using UglifyJS.  The code will be linted
  * and tested before being rolled up and minified.
  */
-gulp.task('dist-build', ["lint", "test"], function () {
-  gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+gulp.task('dist-build', ["dist-typings", "lint", "test"], function () {
+  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(rollup({
-      format: 'cjs',
+      format: 'iife',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
       plugins: [
@@ -85,6 +93,18 @@ gulp.task('dist-build', ["lint", "test"], function () {
     .pipe(rename("convergence-client.js"))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
+});
+
+gulp.task('dist-typings', ["build"], function() {
+  var dts = require('dts-bundle');
+
+  dts.bundle({
+    name: 'convergence-client',
+    main: 'build/main/ts/ConvergenceDomain.d.ts',
+    out: '../../../dist/convergence-client.d.ts',
+    externals: true,
+    referenceExternals: true
+  });
 });
 
 /**

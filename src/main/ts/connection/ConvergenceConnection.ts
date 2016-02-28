@@ -1,3 +1,5 @@
+import {Promise} from 'es6-promise';
+
 import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {ProtocolConnection} from "./ProtocolConnection";

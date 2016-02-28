@@ -1,3 +1,5 @@
+import {Promise} from 'es6-promise';
+
 import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 import Session from "../Session";
 import RealTimeModel from "./RealTimeModel";
