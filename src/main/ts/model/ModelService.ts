@@ -64,7 +64,7 @@ export default class ModelService extends ConvergenceEventEmitter {
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
       var transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
       var clientConcurrencyControl: ClientConcurrencyControl =
-        new ClientConcurrencyControl(this._connection.session().getSessionId(), response.version, transformer);
+        new ClientConcurrencyControl(this._connection.session().sessionId(), response.version, transformer);
       var model: RealTimeModel = new RealTimeModel(
         response.resourceId,
         response.data,

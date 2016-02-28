@@ -59,7 +59,7 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
     this._data = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
       var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
       this._sendOperation(opEvent);
-    });
+    }, this);
 
     this._open = true;
     this._committed = true;

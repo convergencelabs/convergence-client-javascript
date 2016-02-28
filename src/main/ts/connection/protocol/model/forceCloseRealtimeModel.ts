@@ -6,7 +6,8 @@ export interface ForceCloseRealTimeModel extends IncomingProtocolNormalMessage {
   reason: string;
 }
 
-export var ForceCloseRealTimeModelDesrializer: MessageBodyDeserializer =  (body: any) => {
+
+export var ForceCloseRealTimeModelDeserializer: MessageBodyDeserializer<ForceCloseRealTimeModel> =  (body: any) => {
   return {
     resourceId: body.r,
     reason: body.s

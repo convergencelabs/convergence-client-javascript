@@ -14,7 +14,7 @@ import {PasswordAuthRequest} from "./protocol/authentication";
 import MessageType from "./protocol/MessageType";
 import {TokenAuthRequest} from "./protocol/authentication";
 import {AuthRequest} from "./protocol/authentication";
-import {AuthenticationResponseMessage} from "./protocol/authentication";
+import {AuthenticationResponse} from "./protocol/authentication";
 import Deferred from "../util/Deferred";
 import {ReplyCallback} from "./ProtocolConnection";
 import {EventKey} from "../util/EventEmitter";
@@ -87,7 +87,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
     this._messageEmitter = new EventEmitter();
 
-    this._session = new SessionImpl(domain, this, null, null);
+    this._session = new SessionImpl(domain, this, null, null, null);
   }
 
   session(): Session {
@@ -202,9 +202,10 @@ export default class ConvergenceConnection extends EventEmitter {
   }
 
   private _sendAuthRequest(authRequest: AuthRequest): Promise<void> {
-    return this.request(authRequest).then((response: AuthenticationResponseMessage) => {
+    return this.request(authRequest).then((response: AuthenticationResponse) => {
       if (response.success === true) {
-        this._session.setUsername(response.username);
+        this._session._setUsername(response.username);
+        this._session._setUserId(response.userId);
         this._session.setAuthenticated(true);
         return;
       } else {
@@ -261,7 +262,7 @@ export default class ConvergenceConnection extends EventEmitter {
           this._connectionDeferred.resolve(handshakeResponse);
           this._connectionDeferred = null;
           this._clientId = handshakeResponse.sessionId;
-          this._session.setSessionId(handshakeResponse.sessionId);
+          this._session._setSessionId(handshakeResponse.sessionId);
           this._reconnectToken = handshakeResponse.reconnectToken;
           if (reconnect) {
             this.emit(ConvergenceConnection.Events.RECONNECTED);

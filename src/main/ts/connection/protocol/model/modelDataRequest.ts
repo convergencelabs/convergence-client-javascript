@@ -8,7 +8,7 @@ export interface ModelDataRequest extends IncomingProtocolRequestMessage {
   modelFqn: ModelFqn;
 }
 
-export var ModelDataRequestDeserializer: MessageBodyDeserializer =  (body: any) => {
+export var ModelDataRequestDeserializer: MessageBodyDeserializer<ModelDataRequest> =  (body: any) => {
   return {
     modelFqn: new ModelFqn(body.c, body.m)
   };

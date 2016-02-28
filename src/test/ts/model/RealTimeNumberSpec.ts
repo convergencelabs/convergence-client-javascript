@@ -19,6 +19,7 @@ describe('RealTimeNumber', () => {
   var timestamp: number = 100;
 
   var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+    // No Op
   };
 
   var lastOp: DiscreteOperation = null;
@@ -32,31 +33,31 @@ describe('RealTimeNumber', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null, null);
     expect(myNumber.value()).to.equal(10);
   });
 
   it('Value is correct after add', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback, null);
     myNumber.add(5);
     expect(myNumber.value()).to.equal(15);
   });
 
   it('Value is correct after subtract', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback, null);
     myNumber.subtract(5);
     expect(myNumber.value()).to.equal(5);
   });
 
   it('Returned value is correct after set', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, ignoreCallback, null);
     myNumber.value(20);
     expect(myNumber.value()).to.equal(20);
   });
 
   it('Correct operation is sent after add', () => {
     lastOp = null;
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback, null);
     myNumber.add(5);
 
     var expectedOp: NumberAddOperation = new NumberAddOperation([], false, 5);
@@ -65,7 +66,7 @@ describe('RealTimeNumber', () => {
 
   it('Correct operation is sent after subtract', () => {
     lastOp = null;
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback, null);
     myNumber.subtract(5);
 
     var expectedOp: NumberAddOperation = new NumberAddOperation([], false, -5);
@@ -74,7 +75,7 @@ describe('RealTimeNumber', () => {
 
   it('Correct operation is sent after set', () => {
     lastOp = null;
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, lastOpCallback, null);
     myNumber.value(20);
 
     var expectedOp: NumberSetOperation = new NumberSetOperation([], false, 20);
@@ -82,7 +83,7 @@ describe('RealTimeNumber', () => {
   });
 
   it('Value is correct after NumberAddOperation', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null, null);
 
     var incomingOp: NumberAddOperation = new NumberAddOperation([], false, 5);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -92,7 +93,7 @@ describe('RealTimeNumber', () => {
   });
 
   it('Value is correct after NumberSetOperation', () => {
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null, null);
 
     var incomingOp: NumberSetOperation = new NumberSetOperation([], false, 20);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -103,7 +104,7 @@ describe('RealTimeNumber', () => {
 
   it('Correct Event is fired after NumberAddOperation', () => {
     lastEvent = null;
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null, null);
     myNumber.on(RealTimeNumber.Events.ADD, lastEventCallback);
 
     var incomingOp: NumberAddOperation = new NumberAddOperation([], false, 5);
@@ -124,7 +125,7 @@ describe('RealTimeNumber', () => {
 
   it('Correct Event is fired after NumberSetOperation', () => {
     lastEvent = null;
-    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null);
+    var myNumber: RealTimeNumber = new RealTimeNumber(10, null, null, null, null);
     myNumber.on(RealTimeNumber.Events.VALUE, lastEventCallback);
 
     var incomingOp: NumberSetOperation = new NumberSetOperation([], false, 20);

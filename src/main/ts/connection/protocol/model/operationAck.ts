@@ -7,7 +7,7 @@ export interface OperationAck extends IncomingProtocolNormalMessage {
   version: number;
 }
 
-export var OperationAckDesrializer: MessageBodyDeserializer = (body: any) => {
+export var OperationAckDeserializer: MessageBodyDeserializer<OperationAck> = (body: any) => {
   return {
     resourceId: body.r,
     seqNo: body.s,

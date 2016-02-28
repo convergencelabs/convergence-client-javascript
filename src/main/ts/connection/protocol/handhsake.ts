@@ -24,7 +24,7 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   retryOk?: boolean;
 }
 
-export var HandshakeResponseDeserializer: MessageBodyDeserializer = (body: any) => {
+export var HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
   return {
     success: body.s,
     sessionId: body.i,

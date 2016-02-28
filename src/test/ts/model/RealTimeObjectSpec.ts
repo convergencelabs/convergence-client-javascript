@@ -17,18 +17,18 @@ describe('RealTimeObject', () => {
   var timestamp: number = 100;
 
   it('Value is correct after creation', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null, null);
     expect(myObject.value()).to.deep.equal({"num": 5});
   });
 
   it('Value is correct after set', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy());
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy(), null);
     myObject.value({"string": "test"});
     expect(myObject.value()).to.deep.equal({"string": "test"});
   });
 
   it('Value is correct after setProperty', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy());
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy(), null);
     myObject.set("num", 10);
     expect(myObject.get("num").value()).to.deep.equal(10);
   });
@@ -36,7 +36,7 @@ describe('RealTimeObject', () => {
   it('Correct operation is sent after set', () => {
 
     var sendOpCallback: SinonSpy = sinon.spy();
-    var myObject: RealTimeObject = new RealTimeObject({num: 5}, null, null, sendOpCallback);
+    var myObject: RealTimeObject = new RealTimeObject({num: 5}, null, null, sendOpCallback, null);
     myObject.value({string: "test"});
 
     var expectedOp: ObjectSetOperation = new ObjectSetOperation([], false, {string: "test"});
@@ -44,7 +44,7 @@ describe('RealTimeObject', () => {
   });
 
   it('Value is correct after ObjectSetOperation', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null, null);
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -55,7 +55,7 @@ describe('RealTimeObject', () => {
 
   it('Correct Event is fired after ObjectSetOperation', () => {
     var eventCallback: SinonSpy = sinon.spy();
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null);
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null, null);
     myObject.on(RealTimeObject.Events.VALUE, eventCallback);
 
     var incomingOp: ObjectSetOperation = new ObjectSetOperation([], false, {"string": "test"});

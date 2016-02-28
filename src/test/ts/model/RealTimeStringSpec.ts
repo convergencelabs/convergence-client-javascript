@@ -21,6 +21,7 @@ describe('RealTimeString', () => {
   var timestamp: number = 100;
 
   var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+    // NoOp
   };
 
   var lastOp: DiscreteOperation = null;
@@ -34,31 +35,31 @@ describe('RealTimeString', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
     expect(myString.value()).to.equal("MyString");
   });
 
   it('Value is correct after set', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
     myString.value("AnotherString");
     expect(myString.value()).to.equal("AnotherString");
   });
 
   it('Value is correct after insert', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
     myString.insert(2, "Edited");
     expect(myString.value()).to.equal("MyEditedString");
   });
 
   it('Value is correct after remove', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
     myString.remove(0, 2);
     expect(myString.value()).to.equal("String");
   });
 
   it('Correct operation is sent after set', () => {
     lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
     myString.value("AnotherString");
 
     var expectedOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
@@ -67,7 +68,7 @@ describe('RealTimeString', () => {
 
   it('Correct operation is sent after insert', () => {
     lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
     myString.insert(2, "Edited");
 
     var expectedOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
@@ -76,7 +77,7 @@ describe('RealTimeString', () => {
 
   it('Correct operation is sent after remove', () => {
     lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
     myString.remove(0, 2);
 
     var expectedOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
@@ -84,7 +85,7 @@ describe('RealTimeString', () => {
   });
 
   it('Value is correct after StringSetOperation', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
 
     var incomingOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -94,7 +95,7 @@ describe('RealTimeString', () => {
   });
 
   it('Value is correct after StringInsertOperation', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
 
     var incomingOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -104,7 +105,7 @@ describe('RealTimeString', () => {
   });
 
   it('Value is correct after StringRemoveOperation', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
 
     var incomingOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -115,7 +116,7 @@ describe('RealTimeString', () => {
 
   it('Correct event is fired after StringSetOperation', () => {
     lastEvent = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
     myString.on(RealTimeString.Events.VALUE, lastEventCallback);
 
     var incomingOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
@@ -136,7 +137,7 @@ describe('RealTimeString', () => {
 
   it('Correct event is fired after StringInsertOperation', () => {
     lastEvent = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
     myString.on(RealTimeString.Events.INSERT, lastEventCallback);
 
     var incomingOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
@@ -158,7 +159,7 @@ describe('RealTimeString', () => {
 
   it('Correct event is fired after StringRemoveOperation', () => {
     lastEvent = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
     myString.on("Remove", lastEventCallback);
 
     var incomingOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");

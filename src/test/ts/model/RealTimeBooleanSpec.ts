@@ -16,6 +16,7 @@ describe('RealTimeBoolean', () => {
   var timestamp: number = 100;
 
   var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
+    // No Op
   };
 
   var lastOp: DiscreteOperation = null;
@@ -29,19 +30,19 @@ describe('RealTimeBoolean', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null, null);
     expect(myBoolean.value()).to.equal(true);
   });
 
   it('Value is correct after set', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, ignoreCallback);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, ignoreCallback, null);
     myBoolean.value(false);
     expect(myBoolean.value()).to.equal(false);
   });
 
   it('Correct operation is sent after set', () => {
     lastOp = null;
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, lastOpCallback);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, lastOpCallback, null);
     myBoolean.value(false);
 
     var expectedOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
@@ -49,7 +50,7 @@ describe('RealTimeBoolean', () => {
   });
 
   it('Value is correct after BooleanSetOperation', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null, null);
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -60,7 +61,7 @@ describe('RealTimeBoolean', () => {
 
   it('Correct Event is fired after BooleanSetOperation', () => {
     lastEvent = null;
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(true, null, null, null, null);
     myBoolean.on(RealTimeBoolean.Events.VALUE, lastEventCallback);
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation([], false, false);

@@ -30,16 +30,16 @@ export var TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAu
   };
 };
 
-export interface AuthenticationResponseMessage extends IncomingProtocolResponseMessage {
+export interface AuthenticationResponse extends IncomingProtocolResponseMessage {
   success: boolean;
+  userId: string;
   username: string;
 }
 
-export var AuthenticationResponseDeserializer: MessageBodyDeserializer = (body: any) => {
+export var AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
   return {
-    type: MessageType.AUTHENTICATE_RESPONSE,
     success: body.s,
-    username: body.u
-
+    username: body.u,
+    userId: body.i
   };
 };
