@@ -3,8 +3,8 @@
   "main": "dist/convergence-client.d.ts",
   "author": "Convergence Labs",
   "description": "The convergence client for typescript",
-  "dependencies": {
-    "es6-promise": "github:typed-typings/npm-es6-promise#fb04188767acfec1defd054fc8024fafa5cd4de7"
+  "ambientDependencies": {
+    "es6-promise": "github:DefinitelyTyped/DefinitelyTyped/es6-promise/es6-promise.d.ts#830e8ebd9ef137d039d5c7ede24a421f08595f83"
   },
   "ambientDevDependencies": {
     "assertion-error": "github:DefinitelyTyped/DefinitelyTyped/assertion-error/assertion-error.d.ts#800a7047cf275cc9f695cbd116748cd408a09d6d",

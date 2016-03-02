@@ -1,5 +1,3 @@
-import {Promise} from 'es6-promise';
-
 import {HeartbeatHelper} from "./HeartbeatHelper";
 import ConvergenceSocket from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";

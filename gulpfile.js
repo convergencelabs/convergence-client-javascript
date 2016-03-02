@@ -5,9 +5,11 @@ const del = require('del');
 const merge = require('merge2');
 const release = require('gulp-github-release');
 const rename = require('gulp-rename');
+const replace = require('gulp-replace');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
+const dts = require('dts-bundle');
 
 const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
@@ -24,10 +26,8 @@ gulp.task('default', ["build"]);
  * Typescript compiler.  This builds both the main source and the test sources.
  */
 gulp.task('build', [], function () {
-  const tsProject = ts.createProject('tsconfig.json', { 
-    sortOutput: true
-  });
-  var tsResult = gulp.src(['src/**/*.ts', "typings/browser.d.ts", "typings/promise.d.ts"])
+  const tsProject = ts.createProject('tsconfig.json');
+  var tsResult = gulp.src(['src/**/*.ts', "typings/main.d.ts"])
     .pipe(ts(tsProject));
     
   return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
@@ -83,12 +83,10 @@ gulp.task('lint', function () {
 gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(rollup({
-      format: 'iife',
+      format: 'umd',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
-      globals: {
-        'es6-promise': 'Promise'
-      },
+      exports: 'named',
       plugins: [
         rollupTypescript()
       ]
@@ -99,15 +97,20 @@ gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
 });
 
 gulp.task('dist-ts', ["build"], function() {
-  var dts = require('dts-bundle');
-
   // TODO hook this up to gulp properly, find/replace erroneous 
   // convergence-client/ConvergenceDomain imports
-  dts.bundle({
+  var options = {
     name: 'convergence-client',
-    main: 'build/main/ts/ConvergenceDomain.d.ts',
-    out: '../../../dist/convergence-client.d.ts'
-  });
+    main: 'build/main/ts/ConvergenceDomain.d.ts'
+  };
+  dts.bundle(options);
+  
+  return gulp.src('build/main/ts/convergence-client.d.ts')
+    .pipe(replace('convergence-client/ConvergenceDomain', 'convergence-client'))
+    .pipe(gulp.dest("dist"))
+    .on('finish', function () {
+      del('build/main/ts/convergence-client.d.ts');
+    });
 });
 
 /**

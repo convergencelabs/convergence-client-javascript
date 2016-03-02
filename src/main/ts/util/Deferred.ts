@@ -1,5 +1,3 @@
-import {Promise, Thenable} from 'es6-promise';
-
 export default class Deferred<R> {
 
   private _promise: Promise<R>;

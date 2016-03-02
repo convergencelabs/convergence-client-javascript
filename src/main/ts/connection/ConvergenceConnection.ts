@@ -1,5 +1,3 @@
-import {Promise} from 'es6-promise';
-
 import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {ProtocolConnection} from "./ProtocolConnection";
@@ -188,7 +186,7 @@ export default class ConvergenceConnection extends EventEmitter {
   private _authenticate(authRequest: AuthRequest): Promise<void> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Promise.reject<void>(new Error("User already authenticated."));
+      return Promise.reject(new Error("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
@@ -199,7 +197,7 @@ export default class ConvergenceConnection extends EventEmitter {
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject<void>(new Error("Must be connected or connecting to authenticate."));
+      return Promise.reject(new Error("Must be connected or connecting to authenticate."));
     }
   }
 

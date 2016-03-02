@@ -1,5 +1,3 @@
-import {Promise} from 'es6-promise';
-
 import {debugFlags} from "../Debug";
 import EventEmitter from "../util/EventEmitter";
 import Deferred from "../util/Deferred";
