@@ -215,17 +215,11 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     switch (referenceEvent.type) {
       case MessageType.SET_REFERENCE:
       case MessageType.CREATE_REFERENCE:
-        this._concurrencyControl
+        // this._concurrencyControl
         break;
       default:
     }
-    var opSubmission: OperationSubmission = {
-      resourceId: this._resourceId,
-      seqNo: opEvent.seqNo,
-      version: opEvent.contextVersion,
-      operation: opEvent.operation,
-      type: MessageType.OPERATION_SUBMISSION
-    };
+
     this._connection.send(referenceEvent);
   }
 
