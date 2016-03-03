@@ -7,7 +7,6 @@ import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";
 import UserService from "./user/UserService";
 
-
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static debugFlags: any = flags;
@@ -68,7 +67,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
-    }).catch<HandshakeResponse>(function (reason: Error): Promise<HandshakeResponse> {
+    }).catch(function (reason: Error): Promise<HandshakeResponse> {
       self._connection = null;
       console.log("Error connecting to domain: " + reason);
       return this;

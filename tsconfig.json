@@ -6,7 +6,8 @@
     "preserveConstEnums": true,
     "outDir": "build",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "moduleResolution": "node"
   },
   "exclude": [
     "node_modules",
