@@ -86,7 +86,6 @@ gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
       format: 'umd',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
-      exports: 'named',
       plugins: [
         rollupTypescript()
       ]

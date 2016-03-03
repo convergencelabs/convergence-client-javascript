@@ -108,6 +108,6 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   }
 }
 
-export interface ConvergenceErrorEvent extends ConvergenceEvent {
+interface ConvergenceErrorEvent extends ConvergenceEvent {
   error: string;
 }
