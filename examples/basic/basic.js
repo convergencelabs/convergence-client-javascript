@@ -13,8 +13,8 @@ var consoleDiv = document.getElementById("console");
 var model;
 
 // Connect to the domain.
-ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
+ConvergenceDomain.default.debugFlags.protocol.messages = true;
+var domain = new ConvergenceDomain.default(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
 domain.on("connected", function () {
   console.log("connected");
 });
