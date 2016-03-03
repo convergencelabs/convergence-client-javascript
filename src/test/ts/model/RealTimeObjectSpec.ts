@@ -6,6 +6,7 @@ import {ObjectSetValueEvent} from "../../../main/ts/model/RealTimeObject";
 import * as chai from "chai";
 import * as sinon from "sinon";
 import SinonSpy = Sinon.SinonSpy;
+import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
 var expect: any = chai.expect;
 
@@ -16,31 +17,38 @@ describe('RealTimeObject', () => {
   var version: number = 1;
   var timestamp: number = 100;
 
+  var callbacks: ModelEventCallbacks;
+
+  beforeEach(function(): void {
+    callbacks = {
+      onOutgoingOperation: sinon.spy(),
+      onOutgoingReferenceEvent: sinon.spy()
+    };
+  });
+
   it('Value is correct after creation', () => {
     var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, null, null);
     expect(myObject.value()).to.deep.equal({"num": 5});
   });
 
   it('Value is correct after set', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy(), null);
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, callbacks, null);
     myObject.value({"string": "test"});
     expect(myObject.value()).to.deep.equal({"string": "test"});
   });
 
   it('Value is correct after setProperty', () => {
-    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, sinon.spy(), null);
+    var myObject: RealTimeObject = new RealTimeObject({"num": 5}, null, null, callbacks, null);
     myObject.set("num", 10);
     expect(myObject.get("num").value()).to.deep.equal(10);
   });
 
   it('Correct operation is sent after set', () => {
-
-    var sendOpCallback: SinonSpy = sinon.spy();
-    var myObject: RealTimeObject = new RealTimeObject({num: 5}, null, null, sendOpCallback, null);
+    var myObject: RealTimeObject = new RealTimeObject({num: 5}, null, null, callbacks, null);
     myObject.value({string: "test"});
 
     var expectedOp: ObjectSetOperation = new ObjectSetOperation([], false, {string: "test"});
-    expect(sendOpCallback.lastCall.args[0]).to.be.deep.equal(expectedOp);
+    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.be.deep.equal(expectedOp);
   });
 
   it('Value is correct after ObjectSetOperation', () => {

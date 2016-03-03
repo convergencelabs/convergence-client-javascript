@@ -1,11 +1,11 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 export default class RealTimeUndefined extends RealTimeValue<void> {
 
@@ -18,9 +18,9 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
    */
   constructor(parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void,
+              callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Undefined, parent, fieldInParent, sendOpCallback, model);
+    super(RealTimeValueType.Undefined, parent, fieldInParent, callbacks, model);
   }
 
   protected _getValue(): void {

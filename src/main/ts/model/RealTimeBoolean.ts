@@ -1,14 +1,14 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import BooleanSetOperation from "./ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
@@ -24,9 +24,9 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   constructor(private _data: boolean,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              _sendOpCallback: (operation: DiscreteOperation) => void,
+              callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Boolean, parent, fieldInParent, _sendOpCallback, model);
+    super(RealTimeValueType.Boolean, parent, fieldInParent, callbacks, model);
   }
 
 
@@ -39,7 +39,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
     var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
     this._data = value;
-    this._sendOpCallback(operation);
+    this._sendOperation(operation);
   }
 
   protected _getValue(): boolean {

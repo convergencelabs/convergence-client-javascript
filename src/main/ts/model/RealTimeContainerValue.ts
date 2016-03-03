@@ -1,9 +1,9 @@
 import RealTimeValue from "./RealTimeValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
 
@@ -13,9 +13,9 @@ abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
   constructor(modelType: RealTimeValueType,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void,
+              callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(modelType, parent, fieldInParent, sendOpCallback, model);
+    super(modelType, parent, fieldInParent, callbacks, model);
   }
 
   _detach(): void {

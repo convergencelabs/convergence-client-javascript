@@ -1,6 +1,6 @@
 import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
 import Session from "../Session";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
 import ConvergenceConnection from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";

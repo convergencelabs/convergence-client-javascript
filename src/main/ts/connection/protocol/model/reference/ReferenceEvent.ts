@@ -1,10 +1,14 @@
 import {Path} from "../../../../model/ot/Path";
-import {IncomingProtocolNormalMessage} from "../../protocol";
 import {MessageBodySerializer} from "../../MessageSerializer";
-import {ReferenceType} from "../../../../model/reference/ModelReference";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {CodeMap} from "../../../../util/CodeMap";
 import {OutgoingProtocolNormalMessage} from "../../protocol";
+import {IncomingProtocolNormalMessage} from "../../protocol";
+import {ReferenceType} from "../../../../model/reference/ModelReference";
+
+///////////////////////////////////////////////////////////////////////////////
+// Constants
+///////////////////////////////////////////////////////////////////////////////
 
 var ReferenceTypeCodes: CodeMap = new CodeMap();
 ReferenceTypeCodes.put(0, ReferenceType.INDEX);
@@ -17,22 +21,22 @@ ReferenceTypeCodes.put(3, ReferenceType.PATH);
 // Incoming References
 ///////////////////////////////////////////////////////////////////////////////
 
-export interface IncomingReferenceMessage extends IncomingProtocolNormalMessage {
+export interface IncomingReferenceEvent extends IncomingProtocolNormalMessage {
   sessionId: string;
   resourceId: string;
   key: string;
   modelPath: Path;
 }
 
-export interface ReferenceCleared extends IncomingReferenceMessage {
+export interface ReferenceCleared extends IncomingReferenceEvent {
 
 }
 
 
-export interface ReferenceRemoved extends IncomingReferenceMessage {
+export interface ReferenceRemoved extends IncomingReferenceEvent {
 }
 
-export var ReferenceMessageDeserializer: MessageBodyDeserializer<IncomingReferenceMessage> = (body: any) => {
+export var ReferenceMessageDeserializer: MessageBodyDeserializer<IncomingReferenceEvent> = (body: any) => {
   return {
     sessionId: body.s,
     resourceId: body.r,
@@ -42,19 +46,19 @@ export var ReferenceMessageDeserializer: MessageBodyDeserializer<IncomingReferen
 };
 
 
-export interface IncomingReferenceValueMessage extends IncomingReferenceMessage {
+export interface IncomingReferenceValueEvent extends IncomingReferenceEvent {
   value?: any;
 }
 
-export interface ReferenceCreated extends IncomingReferenceValueMessage {
+export interface ReferenceCreated extends IncomingReferenceValueEvent {
   referenceType: string;
 }
 
-export interface ReferenceSet extends IncomingReferenceValueMessage {
+export interface ReferenceSet extends IncomingReferenceValueEvent {
 
 }
 
-export var ReferenceValueDeserializer: MessageBodyDeserializer<IncomingReferenceValueMessage> = (body: any) => {
+export var ReferenceValueDeserializer: MessageBodyDeserializer<IncomingReferenceValueEvent> = (body: any) => {
   return {
     resourceId: body.r,
     sessionId: body.s,
@@ -71,13 +75,13 @@ export var ReferenceValueDeserializer: MessageBodyDeserializer<IncomingReference
 // Outgoing References
 ///////////////////////////////////////////////////////////////////////////////
 
-export interface OutgoingReferenceMessage extends OutgoingProtocolNormalMessage {
+export interface OutgoingReferenceEvent extends OutgoingProtocolNormalMessage {
   resourceId: string;
   modelPath: Path;
   key: string;
 }
 
-export var ReferenceMessageSerializer: MessageBodySerializer = (message: OutgoingReferenceMessage) => {
+export var ReferenceMessageSerializer: MessageBodySerializer = (message: OutgoingReferenceEvent) => {
   return {
     r: message.resourceId,
     m: message.modelPath,
@@ -85,14 +89,14 @@ export var ReferenceMessageSerializer: MessageBodySerializer = (message: Outgoin
   };
 };
 
-export interface OutgoingReferenceValueMessage extends OutgoingReferenceMessage {
+export interface OutgoingReferenceValueEvent extends OutgoingReferenceEvent {
   value: any;
 }
 
-export interface SetReference extends OutgoingReferenceValueMessage {
+export interface SetReferenceEvent extends OutgoingReferenceValueEvent {
 }
 
-export var SetReferenceSerializer: MessageBodySerializer = (message: SetReference) => {
+export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
     m: message.modelPath,
@@ -101,11 +105,11 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
   };
 };
 
-export interface CreateReference extends OutgoingReferenceValueMessage {
+export interface CreateReferenceEvent extends OutgoingReferenceValueEvent {
   referenceType: string;
 }
 
-export var CreateReferenceSerializer: MessageBodySerializer = (message: CreateReference) => {
+export var CreateReferenceSerializer: MessageBodySerializer = (message: CreateReferenceEvent) => {
   return {
     r: message.resourceId,
     m: message.modelPath,
@@ -116,7 +120,7 @@ export var CreateReferenceSerializer: MessageBodySerializer = (message: CreateRe
 };
 
 
-export var ReferenceValueSerializer: MessageBodySerializer = (message: IncomingReferenceValueMessage) => {
+export var ReferenceValueSerializer: MessageBodySerializer = (message: OutgoingReferenceValueEvent) => {
   return {
     r: message.resourceId,
     m: message.modelPath,

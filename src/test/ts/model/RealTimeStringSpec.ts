@@ -1,4 +1,3 @@
-import DiscreteOperation from "../../../main/ts/model/ot/ops/DiscreteOperation";
 import RealTimeString from "../../../main/ts/model/RealTimeString";
 import StringSetOperation from "../../../main/ts/model/ot/ops/StringSetOperation";
 import StringInsertOperation from "../../../main/ts/model/ot/ops/StringInsertOperation";
@@ -8,8 +7,10 @@ import {StringRemoveEvent} from "../../../main/ts/model/RealTimeString";
 import {StringInsertEvent} from "../../../main/ts/model/RealTimeString";
 import {StringSetValueEvent} from "../../../main/ts/model/RealTimeString";
 import {ModelChangeEvent} from "../../../main/ts/model/events";
+import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
 import * as chai from "chai";
+import * as sinon from "sinon";
 
 var expect: any = chai.expect;
 
@@ -20,14 +21,14 @@ describe('RealTimeString', () => {
   var version: number = 1;
   var timestamp: number = 100;
 
-  var ignoreCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
-    // NoOp
-  };
+  var callbacks: ModelEventCallbacks;
 
-  var lastOp: DiscreteOperation = null;
-  var lastOpCallback: (op: DiscreteOperation) => void = (op: DiscreteOperation) => {
-    lastOp = op;
-  };
+  beforeEach(function(): void {
+    callbacks = {
+      onOutgoingOperation: sinon.spy(),
+      onOutgoingReferenceEvent: sinon.spy()
+    };
+  });
 
   var lastEvent: ModelChangeEvent = null;
   var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
@@ -35,53 +36,50 @@ describe('RealTimeString', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, null, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     expect(myString.value()).to.equal("MyString");
   });
 
   it('Value is correct after set', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.value("AnotherString");
     expect(myString.value()).to.equal("AnotherString");
   });
 
   it('Value is correct after insert', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.insert(2, "Edited");
     expect(myString.value()).to.equal("MyEditedString");
   });
 
   it('Value is correct after remove', () => {
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, ignoreCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.remove(0, 2);
     expect(myString.value()).to.equal("String");
   });
 
   it('Correct operation is sent after set', () => {
-    lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.value("AnotherString");
 
     var expectedOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
-    expect(lastOp).to.deep.equal(expectedOp);
+    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after insert', () => {
-    lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.insert(2, "Edited");
 
     var expectedOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
-    expect(lastOp).to.deep.equal(expectedOp);
+    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after remove', () => {
-    lastOp = null;
-    var myString: RealTimeString = new RealTimeString("MyString", null, null, lastOpCallback, null);
+    var myString: RealTimeString = new RealTimeString("MyString", null, null, callbacks, null);
     myString.remove(0, 2);
 
     var expectedOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
-    expect(lastOp).to.deep.equal(expectedOp);
+    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Value is correct after StringSetOperation', () => {

@@ -21,8 +21,9 @@ import {Path} from "./ot/Path";
 import ConvergenceEvent from "../util/ConvergenceEvent";
 import OperationType from "../connection/protocol/model/OperationType";
 import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
+import {OutgoingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
-export default class RealTimeModel extends ConvergenceEventEmitter {
+export class RealTimeModel extends ConvergenceEventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
@@ -56,10 +57,17 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
       this.emit(name, evt);
     });
 
-    this._data = new RealTimeObject(_data, null, null, (operation: DiscreteOperation) => {
-      var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
-      this._sendOperation(opEvent);
-    }, this);
+    var callbacks: ModelEventCallbacks = {
+      onOutgoingOperation: (operation: DiscreteOperation): void => {
+        var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
+        this._sendOperation(opEvent);
+      },
+      onOutgoingReferenceEvent: (referenceEvent: OutgoingReferenceEvent): void => {
+        this._handleOutgoingReference(referenceEvent);
+      }
+    };
+
+    this._data = new RealTimeObject(_data, null, null, callbacks, this);
 
     this._open = true;
     this._committed = true;
@@ -107,7 +115,8 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
       var event: RealTimeModelClosedEvent = {
         src: this,
         name: RealTimeModel.Events.CLOSED,
-        local: true};
+        local: true
+      };
       this._close(event);
     });
   }
@@ -202,6 +211,24 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
     }
   }
 
+  private _handleOutgoingReference(referenceEvent: OutgoingReferenceEvent): void {
+    switch (referenceEvent.type) {
+      case MessageType.SET_REFERENCE:
+      case MessageType.CREATE_REFERENCE:
+        this._concurrencyControl
+        break;
+      default:
+    }
+    var opSubmission: OperationSubmission = {
+      resourceId: this._resourceId,
+      seqNo: opEvent.seqNo,
+      version: opEvent.contextVersion,
+      operation: opEvent.operation,
+      type: MessageType.OPERATION_SUBMISSION
+    };
+    this._connection.send(referenceEvent);
+  }
+
   private _sendOperation(opEvent: UnprocessedOperationEvent): void {
     var opSubmission: OperationSubmission = {
       resourceId: this._resourceId,
@@ -212,6 +239,11 @@ export default class RealTimeModel extends ConvergenceEventEmitter {
     };
     this._connection.send(opSubmission);
   }
+}
+
+export interface ModelEventCallbacks {
+  onOutgoingOperation: (operation: DiscreteOperation) => void;
+  onOutgoingReferenceEvent: (operation: OutgoingReferenceEvent) => void;
 }
 
 interface RealTimeModelEvent extends ConvergenceEvent {

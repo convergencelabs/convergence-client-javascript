@@ -5,7 +5,8 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {ModelDetachedEvent} from "./events";
 import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
@@ -20,8 +21,8 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
    */
   constructor(private _modelType: RealTimeValueType,
               private _parent: RealTimeContainerValue<any>,
-              public fieldInParent: PathElement,
-              protected _sendOpCallback: (operation: DiscreteOperation) => void,
+              public fieldInParent: PathElement, // fixme not sure I like this being public
+              protected _callbacks: ModelEventCallbacks,
               protected _model: RealTimeModel) {
     super();
   }
@@ -51,7 +52,7 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
   _detach(): void {
     this._parent = null;
     this._detached = true;
-    this._sendOpCallback = null;
+    this._callbacks = null;
     var event: ModelDetachedEvent = {
       src: this,
       name: RealTimeValue.Events.DETACHED
@@ -79,7 +80,7 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   protected _sendOperation(operation: DiscreteOperation): void {
     this._exceptionIfDetached();
-    this._sendOpCallback(operation);
+    this._callbacks.onOutgoingOperation(operation);
   }
 
   protected abstract _getValue(): T;

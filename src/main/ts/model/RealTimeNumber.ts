@@ -1,7 +1,6 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import NumberAddOperation from "./ot/ops/NumberAddOperation";
 import NumberSetOperation from "./ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
@@ -9,7 +8,8 @@ import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -25,9 +25,9 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   constructor(private _data: number,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              _sendOperation: (operation: DiscreteOperation) => void,
+              callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Number, parent, fieldInParent, _sendOperation, model);
+    super(RealTimeValueType.Number, parent, fieldInParent, callbacks, model);
   }
 
   add(value: number): void {

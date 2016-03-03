@@ -1,7 +1,6 @@
 import RealTimeValue from "./RealTimeValue";
 import RealTimeContainerValue from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import StringInsertOperation from "./ot/ops/StringInsertOperation";
 import StringRemoveOperation from "./ot/ops/StringRemoveOperation";
 import StringSetOperation from "./ot/ops/StringSetOperation";
@@ -11,13 +10,14 @@ import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
 import {LocalIndexReference} from "./reference/LocalIndexReference";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {LocalModelReference} from "./reference/LocalModelReference";
 import {ModelReference} from "./reference/ModelReference";
 import {IndexReference} from "./reference/IndexReference";
 import Session from "../Session";
 import {ReferenceMap} from "./reference/ReferenceMap";
 import {ReferenceType} from "./reference/ModelReference";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -39,9 +39,9 @@ export default class RealTimeString extends RealTimeValue<String> {
   constructor(data: string,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              sendOpCallback: (operation: DiscreteOperation) => void,
+              callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.String, parent, fieldInParent, sendOpCallback, model);
+    super(RealTimeValueType.String, parent, fieldInParent, callbacks, model);
 
     this._data = data;
     this._referenceMap = new ReferenceMap();
