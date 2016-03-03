@@ -97,8 +97,7 @@ gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
 });
 
 gulp.task('dist-ts', ["build"], function() {
-  // TODO hook this up to gulp properly, find/replace erroneous 
-  // convergence-client/ConvergenceDomain imports
+  // TODO we could write a plugin to make this more gulpy
   var options = {
     name: 'convergence-client',
     main: 'build/main/ts/ConvergenceDomain.d.ts'
