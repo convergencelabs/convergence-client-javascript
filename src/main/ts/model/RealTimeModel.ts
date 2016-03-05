@@ -179,7 +179,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _handleRemoteOperation(message: RemoteOperation): void {
     var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       message.clientId,
-      -1, // not needed
+      -1, // fixme not needed, this is only needed when going to the server.  Perhaps
+          // this should probalby go in the op submission message.
       message.version,
       message.timestamp,
       message.operation
@@ -215,7 +216,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     switch (referenceEvent.type) {
       case MessageType.SET_REFERENCE:
       case MessageType.CREATE_REFERENCE:
-        // this._concurrencyControl
+
         break;
       default:
     }

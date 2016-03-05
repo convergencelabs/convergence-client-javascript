@@ -65,13 +65,20 @@ import ObjectSetPropertyPTF from "./path/ObjectSetPropertyPTF";
 import ObjectRemovePropertyPTF from "./path/ObjectRemovePropertyPTF";
 import ObjectSetPTF from "./path/ObjectSetPTF";
 import OperationType from "../../../connection/protocol/model/OperationType";
+import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
+import {ModelReferenceData} from "./ReferenceTransformer";
 
 
 export default class TransformationFunctionRegistry {
-  otfs: any = {};
-  ptfs: any = {};
+  _otfs: {[key: string]: OperationTransformationFunction<any, any>};
+  _rtfs: {[key: string]: ReferenceTransformationFunction<any>};
+  _ptfs: {[key: string]: PathTransformationFunction<any>};
 
   constructor() {
+    this._otfs = {};
+    this._rtfs = {};
+    this._ptfs = {};
+
     // string Functions
     this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_INSERT, new StringInsertInsertOTF());
     this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_REMOVE, new StringInsertRemoveOTF());
@@ -152,34 +159,39 @@ export default class TransformationFunctionRegistry {
     // path Transformation Functions
     //
 
-    this.ptfs[OperationType.ARRAY_INSERT] = new ArrayInsertPTF();
-    this.ptfs[OperationType.ARRAY_REMOVE] = new ArrayRemovePTF();
-    this.ptfs[OperationType.ARRAY_SET] = new ArrayReplacePTF();
-    this.ptfs[OperationType.ARRAY_REORDER] = new ArrayMovePTF();
-    this.ptfs[OperationType.ARRAY_VALUE] = new ArraySetPTF();
+    this._ptfs[OperationType.ARRAY_INSERT] = new ArrayInsertPTF();
+    this._ptfs[OperationType.ARRAY_REMOVE] = new ArrayRemovePTF();
+    this._ptfs[OperationType.ARRAY_SET] = new ArrayReplacePTF();
+    this._ptfs[OperationType.ARRAY_REORDER] = new ArrayMovePTF();
+    this._ptfs[OperationType.ARRAY_VALUE] = new ArraySetPTF();
 
-    this.ptfs[OperationType.OBJECT_SET] = new ObjectSetPropertyPTF();
-    this.ptfs[OperationType.OBJECT_REMOVE] = new ObjectRemovePropertyPTF();
-    this.ptfs[OperationType.OBJECT_VALUE] = new ObjectSetPTF();
+    this._ptfs[OperationType.OBJECT_SET] = new ObjectSetPropertyPTF();
+    this._ptfs[OperationType.OBJECT_REMOVE] = new ObjectRemovePropertyPTF();
+    this._ptfs[OperationType.OBJECT_VALUE] = new ObjectSetPTF();
   }
 
   registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
   (s: number, c: number, otf: OperationTransformationFunction<S, C>): void {
     var key: string = "" + s + c;
-    if (this.otfs[key]) {
+    if (this._otfs[key]) {
       throw new Error("Transformation function already registered for " + s + ", " + c);
     } else {
-      this.otfs[key] = otf;
+      this._otfs[key] = otf;
     }
   }
 
   getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>
   (s: S, c: C): OperationTransformationFunction<S, C> {
     var key: string = "" + s.type + c.type;
-    return this.otfs[key];
+    return this._otfs[key];
+  }
+
+  getReferenceTransformationFunction<O extends DiscreteOperation> (o: O, r: ModelReferenceData): ReferenceTransformationFunction<O> {
+    var key: string = "" + o.type + r.type;
+    return this._rtfs[key];
   }
 
   getPathTransformationFunction<A extends DiscreteOperation>(a: A): PathTransformationFunction<A> {
-    return this.ptfs[a.type];
+    return this._ptfs[a.type];
   }
 }

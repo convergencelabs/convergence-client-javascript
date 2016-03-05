@@ -91,6 +91,7 @@ export var ReferenceMessageSerializer: MessageBodySerializer = (message: Outgoin
 
 export interface OutgoingReferenceValueEvent extends OutgoingReferenceEvent {
   value: any;
+  version: number;
 }
 
 export interface SetReferenceEvent extends OutgoingReferenceValueEvent {

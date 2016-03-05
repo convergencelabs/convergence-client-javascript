@@ -17,6 +17,7 @@ import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealt
 import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
+import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 
 export default class ModelService extends ConvergenceEventEmitter {
 
@@ -63,8 +64,13 @@ export default class ModelService extends ConvergenceEventEmitter {
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
       var transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
-      var clientConcurrencyControl: ClientConcurrencyControl =
-        new ClientConcurrencyControl(this._connection.session().sessionId(), response.version, transformer);
+      var referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
+      var clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
+        this._connection.session().sessionId(),
+        response.version,
+        transformer,
+        referenceTransformer);
+
       var model: RealTimeModel = new RealTimeModel(
         response.resourceId,
         response.data,

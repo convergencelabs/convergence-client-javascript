@@ -6,6 +6,8 @@ import EventEmitter from "../../util/EventEmitter";
 import CompoundOperation from "./ops/CompoundOperation";
 import OperationTransformer from "./xform/OperationTransformer";
 import OperationPair from "./xform/OperationPair";
+import {ReferenceTransformer} from "./xform/ReferenceTransformer";
+import {ModelReferenceData} from "./xform/ReferenceTransformer";
 
 export default class ClientConcurrencyControl extends EventEmitter {
 
@@ -24,10 +26,12 @@ export default class ClientConcurrencyControl extends EventEmitter {
 
   private _contextVersion: number;
   private _transformer: OperationTransformer;
+  private _referenceTransformer: ReferenceTransformer;
 
   constructor(clientId: string,
               contextVersion: number,
-              transformer: OperationTransformer) {
+              transformer: OperationTransformer,
+              referenceTransformer: ReferenceTransformer) {
     super();
 
     this._clientId = clientId;
@@ -37,6 +41,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     this._inflightOperations = [];
 
     this._transformer = transformer;
+    this._referenceTransformer = referenceTransformer;
     this._compoundOpInProgress = false;
     this._pendingCompoundOperation = [];
   }
@@ -123,6 +128,13 @@ export default class ClientConcurrencyControl extends EventEmitter {
         new Date().getTime(),
         outgoingOperation);
     }
+  }
+
+  processOutgoingReference(r: ModelReferenceData): ModelReferenceData {
+    for (var i: number = 0; i < this._unappliedOperations.length && r; i++) {
+      r = this._referenceTransformer.transform( this._unappliedOperations[i].operation, r);
+    }
+    return r;
   }
 
   dispose(): void {

@@ -67,7 +67,7 @@ export default class OperationTransformer {
       return tf.transform(s, c);
     } else {
       throw new Error(
-        "No operation transformation function found for operation pair (${s.getClass.getName},${s.getClass.getName})");
+        `No operation transformation function found for operation pair (${s.type},${s.type})`);
     }
   }
 
@@ -83,10 +83,10 @@ export default class OperationTransformer {
         case PathTransformationResult.PathUpdated:
           return new OperationPair(a, d.copy({path: result.path}));
         default:
-          throw new Error("Invalid pat transofrmation result");
+          throw new Error("Invalid path transformation result");
       }
     } else {
-      throw new Error("No path transformation function found for ancestor operation: ${a.getClass.getName}");
+      throw new Error(`No path transformation function found for ancestor operation: ${a.type}`);
     }
   }
 }
