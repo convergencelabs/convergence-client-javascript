@@ -7,6 +7,7 @@ export var ReferenceType: any = {
   PROPERTY: "property",
   PATH: "path"
 };
+Object.freeze(ReferenceType);
 
 export abstract class ModelReference extends EventEmitter {
 

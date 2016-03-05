@@ -52,9 +52,9 @@ export class ReferenceTransformer {
   }
 
   private transformWithIdenticalPathOperation(o: DiscreteOperation, r: ModelReferenceData): ModelReferenceData {
-    var tf: ReferenceTransformationFunction<any> = this._tfr.getReferenceTransformationFunction(o, r);
+    var tf: ReferenceTransformationFunction = this._tfr.getReferenceTransformationFunction(o, r);
     if (tf) {
-      return tf.transform(o, r);
+      return tf(o, r);
     } else {
       throw new Error(
         `No operation transformation function found for operation pair (${o.type},${r.type})`);

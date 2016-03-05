@@ -67,11 +67,13 @@ import ObjectSetPTF from "./path/ObjectSetPTF";
 import OperationType from "../../../connection/protocol/model/OperationType";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 import {ModelReferenceData} from "./ReferenceTransformer";
+import {ReferenceType} from "../../reference/ModelReference";
+import {StringInsertIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
 
 
 export default class TransformationFunctionRegistry {
   _otfs: {[key: string]: OperationTransformationFunction<any, any>};
-  _rtfs: {[key: string]: ReferenceTransformationFunction<any>};
+  _rtfs: {[key: string]: ReferenceTransformationFunction};
   _ptfs: {[key: string]: PathTransformationFunction<any>};
 
   constructor() {
@@ -168,6 +170,13 @@ export default class TransformationFunctionRegistry {
     this._ptfs[OperationType.OBJECT_SET] = new ObjectSetPropertyPTF();
     this._ptfs[OperationType.OBJECT_REMOVE] = new ObjectRemovePropertyPTF();
     this._ptfs[OperationType.OBJECT_VALUE] = new ObjectSetPTF();
+
+    //
+    // Reference Transformation Functions
+    //
+    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_INSERT, StringInsertIndexTransformationFunction);
+    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_REMOVE, StringInsertIndexTransformationFunction);
+    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_VALUE, StringInsertIndexTransformationFunction);
   }
 
   registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
@@ -180,13 +189,22 @@ export default class TransformationFunctionRegistry {
     }
   }
 
+  registerRtf<S extends DiscreteOperation>(r: string, s: number, rtf: ReferenceTransformationFunction): void {
+    var key: string = "" + s + r;
+    if (this._rtfs[key]) {
+      throw new Error("Transformation function already registered for " + s + ", " + r);
+    } else {
+      this._rtfs[key] = rtf;
+    }
+  }
+
   getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>
   (s: S, c: C): OperationTransformationFunction<S, C> {
     var key: string = "" + s.type + c.type;
     return this._otfs[key];
   }
 
-  getReferenceTransformationFunction<O extends DiscreteOperation> (o: O, r: ModelReferenceData): ReferenceTransformationFunction<O> {
+  getReferenceTransformationFunction<O extends DiscreteOperation> (o: O, r: ModelReferenceData): ReferenceTransformationFunction {
     var key: string = "" + o.type + r.type;
     return this._rtfs[key];
   }
