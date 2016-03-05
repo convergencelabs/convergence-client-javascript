@@ -14,7 +14,8 @@ const dts = require('dts-bundle');
 const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
 
-const rollup = require('gulp-rollup');
+const rollup = require('rollup');
+const gulpRollup = require('gulp-rollup');
 const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
@@ -82,10 +83,12 @@ gulp.task('lint', function () {
  */
 gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(rollup({
+    .pipe(gulpRollup({
+      rollup: rollup,
       format: 'umd',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
+      exports: 'named',
       plugins: [
         rollupTypescript()
       ]

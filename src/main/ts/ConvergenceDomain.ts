@@ -7,7 +7,7 @@ import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
 import ConvergenceEvent from "./util/ConvergenceEvent";
 import UserService from "./user/UserService";
 
-class ConvergenceDomain extends ConvergenceEventEmitter {
+export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static debugFlags: any = flags;
 
@@ -111,8 +111,3 @@ class ConvergenceDomain extends ConvergenceEventEmitter {
 interface ConvergenceErrorEvent extends ConvergenceEvent {
   error: string;
 }
-
-// This utilizes the allowSyntheticDefaultImports flag, allowing a default export to work properly
-// when exporting to commonjs.
-// see https://github.com/Microsoft/TypeScript/issues/5285
-export = ConvergenceDomain;

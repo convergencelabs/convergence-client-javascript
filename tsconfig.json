@@ -7,8 +7,7 @@
     "outDir": "build",
     "sourceMap": true,
     "declaration": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "moduleResolution": "node"
   },
   "exclude": [
     "node_modules",
