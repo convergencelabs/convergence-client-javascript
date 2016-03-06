@@ -1,7 +1,7 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
 import MessageType from "../../connection/protocol/MessageType";
-import {IncomingReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferencePublished} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferenceCleared} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -60,7 +60,7 @@ export class ReferenceManager {
     return Immutable.copy(this._localReferences);
   }
 
-  handleRemoteReferenceEvent(event: IncomingReferenceEvent): void {
+  handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     switch (event.type) {
       case MessageType.REFERENCE_PUBLISHED:
         this._handleRemoteReferencePublished(<RemoteReferencePublished>event);

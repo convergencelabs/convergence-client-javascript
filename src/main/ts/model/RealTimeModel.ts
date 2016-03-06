@@ -28,6 +28,9 @@ import {ClearReferenceEvent} from "../connection/protocol/model/reference/Refere
 import {SetReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReferenceData} from "./ot/xform/ReferenceTransformer";
 import {OperationType} from "./ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import Immutable from "../util/Immutable";
+import {RemoteReferenceSet} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 
@@ -65,21 +68,29 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     var referenceCallbacks: ModelReferenceCallbacks = {
       onPublish: (reference: LocalModelReference<any>): void => {
-        var event: PublishReferenceEvent = {
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          modelPath: reference.reference().source().path(),
-          referenceType: reference.reference().type()
-        };
-        this._connection.send(event);
+        var path: Path = reference.reference().source().path();
+        path = this._concurrencyControl.processOutgoingReferencePath(path);
+        if (path) {
+          var event: PublishReferenceEvent = {
+            resourceId: this._resourceId,
+            key: reference.reference().key(),
+            path: path,
+            referenceType: reference.reference().type()
+          };
+          this._connection.send(event);
+        }
       },
       onUnpublish: (reference: LocalModelReference<any>): void => {
-        var event: UnpublishReferenceEvent = {
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          modelPath: reference.reference().source().path()
-        };
-        this._connection.send(event);
+        var path: Path = reference.reference().source().path();
+        path = this._concurrencyControl.processOutgoingReferencePath(path);
+        if (path) {
+          var event: UnpublishReferenceEvent = {
+            resourceId: this._resourceId,
+            key: reference.reference().key(),
+            path: path
+          };
+          this._connection.send(event);
+        }
       },
       onSet: (reference: LocalModelReference<any>): void => {
         var refData: ModelReferenceData = {
@@ -88,25 +99,29 @@ export class RealTimeModel extends ConvergenceEventEmitter {
           value: reference.reference()
         };
 
-        refData = this._concurrencyControl.processOutgoingReference(refData);
+        refData = this._concurrencyControl.processOutgoingSetReference(refData);
         if (refData) {
           var event: SetReferenceEvent = {
             resourceId: this._resourceId,
             key: reference.reference().key(),
-            modelPath: refData.path,
-            value: refData.value,
-            version: this._concurrencyControl.contextVersion()
+            path: refData.path,
+            referenceType: reference.reference().type(),
+            value: refData.value
           };
           this._connection.send(event);
         }
       },
       onClear: (reference: LocalModelReference<any>): void => {
-        var event: ClearReferenceEvent = {
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          modelPath: reference.reference().source().path()
-        };
-        this._connection.send(event);
+        var path: Path = reference.reference().source().path();
+        path = this._concurrencyControl.processOutgoingReferencePath(path);
+        if (path) {
+          var event: ClearReferenceEvent = {
+            resourceId: this._resourceId,
+            key: reference.reference().key(),
+            path: path
+          };
+          this._connection.send(event);
+        }
       }
     };
 
@@ -197,11 +212,58 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       case MessageType.REMOTE_OPERATION:
         this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
         break;
+      case MessageType.REFERENCE_PUBLISHED:
+      case MessageType.REFERENCE_UNPUBLISHED:
+      case MessageType.REFERENCE_SET:
+      case MessageType.REFERENCE_CLEARED:
+        this._handleRemoteReferenceEvent(<RemoteReferenceEvent>messageEvent.message);
+        break;
       case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
         break;
       default:
         throw new Error("Unexpected message");
+    }
+  }
+
+  private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    var processedEvent: RemoteReferenceEvent;
+
+    switch (event.type) {
+      case MessageType.REFERENCE_PUBLISHED:
+      case MessageType.REFERENCE_UNPUBLISHED:
+      case MessageType.REFERENCE_CLEARED:
+        var currentPath: Path = this._concurrencyControl.processRemoteReferencePath(event.path);
+        if (currentPath) {
+          processedEvent = Immutable.copy(event, {
+            path: currentPath
+          });
+        }
+        break;
+      case MessageType.REFERENCE_SET:
+        var setEvent: RemoteReferenceSet = <RemoteReferenceSet>event;
+        var data: ModelReferenceData = {
+          type: setEvent.referenceType,
+          path: setEvent.path,
+          value: setEvent.value
+        };
+        data = this._concurrencyControl.processRemoteReferenceSet(data);
+        if (data) {
+          processedEvent = Immutable.copy(event, {
+            path: data.path,
+            value: data.value
+          });
+        }
+        break;
+      default:
+    }
+
+    // TODO if we wind up being able to pause the processing of incoming
+    // operations, then we would put this in a queue.  We would also need
+    // to somehow wrap this in an object that stores the currentContext
+    // version right now, so we know when to distribute this event.
+    if (processedEvent !== undefined) {
+      this._data._handleRemoteReferenceEvent(event.path, event);
     }
   }
 
@@ -231,7 +293,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       message.clientId,
       -1, // fixme not needed, this is only needed when going to the server.  Perhaps
-          // this should probalby go in the op submission message.
+      // this should probalby go in the op submission message.
       message.version,
       message.timestamp,
       message.operation

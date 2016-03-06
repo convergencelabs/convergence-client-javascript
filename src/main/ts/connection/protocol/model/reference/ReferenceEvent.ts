@@ -21,25 +21,26 @@ ReferenceTypeCodes.put(3, ReferenceType.PATH);
 // Incoming References
 ///////////////////////////////////////////////////////////////////////////////
 
-export interface IncomingReferenceEvent extends IncomingProtocolNormalMessage {
+export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   sessionId: string;
   resourceId: string;
   key: string;
-  modelPath: Path;
+  path: Path;
 }
 
-export interface RemoteReferencePublished extends IncomingReferenceEvent {
+export interface RemoteReferencePublished extends RemoteReferenceEvent {
   referenceType: string;
 }
 
-export interface RemoteReferenceUnpublished extends IncomingReferenceEvent {
+export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
 }
 
-export interface RemoteReferenceSet extends IncomingReferenceEvent {
+export interface RemoteReferenceSet extends RemoteReferenceEvent {
+  referenceType: string;
   value: any;
 }
 
-export interface RemoteReferenceCleared extends IncomingReferenceEvent {
+export interface RemoteReferenceCleared extends RemoteReferenceEvent {
 }
 
 export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
@@ -47,7 +48,7 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
     resourceId: body.r,
     sessionId: body.s,
     key: body.k,
-    modelPath: body.m,
+    path: body.m,
     referenceType: ReferenceTypeCodes.value(body.p)
   };
   return result;
@@ -58,18 +59,19 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
     resourceId: body.r,
     sessionId: body.s,
     key: body.k,
-    modelPath: body.m,
+    path: body.m,
+    referenceType: ReferenceTypeCodes.value(body.p),
     value: body.v
   };
   return result;
 };
 
-var ReferenceMessageDeserializer: MessageBodyDeserializer<IncomingReferenceEvent> = (body: any) => {
-  var result: IncomingReferenceEvent = {
+var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
+  var result: RemoteReferenceEvent = {
     sessionId: body.s,
     resourceId: body.r,
     key: body.k,
-    modelPath: body.m
+    path: body.m
   };
   return result;
 };
@@ -84,7 +86,7 @@ export var RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<Remot
 
 export interface OutgoingReferenceEvent extends OutgoingProtocolNormalMessage {
   resourceId: string;
-  modelPath: Path;
+  path: Path;
   key: string;
 }
 
@@ -96,7 +98,7 @@ export interface UnpublishReferenceEvent extends OutgoingReferenceEvent {
 }
 
 export interface SetReferenceEvent extends OutgoingReferenceEvent {
-  version: number;
+  referenceType: string;
   value: any;
 }
 
@@ -107,7 +109,7 @@ export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 export var PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.modelPath,
+    m: message.path,
     k: message.key,
     p: ReferenceTypeCodes.code(message.referenceType)
   };
@@ -116,7 +118,7 @@ export var PublishReferenceSerializer: MessageBodySerializer = (message: Publish
 export var UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.modelPath,
+    m: message.path,
     k: message.key
   };
 };
@@ -125,17 +127,17 @@ export var UnpublishReferenceSerializer: MessageBodySerializer = (message: Unpub
 export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.modelPath,
+    m: message.path,
     k: message.key,
-    u: message.value,
-    v: message.version
+    p: ReferenceTypeCodes.code(message.referenceType),
+    v: message.value
   };
 };
 
 export var ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.modelPath,
+    m: message.path,
     k: message.key
   };
 };

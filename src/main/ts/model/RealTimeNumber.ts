@@ -9,7 +9,7 @@ import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
@@ -128,7 +128,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     throw new Error("Number values do not process references");
   }
 }

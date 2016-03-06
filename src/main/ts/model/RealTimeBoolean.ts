@@ -8,7 +8,7 @@ import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
 
 
@@ -87,7 +87,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }
 }

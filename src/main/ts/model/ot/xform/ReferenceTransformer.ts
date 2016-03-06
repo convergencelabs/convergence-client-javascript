@@ -11,8 +11,8 @@ import Immutable from "../../../util/Immutable";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 
 export interface ModelReferenceData {
-  path: Path;
   type: string;
+  path: Path;
   value: any;
 }
 
@@ -72,6 +72,53 @@ export class ReferenceTransformer {
           return null;
         case PathTransformationResult.PathUpdated:
           return <ModelReferenceData>Immutable.copy(r, {path: result.path});
+        default:
+          throw new Error("Invalid path transformation result");
+      }
+    } else {
+      throw new Error(`No path transformation function found for ancestor operation: ${a.type}`);
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Path Transformation
+  /////////////////////////////////////////////////////////////////////////////
+
+  transformPath(o: Operation, path: Path): Path {
+    if (o instanceof CompoundOperation) {
+      return this._transformPathWithCompoundOperation(o, path);
+    } else {
+      return this._transformPathWithDiscreteOperation(<DiscreteOperation>o, path);
+    }
+  }
+
+  private _transformPathWithCompoundOperation(o: CompoundOperation, p: Path): Path {
+  var result: Path = p;
+  for (var i: number = 0; i < o.ops.length && result; i++) {
+    result = this.transformPath(o.ops[i], result);
+  }
+  return result;
+}
+
+  private _transformPathWithDiscreteOperation(operation: DiscreteOperation, path: Path): Path {
+    if (PathComparator.isAncestorOf(operation.path, path)) {
+      return this._transformHierarchicalOperations(operation, path);
+    } else {
+      return path;
+    }
+  };
+
+  private _transformHierarchicalOperations(a: DiscreteOperation, path: Path): Path {
+    var ptf: PathTransformationFunction<any> = this._tfr.getPathTransformationFunction(a);
+    if (ptf) {
+      var result: PathTransformation = ptf.transformDescendantPath(a, path);
+      switch (result.result) {
+        case PathTransformationResult.NoTransformation:
+          return path;
+        case PathTransformationResult.PathObsoleted:
+          return null;
+        case PathTransformationResult.PathUpdated:
+          return result.path;
         default:
           throw new Error("Invalid path transformation result");
       }

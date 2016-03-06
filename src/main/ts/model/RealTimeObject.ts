@@ -14,8 +14,8 @@ import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -296,7 +296,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     if (relativePath.length === 0) {
       // fixme implement when we have object references.
       throw new Error("Objects to do have references yet.");

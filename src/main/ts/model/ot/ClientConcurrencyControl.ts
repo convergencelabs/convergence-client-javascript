@@ -8,6 +8,7 @@ import OperationTransformer from "./xform/OperationTransformer";
 import OperationPair from "./xform/OperationPair";
 import {ReferenceTransformer} from "./xform/ReferenceTransformer";
 import {ModelReferenceData} from "./xform/ReferenceTransformer";
+import {Path} from "./Path";
 
 export default class ClientConcurrencyControl extends EventEmitter {
 
@@ -55,6 +56,20 @@ export default class ClientConcurrencyControl extends EventEmitter {
   }
 
   getNextIncomingOperation(): ProcessedOperationEvent {
+    if (this._unappliedOperations.length === 0) {
+      return null;
+    } else {
+      // todo: should we fire incoming reference if references are now
+      // available???
+      return this._unappliedOperations.shift();
+    }
+  }
+
+  hasNextRemoteReference(): boolean {
+    return this._unappliedOperations.length !== 0;
+  }
+
+  getNextRemoteReferenceSetEvent(): ProcessedOperationEvent {
     if (this._unappliedOperations.length === 0) {
       return null;
     } else {
@@ -134,11 +149,18 @@ export default class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  processOutgoingReference(r: ModelReferenceData): ModelReferenceData {
+  processOutgoingSetReference(r: ModelReferenceData): ModelReferenceData {
     for (var i: number = 0; i < this._unappliedOperations.length && r; i++) {
-      r = this._referenceTransformer.transform( this._unappliedOperations[i].operation, r);
+      r = this._referenceTransformer.transform(this._unappliedOperations[i].operation, r);
     }
     return r;
+  }
+
+  processOutgoingReferencePath(p: Path): Path {
+    for (var i: number = 0; i < this._unappliedOperations.length && p; i++) {
+      p = this._referenceTransformer.transformPath(this._unappliedOperations[i].operation, p);
+    }
+    return p;
   }
 
   dispose(): void {
@@ -155,7 +177,6 @@ export default class ClientConcurrencyControl extends EventEmitter {
     }
 
     this._contextVersion++;
-
     this._inflightOperations.shift();
 
     // fixme we need to store an unprocessed event so we can verify te seqNo
@@ -191,6 +212,20 @@ export default class ClientConcurrencyControl extends EventEmitter {
       incomingOperation.contextVersion,
       incomingOperation.timestamp,
       remoteOperation));
+  }
+
+  processRemoteReferenceSet(r: ModelReferenceData): ModelReferenceData {
+    for (var i: number = 0; i < this._inflightOperations.length && r; i++) {
+      r = this._referenceTransformer.transform(this._inflightOperations[i], r);
+    }
+    return r;
+  }
+
+  processRemoteReferencePath(p: Path): Path {
+    for (var i: number = 0; i < this._inflightOperations.length && p; i++) {
+      p = this._referenceTransformer.transformPath(this._inflightOperations[i], p);
+    }
+    return p;
   }
 
   private transformIncoming(serverOp: Operation, clientOps: Operation[]): Operation {

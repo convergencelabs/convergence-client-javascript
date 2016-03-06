@@ -7,7 +7,7 @@ import {ModelDetachedEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ModelReference} from "./reference/ModelReference";
 
@@ -93,7 +93,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
 
-  abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: IncomingReferenceEvent): void;
+  abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: RemoteReferenceEvent): void;
 
   protected _fireReferenceCreated(reference: ModelReference): void {
     var createdEvent: RemoteReferenceCreatedEvent = {

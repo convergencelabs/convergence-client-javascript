@@ -6,7 +6,7 @@ import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeNull extends RealTimeValue<any> {
 
@@ -40,7 +40,7 @@ export default class RealTimeNull extends RealTimeValue<any> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     throw new Error("Null values do not process references");
   }
 }

@@ -14,7 +14,7 @@ import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
 
 
@@ -337,7 +337,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     this.emitEvent(event);
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     if (relativePath.length === 0) {
       // fixme implement when we have object references.
       throw new Error("Arrays to do have references yet.");

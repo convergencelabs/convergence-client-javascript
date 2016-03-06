@@ -16,7 +16,7 @@ import {IndexReference} from "./reference/IndexReference";
 import Session from "../Session";
 import {ReferenceType} from "./reference/ModelReference";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ReferenceManager} from "./reference/ReferenceManager";
 import {OperationType} from "./ot/ops/OperationType";
 
@@ -258,7 +258,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     if (relativePath.length === 0) {
       this._referenceManager.handleRemoteReferenceEvent(event);
     } else {
