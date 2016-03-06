@@ -12,10 +12,10 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {OperationType} from "./ot/ops/OperationType";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 

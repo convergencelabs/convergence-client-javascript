@@ -1,6 +1,5 @@
-import OperationType from "../../../connection/protocol/model/OperationType";
 abstract class Operation {
-  constructor(public type: OperationType) {
+  constructor(public type: string) {
   }
 
   abstract copy(properties: any): Operation;

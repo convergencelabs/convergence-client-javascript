@@ -1,7 +1,7 @@
 import Immutable from "../../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {Path} from "../Path";
-import OperationType from "../../../connection/protocol/model/OperationType";
+import {OperationType} from "./OperationType";
 
 export default class ArrayRemoveOperation extends DiscreteOperation {
 
@@ -17,4 +17,3 @@ export default class ArrayRemoveOperation extends DiscreteOperation {
       Immutable.update(this.index, updates.index));
   }
 }
-

@@ -1,7 +1,7 @@
 import Operation from "./Operation";
 import DiscreteOperation from "./DiscreteOperation";
 import Immutable from "../../../util/Immutable";
-import OperationType from "../../../connection/protocol/model/OperationType";
+import {OperationType} from "./OperationType";
 
 export default class CompoundOperation extends Operation {
 

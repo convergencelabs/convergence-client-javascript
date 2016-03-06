@@ -19,7 +19,6 @@ import {OperationAck} from "../connection/protocol/model/operationAck";
 import {RealTimeValue} from "./RealTimeValue";
 import {Path} from "./ot/Path";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
-import OperationType from "../connection/protocol/model/OperationType";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ModelReferenceCallbacks} from "./reference/LocalModelReference";
 import {LocalModelReference} from "./reference/LocalModelReference";
@@ -28,6 +27,7 @@ import {UnpublishReferenceEvent} from "../connection/protocol/model/reference/Re
 import {ClearReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {SetReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReferenceData} from "./ot/xform/ReferenceTransformer";
+import {OperationType} from "./ot/ops/OperationType";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 

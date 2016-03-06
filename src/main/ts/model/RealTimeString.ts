@@ -8,7 +8,6 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../connection/protocol/model/OperationType";
 import {LocalIndexReference} from "./reference/LocalIndexReference";
 import {RealTimeModel} from "./RealTimeModel";
 import {LocalModelReference} from "./reference/LocalModelReference";
@@ -19,6 +18,7 @@ import {ReferenceType} from "./reference/ModelReference";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ReferenceManager} from "./reference/ReferenceManager";
+import {OperationType} from "./ot/ops/OperationType";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -138,7 +138,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: OperationType = operationEvent.operation.type;
+      var type: string = operationEvent.operation.type;
       if (type === OperationType.STRING_INSERT) {
         this._handleInsertOperation(operationEvent);
       } else if (type === OperationType.STRING_REMOVE) {

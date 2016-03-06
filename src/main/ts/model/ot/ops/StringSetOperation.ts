@@ -1,7 +1,7 @@
 import DiscreteOperation from "./DiscreteOperation";
 import Immutable from "../../../util/Immutable";
 import {Path} from "../Path";
-import OperationType from "../../../connection/protocol/model/OperationType";
+import {OperationType} from "./OperationType";
 
 export default class StringSetOperation extends DiscreteOperation {
 

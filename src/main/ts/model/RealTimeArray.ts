@@ -12,10 +12,10 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {OperationType} from "./ot/ops/OperationType";
 
 
 export default class RealTimeArray extends RealTimeContainerValue<any[]> {
@@ -178,7 +178,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: OperationType = operationEvent.operation.type;
+      var type: string = operationEvent.operation.type;
       if (type === OperationType.ARRAY_INSERT) {
         this._handleInsertOperation(operationEvent);
       } else if (type === OperationType.ARRAY_REORDER) {

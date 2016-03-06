@@ -7,10 +7,10 @@ import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {OperationType} from "./ot/ops/OperationType";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -71,7 +71,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: OperationType = operationEvent.operation.type;
+      var type: string = operationEvent.operation.type;
       if (type === OperationType.NUMBER_ADD) {
         this._handleAddOperation(operationEvent);
       } else if (type === OperationType.NUMBER_VALUE) {
