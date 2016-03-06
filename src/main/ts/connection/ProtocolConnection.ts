@@ -12,7 +12,7 @@ import {IncomingProtocolResponseMessage} from "./protocol/protocol";
 import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
 import {ErrorMessage} from "./protocol/ErrorMessage";
 import {OutgoingProtocolResponseMessage} from "./protocol/protocol";
-import EventEmitter from "../util/EventEmitter";
+import {EventEmitter} from "../util/EventEmitter";
 import Deferred from "../util/Deferred";
 import {debugFlags} from "../Debug";
 

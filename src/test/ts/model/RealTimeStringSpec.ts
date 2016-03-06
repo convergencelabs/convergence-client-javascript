@@ -23,10 +23,15 @@ describe('RealTimeString', () => {
 
   var callbacks: ModelEventCallbacks;
 
-  beforeEach(function(): void {
+  beforeEach(function (): void {
     callbacks = {
-      onOutgoingOperation: sinon.spy(),
-      onOutgoingReferenceEvent: sinon.spy()
+      sendOperationCallback: sinon.spy(),
+      referenceEventCallbacks: {
+        onPublish: sinon.spy(),
+        onUnpublish: sinon.spy(),
+        onSet: sinon.spy(),
+        onClear: sinon.spy(),
+      }
     };
   });
 
@@ -63,7 +68,7 @@ describe('RealTimeString', () => {
     myString.value("AnotherString");
 
     var expectedOp: StringSetOperation = new StringSetOperation([], false, "AnotherString");
-    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
+    expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after insert', () => {
@@ -71,7 +76,7 @@ describe('RealTimeString', () => {
     myString.insert(2, "Edited");
 
     var expectedOp: StringInsertOperation = new StringInsertOperation([], false, 2, "Edited");
-    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
+    expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after remove', () => {
@@ -79,7 +84,7 @@ describe('RealTimeString', () => {
     myString.remove(0, 2);
 
     var expectedOp: StringRemoveOperation = new StringRemoveOperation([], false, 0, "My");
-    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
+    expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Value is correct after StringSetOperation', () => {

@@ -1,11 +1,12 @@
-import RealTimeValue from "./RealTimeValue";
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeNull extends RealTimeValue<any> {
 
@@ -37,5 +38,9 @@ export default class RealTimeNull extends RealTimeValue<any> {
     } else {
       throw new Error("Invalid path: null values do not have children");
     }
+  }
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    throw new Error("Null values do not process references");
   }
 }

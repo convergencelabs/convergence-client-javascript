@@ -1,5 +1,5 @@
-import RealTimeValue from "../RealTimeValue";
-import EventEmitter from "../../util/EventEmitter";
+import {RealTimeValue} from "../RealTimeValue";
+import {EventEmitter} from "../../util/EventEmitter";
 
 export var ReferenceType: any = {
   INDEX: "index",
@@ -59,7 +59,12 @@ export abstract class ModelReference extends EventEmitter {
   _dispose(): void {
     this._disposed = true;
     this.emit(ModelReference.Events.DISPOSED, {});
+    this.removeAllListenersForAllEvents();
   }
 
+  abstract value(): any;
+
   abstract isSet(): boolean;
+
+  abstract _clear(): void;
 }

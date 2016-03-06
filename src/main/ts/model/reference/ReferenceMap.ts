@@ -56,10 +56,18 @@ export class ReferenceMap {
     return refs;
   }
 
-  remove(sessionId: string, key: string): void {
+  removeAll(): void {
+    this._references = {};
+  }
+
+  remove(sessionId: string, key: string): ModelReference {
     var sessionModels: {[key: string]: ModelReference} = this._references[sessionId];
     if (sessionModels !== undefined) {
+      var current: ModelReference = sessionModels[key];
       delete sessionModels[key];
+      return current;
+    } else {
+      return;
     }
   }
 

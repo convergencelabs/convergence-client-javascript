@@ -1,5 +1,5 @@
-import RealTimeValue from "./RealTimeValue";
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
 import NumberAddOperation from "./ot/ops/NumberAddOperation";
 import NumberSetOperation from "./ot/ops/NumberSetOperation";
@@ -10,6 +10,7 @@ import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -125,6 +126,10 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     if (isNaN(value)) {
       throw new Error("Value is NaN");
     }
+  }
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    throw new Error("Number values do not process references");
   }
 }
 

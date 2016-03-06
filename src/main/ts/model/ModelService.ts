@@ -1,4 +1,4 @@
-import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import Session from "../Session";
 import {RealTimeModel} from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";

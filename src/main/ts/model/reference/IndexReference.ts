@@ -1,4 +1,4 @@
-import RealTimeValue from "../RealTimeValue";
+import {RealTimeValue} from "../RealTimeValue";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {IndexTransformer} from "../ot/xform/reference/IndexTransformer";
@@ -11,7 +11,7 @@ export class IndexReference extends ModelReference {
               source: RealTimeValue<any>,
               userId: string,
               sessionId: string,
-              index: number) {
+              index?: number) {
     super(ReferenceType.INDEX, key, source, userId, sessionId);
     this._index = index;
   }
@@ -29,7 +29,7 @@ export class IndexReference extends ModelReference {
     this._setIfChanged(IndexTransformer.handleReorder([this._index], fromIndex, toIndex)[0]);
   }
 
-  index(): number {
+  value(): number {
     return this._index;
   }
 

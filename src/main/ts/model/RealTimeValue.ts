@@ -2,16 +2,20 @@ import RealTimeValueType from "./RealTimeValueType";
 import {PathElement, Path} from "./ot/Path";
 import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {ModelDetachedEvent} from "./events";
-import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {ModelReference} from "./reference/ModelReference";
 
-abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
+export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
-    DETACHED: "detached"
+    DETACHED: "detached",
+    REFERENCE: "reference"
   };
 
   private _detached: boolean = false;
@@ -80,13 +84,27 @@ abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   protected _sendOperation(operation: DiscreteOperation): void {
     this._exceptionIfDetached();
-    this._callbacks.onOutgoingOperation(operation);
+    this._callbacks.sendOperationCallback(operation);
   }
 
   protected abstract _getValue(): T;
+
   protected abstract _setValue(value: T): void;
 
   abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
+
+  abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: IncomingReferenceEvent): void;
+
+  protected _fireReferenceCreated(reference: ModelReference): void {
+    var createdEvent: RemoteReferenceCreatedEvent = {
+      name: RealTimeValue.Events.REFERENCE,
+      src: this,
+      reference: reference
+    };
+    this.emitEvent(createdEvent);
+  }
 }
 
-export default RealTimeValue;
+export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
+  reference: ModelReference;
+}

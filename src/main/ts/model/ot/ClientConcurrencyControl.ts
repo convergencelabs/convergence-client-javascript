@@ -2,7 +2,7 @@ import ProcessedOperationEvent from "./ProcessedOperationEvent";
 import Operation from "./ops/Operation";
 import DiscreteOperation from "./ops/DiscreteOperation";
 import UnprocessedOperationEvent from "./UnprocessedOperationEvent";
-import EventEmitter from "../../util/EventEmitter";
+import {EventEmitter} from "../../util/EventEmitter";
 import CompoundOperation from "./ops/CompoundOperation";
 import OperationTransformer from "./xform/OperationTransformer";
 import OperationPair from "./xform/OperationPair";
@@ -44,6 +44,10 @@ export default class ClientConcurrencyControl extends EventEmitter {
     this._referenceTransformer = referenceTransformer;
     this._compoundOpInProgress = false;
     this._pendingCompoundOperation = [];
+  }
+
+  contextVersion(): number {
+    return this._contextVersion;
   }
 
   hasNextIncomingOperation(): boolean {

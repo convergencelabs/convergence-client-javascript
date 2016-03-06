@@ -1,7 +1,7 @@
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
 import DiscreteOperation from "./ot/ops/DiscreteOperation";
-import RealTimeValue from "./RealTimeValue";
+import {RealTimeValue} from "./RealTimeValue";
 import ObjectSetPropertyOperation from "./ot/ops/ObjectSetPropertyOperation";
 import ObjectAddPropertyOperation from "./ot/ops/ObjectAddPropertyOperation";
 import ObjectRemovePropertyOperation from "./ot/ops/ObjectRemovePropertyOperation";
@@ -15,6 +15,7 @@ import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -149,31 +150,30 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     });
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   // Handlers for incoming operations
+  /////////////////////////////////////////////////////////////////////////////
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      var type: OperationType = operationEvent.operation.type;
-      if (type === OperationType.OBJECT_ADD) {
-        this._handleAddPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_SET) {
-        this._handleSetPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_REMOVE) {
-        this._handleRemovePropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_VALUE) {
-        this._handleSetOperation(operationEvent);
-      } else {
-        throw new Error("Invalid operation!");
+      switch (operationEvent.operation.type) {
+        case OperationType.OBJECT_ADD:
+          this._handleAddPropertyOperation(operationEvent);
+          break;
+        case OperationType.OBJECT_SET:
+          this._handleSetPropertyOperation(operationEvent);
+          break;
+        case OperationType.OBJECT_REMOVE:
+          this._handleRemovePropertyOperation(operationEvent);
+          break;
+        case OperationType.OBJECT_VALUE:
+          this._handleSetOperation(operationEvent);
+          break;
+        default:
+          throw new Error("Invalid operation for RealTimeObject");
       }
     } else {
-      var childPath: any = relativePath[0];
-      if (typeof childPath !== "string") {
-        throw new Error("Invalid path element, object properties must be a string");
-      }
-      var child: RealTimeValue<any> = this._children[childPath];
-      if (child === undefined) {
-        throw new Error("Invalid path element, child does not exist");
-      }
+      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
       var subPath: Path = relativePath.slice(0);
       subPath.shift();
       child._handleRemoteOperation(subPath, operationEvent);
@@ -290,6 +290,33 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         oldChildren[key]._detach();
       }
     }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Handlers for incoming operations
+  /////////////////////////////////////////////////////////////////////////////
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    if (relativePath.length === 0) {
+      // fixme implement when we have object references.
+      throw new Error("Objects to do have references yet.");
+    } else {
+      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
+      var subPath: Path = relativePath.slice(0);
+      subPath.shift();
+      child._handleRemoteReferenceEvent(subPath, event);
+    }
+  }
+
+  private _getChild(relPath: PathElement): RealTimeValue<any> {
+    if (typeof relPath !== "string") {
+      throw new Error("Invalid path element, object properties must be a string");
+    }
+    var child: RealTimeValue<any> = this._children[relPath];
+    if (child === undefined) {
+      throw new Error("Invalid path element, child does not exist");
+    }
+    return child;
   }
 }
 

@@ -3,8 +3,8 @@ import Session from "./Session";
 import ModelService from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
-import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
-import ConvergenceEvent from "./util/ConvergenceEvent";
+import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import UserService from "./user/UserService";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {

@@ -20,10 +20,15 @@ describe('RealTimeBoolean', () => {
 
   var callbacks: ModelEventCallbacks;
 
-  beforeEach(function(): void {
+  beforeEach(function (): void {
     callbacks = {
-      onOutgoingOperation: sinon.spy(),
-      onOutgoingReferenceEvent: sinon.spy()
+      sendOperationCallback: sinon.spy(),
+      referenceEventCallbacks: {
+        onPublish: sinon.spy(),
+        onUnpublish: sinon.spy(),
+        onSet: sinon.spy(),
+        onClear: sinon.spy(),
+      }
     };
   });
 
@@ -48,7 +53,7 @@ describe('RealTimeBoolean', () => {
     myBoolean.value(false);
 
     var expectedOp: BooleanSetOperation = new BooleanSetOperation([], false, false);
-    expect((<any>callbacks.onOutgoingOperation).lastCall.args[0]).to.deep.equal(expectedOp);
+    expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it('Value is correct after BooleanSetOperation', () => {

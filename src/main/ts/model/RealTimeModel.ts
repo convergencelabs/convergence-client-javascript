@@ -16,12 +16,18 @@ import ModelService from "./ModelService";
 import {OperationSubmission} from "../connection/protocol/model/operationSubmission";
 import {RemoteOperation} from "../connection/protocol/model/remoteOperation";
 import {OperationAck} from "../connection/protocol/model/operationAck";
-import RealTimeValue from "./RealTimeValue";
+import {RealTimeValue} from "./RealTimeValue";
 import {Path} from "./ot/Path";
-import ConvergenceEvent from "../util/ConvergenceEvent";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import OperationType from "../connection/protocol/model/OperationType";
-import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
-import {OutgoingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ModelReferenceCallbacks} from "./reference/LocalModelReference";
+import {LocalModelReference} from "./reference/LocalModelReference";
+import {PublishReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {UnpublishReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ClearReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {SetReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ModelReferenceData} from "./ot/xform/ReferenceTransformer";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 
@@ -57,14 +63,59 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       this.emit(name, evt);
     });
 
+    var referenceCallbacks: ModelReferenceCallbacks = {
+      onPublish: (reference: LocalModelReference<any>): void => {
+        var event: PublishReferenceEvent = {
+          resourceId: this._resourceId,
+          key: reference.reference().key(),
+          modelPath: reference.reference().source().path(),
+          referenceType: reference.reference().type()
+        };
+        this._connection.send(event);
+      },
+      onUnpublish: (reference: LocalModelReference<any>): void => {
+        var event: UnpublishReferenceEvent = {
+          resourceId: this._resourceId,
+          key: reference.reference().key(),
+          modelPath: reference.reference().source().path()
+        };
+        this._connection.send(event);
+      },
+      onSet: (reference: LocalModelReference<any>): void => {
+        var refData: ModelReferenceData = {
+          type: reference.reference().type(),
+          path: reference.reference().source().path(),
+          value: reference.reference()
+        };
+
+        refData = this._concurrencyControl.processOutgoingReference(refData);
+        if (refData) {
+          var event: SetReferenceEvent = {
+            resourceId: this._resourceId,
+            key: reference.reference().key(),
+            modelPath: refData.path,
+            value: refData.value,
+            version: this._concurrencyControl.contextVersion()
+          };
+          this._connection.send(event);
+        }
+      },
+      onClear: (reference: LocalModelReference<any>): void => {
+        var event: ClearReferenceEvent = {
+          resourceId: this._resourceId,
+          key: reference.reference().key(),
+          modelPath: reference.reference().source().path()
+        };
+        this._connection.send(event);
+      }
+    };
+
     var callbacks: ModelEventCallbacks = {
-      onOutgoingOperation: (operation: DiscreteOperation): void => {
+      sendOperationCallback: (operation: DiscreteOperation): void => {
         var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
         this._sendOperation(opEvent);
       },
-      onOutgoingReferenceEvent: (referenceEvent: OutgoingReferenceEvent): void => {
-        this._handleOutgoingReference(referenceEvent);
-      }
+      referenceEventCallbacks: referenceCallbacks
     };
 
     this._data = new RealTimeObject(_data, null, null, callbacks, this);
@@ -212,18 +263,6 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     }
   }
 
-  private _handleOutgoingReference(referenceEvent: OutgoingReferenceEvent): void {
-    switch (referenceEvent.type) {
-      case MessageType.SET_REFERENCE:
-      case MessageType.CREATE_REFERENCE:
-
-        break;
-      default:
-    }
-
-    this._connection.send(referenceEvent);
-  }
-
   private _sendOperation(opEvent: UnprocessedOperationEvent): void {
     var opSubmission: OperationSubmission = {
       resourceId: this._resourceId,
@@ -237,8 +276,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 }
 
 export interface ModelEventCallbacks {
-  onOutgoingOperation: (operation: DiscreteOperation) => void;
-  onOutgoingReferenceEvent: (operation: OutgoingReferenceEvent) => void;
+  sendOperationCallback: (operation: DiscreteOperation) => void;
+  referenceEventCallbacks: ModelReferenceCallbacks;
 }
 
 interface RealTimeModelEvent extends ConvergenceEvent {

@@ -21,10 +21,15 @@ describe('RealTimeNumber', () => {
 
   var callbacks: ModelEventCallbacks;
 
-  beforeEach(function(): void {
+  beforeEach(function (): void {
     callbacks = {
-      onOutgoingOperation: sinon.spy(),
-      onOutgoingReferenceEvent: sinon.spy()
+      sendOperationCallback: sinon.spy(),
+      referenceEventCallbacks: {
+        onPublish: sinon.spy(),
+        onUnpublish: sinon.spy(),
+        onSet: sinon.spy(),
+        onClear: sinon.spy(),
+      }
     };
   });
 

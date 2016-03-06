@@ -1,11 +1,11 @@
-import RealTimeValue from "./RealTimeValue";
+import {RealTimeValue} from "./RealTimeValue";
 import {PathElement} from "./ot/Path";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 
-abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
+export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
 
   /**
    * Constructs a new RealTimeContainer.
@@ -37,5 +37,3 @@ abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
   protected abstract _detachChildren(): void;
 
 }
-
-export default RealTimeContainerValue;

@@ -1,11 +1,12 @@
-import RealTimeValue from "./RealTimeValue";
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export default class RealTimeUndefined extends RealTimeValue<void> {
 
@@ -33,9 +34,13 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
-      throw new Error("Null values do not process operations");
+      throw new Error("Undefined values do not process operations");
     } else {
-      throw new Error("Invalid path: null values do not have children");
+      throw new Error("Invalid path: undefined values do not have children");
     }
+  }
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    throw new Error("Undefined values do not process references");
   }
 }

@@ -1,6 +1,6 @@
 export type EventKey = string | number;
 
-export default class EventEmitter {
+export class EventEmitter {
 
   static defaultMaxListeners: number = 10;
 

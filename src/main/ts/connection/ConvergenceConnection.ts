@@ -6,7 +6,7 @@ import ConvergenceSocket from "./ConvergenceSocket";
 import {OutgoingProtocolMessage} from "./protocol/protocol";
 import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
 import {IncomingProtocolResponseMessage} from "./protocol/protocol";
-import EventEmitter from "../util/EventEmitter";
+import {EventEmitter} from "../util/EventEmitter";
 import SessionImpl from "../SessionImpl";
 import ConvergenceDomain from "../ConvergenceDomain";
 import Session from "../Session";

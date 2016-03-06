@@ -1,47 +1,66 @@
-import RealTimeValue from "../RealTimeValue";
 import {ModelReference} from "./ModelReference";
 
-export abstract class LocalModelReference {
+export interface ModelReferenceCallbacks {
+  onPublish: (reference: LocalModelReference<any>) => void;
+  onUnpublish: (reference: LocalModelReference<any>) => void;
+  onSet: (reference: LocalModelReference<any>) => void;
+  onClear: (reference: LocalModelReference<any>) => void;
+}
 
-  constructor(protected _reference: ModelReference,
-              private _published: boolean) {
+export abstract class LocalModelReference<R extends ModelReference> {
+
+  private _published: boolean;
+  private _callbacks: ModelReferenceCallbacks;
+  protected _reference: R;
+
+  constructor(reference: R, callbacks: ModelReferenceCallbacks) {
+    this._reference = reference;
+    this._published = false;
+    this._callbacks = callbacks;
   }
 
-  type(): string {
-    return this._reference.type();
-  }
-
-  key(): string {
-    return this._reference.key();
-  }
-
-  source(): RealTimeValue<any> {
-    return this._reference.source();
-  }
-
-  userId(): string {
-    return this._reference.userId();
-  }
-
-  sessionId(): string {
-    return this._reference.sessionId();
-  }
-
-  isDisposed(): boolean {
-    return this._reference.isDisposed();
+  reference(): R {
+    return this._reference;
   }
 
   publish(): void {
+    this._ensureAttached();
     this._published = true;
+    this._callbacks.onPublish(this);
   }
 
   unpublish(): void {
+    this._ensureAttached();
     this._published = false;
+    this._callbacks.onUnpublish(this);
   }
 
   isPublished(): boolean {
     return this._published;
   }
 
-  abstract clear(): void;
+  clear(): void {
+    this._ensureAttached();
+    this._reference._clear();
+    this._callbacks.onClear(this);
+  }
+
+  dispose(): void {
+    this._ensureAttached();
+    this.unpublish();
+    // fixme
+  }
+
+  private _ensureAttached(): void {
+    if (this.reference().source().isDetached()) {
+      throw new Error("The source model is deteched");
+    }
+  }
+
+  abstract set(value: any): void;
+
+  protected _fireSet(): void {
+    this._ensureAttached();
+    this._callbacks.onSet(this);
+  }
 }

@@ -1,5 +1,5 @@
-import RealTimeContainerValue from "./RealTimeContainerValue";
-import RealTimeValue from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {RealTimeValue} from "./RealTimeValue";
 import {PathElement} from "./ot/Path";
 import ArrayInsertOperation from "./ot/ops/ArrayInsertOperation";
 import ArrayRemoveOperation from "./ot/ops/ArrayRemoveOperation";
@@ -15,6 +15,7 @@ import {ModelChangeEvent} from "./events";
 import OperationType from "../connection/protocol/model/OperationType";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 
 
 export default class RealTimeArray extends RealTimeContainerValue<any[]> {
@@ -192,18 +193,22 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
         throw new Error("Invalid operation!");
       }
     } else {
-      var childPath: any = relativePath[0];
-      if (typeof childPath !== "number") {
-        throw new Error("Invalid path element, array indices must be a number");
-      }
-      var child: RealTimeValue<any> = this._children[childPath];
-      if (child === undefined) {
-        throw new Error("Invalid path element, child does not exist");
-      }
+      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
       var subPath: Path = relativePath.slice(0);
       subPath.shift();
       child._handleRemoteOperation(subPath, operationEvent);
     }
+  }
+
+  private _getChild(relPath: PathElement): RealTimeValue<any> {
+    if (typeof relPath !== "number") {
+      throw new Error("Invalid path element, array indices must be a number");
+    }
+    var child: RealTimeValue<any> = this._children[relPath];
+    if (child === undefined) {
+      throw new Error("Invalid path element, child does not exist");
+    }
+    return child;
   }
 
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
@@ -330,6 +335,18 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: values
     };
     this.emitEvent(event);
+  }
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    if (relativePath.length === 0) {
+      // fixme implement when we have object references.
+      throw new Error("Arrays to do have references yet.");
+    } else {
+      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
+      var subPath: Path = relativePath.slice(0);
+      subPath.shift();
+      child._handleRemoteReferenceEvent(subPath, event);
+    }
   }
 
   // Private Validation Methods

@@ -1,5 +1,5 @@
-import RealTimeValue from "./RealTimeValue";
-import RealTimeContainerValue from "./RealTimeContainerValue";
+import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
 import StringInsertOperation from "./ot/ops/StringInsertOperation";
 import StringRemoveOperation from "./ot/ops/StringRemoveOperation";
@@ -15,9 +15,10 @@ import {LocalModelReference} from "./reference/LocalModelReference";
 import {ModelReference} from "./reference/ModelReference";
 import {IndexReference} from "./reference/IndexReference";
 import Session from "../Session";
-import {ReferenceMap} from "./reference/ReferenceMap";
 import {ReferenceType} from "./reference/ModelReference";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {IncomingReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ReferenceManager} from "./reference/ReferenceManager";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -26,11 +27,11 @@ export default class RealTimeString extends RealTimeValue<String> {
     INSERT: "insert",
     REMOVE: "remove",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeValue.Events.DETACHED,
+    REFERENCE: RealTimeValue.Events.REFERENCE
   };
 
-  private _referenceMap: ReferenceMap;
-  private _localReferences: {[key: string]: LocalModelReference};
+  private _referenceManager: ReferenceManager;
   private _data: string;
 
   /**
@@ -44,8 +45,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     super(RealTimeValueType.String, parent, fieldInParent, callbacks, model);
 
     this._data = data;
-    this._referenceMap = new ReferenceMap();
-    this._localReferences = {};
+    this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX]);
   }
 
   insert(index: number, value: string): void {
@@ -54,6 +54,12 @@ export default class RealTimeString extends RealTimeValue<String> {
     var operation: StringInsertOperation = new StringInsertOperation(this.path(), false, index, value);
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      if (ref instanceof IndexReference) {
+        ref.handleInsert(index, value.length);
+      }
+    });
   }
 
   remove(index: number, length: number): void {
@@ -62,6 +68,12 @@ export default class RealTimeString extends RealTimeValue<String> {
     var operation: StringRemoveOperation = new StringRemoveOperation(this.path(), false, index, this._data.substr(index, length));
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      if (ref instanceof IndexReference) {
+        ref.handleRemove(index, length);
+      }
+    });
   }
 
   length(): number {
@@ -73,9 +85,9 @@ export default class RealTimeString extends RealTimeValue<String> {
   /////////////////////////////////////////////////////////////////////////////
 
   indexReference(key: string): LocalIndexReference {
-    var existing: LocalModelReference = this._localReferences[key];
+    var existing: LocalModelReference<any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
-      if (existing.type() !== ReferenceType.INDEX) {
+      if (existing.reference().type() !== ReferenceType.INDEX) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
         return <LocalIndexReference>existing;
@@ -84,19 +96,19 @@ export default class RealTimeString extends RealTimeValue<String> {
       var session: Session = this.model().session();
       var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId(), null);
 
-      this._referenceMap.put(reference);
-      var local: LocalIndexReference = new LocalIndexReference(reference, false);
-      this._localReferences[key] = local;
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalIndexReference = new LocalIndexReference(reference, this._callbacks.referenceEventCallbacks);
+      this._referenceManager.addLocalReference(local);
       return local;
     }
   }
 
   reference(sessionId: string, key: string): ModelReference {
-    return this._referenceMap.get(sessionId, key);
+    return this._referenceManager.referenceMap().get(sessionId, key);
   }
 
   references(sessionId?: string, key?: string): ModelReference[] {
-    return this._referenceMap.getAll(sessionId, key);
+    return this._referenceManager.referenceMap().getAll(sessionId, key);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -109,15 +121,20 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._data = value;
     var operation: StringSetOperation = new StringSetOperation(this.path(), false, value);
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
   }
 
   protected _getValue(): string {
     return this._data;
   }
 
-  _handleReferenceEvent(): void {
-
-  }
+  //
+  // Operations
+  //
 
   _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
     if (relativePath.length === 0) {
@@ -156,6 +173,12 @@ export default class RealTimeString extends RealTimeValue<String> {
       value: value
     };
     this.emitEvent(event);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      if (ref instanceof IndexReference) {
+        ref.handleInsert(index, value.length);
+      }
+    });
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
@@ -178,6 +201,12 @@ export default class RealTimeString extends RealTimeValue<String> {
       value: value
     };
     this.emitEvent(event);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      if (ref instanceof IndexReference) {
+        ref.handleRemove(index, value.length);
+      }
+    });
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
@@ -197,6 +226,12 @@ export default class RealTimeString extends RealTimeValue<String> {
       value: value
     };
     this.emitEvent(event);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
+    this._referenceManager.removeAllLocalReferences();
   }
 
   private _validateInsert(index: number, value: string): void {
@@ -220,6 +255,14 @@ export default class RealTimeString extends RealTimeValue<String> {
   private _validateSet(value: string): void {
     if (typeof value !== "string") {
       throw new Error("Value must be a string");
+    }
+  }
+
+  _handleRemoteReferenceEvent(relativePath: Path, event: IncomingReferenceEvent): void {
+    if (relativePath.length === 0) {
+      this._referenceManager.handleRemoteReferenceEvent(event);
+    } else {
+      throw new Error("Invalid reference event. Path targeted at a child of a string.");
     }
   }
 }

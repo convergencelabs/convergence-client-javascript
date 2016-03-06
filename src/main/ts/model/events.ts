@@ -1,5 +1,5 @@
-import ConvergenceEvent from "../util/ConvergenceEvent";
-import RealTimeValue from "./RealTimeValue";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {RealTimeValue} from "./RealTimeValue";
 
 export interface ModelChangeEvent extends ConvergenceEvent {
   src: RealTimeValue<any>;

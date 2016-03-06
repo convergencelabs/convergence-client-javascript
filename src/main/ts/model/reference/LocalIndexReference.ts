@@ -1,26 +1,15 @@
 import {LocalModelReference} from "./LocalModelReference";
 import {IndexReference} from "./IndexReference";
+import {ModelReferenceCallbacks} from "./LocalModelReference";
 
-export class LocalIndexReference extends LocalModelReference {
+export class LocalIndexReference extends LocalModelReference<IndexReference> {
 
-  constructor(reference: IndexReference,
-              published: boolean) {
-    super(reference, published);
+  constructor(reference: IndexReference, callbacks: ModelReferenceCallbacks) {
+    super(reference, callbacks);
   }
 
   set(index: number): void {
-    (<IndexReference>this._reference)._set(index, true);
-  }
-
-  index(): number {
-    return (<IndexReference>this._reference).index();
-  }
-
-  clear(): void {
-    (<IndexReference>this._reference)._clear();
-  }
-
-  isSet(): boolean {
-    return this._reference.isSet();
+    this._reference._set(index, true);
+    this._fireSet();
   }
 }
