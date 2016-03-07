@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Convergence - Basic</title>
-  <link rel="stylesheet" href="basic.css"/>
+  <link rel="stylesheet" href="references.css"/>
   <script src="../../node_modules/es6-promise-polyfill/promise.js"></script>
   <script src="../../dist/convergence-client.js"></script>
-  <script src="binding-helpers.js"></script>
+  <script src="../common/binding-helpers.js"></script>
   <script src="../connection.js"></script>
 </head>
 <body>
@@ -14,7 +14,10 @@
 <div class="dt">
   <label>String</label>
   <textarea class="string" id="stringVal"></textarea>
+  <br/>
+  <input type="checkbox" name="shareCursor" id="shareCursor"/>Share Local Cursor
+
 </div>
-<script src="basic.js"></script>
+<script src="references.js"></script>
 </body>
 </html>

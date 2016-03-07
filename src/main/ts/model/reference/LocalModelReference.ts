@@ -27,6 +27,9 @@ export abstract class LocalModelReference<R extends ModelReference> {
     this._ensureAttached();
     this._published = true;
     this._callbacks.onPublish(this);
+    if (this.reference().isSet()) {
+      this._fireSet();
+    }
   }
 
   unpublish(): void {
@@ -61,6 +64,8 @@ export abstract class LocalModelReference<R extends ModelReference> {
 
   protected _fireSet(): void {
     this._ensureAttached();
-    this._callbacks.onSet(this);
+    if (this.isPublished()) {
+      this._callbacks.onSet(this);
+    }
   }
 }

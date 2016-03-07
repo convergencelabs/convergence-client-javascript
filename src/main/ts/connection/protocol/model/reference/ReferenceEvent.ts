@@ -48,8 +48,8 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
     resourceId: body.r,
     sessionId: body.s,
     key: body.k,
-    path: body.m,
-    referenceType: ReferenceTypeCodes.value(body.p)
+    path: body.p,
+    referenceType: ReferenceTypeCodes.value(body.c)
   };
   return result;
 };
@@ -59,8 +59,8 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
     resourceId: body.r,
     sessionId: body.s,
     key: body.k,
-    path: body.m,
-    referenceType: ReferenceTypeCodes.value(body.p),
+    path: body.p,
+    referenceType: ReferenceTypeCodes.value(body.c),
     value: body.v
   };
   return result;
@@ -71,7 +71,7 @@ var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> 
     sessionId: body.s,
     resourceId: body.r,
     key: body.k,
-    path: body.m
+    path: body.p
   };
   return result;
 };
@@ -109,16 +109,16 @@ export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 export var PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.path,
+    p: message.path,
     k: message.key,
-    p: ReferenceTypeCodes.code(message.referenceType)
+    c: ReferenceTypeCodes.code(message.referenceType)
   };
 };
 
 export var UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.path,
+    p: message.path,
     k: message.key
   };
 };
@@ -127,9 +127,9 @@ export var UnpublishReferenceSerializer: MessageBodySerializer = (message: Unpub
 export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.path,
+    p: message.path,
     k: message.key,
-    p: ReferenceTypeCodes.code(message.referenceType),
+    c: ReferenceTypeCodes.code(message.referenceType),
     v: message.value
   };
 };
@@ -137,7 +137,7 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
 export var ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
   return {
     r: message.resourceId,
-    m: message.path,
+    p: message.path,
     k: message.key
   };
 };

@@ -20,7 +20,7 @@ const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 
-gulp.task('default', ["build"]);
+gulp.task('default', ["dist"]);
 
 /**
  * Converts Typescript w/ ES6 modules to ES5 w/ commonjs modules using the
@@ -76,12 +76,24 @@ gulp.task('lint', function () {
 });
 
 
-/**
- * Creates a single file build in ES5 using RollupJS.  Both a minified and
- * non minified version is created using UglifyJS.  The code will be linted
- * and tested before being rolled up and minified.
- */
-gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
+gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
+  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+    .pipe(gulpRollup({
+      rollup: rollup,
+      format: 'umd',
+      moduleName: 'ConvergenceDomain',
+      sourceMap: true,
+      //exports: 'named',
+      plugins: [
+        rollupTypescript()
+      ]
+    }))
+    .pipe(rename("convergence-client.umd.js"))
+    .pipe(sourceMaps.write("."))
+    .pipe(gulp.dest("dist"));
+});
+
+gulp.task('dist-umd-named', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(gulpRollup({
       rollup: rollup,
@@ -93,35 +105,15 @@ gulp.task('dist-build', ["dist-ts", "lint", "test"], function () {
         rollupTypescript()
       ]
     }))
-    .pipe(rename("convergence-client.js"))
+    .pipe(rename("convergence-client.umd-named.js"))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('dist-ts', ["build"], function() {
-  // TODO we could write a plugin to make this more gulpy
-  var options = {
-    name: 'convergence-client',
-    main: 'build/main/ts/ConvergenceDomain.d.ts'
-  };
-  dts.bundle(options);
-  
-  return gulp.src('build/main/ts/convergence-client.d.ts')
-    .pipe(replace('convergence-client/ConvergenceDomain', 'convergence-client'))
-    .pipe(gulp.dest("dist"))
-    .on('finish', function () {
-      del('build/main/ts/convergence-client.d.ts');
-    });
-});
-
-/**
- * Creates a single file build in ES5 using RollupJS.  Both a minified and
- * non minified version is created using UglifyJS.  The code will be linted
- * and tested before being rolled up and minified.
- */
-gulp.task('dist-build-es6', ["lint", "test"], function () {
-  gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(rollup({
+gulp.task('dist-es6', ["lint", "test"], function () {
+  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
+    .pipe(gulpRollup({
+      rollup: rollup,
       format: 'es6',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
@@ -134,14 +126,26 @@ gulp.task('dist-build-es6', ["lint", "test"], function () {
     .pipe(gulp.dest("dist"));
 });
 
+gulp.task('dist-build-all', ["dist-umd", "dist-umd-named", "dist-es6"]);
 
-/**
- * Creates a single file build in ES5 using RollupJS.  Both a minified and
- * non minified version is created using UglifyJS.  The code will be linted
- * and tested before being rolled up and minified.
- */
-gulp.task('dist-min', ["dist-build"], function () {
-  gulp.src("dist/convergence-client.js")
+gulp.task('dist-ts', ["build"], function() {
+  // TODO we could write a plugin to make this more gulpy
+  var options = {
+    name: 'convergence-client',
+    main: 'build/main/ts/ConvergenceDomain.d.ts'
+  };
+  dts.bundle(options);
+
+  return gulp.src('build/main/ts/convergence-client.d.ts')
+    .pipe(replace('convergence-client/ConvergenceDomain', 'convergence-client'))
+    .pipe(gulp.dest("dist"))
+    .on('finish', function () {
+      del('build/main/ts/convergence-client.d.ts');
+    });
+});
+
+gulp.task('dist', ["dist-build-all"], function () {
+  gulp.src("dist/convergence-client-umd.js")
     .pipe(sourceMaps.init())
     .pipe(uglify())
     .pipe(rename({
@@ -151,7 +155,7 @@ gulp.task('dist-min', ["dist-build"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('release', ['dist-min'], function() {
+gulp.task('release', ['dist'], function() {
   // you will need to have the environment var GITHUB_TOKEN set to a personal access token from
   // https://github.com/settings/tokens
   gulp.src(["dist/convergence-client.min.js", "dist/convergence-client.d.ts"])

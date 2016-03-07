@@ -72,6 +72,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         path = this._concurrencyControl.processOutgoingReferencePath(path);
         if (path) {
           var event: PublishReferenceEvent = {
+            type: MessageType.PUBLISH_REFERENCE,
             resourceId: this._resourceId,
             key: reference.reference().key(),
             path: path,
@@ -83,8 +84,9 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       onUnpublish: (reference: LocalModelReference<any>): void => {
         var path: Path = reference.reference().source().path();
         path = this._concurrencyControl.processOutgoingReferencePath(path);
-        if (path) {
+        if (path !== null) {
           var event: UnpublishReferenceEvent = {
+            type: MessageType.UNPUBLISH_REFERENCE,
             resourceId: this._resourceId,
             key: reference.reference().key(),
             path: path
@@ -96,12 +98,13 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         var refData: ModelReferenceData = {
           type: reference.reference().type(),
           path: reference.reference().source().path(),
-          value: reference.reference()
+          value: reference.reference().value()
         };
 
         refData = this._concurrencyControl.processOutgoingSetReference(refData);
         if (refData) {
           var event: SetReferenceEvent = {
+            type: MessageType.SET_REFERENCE,
             resourceId: this._resourceId,
             key: reference.reference().key(),
             path: refData.path,
@@ -116,6 +119,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         path = this._concurrencyControl.processOutgoingReferencePath(path);
         if (path) {
           var event: ClearReferenceEvent = {
+            type: MessageType.CLEAR_REFERENCE,
             resourceId: this._resourceId,
             key: reference.reference().key(),
             path: path
