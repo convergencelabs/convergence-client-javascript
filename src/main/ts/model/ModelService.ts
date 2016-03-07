@@ -32,7 +32,11 @@ export default class ModelService extends ConvergenceEventEmitter {
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
         MessageType.OPERATION_ACKNOWLEDGEMENT,
-        MessageType.MODEL_DATA_REQUEST],
+        MessageType.MODEL_DATA_REQUEST,
+        MessageType.REFERENCE_PUBLISHED,
+        MessageType.REFERENCE_UNPUBLISHED,
+        MessageType.REFERENCE_SET,
+        MessageType.REFERENCE_CLEARED],
       (message: MessageEvent) => this._handleMessage(message));
   }
 

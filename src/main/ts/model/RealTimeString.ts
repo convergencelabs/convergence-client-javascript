@@ -19,6 +19,7 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ReferenceManager} from "./reference/ReferenceManager";
 import {OperationType} from "./ot/ops/OperationType";
+import MessageType from "../connection/protocol/MessageType";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -55,7 +56,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
     this._sendOperation(operation);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
         ref.handleInsert(index, value.length);
       }
@@ -69,7 +70,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
     this._sendOperation(operation);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
         ref.handleRemove(index, length);
       }
@@ -94,7 +95,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       }
     } else {
       var session: Session = this.model().session();
-      var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId(), null);
+      var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId());
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalIndexReference = new LocalIndexReference(reference, this._callbacks.referenceEventCallbacks);
@@ -103,11 +104,11 @@ export default class RealTimeString extends RealTimeValue<String> {
     }
   }
 
-  reference(sessionId: string, key: string): ModelReference {
+  reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.referenceMap().get(sessionId, key);
   }
 
-  references(sessionId?: string, key?: string): ModelReference[] {
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
     return this._referenceManager.referenceMap().getAll(sessionId, key);
   }
 
@@ -122,7 +123,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     var operation: StringSetOperation = new StringSetOperation(this.path(), false, value);
     this._sendOperation(operation);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       ref._dispose();
     });
     this._referenceManager.referenceMap().removeAll();
@@ -174,7 +175,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     };
     this.emitEvent(event);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
         ref.handleInsert(index, value.length);
       }
@@ -202,7 +203,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     };
     this.emitEvent(event);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
         ref.handleRemove(index, value.length);
       }
@@ -227,7 +228,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     };
     this.emitEvent(event);
 
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference) => {
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       ref._dispose();
     });
     this._referenceManager.referenceMap().removeAll();
@@ -261,6 +262,10 @@ export default class RealTimeString extends RealTimeValue<String> {
   _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
     if (relativePath.length === 0) {
       this._referenceManager.handleRemoteReferenceEvent(event);
+      if (event.type === MessageType.REFERENCE_PUBLISHED) {
+        var reference: ModelReference<any> = this._referenceManager.referenceMap().get(event.sessionId, event.key);
+        this._fireReferenceCreated(reference);
+      }
     } else {
       throw new Error("Invalid reference event. Path targeted at a child of a string.");
     }

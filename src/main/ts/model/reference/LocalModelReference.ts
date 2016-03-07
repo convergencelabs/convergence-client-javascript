@@ -7,7 +7,7 @@ export interface ModelReferenceCallbacks {
   onClear: (reference: LocalModelReference<any>) => void;
 }
 
-export abstract class LocalModelReference<R extends ModelReference> {
+export abstract class LocalModelReference<R extends ModelReference<any>> {
 
   private _published: boolean;
   private _callbacks: ModelReferenceCallbacks;

@@ -95,7 +95,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: RemoteReferenceEvent): void;
 
-  protected _fireReferenceCreated(reference: ModelReference): void {
+  protected _fireReferenceCreated(reference: ModelReference<any>): void {
     var createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeValue.Events.REFERENCE,
       src: this,
@@ -106,5 +106,5 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 }
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  reference: ModelReference;
+  reference: ModelReference<any>;
 }

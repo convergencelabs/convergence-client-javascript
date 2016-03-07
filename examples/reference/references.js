@@ -54,4 +54,20 @@ function bindToModel(realTimeModel) {
       }
     }, 0);
   }
+
+  rtString.on("reference", function(e) {
+    var ref = e.reference;
+    console.log("cursor shared for session (" + ref.sessionId() + ")");
+    ref.on("changed", function(e) {
+      console.log("remote cursor changed for session (" + ref.sessionId() + "): " + ref.value());
+    });
+
+    ref.on("cleared", function(e) {
+      console.log("remote cursor cleared for session (" + ref.sessionId() + ")");
+    });
+
+    ref.on("disposed", function(e) {
+      console.log("remote cursor disposed for session (" + ref.sessionId() + ")");
+    });
+  });
 }

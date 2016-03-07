@@ -1,5 +1,6 @@
 import {RealTimeValue} from "../RealTimeValue";
-import {EventEmitter} from "../../util/EventEmitter";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
 export var ReferenceType: any = {
   INDEX: "index",
@@ -9,7 +10,7 @@ export var ReferenceType: any = {
 };
 Object.freeze(ReferenceType);
 
-export abstract class ModelReference extends EventEmitter {
+export abstract class ModelReference<V> extends ConvergenceEventEmitter {
 
   static Events: any = {
     CLEARED: "cleared",
@@ -18,6 +19,7 @@ export abstract class ModelReference extends EventEmitter {
   };
 
   private _disposed: boolean;
+  protected _value: V;
 
   constructor(private _type: string,
               private _key: string,
@@ -26,6 +28,7 @@ export abstract class ModelReference extends EventEmitter {
               private _sessionId: string) {
     super();
     this._disposed = false;
+    this._value = null;
   }
 
   type(): string {
@@ -58,13 +61,51 @@ export abstract class ModelReference extends EventEmitter {
 
   _dispose(): void {
     this._disposed = true;
-    this.emit(ModelReference.Events.DISPOSED, {});
+    var event: ReferenceDisposedEvent = {
+      name: ModelReference.Events.DISPOSED,
+      src: this
+    };
+    this.emitEvent(event);
     this.removeAllListenersForAllEvents();
   }
 
-  abstract value(): any;
+  value(): V {
+    return this._value;
+  }
 
-  abstract isSet(): boolean;
+  isSet(): boolean {
+    return this._value !== null;
+  }
 
-  abstract _clear(): void;
+  _set(value: V, local: boolean = false): void {
+    this._value = value;
+    var event: ReferenceChangedEvent = {
+      name: ModelReference.Events.CHANGED,
+      src: this,
+      local: local
+    };
+    this.emitEvent(event);
+  }
+
+  _clear(): void {
+    this._value = null;
+    var event: ReferenceClearedEvent = {
+      name: ModelReference.Events.CLEARED,
+      src: this
+    };
+    this.emitEvent(event);
+  }
+}
+
+export interface ReferenceChangedEvent extends ConvergenceEvent {
+  src: ModelReference<any>;
+  local: boolean;
+}
+
+export interface ReferenceClearedEvent extends ConvergenceEvent {
+  src: ModelReference<any>;
+}
+
+export interface ReferenceDisposedEvent extends ConvergenceEvent {
+  src: ModelReference<any>;
 }

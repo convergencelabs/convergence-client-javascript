@@ -85,7 +85,7 @@ export class ReferenceManager {
     }
 
     var userId: string = event.sessionId; // fixme - need to fix userid / session id encoding.
-    var reference: ModelReference;
+    var reference: ModelReference<any>;
     switch (event.referenceType) {
       case ReferenceType.INDEX:
         reference = new IndexReference(event.key, this._source, userId, event.sessionId);
@@ -98,17 +98,17 @@ export class ReferenceManager {
   }
 
   private _handleRemoteReferenceUnpublished(event: RemoteReferenceUnpublished): void {
-    var reference: ModelReference = this._referenceMap.remove(event.sessionId, event.key);
+    var reference: ModelReference<any> = this._referenceMap.remove(event.sessionId, event.key);
     reference._dispose();
   }
 
   private _handleRemoteReferenceCleared(event: RemoteReferenceCleared): void {
-    var reference: ModelReference = this._referenceMap.get(event.sessionId, event.key);
+    var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
     reference._clear();
   }
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
-    var reference: ModelReference = this._referenceMap.remove(event.sessionId, event.key);
+    var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
     if (reference instanceof IndexReference) {
       reference._set(event.value);
     }
