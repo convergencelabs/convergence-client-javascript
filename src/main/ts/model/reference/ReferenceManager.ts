@@ -14,7 +14,7 @@ import Immutable from "../../util/Immutable";
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
-  private _localReferences: {[key: string]: LocalModelReference<any>};
+  private _localReferences: {[key: string]: LocalModelReference<any, any>};
   private _validTypes: string[];
   private _source: RealTimeValue<any>;
 
@@ -29,7 +29,7 @@ export class ReferenceManager {
     return this._referenceMap;
   }
 
-  addLocalReference(reference: LocalModelReference<any>): void {
+  addLocalReference(reference: LocalModelReference<any, any>): void {
     var key: string = reference.reference().key();
     if (this._localReferences[key] !== undefined) {
       throw new Error(`Local reference already set for key: ${key}`);
@@ -38,7 +38,7 @@ export class ReferenceManager {
   }
 
   removeLocalReference(key: string): void {
-    var current: LocalModelReference<any> = this._localReferences[key];
+    var current: LocalModelReference<any, any> = this._localReferences[key];
     if (current !== undefined) {
       current.dispose();
       delete this._localReferences[key];
@@ -52,11 +52,11 @@ export class ReferenceManager {
     });
   }
 
-  getLocalReference(key: string): LocalModelReference<any> {
+  getLocalReference(key: string): LocalModelReference<any, any> {
     return this._localReferences[key];
   }
 
-  localReferences(): {[key: string]: LocalModelReference<any>} {
+  localReferences(): {[key: string]: LocalModelReference<any, any>} {
     return Immutable.copy(this._localReferences);
   }
 

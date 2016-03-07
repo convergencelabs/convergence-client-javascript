@@ -58,7 +58,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
-        ref.handleInsert(index, value.length);
+        ref._handleInsert(index, value.length);
       }
     });
   }
@@ -72,7 +72,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
-        ref.handleRemove(index, length);
+        ref._handleRemove(index, length);
       }
     });
   }
@@ -86,7 +86,7 @@ export default class RealTimeString extends RealTimeValue<String> {
   /////////////////////////////////////////////////////////////////////////////
 
   indexReference(key: string): LocalIndexReference {
-    var existing: LocalModelReference<any> = this._referenceManager.getLocalReference(key);
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.INDEX) {
         throw new Error("A reference with this key already exists, but is not an index reference");
@@ -177,7 +177,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
-        ref.handleInsert(index, value.length);
+        ref._handleInsert(index, value.length);
       }
     });
   }
@@ -205,7 +205,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
       if (ref instanceof IndexReference) {
-        ref.handleRemove(index, value.length);
+        ref._handleRemove(index, value.length);
       }
     });
   }

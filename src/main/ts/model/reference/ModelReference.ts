@@ -95,6 +95,12 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     };
     this.emitEvent(event);
   }
+
+  protected _setIfChanged(newIndex: V): void {
+    if (this._value !== newIndex) {
+      this._set(newIndex);
+    }
+  }
 }
 
 export interface ReferenceChangedEvent extends ConvergenceEvent {
