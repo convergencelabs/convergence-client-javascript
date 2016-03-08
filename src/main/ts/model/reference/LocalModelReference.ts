@@ -9,17 +9,21 @@ export interface ModelReferenceCallbacks {
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
 
+export type ReferenceDisposedCallback = (reference: LocalModelReference<any, any>) => void;
+
 export abstract class LocalModelReference<V, R extends ModelReference<V>> extends DelegatingEventEmitter {
 
   private _published: boolean;
   private _callbacks: ModelReferenceCallbacks;
   protected _reference: R;
+  private _disposeCallback: ReferenceDisposedCallback;
 
-  constructor(reference: R, callbacks: ModelReferenceCallbacks) {
+  constructor(reference: R, callbacks: ModelReferenceCallbacks, disposeCallback: ReferenceDisposedCallback) {
     super(reference);
     this._reference = reference;
     this._published = false;
     this._callbacks = callbacks;
+    this._disposeCallback = disposeCallback;
   }
 
   type(): string {
@@ -48,6 +52,10 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
 
   isDisposed(): boolean {
     return this._reference.isDisposed();
+  }
+
+  value(): V {
+    return this._reference.value();
   }
 
   reference(): R {
@@ -82,7 +90,9 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
   dispose(): void {
     this._ensureAttached();
     this.unpublish();
-    // fixme
+    this._disposeCallback(this);
+    this._callbacks = null;
+    this._disposeCallback = null;
   }
 
   set(value: V): void {

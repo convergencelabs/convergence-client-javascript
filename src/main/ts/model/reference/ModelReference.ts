@@ -1,6 +1,7 @@
 import {RealTimeValue} from "../RealTimeValue";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import EqualsUtil from "../../util/EqualsUtil";
 
 export var ReferenceType: any = {
   INDEX: "index",
@@ -96,9 +97,9 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     this.emitEvent(event);
   }
 
-  protected _setIfChanged(newIndex: V): void {
-    if (this._value !== newIndex) {
-      this._set(newIndex);
+  protected _setIfChanged(value: V): void {
+    if (!EqualsUtil.deepEquals(this._value, value)) {
+      this._set(value);
     }
   }
 }

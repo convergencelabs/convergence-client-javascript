@@ -5,6 +5,7 @@ import {CodeMap} from "../../../../util/CodeMap";
 import {OutgoingProtocolNormalMessage} from "../../protocol";
 import {IncomingProtocolNormalMessage} from "../../protocol";
 import {ReferenceType} from "../../../../model/reference/ModelReference";
+import {IndexRange} from "../../../../model/reference/RangeReference";
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -54,14 +55,33 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
   return result;
 };
 
+function deserializeReferenceValue(value: any, type: string): any {
+  "use strict";
+
+  switch (type) {
+    case ReferenceType.INDEX:
+      return value;
+    case ReferenceType.RANGE:
+      var range: IndexRange = {
+        start: value[0],
+        end: value[1]
+      };
+      return range;
+    default:
+      throw new Error("Invlaid reference type");
+  }
+};
+
 export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
+  var type: string = ReferenceTypeCodes.value(body.c);
+  var value: any = deserializeReferenceValue(body.v, type);
   var result: RemoteReferenceSet = {
     resourceId: body.r,
     sessionId: body.s,
     key: body.k,
     path: body.p,
-    referenceType: ReferenceTypeCodes.value(body.c),
-    value: body.v
+    referenceType: type,
+    value: value
   };
   return result;
 };
@@ -123,6 +143,18 @@ export var UnpublishReferenceSerializer: MessageBodySerializer = (message: Unpub
   };
 };
 
+function seserializeReferenceValue(value: any, type: string): any {
+  "use strict";
+  switch (type) {
+    case ReferenceType.INDEX:
+      return value;
+    case ReferenceType.RANGE:
+      var range: IndexRange = <IndexRange>value;
+      return [range.start, range.end];
+    default:
+      throw new Error("Invlaid reference type");
+  }
+};
 
 export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
@@ -130,7 +162,7 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
     p: message.path,
     k: message.key,
     c: ReferenceTypeCodes.code(message.referenceType),
-    v: message.value
+    v: seserializeReferenceValue(message.value, message.referenceType)
   };
 };
 

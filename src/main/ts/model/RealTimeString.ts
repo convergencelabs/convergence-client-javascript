@@ -20,6 +20,9 @@ import {RemoteReferenceEvent} from "../connection/protocol/model/reference/Refer
 import {ReferenceManager} from "./reference/ReferenceManager";
 import {OperationType} from "./ot/ops/OperationType";
 import MessageType from "../connection/protocol/MessageType";
+import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
+import {LocalRangeReference} from "./reference/LocalRangeReference";
+import {RangeReference} from "./reference/RangeReference";
 
 
 export default class RealTimeString extends RealTimeValue<String> {
@@ -34,6 +37,7 @@ export default class RealTimeString extends RealTimeValue<String> {
 
   private _referenceManager: ReferenceManager;
   private _data: string;
+  private _referenceDisposed: ReferenceDisposedCallback;
 
   /**
    * Constructs a new RealTimeString.
@@ -47,6 +51,9 @@ export default class RealTimeString extends RealTimeValue<String> {
 
     this._data = data;
     this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX]);
+    this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
+      this._referenceManager.removeLocalReference(reference.key());
+    };
   }
 
   insert(index: number, value: string): void {
@@ -85,6 +92,7 @@ export default class RealTimeString extends RealTimeValue<String> {
   // References
   /////////////////////////////////////////////////////////////////////////////
 
+  // fixme the index and range reference methods are almost the same.  can we refactor?
   indexReference(key: string): LocalIndexReference {
     var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
@@ -98,7 +106,34 @@ export default class RealTimeString extends RealTimeValue<String> {
       var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId());
 
       this._referenceManager.referenceMap().put(reference);
-      var local: LocalIndexReference = new LocalIndexReference(reference, this._callbacks.referenceEventCallbacks);
+      var local: LocalIndexReference = new LocalIndexReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+        );
+      this._referenceManager.addLocalReference(local);
+      return local;
+    }
+  }
+
+  rangeReference(key: string): LocalRangeReference {
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    if (existing !== undefined) {
+      if (existing.reference().type() !== ReferenceType.RANGE) {
+        throw new Error("A reference with this key already exists, but is not a range reference");
+      } else {
+        return <LocalRangeReference>existing;
+      }
+    } else {
+      var session: Session = this.model().session();
+      var reference: RangeReference = new RangeReference(key, this, session.userId(), session.userId());
+
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalRangeReference = new LocalRangeReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+      );
       this._referenceManager.addLocalReference(local);
       return local;
     }
