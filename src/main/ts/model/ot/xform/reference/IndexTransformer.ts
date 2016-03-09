@@ -21,8 +21,8 @@ export class IndexTransformer {
 
   static handleRemove(indices: number[], removeIndex: number, length: number): number[] {
     return indices.map((index: number) => {
-      if (index >= removeIndex) {
-        return index - length;
+      if (index > removeIndex) {
+        return index - Math.min(index - removeIndex, length);
       } else {
         return index;
       }

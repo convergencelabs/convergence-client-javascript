@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ACE Convergence Demo</title>
+
+  <link rel="stylesheet" href="ace-example.css"/>
+  <link rel="stylesheet" href="lib/ace_multi_cursor_manager.css"/>
+  <link rel="stylesheet" href="lib/ace_multi_selection_manager.css"/>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/ace_multi_cursor_manager.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/ace_multi_selection_manager.js" type="text/javascript" charset="utf-8"></script>
+
+  <!-- Convergence Resources -->
+  <script src="../connection.js"></script>
+  <script src="../../node_modules/es6-promise-polyfill/promise.js"></script>
+  <script src="../../dist/convergence-client.umd.js"></script>
+</head>
+<body>
+
+<div id="editor">function foo(items) {
+  var x = "All this is syntax highlighted";
+  return x;
+  }
+</div>
+
+
+<script src="ace-example.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+</html>
