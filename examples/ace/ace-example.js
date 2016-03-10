@@ -5,6 +5,7 @@
 var AceRange = ace.require('ace/range').Range;
 
 var aceEditor = ace.edit("editor");
+aceEditor.setReadOnly(true);
 var aceSession = aceEditor.getSession();
 var aceDocument = aceSession.getDocument();
 
@@ -15,6 +16,12 @@ var cursorManager = new AceMultiCursorManager(aceSession);
 var selectionManager = new AceMultiSelectionManager(aceSession);
 
 
+var users = document.getElementById("sessions");
+var usernameSelect = document.getElementById("username");
+var connectButton = document.getElementById("connectButton");
+var disconnectButton = document.getElementById("disconnectButton");
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Convergence Set Up
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,23 +30,44 @@ var model; // The RealTimeModel.
 var rtString; // The RealTimeString that holds the text document
 var localCursor; // The local cursor reference
 
+
 // Connect to the domain.
 ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
-domain.on("connected", function () {
-  console.log("connected");
-});
+var domain;
 
-// Now authenticate.  This is deferred unti connection is successful.
-domain.authenticateWithPassword("test1", "password").then(function (username) {
-  return domain.modelService().open("example", "ace-demo", function (collectionId, modelId) {
-    return {
-      "text": aceDocument.getValue()
-    };
+function connect() {
+  var username = usernameSelect.options[usernameSelect.selectedIndex].value;
+  domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
+  domain.on("connected", function () {
+    connectButton.disabled = true;
+    disconnectButton.disabled = false;
+    usernameSelect.disabled = true;
   });
-}).then(function (model) {
-  bind(model);
-});
+
+  // Now authenticate.  This is deferred unti connection is successful.
+  domain.authenticateWithPassword(username, "password").then(function (username) {
+    return domain.modelService().open("example", "ace-demo", function (collectionId, modelId) {
+      return {
+        "text": defaultText
+      };
+    });
+  }).then(function (model) {
+    bind(model);
+  });
+}
+
+function disconnect() {
+  domain.dispose();
+  connectButton.disabled = false;
+  disconnectButton.disabled = true;
+  usernameSelect.disabled = false;
+
+  suppressEvents = true;
+  aceEditor.setValue("");
+  suppressEvents = false;
+
+  aceEditor.setReadOnly(true);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Two Way Binding from Quill to Convergence
@@ -49,11 +77,27 @@ domain.authenticateWithPassword("test1", "password").then(function (username) {
 // Create a two way binding between Quill and Convergence.
 //
 function bind(realTimeModel) {
+  aceEditor.setReadOnly(false);
   model = realTimeModel;
+
+  model.connectedSessions().forEach(function(session) {
+    addUser(session.userId, session.sessionId);
+  });
+
+  model.on("remoteopen", function(e) {
+    addUser(e.userId, e.sessionId);
+  });
+
+  model.on("remoteclose", function(e) {
+    removeUser(e.sessionId);
+  });
+
   rtString = model.dataAt("text");
 
   // Initialize editor with current text.
+  suppressEvents = true;
   aceDocument.setValue(rtString.value());
+  suppressEvents = false;
 
   // bind to editing events and send them to the Quill API.
   rtString.on("insert", function (e) {
@@ -71,7 +115,9 @@ function bind(realTimeModel) {
   });
 
   rtString.on("value", function (e) {
+    suppressEvents = true;
     aceDocument.setValue(e.value);
+    suppressEvents = false;
   });
 
   // Create and publish a local cursor.
@@ -234,3 +280,24 @@ function toAceRange(value) {
   var selectionLead = aceDocument.indexToPosition(end, 0);
   return new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
 }
+
+function addUser(userId, sessionId) {
+  domain.userService().getUser(userId).then(function(user) {
+    var userDiv = document.createElement("div");
+    userDiv.innerHTML = user.username;
+    userDiv.id = "user" + sessionId;
+    users.appendChild(userDiv);
+  });
+
+}
+
+function removeUser(sessionId) {
+  var user = document.getElementById("user" + sessionId);
+  user.parentNode.removeChild(user)
+}
+
+
+var defaultText = "function foo(items) {\n" +
+"  var x = \"All this is syntax highlighted\";\n" +
+"  return x; \n" +
+"}";

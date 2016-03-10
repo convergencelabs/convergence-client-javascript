@@ -44,7 +44,9 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     CLOSED: "closed",
     DELETED: "deleted",
     MODIFIED: "modified",
-    COMMITTED: "committed"
+    COMMITTED: "committed",
+    REMOTE_OPEN: "remoteopen",
+    REMOTE_CLOSE: "remoteclose"
   };
 
   private _data: RealTimeObject;
@@ -195,6 +197,15 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     });
   }
 
+  connectedSessions(): RemoteSession[] {
+    return this._sessions.map((sessionId: string) => {
+      return {
+        userId: SessionIdParser.parseUserId(sessionId),
+        sessionId: sessionId
+      };
+    });
+  }
+
   collectionId(): string {
     return this._modelFqn.collectionId;
   }
@@ -291,6 +302,13 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
   private _handleClientOpen(message: RemoteClientOpenedModel): void {
     this._referencesBySession[message.sessionId] = [];
+    var event: RemoteSessionOpenedEvent = {
+      name: RealTimeModel.Events.REMOTE_OPEN,
+      src: this,
+      sessionId: message.sessionId,
+      userId: SessionIdParser.parseUserId(message.sessionId)
+    };
+    this.emitEvent(event);
   }
 
   private _handleClientClosed(message: RemoteClientClosedModel): void {
@@ -300,6 +318,14 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     refs.forEach((ref: ModelReference<any>) => {
       ref._dispose();
     });
+
+    var event: RemoteSessionClosedEvent = {
+      name: RealTimeModel.Events.REMOTE_CLOSE,
+      src: this,
+      sessionId: message.sessionId,
+      userId: SessionIdParser.parseUserId(message.sessionId)
+    };
+    this.emitEvent(event);
   }
 
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
@@ -441,4 +467,19 @@ interface RealTimeModelEvent extends ConvergenceEvent {
 interface RealTimeModelClosedEvent extends RealTimeModelEvent {
   local: boolean;
   reason?: string;
+}
+
+export interface RemoteSession {
+  userId: string;
+  sessionId: string;
+}
+
+export interface RemoteSessionOpenedEvent extends ConvergenceEvent {
+  userId: string;
+  sessionId: string;
+}
+
+export interface RemoteSessionClosedEvent extends ConvergenceEvent {
+  userId: string;
+  sessionId: string;
 }

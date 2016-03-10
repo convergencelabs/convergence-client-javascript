@@ -1,7 +1,49 @@
+#banner {
+  padding-top: 10px;
+  font-family: "helvetica-neue", helvetica, arial;
+  font-size: 20px;
+  font-weight: bold;
+  position: absolute;
+  top: 0px;
+  right: 260px;
+  height: 30px;
+  left: 10px;
+}
 #editor {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  top: 40px;
+  right: 260px;
+  bottom: 10px;
+  left: 10px;
+}
+
+#sessions {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  bottom: 10px;
+  width: 240px;
+  border: 1px solid black;
+}
+
+
+#usersTitle {
+  font-family: "helvetica-neue", helvetica, arial;
+  text-align: center;
+  position: absolute;
+  top: 40px;
+  right: 10px;
+  height: 18px;
+  width: 240px;
+  border: 1px solid black;
+}
+
+
+#connect {
+  padding-top: 10px;
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  height: 30px;
+  width: 250px;
 }

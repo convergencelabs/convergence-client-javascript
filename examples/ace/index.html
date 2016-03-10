@@ -17,12 +17,19 @@
   <script src="../../dist/convergence-client.umd.js"></script>
 </head>
 <body>
-
-<div id="editor">function foo(items) {
-  var x = "All this is syntax highlighted";
-  return x;
-  }
+<div id="connect">
+  User:
+  <select id="username">
+    <option value="test1">Test 1</option>
+    <option value="test2">Test 2</option>
+  </select>
+  <button id="connectButton" onclick="connect()">Connect</button>
+  <button id="disconnectButton" onclick="disconnect()" disabled="disabled">Disconnect</button>
 </div>
+<div id="banner">Ace Editor Demo</div>
+<div id="editor"></div>
+<div id="usersTitle">Connected Users</div>
+<div id="sessions"></div>
 
 <script src="ace-example.js" type="text/javascript" charset="utf-8"></script>
 </body>

@@ -3,6 +3,11 @@ export class SessionIdParser {
     return `${sk.userId}:${sk.sessionId}`;
   }
 
+  static parseUserId(sk: string): string {
+    var parts: string[] = sk.split(":");
+    return parts[0];
+  }
+
   static deserialize(sk: string): SessionKey {
     var parts: string[] = sk.split(":");
     return {
