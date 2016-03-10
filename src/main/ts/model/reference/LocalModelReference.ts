@@ -100,6 +100,10 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     this._fireSet();
   }
 
+  isSet(): boolean {
+    return this._reference.isSet();
+  }
+
   protected _fireSet(): void {
     this._ensureAttached();
     if (this.isPublished()) {

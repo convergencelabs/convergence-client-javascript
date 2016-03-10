@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Ace Editor Set Up
 ///////////////////////////////////////////////////////////////////////////////
-
 var AceRange = ace.require('ace/range').Range;
 
 var aceEditor = ace.edit("editor");
@@ -15,82 +14,52 @@ aceEditor.setTheme("ace/theme/monokai");
 var cursorManager = new AceMultiCursorManager(aceSession);
 var selectionManager = new AceMultiSelectionManager(aceSession);
 
-
-var usersList = document.getElementById("sessions");
-var usernameSelect = document.getElementById("username");
-var connectButton = document.getElementById("connectButton");
-var disconnectButton = document.getElementById("disconnectButton");
 var suppressEvents = false;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Convergence Set Up
+// Convergence Globals
 ///////////////////////////////////////////////////////////////////////////////
-
+ConvergenceDomain.debugFlags.protocol.messages = true;
+var domain;
 var model; // The RealTimeModel.
 var rtString; // The RealTimeString that holds the text document
 var localCursor; // The local cursor reference
 
-
-// Connect to the domain.
-ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain;
-
-function connect() {
-  var username = usernameSelect.options[usernameSelect.selectedIndex].value;
-  domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
-  domain.on("connected", function () {
-    connectButton.disabled = true;
-    disconnectButton.disabled = false;
-    usernameSelect.disabled = true;
-  });
-
-  // Now authenticate.  This is deferred unti connection is successful.
-  domain.authenticateWithPassword(username, "password").then(function (username) {
-    return domain.modelService().open("example", "ace-demo", function (collectionId, modelId) {
-      return {
-        "text": defaultText
-      };
-    });
-  }).then(function (model) {
-    bind(model);
-  });
-}
-
-function disconnect() {
-  domain.dispose();
-  connectButton.disabled = false;
-  disconnectButton.disabled = true;
-  usernameSelect.disabled = false;
-
-  aceEditor.removeAllListeners('change');
-  aceSession.selection.removeAllListeners('changeCursor');
-  aceSession.selection.removeAllListeners('changeSelection');
-
-  suppressEvents = true;
-  aceEditor.setValue("");
-  suppressEvents = false;
-
-  aceEditor.setReadOnly(true);
-
-  Object.getOwnPropertyNames(users).forEach(function (sessionId) {
-    removeUser(sessionId);
-  });
-
-  colorSeq = 0;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// Two Way Binding from Quill to Convergence
+// Two Way Binding from Ace to Convergence
 ///////////////////////////////////////////////////////////////////////////////
-
-
-//
-// Create a two way binding between Quill and Convergence.
-//
-function bind(realTimeModel) {
+function initialize(realTimeModel) {
   aceEditor.setReadOnly(false);
   model = realTimeModel;
 
+  rtString = model.dataAt("text");
+
+  // Initialize editor with current text.
+  suppressEvents = true;
+  aceDocument.setValue(rtString.value());
+  suppressEvents = false;
+
+  registerUserListeners();
+  registerModelListeners();
+
+  // Create and publish a local cursor.
+  localCursor = rtString.indexReference("cursor");
+  localCursor.publish();
+
+  // Create and publish a local cursor.
+  localSelection = rtString.rangeReference("selection");
+  localSelection.publish();
+
+  // Listen for remote references.
+  rtString.on("reference", function (e) {
+    handleReference(e.reference);
+  });
+
+  initializeExistingReferences();
+  registerAceListeners();
+}
+
+function registerUserListeners() {
   model.connectedSessions().forEach(function (session) {
     addUser(session.userId, session.sessionId);
   });
@@ -102,15 +71,9 @@ function bind(realTimeModel) {
   model.on("session_closed", function (e) {
     removeUser(e.sessionId);
   });
+}
 
-  rtString = model.dataAt("text");
-
-  // Initialize editor with current text.
-  suppressEvents = true;
-  aceDocument.setValue(rtString.value());
-  suppressEvents = false;
-
-  // bind to editing events and send them to the Quill API.
+function registerModelListeners() {
   rtString.on("insert", function (e) {
     suppressEvents = true;
     aceDocument.insert(aceDocument.indexToPosition(e.index), e.value);
@@ -130,110 +93,68 @@ function bind(realTimeModel) {
     aceDocument.setValue(e.value);
     suppressEvents = false;
   });
+}
 
-  // Create and publish a local cursor.
-  localCursor = rtString.indexReference("cursor");
-  localCursor.publish();
-
-  // Create and publish a local cursor.
-  localSelection = rtString.rangeReference("selection");
-  localSelection.publish();
-
-  // Listen for remote references.
-  rtString.on("reference", function (e) {
-    handleReference(e.reference);
-  });
-
-  function handleReference(reference) {
-    if (reference.key() === "cursor") {
-      handleRemoteCursorReference(reference);
-    } else if (reference.key() === "selection") {
-      handleRemoteSelectionReference(reference);
-    }
-  }
-
-  // init current references
-  var currentReferences = rtString.references();
-  currentReferences.forEach(function (reference) {
+function initializeExistingReferences() {
+  rtString.references().forEach(function (reference) {
     if (!reference.isLocal()) {
       handleReference(reference);
-      if (reference.key() === "cursor" && reference.value() !== null) {
+      if (reference.key() === "cursor") {
         cursorManager.setCursor(reference.sessionId(), reference.value());
-      } else if (reference.key() === "selection" && reference.value() !== null) {
+      } else if (reference.key() === "selection" ) {
         selectionManager.setSelection(reference.sessionId(), toAceRange(reference.value()));
       }
     }
   });
+}
 
+function registerAceListeners() {
   aceEditor.on('change', function (e) {
-    if (suppressEvents) {
-      return;
+    if (!suppressEvents) {
+      convertDeltaToModelUpdate(e);
     }
-    convertDeltaToModelUpdate(e);
   });
 
   aceSession.selection.on('changeCursor', function (e) {
-    // This event was generated in response to a remote operation.
-    if (suppressEvents) {
-      return;
+    if (!suppressEvents) {
+      var pos = aceDocument.positionToIndex(aceEditor.getCursorPosition());
+      localCursor.set(pos);
     }
-    var cursor2DPos = aceEditor.getCursorPosition();
-    var pos = aceDocument.positionToIndex(cursor2DPos, 0);
-    localCursor.set(pos);
   });
 
   aceSession.selection.on('changeSelection', function (e) {
-    // This event was generated in response to a remote operation.
-    if (suppressEvents) {
-      return;
+    if (!suppressEvents) {
+      if (!aceEditor.selection.isEmpty()) {
+        // todo ace has more complex seleciton capabilities beyond a single range.
+        var start = aceDocument.positionToIndex(aceEditor.selection.anchor);
+        var end = aceDocument.positionToIndex(aceEditor.selection.lead);
+        localSelection.set({start: start, end: end});
+      } else if (localSelection.isSet()) {
+        localSelection.clear();
+      }
     }
-
-    var selection = aceEditor.selection;
-    var selectionAnchor = aceEditor.selection.anchor;
-    var selectionLead = aceEditor.selection.lead;
-
-    var start = 0;
-    var end = 0;
-
-    // Note: it seems that when you mouse out or cursor out of the selection
-    // the last selection is still set, but isEmpty() will return true.  So
-    // we only want to look at the selection if isEmpty() is false??
-    if (!selection.isEmpty()) {
-      start = aceDocument.positionToIndex(selectionAnchor, 0);
-      end = aceDocument.positionToIndex(selectionLead, 0);
-    }
-
-    // FIXME Ace does more complex selections than just a continuous range.
-    localSelection.set({start: start, end: end});
   });
+}
 
-  function convertDeltaToModelUpdate(delta) {
-    var text;
-    var pos = aceDocument.positionToIndex(delta.start, 0);
+function handleReference(reference) {
+  if (reference.key() === "cursor") {
+    handleRemoteCursorReference(reference);
+  } else if (reference.key() === "selection") {
+    handleRemoteSelectionReference(reference);
+  }
+}
 
-    switch (delta.action) {
-      case 'insert':
-        var insertText;
-        if (delta.lines.length === 1) {
-          insertText = delta.lines[0];
-        } else {
-          insertText = delta.lines.join("\n");
-        }
-        rtString.insert(pos, insertText);
-        break;
-      case 'remove':
-        var removeText;
-        if (delta.lines.length == 1) {
-          removeText = delta.lines[0];
-        }
-        else {
-          removeText = delta.lines.join("\n");
-        }
-        rtString.remove(pos, removeText.length);
-        break;
-      default:
-        throw new Error("unknown action: " + delta.action);
-    }
+function convertDeltaToModelUpdate(delta) {
+  var pos = aceDocument.positionToIndex(delta.start);
+  switch (delta.action) {
+    case "insert":
+      rtString.insert(pos, delta.lines.join("\n"));
+      break;
+    case "remove":
+      rtString.remove(pos, delta.lines.join("\n").length);
+      break;
+    default:
+      throw new Error("unknown action: " + delta.action);
   }
 }
 
@@ -279,6 +200,10 @@ function handleRemoteSelectionReference(reference) {
 }
 
 function toAceRange(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
   var start = value.start;
   var end = value.end;
 
@@ -288,17 +213,64 @@ function toAceRange(value) {
     end = temp;
   }
 
-  var selectionAchnor = aceDocument.indexToPosition(start, 0);
-  var selectionLead = aceDocument.indexToPosition(end, 0);
+  var selectionAchnor = aceDocument.indexToPosition(start);
+  var selectionLead = aceDocument.indexToPosition(end);
   return new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Connection and User List
+///////////////////////////////////////////////////////////////////////////////
+var usersList = document.getElementById("sessions");
+var usernameSelect = document.getElementById("username");
+var connectButton = document.getElementById("connectButton");
+var disconnectButton = document.getElementById("disconnectButton");
+
 var users = {};
-var colorSeq = 0;
+
+function connect() {
+  domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
+  domain.on("connected", function () {
+    connectButton.disabled = true;
+    disconnectButton.disabled = false;
+    usernameSelect.disabled = true;
+  });
+
+  var username = usernameSelect.options[usernameSelect.selectedIndex].value;
+  domain.authenticateWithPassword(username, "password").then(function (username) {
+    return domain.modelService().open("example", "ace-demo", function (collectionId, modelId) {
+      return {
+        "text": defaultText
+      };
+    });
+  }).then(function (model) {
+    initialize(model);
+  });
+}
+
+function disconnect() {
+  domain.dispose();
+  connectButton.disabled = false;
+  disconnectButton.disabled = true;
+  usernameSelect.disabled = false;
+
+  aceEditor.removeAllListeners('change');
+  aceSession.selection.removeAllListeners('changeCursor');
+  aceSession.selection.removeAllListeners('changeSelection');
+
+  suppressEvents = true;
+  aceEditor.setValue("");
+  suppressEvents = false;
+
+  aceEditor.setReadOnly(true);
+
+  Object.getOwnPropertyNames(users).forEach(function (sessionId) {
+    removeUser(sessionId);
+  });
+}
 
 function addUser(userId, sessionId) {
-  var seq = colorSeq++;
-  var color = USERS_COLORS[seq];
+  var color = getConvergenceColor();
   users[sessionId] = {
     userId: userId,
     sessionId: sessionId,

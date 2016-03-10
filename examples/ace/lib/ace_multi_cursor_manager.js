@@ -113,7 +113,7 @@ AceCursorMarker.prototype._forceSessionUpdate = function() {
 
 AceCursorMarker.prototype._convertPosition = function(position) {
   var type = typeof position;
-  if (type === null) {
+  if (position === null) {
     return null;
   } else if (type === "number") {
     return this._session.getDocument().indexToPosition(position, 0);
