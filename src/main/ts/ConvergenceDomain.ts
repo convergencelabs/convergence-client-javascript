@@ -99,6 +99,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   }
 
   dispose(): void {
+    this._modelService._dispose();
     this._connection.disconnect();
     this._connection = undefined;
   }

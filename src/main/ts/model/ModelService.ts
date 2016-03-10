@@ -27,7 +27,6 @@ export default class ModelService extends ConvergenceEventEmitter {
 
   constructor(private _connection: ConvergenceConnection) {
     super();
-
     this._connection.addMultipleMessageListener(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
@@ -142,6 +141,12 @@ export default class ModelService extends ConvergenceEventEmitter {
 
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
+    });
+  }
+
+  _dispose(): void {
+    Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
+      this._openModelsByFqn[fqn].close();
     });
   }
 

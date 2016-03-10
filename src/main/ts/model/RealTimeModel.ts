@@ -45,8 +45,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     DELETED: "deleted",
     MODIFIED: "modified",
     COMMITTED: "committed",
-    REMOTE_OPEN: "remoteopen",
-    REMOTE_CLOSE: "remoteclose"
+    SESSION_OPENED: "session_opened",
+    SESSION_CLOSED: "session_closed"
   };
 
   private _data: RealTimeObject;
@@ -303,7 +303,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _handleClientOpen(message: RemoteClientOpenedModel): void {
     this._referencesBySession[message.sessionId] = [];
     var event: RemoteSessionOpenedEvent = {
-      name: RealTimeModel.Events.REMOTE_OPEN,
+      name: RealTimeModel.Events.SESSION_OPENED,
       src: this,
       sessionId: message.sessionId,
       userId: SessionIdParser.parseUserId(message.sessionId)
@@ -320,7 +320,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     });
 
     var event: RemoteSessionClosedEvent = {
-      name: RealTimeModel.Events.REMOTE_CLOSE,
+      name: RealTimeModel.Events.SESSION_CLOSED,
       src: this,
       sessionId: message.sessionId,
       userId: SessionIdParser.parseUserId(message.sessionId)
@@ -454,6 +454,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     this._connection.send(opSubmission);
   }
 }
+
+Object.freeze(RealTimeModel.Events);
 
 export interface ModelEventCallbacks {
   sendOperationCallback: (operation: DiscreteOperation) => void;

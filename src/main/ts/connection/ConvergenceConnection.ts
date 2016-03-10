@@ -77,7 +77,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
     // fixme
     this._protocolConfig = {
-      defaultRequestTimeout: 1000,
+      defaultRequestTimeout: 5000,
       heartbeatConfig: {
         enabled: true,
         pingInterval: 5000,

@@ -16,11 +16,11 @@ var cursorManager = new AceMultiCursorManager(aceSession);
 var selectionManager = new AceMultiSelectionManager(aceSession);
 
 
-var users = document.getElementById("sessions");
+var usersList = document.getElementById("sessions");
 var usernameSelect = document.getElementById("username");
 var connectButton = document.getElementById("connectButton");
 var disconnectButton = document.getElementById("disconnectButton");
-
+var suppressEvents = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Convergence Set Up
@@ -62,16 +62,27 @@ function disconnect() {
   disconnectButton.disabled = true;
   usernameSelect.disabled = false;
 
+  aceEditor.removeAllListeners('change');
+  aceSession.selection.removeAllListeners('changeCursor');
+  aceSession.selection.removeAllListeners('changeSelection');
+
   suppressEvents = true;
   aceEditor.setValue("");
   suppressEvents = false;
 
   aceEditor.setReadOnly(true);
+
+  Object.getOwnPropertyNames(users).forEach(function (sessionId) {
+    removeUser(sessionId);
+  });
+
+  colorSeq = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Two Way Binding from Quill to Convergence
 ///////////////////////////////////////////////////////////////////////////////
+
 
 //
 // Create a two way binding between Quill and Convergence.
@@ -80,15 +91,15 @@ function bind(realTimeModel) {
   aceEditor.setReadOnly(false);
   model = realTimeModel;
 
-  model.connectedSessions().forEach(function(session) {
+  model.connectedSessions().forEach(function (session) {
     addUser(session.userId, session.sessionId);
   });
 
-  model.on("remoteopen", function(e) {
+  model.on("session_opened", function (e) {
     addUser(e.userId, e.sessionId);
   });
 
-  model.on("remoteclose", function(e) {
+  model.on("session_closed", function (e) {
     removeUser(e.sessionId);
   });
 
@@ -143,7 +154,7 @@ function bind(realTimeModel) {
 
   // init current references
   var currentReferences = rtString.references();
-  currentReferences.forEach(function(reference) {
+  currentReferences.forEach(function (reference) {
     if (!reference.isLocal()) {
       handleReference(reference);
       if (reference.key() === "cursor" && reference.value() !== null) {
@@ -154,7 +165,6 @@ function bind(realTimeModel) {
     }
   });
 
-  var suppressEvents = false;
   aceEditor.on('change', function (e) {
     if (suppressEvents) {
       return;
@@ -228,10 +238,11 @@ function bind(realTimeModel) {
 }
 
 function handleRemoteCursorReference(reference) {
+  var color = users[reference.sessionId()].color;
   cursorManager.addCursor(
     reference.sessionId(),
     reference.userId(),
-    'rgba(255,153,51,0.9)');
+    color);
 
   // fixme should this be "set"
   reference.on("set", function (e) {
@@ -248,10 +259,11 @@ function handleRemoteCursorReference(reference) {
 }
 
 function handleRemoteSelectionReference(reference) {
+  var color = users[reference.sessionId()].color;
   selectionManager.addSelection(
     reference.sessionId(),
     reference.userId(),
-    'rgba(255,153,51,0.9)');
+    color);
 
   reference.on("set", function (e) {
     selectionManager.setSelection(reference.sessionId(), toAceRange(e.src.value()));
@@ -281,12 +293,24 @@ function toAceRange(value) {
   return new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
 }
 
+var users = {};
+var colorSeq = 0;
+
 function addUser(userId, sessionId) {
-  domain.userService().getUser(userId).then(function(user) {
+  var seq = colorSeq++;
+  var color = USERS_COLORS[seq];
+  users[sessionId] = {
+    userId: userId,
+    sessionId: sessionId,
+    color: color
+  };
+
+  domain.userService().getUser(userId).then(function (user) {
     var userDiv = document.createElement("div");
     userDiv.innerHTML = user.username;
     userDiv.id = "user" + sessionId;
-    users.appendChild(userDiv);
+    userDiv.style.color = color;
+    usersList.appendChild(userDiv);
   });
 
 }
@@ -294,10 +318,10 @@ function addUser(userId, sessionId) {
 function removeUser(sessionId) {
   var user = document.getElementById("user" + sessionId);
   user.parentNode.removeChild(user)
+  delete users[sessionId];
 }
 
-
 var defaultText = "function foo(items) {\n" +
-"  var x = \"All this is syntax highlighted\";\n" +
-"  return x; \n" +
-"}";
+  "  var x = \"All this is syntax highlighted\";\n" +
+  "  return x; \n" +
+  "}";
