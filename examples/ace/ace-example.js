@@ -307,7 +307,7 @@ function addUser(userId, sessionId) {
 
   domain.userService().getUser(userId).then(function (user) {
     var userDiv = document.createElement("div");
-    userDiv.innerHTML = user.username;
+    userDiv.innerHTML = user.firstName + " " + user.lastName;
     userDiv.id = "user" + sessionId;
     userDiv.style.color = color;
     usersList.appendChild(userDiv);
@@ -317,7 +317,7 @@ function addUser(userId, sessionId) {
 
 function removeUser(sessionId) {
   var user = document.getElementById("user" + sessionId);
-  user.parentNode.removeChild(user)
+  user.parentNode.removeChild(user);
   delete users[sessionId];
 }
 
