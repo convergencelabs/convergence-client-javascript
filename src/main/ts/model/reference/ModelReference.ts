@@ -14,22 +14,35 @@ Object.freeze(ReferenceType);
 export abstract class ModelReference<V> extends ConvergenceEventEmitter {
 
   static Events: any = {
+    SET: "set",
     CLEARED: "cleared",
-    CHANGED: "changed",
     DISPOSED: "disposed"
   };
 
   private _disposed: boolean;
   protected _value: V;
+  private _type: string;
+  private _key: string;
+  private _source: RealTimeValue<any>;
+  private _userId: string;
+  private _sessionId: string;
+  private _local: boolean;
 
-  constructor(private _type: string,
-              private _key: string,
-              private _source: RealTimeValue<any>,
-              private _userId: string,
-              private _sessionId: string) {
+  constructor(type: string,
+              key: string,
+              source: RealTimeValue<any>,
+              userId: string,
+              sessionId: string,
+              local: boolean) {
     super();
     this._disposed = false;
     this._value = null;
+    this._type = type;
+    this._key = key;
+    this._source = source;
+    this._userId = userId;
+    this._sessionId = sessionId;
+    this._local = local;
   }
 
   type(): string {
@@ -45,7 +58,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   }
 
   isLocal(): boolean {
-    return false;
+    return this._local;
   }
 
   userId(): string {
@@ -81,7 +94,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   _set(value: V, local: boolean = false): void {
     this._value = value;
     var event: ReferenceChangedEvent = {
-      name: ModelReference.Events.CHANGED,
+      name: ModelReference.Events.SET,
       src: this,
       local: local
     };

@@ -102,12 +102,6 @@ function bind(realTimeModel) {
   quillEditor.on('selection-change', function (range) {
     if (range) {
       localCursor.set(range.end);
-      //if (range.start == range.end) {
-      //  console.log('User cursor is on', range.start);
-      //} else {
-      //  var text = editor.getText(range.start, range.end);
-      //  console.log('User has highlighted', text);
-      //}
     } else {
       console.log('Cursor not in the editor');
     }
@@ -115,7 +109,7 @@ function bind(realTimeModel) {
 }
 
 function handleRemoteCursorReference(reference) {
-  reference.on("changed", function (e) {
+  reference.on("set", function (e) {
     cursorManager.setCursor(
       reference.sessionId(),
       reference.value(),

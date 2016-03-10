@@ -50,7 +50,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     super(RealTimeValueType.String, parent, fieldInParent, callbacks, model);
 
     this._data = data;
-    this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX]);
+    this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX, ReferenceType.RANGE]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
       this._referenceManager.removeLocalReference(reference.key());
     };
@@ -103,7 +103,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       }
     } else {
       var session: Session = this.model().session();
-      var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId());
+      var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId(), true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalIndexReference = new LocalIndexReference(
@@ -126,7 +126,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       }
     } else {
       var session: Session = this.model().session();
-      var reference: RangeReference = new RangeReference(key, this, session.userId(), session.userId());
+      var reference: RangeReference = new RangeReference(key, this, session.userId(), session.userId(), true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalRangeReference = new LocalRangeReference(

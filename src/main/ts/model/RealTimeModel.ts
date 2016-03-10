@@ -31,6 +31,12 @@ import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import Immutable from "../util/Immutable";
 import {RemoteReferenceSet} from "../connection/protocol/model/reference/ReferenceEvent";
+import {RemoteClientClosedModel} from "../connection/protocol/model/remoteOpenClose";
+import {ModelReference} from "./reference/ModelReference";
+import {RemoteClientOpenedModel} from "../connection/protocol/model/remoteOpenClose";
+import {ReferenceData} from "../connection/protocol/model/openRealtimeModel";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {RemoteReferencePublished} from "../connection/protocol/model/reference/ReferenceEvent";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 
@@ -44,12 +50,16 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _data: RealTimeObject;
   private _open: boolean;
   private _committed: boolean;
+  private _referencesBySession: {[key: string]: ModelReference<any>[]};
+  private _sessions: string[];
 
   /**
    * Constructs a new RealTimeModel.
    */
   constructor(private _resourceId: string,
               _data: Object,
+              sessions: string[],
+              references: {[key: string]: ReferenceData[]},
               private _version: number,
               private _createdTime: Date,
               private _modifiedTime: Date,
@@ -58,6 +68,12 @@ export class RealTimeModel extends ConvergenceEventEmitter {
               private _connection: ConvergenceConnection,
               private _modelService: ModelService) {
     super();
+
+    this._referencesBySession = {};
+    this._sessions = sessions.slice(0);
+    this._sessions.forEach((sessionId: string) => {
+      this._referencesBySession[sessionId] = [];
+    });
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this._committed = committed;
@@ -141,6 +157,42 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     this._open = true;
     this._committed = true;
+
+    Object.getOwnPropertyNames(references).forEach((sessionId: string) => {
+      var sessionRefs: ReferenceData[] = references[sessionId];
+      sessionRefs.forEach((ref: ReferenceData) => {
+        var published: RemoteReferencePublished = {
+          type: MessageType.REFERENCE_PUBLISHED,
+          sessionId: sessionId,
+          userId: SessionIdParser.deserialize(sessionId).userId,
+          resourceId: this._resourceId,
+          key: ref.key,
+          path: ref.path,
+          referenceType: ref.referenceType
+        };
+
+        // fixme refactor
+        this._data._handleRemoteReferenceEvent(ref.path, published);
+        var m: RealTimeValue<any> = this._data.dataAt(ref.path);
+        var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
+        this._referencesBySession[sessionId].push(r);
+
+        if (ref.value) {
+          var set: RemoteReferenceSet = {
+            type: MessageType.REFERENCE_SET,
+            sessionId: sessionId,
+            userId: SessionIdParser.deserialize(sessionId).userId,
+            resourceId: this._resourceId,
+            key: ref.key,
+            path: ref.path,
+            referenceType: ref.referenceType,
+            value: ref.value
+          };
+          this._data._handleRemoteReferenceEvent(ref.path, set);
+        }
+
+      });
+    });
   }
 
   collectionId(): string {
@@ -225,9 +277,29 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
         break;
+      case MessageType.REMOTE_CLIENT_OPENED:
+        this._handleClientOpen(<RemoteClientOpenedModel>messageEvent.message);
+
+        break;
+      case MessageType.REMOTE_CLIENT_CLOSED:
+        this._handleClientClosed(<RemoteClientClosedModel>messageEvent.message);
+        break;
       default:
         throw new Error("Unexpected message");
     }
+  }
+
+  private _handleClientOpen(message: RemoteClientOpenedModel): void {
+    this._referencesBySession[message.sessionId] = [];
+  }
+
+  private _handleClientClosed(message: RemoteClientClosedModel): void {
+    var refs: ModelReference<any>[] = this._referencesBySession[message.sessionId];
+    delete this._referencesBySession[message.sessionId];
+
+    refs.forEach((ref: ModelReference<any>) => {
+      ref._dispose();
+    });
   }
 
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
@@ -262,12 +334,28 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       default:
     }
 
+    var m: RealTimeValue<any>;
+    var r: ModelReference<any>;
+
+    if (event.type === MessageType.REFERENCE_UNPUBLISHED) {
+      m = this._data.dataAt(event.path);
+      r = m.reference(event.sessionId, event.key);
+      var index: number = this._referencesBySession[event.sessionId].indexOf(r);
+      this._referencesBySession[event.sessionId].splice(index, 1);
+    }
+
     // TODO if we wind up being able to pause the processing of incoming
     // operations, then we would put this in a queue.  We would also need
     // to somehow wrap this in an object that stores the currentContext
     // version right now, so we know when to distribute this event.
     if (processedEvent !== undefined) {
       this._data._handleRemoteReferenceEvent(event.path, event);
+    }
+
+    if (event.type === MessageType.REFERENCE_PUBLISHED) {
+      m = this._data.dataAt(event.path);
+      r = m.reference(event.sessionId, event.key);
+      this._referencesBySession[event.sessionId].push(r);
     }
   }
 

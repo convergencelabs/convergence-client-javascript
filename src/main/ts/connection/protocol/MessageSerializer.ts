@@ -32,6 +32,8 @@ import {RemoteReferencePublishedDeserializer} from "./model/reference/ReferenceE
 import {RemoteReferenceClearedDeserializer} from "./model/reference/ReferenceEvent";
 import {RemoteReferenceUnpublishedDeserializer} from "./model/reference/ReferenceEvent";
 import {PublishReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {RemoteClientOpenedModelDeserializer} from "./model/remoteOpenClose";
+import {RemoteClientClosedModelDeserializer} from "./model/remoteOpenClose";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -152,6 +154,9 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_DATA_REQUEST
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.OPERATION_ACKNOWLEDGEMENT, OperationAckDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_OPERATION, RemoteOperationDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_CLIENT_OPENED, RemoteClientOpenedModelDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_CLIENT_CLOSED, RemoteClientClosedModelDeserializer);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.FORCE_CLOSE_REAL_TIME_MODEL, ForceCloseRealTimeModelDeserializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.DELETE_REAL_TIME_MODEL_RESPONSE);

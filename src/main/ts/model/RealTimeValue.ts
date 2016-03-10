@@ -95,6 +95,14 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: RemoteReferenceEvent): void;
 
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return;
+  }
+
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
+    return;
+  }
+
   protected _fireReferenceCreated(reference: ModelReference<any>): void {
     var createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeValue.Events.REFERENCE,

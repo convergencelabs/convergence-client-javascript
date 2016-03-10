@@ -33,6 +33,8 @@ export default class ModelService extends ConvergenceEventEmitter {
         MessageType.REMOTE_OPERATION,
         MessageType.OPERATION_ACKNOWLEDGEMENT,
         MessageType.MODEL_DATA_REQUEST,
+        MessageType.REMOTE_CLIENT_OPENED,
+        MessageType.REMOTE_CLIENT_CLOSED,
         MessageType.REFERENCE_PUBLISHED,
         MessageType.REFERENCE_UNPUBLISHED,
         MessageType.REFERENCE_SET,
@@ -78,6 +80,8 @@ export default class ModelService extends ConvergenceEventEmitter {
       var model: RealTimeModel = new RealTimeModel(
         response.resourceId,
         response.data,
+        response.connectedClients,
+        response.references,
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),

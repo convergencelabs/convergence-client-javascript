@@ -6,12 +6,13 @@ import {OutgoingProtocolNormalMessage} from "../../protocol";
 import {IncomingProtocolNormalMessage} from "../../protocol";
 import {ReferenceType} from "../../../../model/reference/ModelReference";
 import {IndexRange} from "../../../../model/reference/RangeReference";
+import {SessionIdParser} from "../../SessionIdParser";
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-var ReferenceTypeCodes: CodeMap = new CodeMap();
+export var ReferenceTypeCodes: CodeMap = new CodeMap();
 ReferenceTypeCodes.put(0, ReferenceType.INDEX);
 ReferenceTypeCodes.put(1, ReferenceType.RANGE);
 ReferenceTypeCodes.put(2, ReferenceType.PROPERTY);
@@ -24,6 +25,7 @@ ReferenceTypeCodes.put(3, ReferenceType.PATH);
 
 export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   sessionId: string;
+  userId: string;
   resourceId: string;
   key: string;
   path: Path;
@@ -48,6 +50,7 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
   var result: RemoteReferencePublished = {
     resourceId: body.r,
     sessionId: body.s,
+    userId: SessionIdParser.deserialize(body.s).userId,
     key: body.k,
     path: body.p,
     referenceType: ReferenceTypeCodes.value(body.c)
@@ -55,8 +58,11 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
   return result;
 };
 
-function deserializeReferenceValue(value: any, type: string): any {
+export function deserializeReferenceValue(value: any, type: string): any {
   "use strict";
+  if (value === undefined) {
+    return;
+  }
 
   switch (type) {
     case ReferenceType.INDEX:
@@ -68,7 +74,7 @@ function deserializeReferenceValue(value: any, type: string): any {
       };
       return range;
     default:
-      throw new Error("Invlaid reference type");
+      throw new Error("Invalid reference type");
   }
 };
 
@@ -78,6 +84,7 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
   var result: RemoteReferenceSet = {
     resourceId: body.r,
     sessionId: body.s,
+    userId: SessionIdParser.deserialize(body.s).userId,
     key: body.k,
     path: body.p,
     referenceType: type,
@@ -89,6 +96,7 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
 var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
   var result: RemoteReferenceEvent = {
     sessionId: body.s,
+    userId: SessionIdParser.deserialize(body.s).userId,
     resourceId: body.r,
     key: body.k,
     path: body.p
@@ -152,7 +160,7 @@ function seserializeReferenceValue(value: any, type: string): any {
       var range: IndexRange = <IndexRange>value;
       return [range.start, range.end];
     default:
-      throw new Error("Invlaid reference type");
+      throw new Error("Invalid reference type");
   }
 };
 

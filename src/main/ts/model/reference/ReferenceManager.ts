@@ -11,6 +11,7 @@ import {ReferenceType} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeValue} from "../RealTimeValue";
 import Immutable from "../../util/Immutable";
+import {RangeReference} from "./RangeReference";
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
@@ -88,7 +89,10 @@ export class ReferenceManager {
     var reference: ModelReference<any>;
     switch (event.referenceType) {
       case ReferenceType.INDEX:
-        reference = new IndexReference(event.key, this._source, userId, event.sessionId);
+        reference = new IndexReference(event.key, this._source, userId, event.sessionId, false);
+        break;
+      case ReferenceType.RANGE:
+        reference = new RangeReference(event.key, this._source, userId, event.sessionId, false);
         break;
       default:
         break;
@@ -109,8 +113,6 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
     var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
-    if (reference instanceof IndexReference) {
-      reference._set(event.value);
-    }
+    reference._set(event.value);
   }
 }

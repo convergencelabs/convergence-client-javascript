@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////////////////////
+// Ace Editor Set Up
+///////////////////////////////////////////////////////////////////////////////
+
 var AceRange = ace.require('ace/range').Range;
 
 var aceEditor = ace.edit("editor");
@@ -80,10 +84,27 @@ function bind(realTimeModel) {
 
   // Listen for remote references.
   rtString.on("reference", function (e) {
-    if (e.reference.key() === "cursor") {
-      handleRemoteCursorReference(e.reference);
-    } else if (e.reference.key() === "selection") {
-      handleRemoteSelectionReference(e.reference);
+    handleReference(e.reference);
+  });
+
+  function handleReference(reference) {
+    if (reference.key() === "cursor") {
+      handleRemoteCursorReference(reference);
+    } else if (reference.key() === "selection") {
+      handleRemoteSelectionReference(reference);
+    }
+  }
+
+  // init current references
+  var currentReferences = rtString.references();
+  currentReferences.forEach(function(reference) {
+    if (!reference.isLocal()) {
+      handleReference(reference);
+      if (reference.key() === "cursor" && reference.value() !== null) {
+        cursorManager.setCursor(reference.sessionId(), reference.value());
+      } else if (reference.key() === "selection" && reference.value() !== null) {
+        selectionManager.setSelection(reference.sessionId(), toAceRange(reference.value()));
+      }
     }
   });
 
@@ -167,7 +188,7 @@ function handleRemoteCursorReference(reference) {
     'rgba(255,153,51,0.9)');
 
   // fixme should this be "set"
-  reference.on("changed", function (e) {
+  reference.on("set", function (e) {
     cursorManager.setCursor(reference.sessionId(), reference.value());
   });
 
@@ -186,20 +207,8 @@ function handleRemoteSelectionReference(reference) {
     reference.userId(),
     'rgba(255,153,51,0.9)');
 
-  reference.on("changed", function (e) {
-    var start = reference.value().start;
-    var end = reference.value().end;
-
-    if (start > end) {
-      var temp = start;
-      start = end;
-      end = temp;
-    }
-
-    var selectionAchnor = aceDocument.indexToPosition(start, 0);
-    var selectionLead = aceDocument.indexToPosition(end, 0);
-    var range = new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
-    selectionManager.setSelection(reference.sessionId(), range);
+  reference.on("set", function (e) {
+    selectionManager.setSelection(reference.sessionId(), toAceRange(e.src.value()));
   });
 
   reference.on("cleared", function (e) {
@@ -207,6 +216,21 @@ function handleRemoteSelectionReference(reference) {
   });
 
   reference.on("disposed", function (e) {
-    cursorManager.removeSelection(reference.sessionId());
+    selectionManager.removeSelection(reference.sessionId());
   });
+}
+
+function toAceRange(value) {
+  var start = value.start;
+  var end = value.end;
+
+  if (start > end) {
+    var temp = start;
+    start = end;
+    end = temp;
+  }
+
+  var selectionAchnor = aceDocument.indexToPosition(start, 0);
+  var selectionLead = aceDocument.indexToPosition(end, 0);
+  return new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
 }
