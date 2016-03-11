@@ -139,7 +139,7 @@ function handleAceSelectionChanged(e) {
 }
 
 function handleAceEditEvent(delta) {
-  if (!suppressEvents) {
+  if (suppressEvents) {
     return;
   }
 
