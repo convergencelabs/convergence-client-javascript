@@ -34,7 +34,7 @@ AceMultiCursorManager.prototype.removeCursor = function(id) {
 AceMultiCursorManager.prototype.removeAll = function () {
   var self = this;
   Object.getOwnPropertyNames(this._cursors).forEach(function(key) {
-    self.removeCursor(self._cursors[key].id);
+    self.removeCursor(self._cursors[key].cursorId());
   });
 };
 

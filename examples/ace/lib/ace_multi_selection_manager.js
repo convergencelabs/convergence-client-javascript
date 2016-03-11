@@ -34,7 +34,7 @@ AceMultiSelectionManager.prototype.removeSelection = function(id) {
 AceMultiSelectionManager.prototype.removeAll = function () {
   var self = this;
   Object.getOwnPropertyNames(this._selections).forEach(function(key) {
-    self.removeCursor(self._selections[key].id);
+    self.removeSelection(self._selections[key].selectionId());
   });
 };
 
