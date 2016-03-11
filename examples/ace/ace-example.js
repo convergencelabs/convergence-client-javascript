@@ -108,43 +108,41 @@ function initializeExistingReferences() {
   });
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Outgoing events
+///////////////////////////////////////////////////////////////////////////////
+
 function registerAceListeners() {
-  aceEditor.on('change', function (e) {
-    if (!suppressEvents) {
-      convertDeltaToModelUpdate(e);
-    }
-  });
-
-  aceSession.selection.on('changeCursor', function (e) {
-    if (!suppressEvents) {
-      var pos = aceDocument.positionToIndex(aceEditor.getCursorPosition());
-      localCursor.set(pos);
-    }
-  });
-
-  aceSession.selection.on('changeSelection', function (e) {
-    if (!suppressEvents) {
-      if (!aceEditor.selection.isEmpty()) {
-        // todo ace has more complex seleciton capabilities beyond a single range.
-        var start = aceDocument.positionToIndex(aceEditor.selection.anchor);
-        var end = aceDocument.positionToIndex(aceEditor.selection.lead);
-        localSelection.set({start: start, end: end});
-      } else if (localSelection.isSet()) {
-        localSelection.clear();
-      }
-    }
-  });
+  aceEditor.on('change', handleAceEditEvent);
+  aceSession.selection.on('changeCursor', handleAceCursorChanged);
+  aceSession.selection.on('changeSelection', handleAceSelectionChanged);
 }
 
-function handleReference(reference) {
-  if (reference.key() === "cursor") {
-    handleRemoteCursorReference(reference);
-  } else if (reference.key() === "selection") {
-    handleRemoteSelectionReference(reference);
+function handleAceCursorChanged(e) {
+  if (!suppressEvents) {
+    var pos = aceDocument.positionToIndex(aceEditor.getCursorPosition());
+    localCursor.set(pos);
   }
 }
 
-function convertDeltaToModelUpdate(delta) {
+function handleAceSelectionChanged(e) {
+  if (!suppressEvents) {
+    if (!aceEditor.selection.isEmpty()) {
+      // todo ace has more complex seleciton capabilities beyond a single range.
+      var start = aceDocument.positionToIndex(aceEditor.selection.anchor);
+      var end = aceDocument.positionToIndex(aceEditor.selection.lead);
+      localSelection.set({start: start, end: end});
+    } else if (localSelection.isSet()) {
+      localSelection.clear();
+    }
+  }
+}
+
+function handleAceEditEvent(delta) {
+  if (!suppressEvents) {
+    return;
+  }
+
   var pos = aceDocument.positionToIndex(delta.start);
   switch (delta.action) {
     case "insert":
@@ -155,6 +153,18 @@ function convertDeltaToModelUpdate(delta) {
       break;
     default:
       throw new Error("unknown action: " + delta.action);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Incoming events
+///////////////////////////////////////////////////////////////////////////////
+
+function handleReference(reference) {
+  if (reference.key() === "cursor") {
+    handleRemoteCursorReference(reference);
+  } else if (reference.key() === "selection") {
+    handleRemoteSelectionReference(reference);
   }
 }
 
@@ -254,15 +264,15 @@ function disconnect() {
   disconnectButton.disabled = true;
   usernameSelect.disabled = false;
 
-  aceEditor.removeAllListeners('change');
-  aceSession.selection.removeAllListeners('changeCursor');
-  aceSession.selection.removeAllListeners('changeSelection');
+  aceEditor.off('change', handleAceEditEvent);
+  aceSession.selection.off('changeCursor', handleAceCursorChanged);
+  aceSession.selection.off('changeSelection', handleAceSelectionChanged);
 
-  suppressEvents = true;
   aceEditor.setValue("");
-  suppressEvents = false;
-
   aceEditor.setReadOnly(true);
+
+  cursorManager.removeAll();
+  selectionManager.removeAll();
 
   Object.getOwnPropertyNames(users).forEach(function (sessionId) {
     removeUser(sessionId);

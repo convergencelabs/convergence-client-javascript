@@ -31,6 +31,13 @@ AceMultiSelectionManager.prototype.removeSelection = function(id) {
   this._session.removeMarker(selection.id);
 };
 
+AceMultiSelectionManager.prototype.removeAll = function () {
+  var self = this;
+  Object.getOwnPropertyNames(this._selections).forEach(function(marker) {
+    self.removeCursor(marker.id);
+  });
+};
+
 AceMultiSelectionManager.prototype._getSelection = function(id) {
   var selection = this._selections[id];
   if (selection === undefined) {

@@ -31,6 +31,13 @@ AceMultiCursorManager.prototype.removeCursor = function(id) {
   this._session.removeMarker(cursor.id);
 };
 
+AceMultiCursorManager.prototype.removeAll = function () {
+  var self = this;
+  Object.getOwnPropertyNames(this._cursors).forEach(function(marker) {
+    self.removeCursor(marker.id);
+  });
+};
+
 AceMultiCursorManager.prototype._getCursor = function(id) {
   var cursor = this._cursors[id];
   if (cursor === undefined) {
@@ -38,6 +45,7 @@ AceMultiCursorManager.prototype._getCursor = function(id) {
   }
   return cursor;
 };
+
 
 function AceCursorMarker(session, cursorId, title, color, position) {
   this._session = session;
