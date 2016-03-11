@@ -29,6 +29,7 @@ AceMultiCursorManager.prototype.removeCursor = function(id) {
     throw new Error("Cursor not found: " + id);
   }
   this._session.removeMarker(cursor.id);
+  delete this._cursors[id];
 };
 
 AceMultiCursorManager.prototype.removeAll = function () {

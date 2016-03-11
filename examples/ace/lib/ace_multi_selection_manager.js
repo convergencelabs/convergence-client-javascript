@@ -29,6 +29,7 @@ AceMultiSelectionManager.prototype.removeSelection = function(id) {
     throw new Error("Selection not found: " + id);
   }
   this._session.removeMarker(selection.id);
+  delete this._selections[id];
 };
 
 AceMultiSelectionManager.prototype.removeAll = function () {
