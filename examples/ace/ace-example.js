@@ -223,9 +223,9 @@ function toAceRange(value) {
     end = temp;
   }
 
-  var selectionAchnor = aceDocument.indexToPosition(start);
+  var selectionAnchor = aceDocument.indexToPosition(start);
   var selectionLead = aceDocument.indexToPosition(end);
-  return new AceRange(selectionAchnor.row, selectionAchnor.column, selectionLead.row, selectionLead.column);
+  return new AceRange(selectionAchnor.row, selectionAnchor.column, selectionLead.row, selectionLead.column);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
