@@ -69,13 +69,13 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       var type: string = operationEvent.operation.type;
       if (type === OperationType.NUMBER_ADD) {
-        this._handleAddOperation(operationEvent);
+        return this._handleAddOperation(operationEvent);
       } else if (type === OperationType.NUMBER_VALUE) {
-        this._handleSetOperation(operationEvent);
+        return this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
       }
@@ -84,7 +84,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     }
   }
 
-  private _handleAddOperation(operationEvent: ModelOperationEvent): void {
+  private _handleAddOperation(operationEvent: ModelOperationEvent): NumberAddEvent {
     var operation: NumberAddOperation = <NumberAddOperation> operationEvent.operation;
     var value: number = operation.value;
 
@@ -101,9 +101,10 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       value: value
     };
     this.emitEvent(event);
+    return event;
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): NumberSetValueEvent {
     var operation: NumberSetOperation = <NumberSetOperation> operationEvent.operation;
     var value: number = operation.value;
 
@@ -120,6 +121,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       value: value
     };
     this.emitEvent(event);
+    return event;
   }
 
   private _validateNumber(value: number): void {

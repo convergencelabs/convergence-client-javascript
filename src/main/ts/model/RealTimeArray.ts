@@ -16,6 +16,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
+import {ChildChangedEvent} from "./RealTimeContainerValue";
 
 
 export default class RealTimeArray extends RealTimeContainerValue<any[]> {
@@ -176,19 +177,19 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       var type: string = operationEvent.operation.type;
       if (type === OperationType.ARRAY_INSERT) {
-        this._handleInsertOperation(operationEvent);
+        return this._handleInsertOperation(operationEvent);
       } else if (type === OperationType.ARRAY_REORDER) {
-        this._handleReorderOperation(operationEvent);
+        return this._handleReorderOperation(operationEvent);
       } else if (type === OperationType.ARRAY_REMOVE) {
-        this._handleRemoveOperation(operationEvent);
+        return this._handleRemoveOperation(operationEvent);
       } else if (type === OperationType.ARRAY_SET) {
-        this._handleSetOperation(operationEvent);
+        return this._handleSetOperation(operationEvent);
       } else if (type === OperationType.ARRAY_VALUE) {
-        this._handleSetValueOperation(operationEvent);
+        return this._handleSetValueOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
       }
@@ -196,7 +197,15 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       var child: RealTimeValue<any> = this._getChild(relativePath[0]);
       var subPath: Path = relativePath.slice(0);
       subPath.shift();
-      child._handleRemoteOperation(subPath, operationEvent);
+      var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
+      var event: ChildChangedEvent = {
+        name: RealTimeObject.Events.CHILD_CHANGED,
+        src: this,
+        relativePath: relativePath,
+        childEvent: childEvent
+      };
+      this.emitEvent(event);
+      return childEvent;
     }
   }
 
@@ -211,7 +220,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
     return child;
   }
 
-  private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
+  private _handleInsertOperation(operationEvent: ModelOperationEvent): ArrayInsertEvent {
     var operation: ArrayInsertOperation = <ArrayInsertOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: Object|number|string|boolean = operation.value;
@@ -232,9 +241,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: value
     };
     this.emitEvent(event);
+    return event;
   }
 
-  private _handleReorderOperation(operationEvent: ModelOperationEvent): void {
+  private _handleReorderOperation(operationEvent: ModelOperationEvent): ArrayReorderEvent {
     var operation: ArrayMoveOperation = <ArrayMoveOperation> operationEvent.operation;
     var fromIndex: number = operation.fromIndex;
     var toIndex: number = operation.toIndex;
@@ -258,9 +268,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       toIndex: toIndex
     };
     this.emitEvent(event);
+    return event;
   }
 
-  private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
+  private _handleRemoveOperation(operationEvent: ModelOperationEvent): ArrayRemoveEvent {
     var operation: ArrayRemoveOperation = <ArrayRemoveOperation> operationEvent.operation;
     var index: number = operation.index;
 
@@ -282,10 +293,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       index: index
     };
     this.emitEvent(event);
-
+    return event;
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): ArraySetEvent {
     var operation: ArrayReplaceOperation = <ArrayReplaceOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: Object|number|string|boolean = operation.value;
@@ -309,9 +320,10 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: value
     };
     this.emitEvent(event);
+    return event;
   }
 
-  private _handleSetValueOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetValueOperation(operationEvent: ModelOperationEvent): ArraySetValueEvent {
     var operation: ArraySetOperation = <ArraySetOperation> operationEvent.operation;
     var values: Array<Object|number|string|boolean> = operation.value;
 
@@ -335,6 +347,7 @@ export default class RealTimeArray extends RealTimeContainerValue<any[]> {
       value: values
     };
     this.emitEvent(event);
+    return event;
   }
 
   _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {

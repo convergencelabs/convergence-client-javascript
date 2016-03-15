@@ -172,15 +172,15 @@ export default class RealTimeString extends RealTimeValue<String> {
   // Operations
   //
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       var type: string = operationEvent.operation.type;
       if (type === OperationType.STRING_INSERT) {
-        this._handleInsertOperation(operationEvent);
+        return this._handleInsertOperation(operationEvent);
       } else if (type === OperationType.STRING_REMOVE) {
-        this._handleRemoveOperation(operationEvent);
+        return this._handleRemoveOperation(operationEvent);
       } else if (type === OperationType.STRING_VALUE) {
-        this._handleSetOperation(operationEvent);
+        return this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
       }
@@ -189,7 +189,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     }
   }
 
-  private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
+  private _handleInsertOperation(operationEvent: ModelOperationEvent): StringInsertEvent {
     var operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: string = operation.value;
@@ -215,9 +215,10 @@ export default class RealTimeString extends RealTimeValue<String> {
         ref._handleInsert(index, value.length);
       }
     });
+    return event;
   }
 
-  private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
+  private _handleRemoveOperation(operationEvent: ModelOperationEvent): StringRemoveEvent {
     var operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: string = operation.value;
@@ -243,9 +244,10 @@ export default class RealTimeString extends RealTimeValue<String> {
         ref._handleRemove(index, value.length);
       }
     });
+    return event;
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): StringSetValueEvent {
     var operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
     var value: string = operation.value;
 
@@ -268,6 +270,8 @@ export default class RealTimeString extends RealTimeValue<String> {
     });
     this._referenceManager.referenceMap().removeAll();
     this._referenceManager.removeAllLocalReferences();
+
+    return event;
   }
 
   private _validateInsert(index: number, value: string): void {

@@ -10,6 +10,7 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ModelReference} from "./reference/ModelReference";
+import {ModelChangeEvent} from "./events";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
@@ -91,7 +92,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   protected abstract _setValue(value: T): void;
 
-  abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void;
+  abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent;
 
   abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: RemoteReferenceEvent): void;
 

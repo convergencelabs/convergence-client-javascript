@@ -45,7 +45,7 @@ export default class ConvergenceSocket extends EventEmitter {
   }
 
   terminate(reason: string): Promise<void> {
-    return this.doClose(false);
+    return this.doClose(false, reason);
   }
 
   doClose(clean: boolean, reason?: string): Promise<void> {

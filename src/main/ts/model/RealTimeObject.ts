@@ -16,6 +16,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ChildChangedEvent} from "./RealTimeContainerValue";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -23,7 +24,8 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     SET: "set",
     REMOVE: "remove",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeValue.Events.DETACHED,
+    CHILD_CHANGED: RealTimeContainerValue.Events.CHILD_CHANGED
   };
 
   private _children: { [key: string]: RealTimeValue<any>; };
@@ -154,21 +156,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       switch (operationEvent.operation.type) {
         case OperationType.OBJECT_ADD:
-          this._handleAddPropertyOperation(operationEvent);
-          break;
+          return this._handleAddPropertyOperation(operationEvent);
         case OperationType.OBJECT_SET:
-          this._handleSetPropertyOperation(operationEvent);
-          break;
+          return this._handleSetPropertyOperation(operationEvent);
         case OperationType.OBJECT_REMOVE:
-          this._handleRemovePropertyOperation(operationEvent);
-          break;
+          return this._handleRemovePropertyOperation(operationEvent);
         case OperationType.OBJECT_VALUE:
-          this._handleSetOperation(operationEvent);
-          break;
+          return this._handleSetOperation(operationEvent);
         default:
           throw new Error("Invalid operation for RealTimeObject");
       }
@@ -176,11 +174,19 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       var child: RealTimeValue<any> = this._getChild(relativePath[0]);
       var subPath: Path = relativePath.slice(0);
       subPath.shift();
-      child._handleRemoteOperation(subPath, operationEvent);
+      var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
+      var event: ChildChangedEvent = {
+        name: RealTimeObject.Events.CHILD_CHANGED,
+        src: this,
+        relativePath: relativePath,
+        childEvent: childEvent
+      };
+      this.emitEvent(event);
+      return childEvent;
     }
   }
 
-  private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
+  private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
     var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
@@ -205,9 +211,10 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     };
 
     this.emitEvent(event);
+    return event;
   }
 
-  private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
     var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
     var value: Object|number|string|boolean = operation.value;
@@ -232,9 +239,10 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     if (oldChild) {
       oldChild._detach();
     }
+    return event;
   }
 
-  private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
+  private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): ObjectRemoveEvent {
     var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
 
@@ -254,12 +262,12 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       };
 
       this.emitEvent(event);
-
       oldChild._detach();
+      return event;
     }
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): ObjectSetValueEvent {
     var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
     var value: Object = operation.value;
 
@@ -290,6 +298,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         oldChildren[key]._detach();
       }
     }
+    return event;
   }
 
   /////////////////////////////////////////////////////////////////////////////

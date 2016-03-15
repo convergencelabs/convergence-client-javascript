@@ -49,11 +49,11 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       var type: string = operationEvent.operation.type;
       if (type === OperationType.BOOLEAN_VALUE) {
-        this._handleSetOperation(operationEvent);
+        return this._handleSetOperation(operationEvent);
       } else {
         throw new Error("Invalid operation!");
       }
@@ -62,7 +62,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     }
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): BooleanSetValueEvent {
     var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
     var value: boolean = operation.value;
 
@@ -79,6 +79,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
       value: value
     };
     this.emitEvent(event);
+    return event;
   }
 
   private _validateSet(value: boolean): void {

@@ -7,6 +7,7 @@ import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ModelChangeEvent} from "./events";
 
 export default class RealTimeNull extends RealTimeValue<any> {
 
@@ -32,7 +33,7 @@ export default class RealTimeNull extends RealTimeValue<any> {
     throw new Error("Can not set the value on a Null type.");
   }
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
+  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
     if (relativePath.length === 0) {
       throw new Error("Null values do not process operations");
     } else {
