@@ -21,7 +21,7 @@
   "license": "",
   "scripts": {
     "build": "gulp",
-    "test": "mocha test"
+    "test": "gulp test"
   },
   "dependencies": {},
   "devDependencies": {

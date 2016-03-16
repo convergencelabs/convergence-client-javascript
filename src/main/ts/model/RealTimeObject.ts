@@ -253,7 +253,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
       var event: ObjectRemoveEvent = {
         src: this,
-        name: RealTimeObject.Events.SET,
+        name: RealTimeObject.Events.REMOVE,
         sessionId: operationEvent.sessionId,
         userId: operationEvent.username,
         version: operationEvent.version,
