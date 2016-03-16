@@ -225,7 +225,7 @@ function toAceRange(value) {
 
   var selectionAnchor = aceDocument.indexToPosition(start);
   var selectionLead = aceDocument.indexToPosition(end);
-  return new AceRange(selectionAchnor.row, selectionAnchor.column, selectionLead.row, selectionLead.column);
+  return new AceRange(selectionAnchor.row, selectionAnchor.column, selectionLead.row, selectionLead.column);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -289,9 +289,18 @@ function addUser(userId, sessionId) {
 
   domain.userService().getUser(userId).then(function (user) {
     var userDiv = document.createElement("div");
-    userDiv.innerHTML = user.firstName + " " + user.lastName;
+    userDiv.className = "session";
     userDiv.id = "user" + sessionId;
-    userDiv.style.color = color;
+
+    var squareDiv = document.createElement("div");
+    squareDiv.className = "userSquare";
+    squareDiv.style.background = color;
+    userDiv.appendChild(squareDiv);
+
+    var usernameDiv = document.createElement("div");
+    usernameDiv.innerHTML = user.firstName + " " + user.lastName;
+    userDiv.appendChild(usernameDiv);
+
     usersList.appendChild(userDiv);
   });
 

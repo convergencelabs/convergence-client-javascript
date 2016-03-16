@@ -35,6 +35,17 @@
   border: 1px solid black;
   color: white;
   background: #272822;
+  font-family: "helvetica-neue", helvetica, arial;
+  font-size: 14px;
+}
+
+#sessions div div {
+  display: inline-block;
+}
+
+#sessions div.session {
+  border-bottom: 1px solid gray;
+  margin-bottom: 5px;
 }
 
 #usersTitle {
@@ -48,6 +59,15 @@
   border: 1px solid black;
   color: white;
   background: #272822;
+}
+
+div.userSquare {
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border: 1px solid gray;
+  position: relative;
+  top: 1px;
 }
 
 #connect {
