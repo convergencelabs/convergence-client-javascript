@@ -47,6 +47,10 @@ export default class ClientConcurrencyControl extends EventEmitter {
     this._pendingCompoundOperation = [];
   }
 
+  clientId(): string {
+    return this._clientId;
+  }
+
   contextVersion(): number {
     return this._contextVersion;
   }
@@ -156,13 +160,6 @@ export default class ClientConcurrencyControl extends EventEmitter {
     return r;
   }
 
-  processOutgoingReferencePath(p: Path): Path {
-    for (var i: number = 0; i < this._unappliedOperations.length && p; i++) {
-      p = this._referenceTransformer.transformPath(this._unappliedOperations[i].operation, p);
-    }
-    return p;
-  }
-
   dispose(): void {
     // todo
   }
@@ -219,13 +216,6 @@ export default class ClientConcurrencyControl extends EventEmitter {
       r = this._referenceTransformer.transform(this._inflightOperations[i], r);
     }
     return r;
-  }
-
-  processRemoteReferencePath(p: Path): Path {
-    for (var i: number = 0; i < this._inflightOperations.length && p; i++) {
-      p = this._referenceTransformer.transformPath(this._inflightOperations[i], p);
-    }
-    return p;
   }
 
   private transformIncoming(serverOp: Operation, clientOps: Operation[]): Operation {

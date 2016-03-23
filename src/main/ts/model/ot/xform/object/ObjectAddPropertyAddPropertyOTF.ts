@@ -13,7 +13,7 @@ export default class ObjectAddPropertyAddPropertyOTF
     } else if (s.value !== c.value) {
       // O-AA-2
       return new OperationPair(
-        new ObjectSetPropertyOperation(s.path, s.noOp, s.prop, s.value),
+        new ObjectSetPropertyOperation(s.id, s.noOp, s.prop, s.value),
         c.copy({noOp: true}));
     } else {
       // O-AA-3

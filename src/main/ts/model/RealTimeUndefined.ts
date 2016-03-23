@@ -18,11 +18,12 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
   /**
    * Constructs a new RealTimeUndefined.
    */
-  constructor(parent: RealTimeContainerValue<any>,
+  constructor(id: string,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Undefined, parent, fieldInParent, callbacks, model);
+    super(RealTimeValueType.Undefined, id, parent, fieldInParent, callbacks, model);
   }
 
   protected _getValue(): void {
@@ -33,15 +34,11 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
     throw new Error("Can not set the value on a Undefined type.");
   }
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
-    if (relativePath.length === 0) {
-      throw new Error("Undefined values do not process operations");
-    } else {
-      throw new Error("Invalid path: undefined values do not have children");
-    }
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+    throw new Error("Undefined values do not process operations");
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Undefined values do not process references");
   }
 }

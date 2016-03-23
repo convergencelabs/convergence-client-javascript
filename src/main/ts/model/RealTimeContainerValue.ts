@@ -17,11 +17,12 @@ export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
    * Constructs a new RealTimeContainer.
    */
   constructor(modelType: RealTimeValueType,
+              id: string,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(modelType, parent, fieldInParent, callbacks, model);
+    super(modelType, id, parent, fieldInParent, callbacks, model);
   }
 
   _detach(): void {

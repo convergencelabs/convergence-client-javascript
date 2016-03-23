@@ -11,6 +11,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
+import {NumberValue} from "../connection/protocol/model/dataValue";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 
@@ -20,22 +21,26 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     DETACHED: RealTimeValue.Events.DETACHED
   };
 
+  private _data: number;
+
   /**
    * Constructs a new RealTimeNumber.
    */
-  constructor(private _data: number,
+  constructor(data: NumberValue,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Number, parent, fieldInParent, callbacks, model);
+    super(RealTimeValueType.Number, data.id, parent, fieldInParent, callbacks, model);
+
+    this._data = data.value;
   }
 
   add(value: number): void {
     this._validateNumber(value);
 
     if (value !== 0) {
-      var operation: NumberAddOperation = new NumberAddOperation(this.path(), false, value);
+      var operation: NumberAddOperation = new NumberAddOperation(this.id(), false, value);
       this._data += value;
       this._sendOperation(operation);
     }
@@ -58,7 +63,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       throw new Error("Value is NaN");
     }
 
-    var operation: NumberSetOperation = new NumberSetOperation(this.path(), false, value);
+    var operation: NumberSetOperation = new NumberSetOperation(this.id(), false, value);
     this._data = value;
     this._sendOperation(operation);
   }
@@ -69,18 +74,14 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
-    if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === OperationType.NUMBER_ADD) {
-        return this._handleAddOperation(operationEvent);
-      } else if (type === OperationType.NUMBER_VALUE) {
-        return this._handleSetOperation(operationEvent);
-      } else {
-        throw new Error("Invalid operation!");
-      }
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+    var type: string = operationEvent.operation.type;
+    if (type === OperationType.NUMBER_ADD) {
+      return this._handleAddOperation(operationEvent);
+    } else if (type === OperationType.NUMBER_VALUE) {
+      return this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid path: number values do not have children");
+      throw new Error("Invalid operation!");
     }
   }
 
@@ -130,7 +131,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Number values do not process references");
   }
 }

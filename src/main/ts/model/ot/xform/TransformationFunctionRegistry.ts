@@ -1,6 +1,5 @@
 import DiscreteOperation from "../ops/DiscreteOperation";
 import OperationTransformationFunction from "./OperationTransformationFunction";
-import {PathTransformationFunction} from "./PathTransformationFunction";
 import ArrayInsertInsertOTF from "./array/ArrayInsertInsertOTF";
 import ArrayInsertRemoveOTF from "./array/ArrayInsertRemoveOTF";
 import ArrayInsertReplaceOTF from "./array/ArrayInsertReplaceOTF";
@@ -40,7 +39,6 @@ import NumberAddSetOTF from "./number/NumberAddSetOTF";
 import NumberSetAddOTF from "./number/NumberSetAddOTF";
 import NumberSetSetOTF from "./number/NumberSetSetOTF";
 import BooleanSetSetOTF from "./bool/BooleanSetSetOTF";
-import ArrayInsertPTF from "./path/ArrayInsertPTF";
 import ObjectAddPropertyAddPropertyOTF from "./object/ObjectAddPropertyAddPropertyOTF";
 import ObjectAddPropertySetPropertyOTF from "./object/ObjectAddPropertySetPropertyOTF";
 import ObjectAddPropertyRemovePropertyOTF from "./object/ObjectAddPropertyRemovePropertyOTF";
@@ -57,29 +55,25 @@ import ObjectSetAddPropertyOTF from "./object/ObjectSetAddPropertyOTF";
 import ObjectSetSetPropertyOTF from "./object/ObjectSetSetPropertyOTF";
 import ObjectSetRemovePropertyOTF from "./object/ObjectSetRemovePropertyOTF";
 import ObjectSetSetOTF from "./object/ObjectSetSetOTF";
-import ArrayRemovePTF from "./path/ArrayRemovePTF";
-import ArrayReplacePTF from "./path/ArrayReplacePTF";
-import ArrayMovePTF from "./path/ArrayMovePTF";
-import ArraySetPTF from "./path/ArraySetPTF";
-import ObjectSetPropertyPTF from "./path/ObjectSetPropertyPTF";
-import ObjectRemovePropertyPTF from "./path/ObjectRemovePropertyPTF";
-import ObjectSetPTF from "./path/ObjectSetPTF";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 import {ModelReferenceData} from "./ReferenceTransformer";
 import {ReferenceType} from "../../reference/ModelReference";
 import {StringInsertIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
 import {OperationType} from "../ops/OperationType";
+import {StringRemoveIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
+import {StringSetIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
+import {StringInsertRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
+import {StringRemoveRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
+import {StringSetRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
 
 
 export default class TransformationFunctionRegistry {
   _otfs: {[key: string]: OperationTransformationFunction<any, any>};
   _rtfs: {[key: string]: ReferenceTransformationFunction};
-  _ptfs: {[key: string]: PathTransformationFunction<any>};
 
   constructor() {
     this._otfs = {};
     this._rtfs = {};
-    this._ptfs = {};
 
     // string Functions
     this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_INSERT, new StringInsertInsertOTF());
@@ -156,27 +150,16 @@ export default class TransformationFunctionRegistry {
     // boolean Functions
     this.registerOtf(OperationType.BOOLEAN_VALUE, OperationType.BOOLEAN_VALUE, new BooleanSetSetOTF());
 
-
-    //
-    // path Transformation Functions
-    //
-
-    this._ptfs[OperationType.ARRAY_INSERT] = new ArrayInsertPTF();
-    this._ptfs[OperationType.ARRAY_REMOVE] = new ArrayRemovePTF();
-    this._ptfs[OperationType.ARRAY_SET] = new ArrayReplacePTF();
-    this._ptfs[OperationType.ARRAY_REORDER] = new ArrayMovePTF();
-    this._ptfs[OperationType.ARRAY_VALUE] = new ArraySetPTF();
-
-    this._ptfs[OperationType.OBJECT_SET] = new ObjectSetPropertyPTF();
-    this._ptfs[OperationType.OBJECT_REMOVE] = new ObjectRemovePropertyPTF();
-    this._ptfs[OperationType.OBJECT_VALUE] = new ObjectSetPTF();
-
     //
     // Reference Transformation Functions
     //
     this.registerRtf(ReferenceType.INDEX, OperationType.STRING_INSERT, StringInsertIndexTransformationFunction);
-    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_REMOVE, StringInsertIndexTransformationFunction);
-    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_VALUE, StringInsertIndexTransformationFunction);
+    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_REMOVE, StringRemoveIndexTransformationFunction);
+    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_VALUE, StringSetIndexTransformationFunction);
+
+    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_INSERT, StringInsertRangeTransformationFunction);
+    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_REMOVE, StringRemoveRangeTransformationFunction);
+    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_VALUE, StringSetRangeTransformationFunction);
   }
 
   registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
@@ -207,9 +190,5 @@ export default class TransformationFunctionRegistry {
   getReferenceTransformationFunction<O extends DiscreteOperation> (o: O, r: ModelReferenceData): ReferenceTransformationFunction {
     var key: string = o.type + r.type;
     return this._rtfs[key];
-  }
-
-  getPathTransformationFunction<A extends DiscreteOperation>(a: A): PathTransformationFunction<A> {
-    return this._ptfs[a.type];
   }
 }

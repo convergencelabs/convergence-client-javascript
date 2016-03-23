@@ -15,6 +15,10 @@ import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
+import {ArrayValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {TestIdGenerator} from "./TestIdGenerator";
+import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
+import {DataValue} from "../../../main/ts/connection/protocol/model/dataValue";
 
 var expect: any = chai.expect;
 
@@ -25,6 +29,17 @@ describe('RealTimeArray', () => {
   var version: number = 1;
   var timestamp: number = 100;
 
+  var idGenerator: () => string = new TestIdGenerator().id;
+
+  var arrayValue: ArrayValue =
+    <ArrayValue>DataValueFactory.createDataValue(["A", "B", "C"], idGenerator);
+
+  var newArray: DataValue[] = [
+    DataValueFactory.createDataValue("X", idGenerator),
+    DataValueFactory.createDataValue("Y", idGenerator),
+    DataValueFactory.createDataValue("Z", idGenerator)
+  ];
+
   var callbacks: ModelEventCallbacks;
 
   beforeEach(function (): void {
@@ -34,7 +49,7 @@ describe('RealTimeArray', () => {
         onPublish: sinon.spy(),
         onUnpublish: sinon.spy(),
         onSet: sinon.spy(),
-        onClear: sinon.spy(),
+        onClear: sinon.spy()
       }
     };
   });
@@ -45,143 +60,149 @@ describe('RealTimeArray', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
-    expect(myArray.value()).to.deep.equal(["A", "B", "C"]);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
+    expect(myArray.value()).to.deep.equal(arrayValue);
   });
 
   it('Value is correct after set', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.value(["X", "Y", "Z"]);
     expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after insert', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.insert(2, "X");
     expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after remove', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.remove(1);
     expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after set', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.set(1, "X");
     expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after move', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.reorder(1, 2);
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct operation is sent after set value', () => {
 
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.value(["X", "Y", "Z"]);
 
-    var expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
+    // var expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     // expect(lastOp).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after insert', () => {
 
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.insert(2, "X");
 
-    var expectedOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
-    //expect(lastOp).to.deep.equal(expectedOp);
+    // var expectedOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
+    // expect(lastOp).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after remove', () => {
 
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.remove(1);
 
-    var expectedOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
-    //expect(lastOp).to.deep.equal(expectedOp);
+    // var expectedOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
+    // expect(lastOp).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after set', () => {
 
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.set(1, "X");
 
-    var expectedOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
-    //expect(lastOp).to.deep.equal(expectedOp);
+    // var expectedOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
+    // expect(lastOp).to.deep.equal(expectedOp);
   });
 
   it('Correct operation is sent after move', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, callbacks, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, null);
     myArray.reorder(1, 2);
 
-    var expectedOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
-    //expect(lastOp).to.deep.equal(expectedOp);
+    // var expectedOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
+    // expect(lastOp).to.deep.equal(expectedOp);
   });
 
 
   it('Value is correct after ArraySetOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
 
-    var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
+    var incomingOp: ArraySetOperation = new ArraySetOperation(arrayValue.id, false, newArray);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after ArrayInsertOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
 
-    var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
+    var newValue: DataValue = DataValueFactory.createDataValue("X", idGenerator);
+
+    var incomingOp: ArrayInsertOperation = new ArrayInsertOperation(arrayValue.id, false, 2, newValue);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after ArrayRemoveOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
 
-    var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
+    var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation(arrayValue.id, false, 1);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after ArrayReplaceOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
 
-    var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
-    var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    var incomingOp: ArrayReplaceOperation =
+      new ArrayReplaceOperation(arrayValue.id, false, 1, DataValueFactory.createDataValue("X", idGenerator));
+    var incomingEvent: ModelOperationEvent =
+      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+    myArray._handleRemoteOperation(incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after ArrayMoveOperation', () => {
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
 
-    var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
-    var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    var incomingOp: ArrayMoveOperation =
+      new ArrayMoveOperation(arrayValue.id, false, 1, 2);
+    var incomingEvent: ModelOperationEvent =
+      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+    myArray._handleRemoteOperation(incomingEvent);
 
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct event is fired after ArraySetOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
     myArray.on(RealTimeArray.Events.VALUE, lastEventCallback);
 
-    var incomingOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
+    var incomingOp: ArraySetOperation = new ArraySetOperation(arrayValue.id, false, newArray);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     var expectedEvent: ArraySetValueEvent = {
       src: myArray,
@@ -197,12 +218,13 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayInsertOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
     myArray.on(RealTimeArray.Events.INSERT, lastEventCallback);
 
-    var incomingOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
+    var newValue: DataValue = DataValueFactory.createDataValue("X", idGenerator);
+    var incomingOp: ArrayInsertOperation = new ArrayInsertOperation(arrayValue.id, false, 2, newValue);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     var expectedEvent: ArrayInsertEvent = {
       src: myArray,
@@ -219,12 +241,12 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayRemoveOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
     myArray.on(RealTimeArray.Events.REMOVE, lastEventCallback);
 
-    var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
+    var incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation(arrayValue.id, false, 1);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     var expectedEvent: ArrayRemoveEvent = {
       src: myArray,
@@ -240,12 +262,14 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayReplaceOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
     myArray.on(RealTimeArray.Events.SET, lastEventCallback);
 
-    var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
+    var newValue: DataValue = DataValueFactory.createDataValue("X", idGenerator);
+
+    var incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation(arrayValue.id, false, 1, newValue);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     var expectedEvent: ArraySetEvent = {
       src: myArray,
@@ -262,12 +286,12 @@ describe('RealTimeArray', () => {
 
   it('Correct event is fired after ArrayMoveOperation', () => {
     lastEvent = null;
-    var myArray: RealTimeArray = new RealTimeArray(["A", "B", "C"], null, null, null, null);
+    var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, null);
     myArray.on(RealTimeArray.Events.REORDER, lastEventCallback);
 
-    var incomingOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
+    var incomingOp: ArrayMoveOperation = new ArrayMoveOperation(arrayValue.id, false, 1, 2);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
-    myArray._handleRemoteOperation(incomingOp.path, incomingEvent);
+    myArray._handleRemoteOperation(incomingEvent);
 
     var expectedEvent: ArrayReorderEvent = {
       src: myArray,

@@ -1,4 +1,3 @@
-import {Path} from "../../../../model/ot/Path";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {CodeMap} from "../../../../util/CodeMap";
@@ -28,7 +27,7 @@ export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   userId: string;
   resourceId: string;
   key: string;
-  path: Path;
+  id: string;
 }
 
 export interface RemoteReferencePublished extends RemoteReferenceEvent {
@@ -52,7 +51,7 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
     sessionId: body.s,
     userId: SessionIdParser.deserialize(body.s).userId,
     key: body.k,
-    path: body.p,
+    id: body.d,
     referenceType: ReferenceTypeCodes.value(body.c)
   };
   return result;
@@ -86,7 +85,7 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
     sessionId: body.s,
     userId: SessionIdParser.deserialize(body.s).userId,
     key: body.k,
-    path: body.p,
+    id: body.d,
     referenceType: type,
     value: value
   };
@@ -99,7 +98,7 @@ var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> 
     userId: SessionIdParser.deserialize(body.s).userId,
     resourceId: body.r,
     key: body.k,
-    path: body.p
+    id: body.d
   };
   return result;
 };
@@ -114,7 +113,7 @@ export var RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<Remot
 
 export interface OutgoingReferenceEvent extends OutgoingProtocolNormalMessage {
   resourceId: string;
-  path: Path;
+  id: string;
   key: string;
 }
 
@@ -137,7 +136,7 @@ export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 export var PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    p: message.path,
+    d: message.id,
     k: message.key,
     c: ReferenceTypeCodes.code(message.referenceType)
   };
@@ -146,7 +145,7 @@ export var PublishReferenceSerializer: MessageBodySerializer = (message: Publish
 export var UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
   return {
     r: message.resourceId,
-    p: message.path,
+    d: message.id,
     k: message.key
   };
 };
@@ -167,7 +166,7 @@ function seserializeReferenceValue(value: any, type: string): any {
 export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
-    p: message.path,
+    d: message.id,
     k: message.key,
     c: ReferenceTypeCodes.code(message.referenceType),
     v: seserializeReferenceValue(message.value, message.referenceType)
@@ -177,7 +176,7 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
 export var ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
   return {
     r: message.resourceId,
-    p: message.path,
+    d: message.id,
     k: message.key
   };
 };

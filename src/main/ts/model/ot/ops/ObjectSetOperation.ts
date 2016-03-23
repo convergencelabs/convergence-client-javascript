@@ -1,18 +1,18 @@
 import Immutable from "../../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
-import {Path} from "../Path";
 import {OperationType} from "./OperationType";
+import {DataValue} from "../../../connection/protocol/model/dataValue";
 
 export default class ObjectSetOperation extends DiscreteOperation {
 
-  constructor(path: Path, noOp: boolean, public value: any) {
-    super(OperationType.OBJECT_VALUE, path, noOp);
+  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue}) {
+    super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }
 
   copy(updates: any): ObjectSetOperation {
     return new ObjectSetOperation(
-      Immutable.update(this.path, updates.path),
+      Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),
       Immutable.update(this.value, updates.value));
   }

@@ -1,18 +1,12 @@
 import Operation from "../ops/Operation";
 import CompoundOperation from "../ops/CompoundOperation";
 import DiscreteOperation from "../ops/DiscreteOperation";
-import {PathTransformationResult} from "./PathTransformationFunction";
-import {PathTransformationFunction} from "./PathTransformationFunction";
 import TransformationFunctionRegistry from "./TransformationFunctionRegistry";
-import PathComparator from "../util/PathComparator";
-import {PathTransformation} from "./PathTransformationFunction";
-import {Path} from "../Path";
-import Immutable from "../../../util/Immutable";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 
 export interface ModelReferenceData {
   type: string;
-  path: Path;
+  id: string;
   value: any;
 }
 
@@ -42,10 +36,8 @@ export class ReferenceTransformer {
   private transformDiscreteOperation(s: DiscreteOperation, r: ModelReferenceData): ModelReferenceData {
     if (s.noOp) {
       return r;
-    } else if (PathComparator.areEqual(s.path, r.path)) {
+    } else if (s.id === r.id) {
       return this.transformWithIdenticalPathOperation(s, r);
-    } else if (PathComparator.isAncestorOf(s.path, r.path)) {
-      return this.transformWithAncestorOperation(s, r);
     } else {
       return r;
     }
@@ -58,72 +50,6 @@ export class ReferenceTransformer {
     } else {
       throw new Error(
         `No operation transformation function found for operation pair (${o.type},${r.type})`);
-    }
-  }
-
-  private transformWithAncestorOperation(a: DiscreteOperation, r: ModelReferenceData): ModelReferenceData {
-    var ptf: PathTransformationFunction<any> = this._tfr.getPathTransformationFunction(a);
-    if (ptf) {
-      var result: PathTransformation = ptf.transformDescendantPath(a, r.path);
-      switch (result.result) {
-        case PathTransformationResult.NoTransformation:
-          return r;
-        case PathTransformationResult.PathObsoleted:
-          return null;
-        case PathTransformationResult.PathUpdated:
-          return <ModelReferenceData>Immutable.copy(r, {path: result.path});
-        default:
-          throw new Error("Invalid path transformation result");
-      }
-    } else {
-      throw new Error(`No path transformation function found for ancestor operation: ${a.type}`);
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Path Transformation
-  /////////////////////////////////////////////////////////////////////////////
-
-  transformPath(o: Operation, path: Path): Path {
-    if (o instanceof CompoundOperation) {
-      return this._transformPathWithCompoundOperation(o, path);
-    } else {
-      return this._transformPathWithDiscreteOperation(<DiscreteOperation>o, path);
-    }
-  }
-
-  private _transformPathWithCompoundOperation(o: CompoundOperation, p: Path): Path {
-  var result: Path = p;
-  for (var i: number = 0; i < o.ops.length && result; i++) {
-    result = this.transformPath(o.ops[i], result);
-  }
-  return result;
-}
-
-  private _transformPathWithDiscreteOperation(operation: DiscreteOperation, path: Path): Path {
-    if (PathComparator.isAncestorOf(operation.path, path)) {
-      return this._transformHierarchicalOperations(operation, path);
-    } else {
-      return path;
-    }
-  };
-
-  private _transformHierarchicalOperations(a: DiscreteOperation, path: Path): Path {
-    var ptf: PathTransformationFunction<any> = this._tfr.getPathTransformationFunction(a);
-    if (ptf) {
-      var result: PathTransformation = ptf.transformDescendantPath(a, path);
-      switch (result.result) {
-        case PathTransformationResult.NoTransformation:
-          return path;
-        case PathTransformationResult.PathObsoleted:
-          return null;
-        case PathTransformationResult.PathUpdated:
-          return result.path;
-        default:
-          throw new Error("Invalid path transformation result");
-      }
-    } else {
-      throw new Error(`No path transformation function found for ancestor operation: ${a.type}`);
     }
   }
 }

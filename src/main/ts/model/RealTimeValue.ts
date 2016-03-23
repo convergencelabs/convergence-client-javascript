@@ -19,17 +19,33 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     REFERENCE: "reference"
   };
 
-  private _detached: boolean = false;
+  private _id: string;
+  private _modelType: RealTimeValueType;
+  private _parent: RealTimeContainerValue<any>;
+  protected _callbacks: ModelEventCallbacks;
+  protected _model: RealTimeModel;
 
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(private _modelType: RealTimeValueType,
-              private _parent: RealTimeContainerValue<any>,
+  constructor(modelType: RealTimeValueType,
+              id: string,
+              parent: RealTimeContainerValue<any>,
               public fieldInParent: PathElement, // fixme not sure I like this being public
-              protected _callbacks: ModelEventCallbacks,
-              protected _model: RealTimeModel) {
+              callbacks: ModelEventCallbacks,
+              model: RealTimeModel) {
     super();
+    this._id = id;
+    this._modelType = modelType;
+    this._parent = parent;
+    this._callbacks = callbacks;
+    this._model = model;
+
+    this._model._registerValue(this);
+  }
+
+  id(): string {
+    return this._id;
   }
 
   type(): RealTimeValueType {
@@ -51,13 +67,16 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
   }
 
   isDetached(): boolean {
-    return this._detached;
+    return this._model === null;
   }
 
   _detach(): void {
+    this._model._unregisterValue(this);
+
+    this._model = null;
     this._parent = null;
-    this._detached = true;
     this._callbacks = null;
+
     var event: ModelDetachedEvent = {
       src: this,
       name: RealTimeValue.Events.DETACHED
@@ -78,7 +97,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
   }
 
   private _exceptionIfDetached(): void {
-    if (this._detached) {
+    if (this.isDetached()) {
       throw Error("Can not perform actions on a detached RealTimeValue.");
     }
   }
@@ -92,9 +111,9 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   protected abstract _setValue(value: T): void;
 
-  abstract _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent;
+  abstract _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent;
 
-  abstract _handleRemoteReferenceEvent(relativePath: Path, referenceEvent: RemoteReferenceEvent): void;
+  abstract _handleRemoteReferenceEvent(referenceEvent: RemoteReferenceEvent): void;
 
   reference(sessionId: string, key: string): ModelReference<any> {
     return;

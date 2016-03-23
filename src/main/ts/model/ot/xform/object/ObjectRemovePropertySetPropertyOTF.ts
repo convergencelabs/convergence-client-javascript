@@ -15,7 +15,7 @@ export default class ObjectRemovePropertySetPropertyOTF
       // O-RT-2
       return new OperationPair(
         s.copy({noOp: true}),
-        new ObjectAddPropertyOperation(c.path, c.noOp, c.prop, c.value));
+        new ObjectAddPropertyOperation(c.id, c.noOp, c.prop, c.value));
     }
   }
 }

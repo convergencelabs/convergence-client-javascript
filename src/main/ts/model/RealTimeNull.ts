@@ -18,11 +18,12 @@ export default class RealTimeNull extends RealTimeValue<any> {
   /**
    * Constructs a new RealTimeNull.
    */
-  constructor(parent: RealTimeContainerValue<any>,
+  constructor(id: string,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Null, parent, fieldInParent, callbacks, model);
+    super(RealTimeValueType.Null, id, parent, fieldInParent, callbacks, model);
   }
 
   protected _getValue(): any {
@@ -33,15 +34,11 @@ export default class RealTimeNull extends RealTimeValue<any> {
     throw new Error("Can not set the value on a Null type.");
   }
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
-    if (relativePath.length === 0) {
-      throw new Error("Null values do not process operations");
-    } else {
-      throw new Error("Invalid path: null values do not have children");
-    }
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+    throw new Error("Null values do not process operations");
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Null values do not process references");
   }
 }

@@ -12,7 +12,7 @@ export default class ArrayRemoveReplaceOTF implements OperationTransformationFun
     } else if (s.index === c.index) {
       // A-RP-2
       return new OperationPair(s.copy({noOp: true}), new ArrayInsertOperation(
-        c.path, c.noOp, c.index, c.value));
+        c.id, c.noOp, c.index, c.value));
     } else {
       // A-RP-3
       return new OperationPair(s, c);

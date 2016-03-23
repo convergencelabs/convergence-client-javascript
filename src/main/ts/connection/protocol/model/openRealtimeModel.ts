@@ -44,7 +44,7 @@ export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRe
 
 export interface ReferenceData {
   sessionId: string;
-  path: Path;
+  id: string;
   key: string;
   referenceType: string;
   value: any;
@@ -71,7 +71,7 @@ function convertReferenceData(sessionId: string, ref: any): ReferenceData {
   var value: any = deserializeReferenceValue(ref.v, type);
   var result: ReferenceData = {
     sessionId: sessionId,
-    path: ref.p,
+    id: ref.d,
     key: ref.k,
     referenceType: type,
     value: value

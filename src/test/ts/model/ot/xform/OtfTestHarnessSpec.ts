@@ -15,9 +15,9 @@ import BooleanSetOperation from "../../../../../main/ts/model/ot/ops/BooleanSetO
 import NumberAddOperation from "../../../../../main/ts/model/ot/ops/NumberAddOperation";
 import NumberSetOperation from "../../../../../main/ts/model/ot/ops/NumberSetOperation";
 import DiscreteOperation from "../../../../../main/ts/model/ot/ops/DiscreteOperation";
-import {Path} from "../../../../../main/ts/model/ot/Path";
 import OperationPair from "../../../../../main/ts/model/ot/xform/OperationPair";
 import OperationTransformationFunction from "../../../../../main/ts/model/ot/xform/OperationTransformationFunction";
+
 import ExpectStatic = Chai.ExpectStatic;
 import * as chai from "chai";
 import * as fs from "fs";
@@ -62,46 +62,46 @@ fs.readdirSync(baseDir).forEach((file: string) => {
   });
 });
 
-var commonPath: Path = [];
+var commonId: string = "vid";
 
 function json2Operation(opData: any): DiscreteOperation {
   "use strict";
 
   switch (opData.type) {
     case "StringInsert":
-      return new StringInsertOperation(commonPath, opData.noOp, opData.index, opData.value);
+      return new StringInsertOperation(commonId, opData.noOp, opData.index, opData.value);
     case "StringRemove":
-      return new StringRemoveOperation(commonPath, opData.noOp, opData.index, opData.value);
+      return new StringRemoveOperation(commonId, opData.noOp, opData.index, opData.value);
     case "StringSet":
-      return new StringSetOperation(commonPath, opData.noOp, opData.value);
+      return new StringSetOperation(commonId, opData.noOp, opData.value);
 
     case "ArrayInsert":
-      return new ArrayInsertOperation(commonPath, opData.noOp, opData.index, opData.value);
+      return new ArrayInsertOperation(commonId, opData.noOp, opData.index, opData.value);
     case "ArrayRemove":
-      return new ArrayRemoveOperation(commonPath, opData.noOp, opData.index);
+      return new ArrayRemoveOperation(commonId, opData.noOp, opData.index);
     case "ArrayReplace":
-      return new ArrayReplaceOperation(commonPath, opData.noOp, opData.index, opData.value);
+      return new ArrayReplaceOperation(commonId, opData.noOp, opData.index, opData.value);
     case "ArrayMove":
-      return new ArrayMoveOperation(commonPath, opData.noOp, opData.fromIndex, opData.toIndex);
+      return new ArrayMoveOperation(commonId, opData.noOp, opData.fromIndex, opData.toIndex);
     case "ArraySet":
-      return new ArraySetOperation(commonPath, opData.noOp, opData.value);
+      return new ArraySetOperation(commonId, opData.noOp, opData.value);
 
     case "ObjectAddProperty":
-      return new ObjectAddPropertyOperation(commonPath, opData.noOp, opData.prop, opData.value);
+      return new ObjectAddPropertyOperation(commonId, opData.noOp, opData.prop, opData.value);
     case "ObjectSetProperty":
-      return new ObjectSetPropertyOperation(commonPath, opData.noOp, opData.prop, opData.value);
+      return new ObjectSetPropertyOperation(commonId, opData.noOp, opData.prop, opData.value);
     case "ObjectRemoveProperty":
-      return new ObjectRemovePropertyOperation(commonPath, opData.noOp, opData.prop);
+      return new ObjectRemovePropertyOperation(commonId, opData.noOp, opData.prop);
     case "ObjectSet":
-      return new ObjectSetOperation(commonPath, opData.noOp, opData.value);
+      return new ObjectSetOperation(commonId, opData.noOp, opData.value);
 
     case "BooleanSet":
-      return new BooleanSetOperation(commonPath, opData.noOp, opData.value);
+      return new BooleanSetOperation(commonId, opData.noOp, opData.value);
 
     case "NumberAdd":
-      return new NumberAddOperation(commonPath, opData.noOp, opData.value);
+      return new NumberAddOperation(commonId, opData.noOp, opData.value);
     case "NumberSet":
-      return new NumberSetOperation(commonPath, opData.noOp, opData.value);
+      return new NumberSetOperation(commonId, opData.noOp, opData.value);
 
     default:
       throw new Error("Invalid operation definition");

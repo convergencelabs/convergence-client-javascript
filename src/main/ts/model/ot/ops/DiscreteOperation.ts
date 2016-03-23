@@ -1,8 +1,7 @@
 import Operation from "./Operation";
-import {Path} from "../Path";
 
 abstract class DiscreteOperation extends Operation {
-  constructor(type: string, public path: Path, public noOp: boolean) {
+  constructor(type: string, public id: string, public noOp: boolean) {
     super(type);
   }
 }

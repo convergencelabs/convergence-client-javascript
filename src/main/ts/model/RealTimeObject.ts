@@ -17,6 +17,8 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ChildChangedEvent} from "./RealTimeContainerValue";
+import {ObjectValue} from "../connection/protocol/model/dataValue";
+import {DataValue} from "../connection/protocol/model/dataValue";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -33,17 +35,18 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   /**
    * Constructs a new RealTimeObject.
    */
-  constructor(data: any, parent: RealTimeContainerValue<any>,
+  constructor(data: ObjectValue,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Object, parent, fieldInParent, callbacks, model);
+    super(RealTimeValueType.Object, data.id, parent, fieldInParent, callbacks, model);
 
     this._children = {};
 
-    for (var prop in data) {
+    for (var prop in data.children) {
       if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this._callbacks, this.model());
+        this._children[prop] = RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, this.model());
       }
     }
   }
@@ -53,16 +56,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   }
 
   set(key: string, value: any): RealTimeValue<any> {
+    var dataValue: DataValue = this._model._createDataValue(value);
 
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(key)) {
-      operation = new ObjectSetPropertyOperation(this.path(), false, key, value);
+      operation = new ObjectSetPropertyOperation(this.id(), false, key, dataValue);
       this._children[key]._detach();
     } else {
-      operation = new ObjectAddPropertyOperation(this.path(), false, key, value);
+      operation = new ObjectAddPropertyOperation(this.id(), false, key, dataValue);
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, key, this._callbacks, this.model());
     this._children[key] = child;
     this._sendOperation(operation);
     return child;
@@ -72,7 +76,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     if (!this._children.hasOwnProperty(key)) {
       throw new Error("Cannot remove property that is undefined!");
     }
-    var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.path(), false, key);
+    var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.id(), false, key);
 
     this._children[key]._detach();
     delete this._children[key];
@@ -121,7 +125,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       }
     }
 
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
+    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, value);
     this._sendOperation(operation);
   }
 
@@ -156,40 +160,42 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
-    if (relativePath.length === 0) {
-      switch (operationEvent.operation.type) {
-        case OperationType.OBJECT_ADD:
-          return this._handleAddPropertyOperation(operationEvent);
-        case OperationType.OBJECT_SET:
-          return this._handleSetPropertyOperation(operationEvent);
-        case OperationType.OBJECT_REMOVE:
-          return this._handleRemovePropertyOperation(operationEvent);
-        case OperationType.OBJECT_VALUE:
-          return this._handleSetOperation(operationEvent);
-        default:
-          throw new Error("Invalid operation for RealTimeObject");
-      }
-    } else {
-      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
-      var subPath: Path = relativePath.slice(0);
-      subPath.shift();
-      var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
-      var event: ChildChangedEvent = {
-        name: RealTimeObject.Events.CHILD_CHANGED,
-        src: this,
-        relativePath: relativePath,
-        childEvent: childEvent
-      };
-      this.emitEvent(event);
-      return childEvent;
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+    switch (operationEvent.operation.type) {
+      case OperationType.OBJECT_ADD:
+        return this._handleAddPropertyOperation(operationEvent);
+      case OperationType.OBJECT_SET:
+        return this._handleSetPropertyOperation(operationEvent);
+      case OperationType.OBJECT_REMOVE:
+        return this._handleRemovePropertyOperation(operationEvent);
+      case OperationType.OBJECT_VALUE:
+        return this._handleSetOperation(operationEvent);
+      default:
+        throw new Error("Invalid operation for RealTimeObject");
     }
+  }
+
+  bubbleChangeEvent(): void {
+    //var child: RealTimeValue<any> = this._getChild(relativePath[0]);
+    //
+    //// fixme what if child doens't exist?
+    //var subPath: Path = relativePath.slice(0);
+    //subPath.shift();
+    //var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
+    //var event: ChildChangedEvent = {
+    //  name: RealTimeObject.Events.CHILD_CHANGED,
+    //  src: this,
+    //  relativePath: relativePath,
+    //  childEvent: childEvent
+    //};
+    //this.emitEvent(event);
+    //return childEvent;
   }
 
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
     var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
-    var value: Object|number|string|boolean = operation.value;
+    var value: DataValue = operation.value;
 
     var oldChild: RealTimeValue<any> = this._children[key];
 
@@ -215,9 +221,9 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
-    var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
+    var operation: ObjectSetPropertyOperation = <ObjectSetPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
-    var value: Object|number|string|boolean = operation.value;
+    var value: DataValue = operation.value;
 
     var oldChild: RealTimeValue<any> = this._children[key];
 
@@ -269,7 +275,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): ObjectSetValueEvent {
     var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
-    var value: Object = operation.value;
+    var value: {[key: string]: DataValue} = operation.value;
 
     var oldChildren: Object = this._children;
 
@@ -305,16 +311,9 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
-    if (relativePath.length === 0) {
-      // fixme implement when we have object references.
-      throw new Error("Objects to do have references yet.");
-    } else {
-      var child: RealTimeValue<any> = this._getChild(relativePath[0]);
-      var subPath: Path = relativePath.slice(0);
-      subPath.shift();
-      child._handleRemoteReferenceEvent(subPath, event);
-    }
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    // fixme implement when we have object references.
+    throw new Error("Objects to do have references yet.");
   }
 
   private _getChild(relPath: PathElement): RealTimeValue<any> {

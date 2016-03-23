@@ -14,7 +14,7 @@ export default class ObjectSetPropertyRemovePropertyOTF
     } else {
       // O-TR-2
       return new OperationPair(
-        new ObjectAddPropertyOperation(s.path, s.noOp, s.prop, s.value),
+        new ObjectAddPropertyOperation(s.id, s.noOp, s.prop, s.value),
         c.copy({noOp: true}));
     }
   }

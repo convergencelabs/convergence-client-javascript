@@ -10,6 +10,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
+import {BooleanValue} from "../connection/protocol/model/dataValue";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
@@ -19,15 +20,18 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     DETACHED: RealTimeValue.Events.DETACHED
   };
 
+  private _data: boolean;
+
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(private _data: boolean,
+  constructor(data: BooleanValue,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Boolean, parent, fieldInParent, callbacks, model);
+    super(RealTimeValueType.Boolean, data.id, parent, fieldInParent, callbacks, model);
+    this._data = data.value;
   }
 
 
@@ -38,7 +42,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   protected _setValue(value: boolean): void {
     this._validateSet(value);
 
-    var operation: BooleanSetOperation = new BooleanSetOperation(this.path(), false, value);
+    var operation: BooleanSetOperation = new BooleanSetOperation(this.id(), false, value);
     this._data = value;
     this._sendOperation(operation);
   }
@@ -49,16 +53,12 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): ModelChangeEvent {
-    if (relativePath.length === 0) {
-      var type: string = operationEvent.operation.type;
-      if (type === OperationType.BOOLEAN_VALUE) {
-        return this._handleSetOperation(operationEvent);
-      } else {
-        throw new Error("Invalid operation!");
-      }
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+    var type: string = operationEvent.operation.type;
+    if (type === OperationType.BOOLEAN_VALUE) {
+      return this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid path: boolean values do not have children");
+      throw new Error("Invalid operation!");
     }
   }
 
@@ -88,7 +88,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     }
   }
 
-  _handleRemoteReferenceEvent(relativePath: Path, event: RemoteReferenceEvent): void {
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }
 }
