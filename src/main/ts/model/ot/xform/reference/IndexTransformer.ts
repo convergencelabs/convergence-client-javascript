@@ -15,6 +15,8 @@ export class IndexTransformer {
         return index + 1;
       } else if (index >= fromIndex && index < toIndex) {
         return index - 1;
+      } else {
+        return index;
       }
     });
   }

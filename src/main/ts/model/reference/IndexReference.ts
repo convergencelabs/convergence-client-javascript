@@ -17,7 +17,6 @@ export class IndexReference extends ModelReference<number> {
     this._setIfChanged(IndexTransformer.handleInsert([this._value], index, length)[0]);
   }
 
-
   _handleRemove(index: number, length: number): void {
     this._setIfChanged(IndexTransformer.handleRemove([this._value], index, length)[0]);
   }
