@@ -3,7 +3,6 @@ import {OutgoingProtocolRequestMessage} from "../protocol";
 import ModelFqn from "../../../model/ModelFqn";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
-import {Path} from "../../../model/ot/Path";
 import {ReferenceTypeCodes} from "./reference/ReferenceEvent";
 import {deserializeReferenceValue} from "./reference/ReferenceEvent";
 

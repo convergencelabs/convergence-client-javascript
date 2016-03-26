@@ -24,11 +24,14 @@ export default class RealTimeValueFactory {
                        fieldInParent: PathElement,
                        callbacks: ModelEventCallbacks,
                        model: RealTimeModel): RealTimeValue<any> {
+
+    if (data === undefined) {
+      return new RealTimeUndefined(undefined, parent, fieldInParent, callbacks, model);
+    }
+
     var type: string = data.type;
-    if (data === null) {
+    if (type === "null") {
       return new RealTimeNull(data.id, parent, fieldInParent, callbacks, model);
-    } else if (type === undefined) {
-      return new RealTimeUndefined(data.id, parent, fieldInParent, callbacks, model);
     } else if (type === "string") {
       return new RealTimeString(<StringValue>data, parent, fieldInParent, callbacks, model);
     } else if (Array.isArray(data)) {

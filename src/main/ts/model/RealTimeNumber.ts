@@ -5,7 +5,6 @@ import NumberAddOperation from "./ot/ops/NumberAddOperation";
 import NumberSetOperation from "./ot/ops/NumberSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";

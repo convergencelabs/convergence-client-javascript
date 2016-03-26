@@ -4,7 +4,6 @@ import {PathElement} from "./ot/Path";
 import BooleanSetOperation from "./ot/ops/BooleanSetOperation";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
-import {Path} from "./ot/Path";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";

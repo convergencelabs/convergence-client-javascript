@@ -1,6 +1,5 @@
 import Immutable from "../../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
-import {Path} from "../Path";
 import {OperationType} from "./OperationType";
 
 export default class ArrayMoveOperation extends DiscreteOperation {

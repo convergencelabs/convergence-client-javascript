@@ -10,6 +10,7 @@ import * as sinon from "sinon";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {BooleanValue} from "../../../main/ts/connection/protocol/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
+import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
 
 
 var expect: any = chai.expect;
@@ -23,7 +24,13 @@ describe('RealTimeBoolean', () => {
 
   var callbacks: ModelEventCallbacks;
 
-  var idGenerator: () => string = new TestIdGenerator().id;
+  var gen: TestIdGenerator = new TestIdGenerator();
+  var idGenerator: () => string = () => {
+    return gen.id();
+  };
+
+  var model: RealTimeModel = <RealTimeModel><any>sinon.createStubInstance(RealTimeModel);
+
   var initialValue: BooleanValue =
     <BooleanValue>DataValueFactory.createDataValue(true, idGenerator);
 
@@ -45,18 +52,18 @@ describe('RealTimeBoolean', () => {
   };
 
   it('Value is correct after creation', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, model);
     expect(myBoolean.value()).to.equal(true);
   });
 
   it('Value is correct after set', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, callbacks, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, callbacks, model);
     myBoolean.value(false);
     expect(myBoolean.value()).to.equal(false);
   });
 
   it('Correct operation is sent after set', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, callbacks, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, callbacks, model);
     myBoolean.value(false);
 
     var expectedOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
@@ -64,7 +71,7 @@ describe('RealTimeBoolean', () => {
   });
 
   it('Value is correct after BooleanSetOperation', () => {
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, model);
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -75,7 +82,7 @@ describe('RealTimeBoolean', () => {
 
   it('Correct Event is fired after BooleanSetOperation', () => {
     lastEvent = null;
-    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, null);
+    var myBoolean: RealTimeBoolean = new RealTimeBoolean(initialValue, null, null, null, model);
     myBoolean.on(RealTimeBoolean.Events.VALUE, lastEventCallback);
 
     var incomingOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);

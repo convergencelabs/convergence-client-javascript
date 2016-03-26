@@ -8,7 +8,6 @@ import OperationTransformer from "./xform/OperationTransformer";
 import OperationPair from "./xform/OperationPair";
 import {ReferenceTransformer} from "./xform/ReferenceTransformer";
 import {ModelReferenceData} from "./xform/ReferenceTransformer";
-import {Path} from "./Path";
 
 export default class ClientConcurrencyControl extends EventEmitter {
 

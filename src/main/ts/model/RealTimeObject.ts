@@ -16,7 +16,6 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {ChildChangedEvent} from "./RealTimeContainerValue";
 import {ObjectValue} from "../connection/protocol/model/dataValue";
 import {DataValue} from "../connection/protocol/model/dataValue";
 
@@ -44,11 +43,10 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     this._children = {};
 
-    for (var prop in data.children) {
-      if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, this.model());
-      }
-    }
+    Object.getOwnPropertyNames(data.children).forEach((prop: string) => {
+      this._children[prop] =
+        RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, model);
+    });
   }
 
   get(key: string): RealTimeValue<any> {
@@ -66,7 +64,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       operation = new ObjectAddPropertyOperation(this.id(), false, key, dataValue);
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, key, this._callbacks, this.model());
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, key, this._callbacks, this._model);
     this._children[key] = child;
     this._sendOperation(operation);
     return child;
@@ -119,11 +117,12 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
     this._children = {};
 
-    for (var prop in value) {
-      if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._callbacks, this.model());
-      }
-    }
+    Object.getOwnPropertyNames(value).forEach((prop: string) => {
+      var val: any = value[prop];
+      var dataValue: DataValue = this._model._createDataValue(val);
+      this._children[prop] =
+        RealTimeValueFactory.create(dataValue, this, prop, this._callbacks, this._model);
+    });
 
     var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, value);
     this._sendOperation(operation);
@@ -176,20 +175,20 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   }
 
   bubbleChangeEvent(): void {
-    //var child: RealTimeValue<any> = this._getChild(relativePath[0]);
+    // var child: RealTimeValue<any> = this._getChild(relativePath[0]);
     //
-    //// fixme what if child doens't exist?
-    //var subPath: Path = relativePath.slice(0);
-    //subPath.shift();
-    //var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
-    //var event: ChildChangedEvent = {
+    // fixme what if child doens't exist?
+    // var subPath: Path = relativePath.slice(0);
+    // subPath.shift();
+    // var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
+    // var event: ChildChangedEvent = {
     //  name: RealTimeObject.Events.CHILD_CHANGED,
     //  src: this,
     //  relativePath: relativePath,
     //  childEvent: childEvent
-    //};
-    //this.emitEvent(event);
-    //return childEvent;
+    // };
+    // this.emitEvent(event);
+    // return childEvent;
   }
 
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
@@ -314,17 +313,6 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     // fixme implement when we have object references.
     throw new Error("Objects to do have references yet.");
-  }
-
-  private _getChild(relPath: PathElement): RealTimeValue<any> {
-    if (typeof relPath !== "string") {
-      throw new Error("Invalid path element, object properties must be a string");
-    }
-    var child: RealTimeValue<any> = this._children[relPath];
-    if (child === undefined) {
-      throw new Error("Invalid path element, child does not exist");
-    }
-    return child;
   }
 }
 

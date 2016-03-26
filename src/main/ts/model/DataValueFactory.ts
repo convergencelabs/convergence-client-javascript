@@ -16,10 +16,10 @@ export class DataValueFactory {
       var stringValue: StringValue = {id: id, type: type, value: data};
       return stringValue;
     } else if (Array.isArray(data)) {
-      var list: DataValue[] = data.forEach((child: any) => {
-        DataValueFactory.createDataValue(child, idGenerator);
+      var list: DataValue[] = data.map((child: any) => {
+        return DataValueFactory.createDataValue(child, idGenerator);
       });
-      var arrayValue: ArrayValue = {id: id, type: type, children: list};
+      var arrayValue: ArrayValue = {id: id, type: "array", children: list};
       return arrayValue;
     } else if (type === "object") {
       var props: {[key: string]: DataValue} = {};
