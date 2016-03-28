@@ -2,10 +2,10 @@ import ModelOperationEvent from "../../../main/ts/model/ModelOperationEvent";
 import RealTimeObject from "../../../main/ts/model/RealTimeObject";
 import ObjectSetOperation from "../../../main/ts/model/ot/ops/ObjectSetOperation";
 import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
-import {ObjectValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {ObjectValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {DataValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {DataValue} from "../../../main/ts/model/dataValue";
 
 import * as chai from "chai";
 import * as sinon from "sinon";

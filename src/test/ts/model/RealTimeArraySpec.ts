@@ -14,11 +14,12 @@ import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
-import {ArrayValue} from "../../../main/ts/connection/protocol/model/dataValue";
+
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {DataValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {DataValue} from "../../../main/ts/model/dataValue";
 import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
+import {ArrayValue} from "../../../main/ts/model/dataValue";
 
 var expect: any = chai.expect;
 

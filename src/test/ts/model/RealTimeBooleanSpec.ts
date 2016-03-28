@@ -8,7 +8,7 @@ import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 import * as chai from "chai";
 import * as sinon from "sinon";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {BooleanValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {BooleanValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
 

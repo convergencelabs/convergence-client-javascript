@@ -37,8 +37,8 @@ import {RemoteClientOpenedModel} from "../connection/protocol/model/remoteOpenCl
 import {ReferenceData} from "../connection/protocol/model/openRealtimeModel";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {RemoteReferencePublished} from "../connection/protocol/model/reference/ReferenceEvent";
-import {ObjectValue} from "../connection/protocol/model/dataValue";
-import {DataValue} from "../connection/protocol/model/dataValue";
+import {ObjectValue} from "./dataValue";
+import {DataValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 
 export class RealTimeModel extends ConvergenceEventEmitter {

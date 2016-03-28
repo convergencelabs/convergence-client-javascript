@@ -18,6 +18,8 @@ import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
+import {ObjectValue} from "./dataValue";
+import {DataValueFactory} from "./DataValueFactory";
 
 export default class ModelService extends ConvergenceEventEmitter {
 
@@ -109,10 +111,14 @@ export default class ModelService extends ConvergenceEventEmitter {
 
   create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    var idGen: InitialIdGenerator = new InitialIdGenerator();
+    var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+      return idGen.id();
+    });
     var request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
-      data: data
+      data: dataValue
     };
 
     return this._connection.request(request).then(() => {
@@ -175,14 +181,29 @@ export default class ModelService extends ConvergenceEventEmitter {
     } else if (openReq.initializer === undefined) {
       replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
     } else {
+      var data: any = openReq.initializer();
+      var idGen: InitialIdGenerator = new InitialIdGenerator();
+      var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+        return idGen.id();
+      });
       var response: ModelDataResponse = {
-        data: openReq.initializer(),
+        data: dataValue,
         type: MessageType.MODEL_DATA_RESPONSE
       };
       replyCallback.reply(response);
     }
   }
 }
+
+class InitialIdGenerator {
+  private _prefix: string = "-1";
+  private _id: number = 0;
+
+  id(): string {
+    return this._prefix + ":" + this._id++;
+  }
+}
+
 
 interface OpenRequest {
   deferred: Deferred<RealTimeModel>;

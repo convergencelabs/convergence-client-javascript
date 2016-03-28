@@ -11,7 +11,7 @@ import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
-import {StringValue} from "../../../main/ts/connection/protocol/model/dataValue";
+import {StringValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";

@@ -18,6 +18,10 @@ import StringSetOperation from "../../../model/ot/ops/StringSetOperation";
 import DiscreteOperation from "../../../model/ot/ops/DiscreteOperation";
 import {OperationType} from "../../../model/ot/ops/OperationType";
 import {CodeMap} from "../../../util/CodeMap";
+import {DataValueSerializer} from "./dataValue";
+import {mapObject} from "../../../util/ObjectUtils";
+import {DataValue} from "../../../model/dataValue";
+import {DataValueDeserializer} from "./dataValue";
 
 
 var OperationTypeCodes: CodeMap = new CodeMap();
@@ -168,14 +172,14 @@ export class ArrayInsertOperationSerializer {
       d: operation.id,
       n: operation.noOp,
       i: operation.index,
-      v: operation.value
+      v: DataValueSerializer(operation.value)
     };
   }
 }
 
 export class ArrayInsertOperationDeserializer {
   static deserialize(body: any): ArrayInsertOperation {
-    return new ArrayInsertOperation(body.d, body.n, body.i, body.v);
+    return new ArrayInsertOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
@@ -221,14 +225,14 @@ export class ArrayReplaceOperationSerializer {
       d: operation.id,
       n: operation.noOp,
       i: operation.index,
-      v: operation.value
+      v: DataValueSerializer(operation.value)
     };
   }
 }
 
 export class ArrayReplaceOperationDeserializer {
   static deserialize(body: any): ArrayReplaceOperation {
-    return new ArrayReplaceOperation(body.d, body.n, body.i, body.v);
+    return new ArrayReplaceOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
@@ -238,14 +242,14 @@ export class ArraySetOperationSerializer {
       t: OperationTypeCodes.code(OperationType.ARRAY_VALUE),
       d: operation.id,
       n: operation.noOp,
-      v: operation.value
+      v: operation.value.map((value: DataValue) => DataValueSerializer(value))
     };
   }
 }
 
 export class ArraySetOperationDeserializer {
   static deserialize(body: any): ArraySetOperation {
-    return new ArraySetOperation(body.d, body.n, body.v);
+    return new ArraySetOperation(body.d, body.n, body.v.map((value: any) => DataValueDeserializer(value)));
   }
 }
 
@@ -307,7 +311,7 @@ export class ObjectAddPropertyOperationSerializer {
       d: operation.id,
       n: operation.noOp,
       k: operation.prop,
-      v: operation.value
+      v: DataValueSerializer(operation.value)
     };
   }
 }
@@ -342,7 +346,7 @@ export class ObjectSetPropertyOperationSerializer {
       d: operation.id,
       n: operation.noOp,
       k: operation.prop,
-      v: operation.value
+      v: DataValueSerializer(operation.value)
     };
   }
 }
@@ -359,14 +363,14 @@ export class ObjectSetOperationSerializer {
       t: OperationTypeCodes.code(OperationType.OBJECT_VALUE),
       d: operation.id,
       n: operation.noOp,
-      v: operation.value
+      v: mapObject(operation.value, (value: DataValue) => DataValueSerializer(value))
     };
   }
 }
 
 export class ObjectSetOperationDeserializer {
   static deserialize(body: any): ObjectSetOperation {
-    return new ObjectSetOperation(body.d, body.n, body.v);
+    return new ObjectSetOperation(body.d, body.n, mapObject(body.v, (value: any) => DataValueDeserializer(value)));
   }
 }
 

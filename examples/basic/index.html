@@ -5,7 +5,7 @@
   <title>Convergence - Basic</title>
   <link rel="stylesheet" href="basic.css"/>
   <script src="../../node_modules/es6-promise-polyfill/promise.js"></script>
-  <script src="../../dist/convergence-client.js"></script>
+  <script src="../../dist/convergence-client.umd.js"></script>
   <script src="../common/binding-helpers.js"></script>
   <script src="../connection.js"></script>
 </head>
@@ -14,6 +14,55 @@
 <div class="dt">
   <label>String</label>
   <textarea class="string" id="stringVal"></textarea>
+</div>
+<div class="dt">
+  <label>Boolean</label>
+  <input type="checkbox" id="booleanVal">
+</div>
+<div class="dt">
+  <label>Number</label>
+  <input type="number" id="numberVal">
+  <button onclick="numberIncrement()">Increment</button><button onclick="numberDecrement()">Decrement</button>
+</div>
+<div class="dt">
+  <label>Array</label>
+  <select size="10" id="arrayVal">
+  </select>
+  <div>
+    <button id="arrayRemoveButton">Remove Item</button>
+  </div>
+  <div>
+    <button id="arrayAddButton">Add Item</button>
+    Value: <input id="arrayAddValue" type="text"/>
+  </div>
+  <div>
+    <button id="arraySetButton">Set Value</button>
+    Value: <input id="arraySetValue" type="text"/>
+  </div>
+  <div>
+    <button id="arrayReorderButton">Reorder</button>
+    Value: <input id="arrayReorderValue" type="number"/>
+  </div>
+</div>
+<div class="dt">
+  <label>Object</label>
+  <table id="objectVal">
+    <thead>
+    <th>Property</th>
+    <th>Value</th>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  <div>
+    <button id="objectRemoveButton">Remove Property</button>
+    Property: <input id="objectRemoveProp" type="text"/>
+  </div>
+  <div>
+    <button id="objectSetButton">Set Property</button>
+    Property: <input id="objectSetProp" type="text"/>
+    Value: <input id="objectSetValue" type="text"/>
+  </div>
 </div>
 <script src="basic.js"></script>
 </body>

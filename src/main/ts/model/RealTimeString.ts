@@ -22,7 +22,7 @@ import MessageType from "../connection/protocol/MessageType";
 import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
 import {LocalRangeReference} from "./reference/LocalRangeReference";
 import {RangeReference} from "./reference/RangeReference";
-import {StringValue} from "../connection/protocol/model/dataValue";
+import {StringValue} from "./dataValue";
 
 
 export default class RealTimeString extends RealTimeValue<String> {

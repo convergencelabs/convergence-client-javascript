@@ -10,7 +10,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
-import {NumberValue} from "../connection/protocol/model/dataValue";
+import {NumberValue} from "./dataValue";
 
 export default class RealTimeNumber extends RealTimeValue<number> {
 

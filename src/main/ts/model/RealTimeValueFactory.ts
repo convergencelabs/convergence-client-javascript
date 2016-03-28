@@ -10,12 +10,12 @@ import {PathElement} from "./ot/Path";
 import RealTimeBoolean from "./RealTimeBoolean";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {DataValue} from "../connection/protocol/model/dataValue";
-import {StringValue} from "../connection/protocol/model/dataValue";
-import {ArrayValue} from "../connection/protocol/model/dataValue";
-import {ObjectValue} from "../connection/protocol/model/dataValue";
-import {NumberValue} from "../connection/protocol/model/dataValue";
-import {BooleanValue} from "../connection/protocol/model/dataValue";
+import {DataValue} from "./dataValue";
+import {StringValue} from "./dataValue";
+import {ArrayValue} from "./dataValue";
+import {ObjectValue} from "./dataValue";
+import {NumberValue} from "./dataValue";
+import {BooleanValue} from "./dataValue";
 
 export default class RealTimeValueFactory {
 

@@ -3,6 +3,8 @@ import {OutgoingProtocolResponseMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import ModelFqn from "../../../model/ModelFqn";
+import {DataValueSerializer} from "./dataValue";
+import {ObjectValue} from "../../../model/dataValue";
 
 export interface ModelDataRequest extends IncomingProtocolRequestMessage {
   modelFqn: ModelFqn;
@@ -16,11 +18,11 @@ export var ModelDataRequestDeserializer: MessageBodyDeserializer<ModelDataReques
 
 
 export interface ModelDataResponse extends OutgoingProtocolResponseMessage {
-  data: any;
+  data: ObjectValue;
 }
 
 export var ModelDataResponseSerializer: MessageBodySerializer = (response: ModelDataResponse) => {
   return {
-    d: response.data
+    d: DataValueSerializer(response.data)
   };
 };

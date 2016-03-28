@@ -1,7 +1,7 @@
 import Immutable from "../../../util/Immutable";
 import DiscreteOperation from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../../connection/protocol/model/dataValue";
+import {DataValue} from "../../dataValue";
 
 export default class ObjectSetOperation extends DiscreteOperation {
 

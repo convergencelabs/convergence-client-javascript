@@ -9,7 +9,7 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {OperationType} from "./ot/ops/OperationType";
-import {BooleanValue} from "../connection/protocol/model/dataValue";
+import {BooleanValue} from "./dataValue";
 
 
 export default class RealTimeBoolean extends RealTimeValue<boolean> {

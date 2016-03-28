@@ -1,9 +1,10 @@
-import {DataValue} from "../connection/protocol/model/dataValue";
-import {NullValue} from "../connection/protocol/model/dataValue";
-import {ObjectValue} from "../connection/protocol/model/dataValue";
-import {NumberValue} from "../connection/protocol/model/dataValue";
-import {StringValue} from "../connection/protocol/model/dataValue";
-import {ArrayValue} from "../connection/protocol/model/dataValue";
+import {DataValue} from "./dataValue";
+import {NullValue} from "./dataValue";
+import {StringValue} from "./dataValue";
+import {ArrayValue} from "./dataValue";
+import {ObjectValue} from "./dataValue";
+import {NumberValue} from "./dataValue";
+import {BooleanValue} from "./dataValue";
 
 export class DataValueFactory {
   static createDataValue(data: any, idGenerator: () => string): DataValue {
@@ -32,7 +33,7 @@ export class DataValueFactory {
       var numberValue: NumberValue = {id: id, type: type, value: data};
       return numberValue;
     } else if (type === "boolean") {
-      var booleanValue: StringValue = {id: id, type: type, value: data};
+      var booleanValue: BooleanValue = {id: id, type: type, value: data};
       return booleanValue;
     } else {
       throw new Error("Invalid data type: " + type);

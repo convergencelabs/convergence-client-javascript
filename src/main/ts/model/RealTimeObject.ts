@@ -16,8 +16,8 @@ import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {ObjectValue} from "../connection/protocol/model/dataValue";
-import {DataValue} from "../connection/protocol/model/dataValue";
+import {ObjectValue} from "./dataValue";
+import {DataValue} from "./dataValue";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
