@@ -72,13 +72,13 @@ function bindToModel(realTimeModel) {
 
 function numberIncrement() {
   numberInput.value = Number(numberInput.value) + 1;
-  var rtNumber = model.data().child("number");
+  var rtNumber = model.dataAt("number");
   rtNumber.increment();
 }
 
 function numberDecrement() {
   numberInput.value = Number(numberInput.value) - 1;
-  var rtNumber = model.data().child("number");
+  var rtNumber = model.dataAt("number");
   rtNumber.decrement();
 }
 
@@ -91,7 +91,7 @@ arrayRemoveButton.onclick = function () {
   var selected = Number(arrayInput.selectedIndex);
   if (selected >= 0) {
     arrayInput.remove(selected);
-    var rtArray = model.data().child("array");
+    var rtArray = model.dataAt("array");
     rtArray.remove(selected);
   }
 };
@@ -107,7 +107,7 @@ arrayAddButton.onclick = function () {
   var option = document.createElement("option");
   option.textContent = arrayAddValue.value;
   arrayInput.add(option, index);
-  var rtArray = model.data().child("array");
+  var rtArray = model.dataAt("array");
   rtArray.insert(index, arrayAddValue.value);
 };
 
@@ -127,7 +127,7 @@ arraySetButton.onclick = function () {
   var index = arrayInput.selectedIndex;
   if (index >= 0) {
     arrayInput.options[index].textContent = arraySetValue.value;
-    var rtArray = model.data().child("array");
+    var rtArray = model.dataAt("array");
     rtArray.set(index, arraySetValue.value);
   }
 };
@@ -142,7 +142,7 @@ arrayReorderButton.onclick = function () {
     var option = arrayInput.options[fromIdx];
     arrayInput.remove(fromIdx);
     arrayInput.add(option, toIdx);
-    var rtArray = model.data().child("array");
+    var rtArray = model.dataAt("array");
     rtArray.reorder(fromIdx, toIdx);
   }
 };
@@ -196,7 +196,7 @@ var objectSetProp = document.getElementById("objectSetProp");
 var objectSetValue = document.getElementById("objectSetValue");
 
 function bindTableButtons() {
-  var rtObject = model.data().child("object");
+  var rtObject = model.dataAt("object");
 
   objectRemoveButton.onclick = function() {
     rtObject.remove(objectRemoveProp.value);
@@ -210,7 +210,7 @@ function bindTableButtons() {
 }
 
 function bindTableEvents() {
-  var rtObject = model.data().child("object");
+  var rtObject = model.dataAt("object");
   rtObject.on("remove", function(evt) {
     renderTable(rtObject);
   });

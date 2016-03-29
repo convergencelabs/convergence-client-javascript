@@ -5,6 +5,7 @@ import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {ReferenceTypeCodes} from "./reference/ReferenceEvent";
 import {deserializeReferenceValue} from "./reference/ReferenceEvent";
+import {DataValueDeserializer} from "./dataValue";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
@@ -35,7 +36,7 @@ export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRe
     version: body.v,
     createdTime: body.c,
     modifiedTime: body.m,
-    data: body.d.d,
+    data: DataValueDeserializer(body.d.d),
     connectedClients: body.d.s,
     references: convertReferences(body.d.r)
   };
@@ -49,27 +50,22 @@ export interface ReferenceData {
   value: any;
 }
 
-function convertReferences(refMap: any): {[key: string]: ReferenceData[]} {
+function convertReferences(refs: any[]): {[key: string]: ReferenceData[]} {
   "use strict";
   var result: {[key: string]: ReferenceData[]} = {};
-  var sessionIds: string[] = Object.getOwnPropertyNames(refMap);
-  sessionIds.forEach((sessionId: string) => {
-    var refs: any[] = refMap[sessionId];
-    var converted: ReferenceData[] = refs.map((ref: any) => {
-      return convertReferenceData(sessionId, ref);
-    });
-    result[sessionId] = converted;
+  refs.forEach((ref: any) => {
+    convertReferenceData(ref);
   });
   return result;
 }
 
-function convertReferenceData(sessionId: string, ref: any): ReferenceData {
+function convertReferenceData(ref: any): ReferenceData {
   "use strict";
 
   var type: string = ReferenceTypeCodes.value(ref.c);
   var value: any = deserializeReferenceValue(ref.v, type);
   var result: ReferenceData = {
-    sessionId: sessionId,
+    sessionId: ref.s,
     id: ref.d,
     key: ref.k,
     referenceType: type,

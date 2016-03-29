@@ -51,8 +51,8 @@ export var DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
 };
 
 export var DataValueDeserializer: (dv: any) => DataValue = (dv: any) => {
-  var id: string = dv["?"];
-  var type: string = DataValueTypeCodes.value(Number(dv.c));
+  var id: string = dv.i;
+  var type: string = DataValueTypeCodes.value(Number(dv["?"]));
 
   switch (type) {
     case DataValueType.OBJECT:

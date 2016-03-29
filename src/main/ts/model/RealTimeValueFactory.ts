@@ -34,7 +34,7 @@ export default class RealTimeValueFactory {
       return new RealTimeNull(data.id, parent, fieldInParent, callbacks, model);
     } else if (type === "string") {
       return new RealTimeString(<StringValue>data, parent, fieldInParent, callbacks, model);
-    } else if (Array.isArray(data)) {
+    } else if (type === "array") {
       return new RealTimeArray(<ArrayValue>data, parent, fieldInParent, callbacks, model);
     } else if (type === "object") {
       return new RealTimeObject(<ObjectValue>data, parent, fieldInParent, callbacks, model);
