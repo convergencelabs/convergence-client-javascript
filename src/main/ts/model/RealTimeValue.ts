@@ -16,12 +16,13 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
     DETACHED: "detached",
-    REFERENCE: "reference"
+    REFERENCE: "reference",
+    MODEL_CHANGED: "model_changed"
   };
 
   private _id: string;
   private _modelType: RealTimeValueType;
-  private _parent: RealTimeContainerValue<any>;
+  protected _parent: RealTimeContainerValue<any>;
   protected _callbacks: ModelEventCallbacks;
   protected _model: RealTimeModel;
 
@@ -111,7 +112,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   protected abstract _setValue(value: T): void;
 
-  abstract _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent;
+  abstract _handleRemoteOperation(operationEvent: ModelOperationEvent): void;
 
   abstract _handleRemoteReferenceEvent(referenceEvent: RemoteReferenceEvent): void;
 
@@ -131,6 +132,27 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     };
     this.emitEvent(createdEvent);
   }
+
+  _bubbleModelChangedEvent(childEvent: ModelChangeEvent, relativePath: Path = []): void {
+    var event: ModelChangedEvent = {
+      name: RealTimeValue.Events.MODEL_CHANGED,
+      src: this,
+      relativePath: relativePath,
+      childEvent: childEvent
+    };
+    this.emitEvent(event);
+
+    if (this._parent) {
+      var newPath: Path = relativePath.slice(0);
+      newPath.push(this.fieldInParent);
+      this._parent._bubbleModelChangedEvent(childEvent, newPath);
+    }
+  }
+}
+
+export interface ModelChangedEvent extends ConvergenceEvent {
+  relativePath: Path;
+  childEvent: ModelChangeEvent;
 }
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {

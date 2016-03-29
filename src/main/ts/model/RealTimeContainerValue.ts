@@ -4,14 +4,8 @@ import RealTimeValueType from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {ModelChangeEvent} from "./events";
-import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
 export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
-
-  static Events: any = {
-    CHILD_CHANGED: "child_changed"
-  };
 
   /**
    * Constructs a new RealTimeContainer.
@@ -42,10 +36,4 @@ export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
   abstract _path(pathArgs: Path): RealTimeValue<any>;
 
   protected abstract _detachChildren(): void;
-
-}
-
-export interface ChildChangedEvent extends ConvergenceEvent {
-  relativePath: Path;
-  childEvent: ModelChangeEvent;
 }

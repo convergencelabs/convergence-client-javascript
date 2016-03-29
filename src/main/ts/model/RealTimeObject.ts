@@ -26,7 +26,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     REMOVE: "remove",
     VALUE: "value",
     DETACHED: RealTimeValue.Events.DETACHED,
-    CHILD_CHANGED: RealTimeContainerValue.Events.CHILD_CHANGED
+    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
   private _children: { [key: string]: RealTimeValue<any>; };
@@ -159,50 +159,32 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
     switch (operationEvent.operation.type) {
       case OperationType.OBJECT_ADD:
-        return this._handleAddPropertyOperation(operationEvent);
+        this._handleAddPropertyOperation(operationEvent);
+        break;
       case OperationType.OBJECT_SET:
-        return this._handleSetPropertyOperation(operationEvent);
+        this._handleSetPropertyOperation(operationEvent);
+        break;
       case OperationType.OBJECT_REMOVE:
-        return this._handleRemovePropertyOperation(operationEvent);
+        this._handleRemovePropertyOperation(operationEvent);
+        break;
       case OperationType.OBJECT_VALUE:
-        return this._handleSetOperation(operationEvent);
+        this._handleSetOperation(operationEvent);
+        break;
       default:
         throw new Error("Invalid operation for RealTimeObject");
     }
   }
 
-  bubbleChangeEvent(): void {
-    // var child: RealTimeValue<any> = this._getChild(relativePath[0]);
-    //
-    // fixme what if child doens't exist?
-    // var subPath: Path = relativePath.slice(0);
-    // subPath.shift();
-    // var childEvent: ModelChangeEvent = child._handleRemoteOperation(subPath, operationEvent);
-    // var event: ChildChangedEvent = {
-    //  name: RealTimeObject.Events.CHILD_CHANGED,
-    //  src: this,
-    //  relativePath: relativePath,
-    //  childEvent: childEvent
-    // };
-    // this.emitEvent(event);
-    // return childEvent;
-  }
-
-  private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
+  private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
     var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
     var value: DataValue = operation.value;
 
-    var oldChild: RealTimeValue<any> = this._children[key];
-
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
-
-    if (oldChild) {
-      oldChild._detach();
-    }
+    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    this._children[key] = newChild;
 
     var event: ObjectSetEvent = {
       src: this,
@@ -212,21 +194,23 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
-      value: value
+      value: newChild
     };
 
     this.emitEvent(event);
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
-  private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): ObjectSetEvent {
+  private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
     var operation: ObjectSetPropertyOperation = <ObjectSetPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
     var value: DataValue = operation.value;
 
     var oldChild: RealTimeValue<any> = this._children[key];
+    oldChild._detach();
 
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    this._children[key] = newChild;
 
     var event: ObjectSetEvent = {
       src: this,
@@ -236,18 +220,14 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
-      value: value
+      value: newChild
     };
 
     this.emitEvent(event);
-
-    if (oldChild) {
-      oldChild._detach();
-    }
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
-  private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): ObjectRemoveEvent {
+  private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
     var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
 
@@ -268,7 +248,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
       this.emitEvent(event);
       oldChild._detach();
-      return event;
+      this._bubbleModelChangedEvent(event);
     }
   }
 

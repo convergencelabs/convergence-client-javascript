@@ -32,7 +32,8 @@ export default class RealTimeString extends RealTimeValue<String> {
     REMOVE: "remove",
     VALUE: "value",
     DETACHED: RealTimeValue.Events.DETACHED,
-    REFERENCE: RealTimeValue.Events.REFERENCE
+    REFERENCE: RealTimeValue.Events.REFERENCE,
+    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
   private _referenceManager: ReferenceManager;
@@ -172,20 +173,20 @@ export default class RealTimeString extends RealTimeValue<String> {
   // Operations
   //
 
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
     var type: string = operationEvent.operation.type;
     if (type === OperationType.STRING_INSERT) {
-      return this._handleInsertOperation(operationEvent);
+      this._handleInsertOperation(operationEvent);
     } else if (type === OperationType.STRING_REMOVE) {
-      return this._handleRemoveOperation(operationEvent);
+      this._handleRemoveOperation(operationEvent);
     } else if (type === OperationType.STRING_VALUE) {
-      return this._handleSetOperation(operationEvent);
+      this._handleSetOperation(operationEvent);
     } else {
       throw new Error("Invalid operation!");
     }
   }
 
-  private _handleInsertOperation(operationEvent: ModelOperationEvent): StringInsertEvent {
+  private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
     var operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: string = operation.value;
@@ -211,10 +212,11 @@ export default class RealTimeString extends RealTimeValue<String> {
         ref._handleInsert(index, value.length);
       }
     });
-    return event;
+
+    this._bubbleModelChangedEvent(event);
   }
 
-  private _handleRemoveOperation(operationEvent: ModelOperationEvent): StringRemoveEvent {
+  private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
     var operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
     var index: number = operation.index;
     var value: string = operation.value;
@@ -240,10 +242,11 @@ export default class RealTimeString extends RealTimeValue<String> {
         ref._handleRemove(index, value.length);
       }
     });
-    return event;
+
+    this._bubbleModelChangedEvent(event);
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): StringSetValueEvent {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     var operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
     var value: string = operation.value;
 
@@ -267,7 +270,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._referenceManager.referenceMap().removeAll();
     this._referenceManager.removeAllLocalReferences();
 
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
   private _validateInsert(index: number, value: string): void {

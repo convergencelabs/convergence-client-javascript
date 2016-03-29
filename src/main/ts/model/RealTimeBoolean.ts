@@ -16,7 +16,8 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   static Events: any = {
     VALUE: "VALUE",
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeValue.Events.DETACHED,
+    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
   private _data: boolean;
@@ -52,16 +53,16 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
     var type: string = operationEvent.operation.type;
     if (type === OperationType.BOOLEAN_VALUE) {
-      return this._handleSetOperation(operationEvent);
+      this._handleSetOperation(operationEvent);
     } else {
       throw new Error("Invalid operation!");
     }
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): BooleanSetValueEvent {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
     var value: boolean = operation.value;
 
@@ -78,7 +79,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
       value: value
     };
     this.emitEvent(event);
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
   private _validateSet(value: boolean): void {

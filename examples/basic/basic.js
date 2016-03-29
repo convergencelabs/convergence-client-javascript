@@ -167,13 +167,13 @@ function bindSelectList(selectInput, arrayModel) {
 
   arrayModel.on("insert", function (evt) {
     var option = document.createElement("option");
-    option.textContent = evt.value;
+    option.textContent = evt.value.value();
     selectInput.add(option, evt.index)
   });
 
   arrayModel.on("set", function (evt) {
-    selectInput.options[evt.index].textContent = evt.value;
-    selectInput.options[evt.index].value = evt.value;
+    selectInput.options[evt.index].textContent = evt.value.value();
+    selectInput.options[evt.index].value = evt.value.value();
   });
 
   arrayModel.on("reorder", function (evt) {

@@ -17,7 +17,8 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   static Events: any = {
     ADD: "add",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeValue.Events.DETACHED,
+    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
   private _data: number;
@@ -73,18 +74,18 @@ export default class RealTimeNumber extends RealTimeValue<number> {
 
   // Handlers for incoming operations
 
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): ModelChangeEvent {
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
     var type: string = operationEvent.operation.type;
     if (type === OperationType.NUMBER_ADD) {
-      return this._handleAddOperation(operationEvent);
+      this._handleAddOperation(operationEvent);
     } else if (type === OperationType.NUMBER_VALUE) {
-      return this._handleSetOperation(operationEvent);
+      this._handleSetOperation(operationEvent);
     } else {
       throw new Error("Invalid operation!");
     }
   }
 
-  private _handleAddOperation(operationEvent: ModelOperationEvent): NumberAddEvent {
+  private _handleAddOperation(operationEvent: ModelOperationEvent): void {
     var operation: NumberAddOperation = <NumberAddOperation> operationEvent.operation;
     var value: number = operation.value;
 
@@ -101,10 +102,10 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       value: value
     };
     this.emitEvent(event);
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): NumberSetValueEvent {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     var operation: NumberSetOperation = <NumberSetOperation> operationEvent.operation;
     var value: number = operation.value;
 
@@ -121,7 +122,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       value: value
     };
     this.emitEvent(event);
-    return event;
+    this._bubbleModelChangedEvent(event);
   }
 
   private _validateNumber(value: number): void {

@@ -318,7 +318,7 @@ export class ObjectAddPropertyOperationSerializer {
 
 export class ObjectAddPropertyOperationDeserializer {
   static deserialize(body: any): ObjectAddPropertyOperation {
-    return new ObjectAddPropertyOperation(body.d, body.n, body.k, body.v);
+    return new ObjectAddPropertyOperation(body.d, body.n, body.k, DataValueDeserializer(body.v));
   }
 }
 
@@ -353,7 +353,7 @@ export class ObjectSetPropertyOperationSerializer {
 
 export class ObjectSetPropertyOperationDeserializer {
   static deserialize(body: any): ObjectSetPropertyOperation {
-    return new ObjectSetPropertyOperation(body.d, body.n, body.k, body.v);
+    return new ObjectSetPropertyOperation(body.d, body.n, body.k, DataValueDeserializer(body.v));
   }
 }
 
