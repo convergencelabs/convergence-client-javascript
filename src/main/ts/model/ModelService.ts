@@ -196,14 +196,13 @@ export default class ModelService extends ConvergenceEventEmitter {
 }
 
 class InitialIdGenerator {
-  private _prefix: string = "-1";
+  private _prefix: string = "0";
   private _id: number = 0;
 
   id(): string {
     return this._prefix + ":" + this._id++;
   }
 }
-
 
 interface OpenRequest {
   deferred: Deferred<RealTimeModel>;
