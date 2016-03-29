@@ -72,7 +72,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   constructor(private _resourceId: string,
               data: ObjectValue,
               sessions: string[],
-              references: {[key: string]: ReferenceData[]},
+              references: ReferenceData[],
               private _version: number,
               private _createdTime: Date,
               private _modifiedTime: Date,
@@ -142,7 +142,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
             key: reference.reference().key(),
             id: refData.id,
             referenceType: reference.reference().type(),
-            value: refData.value
+            value: refData.value,
+            version: this._concurrencyControl.contextVersion()
           };
           this._connection.send(event);
         }
@@ -172,39 +173,36 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     this._open = true;
     this._committed = true;
 
-    Object.getOwnPropertyNames(references).forEach((sessionId: string) => {
-      var sessionRefs: ReferenceData[] = references[sessionId];
-      sessionRefs.forEach((ref: ReferenceData) => {
-        var published: RemoteReferencePublished = {
-          type: MessageType.REFERENCE_PUBLISHED,
-          sessionId: sessionId,
-          userId: SessionIdParser.deserialize(sessionId).userId,
+    references.forEach((ref: ReferenceData) => {
+      var published: RemoteReferencePublished = {
+        type: MessageType.REFERENCE_PUBLISHED,
+        sessionId: ref.sessionId,
+        userId: SessionIdParser.deserialize(ref.sessionId).userId,
+        resourceId: this._resourceId,
+        key: ref.key,
+        id: ref.id,
+        referenceType: ref.referenceType
+      };
+
+      // fixme refactor
+      var m: RealTimeValue<any> = this._idToValue[published.id];
+      m._handleRemoteReferenceEvent(published);
+      var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
+      this._referencesBySession[ref.sessionId].push(r);
+
+      if (ref.value) {
+        var set: RemoteReferenceSet = {
+          type: MessageType.REFERENCE_SET,
+          sessionId: ref.sessionId,
+          userId: SessionIdParser.deserialize(ref.sessionId).userId,
           resourceId: this._resourceId,
           key: ref.key,
           id: ref.id,
-          referenceType: ref.referenceType
+          referenceType: ref.referenceType,
+          value: ref.value
         };
-
-        // fixme refactor
-        var m: RealTimeValue<any> = this._idToValue[published.id];
-        m._handleRemoteReferenceEvent(published);
-        var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
-        this._referencesBySession[sessionId].push(r);
-
-        if (ref.value) {
-          var set: RemoteReferenceSet = {
-            type: MessageType.REFERENCE_SET,
-            sessionId: sessionId,
-            userId: SessionIdParser.deserialize(sessionId).userId,
-            resourceId: this._resourceId,
-            key: ref.key,
-            id: ref.id,
-            referenceType: ref.referenceType,
-            value: ref.value
-          };
-          m._handleRemoteReferenceEvent(set);
-        }
-      });
+        m._handleRemoteReferenceEvent(set);
+      }
     });
   }
 
@@ -395,9 +393,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     // operations, then we would put this in a queue.  We would also need
     // to somehow wrap this in an object that stores the currentContext
     // version right now, so we know when to distribute this event.
-    if (processedEvent !== undefined) {
-      this._data._handleRemoteReferenceEvent(event);
-    }
+    value._handleRemoteReferenceEvent(event);
 
     if (event.type === MessageType.REFERENCE_PUBLISHED) {
       r = value.reference(event.sessionId, event.key);

@@ -27,7 +27,7 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   modifiedTime: number;
   data: any;
   connectedClients: string[];
-  references: {[key: string]: ReferenceData[]};
+  references: ReferenceData[];
 }
 
 export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> = (body: any) => {
@@ -50,13 +50,11 @@ export interface ReferenceData {
   value: any;
 }
 
-function convertReferences(refs: any[]): {[key: string]: ReferenceData[]} {
+function convertReferences(refs: any[]): ReferenceData[] {
   "use strict";
-  var result: {[key: string]: ReferenceData[]} = {};
-  refs.forEach((ref: any) => {
-    convertReferenceData(ref);
+  return refs.map((ref: any) => {
+    return convertReferenceData(ref);
   });
-  return result;
 }
 
 function convertReferenceData(ref: any): ReferenceData {

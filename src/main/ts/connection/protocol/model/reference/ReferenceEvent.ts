@@ -127,6 +127,7 @@ export interface UnpublishReferenceEvent extends OutgoingReferenceEvent {
 export interface SetReferenceEvent extends OutgoingReferenceEvent {
   referenceType: string;
   value: any;
+  version: number;
 }
 
 export interface ClearReferenceEvent extends OutgoingReferenceEvent {
@@ -169,7 +170,8 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
     d: message.id,
     k: message.key,
     c: ReferenceTypeCodes.code(message.referenceType),
-    v: seserializeReferenceValue(message.value, message.referenceType)
+    v: seserializeReferenceValue(message.value, message.referenceType),
+    s: message.version
   };
 };
 
