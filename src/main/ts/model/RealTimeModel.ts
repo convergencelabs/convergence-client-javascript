@@ -70,6 +70,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
    * Constructs a new RealTimeModel.
    */
   constructor(private _resourceId: string,
+              valueIdPrefix: string,
               data: ObjectValue,
               sessions: string[],
               references: ReferenceData[],
@@ -93,7 +94,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     this._idToValue = {};
 
-    this._vidPrefix = this._concurrencyControl.clientId();
+    this._vidPrefix = valueIdPrefix;
     this._vidCounter = 0;
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {

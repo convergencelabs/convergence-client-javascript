@@ -22,6 +22,7 @@ export var OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request:
 
 export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessage {
   resourceId: string;
+  valueIdPrefix: string;
   version: number;
   createdTime: number;
   modifiedTime: number;
@@ -33,6 +34,7 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
 export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> = (body: any) => {
   return {
     resourceId: body.r,
+    valueIdPrefix: body.p,
     version: body.v,
     createdTime: body.c,
     modifiedTime: body.m,

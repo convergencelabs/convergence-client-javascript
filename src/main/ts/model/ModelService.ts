@@ -80,6 +80,7 @@ export default class ModelService extends ConvergenceEventEmitter {
 
       var model: RealTimeModel = new RealTimeModel(
         response.resourceId,
+        response.valueIdPrefix,
         response.data,
         response.connectedClients,
         response.references,
