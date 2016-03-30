@@ -18,6 +18,14 @@ import {OperationType} from "./ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
 import {ObjectValue} from "./dataValue";
 import {DataValue} from "./dataValue";
+import {PropertyReference} from "./reference/PropertyReference";
+import {ModelReference} from "./reference/ModelReference";
+import {ReferenceManager} from "./reference/ReferenceManager";
+import {ReferenceType} from "./reference/ModelReference";
+import {LocalModelReference} from "./reference/LocalModelReference";
+import Session from "../Session";
+import {LocalPropertyReference} from "./reference/LocalPropertyReference";
+import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -30,6 +38,8 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   };
 
   private _children: { [key: string]: RealTimeValue<any>; };
+  private _referenceManager: ReferenceManager;
+  private _referenceDisposed: ReferenceDisposedCallback;
 
   /**
    * Constructs a new RealTimeObject.
@@ -47,6 +57,11 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       this._children[prop] =
         RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, model);
     });
+
+    this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
+    this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
+      this._referenceManager.removeLocalReference(reference.key());
+    };
   }
 
   get(key: string): RealTimeValue<any> {
@@ -79,6 +94,12 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     this._children[key]._detach();
     delete this._children[key];
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      if (ref instanceof PropertyReference) {
+        ref._handlePropertyRemoved(key);
+      }
+    });
   }
 
   keys(): string[] {
@@ -95,6 +116,37 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         callback(this._children[key], key);
       }
     }
+  }
+
+  propertyReference(key: string): LocalPropertyReference {
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    if (existing !== undefined) {
+      if (existing.reference().type() !== ReferenceType.PROPERTY) {
+        throw new Error("A reference with this key already exists, but is not an index reference");
+      } else {
+        return <LocalPropertyReference>existing;
+      }
+    } else {
+      var session: Session = this.model().session();
+      var reference: PropertyReference = new PropertyReference(key, this, session.userId(), session.userId(), true);
+
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalPropertyReference = new LocalPropertyReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+      );
+      this._referenceManager.addLocalReference(local);
+      return local;
+    }
+  }
+
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceManager.referenceMap().get(sessionId, key);
+  }
+
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(sessionId, key);
   }
 
   //
@@ -126,6 +178,11 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, value);
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
   }
 
   _path(pathArgs: Path): RealTimeValue<any> {
@@ -248,6 +305,13 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
       this.emitEvent(event);
       oldChild._detach();
+
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(key);
+        }
+      });
+
       this._bubbleModelChangedEvent(event);
     }
   }
@@ -275,6 +339,12 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       timestamp: operationEvent.timestamp,
       value: value
     };
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
+    this._referenceManager.removeAllLocalReferences();
 
     this.emitEvent(event);
 
