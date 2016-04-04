@@ -98,22 +98,23 @@ export default class ClientConcurrencyControl extends EventEmitter {
 
     this._compoundOpInProgress = false;
 
-    if (this._pendingCompoundOperation.length !== 0) {
-      var compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
-      this._pendingCompoundOperation = [];
-      this._inflightOperations.push(compoundOp);
+    if (this._pendingCompoundOperation.length === 0) {
+      throw new Error("A compound operation must have at least one operation.");
 
-      var event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
-        this._clientId,
-        this._seqNo++,
-        this._contextVersion,
-        new Date().getTime(),
-        compoundOp);
-
-      return event;
-    } else {
-      return null;
     }
+
+    var compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
+    this._pendingCompoundOperation = [];
+    this._inflightOperations.push(compoundOp);
+
+    var event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
+      this._clientId,
+      this._seqNo++,
+      this._contextVersion,
+      new Date().getTime(),
+      compoundOp);
+
+    return event;
   }
 
   isCompoundOperationInProgress(): boolean {
@@ -169,7 +170,7 @@ export default class ClientConcurrencyControl extends EventEmitter {
     }
 
     if (this._contextVersion !== version) {
-      throw new Error("Acknowledgement did not meet expected context version of " + this._contextVersion + ":" + version);
+      throw new Error("Acknowledgement did not meet expected context version of " + this._contextVersion + ": " + version);
     }
 
     this._contextVersion++;

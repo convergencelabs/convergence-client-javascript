@@ -16,7 +16,7 @@ DataValueTypeCodes.put(4, DataValueType.BOOLEAN);
 DataValueTypeCodes.put(5, DataValueType.NULL);
 
 export var DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
-  var result: any = {i: dv.id, "?": "" + DataValueTypeCodes.code(dv.type)};
+  var result: any = {i: dv.id, t: "" + DataValueTypeCodes.code(dv.type)};
 
   switch (dv.type) {
     case DataValueType.OBJECT:
@@ -52,7 +52,7 @@ export var DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
 
 export var DataValueDeserializer: (dv: any) => DataValue = (dv: any) => {
   var id: string = dv.i;
-  var type: string = DataValueTypeCodes.value(Number(dv["?"]));
+  var type: string = DataValueTypeCodes.value(Number(dv.t));
 
   switch (type) {
     case DataValueType.OBJECT:

@@ -360,7 +360,7 @@ export class ObjectSetPropertyOperationDeserializer {
 export class ObjectSetOperationSerializer {
   static serialize(operation: ObjectSetOperation): any {
     return {
-      t: OperationTypeCodes.code(OperationType.OBJECT_VALUE),
+      t: "" + OperationTypeCodes.code(OperationType.OBJECT_VALUE),
       d: operation.id,
       n: operation.noOp,
       v: mapObject(operation.value, (value: DataValue) => DataValueSerializer(value))

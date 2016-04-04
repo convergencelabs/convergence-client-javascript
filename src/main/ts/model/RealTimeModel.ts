@@ -164,7 +164,9 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var callbacks: ModelEventCallbacks = {
       sendOperationCallback: (operation: DiscreteOperation): void => {
         var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
-        this._sendOperation(opEvent);
+        if (!this._concurrencyControl.isCompoundOperationInProgress()) {
+          this._sendOperation(opEvent);
+        }
       },
       referenceEventCallbacks: referenceCallbacks
     };
