@@ -5,8 +5,7 @@ import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface RemoteOperation extends IncomingProtocolNormalMessage {
   resourceId: string;
-  userId: string;
-  clientId: string;
+  sessionId: string;
   version: number;
   timestamp: number;
   operation: Operation;
@@ -15,8 +14,7 @@ export interface RemoteOperation extends IncomingProtocolNormalMessage {
 export var RemoteOperationDeserializer: MessageBodyDeserializer<RemoteOperation> =  (body: any) => {
   return {
     resourceId: body.r,
-    userId: body.u,
-    clientId: body.s,
+    sessionId: body.s,
     version: body.v,
     timestamp: body.p,
     operation: OperationDeserializer.deserialize(body.o)

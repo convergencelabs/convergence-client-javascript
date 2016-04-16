@@ -428,7 +428,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
   private _handleRemoteOperation(message: RemoteOperation): void {
     var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
-      message.clientId,
+      message.sessionId,
       -1, // fixme not needed, this is only needed when going to the server.  Perhaps
       // this should probalby go in the op submission message.
       message.version,
@@ -443,7 +443,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var clientId: string = processed.clientId;
     var contextVersion: number = processed.version;
     var timestamp: number = processed.timestamp;
-    var userId: string = "userId"; // fixme
+    var userId: string = SessionIdParser.parseUserId(message.sessionId);
 
     this._version = contextVersion;
     this._modifiedTime = new Date(timestamp);

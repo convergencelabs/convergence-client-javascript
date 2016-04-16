@@ -96,7 +96,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       src: this,
       name: RealTimeNumber.Events.ADD,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.username,
+      userId: operationEvent.userId,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value
@@ -116,7 +116,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
       src: this,
       name: RealTimeNumber.Events.VALUE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.username,
+      userId: operationEvent.userId,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value
