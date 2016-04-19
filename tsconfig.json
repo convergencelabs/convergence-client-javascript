@@ -1,12 +1,11 @@
 {
-  "version": "1.7.5",
+  "version": "1.8.10",
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
     "preserveConstEnums": true,
     "outDir": "build",
     "sourceMap": true,
-    "declaration": true,
     "moduleResolution": "node"
   },
   "exclude": [
