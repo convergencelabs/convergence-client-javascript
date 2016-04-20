@@ -21,7 +21,8 @@
   "license": "",
   "scripts": {
     "build": "gulp",
-    "test": "gulp test"
+    "test": "gulp test",
+    "typings": "typings install"
   },
   "dependencies": {},
   "devDependencies": {
@@ -49,6 +50,9 @@
     "rollup-plugin-typescript": "^0.7.3",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
+    "tslint": "^3.7.4",
+    "typescript": "^1.8.10",
+    "typings": "^0.8.1",
     "uglify-js": "^2.6.2"
   }
 }
