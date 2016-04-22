@@ -30,11 +30,11 @@ gulp.task('build', [], function () {
   const tsProject = ts.createProject('tsconfig.json');
   var tsResult = gulp.src(['src/**/*.ts', "typings/main.d.ts"])
     .pipe(ts(tsProject));
-    
+
   return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
-		tsResult.dts.pipe(gulp.dest('build')),
-		tsResult.js.pipe(gulp.dest('build'))
-	]);
+    tsResult.dts.pipe(gulp.dest('build')),
+    tsResult.js.pipe(gulp.dest('build'))
+  ]);
 });
 
 
@@ -128,7 +128,7 @@ gulp.task('dist-es6', ["lint", "test"], function () {
 
 gulp.task('dist-build-all', ["dist-umd", "dist-umd-named", "dist-es6"]);
 
-gulp.task('dist-ts', ["build"], function() {
+gulp.task('dist-ts', ["build"], function () {
   // TODO we could write a plugin to make this more gulpy
   var options = {
     name: 'convergence-client',
@@ -145,9 +145,13 @@ gulp.task('dist-ts', ["build"], function() {
 });
 
 gulp.task('dist', ["dist-build-all"], function () {
-  gulp.src("dist/convergence-client-umd.js")
+  gulp.src("dist/convergence-client.umd.js")
     .pipe(sourceMaps.init())
-    .pipe(uglify())
+    .pipe(uglify({
+      mangleProperties: {
+        regex: /^_/
+      }
+    }))
     .pipe(rename({
       extname: '.min.js'
     }))
@@ -155,14 +159,16 @@ gulp.task('dist', ["dist-build-all"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('release', ['dist'], function() {
+gulp.task('release', ['dist'], function () {
   // you will need to have the environment var GITHUB_TOKEN set to a personal access token from
   // https://github.com/settings/tokens
   gulp.src(["dist/convergence-client.min.js", "dist/convergence-client.d.ts"])
     .pipe(release({
       manifest: require('./package.json')
     }))
-    .on('error', function(err) { console.error(err)});
+    .on('error', function (err) {
+      console.error(err)
+    });
 });
 
 /**
