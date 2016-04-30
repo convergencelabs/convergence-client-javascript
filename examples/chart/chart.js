@@ -59,6 +59,7 @@ function createControl(segment, index) {
   controlDiv.appendChild(valueDiv);
 
   noUiSlider.create(sliderDiv, {
+    animate: false,
     start: 40,
     connect: 'lower',
     step: 1,
@@ -84,6 +85,14 @@ function createControl(segment, index) {
     pieChart.update();
     sliderDiv.noUiSlider.set(e.value);
     valueInput.value = e.value;
+  });
+
+  segment.get("value").on("add", function (e) {
+    var val = pieChart.segments[index].value + e.value;
+    pieChart.segments[index].value = val;
+    pieChart.update();
+    sliderDiv.noUiSlider.set(val);
+    valueInput.value = val;
   });
 
   controlsDiv.appendChild(controlDiv);
