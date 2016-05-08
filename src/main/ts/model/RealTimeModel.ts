@@ -40,6 +40,7 @@ import {RemoteReferencePublished} from "../connection/protocol/model/reference/R
 import {ObjectValue} from "./dataValue";
 import {DataValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
+import {RemoteSession} from "../RemoteSession";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 
@@ -495,11 +496,6 @@ interface RealTimeModelEvent extends ConvergenceEvent {
 interface RealTimeModelClosedEvent extends RealTimeModelEvent {
   local: boolean;
   reason?: string;
-}
-
-export interface RemoteSession {
-  userId: string;
-  sessionId: string;
 }
 
 export interface RemoteSessionOpenedEvent extends ConvergenceEvent {
