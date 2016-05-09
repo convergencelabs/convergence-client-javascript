@@ -2,7 +2,7 @@ import ModelFqn from "./ModelFqn";
 import RealTimeObject from "./RealTimeObject";
 import Session from "../Session";
 import ClientConcurrencyControl from "./ot/ClientConcurrencyControl";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import DiscreteOperation from "./ot/ops/DiscreteOperation";
 import UnprocessedOperationEvent from "./ot/UnprocessedOperationEvent";
 import ProcessedOperationEvent from "./ot/ProcessedOperationEvent";

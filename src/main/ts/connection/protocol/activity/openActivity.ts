@@ -1,13 +1,32 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import {RemoteSession} from "../../../RemoteSession";
+import {MessageBodyDeserializer} from "../MessageSerializer";
+import {MessageBodySerializer} from "../MessageSerializer";
 
-export interface OpenActivityRequest extends OutgoingProtocolRequestMessage {
+export interface ActivityOpenRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
 }
 
-export interface OpenActivityResponse extends OutgoingProtocolRequestMessage {
-  joinedSession: {[key: string]: RemoteSession[]};
+export var ActivityOpenRequestSerializer: MessageBodySerializer = (request: ActivityOpenRequest) => {
+  return {
+    i: request.activityId
+  };
+};
+
+export interface ActivityOpenResponse extends OutgoingProtocolRequestMessage {
+  joinedSessions: string[];
   state: ActivityState;
 }
 
+export var ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
+  var result: ActivityOpenResponse = {
+    joinedSessions: body.j,
+    state: body.s
+  };
+  return result;
+};
+
+
+/**
+ * Stored by session id, then key.
+ */
 export type ActivityState = {[key: string]: {[key: string]: any}};

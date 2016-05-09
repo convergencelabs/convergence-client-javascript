@@ -1,6 +1,6 @@
 import Session from "../Session";
 import DomainUser from "./DomainUser";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import MessageType from "../connection/protocol/MessageType";
 import {UserLookUpRequest} from "../connection/protocol/user/userLookUps";
 import {UserSearchRequest} from "../connection/protocol/user/userLookUps";

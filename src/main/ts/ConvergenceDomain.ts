@@ -1,4 +1,4 @@
-import ConvergenceConnection from "./connection/ConvergenceConnection";
+import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";

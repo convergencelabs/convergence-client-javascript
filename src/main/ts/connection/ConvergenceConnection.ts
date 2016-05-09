@@ -19,7 +19,7 @@ import Deferred from "../util/Deferred";
 import {ReplyCallback} from "./ProtocolConnection";
 import {EventKey} from "../util/EventEmitter";
 
-export default class ConvergenceConnection extends EventEmitter {
+export class ConvergenceConnection extends EventEmitter {
 
   static Events: any = {
     CONNECTED: "connected",

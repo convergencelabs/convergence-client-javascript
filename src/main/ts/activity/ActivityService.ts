@@ -1,10 +1,14 @@
 import Session from "../Session";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
 import Deferred from "../util/Deferred";
 import MessageType from "../connection/protocol/MessageType";
-import {OpenActivityRequest} from "../connection/protocol/activity/openActivity";
-import {OpenActivityResponse} from "../connection/protocol/activity/openActivity";
+import {ActivityOpenRequest} from "../connection/protocol/activity/openActivity";
+import {ActivityOpenResponse} from "../connection/protocol/activity/openActivity";
+import {RemoteSession} from "../RemoteSession";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {SessionKey} from "../connection/protocol/SessionIdParser";
+import {MessageEvent} from "../connection/ConvergenceConnection";
 
 export class ActivityService {
 
@@ -20,8 +24,8 @@ export class ActivityService {
     this._connection.addMultipleMessageListener(
       [MessageType.ACTIVITY_SESSION_JOINED,
         MessageType.ACTIVITY_SESSION_LEFT,
-        MessageType.ACTIVITY_STATE_SET,
-        MessageType.ACTIVITY_STATE_CLEARED],
+        MessageType.ACTIVITY_REMOTE_STATE_SET,
+        MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
       (message: MessageEvent) => this._handleMessage(message));
   }
 
@@ -74,14 +78,24 @@ export class ActivityService {
   private _loadActivity(id: string): Deferred<Activity> {
     var deferred: Deferred<Activity> = new Deferred<Activity>();
 
-    var openActivityMessage: OpenActivityRequest = {
+    var openActivityMessage: ActivityOpenRequest = {
       activityId: id
     };
 
-    this._connection.request(openActivityMessage).then((response: OpenActivityResponse) => {
+    this._connection.request(openActivityMessage).then((response: ActivityOpenResponse) => {
+      var joinedSessionsByUserId: {[key: string]: RemoteSession[]} = {};
+      response.joinedSessions.forEach((sessionId: string) => {
+        var sk: SessionKey = SessionIdParser.deserialize(sessionId);
+        var userSessions: RemoteSession[] = joinedSessionsByUserId[sk.userId];
+        if (userSessions === undefined) {
+          userSessions = [];
+          joinedSessionsByUserId[sk.userId] = userSessions;
+        }
+        userSessions.push({userId: sk.userId, sessionId: sk.sessionId});
+      });
       var activity: Activity = new Activity(
         this._connection,
-        response.joinedSession,
+        joinedSessionsByUserId,
         response.state,
         id,
         () => {

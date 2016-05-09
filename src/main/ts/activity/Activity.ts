@@ -1,19 +1,22 @@
 import Session from "../Session";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {RemoteSession} from "../RemoteSession";
 import {ActivityStateMap} from "./ActivityStateMap";
 import Deferred from "../util/Deferred";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {CloseActivity} from "../connection/protocol/activity/closeActivity";
-import {JoinActivityRequest} from "../connection/protocol/activity/joinActivity";
-import {JoinActivityResponse} from "../connection/protocol/activity/joinActivity";
-import {LeaveActivityRequest} from "../connection/protocol/activity/leaveActivity";
-import {LeaveActivityResponse} from "../connection/protocol/activity/leaveActivity";
 import MessageType from "../connection/protocol/MessageType";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
+import {ActivityState} from "../connection/protocol/activity/openActivity";
+import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
+import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
+import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
+import {ActivityLeaveResponse} from "../connection/protocol/activity/leaveActivity";
+import {ActivityCloseRequest} from "../connection/protocol/activity/closeActivity";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {MessageEvent} from "../connection/ConvergenceConnection";
 
 export class Activity extends ConvergenceEventEmitter {
 
@@ -36,17 +39,21 @@ export class Activity extends ConvergenceEventEmitter {
   private _closeCallback: (id: string) => void;
 
   constructor(connection: ConvergenceConnection,
-              joinedSessions: {[key: string]: RemoteSession[]},
-              stateMap: ActivityStateMap,
+              joinedSessionsByUserId: {[key: string]: RemoteSession[]},
+              stateMap: ActivityState,
               id: string,
               closeCallback: (id: string) => void) {
+    super();
     this._connection = connection;
     this._id = id;
     this._closeCallback = closeCallback;
     this._joiningDeferred = null;
     this._joined = false;
-    this._joinedSessionsByUserId = joinedSessions;
-    this._stateMap = stateMap;
+    this._joinedSessionsByUserId = joinedSessionsByUserId;
+    this._stateMap = new ActivityStateMap(
+      connection,
+      this,
+      stateMap);
   }
 
   session(): Session {
@@ -59,16 +66,16 @@ export class Activity extends ConvergenceEventEmitter {
 
   join(): Promise<void> {
     if (this.joined()) {
-      return Promise.resolve();
+      return Promise.resolve(null);
     } else if (this._joiningDeferred !== null) {
       return this._joiningDeferred.promise();
     } else {
       var deferred: Deferred<void> = new Deferred<void>();
-      var joinRequest: JoinActivityRequest = {
+      var joinRequest: ActivityJoinRequest = {
         activityId: this._id
       };
 
-      this._connection.request(joinRequest).then((response: JoinActivityResponse) => {
+      this._connection.request(joinRequest).then((response: ActivityJoinResponse) => {
         this._joined = true;
         deferred.resolve();
       }).catch((error: Error) => {
@@ -80,11 +87,11 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   leave(): Promise<void> {
-    var leaveRequest: LeaveActivityRequest = {
+    var leaveRequest: ActivityLeaveRequest = {
       activityId: this._id
     };
     var deferred: Deferred<void> = new Deferred<void>();
-    this._connection.request(leaveRequest).then((response: LeaveActivityResponse) => {
+    this._connection.request(leaveRequest).then((response: ActivityLeaveResponse) => {
       deferred.resolve();
     }).catch((error: Error) => {
       deferred.reject(error);
@@ -108,7 +115,7 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   joinedSessionsByUserId(): {[key: string]: RemoteSession[]} {
-    var result: {[key: string]: RemoteSession[]} = [];
+    var result: {[key: string]: RemoteSession[]} = {};
     Object.keys(this._joinedSessionsByUserId).forEach(userId => {
       var sessions: RemoteSession[] = [];
       result[userId] = sessions;
@@ -120,11 +127,11 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   close(): void {
-    var message: CloseActivity = {
+    var message: ActivityCloseRequest = {
       activityId: this._id
     };
 
-    this._connection.send(message);
+    this._connection.request(message);
     this._closeCallback(this._id);
   }
 
@@ -142,8 +149,8 @@ export class Activity extends ConvergenceEventEmitter {
       case MessageType.ACTIVITY_SESSION_LEFT:
         this._sessionLeft(<ActivitySessionLeft>message);
         break;
-      case MessageType.ACTIVITY_STATE_SET:
-      case MessageType.ACTIVITY_STATE_CLEARED:
+      case MessageType.ACTIVITY_REMOTE_STATE_SET:
+      case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
         this._stateMap._handleMessage(message);
         break;
       default:
@@ -152,7 +159,7 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   private _sessionJoined(message: ActivitySessionJoined): void {
-    var userId: string = message.userId;
+    var userId: string = SessionIdParser.parseUserId(message.sessionId);
     var sessionId: string = message.sessionId;
     var fireUserEvent: boolean = false;
     var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
@@ -186,7 +193,7 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   private _sessionLeft(message: ActivitySessionLeft): void {
-    var userId: string = message.userId;
+    var userId: string = SessionIdParser.parseUserId(message.sessionId);
     var sessionId: string = message.sessionId;
     var fireUserEvent: boolean = false;
     var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];

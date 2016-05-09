@@ -1,4 +1,4 @@
-import ConvergenceConnection from "./connection/ConvergenceConnection";
+import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import ConvergenceDomain from "./ConvergenceDomain";
 import Session from "./Session";
 

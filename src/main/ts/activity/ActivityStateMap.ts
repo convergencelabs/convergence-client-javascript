@@ -7,8 +7,9 @@ import {ActivityRemoteStateSet} from "../connection/protocol/activity/activitySt
 import {ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ActivityClearState} from "../connection/protocol/activity/activityState";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {ActivitySetState} from "../connection/protocol/activity/activityState";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 
 
 export class ActivityStateMap extends ConvergenceEventEmitter {
@@ -20,11 +21,13 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
 
   private _connection: ConvergenceConnection;
   private _activity: Activity;
+  // Stored by session id, then key.
   private _state: ActivityState;
 
   constructor(connection: ConvergenceConnection,
               activity: Activity,
               state: ActivityState) {
+    super();
     this._connection = connection;
     this._activity = activity;
     this._state = state;
@@ -50,8 +53,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     });
   }
 
-  get(key: string): any
-  get(key: string, sessionId: string): any {
+  get(key: string, sessionId?: string): any {
     if (arguments.length === 1) {
       sessionId = this._activity.session().sessionId();
     }
@@ -63,7 +65,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     }
   }
 
-  getByKey(key: string, includeLocal?: boolean = true): {[key: string]: any} {
+  getByKey(key: string, includeLocal: boolean = true): {[key: string]: any} {
     var result: {[key: string]: any} = {};
     Object.keys(this._state).forEach(sessionId => {
       if (includeLocal || sessionId !== this._activity.session().sessionId()) {
@@ -94,10 +96,10 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
 
   _handleMessage(message: IncomingProtocolNormalMessage): void {
     switch (message.type) {
-      case MessageType.ACTIVITY_STATE_SET:
+      case MessageType.ACTIVITY_REMOTE_STATE_SET:
         this._onRemoteStateSet(<ActivityRemoteStateSet>message);
         break;
-      case MessageType.ACTIVITY_STATE_CLEARED:
+      case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
         this._onRemoteStateCleared(<ActivityRemoteStateCleared>message);
         break;
       default:
@@ -109,7 +111,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateSetEvent = {
       src: this,
       name: ActivityStateMap.Events.REMOTE_STATE_SET,
-      userId: message.userId,
+      userId: SessionIdParser.parseUserId(message.sessionId),
       sessionId: message.sessionId,
       key: message.key,
       value: message.value
@@ -121,7 +123,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateClearedEvent = {
       src: this,
       name: ActivityStateMap.Events.REMOTE_STATE_CLEARED,
-      userId: message.userId,
+      userId: SessionIdParser.parseUserId(message.sessionId),
       sessionId: message.sessionId,
       key: message.key
     };
