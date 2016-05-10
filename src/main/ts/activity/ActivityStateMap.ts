@@ -39,14 +39,20 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
   }
 
   set(key: string, value: any): void {
+    if (!this.activity().opened()) {
+      throw new Error("Can not set state because the parent activity was already closed.");
+    }
+
     this._state[this._activity.session().sessionId()][key] = value;
-    var message: ActivitySetState = {
-      type: MessageType.ACTIVITY_LOCAL_STATE_SET,
-      activityId: this.activity().id(),
-      key: key,
-      value: value
-    };
-    this._connection.send(message);
+    if (this.activity().joined()) {
+      var message: ActivitySetState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_SET,
+        activityId: this.activity().id(),
+        key: key,
+        value: value
+      };
+      this._connection.send(message);
+    }
   }
 
   setAll(values: {[key: string]: any}): void {
@@ -84,12 +90,14 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
 
   remove(key: string): void {
     delete this._state[this._activity.session().sessionId()][key];
-    var message: ActivityClearState = {
-      type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
-      activityId: this.activity().id(),
-      key: key
-    };
-    this._connection.send(message);
+    if (this.activity().joined()) {
+      var message: ActivityClearState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
+        activityId: this.activity().id(),
+        key: key
+      };
+      this._connection.send(message);
+    }
   }
 
   removeAll(): void {

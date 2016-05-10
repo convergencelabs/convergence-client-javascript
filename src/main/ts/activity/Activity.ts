@@ -37,6 +37,7 @@ export class Activity extends ConvergenceEventEmitter {
   private _joiningDeferred: Deferred<void>;
   private _joined: boolean;
   private _closeCallback: (id: string) => void;
+  private _open: boolean;
 
   constructor(connection: ConvergenceConnection,
               joinedSessionsByUserId: {[key: string]: RemoteSession[]},
@@ -54,6 +55,8 @@ export class Activity extends ConvergenceEventEmitter {
       connection,
       this,
       stateMap);
+
+    this._open = true;
   }
 
   session(): Session {
@@ -131,6 +134,7 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   close(): Promise<void> {
+    this._open = false;
     var message: ActivityCloseRequest = {
       type: MessageType.ACTIVITY_CLOSE_REQUEST,
       activityId: this._id
@@ -138,6 +142,7 @@ export class Activity extends ConvergenceEventEmitter {
 
     this._closeCallback(this._id);
 
+    this._joined = false;
     var deferred: Deferred<void> = new Deferred<void>();
     this._connection.request(message).then(() => {
       deferred.resolve();
@@ -145,6 +150,10 @@ export class Activity extends ConvergenceEventEmitter {
       deferred.reject(error);
     });
     return deferred.promise();
+  }
+
+  opened(): boolean {
+    return this._open;
   }
 
   stateMap(): ActivityStateMap {

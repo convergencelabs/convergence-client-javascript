@@ -7,6 +7,8 @@ var localMouseSpan = document.getElementById("localMouse");
 
 var activity;
 
+var remotePointers = {};
+
 // Connect to the domain.
 ConvergenceDomain.debugFlags.protocol.messages = true;
 var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
@@ -50,8 +52,6 @@ function leaveActivity() {
     leaveButton.disabled = true;
   });
 }
-
-
 
 function mouseMoved(evt) {
   localMouseSpan.innerHTML = " (" + evt.clientX + "," +evt.clientY + ")";
