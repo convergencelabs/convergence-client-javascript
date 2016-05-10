@@ -13,13 +13,11 @@ export var ActivityOpenRequestSerializer: MessageBodySerializer = (request: Acti
 };
 
 export interface ActivityOpenResponse extends OutgoingProtocolRequestMessage {
-  joinedSessions: string[];
   state: ActivityState;
 }
 
 export var ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
   var result: ActivityOpenResponse = {
-    joinedSessions: body.j,
     state: body.s
   };
   return result;

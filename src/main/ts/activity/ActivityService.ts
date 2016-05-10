@@ -79,12 +79,13 @@ export class ActivityService {
     var deferred: Deferred<Activity> = new Deferred<Activity>();
 
     var openActivityMessage: ActivityOpenRequest = {
+      type: MessageType.ACTIVITY_OPEN_REQUEST,
       activityId: id
     };
 
     this._connection.request(openActivityMessage).then((response: ActivityOpenResponse) => {
       var joinedSessionsByUserId: {[key: string]: RemoteSession[]} = {};
-      response.joinedSessions.forEach((sessionId: string) => {
+      Object.keys(response.state).forEach((sessionId: string) => {
         var sk: SessionKey = SessionIdParser.deserialize(sessionId);
         var userSessions: RemoteSession[] = joinedSessionsByUserId[sk.userId];
         if (userSessions === undefined) {
@@ -102,6 +103,7 @@ export class ActivityService {
           this._close(id);
         });
       this._opened[id] = activity;
+      delete this._opening[id];
       deferred.resolve(activity);
     }).catch((error: Error) => {
       deferred.reject(error);

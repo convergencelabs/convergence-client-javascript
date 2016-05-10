@@ -6,6 +6,7 @@ import {debugFlags as flags} from "./Debug";
 import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import UserService from "./user/UserService";
+import {ActivityService} from "./activity/ActivityService";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
@@ -21,6 +22,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   private _modelService: ModelService;
   private _identityService: UserService;
+  private _activityService: ActivityService;
   private _connection: ConvergenceConnection;
   private _connectPromise: Promise<HandshakeResponse>;
 
@@ -64,6 +66,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
     this._modelService = new ModelService(this._connection);
     this._identityService = new UserService(this._connection);
+    this._activityService = new ActivityService(this._connection);
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
@@ -96,6 +99,10 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   userService(): UserService {
     return this._identityService;
+  }
+
+  activityService(): ActivityService {
+    return this._activityService;
   }
 
   dispose(): void {

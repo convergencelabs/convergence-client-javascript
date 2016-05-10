@@ -18,7 +18,6 @@ export var PasswordAuthRequestSerializer: MessageBodySerializer = (request: Pass
   };
 };
 
-
 export interface TokenAuthRequest extends AuthRequest {
   token: string;
 }

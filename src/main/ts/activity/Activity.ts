@@ -72,11 +72,13 @@ export class Activity extends ConvergenceEventEmitter {
     } else {
       var deferred: Deferred<void> = new Deferred<void>();
       var joinRequest: ActivityJoinRequest = {
+        type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: this._id
       };
 
       this._connection.request(joinRequest).then((response: ActivityJoinResponse) => {
         this._joined = true;
+        this._joiningDeferred = null;
         deferred.resolve();
       }).catch((error: Error) => {
         deferred.reject(error);
@@ -88,10 +90,12 @@ export class Activity extends ConvergenceEventEmitter {
 
   leave(): Promise<void> {
     var leaveRequest: ActivityLeaveRequest = {
+      type: MessageType.ACTIVITY_LEAVE_REQUEST,
       activityId: this._id
     };
     var deferred: Deferred<void> = new Deferred<void>();
     this._connection.request(leaveRequest).then((response: ActivityLeaveResponse) => {
+      this._joined = false;
       deferred.resolve();
     }).catch((error: Error) => {
       deferred.reject(error);
@@ -126,13 +130,21 @@ export class Activity extends ConvergenceEventEmitter {
     return result;
   }
 
-  close(): void {
+  close(): Promise<void> {
     var message: ActivityCloseRequest = {
+      type: MessageType.ACTIVITY_CLOSE_REQUEST,
       activityId: this._id
     };
 
-    this._connection.request(message);
     this._closeCallback(this._id);
+
+    var deferred: Deferred<void> = new Deferred<void>();
+    this._connection.request(message).then(() => {
+      deferred.resolve();
+    }).catch((error: Error) => {
+      deferred.reject(error);
+    });
+    return deferred.promise();
   }
 
   stateMap(): ActivityStateMap {

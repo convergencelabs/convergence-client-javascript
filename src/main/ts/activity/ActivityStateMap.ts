@@ -41,6 +41,8 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
   set(key: string, value: any): void {
     this._state[this._activity.session().sessionId()][key] = value;
     var message: ActivitySetState = {
+      type: MessageType.ACTIVITY_LOCAL_STATE_SET,
+      activityId: this.activity().id(),
       key: key,
       value: value
     };
@@ -83,6 +85,8 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
   remove(key: string): void {
     delete this._state[this._activity.session().sessionId()][key];
     var message: ActivityClearState = {
+      type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
+      activityId: this.activity().id(),
       key: key
     };
     this._connection.send(message);
