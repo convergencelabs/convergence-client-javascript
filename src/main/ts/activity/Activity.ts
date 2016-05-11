@@ -22,9 +22,9 @@ export class Activity extends ConvergenceEventEmitter {
 
   static Events: any = {
     USER_JOINED: "user_joined",
-    USER_LEFT: "user_joined",
+    USER_LEFT: "user_left",
     SESSION_JOINED: "session_joined",
-    SESSION_LEFT: "session_joined"
+    SESSION_LEFT: "session_left"
   };
 
   private _id: string;
@@ -82,6 +82,7 @@ export class Activity extends ConvergenceEventEmitter {
       this._connection.request(joinRequest).then((response: ActivityJoinResponse) => {
         this._joined = true;
         this._joiningDeferred = null;
+        this._sessionJoined(this._connection.session().sessionId());
         deferred.resolve();
       }).catch((error: Error) => {
         deferred.reject(error);
@@ -99,6 +100,7 @@ export class Activity extends ConvergenceEventEmitter {
     var deferred: Deferred<void> = new Deferred<void>();
     this._connection.request(leaveRequest).then((response: ActivityLeaveResponse) => {
       this._joined = false;
+      this._sessionLeft(this._connection.session().sessionId());
       deferred.resolve();
     }).catch((error: Error) => {
       deferred.reject(error);
@@ -140,11 +142,10 @@ export class Activity extends ConvergenceEventEmitter {
       activityId: this._id
     };
 
-    this._closeCallback(this._id);
-
     this._joined = false;
     var deferred: Deferred<void> = new Deferred<void>();
     this._connection.request(message).then(() => {
+      this._closeCallback(this._id);
       deferred.resolve();
     }).catch((error: Error) => {
       deferred.reject(error);
@@ -156,7 +157,7 @@ export class Activity extends ConvergenceEventEmitter {
     return this._open;
   }
 
-  stateMap(): ActivityStateMap {
+  state(): ActivityStateMap {
     return this._stateMap;
   }
 
@@ -165,10 +166,10 @@ export class Activity extends ConvergenceEventEmitter {
 
     switch (message.type) {
       case MessageType.ACTIVITY_SESSION_JOINED:
-        this._sessionJoined(<ActivitySessionJoined>message);
+        this._sessionJoined((<ActivitySessionJoined>message).sessionId);
         break;
       case MessageType.ACTIVITY_SESSION_LEFT:
-        this._sessionLeft(<ActivitySessionLeft>message);
+        this._sessionLeft((<ActivitySessionLeft>message).sessionId);
         break;
       case MessageType.ACTIVITY_REMOTE_STATE_SET:
       case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
@@ -179,9 +180,9 @@ export class Activity extends ConvergenceEventEmitter {
     }
   }
 
-  private _sessionJoined(message: ActivitySessionJoined): void {
-    var userId: string = SessionIdParser.parseUserId(message.sessionId);
-    var sessionId: string = message.sessionId;
+  private _sessionJoined(sessionId: string): void {
+    var userId: string = SessionIdParser.parseUserId(sessionId);
+
     var fireUserEvent: boolean = false;
     var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
     if (userSessions === undefined) {
@@ -213,9 +214,9 @@ export class Activity extends ConvergenceEventEmitter {
     this.emitEvent(sessionEvent);
   }
 
-  private _sessionLeft(message: ActivitySessionLeft): void {
-    var userId: string = SessionIdParser.parseUserId(message.sessionId);
-    var sessionId: string = message.sessionId;
+  private _sessionLeft(sessionId: string): void {
+    var userId: string = SessionIdParser.parseUserId(sessionId);
+
     var fireUserEvent: boolean = false;
     var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
     userSessions.forEach((session: RemoteSession) => {

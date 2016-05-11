@@ -41,9 +41,6 @@ export class ConvergenceConnection extends EventEmitter {
 
   private _protocolConfig: ProtocolConfiguration;
 
-  private _clientId: string;
-  private _reconnectToken: string;
-
   private _connectionState: ConnectionState;
 
   private _protocolConnection: ProtocolConnection;
@@ -206,6 +203,7 @@ export class ConvergenceConnection extends EventEmitter {
       if (response.success === true) {
         this._session._setUsername(response.username);
         this._session._setUserId(response.userId);
+        this._session._setSessionId(response.sessionId);
         this._session.setAuthenticated(true);
         return;
       } else {
@@ -261,9 +259,7 @@ export class ConvergenceConnection extends EventEmitter {
         if (handshakeResponse.success) {
           this._connectionDeferred.resolve(handshakeResponse);
           this._connectionDeferred = null;
-          this._clientId = handshakeResponse.sessionId;
-          this._session._setSessionId(handshakeResponse.sessionId);
-          this._reconnectToken = handshakeResponse.reconnectToken;
+
           if (reconnect) {
             this.emit(ConvergenceConnection.Events.RECONNECTED);
           } else {

@@ -5,3 +5,16 @@ body {
   left: 0px;
   right: 0px;
 }
+
+#cursorBox {
+  height: 200px;
+  width: 200px;
+  border: 1px solid black;
+}
+
+div.remoteCursor {
+  position: absolute;
+  height: 4px;
+  width: 4px;
+  background: blue;
+}

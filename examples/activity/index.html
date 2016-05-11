@@ -8,7 +8,7 @@
   <script src="../../dist/convergence-client.umd.js"></script>
   <script src="../connection.js"></script>
 </head>
-<body onmousemove="mouseMoved(event)" >
+<body>
 
 <button id="openButton" onclick="openActivity()" disabled="disabled">Open</button>
 <button id="closeButton" onclick="closeActivity()" disabled="disabled">Close</button>
@@ -19,10 +19,12 @@
 <br/>
 <span >Local Mouse Location: </span><span id="localMouse"></span>
 
+<div id="cursorBox" onmousemove="mouseMoved(event)"></div>
+
 <br/>
 <br/>
 <span>Session Mouse Location</span>
-<ul id="session">
+<ul id="sessions">
 </ul>
 
 <script src="activity.js"></script>

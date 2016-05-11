@@ -32,12 +32,14 @@ export interface AuthenticationResponse extends IncomingProtocolResponseMessage 
   success: boolean;
   userId: string;
   username: string;
+  sessionId: string;
 }
 
 export var AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
   return {
     success: body.s,
-    username: body.u,
-    userId: body.i
+    username: body.n,
+    userId: body.i,
+    sessionId: body.e
   };
 };
