@@ -28,6 +28,11 @@ gulp.task('default', ["dist"]);
  */
 gulp.task('build', [], function () {
   const tsProject = ts.createProject('tsconfig.json');
+
+  // We need this here because we need to create the d.ts, but we
+  // can't put this in the tsconfig because the other steps bomb out.
+  tsProject.options.declaration = true;
+
   var tsResult = gulp.src(['src/**/*.ts', "typings/main.d.ts"])
     .pipe(ts(tsProject));
 
