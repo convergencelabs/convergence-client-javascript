@@ -5,4 +5,4 @@ interface OperationTransformationFunction<S extends DiscreteOperation, C extends
   transform(s: S, c: C): OperationPair;
 }
 
-export default OperationTransformationFunction
+export default OperationTransformationFunction;
