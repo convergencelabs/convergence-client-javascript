@@ -287,7 +287,7 @@ function addUser(userId, sessionId) {
     color: color
   };
 
-  domain.userService().getUser(userId).then(function (user) {
+  domain.identityService().getUser(userId).then(function (user) {
     var userDiv = document.createElement("div");
     userDiv.className = "session";
     userDiv.id = "user" + sessionId;

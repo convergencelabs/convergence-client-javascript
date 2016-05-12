@@ -4,10 +4,10 @@ import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import MessageType from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
-import DomainUser from "../../../main/ts/user/DomainUser";
+import DomainUser from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import {UserField} from "../../../main/ts/user/UserService";
+import {UserField} from "../../../main/ts/identity/IdentityService";
 
 var expect: ExpectStatic = chai.expect;
 
@@ -24,7 +24,7 @@ var expectedSuccessOptions: Function = function(done: MochaDone): IMockServerOpt
   };
 };
 
-describe('UserService.getUser()', () => {
+describe('IdentityService.getUser()', () => {
 
   it('must resolve with the correct user', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
@@ -38,7 +38,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1");
+      return domain.identityService().getUser("u1");
     }).then((user: DomainUser) => {
       expect(user.uid).to.equal("u1");
       expect(user.username).to.equal("test1");
@@ -59,7 +59,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1");
+      return domain.identityService().getUser("u1");
     }).then((user: DomainUser) => {
       expect(user).to.be.undefined;
       mockServer.doneManager().testSuccess();
@@ -81,7 +81,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1");
+      return domain.identityService().getUser("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testFailure(
         new Error("getUser() resolved, even though multiple users were returned from the server"));
@@ -96,7 +96,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser(null);
+      return domain.identityService().getUser(null);
     }).then((user: DomainUser) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {
@@ -112,7 +112,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1", UserField.USERNAME);
+      return domain.identityService().getUser("u1", UserField.USERNAME);
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -128,7 +128,7 @@ describe('UserService.getUser()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().getUser("u1", UserField.EMAIL);
+      return domain.identityService().getUser("u1", UserField.EMAIL);
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -137,7 +137,7 @@ describe('UserService.getUser()', () => {
   });
 });
 
-describe('UserService.searchUsers()', () => {
+describe('IdentityService.searchUsers()', () => {
   it('must resolve with the proper users that were returned', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     var req: IReceiveRequestRecord = mockServer.expectRequest(
@@ -153,7 +153,7 @@ describe('UserService.searchUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().searchUsers(["firstName", "lastName"], "keyword");
+      return domain.identityService().searchUsers(["firstName", "lastName"], "keyword");
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(2);
 
@@ -186,7 +186,7 @@ describe('UserService.searchUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().searchUsers([UserField.FIRST_NAME, UserField.LAST_NAME], "keyword");
+      return domain.identityService().searchUsers([UserField.FIRST_NAME, UserField.LAST_NAME], "keyword");
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(0);
       mockServer.doneManager().testSuccess();
@@ -201,7 +201,7 @@ describe('UserService.searchUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().searchUsers([], "keyword");
+      return domain.identityService().searchUsers([], "keyword");
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {
@@ -215,7 +215,7 @@ describe('UserService.searchUsers()', () => {
 
     var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
     domain.authenticateWithToken("token").then(() => {
-      return domain.userService().searchUsers("username", null);
+      return domain.identityService().searchUsers("username", null);
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {

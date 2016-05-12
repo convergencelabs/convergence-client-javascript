@@ -26,7 +26,7 @@ var validSearchFields: string[] = [
   UserField.LAST_NAME];
 
 
-export default class UserService {
+export class IdentityService {
 
   constructor(private _connection: ConvergenceConnection) {
   }

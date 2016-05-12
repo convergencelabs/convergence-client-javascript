@@ -1,6 +1,6 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
-import DomainUser from "../../../user/DomainUser";
+import DomainUser from "../../../identity/DomainUser";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {DomainUserDeserilizer} from "./DomainUser";
 

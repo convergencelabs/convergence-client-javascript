@@ -49,11 +49,11 @@ function bindTableEvents() {
 }
 
 
-hot.selectCell(2, 2, 3, 3);
+//hot.selectCell(2, 2, 3, 3);
 
 function remoteSelect(row, column, userId) {
   var td = hot.getCell(3,3);
   td.className = "remoteSelection"
 }
 
-remoteSelect(3,3, "foo");
+//remoteSelect(3,3, "foo");

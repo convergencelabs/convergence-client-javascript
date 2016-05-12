@@ -1,4 +1,4 @@
-import DomainUser from "../../../user/DomainUser";
+import DomainUser from "../../../identity/DomainUser";
 
 export var DomainUserDeserilizer: (user: any) => DomainUser =  (body: any) => {
   return new DomainUser(

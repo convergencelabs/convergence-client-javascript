@@ -96,7 +96,6 @@ function handleSessionJoined(event) {
     locationLabel: locationLabel,
     cursorDiv: cursorDiv
   }
-
 }
 
 function handleSessionLeft(event) {
