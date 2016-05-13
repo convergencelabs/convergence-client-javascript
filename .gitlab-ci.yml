@@ -3,5 +3,5 @@ image: node:6.1.0
 all_tests:
   script:
    - npm install
-   - npm typings
-   - npm build
+   - npm run typings
+   - npm run build
