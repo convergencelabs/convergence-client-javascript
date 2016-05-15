@@ -9,20 +9,22 @@
     "Real Time"
   ],
   "author": "Convergence Labs",
-  "homepage": "",
+  "homepage": "http://www.convergencelabs.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/convergencelabs/convergence-client-javascript"
+    "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
   },
-  "registry": "github",
-  "main": "dist/convergence-client.js",
+  "main": "dist/convergence-client.umd.js",
   "jsnext:main": "dist/convergence-client.es2015.js",
-  "bugs": "",
-  "license": "",
+  "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
+  "license": "Commercial",
   "scripts": {
     "build": "gulp",
     "test": "gulp test",
     "typings": "typings install"
+  },
+  "publishConfig" : {
+    "registry" : "https://builds.convergencelabs.tech/nexus/repository/convergence-npm/"
   },
   "dependencies": {},
   "devDependencies": {

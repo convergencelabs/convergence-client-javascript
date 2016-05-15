@@ -7,7 +7,8 @@ export var ReferenceType: any = {
   INDEX: "index",
   RANGE: "range",
   PROPERTY: "property",
-  PATH: "path"
+  PATH: "path",
+  CELL: "cell"
 };
 Object.freeze(ReferenceType);
 

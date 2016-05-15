@@ -95,6 +95,20 @@ function createControl(segment, index) {
     valueInput.value = val;
   });
 
+  var color = segment.get("color");
+  color.on("model_changed", function (e) {
+    var colorVal = color.value();
+    pieChart.segments[index].fillColor = colorVal;
+    pieChart.update();
+    sliderDiv.style.background = colorVal;
+  });
+
+  var label = segment.get("label");
+  label.on("model_changed", function (e) {
+    pieChart.segments[index].label = label.value();
+    pieChart.update();
+  });
+
   controlsDiv.appendChild(controlDiv);
 }
 
