@@ -20,6 +20,7 @@ const gulpRollup = require('gulp-rollup');
 const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
+const fs = require('fs');
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 
