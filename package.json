@@ -14,8 +14,8 @@
     "type": "git",
     "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
   },
-  "main": "dist/convergence-client.umd.js",
-  "jsnext:main": "dist/convergence-client.es2015.js",
+  "main": "convergence-client.umd.js",
+  "jsnext:main": "convergence-client.es2015.js",
   "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
   "license": "Commercial",
   "scripts": {
@@ -36,6 +36,7 @@
     "gulp": "^3.9.1",
     "gulp-bump": "^2.1.0",
     "gulp-concat": "^2.6.0",
+    "gulp-copy": "^0.0.2",
     "gulp-github-release": "^1.1.2",
     "gulp-istanbul": "^0.10.4",
     "gulp-mocha": "^2.2.0",
