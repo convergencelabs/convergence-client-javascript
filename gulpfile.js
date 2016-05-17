@@ -6,6 +6,7 @@ const merge = require('merge2');
 const release = require('gulp-github-release');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
+const bump = require('gulp-bump');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
@@ -174,6 +175,12 @@ gulp.task('release', ['dist'], function () {
     .on('error', function (err) {
       console.error(err)
     });
+});
+
+gulp.task('bump', function(){
+    gulp.src('./package.json')
+        .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
+        .pipe(gulp.dest('./'));
 });
 
 /**
