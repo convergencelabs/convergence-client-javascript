@@ -7,7 +7,6 @@ const release = require('gulp-github-release');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
 const bump = require('gulp-bump');
-const copy = require('gulp-copy');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
@@ -154,7 +153,7 @@ gulp.task('dist-ts', ["build"], function () {
     });
 });
 
-gulp.task('dist', ["dist-build-all", "copy"], function () {
+gulp.task('dist', ["dist-build-all", "copyPackage"], function () {
   gulp.src("dist/convergence-client.umd.js")
     .pipe(sourceMaps.init())
     .pipe(uglify({
@@ -187,7 +186,7 @@ gulp.task('bump', function(){
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('copy', function(){
+gulp.task('copyPackage', function(){
     gulp.src('./package.json')
         .pipe((gulp.dest('dist')))
 });
