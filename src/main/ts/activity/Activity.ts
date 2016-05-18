@@ -199,7 +199,8 @@ export class Activity extends ConvergenceEventEmitter {
         name: Activity.Events.USER_JOINED,
         activityId: this._id,
         userId: userId,
-        sessionId: sessionId
+        sessionId: sessionId,
+        local: sessionId === this._connection.session().sessionId()
       };
       this.emitEvent(userEvent);
     }
@@ -209,7 +210,8 @@ export class Activity extends ConvergenceEventEmitter {
       name: Activity.Events.SESSION_JOINED,
       activityId: this._id,
       userId: userId,
-      sessionId: sessionId
+      sessionId: sessionId,
+      local: sessionId === this._connection.session().sessionId()
     };
     this.emitEvent(sessionEvent);
   }
@@ -236,7 +238,8 @@ export class Activity extends ConvergenceEventEmitter {
         name: Activity.Events.USER_LEFT,
         activityId: this._id,
         userId: userId,
-        sessionId: sessionId
+        sessionId: sessionId,
+        local: sessionId === this._connection.session().sessionId()
       };
       this.emitEvent(userEvent);
     }
@@ -246,7 +249,8 @@ export class Activity extends ConvergenceEventEmitter {
       name: Activity.Events.SESSION_LEFT,
       activityId: this._id,
       userId: userId,
-      sessionId: sessionId
+      sessionId: sessionId,
+      local: sessionId === this._connection.session().sessionId()
     };
     this.emitEvent(sessionEvent);
   }
@@ -256,22 +260,26 @@ export interface ActivityUserJoinedEvent extends ConvergenceEvent {
   activityId: string;
   userId: string;
   sessionId: string;
+  local: boolean;
 }
 
 export interface ActivityUserLeftEvent extends ConvergenceEvent {
   activityId: string;
   userId: string;
   sessionId: string;
+  local: boolean;
 }
 
 export interface ActivitySessionJoinedEvent extends ConvergenceEvent {
   activityId: string;
   userId: string;
   sessionId: string;
+  local: boolean;
 }
 
 export interface ActivitySessionLeftEvent extends ConvergenceEvent {
   activityId: string;
   userId: string;
   sessionId: string;
+  local: boolean;
 }

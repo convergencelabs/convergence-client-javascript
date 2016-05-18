@@ -7,7 +7,6 @@ import {ActivityOpenRequest} from "../connection/protocol/activity/openActivity"
 import {ActivityOpenResponse} from "../connection/protocol/activity/openActivity";
 import {RemoteSession} from "../RemoteSession";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {SessionKey} from "../connection/protocol/SessionIdParser";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 
 export class ActivityService {
@@ -86,13 +85,13 @@ export class ActivityService {
     this._connection.request(openActivityMessage).then((response: ActivityOpenResponse) => {
       var joinedSessionsByUserId: {[key: string]: RemoteSession[]} = {};
       Object.keys(response.state).forEach((sessionId: string) => {
-        var sk: SessionKey = SessionIdParser.deserialize(sessionId);
-        var userSessions: RemoteSession[] = joinedSessionsByUserId[sk.userId];
+        var userId: string = SessionIdParser.parseUserId(sessionId);
+        var userSessions: RemoteSession[] = joinedSessionsByUserId[userId];
         if (userSessions === undefined) {
           userSessions = [];
-          joinedSessionsByUserId[sk.userId] = userSessions;
+          joinedSessionsByUserId[userId] = userSessions;
         }
-        userSessions.push({userId: sk.userId, sessionId: sk.sessionId});
+        userSessions.push({userId: userId, sessionId: sessionId});
       });
       var activity: Activity = new Activity(
         this._connection,

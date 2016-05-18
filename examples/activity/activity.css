@@ -12,9 +12,8 @@ body {
   border: 1px solid black;
 }
 
-div.remoteCursor {
-  position: absolute;
-  height: 4px;
-  width: 4px;
-  background: blue;
+.remoteCursor {
+  display: inline;
+  position: relative;
+  height: 16px;
 }
