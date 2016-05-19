@@ -7,8 +7,10 @@ var leaveButton = document.getElementById("leaveButton");
 // The element that shows the local moust location
 var localMouseSpan = document.getElementById("localMouse");
 
+var sessionIdSpan = document.getElementById("sessionId");
+
 // The list where all the cursors by session are listed.
-var sessionsUl = document.getElementById("sessions");
+var mouseLocations = document.getElementById("mouseLocations");
 
 // The div where the mouse events are sourced / rendered
 var cursorBox = document.getElementById('cursorBox');
@@ -30,6 +32,7 @@ domain.on("connected", function () {
 // Now authenticate.  This is deferred until connection is successful.
 domain.authenticateWithPassword("test1", "password").then(function (username) {
   openButton.disabled = false;
+  sessionIdSpan.innerHTML = domain.session().sessionId();
 });
 
 var zOrder = 1;
@@ -43,7 +46,10 @@ function openActivity() {
     joinButton.disabled = false;
 
     activity.joinedSessions().forEach(function (session) {
-      handleSessionJoined(session.userId, session.sessionId, session.sessionId === activity.session().sessionId());
+      var local = session.sessionId === activity.session().sessionId();
+      handleSessionJoined(session.userId, session.sessionId, local);
+      var state = activity.state().get("pointer", session.sessionId);
+      handleStateSet(session.sessionId, state.x, state.y, local)
     });
 
     activity.on("session_joined", function (event) {
@@ -55,7 +61,7 @@ function openActivity() {
     });
 
     activity.state().on("state_set", function (event) {
-      handleStateSet(event);
+      handleStateSet(event.sessionId, event.value.x, event.value.y, event.local);
     });
   });
 }
@@ -67,6 +73,10 @@ function closeActivity() {
     closeButton.disabled = true;
     joinButton.disabled = true;
     leaveButton.disabled = true;
+
+    Object.keys(remoteSessions).forEach(function(sessionId) {
+      handleSessionLeft(sessionId);
+    });
   });
 }
 
@@ -89,15 +99,15 @@ function leaveActivity() {
 
 // Handles a session joining (both remote and local)
 function handleSessionJoined(userId, sessionId, local) {
-  var sessionLi = document.createElement("li");
-  var sessionLabel = document.createElement("span");
-  sessionLabel.innerHTML = userId + "(" + sessionId + "): ";
-  sessionLi.appendChild(sessionLabel);
+  var sessionTr = document.createElement("tr");
+  var sessionIdCell = document.createElement("td");
+  sessionIdCell.innerHTML = sessionId;
+  sessionTr.appendChild(sessionIdCell);
 
-  var locationLabel = document.createElement("span");
-  sessionLi.appendChild(locationLabel);
+  var locationCell = document.createElement("td");
+  sessionTr.appendChild(locationCell);
 
-  sessionsUl.appendChild(sessionLi);
+  mouseLocations.appendChild(sessionTr);
   var cursorDiv;
 
   if (!local) {
@@ -109,8 +119,8 @@ function handleSessionJoined(userId, sessionId, local) {
   }
 
   remoteSessions[sessionId] = {
-    sessionLi: sessionLi,
-    locationLabel: locationLabel,
+    sessionTr: sessionTr,
+    locationCell: locationCell,
     cursorDiv: cursorDiv
   }
 }
@@ -118,19 +128,20 @@ function handleSessionJoined(userId, sessionId, local) {
 // Handles a session leaving (both remote and local)
 function handleSessionLeft(sessionId) {
   var sessionRec = remoteSessions[sessionId];
-  sessionRec.sessionLi.parentNode.removeChild(sessionRec.sessionLi);
+  sessionRec.sessionTr.parentNode.removeChild(sessionRec.sessionTr);
   if (sessionRec.cursorDiv) {
     cursorBox.removeChild(sessionRec.cursorDiv);
   }
+  delete remoteSessions[sessionId];
 }
 
 // Handles the state set event, rendering the current information
-function handleStateSet(event) {
-  var sessionRec = remoteSessions[event.sessionId];
-  sessionRec.locationLabel.innerHTML = "(" + event.value.x + "," + event.value.y + ")"
-  if (!event.local) {
-    sessionRec.cursorDiv.style.top = event.value.y + "px";
-    sessionRec.cursorDiv.style.left = event.value.x + "px";
+function handleStateSet(sessionId, x, y, local) {
+  var sessionRec = remoteSessions[sessionId];
+  sessionRec.locationCell.innerHTML = "(" + x + "," + y + ")"
+  if (!local) {
+    sessionRec.cursorDiv.style.top = y + "px";
+    sessionRec.cursorDiv.style.left = x + "px";
   }
 }
 
