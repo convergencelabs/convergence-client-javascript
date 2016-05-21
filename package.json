@@ -17,7 +17,7 @@
   "main": "convergence-client.umd.js",
   "jsnext:main": "convergence-client.es2015.js",
   "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
-  "license": "Commercial",
+  "license": "UNLICENSED",
   "scripts": {
     "build": "gulp",
     "test": "gulp test",
@@ -52,6 +52,7 @@
     "mock-socket": "^2.0.0",
     "rollup": "^0.25.8",
     "rollup-plugin-typescript": "^0.7.3",
+    "run-sequence": "^1.2.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "tslint": "^3.7.4",

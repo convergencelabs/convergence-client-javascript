@@ -1,12 +1,13 @@
 const gulp = require('gulp');
 
+const bump = require('gulp-bump');
 const concat = require('gulp-concat');
 const del = require('del');
 const merge = require('merge2');
 const release = require('gulp-github-release');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const bump = require('gulp-bump');
+const runSequence = require('run-sequence');
 
 const ts = require('gulp-typescript');
 const tsLint = require('gulp-tslint');
@@ -84,6 +85,22 @@ gulp.task('lint', function () {
     .pipe(tsLint.report('prose'));
 });
 
+gulp.task('dist-ts', ["build"], function () {
+  // TODO we could write a plugin to make this more gulpy
+  var options = {
+    name: 'convergence-client',
+    main: 'build/main/ts/ConvergenceDomain.d.ts'
+  };
+  dts.bundle(options);
+
+  return gulp.src('build/main/ts/convergence-client.d.ts')
+    .pipe(replace('convergence-client/ConvergenceDomain', 'convergence-client'))
+    .pipe(gulp.dest("dist"))
+    .on('finish', function () {
+      del('build/main/ts/convergence-client.d.ts');
+    });
+});
+
 
 gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
@@ -102,11 +119,11 @@ gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('dist-umd-named', ["dist-ts", "lint", "test"], function () {
+gulp.task('dist-amd', ["dist-ts", "lint", "test"], function () {
   return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
     .pipe(gulpRollup({
       rollup: rollup,
-      format: 'umd',
+      format: 'amd',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
       exports: 'named',
@@ -114,7 +131,7 @@ gulp.task('dist-umd-named', ["dist-ts", "lint", "test"], function () {
         rollupTypescript()
       ]
     }))
-    .pipe(rename("convergence-client.umd-named.js"))
+    .pipe(rename("convergence-client.amd.js"))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
 });
@@ -135,27 +152,8 @@ gulp.task('dist-es6', ["lint", "test"], function () {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('dist-build-all', ["dist-umd", "dist-umd-named", "dist-es6"]);
-
-gulp.task('dist-ts', ["build"], function () {
-  // TODO we could write a plugin to make this more gulpy
-  var options = {
-    name: 'convergence-client',
-    main: 'build/main/ts/ConvergenceDomain.d.ts'
-  };
-  dts.bundle(options);
-
-  return gulp.src('build/main/ts/convergence-client.d.ts')
-    .pipe(replace('convergence-client/ConvergenceDomain', 'convergence-client'))
-    .pipe(gulp.dest("dist"))
-    .on('finish', function () {
-      del('build/main/ts/convergence-client.d.ts');
-    });
-});
-
-gulp.task('dist', ["dist-build-all", "copyPackage"], function () {
-  gulp.src("dist/convergence-client.umd.js")
-    .pipe(sourceMaps.init())
+function minify(src) {
+  return src.pipe(sourceMaps.init())
     .pipe(uglify({
       mangleProperties: {
         regex: /^_/
@@ -164,8 +162,19 @@ gulp.task('dist', ["dist-build-all", "copyPackage"], function () {
     .pipe(rename({
       extname: '.min.js'
     }))
-    .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
+}
+
+gulp.task('dist-umd-min', function() {
+  return minify(gulp.src("dist/convergence-client.umd.js"));
+})
+
+gulp.task('dist-amd-min', function() {
+  return minify(gulp.src("dist/convergence-client.amd.js"));
+})
+
+gulp.task('dist', ["dist-umd", "dist-amd", "dist-es6", "copyPackage"], function(cb) {
+  runSequence('dist-umd-min', 'dist-amd-min', cb);
 });
 
 gulp.task('release', ['dist'], function () {
