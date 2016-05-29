@@ -13,23 +13,38 @@ export class UserPresence {
 
   static Events: any = Events;
 
+  private _userId: string;
+  private _sessions: RemoteSession[];
+  private _available: boolean;
+  private _state: {[key: string]: any};
+
+  constructor(userId: string,
+              sessions: RemoteSession[],
+              available: boolean,
+              state: {[key: string]: any}) {
+    this._userId = userId;
+    this._sessions = sessions;
+    this._available = available;
+    this._state = state;
+  }
+
   userId(): string {
-    return;
+    return this._userId;
   }
 
   sessions(): RemoteSession[] {
-    return [];
+    return this._sessions;
   }
 
   available(): boolean {
-    return false;
+    return this._available;
   }
 
   states(): {[key: string]: any} {
-    return {};
+    return this._state;
   }
 
   state(key: string): any {
-    return;
+    return this._state[key];
   }
 }
