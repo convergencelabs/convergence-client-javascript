@@ -298,7 +298,12 @@ function addUser(userId, sessionId) {
     userDiv.appendChild(squareDiv);
 
     var usernameDiv = document.createElement("div");
-    usernameDiv.innerHTML = user.firstName + " " + user.lastName;
+    if(!user.firstName && !user.lastName) {
+      usernameDiv.innerHTML = user.username;
+    } else {
+      usernameDiv.innerHTML = user.firstName + " " + user.lastName;
+    }
+    
     userDiv.appendChild(usernameDiv);
 
     usersList.appendChild(userDiv);
