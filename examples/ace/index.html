@@ -16,6 +16,7 @@
   <script src="../connection.js"></script>
   <script src="../../node_modules/es6-promise-polyfill/promise.js"></script>
   <script src="../../dist/convergence-client.umd.min.js"></script>
+  <script src="ace-example.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 <div id="banner"><img id="logo" src="../common/images/cl_logo.png"/>Ace Editor Demo</div>
@@ -27,12 +28,11 @@
     <option value="test3">Test 3</option>
     <option value="test4">Test 4</option>
   </select>
-  <button id="connectButton" onclick="connect()">Connect</button>
-  <button id="disconnectButton" onclick="disconnect()" disabled="disabled">Disconnect</button>
+  <button id="connectButton" onclick="aceExample.connect()">Connect</button>
+  <button id="disconnectButton" onclick="aceExample.disconnect()" disabled="disabled">Disconnect</button>
 </div>
 <div id="editor"></div>
 <div id="usersTitle">Connected Users</div>
 <div id="sessions"></div>
-<script src="ace-example.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
