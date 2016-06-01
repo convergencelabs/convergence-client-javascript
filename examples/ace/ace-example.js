@@ -1,28 +1,6 @@
 var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager, ConvergenceDomain, connectionConfig) {
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // Ace Selection Range Utilities
-  ///////////////////////////////////////////////////////////////////////////////
   var AceRange = ace.require('ace/range').Range;
-
-  function toAceRange(value, aceDocument) {
-    if (value === null || value === undefined) {
-      return null;
-    }
-
-    var start = value.start;
-    var end = value.end;
-
-    if (start > end) {
-      var temp = start;
-      start = end;
-      end = temp;
-    }
-
-    var selectionAnchor = aceDocument.indexToPosition(start);
-    var selectionLead = aceDocument.indexToPosition(end);
-    return new AceRange(selectionAnchor.row, selectionAnchor.column, selectionLead.row, selectionLead.column);
-  }
 
   ///////////////////////////////////////////////////////////////////////////////
   // Global settings
@@ -75,6 +53,27 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
       suppressEvents = true;
       this.document.setValue(e.value);
       suppressEvents = false;
+    },
+    setSelection: function(id, value) { 
+      this.selectionManager.setSelection(id, this.toAceRange(value));
+    },
+    toAceRange: function(value) {
+      if (value === null || value === undefined) {
+        return null;
+      }
+
+      var start = value.start;
+      var end = value.end;
+
+      if (start > end) {
+        var temp = start;
+        start = end;
+        end = temp;
+      }
+
+      var selectionAnchor = this.document.indexToPosition(start);
+      var selectionLead = this.document.indexToPosition(end);
+      return new AceRange(selectionAnchor.row, selectionAnchor.column, selectionLead.row, selectionLead.column);
     },
     reset: function() {
       this.editor.setValue("");
@@ -271,7 +270,7 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
           if (reference.key() === "cursor") {
             this.ace.cursorManager.setCursor(reference.sessionId(), reference.value());
           } else if (reference.key() === "selection" ) {
-            this.ace.selectionManager.setSelection(reference.sessionId(), toAceRange(reference.value(), this.ace.document));
+            this.ace.setSelection(reference.sessionId(), reference.value());
           }
         }
       }.bind(this));
@@ -314,7 +313,7 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
         color);
 
       reference.on("set", function (e) {
-        this.ace.selectionManager.setSelection(reference.sessionId(), toAceRange(e.src.value(), this.ace.document));
+        this.ace.setSelection(reference.sessionId(), e.src.value());
       }.bind(this));
 
       reference.on("cleared", function () {
