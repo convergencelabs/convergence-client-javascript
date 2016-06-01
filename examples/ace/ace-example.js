@@ -135,6 +135,9 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
       // create ref object
       this.referenceHandler = new ReferenceHandler(rtString, this.ace);
     },
+    ///////////////////////////////////////////////////////////////////////////////
+    // Incoming events
+    ///////////////////////////////////////////////////////////////////////////////
     registerUserListeners: function() {
       this.model.connectedSessions().forEach(function (session) {
         this.addUser(session.userId, session.sessionId);
@@ -146,19 +149,6 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
 
       this.model.on("session_closed", function (e) {
         this.removeUser(e.sessionId);
-      }.bind(this));
-    },
-    registerModelListeners: function() {
-      this.rtString.on("insert", function (e) {
-        this.ace.onRemoteInsert(e);
-      }.bind(this));
-
-      this.rtString.on("remove", function (e) {
-        this.ace.onRemoteDelete(e);
-      }.bind(this));
-
-      this.rtString.on("value", function (e) {
-        this.ace.onRemoteAdd(e);
       }.bind(this));
     },
     addUser: function(userId, sessionId) {
@@ -195,6 +185,19 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
       var user = document.getElementById("user" + sessionId);
       user.parentNode.removeChild(user);
       delete users[sessionId];
+    },
+    registerModelListeners: function() {
+      this.rtString.on("insert", function (e) {
+        this.ace.onRemoteInsert(e);
+      }.bind(this));
+
+      this.rtString.on("remove", function (e) {
+        this.ace.onRemoteDelete(e);
+      }.bind(this));
+
+      this.rtString.on("value", function (e) {
+        this.ace.onRemoteAdd(e);
+      }.bind(this));
     },
     ///////////////////////////////////////////////////////////////////////////////
     // Outgoing events
