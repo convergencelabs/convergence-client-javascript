@@ -13,3 +13,4 @@ bower_components
 typings
 /.project
 examples/connection.js
+.npmrc

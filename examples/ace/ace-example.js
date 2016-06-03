@@ -124,7 +124,7 @@ var aceExample = (function(ace, AceMultiCursorManager, AceMultiSelectionManager,
     ///////////////////////////////////////////////////////////////////////////////
     // Two Way Binding from Ace to Convergence
     ///////////////////////////////////////////////////////////////////////////////
-    createListeners(rtString) {
+    createListeners: function(rtString) {
       this.registerUserListeners();
       this.registerModelListeners();
 
