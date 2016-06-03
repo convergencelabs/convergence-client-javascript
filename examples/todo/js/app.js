@@ -61,9 +61,9 @@ jQuery(function ($) {
     },
     listenToExternalEvents: function() {
       this.model.loaded.then(function() {
-        this.model.rtTodos.on('changed', function(e, e2) {
-          console.log('changed');
-        });
+        this.model.rtTodos.on('model_changed', function(e, e2) {
+          this.render();
+        }.bind(this));
       }.bind(this));
     },
     render: function () {
