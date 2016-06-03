@@ -88,30 +88,18 @@ jQuery(function ($) {
     },
     toggleAll: function (e) {
       var isChecked = $(e.target).prop('checked');
-
-      this.todos.forEach(function (todo) {
-        todo.completed = isChecked;
-      });
-
+      this.model.toggleAll(isChecked);
       this.render();
     },
     destroyCompleted: function () {
-      this.todos = this.getActiveTodos();
+      this.model.deleteCompletedTodos();
       this.model.resetFilter();
       this.render();
     },
     // accepts an element from inside the `.item` div and
     // returns the corresponding index in the `todos` array
-    indexFromEl: function (el) {
-      var id = $(el).closest('li').data('id');
-      var todos = this.todos;
-      var i = todos.length;
-
-      while (i--) {
-        if (todos[i].id === id) {
-          return i;
-        }
-      }
+    idFromEl: function (el) {
+      return $(el).closest('li').data('id');
     },
     create: function (e) {
       var $input = $(e.target);
@@ -121,7 +109,7 @@ jQuery(function ($) {
         return;
       }
 
-      this.todos.push({
+      this.model.addTodo({
         id: util.uuid(),
         title: val,
         completed: false
@@ -132,7 +120,7 @@ jQuery(function ($) {
       this.render();
     },
     toggle: function (e) {
-      var id = $(e.target).closest('li').data('id');
+      var id = this.idFromEl(e.target);
       this.model.toggleTodo(id);
       this.render();
     },
@@ -162,14 +150,16 @@ jQuery(function ($) {
       if ($el.data('abort')) {
         $el.data('abort', false);
       } else {
-        this.todos[this.indexFromEl(el)].title = val;
+        var id = this.idFromEl(el);
+        this.model.editTodo(id, {title: val});
       }
 
       this.render();
     },
     destroy: function (e) {
-      this.todos.splice(this.indexFromEl(e.target), 1);
-      this.render();
+      var id = this.idFromEl(e.target);
+      this.model.deleteTodo(id);
+      this.render();  
     }
   };
 

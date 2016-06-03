@@ -60,6 +60,38 @@
           rtTodo.set('completed', !rtTodo.get('completed').value());
         }
       });
+    },
+    toggleAll: function(completed) {
+      this.rtTodos.forEach(function (rtTodo) {
+        rtTodo.set('completed', completed);
+      });
+    },
+    addTodo: function(todo) {
+      this.rtTodos.push(todo);
+    },
+    editTodo: function(id, data) {
+      this.rtTodos.forEach(function (rtTodo, index) {
+        if (rtTodo.get('id').value() === id) {
+          for(var key in data) {
+            rtTodo.set(key, data[key]);
+          }
+        }
+      }.bind(this));
+    },
+    deleteTodo: function(id) {
+      this.rtTodos.forEach(function (rtTodo, index) {
+        if (rtTodo.get('id').value() === id) {
+          this.rtTodos.remove(index);
+        }
+      }.bind(this));
+    },
+    deleteCompletedTodos: function() {
+      // start at the end so the indices don't shift while we're deleting elements
+      for(var i = this.rtTodos.length(); i--; i >= 0) {
+        if (this.rtTodos.get(i).get('completed').value() === true) {
+          this.rtTodos.remove(i);
+        }
+      }
     }
   };
 
