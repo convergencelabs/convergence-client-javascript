@@ -45,7 +45,7 @@
         if (!rtTodo.value().completed) {
           count++;
         }
-      })
+      });
       return count;
     },
     resetFilter: function () {

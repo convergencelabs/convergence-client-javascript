@@ -20,6 +20,7 @@ import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
+import {Validation} from "../util/Validation";
 
 export default class ModelService extends ConvergenceEventEmitter {
 
@@ -48,6 +49,18 @@ export default class ModelService extends ConvergenceEventEmitter {
   }
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
+    if (!Validation.nonEmptyString(collectionId)) {
+      return Promise.reject(new Error("collectionId must be a non-null, non empty string."));
+    }
+
+    if (!Validation.nonEmptyString(modelId)) {
+      return Promise.reject(new Error("modelId must be a non-null, non empty string."));
+    }
+
+    if (arguments.length > 2 && typeof initializer !== "function") {
+      return Promise.reject(new Error("initializer, supplied as an argument, must be a function."));
+    }
+
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var k: string = fqn.hash();
 

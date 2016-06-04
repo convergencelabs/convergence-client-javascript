@@ -1,4 +1,7 @@
 import {RemoteSession} from "../RemoteSession";
+import {InternalUserPresence} from "./PresenceService";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
 var Events: any = {
   USER_AVAILABLE: "user_available",
@@ -9,42 +12,47 @@ var Events: any = {
 };
 Object.freeze(Events);
 
-export class UserPresence {
+export class UserPresence extends ConvergenceEventEmitter {
 
   static Events: any = Events;
 
-  private _userId: string;
-  private _sessions: RemoteSession[];
-  private _available: boolean;
-  private _state: {[key: string]: any};
+  private _delegate: InternalUserPresence;
 
-  constructor(userId: string,
-              sessions: RemoteSession[],
-              available: boolean,
-              state: {[key: string]: any}) {
-    this._userId = userId;
-    this._sessions = sessions;
-    this._available = available;
-    this._state = state;
+  constructor(delegate: InternalUserPresence) {
+    super();
+    this._delegate = delegate;
   }
 
   userId(): string {
-    return this._userId;
+    return this._delegate.userId();
   }
 
   sessions(): RemoteSession[] {
-    return this._sessions;
+    return this._delegate.sessions();
   }
 
   available(): boolean {
-    return this._available;
+    return this._delegate.available();
   }
 
   states(): {[key: string]: any} {
-    return this._state;
+    return this._delegate.states();
   }
 
   state(key: string): any {
-    return this._state[key];
+    return this._delegate.state(key);
+  }
+
+  dispose(): void {
+    this._delegate.unsubscribe(this);
+    this._delegate = null;
+  }
+
+  isDisposed(): boolean {
+    return this._delegate === null;
+  }
+
+  _emitEvent(event: ConvergenceEvent): void {
+    this._emitEvent(event);
   }
 }
