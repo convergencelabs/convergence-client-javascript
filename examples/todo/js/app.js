@@ -36,6 +36,7 @@ jQuery(function ($) {
 
       this.todoTemplate = Handlebars.compile($('#todo-template').html());
       this.footerTemplate = Handlebars.compile($('#footer-template').html());
+      
       this.bindEvents();
       this.listenToExternalEvents();
 
@@ -57,7 +58,13 @@ jQuery(function ($) {
         .on('dblclick', 'label', this.edit.bind(this))
         .on('keyup', '.edit', this.editKeyup.bind(this))
         .on('focusout', '.edit', this.update.bind(this))
-        .on('click', '.destroy', this.destroy.bind(this));
+        .on('click', '.destroy', this.destroy.bind(this))
+        .on('dragstart', 'li', this.dragStart.bind(this))
+        .on('dragend', 'li', this.dragEnd.bind(this))
+        .on('dragenter', 'li', this.dragEnter.bind(this))
+        .on('dragleave', 'li', this.dragLeave.bind(this))
+        .on('dragover', 'li', this.dragOver.bind(this))
+        .on('drop', 'li', this.drop.bind(this));
     },
     listenToExternalEvents: function() {
       this.model.loaded.then(function() {
@@ -69,6 +76,7 @@ jQuery(function ($) {
     render: function () {
       var todos = this.model.getViewTodos();
       $('#todo-list').html(this.todoTemplate(todos));
+      //this.bindDragAndDropEvents();
       $('#main').toggle(todos.length > 0);
       $('#toggle-all').prop('checked', this.model.getActiveTodoCount() === 0);
       this.renderFooter();
@@ -160,6 +168,45 @@ jQuery(function ($) {
       var id = this.idFromEl(e.target);
       this.model.deleteTodo(id);
       this.render();
+    },
+    dragStart: function(e) {
+      var listItemEl = $(e.currentTarget);
+      this.draggedEl = listItemEl;
+      e.originalEvent.dataTransfer.effectAllowed = 'move';
+      e.originalEvent.dataTransfer.setData('text/plain', listItemEl.data('id'));
+      listItemEl.addClass('dragging');
+    },
+    dragEnd: function(e) {
+      var listItemEl = $(e.currentTarget);
+      listItemEl.removeClass('dragging');
+    },
+    dragOver: function(e) {
+      if (e.preventDefault) {
+        e.preventDefault(); // Necessary. Allows us to drop.
+      }
+      //e.originalEvent.dataTransfer.dropEffect = 'move';
+      return false;
+    },
+    dragEnter: function(e) {
+      var el = $(e.currentTarget);
+      el.addClass('drag-over');
+    },
+    dragLeave: function(e) {
+      var el = $(e.currentTarget);
+      el.removeClass('drag-over');
+    },
+    drop: function(e) {
+      var listItemEl = $(e.currentTarget);
+      if (e.stopPropagation) {
+        e.stopPropagation(); // Stops some browsers from redirecting.
+      }
+
+      // Don't do anything if dropping the same column we're dragging.
+      if (this.draggedEl != listItemEl) {
+        this.model.moveTodo(this.draggedEl.data('id'), listItemEl.data('id'));
+        this.render();
+      }
+      return false;
     }
   };
 

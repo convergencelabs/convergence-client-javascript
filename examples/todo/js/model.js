@@ -54,12 +54,29 @@
     setFilter: function (filter) {
       this.filter = filter;
     },
-    toggleTodo: function (id) {
+    getTodo: function(id) {
+      var todo;
       this.rtTodos.forEach(function (rtTodo) {
-        if (rtTodo.get('id').value() === id) {
-          rtTodo.set('completed', !rtTodo.get('completed').value());
+        if (!todo && rtTodo.get('id').value() === id) {
+          todo = rtTodo;
         }
       });
+      return todo;
+    },
+    getTodoIndex: function(id) {
+      var index = -1;
+      this.rtTodos.forEach(function (rtTodo, i) {
+        if (index < 0 && rtTodo.get('id').value() === id) {
+          index = i;
+        }
+      });
+      return index;
+    },
+    toggleTodo: function (id) {
+      var rtTodo = this.getTodo(id);
+      if(rtTodo) {
+        rtTodo.set('completed', !rtTodo.get('completed').value());
+      }
     },
     toggleAll: function(completed) {
       this.rtTodos.forEach(function (rtTodo) {
@@ -70,20 +87,25 @@
       this.rtTodos.push(todo);
     },
     editTodo: function(id, data) {
-      this.rtTodos.forEach(function (rtTodo, index) {
-        if (rtTodo.get('id').value() === id) {
-          for(var key in data) {
-            rtTodo.set(key, data[key]);
-          }
+      var rtTodo = this.getTodo(id);
+      if(rtTodo) {
+        for(var key in data) {
+          rtTodo.set(key, data[key]);
         }
-      }.bind(this));
+      }
+    },
+    moveTodo(id, idToReplace) {
+      var index = this.getTodoIndex(id);
+      var newIndex = this.getTodoIndex(idToReplace);
+      if(newIndex >= 0) {
+        this.rtTodos.reorder(index, newIndex);
+      }
     },
     deleteTodo: function(id) {
-      this.rtTodos.forEach(function (rtTodo, index) {
-        if (rtTodo.get('id').value() === id) {
-          this.rtTodos.remove(index);
-        }
-      }.bind(this));
+      var index = this.getTodoIndex(id);
+      if(index >= 0) {
+        this.rtTodos.remove(index); 
+      }
     },
     deleteCompletedTodos: function() {
       // start at the end so the indices don't shift while we're deleting elements

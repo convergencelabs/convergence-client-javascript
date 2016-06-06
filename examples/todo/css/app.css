@@ -2,3 +2,13 @@
 #footer {
 	display: none;
 }
+
+.dragging {
+	opacity: 0.4;
+}
+.drag-over {
+	border: 1px dashed #000;
+}
+#todo-list li label {
+	cursor: move;
+}
