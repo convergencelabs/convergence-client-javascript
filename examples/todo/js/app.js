@@ -33,7 +33,7 @@ jQuery(function ($) {
   var App = {
     init: function () {
       this.model = new app.Model('todos-convergence');
-      
+
       this.todoTemplate = Handlebars.compile($('#todo-template').html());
       this.footerTemplate = Handlebars.compile($('#footer-template').html());
       this.bindEvents();
@@ -61,7 +61,7 @@ jQuery(function ($) {
     },
     listenToExternalEvents: function() {
       this.model.loaded.then(function() {
-        this.model.rtTodos.on('model_changed', function(e, e2) {
+        this.model.rtTodos.on('model_changed', function() {
           this.render();
         }.bind(this));
       }.bind(this));
@@ -159,7 +159,7 @@ jQuery(function ($) {
     destroy: function (e) {
       var id = this.idFromEl(e.target);
       this.model.deleteTodo(id);
-      this.render();  
+      this.render();
     }
   };
 

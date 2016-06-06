@@ -43,3 +43,8 @@ export var AuthenticationResponseDeserializer: MessageBodyDeserializer<Authentic
     sessionId: body.e
   };
 };
+
+export interface InitialUserPresence {
+  sessions: string[];
+  state: {[key: string]: any};
+}

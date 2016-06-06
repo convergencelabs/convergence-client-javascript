@@ -133,7 +133,7 @@ export class DiscreteOperationDeserializer {
       case OperationType.STRING_VALUE:
         return StringSetOperationDeserializer.deserialize(body);
       default:
-        throw new Error("Can't deserialize operation:  unknown operation type");
+        throw new Error("Can't deserialize unknown operation type: " + body.t);
     }
   }
 }
@@ -310,7 +310,7 @@ export class ObjectAddPropertyOperationSerializer {
       t: OperationTypeCodes.code(OperationType.OBJECT_ADD),
       d: operation.id,
       n: operation.noOp,
-      k: operation.prop,
+      p: operation.prop,
       v: DataValueSerializer(operation.value)
     };
   }
@@ -318,7 +318,7 @@ export class ObjectAddPropertyOperationSerializer {
 
 export class ObjectAddPropertyOperationDeserializer {
   static deserialize(body: any): ObjectAddPropertyOperation {
-    return new ObjectAddPropertyOperation(body.d, body.n, body.k, DataValueDeserializer(body.v));
+    return new ObjectAddPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
@@ -328,14 +328,14 @@ export class ObjectRemovePropertyOperationSerializer {
       t: OperationTypeCodes.code(OperationType.OBJECT_REMOVE),
       d: operation.id,
       n: operation.noOp,
-      k: operation.prop
+      p: operation.prop
     };
   }
 }
 
 export class ObjectRemovePropertyOperationDeserializer {
   static deserialize(body: any): ObjectRemovePropertyOperation {
-    return new ObjectRemovePropertyOperation(body.d, body.n, body.k);
+    return new ObjectRemovePropertyOperation(body.d, body.n, body.p);
   }
 }
 
@@ -345,7 +345,7 @@ export class ObjectSetPropertyOperationSerializer {
       t: OperationTypeCodes.code(OperationType.OBJECT_SET),
       d: operation.id,
       n: operation.noOp,
-      k: operation.prop,
+      p: operation.prop,
       v: DataValueSerializer(operation.value)
     };
   }
@@ -353,7 +353,7 @@ export class ObjectSetPropertyOperationSerializer {
 
 export class ObjectSetPropertyOperationDeserializer {
   static deserialize(body: any): ObjectSetPropertyOperation {
-    return new ObjectSetPropertyOperation(body.d, body.n, body.k, DataValueDeserializer(body.v));
+    return new ObjectSetPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
