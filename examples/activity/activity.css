@@ -24,6 +24,7 @@ body {
 #cursorBox {
   height: 300px;
   border: 1px solid black;
+  position: relative;
 }
 #titleBar, #rightTitle {
   border: 1px solid black;
@@ -58,7 +59,7 @@ body {
 }
 
 .remoteCursor {
-  display: inline;
-  position: relative;
+  display: inline-block;
+  position: absolute;
   height: 16px;
 }
