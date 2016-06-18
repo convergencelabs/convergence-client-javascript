@@ -25,7 +25,7 @@
     "timestamp": "gulp bump"
   },
   "publishConfig": {
-    "registry": "https://builds.convergencelabs.tech/nexus/repository/convergence-npm/"
+    "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
   },
   "dependencies": {},
   "devDependencies": {
