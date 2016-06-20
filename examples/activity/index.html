@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Convergence - Actvity</title>
+  <link rel="stylesheet" href="activity.css"/>
+  <script src="../../node_modules/es6-promise-polyfill/promise.js"></script>
+  <script src="../../dist/convergence-client.umd.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+  <script src="../connection.js"></script>
+</head>
+<body>
+
+
+<div id="buttons">
+  <span>Activity Actions: </span>
+  <button id="openButton" onclick="openActivity()" disabled="disabled">Open</button>
+  <button id="closeButton" onclick="closeActivity()" disabled="disabled">Close</button>
+  <button id="joinButton" onclick="joinActivity()" disabled="disabled">Join</button>
+  <button id="leaveButton" onclick="leaveActivity()" disabled="disabled">Leave</button>
+</div>
+
+<div id="left">
+  <div id="titleBar">Move Mouse In Box Below</div>
+  <div id="cursorBox" onmousemove="mouseMoved(event)"></div>
+  <div id="statusBar">
+    <span>Session Id: </span><span id="sessionId"></span>
+    <span>Local Mouse Location: </span><span id="localMouse"></span>
+  </div>
+</div>
+<div id="right">
+  <div id="rightTitle">Session Mouse Location</div>
+  <table id="mouseLocationsTable">
+    <thead>
+     <th>Session Id</th>
+     <th>Mouse Location</th>
+    </thead>
+    <tbody id="mouseLocations">
+
+    </tbody>
+  </table>
+</div>
+
+
+<script src="activity.js"></script>
+</body>
+</html>

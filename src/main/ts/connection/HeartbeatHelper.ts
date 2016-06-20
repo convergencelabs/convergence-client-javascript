@@ -22,19 +22,19 @@ export class HeartbeatHelper {
     this._started = false;
   }
 
-  set pingInterval(pingInterval: number) {
+  setPingInterval(pingInterval: number): void {
     this._pingInterval = pingInterval;
   }
 
-  get pingInterval(): number {
+  getPingInterval(): number {
     return this._pingInterval;
   }
 
-  set pongTimeout(pongTimeout: number) {
+  setPongTimeout(pongTimeout: number): void {
     this._pongTimeout = pongTimeout;
   }
 
-  get pongTimeout(): number {
+  getPongTimeout(): number {
     return this._pongTimeout;
   }
 
@@ -52,8 +52,8 @@ export class HeartbeatHelper {
 
     if (this._debugFlags.heartbeatHelper) {
       console.log(
-        "HeartbeatHelper started with Ping Interval " + this.pingInterval +
-        " and Pong Timeout " + this.pongTimeout);
+        "HeartbeatHelper started with Ping Interval " + this._pingInterval +
+        " and Pong Timeout " + this._pongTimeout);
     }
 
     this._started = true;

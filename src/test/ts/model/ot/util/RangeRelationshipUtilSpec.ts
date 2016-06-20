@@ -1,5 +1,5 @@
-import {RangeRelationshipUtil} from "../../../../../main/ts/ot/util/RangeRelationshipUtil";
-import {RangeRangeRelationship} from "../../../../../main/ts/ot/util/RangeRelationshipUtil";
+import {RangeRelationshipUtil} from "../../../../../main/ts/model/ot/util/RangeRelationshipUtil";
+import {RangeRangeRelationship} from "../../../../../main/ts/model/ot/util/RangeRelationshipUtil";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 

@@ -1,6 +1,6 @@
 // Connect to the domain.
 ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain("http://localhost:8080/domain/namespace1/domain1");
+var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
 domain.on("connected", function () {
   console.log("connected");
 });
@@ -59,6 +59,7 @@ function createControl(segment, index) {
   controlDiv.appendChild(valueDiv);
 
   noUiSlider.create(sliderDiv, {
+    animate: false,
     start: 40,
     connect: 'lower',
     step: 1,
@@ -84,6 +85,28 @@ function createControl(segment, index) {
     pieChart.update();
     sliderDiv.noUiSlider.set(e.value);
     valueInput.value = e.value;
+  });
+
+  segment.get("value").on("add", function (e) {
+    var val = pieChart.segments[index].value + e.value;
+    pieChart.segments[index].value = val;
+    pieChart.update();
+    sliderDiv.noUiSlider.set(val);
+    valueInput.value = val;
+  });
+
+  var color = segment.get("color");
+  color.on("model_changed", function (e) {
+    var colorVal = color.value();
+    pieChart.segments[index].fillColor = colorVal;
+    pieChart.update();
+    sliderDiv.style.background = colorVal;
+  });
+
+  var label = segment.get("label");
+  label.on("model_changed", function (e) {
+    pieChart.segments[index].label = label.value();
+    pieChart.update();
   });
 
   controlsDiv.appendChild(controlDiv);

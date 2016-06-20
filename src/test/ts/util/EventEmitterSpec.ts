@@ -1,5 +1,5 @@
 import * as chai from "chai";
-import EventEmitter from "../../../main/ts/util/EventEmitter";
+import {EventEmitter} from "../../../main/ts/util/EventEmitter";
 import ExpectStatic = Chai.ExpectStatic;
 import {fail} from "assert";
 

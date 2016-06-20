@@ -1,18 +1,18 @@
 import {HeartbeatHelper} from "./HeartbeatHelper";
 import ConvergenceSocket from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {HandshakeResponse} from "../protocol/handhsake";
-import {HandshakeRequest} from "../protocol/handhsake";
-import MessageType from "../protocol/MessageType";
+import {HandshakeResponse} from "./protocol/handhsake";
+import {HandshakeRequest} from "./protocol/handhsake";
+import MessageType from "./protocol/MessageType";
 import {HeartbeatHandler} from "./HeartbeatHelper";
-import {OutgoingProtocolNormalMessage} from "../protocol/protocol";
-import {MessageSerializer} from "../protocol/MessageSerializer";
-import {MessageEnvelope} from "../protocol/protocol";
-import {IncomingProtocolResponseMessage} from "../protocol/protocol";
-import {OutgoingProtocolRequestMessage} from "../protocol/protocol";
-import {ErrorMessage} from "../protocol/ErrorMessage";
-import {OutgoingProtocolResponseMessage} from "../protocol/protocol";
-import EventEmitter from "../util/EventEmitter";
+import {OutgoingProtocolNormalMessage} from "./protocol/protocol";
+import {MessageSerializer} from "./protocol/MessageSerializer";
+import {MessageEnvelope} from "./protocol/protocol";
+import {IncomingProtocolResponseMessage} from "./protocol/protocol";
+import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
+import {ErrorMessage} from "./protocol/ErrorMessage";
+import {OutgoingProtocolResponseMessage} from "./protocol/protocol";
+import {EventEmitter} from "../util/EventEmitter";
 import Deferred from "../util/Deferred";
 import {debugFlags} from "../Debug";
 
@@ -33,21 +33,20 @@ export class ProtocolConnection extends EventEmitter {
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
-    var self: ProtocolConnection = this;
 
     this._protocolConfig = protocolConfig;
     this._socket = socket;
 
     this._socket.on(ConvergenceSocket.Events.MESSAGE, (message: any) => {
-      self.onSocketMessage(message);
+      this.onSocketMessage(message);
     });
 
     this._socket.on(ConvergenceSocket.Events.ERROR, (error: string) => {
-      self.onSocketError(error);
+      this.onSocketError(error);
     });
 
     this._socket.on(ConvergenceSocket.Events.CLOSE, (reason: string) => {
-      self.onSocketClosed(reason);
+      this.onSocketClosed(reason);
     });
 
     this._requests = {};
@@ -88,7 +87,6 @@ export class ProtocolConnection extends EventEmitter {
     });
   }
 
-
   send(message: OutgoingProtocolNormalMessage): void {
     var envelope: MessageEnvelope = new MessageEnvelope(message);
     this.sendMessage(envelope);
@@ -111,14 +109,13 @@ export class ProtocolConnection extends EventEmitter {
       },
       timeout);
 
-    var sent: MessageEnvelope = new MessageEnvelope(message, requestId);
-    this.sendMessage(sent);
-
     this._requests[requestId] = <RequestRecord> {
       reqId: requestId,
       replyDeferred: replyDeferred,
       timeoutTask: timeoutTask
     };
+
+    this.sendMessage(new MessageEnvelope(message, requestId));
 
     return replyDeferred.promise();
   }
@@ -133,7 +130,7 @@ export class ProtocolConnection extends EventEmitter {
 
   close(): Promise<void> {
     this.removeAllListenersForAllEvents();
-    if (this._heartbeatHelper.started) {
+    if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
     return this._socket.close();

@@ -1,0 +1,6 @@
+.ace-multi-cursor {
+  position: absolute;
+  pointer-events: auto;
+  z-index: 10;
+  background: lightgreen;
+}

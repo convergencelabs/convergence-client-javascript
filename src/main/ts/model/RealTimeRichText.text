@@ -1,0 +1,60 @@
+import {RealTimeValue} from "./RealTimeValue";
+
+
+export type StyleMap = {[key: string]: any};
+
+export interface RealTimeRichText extends RealTimeValue<RichTextDocument> {
+  insertText(index: number, text: String, style?: StyleMap): void;
+  removeText(index: number, length: number): void;
+  formatText(start: number, end: number, styles: StyleMap): void;
+
+  insertBlock(index: number, block: RichTextBlock): void;
+  removeBlocks(index: number, number: number): void;
+  formatBlock(index: number, styles: StyleMap): void;
+
+
+}
+
+export interface RichTextChangeSet {
+  changes: any[];
+}
+
+export class RichTextDocument {
+  blocks: RichTextBlock[];
+}
+
+export interface RichTextBlock {
+  type: String;
+}
+
+export interface RichTextParagraph extends RichTextBlock {
+  contents: RichTextInline[];
+}
+
+export interface RichTextInline {
+
+}
+
+export interface TextRegion extends RichTextInline {
+  type: string;
+  text: string;
+  style: {[key: string]: any};
+}
+
+export interface RichTextEmbed {
+
+}
+
+
+var changeSet: any[] = [
+  {action: "insertText", pos: {block: 3, index: 4}, text: "foo"},
+  {action: "insertText", pos: {block: 3, index: 4}, text: "foo", attributes: {bold: true}},
+  {action: "insertBlock", index: 5, type: "text"},
+  {action: "insertBlock", index: 6, type: "text", contents: [{text: "foo", attributes: {bold: true}}]},
+
+  {action: "removeText", pos: {block: 3, index: 4}, length: 5},
+  {action: "removeBlock", index: 7},
+  {action: "removeBlock", index: 7, count: 3},
+
+  {action: "setAttributes", startPos: {block: 4, index: 2}, endPos: {block: 6, index: 7}, attributes: {bold: false}}
+];

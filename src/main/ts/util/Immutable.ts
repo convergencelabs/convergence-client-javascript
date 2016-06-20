@@ -9,7 +9,7 @@ export default class Immutable {
     }
   }
 
-  static copy(source: any, updates: any): any {
+  static copy(source: any, updates?: any): any {
     var result: any = {};
     Object.keys(source).forEach(function (prop: any, idx: number, array: Array<any>): void {
       if (updates[prop] !== undefined) {
@@ -21,7 +21,7 @@ export default class Immutable {
 
     // we do a shallow freeze here since we assume that the whole thing was
     // already immutable.
-    Object.freeze(source);
+    Object.freeze(result);
     return result;
   }
 

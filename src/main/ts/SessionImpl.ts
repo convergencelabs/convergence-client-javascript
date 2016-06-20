@@ -1,4 +1,4 @@
-import ConvergenceConnection from "./connection/ConvergenceConnection";
+import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import ConvergenceDomain from "./ConvergenceDomain";
 import Session from "./Session";
 
@@ -8,12 +8,14 @@ export default class SessionImpl implements Session {
   private _connection: ConvergenceConnection;
   private _sessionId: string;
   private _userame: string;
+  private _userId: string;
   private _authenticated: boolean;
 
-  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
+  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, userId: string, username: string) {
     this._domain = domain;
     this._sessionId = sessionId;
     this._userame = username;
+    this._userId = userId;
     this._connection = connection;
     this._authenticated = false;
   }
@@ -25,26 +27,34 @@ export default class SessionImpl implements Session {
     return this._domain;
   }
 
-  setSessionId(sessionId: string): void {
+  _setSessionId(sessionId: string): void {
     this._sessionId = sessionId;
   }
 
   /**
    * @return The sessionId of the connected client
    */
-  getSessionId(): string {
+  sessionId(): string {
     return this._sessionId;
   }
 
   /**
    * @return The username of the authenticated client or null if not authenticated
    */
-  getUsername(): string {
+  username(): string {
     return this._userame;
   }
 
-  setUsername(username: string): void {
+  _setUsername(username: string): void {
     this._userame = username;
+  }
+
+  userId(): string {
+    return this._userId;
+  }
+
+  _setUserId(userId: string): void {
+    this._userId = userId;
   }
 
   /**

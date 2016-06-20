@@ -1,18 +1,31 @@
-import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
-import RealTimeValue from "./RealTimeValue";
-import ObjectSetPropertyOperation from "../ot/ops/ObjectSetPropertyOperation";
-import ObjectAddPropertyOperation from "../ot/ops/ObjectAddPropertyOperation";
-import ObjectRemovePropertyOperation from "../ot/ops/ObjectRemovePropertyOperation";
-import ObjectSetOperation from "../ot/ops/ObjectSetOperation";
-import {Path} from "../ot/Path";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {PathElement} from "./ot/Path";
+import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import {RealTimeValue} from "./RealTimeValue";
+import ObjectSetPropertyOperation from "./ot/ops/ObjectSetPropertyOperation";
+import ObjectAddPropertyOperation from "./ot/ops/ObjectAddPropertyOperation";
+import ObjectRemovePropertyOperation from "./ot/ops/ObjectRemovePropertyOperation";
+import ObjectSetOperation from "./ot/ops/ObjectSetOperation";
+import {Path} from "./ot/Path";
 import RealTimeArray from "./RealTimeArray";
 import ModelOperationEvent from "./ModelOperationEvent";
 import RealTimeValueType from "./RealTimeValueType";
 import RealTimeValueFactory from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
-import OperationType from "../protocol/model/OperationType";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
+import {OperationType} from "./ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {ObjectValue} from "./dataValue";
+import {DataValue} from "./dataValue";
+import {PropertyReference} from "./reference/PropertyReference";
+import {ModelReference} from "./reference/ModelReference";
+import {ReferenceManager} from "./reference/ReferenceManager";
+import {ReferenceType} from "./reference/ModelReference";
+import {LocalModelReference} from "./reference/LocalModelReference";
+import Session from "../Session";
+import {LocalPropertyReference} from "./reference/LocalPropertyReference";
+import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
 
 export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -20,26 +33,35 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     SET: "set",
     REMOVE: "remove",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeValue.Events.DETACHED,
+    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
   private _children: { [key: string]: RealTimeValue<any>; };
+  private _referenceManager: ReferenceManager;
+  private _referenceDisposed: ReferenceDisposedCallback;
 
   /**
    * Constructs a new RealTimeObject.
    */
-  constructor(data: any, parent: RealTimeContainerValue<any>,
+  constructor(data: ObjectValue,
+              parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
-              _sendOpCallback: (operation: DiscreteOperation) => void) {
-    super(RealTimeValueType.Object, parent, fieldInParent, _sendOpCallback);
+              callbacks: ModelEventCallbacks,
+              model: RealTimeModel) {
+    super(RealTimeValueType.Object, data.id, parent, fieldInParent, callbacks, model);
 
     this._children = {};
 
-    for (var prop in data) {
-      if (data.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(data[prop], this, prop, this._sendOpCallback);
-      }
-    }
+    Object.getOwnPropertyNames(data.children).forEach((prop: string) => {
+      this._children[prop] =
+        RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, model);
+    });
+
+    this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
+    this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
+      this._referenceManager.removeLocalReference(reference.key());
+    };
   }
 
   get(key: string): RealTimeValue<any> {
@@ -47,16 +69,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
   }
 
   set(key: string, value: any): RealTimeValue<any> {
+    var dataValue: DataValue = this._model._createDataValue(value);
 
     var operation: DiscreteOperation;
     if (this._children.hasOwnProperty(key)) {
-      operation = new ObjectSetPropertyOperation(this.path(), false, key, value);
+      operation = new ObjectSetPropertyOperation(this.id(), false, key, dataValue);
       this._children[key]._detach();
     } else {
-      operation = new ObjectAddPropertyOperation(this.path(), false, key, value);
+      operation = new ObjectAddPropertyOperation(this.id(), false, key, dataValue);
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._sendOpCallback);
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, key, this._callbacks, this._model);
     this._children[key] = child;
     this._sendOperation(operation);
     return child;
@@ -66,11 +89,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     if (!this._children.hasOwnProperty(key)) {
       throw new Error("Cannot remove property that is undefined!");
     }
-    var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.path(), false, key);
+    var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.id(), false, key);
 
     this._children[key]._detach();
     delete this._children[key];
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      if (ref instanceof PropertyReference) {
+        ref._handlePropertyRemoved(key);
+      }
+    });
   }
 
   keys(): string[] {
@@ -87,6 +116,37 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         callback(this._children[key], key);
       }
     }
+  }
+
+  propertyReference(key: string): LocalPropertyReference {
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    if (existing !== undefined) {
+      if (existing.reference().type() !== ReferenceType.PROPERTY) {
+        throw new Error("A reference with this key already exists, but is not an index reference");
+      } else {
+        return <LocalPropertyReference>existing;
+      }
+    } else {
+      var session: Session = this.model().session();
+      var reference: PropertyReference = new PropertyReference(key, this, session.userId(), session.userId(), true);
+
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalPropertyReference = new LocalPropertyReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+      );
+      this._referenceManager.addLocalReference(local);
+      return local;
+    }
+  }
+
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceManager.referenceMap().get(sessionId, key);
+  }
+
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(sessionId, key);
   }
 
   //
@@ -109,14 +169,20 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
     this._children = {};
 
-    for (var prop in value) {
-      if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOpCallback);
-      }
-    }
+    Object.getOwnPropertyNames(value).forEach((prop: string) => {
+      var val: any = value[prop];
+      var dataValue: DataValue = this._model._createDataValue(val);
+      this._children[prop] =
+        RealTimeValueFactory.create(dataValue, this, prop, this._callbacks, this._model);
+    });
 
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.path(), false, value);
+    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, value);
     this._sendOperation(operation);
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
   }
 
   _path(pathArgs: Path): RealTimeValue<any> {
@@ -133,7 +199,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         return (<RealTimeArray> child).dataAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
-        return RealTimeValueFactory.create(undefined, null, null, this._sendOperation);
+        return RealTimeValueFactory.create(undefined, null, null, this._callbacks, this.model());
       }
     } else {
       return child;
@@ -146,89 +212,76 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
     });
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   // Handlers for incoming operations
+  /////////////////////////////////////////////////////////////////////////////
 
-  _handleRemoteOperation(relativePath: Path, operationEvent: ModelOperationEvent): void {
-    if (relativePath.length === 0) {
-      var type: OperationType = operationEvent.operation.type;
-      if (type === OperationType.OBJECT_ADD) {
+  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
+    switch (operationEvent.operation.type) {
+      case OperationType.OBJECT_ADD:
         this._handleAddPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_SET) {
+        break;
+      case OperationType.OBJECT_SET:
         this._handleSetPropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_REMOVE) {
+        break;
+      case OperationType.OBJECT_REMOVE:
         this._handleRemovePropertyOperation(operationEvent);
-      } else if (type === OperationType.OBJECT_VALUE) {
+        break;
+      case OperationType.OBJECT_VALUE:
         this._handleSetOperation(operationEvent);
-      } else {
-        throw new Error("Invalid operation!");
-      }
-    } else {
-      var childPath: any = relativePath[0];
-      if (typeof childPath !== "string") {
-        throw new Error("Invalid path element, object properties must be a string");
-      }
-      var child: RealTimeValue<any> = this._children[childPath];
-      if (child === undefined) {
-        throw new Error("Invalid path element, child does not exist");
-      }
-      var subPath: Path = relativePath.slice(0);
-      subPath.shift();
-      child._handleRemoteOperation(subPath, operationEvent);
+        break;
+      default:
+        throw new Error("Invalid operation for RealTimeObject");
     }
   }
 
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
     var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
-    var value: Object|number|string|boolean = operation.value;
+    var value: DataValue = operation.value;
 
-    var oldChild: RealTimeValue<any> = this._children[key];
-
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation);
-
-    if (oldChild) {
-      oldChild._detach();
-    }
+    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    this._children[key] = newChild;
 
     var event: ObjectSetEvent = {
       src: this,
       name: RealTimeObject.Events.SET,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.username,
+      userId: operationEvent.userId,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
-      value: value
+      value: newChild
     };
 
     this.emitEvent(event);
+    this._bubbleModelChangedEvent(event);
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
+    var operation: ObjectSetPropertyOperation = <ObjectSetPropertyOperation> operationEvent.operation;
     var key: string = operation.prop;
-    var value: Object|number|string|boolean = operation.value;
+    var value: DataValue = operation.value;
 
     var oldChild: RealTimeValue<any> = this._children[key];
+    oldChild._detach();
 
-    this._children[key] = RealTimeValueFactory.create(value, this, key, this._sendOperation);
+    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
+    this._children[key] = newChild;
 
     var event: ObjectSetEvent = {
       src: this,
       name: RealTimeObject.Events.SET,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.username,
+      userId: operationEvent.userId,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
-      value: value
+      value: newChild
     };
 
     this.emitEvent(event);
-
-    if (oldChild) {
-      oldChild._detach();
-    }
+    this._bubbleModelChangedEvent(event);
   }
 
   private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
@@ -242,23 +295,30 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
       var event: ObjectRemoveEvent = {
         src: this,
-        name: RealTimeObject.Events.SET,
+        name: RealTimeObject.Events.REMOVE,
         sessionId: operationEvent.sessionId,
-        userId: operationEvent.username,
+        userId: operationEvent.userId,
         version: operationEvent.version,
         timestamp: operationEvent.timestamp,
         key: key
       };
 
       this.emitEvent(event);
-
       oldChild._detach();
+
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(key);
+        }
+      });
+
+      this._bubbleModelChangedEvent(event);
     }
   }
 
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
+  private _handleSetOperation(operationEvent: ModelOperationEvent): ObjectSetValueEvent {
     var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
-    var value: Object = operation.value;
+    var value: {[key: string]: DataValue} = operation.value;
 
     var oldChildren: Object = this._children;
 
@@ -266,7 +326,7 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
 
     for (var prop in value) {
       if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._sendOperation);
+        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._callbacks, this.model());
       }
     }
 
@@ -274,11 +334,17 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
       src: this,
       name: RealTimeObject.Events.VALUE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.username,
+      userId: operationEvent.userId,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value
     };
+
+    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+      ref._dispose();
+    });
+    this._referenceManager.referenceMap().removeAll();
+    this._referenceManager.removeAllLocalReferences();
 
     this.emitEvent(event);
 
@@ -287,6 +353,16 @@ export default class RealTimeObject extends RealTimeContainerValue<{ [key: strin
         oldChildren[key]._detach();
       }
     }
+    return event;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Handlers for incoming operations
+  /////////////////////////////////////////////////////////////////////////////
+
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    // fixme implement when we have object references.
+    throw new Error("Objects to do have references yet.");
   }
 }
 
