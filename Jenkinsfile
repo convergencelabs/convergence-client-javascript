@@ -1,6 +1,6 @@
 node {
-  withCredentials([[$class: 'SecretText', credentialsId: 'NpmAuthToken', variable: 'NPM_TOKEN'],
-  [$class: 'SecretText', credentialsId: 'ConvNpmAuthToken', variable: 'C_NPM_TOKEN']]) {
+  withCredentials([[$class: 'StringBinding', credentialsId: 'NpmAuthToken', variable: 'NPM_TOKEN'],
+  [$class: 'StringBinding', credentialsId: 'ConvNpmAuthToken', variable: 'C_NPM_TOKEN']]) {
 
     stage 'Checkout'
     checkout scm
