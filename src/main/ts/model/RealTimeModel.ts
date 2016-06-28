@@ -49,6 +49,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     DELETED: "deleted",
     MODIFIED: "modified",
     COMMITTED: "committed",
+    VERSION_CHANGED: "version_changed",
     SESSION_OPENED: "session_opened",
     SESSION_CLOSED: "session_closed"
   };
@@ -106,6 +107,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     });
 
     // fixme these should have versions unless we move to GUIDs.
+    // also move this out of this constructor.
     var referenceCallbacks: ModelReferenceCallbacks = {
       onPublish: (reference: LocalModelReference<any, any>): void => {
         var id: string = reference.reference().source().id();
@@ -303,6 +305,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         break;
       case MessageType.REMOTE_OPERATION:
         this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
+        this._emitVersionChanged();
         break;
       case MessageType.REFERENCE_PUBLISHED:
       case MessageType.REFERENCE_UNPUBLISHED:
@@ -312,6 +315,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         break;
       case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
+        this._emitVersionChanged();
         break;
       case MessageType.REMOTE_CLIENT_OPENED:
         this._handleClientOpen(<RemoteClientOpenedModel>messageEvent.message);
@@ -480,6 +484,15 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     };
     this._connection.send(opSubmission);
   }
+
+  private _emitVersionChanged(): void {
+    var event: VersionChangedEvent = {
+      name: RealTimeModel.Events.VERSION_CHANGED,
+      src: this,
+      version: this._version
+    };
+    this.emitEvent(event);
+  }
 }
 
 Object.freeze(RealTimeModel.Events);
@@ -506,4 +519,8 @@ export interface RemoteSessionOpenedEvent extends ConvergenceEvent {
 export interface RemoteSessionClosedEvent extends ConvergenceEvent {
   userId: string;
   sessionId: string;
+}
+
+interface VersionChangedEvent extends RealTimeModelEvent {
+  version: number;
 }
