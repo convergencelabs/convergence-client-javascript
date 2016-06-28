@@ -5,12 +5,14 @@ export interface OperationAck extends IncomingProtocolNormalMessage {
   resourceId: string;
   seqNo: number;
   version: number;
+  timestamp: number;
 }
 
 export var OperationAckDeserializer: MessageBodyDeserializer<OperationAck> = (body: any) => {
   return {
     resourceId: body.r,
     seqNo: body.s,
-    version: body.v
+    version: body.v,
+    timestamp: body.p
   };
 };

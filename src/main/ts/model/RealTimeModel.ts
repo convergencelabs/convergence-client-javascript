@@ -429,6 +429,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _handelOperationAck(message: OperationAck): void {
     // todo in theory we could pass the operation in to verify it as well.
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, message.version);
+    this._version = message.version;
+    this._modifiedTime = new Date(message.timestamp);
   }
 
   private _handleRemoteOperation(message: RemoteOperation): void {
