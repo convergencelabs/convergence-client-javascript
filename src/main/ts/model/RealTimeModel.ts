@@ -429,7 +429,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _handelOperationAck(message: OperationAck): void {
     // todo in theory we could pass the operation in to verify it as well.
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, message.version);
-    this._version = message.version;
+    this._version = message.version + 1;
     this._modifiedTime = new Date(message.timestamp);
   }
 
@@ -452,7 +452,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var timestamp: number = processed.timestamp;
     var userId: string = SessionIdParser.parseUserId(message.sessionId);
 
-    this._version = contextVersion;
+    this._version = contextVersion + 1;
     this._modifiedTime = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
