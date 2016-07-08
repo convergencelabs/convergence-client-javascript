@@ -12,7 +12,6 @@ import {IndexReference} from "./IndexReference";
 import {RealTimeValue} from "../RealTimeValue";
 import Immutable from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
-import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
