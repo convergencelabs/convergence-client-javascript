@@ -391,21 +391,21 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     var r: ModelReference<any>;
 
-    if (event.type === MessageType.REFERENCE_UNPUBLISHED) {
-      r = value.reference(event.sessionId, event.key);
-      var index: number = this._referencesBySession[event.sessionId].indexOf(r);
-      this._referencesBySession[event.sessionId].splice(index, 1);
+    if (processedEvent.type === MessageType.REFERENCE_UNPUBLISHED) {
+      r = value.reference(processedEvent.sessionId, processedEvent.key);
+      var index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
+      this._referencesBySession[processedEvent.sessionId].splice(index, 1);
     }
 
     // TODO if we wind up being able to pause the processing of incoming
     // operations, then we would put this in a queue.  We would also need
     // to somehow wrap this in an object that stores the currentContext
     // version right now, so we know when to distribute this event.
-    value._handleRemoteReferenceEvent(event);
+    value._handleRemoteReferenceEvent(processedEvent);
 
-    if (event.type === MessageType.REFERENCE_PUBLISHED) {
-      r = value.reference(event.sessionId, event.key);
-      this._referencesBySession[event.sessionId].push(r);
+    if (processedEvent.type === MessageType.REFERENCE_PUBLISHED) {
+      r = value.reference(processedEvent.sessionId, processedEvent.key);
+      this._referencesBySession[processedEvent.sessionId].push(r);
     }
   }
 

@@ -128,7 +128,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.record();
   }
 
@@ -141,7 +141,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.requestRecord();
   }
 
@@ -155,7 +155,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.responseRecord();
   }
 
@@ -169,7 +169,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.sendRecord();
   }
 
@@ -184,7 +184,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.sendRequestRecord();
   }
 
@@ -199,7 +199,7 @@ export class MockConvergenceServer {
       timeout
     );
 
-    this._registerActionAction(action);
+    this._registerAction(action);
     return action.sendResponseRecord();
   }
 
@@ -279,7 +279,7 @@ export class MockConvergenceServer {
     this.sendReplyTo(requestRecord, response);
   }
 
-  private _registerActionAction(action: MockServerAction): void {
+  private _registerAction(action: MockServerAction): void {
     this._actionQueue.push(action);
     this._actions.push(action);
     if (action.timeout() !== undefined) {

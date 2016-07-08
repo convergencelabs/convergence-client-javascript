@@ -12,6 +12,7 @@ import {IndexReference} from "./IndexReference";
 import {RealTimeValue} from "../RealTimeValue";
 import Immutable from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
+import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
@@ -85,7 +86,7 @@ export class ReferenceManager {
       throw new Error(`Invalid reference type for RealTimeString: ${event.referenceType}`);
     }
 
-    var userId: string = event.sessionId; // fixme - need to fix userid / session id encoding.
+    var userId: string = event.userId;
     var reference: ModelReference<any>;
     switch (event.referenceType) {
       case ReferenceType.INDEX:

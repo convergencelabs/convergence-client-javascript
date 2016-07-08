@@ -265,10 +265,8 @@ export default class RealTimeString extends RealTimeValue<String> {
     this.emitEvent(event);
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      ref._dispose();
+      ref._clear();
     });
-    this._referenceManager.referenceMap().removeAll();
-    this._referenceManager.removeAllLocalReferences();
 
     this._bubbleModelChangedEvent(event);
   }
