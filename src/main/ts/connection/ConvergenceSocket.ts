@@ -1,5 +1,5 @@
 import {debugFlags} from "../Debug";
-import EventEmitter from "../util/EventEmitter";
+import {EventEmitter} from "../util/EventEmitter";
 import Deferred from "../util/Deferred";
 
 export default class ConvergenceSocket extends EventEmitter {
@@ -45,7 +45,7 @@ export default class ConvergenceSocket extends EventEmitter {
   }
 
   terminate(reason: string): Promise<void> {
-    return this.doClose(false);
+    return this.doClose(false, reason);
   }
 
   doClose(clean: boolean, reason?: string): Promise<void> {
@@ -76,10 +76,12 @@ export default class ConvergenceSocket extends EventEmitter {
       this._socket.close();
       this._socket = null;
 
-      var tmp: Deferred<void> = this._openDeferred;
-      this._openDeferred = null;
+      if (this._openDeferred !== null) {
+        var tmp: Deferred<void> = this._openDeferred;
+        this._openDeferred = null;
+        tmp.reject(new Error("Web Socket connection aborted while opening"));
+      }
 
-      tmp.reject(new Error("Web Socket connection aborted while opening"));
       localDeferred.resolve(null);
     } else {
       // The socket was open.  This is a normal request to close.

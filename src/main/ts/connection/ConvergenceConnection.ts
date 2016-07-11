@@ -1,25 +1,25 @@
-import {HandshakeResponse} from "../protocol/handhsake";
+import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {ProtocolConnection} from "./ProtocolConnection";
 import {debugFlags} from "../Debug";
 import ConvergenceSocket from "./ConvergenceSocket";
-import {OutgoingProtocolMessage} from "../protocol/protocol";
-import {OutgoingProtocolRequestMessage} from "../protocol/protocol";
-import {IncomingProtocolResponseMessage} from "../protocol/protocol";
-import EventEmitter from "../util/EventEmitter";
+import {OutgoingProtocolMessage} from "./protocol/protocol";
+import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
+import {IncomingProtocolResponseMessage} from "./protocol/protocol";
+import {EventEmitter} from "../util/EventEmitter";
 import SessionImpl from "../SessionImpl";
 import ConvergenceDomain from "../ConvergenceDomain";
 import Session from "../Session";
-import {PasswordAuthRequest} from "../protocol/authentication";
-import MessageType from "../protocol/MessageType";
-import {TokenAuthRequest} from "../protocol/authentication";
-import {AuthRequest} from "../protocol/authentication";
-import {AuthenticationResponseMessage} from "../protocol/authentication";
+import {PasswordAuthRequest} from "./protocol/authentication";
+import MessageType from "./protocol/MessageType";
+import {TokenAuthRequest} from "./protocol/authentication";
+import {AuthRequest} from "./protocol/authentication";
+import {AuthenticationResponse} from "./protocol/authentication";
 import Deferred from "../util/Deferred";
 import {ReplyCallback} from "./ProtocolConnection";
 import {EventKey} from "../util/EventEmitter";
 
-export default class ConvergenceConnection extends EventEmitter {
+export class ConvergenceConnection extends EventEmitter {
 
   static Events: any = {
     CONNECTED: "connected",
@@ -40,9 +40,6 @@ export default class ConvergenceConnection extends EventEmitter {
   private _retryOnOpen: boolean;
 
   private _protocolConfig: ProtocolConfiguration;
-
-  private _clientId: string;
-  private _reconnectToken: string;
 
   private _connectionState: ConnectionState;
 
@@ -77,7 +74,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
     // fixme
     this._protocolConfig = {
-      defaultRequestTimeout: 1000,
+      defaultRequestTimeout: 5000,
       heartbeatConfig: {
         enabled: true,
         pingInterval: 5000,
@@ -87,7 +84,7 @@ export default class ConvergenceConnection extends EventEmitter {
 
     this._messageEmitter = new EventEmitter();
 
-    this._session = new SessionImpl(domain, this, null, null);
+    this._session = new SessionImpl(domain, this, null, null, null);
   }
 
   session(): Session {
@@ -186,7 +183,7 @@ export default class ConvergenceConnection extends EventEmitter {
   private _authenticate(authRequest: AuthRequest): Promise<void> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Promise.reject<void>(new Error("User already authenticated."));
+      return Promise.reject(new Error("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
@@ -197,14 +194,16 @@ export default class ConvergenceConnection extends EventEmitter {
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject<void>(new Error("Must be connected or connecting to authenticate."));
+      return Promise.reject(new Error("Must be connected or connecting to authenticate."));
     }
   }
 
   private _sendAuthRequest(authRequest: AuthRequest): Promise<void> {
-    return this.request(authRequest).then((response: AuthenticationResponseMessage) => {
+    return this.request(authRequest).then((response: AuthenticationResponse) => {
       if (response.success === true) {
-        this._session.setUsername(response.username);
+        this._session._setUsername(response.username);
+        this._session._setUserId(response.userId);
+        this._session._setSessionId(response.sessionId);
         this._session.setAuthenticated(true);
         return;
       } else {
@@ -260,9 +259,7 @@ export default class ConvergenceConnection extends EventEmitter {
         if (handshakeResponse.success) {
           this._connectionDeferred.resolve(handshakeResponse);
           this._connectionDeferred = null;
-          this._clientId = handshakeResponse.sessionId;
-          this._session.setSessionId(handshakeResponse.sessionId);
-          this._reconnectToken = handshakeResponse.reconnectToken;
+
           if (reconnect) {
             this.emit(ConvergenceConnection.Events.RECONNECTED);
           } else {

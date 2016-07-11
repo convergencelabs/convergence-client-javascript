@@ -1,0 +1,18 @@
+{
+  "globals": {
+    "angular": true,
+    "_": true
+  },
+  "env": {
+    // I write for browser
+    "browser": true,
+    // in CommonJS
+    "node": false
+  },
+  "rules": {
+    "semi": [2, "always"],
+    "no-console": 0
+  },
+  "extends": "eslint:recommended",
+  "parser": "babel-eslint"
+}

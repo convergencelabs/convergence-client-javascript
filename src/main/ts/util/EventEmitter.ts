@@ -1,6 +1,6 @@
 export type EventKey = string | number;
 
-export default class EventEmitter {
+export class EventEmitter {
 
   static defaultMaxListeners: number = 10;
 
@@ -13,6 +13,9 @@ export default class EventEmitter {
   }
 
   addListener(event: EventKey, listener: Function): EventEmitter {
+    if (typeof listener !== "function") {
+      throw new TypeError("Listeners must be functions");
+    }
 
     event = this._resolveEventKey(event);
     var listeners: Function[] = this._events[event];

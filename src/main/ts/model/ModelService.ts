@@ -1,22 +1,26 @@
-import ConvergenceEventEmitter from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import Session from "../Session";
-import RealTimeModel from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import ModelFqn from "./ModelFqn";
-import ConvergenceConnection from "../connection/ConvergenceConnection";
-import {OpenRealTimeModelRequest} from "../protocol/model/openRealtimeModel";
-import {OpenRealTimeModelResponse} from "../protocol/model/openRealtimeModel";
-import MessageType from "../protocol/MessageType";
-import OperationTransformer from "../ot/xform/OperationTransformer";
-import TransformationFunctionRegistry from "../ot/xform/TransformationFunctionRegistry";
-import ClientConcurrencyControl from "../ot/ClientConcurrencyControl";
-import {CreateRealTimeModelRequest} from "../protocol/model/createRealtimeModel";
-import {DeleteRealTimeModelRequest} from "../protocol/model/deleteRealtimeModel";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
+import {OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
+import MessageType from "../connection/protocol/MessageType";
+import OperationTransformer from "./ot/xform/OperationTransformer";
+import TransformationFunctionRegistry from "./ot/xform/TransformationFunctionRegistry";
+import ClientConcurrencyControl from "./ot/ClientConcurrencyControl";
+import {CreateRealTimeModelRequest} from "../connection/protocol/model/createRealtimeModel";
+import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import Deferred from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
-import {CloseRealTimeModelRequest} from "../protocol/model/closeRealtimeModel";
-import {ModelDataRequest} from "../protocol/model/modelDataRequest";
+import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
+import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
-import {ModelDataResponse} from "../protocol/model/modelDataRequest";
+import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
+import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
+import {ObjectValue} from "./dataValue";
+import {DataValueFactory} from "./DataValueFactory";
+import {Validation} from "../util/Validation";
 
 export default class ModelService extends ConvergenceEventEmitter {
 
@@ -26,46 +30,18 @@ export default class ModelService extends ConvergenceEventEmitter {
 
   constructor(private _connection: ConvergenceConnection) {
     super();
-
     this._connection.addMultipleMessageListener(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
         MessageType.OPERATION_ACKNOWLEDGEMENT,
-        MessageType.MODEL_DATA_REQUEST],
+        MessageType.MODEL_DATA_REQUEST,
+        MessageType.REMOTE_CLIENT_OPENED,
+        MessageType.REMOTE_CLIENT_CLOSED,
+        MessageType.REFERENCE_PUBLISHED,
+        MessageType.REFERENCE_UNPUBLISHED,
+        MessageType.REFERENCE_SET,
+        MessageType.REFERENCE_CLEARED],
       (message: MessageEvent) => this._handleMessage(message));
-  }
-
-  private _handleMessage(messageEvent: MessageEvent): void {
-    switch (messageEvent.message.type) {
-      case MessageType.MODEL_DATA_REQUEST:
-        this._handleModelDataRequest(
-          <ModelDataRequest>messageEvent.message,
-          messageEvent.callback);
-        break;
-      default:
-        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
-        if (model !== undefined) {
-          model._handleMessage(messageEvent);
-        } else {
-          // todo error.
-        }
-    }
-  }
-
-  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
-    var fqn: ModelFqn = request.modelFqn;
-    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
-    if (openReq === undefined) {
-      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
-    } else if (openReq.initializer === undefined) {
-      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
-    } else {
-      var response: ModelDataResponse = {
-        data: openReq.initializer(),
-        type: MessageType.MODEL_DATA_RESPONSE
-      };
-      replyCallback.reply(response);
-    }
   }
 
   session(): Session {
@@ -73,6 +49,18 @@ export default class ModelService extends ConvergenceEventEmitter {
   }
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
+    if (!Validation.nonEmptyString(collectionId)) {
+      return Promise.reject(new Error("collectionId must be a non-null, non empty string."));
+    }
+
+    if (!Validation.nonEmptyString(modelId)) {
+      return Promise.reject(new Error("modelId must be a non-null, non empty string."));
+    }
+
+    if (arguments.length > 2 && typeof initializer !== "function") {
+      return Promise.reject(new Error("initializer, supplied as an argument, must be a function."));
+    }
+
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var k: string = fqn.hash();
 
@@ -96,11 +84,19 @@ export default class ModelService extends ConvergenceEventEmitter {
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
       var transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
-      var clientConcurrencyControl: ClientConcurrencyControl =
-        new ClientConcurrencyControl(this._connection.session().getSessionId(), response.version, transformer);
+      var referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
+      var clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
+        this._connection.session().sessionId(),
+        response.version,
+        transformer,
+        referenceTransformer);
+
       var model: RealTimeModel = new RealTimeModel(
         response.resourceId,
+        response.valueIdPrefix,
         response.data,
+        response.connectedClients,
+        response.references,
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),
@@ -127,12 +123,16 @@ export default class ModelService extends ConvergenceEventEmitter {
     return deferred.promise();
   }
 
-  create(collectionId: string, modelId: string, data: any): Promise<void> {
+  create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    var idGen: InitialIdGenerator = new InitialIdGenerator();
+    var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+      return idGen.id();
+    });
     var request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
-      data: data
+      data: dataValue
     };
 
     return this._connection.request(request).then(() => {
@@ -162,6 +162,59 @@ export default class ModelService extends ConvergenceEventEmitter {
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
     });
+  }
+
+  _dispose(): void {
+    Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
+      this._openModelsByFqn[fqn].close();
+    });
+  }
+
+  private _handleMessage(messageEvent: MessageEvent): void {
+    switch (messageEvent.message.type) {
+      case MessageType.MODEL_DATA_REQUEST:
+        this._handleModelDataRequest(
+          <ModelDataRequest>messageEvent.message,
+          messageEvent.callback);
+        break;
+      default:
+        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+        if (model !== undefined) {
+          model._handleMessage(messageEvent);
+        } else {
+          // todo error.
+        }
+    }
+  }
+
+  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
+    var fqn: ModelFqn = request.modelFqn;
+    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
+    if (openReq === undefined) {
+      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
+    } else if (openReq.initializer === undefined) {
+      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
+    } else {
+      var data: any = openReq.initializer();
+      var idGen: InitialIdGenerator = new InitialIdGenerator();
+      var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+        return idGen.id();
+      });
+      var response: ModelDataResponse = {
+        data: dataValue,
+        type: MessageType.MODEL_DATA_RESPONSE
+      };
+      replyCallback.reply(response);
+    }
+  }
+}
+
+class InitialIdGenerator {
+  private _prefix: string = "0";
+  private _id: number = 0;
+
+  id(): string {
+    return this._prefix + ":" + this._id++;
   }
 }
 

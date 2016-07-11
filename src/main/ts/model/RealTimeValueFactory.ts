@@ -1,36 +1,49 @@
-import RealTimeValue from "./RealTimeValue";
+import {RealTimeValue} from "./RealTimeValue";
 import RealTimeNull from "./RealTimeNull";
 import RealTimeUndefined from "./RealTimeUndefined";
 import RealTimeString from "./RealTimeString";
 import RealTimeArray from "./RealTimeArray";
 import RealTimeObject from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
-import RealTimeContainerValue from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import DiscreteOperation from "../ot/ops/DiscreteOperation";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {PathElement} from "./ot/Path";
 import RealTimeBoolean from "./RealTimeBoolean";
+import {RealTimeModel} from "./RealTimeModel";
+import {ModelEventCallbacks} from "./RealTimeModel";
+import {DataValue} from "./dataValue";
+import {StringValue} from "./dataValue";
+import {ArrayValue} from "./dataValue";
+import {ObjectValue} from "./dataValue";
+import {NumberValue} from "./dataValue";
+import {BooleanValue} from "./dataValue";
 
 export default class RealTimeValueFactory {
 
-  public static create(data: any,
+  public static create(data: DataValue,
                        parent: RealTimeContainerValue<any>,
                        fieldInParent: PathElement,
-                       sendOpCallback: (operation: DiscreteOperation) => void): RealTimeValue<any> {
-    var type: string = typeof data;
-    if (data === null) {
-      return new RealTimeNull(parent, fieldInParent, sendOpCallback);
-    } else if (type === undefined) {
-      return new RealTimeUndefined(parent, fieldInParent, sendOpCallback);
+                       callbacks: ModelEventCallbacks,
+                       model: RealTimeModel): RealTimeValue<any> {
+
+    if (data === undefined) {
+      return new RealTimeUndefined(undefined, parent, fieldInParent, callbacks, model);
+    }
+
+    var type: string = data.type;
+    if (type === "null") {
+      return new RealTimeNull(data.id, parent, fieldInParent, callbacks, model);
     } else if (type === "string") {
-      return new RealTimeString(data, parent, fieldInParent, sendOpCallback);
-    } else if (Array.isArray(data)) {
-      return new RealTimeArray(data, parent, fieldInParent, sendOpCallback);
+      return new RealTimeString(<StringValue>data, parent, fieldInParent, callbacks, model);
+    } else if (type === "array") {
+      return new RealTimeArray(<ArrayValue>data, parent, fieldInParent, callbacks, model);
     } else if (type === "object") {
-      return new RealTimeObject(data, parent, fieldInParent, sendOpCallback);
+      return new RealTimeObject(<ObjectValue>data, parent, fieldInParent, callbacks, model);
     } else if (type === "number") {
-      return new RealTimeNumber(data, parent, fieldInParent, sendOpCallback);
+      return new RealTimeNumber(<NumberValue>data, parent, fieldInParent, callbacks, model);
     } else if (type === "boolean") {
-      return new RealTimeBoolean(data, parent, fieldInParent, sendOpCallback);
+      return new RealTimeBoolean(<BooleanValue>data, parent, fieldInParent, callbacks, model);
+    } else {
+      throw new Error("Invalid data type: " + type);
     }
   }
 }

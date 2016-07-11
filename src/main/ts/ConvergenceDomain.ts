@@ -1,11 +1,12 @@
-import ConvergenceConnection from "./connection/ConvergenceConnection";
+import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import Session from "./Session";
 import ModelService from "./model/ModelService";
-import {HandshakeResponse} from "./protocol/handhsake";
+import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
-import ConvergenceEventEmitter from "./util/ConvergenceEventEmitter";
-import ConvergenceEvent from "./util/ConvergenceEvent";
-
+import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "./util/ConvergenceEvent";
+import {ActivityService} from "./activity/ActivityService";
+import {IdentityService} from "./identity/IdentityService";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
@@ -20,6 +21,8 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   };
 
   private _modelService: ModelService;
+  private _identityService: IdentityService;
+  private _activityService: ActivityService;
   private _connection: ConvergenceConnection;
   private _connectPromise: Promise<HandshakeResponse>;
 
@@ -62,10 +65,12 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     });
 
     this._modelService = new ModelService(this._connection);
+    this._identityService = new IdentityService(this._connection);
+    this._activityService = new ActivityService(this._connection);
 
     this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
       return response;
-    }).catch<HandshakeResponse>(function (reason: Error): Promise<HandshakeResponse> {
+    }).catch(function (reason: Error): Promise<HandshakeResponse> {
       self._connection = null;
       console.log("Error connecting to domain: " + reason);
       return this;
@@ -84,37 +89,33 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     return this._connection.session().isAuthenticated();
   }
 
-  /**
-   * Gets the session of the connected user.
-   * @return The users session.
-   */
   session(): Session {
     return this._connection.session();
   }
 
-  /**
-   * Gets the ModelService
-   */
   modelService(): ModelService {
     return this._modelService;
   }
 
-  /**
-   * Closes the connection to the server and disposes of the ConvergenceDomain
-   */
+  identityService(): IdentityService {
+    return this._identityService;
+  }
+
+  activityService(): ActivityService {
+    return this._activityService;
+  }
+
   dispose(): void {
+    this._modelService._dispose();
     this._connection.disconnect();
     this._connection = undefined;
   }
 
-  /**
-   * @returns {boolean} True if this ConvergenceDomain is disposed.
-   */
   isDisposed(): boolean {
     return this._connection === undefined;
   }
 }
 
-export interface ConvergenceErrorEvent extends ConvergenceEvent {
+interface ConvergenceErrorEvent extends ConvergenceEvent {
   error: string;
 }
