@@ -196,10 +196,12 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   private onNormalMessage(envelope: MessageEnvelope): void {
-    this.emit(ProtocolConnection.Events.MESSAGE, {
-      request: false,
-      message: envelope.body
-    });
+    setTimeout(() => {
+      this.emit(ProtocolConnection.Events.MESSAGE, {
+        request: false,
+        message: envelope.body
+      });
+    }, 0);
   }
 
   private onRequest(envelope: MessageEnvelope): void {

@@ -49,6 +49,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     DELETED: "deleted",
     MODIFIED: "modified",
     COMMITTED: "committed",
+    VERSION_CHANGED: "version_changed",
     SESSION_OPENED: "session_opened",
     SESSION_CLOSED: "session_closed"
   };
@@ -106,6 +107,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     });
 
     // fixme these should have versions unless we move to GUIDs.
+    // also move this out of this constructor.
     var referenceCallbacks: ModelReferenceCallbacks = {
       onPublish: (reference: LocalModelReference<any, any>): void => {
         var id: string = reference.reference().source().id();
@@ -303,6 +305,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         break;
       case MessageType.REMOTE_OPERATION:
         this._handleRemoteOperation(<RemoteOperation>messageEvent.message);
+        this._emitVersionChanged();
         break;
       case MessageType.REFERENCE_PUBLISHED:
       case MessageType.REFERENCE_UNPUBLISHED:
@@ -312,6 +315,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         break;
       case MessageType.OPERATION_ACKNOWLEDGEMENT:
         this._handelOperationAck(<OperationAck>messageEvent.message);
+        this._emitVersionChanged();
         break;
       case MessageType.REMOTE_CLIENT_OPENED:
         this._handleClientOpen(<RemoteClientOpenedModel>messageEvent.message);
@@ -387,21 +391,21 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     var r: ModelReference<any>;
 
-    if (event.type === MessageType.REFERENCE_UNPUBLISHED) {
-      r = value.reference(event.sessionId, event.key);
-      var index: number = this._referencesBySession[event.sessionId].indexOf(r);
-      this._referencesBySession[event.sessionId].splice(index, 1);
+    if (processedEvent.type === MessageType.REFERENCE_UNPUBLISHED) {
+      r = value.reference(processedEvent.sessionId, processedEvent.key);
+      var index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
+      this._referencesBySession[processedEvent.sessionId].splice(index, 1);
     }
 
     // TODO if we wind up being able to pause the processing of incoming
     // operations, then we would put this in a queue.  We would also need
     // to somehow wrap this in an object that stores the currentContext
     // version right now, so we know when to distribute this event.
-    value._handleRemoteReferenceEvent(event);
+    value._handleRemoteReferenceEvent(processedEvent);
 
-    if (event.type === MessageType.REFERENCE_PUBLISHED) {
-      r = value.reference(event.sessionId, event.key);
-      this._referencesBySession[event.sessionId].push(r);
+    if (processedEvent.type === MessageType.REFERENCE_PUBLISHED) {
+      r = value.reference(processedEvent.sessionId, processedEvent.key);
+      this._referencesBySession[processedEvent.sessionId].push(r);
     }
   }
 
@@ -425,6 +429,8 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   private _handelOperationAck(message: OperationAck): void {
     // todo in theory we could pass the operation in to verify it as well.
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, message.version);
+    this._version = message.version + 1;
+    this._modifiedTime = new Date(message.timestamp);
   }
 
   private _handleRemoteOperation(message: RemoteOperation): void {
@@ -446,7 +452,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var timestamp: number = processed.timestamp;
     var userId: string = SessionIdParser.parseUserId(message.sessionId);
 
-    this._version = contextVersion;
+    this._version = contextVersion + 1;
     this._modifiedTime = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
@@ -480,6 +486,15 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     };
     this._connection.send(opSubmission);
   }
+
+  private _emitVersionChanged(): void {
+    var event: VersionChangedEvent = {
+      name: RealTimeModel.Events.VERSION_CHANGED,
+      src: this,
+      version: this._version
+    };
+    this.emitEvent(event);
+  }
 }
 
 Object.freeze(RealTimeModel.Events);
@@ -506,4 +521,8 @@ export interface RemoteSessionOpenedEvent extends ConvergenceEvent {
 export interface RemoteSessionClosedEvent extends ConvergenceEvent {
   userId: string;
   sessionId: string;
+}
+
+interface VersionChangedEvent extends RealTimeModelEvent {
+  version: number;
 }

@@ -5,28 +5,30 @@ node {
     stage 'Checkout'
     checkout scm
 
-    stage 'Setup Registry'
-    sh '''
-      npm config set registry https://nexus.convergencelabs.tech/repository/npm/
-      npm config set //nexus.convergencelabs.tech/repository/npm/:_authToken=$NPM_TOKEN
-      npm config set //nexus.convergencelabs.tech/repository/convergence-npm/:_authToken=$C_NPM_TOKEN
-    '''
+    gitlabCommitStatus {
+      stage 'Setup Registry'
+      sh '''
+        npm config set registry https://nexus.convergencelabs.tech/repository/npm/
+        npm config set //nexus.convergencelabs.tech/repository/npm/:_authToken=$NPM_TOKEN
+        npm config set //nexus.convergencelabs.tech/repository/convergence-npm/:_authToken=$C_NPM_TOKEN
+      '''
 
-    stage 'NPM Install'
-    sh '''
-      npm install
-      npm run typings
-    '''
+      stage 'NPM Install'
+      sh '''
+        npm install
+        npm run typings
+      '''
 
-    stage 'Compile'
-    sh '''
-      npm run timestamp
-      npm run build
-    '''
-  
-    stage 'Publish'
-    sh '''
-      npm publish dist
-    '''
+      stage 'Compile'
+      sh '''
+        npm run timestamp
+        npm run build
+      '''
+
+      stage 'Publish'
+      sh '''
+        npm publish dist
+      '''
+    }
   }
- }
+}
