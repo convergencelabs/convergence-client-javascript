@@ -1,4 +1,5 @@
 node {
+  deleteDir()
   withCredentials([[$class: 'StringBinding', credentialsId: 'NpmAuthToken', variable: 'NPM_TOKEN'],
   [$class: 'StringBinding', credentialsId: 'ConvNpmAuthToken', variable: 'C_NPM_TOKEN']]) {
 
@@ -31,4 +32,5 @@ node {
       '''
     }
   }
+  deleteDir()
 }
