@@ -81,8 +81,7 @@ describe('Reference Transformation E2E', () => {
 
     mockServer.start();
 
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithToken("token").then(() => {
+    ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
       return domain.modelService().open("collection", "model");
     }).then((model: RealTimeModel) => {
       referenceSetAction.acknowledgeReceipt();

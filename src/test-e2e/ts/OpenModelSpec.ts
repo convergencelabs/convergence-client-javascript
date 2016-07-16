@@ -26,8 +26,7 @@ describe('Open Real Time Model E2E', () => {
     });
     mockServer.start();
 
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithToken("token").then(() => {
+    ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
       return domain.modelService().open("collection", "model");
     }).then((model: RealTimeModel) => {
       mockServer.doneManager().testSuccess();
@@ -36,7 +35,7 @@ describe('Open Real Time Model E2E', () => {
     });
   });
 
-  it('Successful open of existing new model with initializer povided', (done: MochaDone) => {
+  it('Successful open of existing new model with initializer provided', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     var expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, c: "collection", m: "model", i: true};
     var openReq: IReceiveRequestRecord =
@@ -57,8 +56,7 @@ describe('Open Real Time Model E2E', () => {
     });
     mockServer.start();
 
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithToken("token").then(() => {
+    ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
       return domain.modelService().open("collection", "model", () => {
         return {num: 10};
       });

@@ -10,6 +10,13 @@ import {IdentityService} from "./identity/IdentityService";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
+  private static DefaultOptions: ConvergenceOptions = {
+    connectionTimeout: 5,
+    maxReconnectAttempts: -1,
+    reconnectInterval: 5,
+    retryOnOpen: true
+  };
+
   static debugFlags: any = flags;
 
   static Events: any = {
@@ -20,11 +27,29 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     ERROR: "error"
   };
 
+  static connect(url: string, username: string, password: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    return domain._connect().then((response) => {
+      return domain._authenticateWithPassword(username, password);
+    }).then((v) => {
+      return domain;
+    });
+  }
+
+  static connectWithToken(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    return domain._connect().then((response) => {
+      return domain._authenticateWithToken(token);
+    }).then((v) => {
+      return domain;
+    });
+  }
+
   private _modelService: ModelService;
   private _identityService: IdentityService;
   private _activityService: ActivityService;
   private _connection: ConvergenceConnection;
-  private _connectPromise: Promise<HandshakeResponse>;
+  private _options: ConvergenceOptions;
 
   /**
    * Constructs a new ConvergenceDomain using the default options.
@@ -32,18 +57,18 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
    * @param url
    *            The url of the convergence domain to connect to.
    */
-  constructor(url: string) {
+  constructor(url: string, options?: ConvergenceOptions) {
     super();
 
-    var self: ConvergenceDomain = this;
+    this._options = this._processOptions(options);
 
     // todo make this optional params
     this._connection = new ConvergenceConnection(
       url,
-      5, // connection timeout in seconds
-      -1, // max retries,
-      1, // reconnection interval in seconds
-      true,
+      this._options.connectionTimeout,
+      this._options.maxReconnectAttempts,
+      this._options.reconnectInterval,
+      this._options.retryOnOpen,
       this
     );
 
@@ -67,26 +92,43 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     this._modelService = new ModelService(this._connection);
     this._identityService = new IdentityService(this._connection);
     this._activityService = new ActivityService(this._connection);
-
-    this._connectPromise = this._connection.connect().then(function (response: HandshakeResponse): HandshakeResponse {
-      return response;
-    }).catch(function (reason: Error): Promise<HandshakeResponse> {
-      self._connection = null;
-      console.log("Error connecting to domain: " + reason);
-      return this;
-    });
   }
 
-  authenticateWithPassword(username: string, password: string): Promise<void> {
+  // TODO seems like a jquery.extend approach here would be simpler.
+  private _processOptions(options?: ConvergenceOptions): ConvergenceOptions {
+    if (options === undefined) {
+      options = ConvergenceDomain.DefaultOptions;
+    } else {
+      if (options.connectionTimeout === undefined) {
+        options.connectionTimeout = ConvergenceDomain.DefaultOptions.connectionTimeout;
+      }
+
+      if (options.maxReconnectAttempts === undefined) {
+        options.maxReconnectAttempts = ConvergenceDomain.DefaultOptions.maxReconnectAttempts;
+      }
+
+      if (options.reconnectInterval === undefined) {
+        options.reconnectInterval = ConvergenceDomain.DefaultOptions.reconnectInterval;
+      }
+
+      if (options.retryOnOpen === undefined) {
+        options.retryOnOpen = ConvergenceDomain.DefaultOptions.retryOnOpen;
+      }
+    }
+
+    return options;
+  }
+
+  private _connect(): Promise<HandshakeResponse> {
+    return this._connection.connect();
+  }
+
+  private _authenticateWithPassword(username: string, password: string): Promise<void> {
     return this._connection.authenticateWithPassword(username, password);
   }
 
-  authenticateWithToken(token: string): Promise<void> {
+  private _authenticateWithToken(token: string): Promise<void> {
     return this._connection.authenticateWithToken(token);
-  }
-
-  isAuthenticated(): boolean {
-    return this._connection.session().isAuthenticated();
   }
 
   session(): Session {

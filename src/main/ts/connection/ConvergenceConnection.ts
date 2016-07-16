@@ -257,6 +257,8 @@ export class ConvergenceConnection extends EventEmitter {
       this._protocolConnection.handshake(reconnect).then((handshakeResponse: HandshakeResponse) => {
         clearTimeout(this._connectionTimeoutTask);
         if (handshakeResponse.success) {
+          this._connectionState = ConnectionState.CONNECTED;
+
           this._connectionDeferred.resolve(handshakeResponse);
           this._connectionDeferred = null;
 

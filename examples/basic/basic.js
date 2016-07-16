@@ -13,14 +13,10 @@ var consoleDiv = document.getElementById("console");
 var model;
 
 // Connect to the domain.
+var url = connectionConfig.SERVER_URL + "/domain/namespace1/domain1";
 ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
-domain.on("connected", function () {
-  console.log("connected");
-});
 
-// Now authenticate.  This is deferred unti connection is successful.
-domain.authenticateWithPassword("test1", "password").then(function (username) {
+ConvergenceDomain.connect(url, "test1", "password").then(function(domain) {
   return domain.modelService().open("foo", "basic-example", function (collectionId, modelId) {
     return {
       "string": "test value",

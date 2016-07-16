@@ -15,8 +15,7 @@ describe('Authentication E2E', () => {
     mockServer.sendReplyTo(authRequest, {t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test"});
     mockServer.start();
 
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithPassword("test", "password").then(() => {
+    ConvergenceDomain.connect(mockServer.url(), "test", "password").then(domain => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
       mockServer.doneManager().testFailure(error);
@@ -30,8 +29,7 @@ describe('Authentication E2E', () => {
     mockServer.sendReplyTo(authReq, {t: MessageType.AUTHENTICATE_RESPONSE, s: false});
     mockServer.start();
 
-    var domain: ConvergenceDomain = new ConvergenceDomain(mockServer.url());
-    domain.authenticateWithPassword("test", "password").then(() => {
+    ConvergenceDomain.connect(mockServer.url(), "test", "password").then(domain => {
       mockServer.doneManager().testFailure(new Error("Unexpected success"));
     }).catch((error: Error) => {
       mockServer.doneManager().testSuccess();
