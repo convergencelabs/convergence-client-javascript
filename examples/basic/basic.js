@@ -5,9 +5,6 @@ var numberInput = document.getElementById("numberVal");
 var arrayInput = document.getElementById("arrayVal");
 var objectTable = document.getElementById("objectVal");
 
-// This is where we send events to.
-var consoleDiv = document.getElementById("console");
-
 
 // The realTimeModel.
 var model;
