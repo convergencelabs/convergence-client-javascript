@@ -1,4 +1,3 @@
-
 var types: {[key: string]: string}  = {
   OBJECT: "object",
   ARRAY: "array",

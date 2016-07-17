@@ -1,8 +1,8 @@
-import Immutable from "../../../util/Immutable";
-import DiscreteOperation from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 
-export default class ArrayRemoveOperation extends DiscreteOperation {
+export class ArrayRemoveOperation extends DiscreteOperation {
 
   constructor(id: string, noOp: boolean, public index: number) {
     super(OperationType.ARRAY_REMOVE, id, noOp);

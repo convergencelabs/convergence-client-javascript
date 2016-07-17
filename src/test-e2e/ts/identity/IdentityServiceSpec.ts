@@ -2,7 +2,7 @@ import {DoneType} from "../../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../../mock-server/MockConvergenceServer";
 import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
-import MessageType from "../../../main/ts/connection/protocol/MessageType";
+import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
 import DomainUser from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";

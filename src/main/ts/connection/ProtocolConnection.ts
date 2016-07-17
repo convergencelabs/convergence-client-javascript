@@ -3,7 +3,7 @@ import ConvergenceSocket from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {HandshakeResponse} from "./protocol/handhsake";
 import {HandshakeRequest} from "./protocol/handhsake";
-import MessageType from "./protocol/MessageType";
+import {MessageType} from "./protocol/MessageType";
 import {HeartbeatHandler} from "./HeartbeatHelper";
 import {OutgoingProtocolNormalMessage} from "./protocol/protocol";
 import {MessageSerializer} from "./protocol/MessageSerializer";
@@ -13,7 +13,7 @@ import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
 import {ErrorMessage} from "./protocol/ErrorMessage";
 import {OutgoingProtocolResponseMessage} from "./protocol/protocol";
 import {EventEmitter} from "../util/EventEmitter";
-import Deferred from "../util/Deferred";
+import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
 
 export class ProtocolConnection extends EventEmitter {

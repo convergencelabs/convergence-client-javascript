@@ -1,6 +1,6 @@
-import Operation from "../ops/Operation";
+import {Operation} from "../ops/Operation";
 
-export default class OperationPair {
+export class OperationPair {
   _serverOp: Operation;
   _clientOp: Operation;
 

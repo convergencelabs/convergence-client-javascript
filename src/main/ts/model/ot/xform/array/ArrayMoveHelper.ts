@@ -1,4 +1,4 @@
-import ArrayMoveOperation from "../../ops/ArrayMoveOperation";
+import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
 import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";

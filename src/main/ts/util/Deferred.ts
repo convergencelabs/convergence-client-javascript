@@ -1,4 +1,4 @@
-export default class Deferred<R> {
+export class Deferred<R> {
 
   private _promise: Promise<R>;
   private _resolve: (value?: R | Thenable<R>) => any;

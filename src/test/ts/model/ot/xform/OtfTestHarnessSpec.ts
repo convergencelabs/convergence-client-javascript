@@ -1,22 +1,22 @@
-import TransformationFunctionRegistry from "../../../../../main/ts/model/ot/xform/TransformationFunctionRegistry";
-import StringInsertOperation from "../../../../../main/ts/model/ot/ops/StringInsertOperation";
-import StringRemoveOperation from "../../../../../main/ts/model/ot/ops/StringRemoveOperation";
-import StringSetOperation from "../../../../../main/ts/model/ot/ops/StringSetOperation";
-import ArrayInsertOperation from "../../../../../main/ts/model/ot/ops/ArrayInsertOperation";
-import ArrayRemoveOperation from "../../../../../main/ts/model/ot/ops/ArrayRemoveOperation";
-import ArrayReplaceOperation from "../../../../../main/ts/model/ot/ops/ArrayReplaceOperation";
-import ArrayMoveOperation from "../../../../../main/ts/model/ot/ops/ArrayMoveOperation";
-import ArraySetOperation from "../../../../../main/ts/model/ot/ops/ArraySetOperation";
-import ObjectAddPropertyOperation from "../../../../../main/ts/model/ot/ops/ObjectAddPropertyOperation";
-import ObjectSetPropertyOperation from "../../../../../main/ts/model/ot/ops/ObjectSetPropertyOperation";
-import ObjectRemovePropertyOperation from "../../../../../main/ts/model/ot/ops/ObjectRemovePropertyOperation";
-import ObjectSetOperation from "../../../../../main/ts/model/ot/ops/ObjectSetOperation";
-import BooleanSetOperation from "../../../../../main/ts/model/ot/ops/BooleanSetOperation";
-import NumberAddOperation from "../../../../../main/ts/model/ot/ops/NumberAddOperation";
-import NumberSetOperation from "../../../../../main/ts/model/ot/ops/NumberSetOperation";
-import DiscreteOperation from "../../../../../main/ts/model/ot/ops/DiscreteOperation";
-import OperationPair from "../../../../../main/ts/model/ot/xform/OperationPair";
-import OperationTransformationFunction from "../../../../../main/ts/model/ot/xform/OperationTransformationFunction";
+import {TransformationFunctionRegistry} from "../../../../../main/ts/model/ot/xform/TransformationFunctionRegistry";
+import {StringInsertOperation} from "../../../../../main/ts/model/ot/ops/StringInsertOperation";
+import {StringRemoveOperation} from "../../../../../main/ts/model/ot/ops/StringRemoveOperation";
+import {StringSetOperation} from "../../../../../main/ts/model/ot/ops/StringSetOperation";
+import {ArrayInsertOperation} from "../../../../../main/ts/model/ot/ops/ArrayInsertOperation";
+import {ArrayRemoveOperation} from "../../../../../main/ts/model/ot/ops/ArrayRemoveOperation";
+import {ArrayReplaceOperation} from "../../../../../main/ts/model/ot/ops/ArrayReplaceOperation";
+import {ArrayMoveOperation} from "../../../../../main/ts/model/ot/ops/ArrayMoveOperation";
+import {ArraySetOperation} from "../../../../../main/ts/model/ot/ops/ArraySetOperation";
+import {ObjectAddPropertyOperation} from "../../../../../main/ts/model/ot/ops/ObjectAddPropertyOperation";
+import {ObjectSetPropertyOperation} from "../../../../../main/ts/model/ot/ops/ObjectSetPropertyOperation";
+import {ObjectRemovePropertyOperation} from "../../../../../main/ts/model/ot/ops/ObjectRemovePropertyOperation";
+import {ObjectSetOperation} from "../../../../../main/ts/model/ot/ops/ObjectSetOperation";
+import {BooleanSetOperation} from "../../../../../main/ts/model/ot/ops/BooleanSetOperation";
+import {NumberAddOperation} from "../../../../../main/ts/model/ot/ops/NumberAddOperation";
+import {NumberSetOperation} from "../../../../../main/ts/model/ot/ops/NumberSetOperation";
+import {DiscreteOperation} from "../../../../../main/ts/model/ot/ops/DiscreteOperation";
+import {OperationPair} from "../../../../../main/ts/model/ot/xform/OperationPair";
+import {OperationTransformationFunction} from "../../../../../main/ts/model/ot/xform/OperationTransformationFunction";
 
 import ExpectStatic = Chai.ExpectStatic;
 import * as chai from "chai";
@@ -49,7 +49,7 @@ fs.readdirSync(baseDir).forEach((file: string) => {
         } else {
           var otf: OperationTransformationFunction<DiscreteOperation, DiscreteOperation> =
             xformer.getOperationTransformationFunction(serverInputOp, clientInputOp);
-          var xformed: OperationPair = otf.transform(serverInputOp, clientInputOp);
+          var xformed: OperationPair = otf(serverInputOp, clientInputOp);
 
           var serverOutputOp: DiscreteOperation = json2Operation(testCase.output.serverOp);
           var clientOutputOp: DiscreteOperation = json2Operation(testCase.output.clientOp);

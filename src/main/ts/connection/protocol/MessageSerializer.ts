@@ -1,4 +1,4 @@
-import MessageType from "./MessageType";
+import {MessageType} from "./MessageType";
 import {MessageEnvelope} from "./protocol";
 import {IncomingProtocolMessage} from "./protocol";
 import {OutgoingProtocolMessage} from "./protocol";

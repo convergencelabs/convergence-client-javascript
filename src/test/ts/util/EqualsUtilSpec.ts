@@ -1,4 +1,4 @@
-import EqualsUtil from "../../../main/ts/util/EqualsUtil";
+import {EqualsUtil} from "../../../main/ts/util/EqualsUtil";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;

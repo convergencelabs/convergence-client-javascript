@@ -1,7 +1,7 @@
-import Operation from "../ops/Operation";
-import CompoundOperation from "../ops/CompoundOperation";
-import DiscreteOperation from "../ops/DiscreteOperation";
-import TransformationFunctionRegistry from "./TransformationFunctionRegistry";
+import {Operation} from "../ops/Operation";
+import {CompoundOperation} from "../ops/CompoundOperation";
+import {DiscreteOperation} from "../ops/DiscreteOperation";
+import {TransformationFunctionRegistry} from "./TransformationFunctionRegistry";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 
 export interface ModelReferenceData {

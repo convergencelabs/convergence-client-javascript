@@ -1,8 +1,8 @@
-import DiscreteOperation from "./DiscreteOperation";
-import Immutable from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
 import {OperationType} from "./OperationType";
 
-export default class StringSetOperation extends DiscreteOperation {
+export class StringSetOperation extends DiscreteOperation {
 
   constructor(id: string, public noOp: boolean, public value: string) {
     super(OperationType.STRING_VALUE, id, noOp);

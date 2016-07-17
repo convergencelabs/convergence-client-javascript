@@ -2,7 +2,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {Activity} from "./Activity";
 import {ActivityState} from "../connection/protocol/activity/openActivity";
 import {IncomingProtocolNormalMessage} from "../connection/protocol/protocol";
-import MessageType from "../connection/protocol/MessageType";
+import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityRemoteStateSet} from "../connection/protocol/activity/activityState";
 import {ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";

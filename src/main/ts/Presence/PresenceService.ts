@@ -1,4 +1,4 @@
-import Session from "../Session";
+import {Session} from "../Session";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {UserPresence} from "./UserPresence";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";

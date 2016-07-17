@@ -1,4 +1,4 @@
-import MessageType from "../../main/ts/connection/protocol/MessageType";
+import {MessageType} from "../../main/ts/connection/protocol/MessageType";
 import AbstractReceiveAction from "./AbstractReceiveAction";
 import AbstractSendAction from "./AbstractSendAction";
 import {IReceiveRequestRecord} from "./records";

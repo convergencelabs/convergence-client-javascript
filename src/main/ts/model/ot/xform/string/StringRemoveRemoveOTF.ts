@@ -1,11 +1,11 @@
-import OperationPair from "../OperationPair";
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import StringRemoveOperation from "../../ops/StringRemoveOperation";
+import {OperationPair} from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
 import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 
-export default class StringRemoveRemoveOTF implements OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> {
-  transform(s: StringRemoveOperation, c: StringRemoveOperation): OperationPair {
+export var StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> =
+  (s: StringRemoveOperation, c: StringRemoveOperation) => {
     var cStart: number = c.index;
     var cEnd: number = c.index + c.value.length;
 
@@ -78,5 +78,4 @@ export default class StringRemoveRemoveOTF implements OperationTransformationFun
       default:
         throw new Error("invalid range range relationship");
     }
-  }
-}
+  };

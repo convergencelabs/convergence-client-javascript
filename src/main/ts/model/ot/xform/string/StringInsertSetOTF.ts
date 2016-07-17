@@ -1,11 +1,10 @@
-import OperationPair from "../OperationPair";
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import StringInsertOperation from "../../ops/StringInsertOperation";
-import StringSetOperation from "../../ops/StringSetOperation";
+import {OperationPair} from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {StringInsertOperation} from "../../ops/StringInsertOperation";
+import {StringSetOperation} from "../../ops/StringSetOperation";
 
-export default class StringInsertSetOTF implements OperationTransformationFunction<StringInsertOperation, StringSetOperation> {
-  transform(s: StringInsertOperation, c: StringSetOperation): OperationPair {
+export var StringInsertSetOTF: OperationTransformationFunction<StringInsertOperation, StringSetOperation> =
+  (s: StringInsertOperation, c: StringSetOperation) => {
     // S-IS-1
     return new OperationPair(s.copy({noOp: true}), c);
-  }
-}
+  };

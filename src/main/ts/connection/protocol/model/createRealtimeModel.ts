@@ -1,5 +1,5 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import ModelFqn from "../../../model/ModelFqn";
+import {ModelFqn} from "../../../model/ModelFqn";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {ObjectValue} from "../../../model/dataValue";
 import {DataValueSerializer} from "./dataValue";

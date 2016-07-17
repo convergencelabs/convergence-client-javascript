@@ -1,6 +1,6 @@
 import ConvergenceDomain from "./ConvergenceDomain";
 
-interface Session {
+export interface Session {
   /**
    * @return The ConvergenceDomain for this session
    */
@@ -31,5 +31,3 @@ interface Session {
    */
   isAuthenticated(): boolean;
 }
-
-export default Session;

@@ -1,4 +1,4 @@
-import ModelFqn from "../../../main/ts/model/ModelFqn";
+import {ModelFqn} from "../../../main/ts/model/ModelFqn";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 

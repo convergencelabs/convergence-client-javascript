@@ -1,16 +1,16 @@
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
-import DiscreteOperation from "./ot/ops/DiscreteOperation";
+import {DiscreteOperation} from "./ot/ops/DiscreteOperation";
 import {RealTimeValue} from "./RealTimeValue";
-import ObjectSetPropertyOperation from "./ot/ops/ObjectSetPropertyOperation";
-import ObjectAddPropertyOperation from "./ot/ops/ObjectAddPropertyOperation";
-import ObjectRemovePropertyOperation from "./ot/ops/ObjectRemovePropertyOperation";
-import ObjectSetOperation from "./ot/ops/ObjectSetOperation";
+import {ObjectSetPropertyOperation} from "./ot/ops/ObjectSetPropertyOperation";
+import {ObjectAddPropertyOperation} from "./ot/ops/ObjectAddPropertyOperation";
+import {ObjectRemovePropertyOperation} from "./ot/ops/ObjectRemovePropertyOperation";
+import {ObjectSetOperation} from "./ot/ops/ObjectSetOperation";
 import {Path} from "./ot/Path";
-import RealTimeArray from "./RealTimeArray";
-import ModelOperationEvent from "./ModelOperationEvent";
-import RealTimeValueType from "./RealTimeValueType";
-import RealTimeValueFactory from "./RealTimeValueFactory";
+import {RealTimeArray} from "./RealTimeArray";
+import {ModelOperationEvent} from "./ModelOperationEvent";
+import {RealTimeValueType} from "./RealTimeValueType";
+import {RealTimeValueFactory} from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
@@ -23,11 +23,11 @@ import {ModelReference} from "./reference/ModelReference";
 import {ReferenceManager} from "./reference/ReferenceManager";
 import {ReferenceType} from "./reference/ModelReference";
 import {LocalModelReference} from "./reference/LocalModelReference";
-import Session from "../Session";
+import {Session} from "../Session";
 import {LocalPropertyReference} from "./reference/LocalPropertyReference";
 import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
 
-export default class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
+export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
 
   static Events: any = {
     SET: "set",

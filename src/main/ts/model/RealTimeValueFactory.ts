@@ -2,8 +2,8 @@ import {RealTimeValue} from "./RealTimeValue";
 import RealTimeNull from "./RealTimeNull";
 import RealTimeUndefined from "./RealTimeUndefined";
 import RealTimeString from "./RealTimeString";
-import RealTimeArray from "./RealTimeArray";
-import RealTimeObject from "./RealTimeObject";
+import {RealTimeArray} from "./RealTimeArray";
+import {RealTimeObject} from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {PathElement} from "./ot/Path";
@@ -17,7 +17,7 @@ import {ObjectValue} from "./dataValue";
 import {NumberValue} from "./dataValue";
 import {BooleanValue} from "./dataValue";
 
-export default class RealTimeValueFactory {
+export class RealTimeValueFactory {
 
   public static create(data: DataValue,
                        parent: RealTimeContainerValue<any>,

@@ -1,13 +1,11 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import ObjectSetPropertyOperation from "../../ops/ObjectSetPropertyOperation";
-import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperation";
-import OperationPair from "../OperationPair";
-import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {ObjectSetPropertyOperation} from "../../ops/ObjectSetPropertyOperation";
+import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
+import {OperationPair} from "../OperationPair";
+import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
 
-export default class ObjectSetPropertyRemovePropertyOTF
-  implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> {
-
-  transform(s: ObjectSetPropertyOperation, c: ObjectRemovePropertyOperation): OperationPair {
+export var ObjectSetPropertyRemovePropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> =
+  (s: ObjectSetPropertyOperation, c: ObjectRemovePropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-TR-1
       return new OperationPair(s, c);
@@ -17,5 +15,4 @@ export default class ObjectSetPropertyRemovePropertyOTF
         new ObjectAddPropertyOperation(s.id, s.noOp, s.prop, s.value),
         c.copy({noOp: true}));
     }
-  }
-}
+  };

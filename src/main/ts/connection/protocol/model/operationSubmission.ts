@@ -1,5 +1,5 @@
 import {OutgoingProtocolNormalMessage} from "../protocol";
-import Operation from "../../../model/ot/ops/Operation";
+import {Operation} from "../../../model/ot/ops/Operation";
 import {OperationSerializer} from "./operationData";
 import {MessageBodySerializer} from "../MessageSerializer";
 

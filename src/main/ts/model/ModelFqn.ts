@@ -1,4 +1,4 @@
-export default class ModelFqn {
+export class ModelFqn {
 
   /**
    * Constructs a new ModelFqn.

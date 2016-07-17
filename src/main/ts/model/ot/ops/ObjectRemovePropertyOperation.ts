@@ -1,8 +1,8 @@
-import Immutable from "../../../util/Immutable";
-import DiscreteOperation from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 
-export default class ObjectRemovePropertyOperation extends DiscreteOperation {
+export class ObjectRemovePropertyOperation extends DiscreteOperation {
 
   protected _prop: string;
 

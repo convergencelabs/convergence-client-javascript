@@ -1,6 +1,6 @@
-import Operation from "./ops/Operation";
+import {Operation} from "./ops/Operation";
 
-export default class UnprocessedOperationEvent {
+export class UnprocessedOperationEvent {
   constructor(
     public clientId: string,
     public seqNo: number,

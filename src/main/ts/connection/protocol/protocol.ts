@@ -1,4 +1,4 @@
-import MessageType from "./MessageType";
+import {MessageType} from "./MessageType";
 
 export interface ProtocolMessage {
   type?: MessageType;

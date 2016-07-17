@@ -1,11 +1,11 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperation";
-import OperationPair from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
+import {OperationPair} from "../OperationPair";
 
-export default class ObjectRemovePropertyRemovePropertyOTF
-  implements OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectRemovePropertyOperation> {
+export var ObjectRemovePropertyRemovePropertyOTF:
+  OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectRemovePropertyOperation> =
 
-  transform(s: ObjectRemovePropertyOperation, c: ObjectRemovePropertyOperation): OperationPair {
+  (s: ObjectRemovePropertyOperation, c: ObjectRemovePropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-RR-1
       return new OperationPair(s, c);
@@ -13,5 +13,4 @@ export default class ObjectRemovePropertyRemovePropertyOTF
       // O-RR-2
       return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
     }
-  }
-}
+  };

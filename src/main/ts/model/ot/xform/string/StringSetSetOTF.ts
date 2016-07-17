@@ -1,9 +1,9 @@
-import OperationPair from "../OperationPair";
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import StringSetOperation from "../../ops/StringSetOperation";
+import {OperationPair} from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {StringSetOperation} from "../../ops/StringSetOperation";
 
-export default class StringSetSetOTF implements OperationTransformationFunction<StringSetOperation, StringSetOperation> {
-  transform(s: StringSetOperation, c: StringSetOperation): OperationPair {
+export var StringSetSetOTF: OperationTransformationFunction<StringSetOperation, StringSetOperation> =
+  (s: StringSetOperation, c: StringSetOperation) => {
     if (s.value === c.value) {
       // S-SS-1
       return new OperationPair(s.copy({noOp: true}), s.copy({noOp: true}));
@@ -11,5 +11,4 @@ export default class StringSetSetOTF implements OperationTransformationFunction<
       // S-SS-2
       return new OperationPair(s, c.copy({noOp: true}));
     }
-  }
-}
+  };

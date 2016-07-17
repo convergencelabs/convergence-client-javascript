@@ -1,9 +1,9 @@
-import Immutable from "../../../util/Immutable";
-import DiscreteOperation from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
 
-export default class ArraySetOperation extends DiscreteOperation {
+export class ArraySetOperation extends DiscreteOperation {
 
   constructor(id: string, noOp: boolean, public value: DataValue[]) {
     super(OperationType.ARRAY_VALUE, id, noOp);

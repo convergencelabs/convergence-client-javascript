@@ -1,4 +1,4 @@
-export default class Immutable {
+export class Immutable {
 
   static make(source: any): void {
     if (typeof source === 'object') {

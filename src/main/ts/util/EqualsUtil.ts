@@ -1,4 +1,4 @@
-export default class EqualsUtil {
+export class EqualsUtil {
   static deepEquals(x: any, y: any): boolean {
     var p: string;
 

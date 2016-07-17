@@ -2,8 +2,8 @@ import MockServerAction from "./MockServerAction";
 import {TimeoutCallback} from "./MockConvergenceServer";
 import {CompleteCallback} from "./MockConvergenceServer";
 import {IDoneManager} from "./doneManager";
-import MessageType from "../../main/ts/connection/protocol/MessageType";
-import EqualsUtil from "../../main/ts/util/EqualsUtil";
+import {MessageType} from "../../main/ts/connection/protocol/MessageType";
+import {EqualsUtil} from "../../main/ts/util/EqualsUtil";
 
 abstract class AbstractReceiveAction extends MockServerAction {
   constructor(actionId: number,

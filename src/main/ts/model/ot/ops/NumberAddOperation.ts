@@ -1,8 +1,8 @@
-import Immutable from "../../../util/Immutable";
-import DiscreteOperation from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 
-export default class NumberAddOperation extends DiscreteOperation {
+export class NumberAddOperation extends DiscreteOperation {
 
   protected _value: number;
 

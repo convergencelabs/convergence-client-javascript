@@ -1,12 +1,10 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
-import OperationPair from "../OperationPair";
-import ObjectSetPropertyOperation from "../../ops/ObjectSetPropertyOperation";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
+import {OperationPair} from "../OperationPair";
+import {ObjectSetPropertyOperation} from "../../ops/ObjectSetPropertyOperation";
 
-export default class ObjectAddPropertyAddPropertyOTF
-  implements OperationTransformationFunction<ObjectAddPropertyOperation, ObjectAddPropertyOperation> {
-
-  transform(s: ObjectAddPropertyOperation, c: ObjectAddPropertyOperation): OperationPair {
+export var ObjectAddPropertyAddPropertyOTF: OperationTransformationFunction<ObjectAddPropertyOperation, ObjectAddPropertyOperation> =
+  (s: ObjectAddPropertyOperation, c: ObjectAddPropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-AA-1
       return new OperationPair(s, c);
@@ -19,5 +17,4 @@ export default class ObjectAddPropertyAddPropertyOTF
       // O-AA-3
       return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
     }
-  }
-}
+  };

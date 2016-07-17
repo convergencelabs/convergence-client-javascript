@@ -1,9 +1,9 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import OperationPair from "../OperationPair";
-import ArrayRemoveOperation from "../../ops/ArrayRemoveOperation";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {OperationPair} from "../OperationPair";
+import {ArrayRemoveOperation} from "../../ops/ArrayRemoveOperation";
 
-export default class ArrayRemoveRemoveOTF implements OperationTransformationFunction<ArrayRemoveOperation, ArrayRemoveOperation> {
-  transform(s: ArrayRemoveOperation, c: ArrayRemoveOperation): OperationPair {
+export var ArrayRemoveRemoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayRemoveOperation> =
+  (s: ArrayRemoveOperation, c: ArrayRemoveOperation) => {
     if (s.index === c.index) {
       // A-RR-2
       return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
@@ -14,5 +14,4 @@ export default class ArrayRemoveRemoveOTF implements OperationTransformationFunc
       // A-RR-3
       return new OperationPair(s.copy({index: s.index - 1}), c);
     }
-  }
-}
+  };

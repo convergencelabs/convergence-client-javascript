@@ -1,8 +1,8 @@
 import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import ConvergenceDomain from "./ConvergenceDomain";
-import Session from "./Session";
+import {Session} from "./Session";
 
-export default class SessionImpl implements Session {
+export class SessionImpl implements Session {
 
   private _domain: ConvergenceDomain;
   private _connection: ConvergenceConnection;

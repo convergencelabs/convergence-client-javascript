@@ -1,16 +1,16 @@
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {RealTimeValue} from "./RealTimeValue";
 import {PathElement} from "./ot/Path";
-import ArrayInsertOperation from "./ot/ops/ArrayInsertOperation";
-import ArrayRemoveOperation from "./ot/ops/ArrayRemoveOperation";
-import ArrayReplaceOperation from "./ot/ops/ArrayReplaceOperation";
-import ArrayMoveOperation from "./ot/ops/ArrayMoveOperation";
-import ArraySetOperation from "./ot/ops/ArraySetOperation";
+import {ArrayInsertOperation} from "./ot/ops/ArrayInsertOperation";
+import {ArrayRemoveOperation} from "./ot/ops/ArrayRemoveOperation";
+import {ArrayReplaceOperation} from "./ot/ops/ArrayReplaceOperation";
+import {ArrayMoveOperation} from "./ot/ops/ArrayMoveOperation";
+import {ArraySetOperation} from "./ot/ops/ArraySetOperation";
 import {Path} from "./ot/Path";
-import RealTimeObject from "./RealTimeObject";
-import ModelOperationEvent from "./ModelOperationEvent";
-import RealTimeValueType from "./RealTimeValueType";
-import RealTimeValueFactory from "./RealTimeValueFactory";
+import {RealTimeObject} from "./RealTimeObject";
+import {ModelOperationEvent} from "./ModelOperationEvent";
+import {RealTimeValueType} from "./RealTimeValueType";
+import {RealTimeValueFactory} from "./RealTimeValueFactory";
 import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
@@ -19,7 +19,7 @@ import {OperationType} from "./ot/ops/OperationType";
 import {ArrayValue} from "./dataValue";
 import {DataValue} from "./dataValue";
 
-export default class RealTimeArray extends RealTimeContainerValue<any[]> {
+export class RealTimeArray extends RealTimeContainerValue<any[]> {
 
   static Events: any = {
     INSERT: "insert",

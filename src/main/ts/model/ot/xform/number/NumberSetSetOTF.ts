@@ -1,9 +1,9 @@
-import OperationPair from "../OperationPair";
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import NumberSetOperation from "../../ops/NumberSetOperation";
+import {OperationPair} from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {NumberSetOperation} from "../../ops/NumberSetOperation";
 
-export default class NumberSetSetOTF implements OperationTransformationFunction<NumberSetOperation, NumberSetOperation> {
-  transform(s: NumberSetOperation, c: NumberSetOperation): OperationPair {
+export var NumberSetSetOTF: OperationTransformationFunction<NumberSetOperation, NumberSetOperation> =
+  (s: NumberSetOperation, c: NumberSetOperation) => {
     if (s.value === c.value) {
       // N-SS-1
       return new OperationPair(s.copy({noOp: true}), s.copy({noOp: true}));
@@ -11,5 +11,4 @@ export default class NumberSetSetOTF implements OperationTransformationFunction<
       // N-SS-2
       return new OperationPair(s, c.copy({noOp: true}));
     }
-  }
-}
+  };

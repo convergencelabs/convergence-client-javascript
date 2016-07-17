@@ -1,7 +1,7 @@
 import {RealTimeValue} from "../RealTimeValue";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import EqualsUtil from "../../util/EqualsUtil";
+import {EqualsUtil} from "../../util/EqualsUtil";
 
 export var ReferenceType: any = {
   INDEX: "index",

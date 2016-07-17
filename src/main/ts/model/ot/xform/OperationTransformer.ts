@@ -1,11 +1,11 @@
-import Operation from "../ops/Operation";
-import CompoundOperation from "../ops/CompoundOperation";
-import OperationPair from "./OperationPair";
-import DiscreteOperation from "../ops/DiscreteOperation";
-import TransformationFunctionRegistry from "./TransformationFunctionRegistry";
-import OperationTransformationFunction from "./OperationTransformationFunction";
+import {Operation} from "../ops/Operation";
+import {CompoundOperation} from "../ops/CompoundOperation";
+import {OperationPair} from "./OperationPair";
+import {DiscreteOperation} from "../ops/DiscreteOperation";
+import {TransformationFunctionRegistry} from "./TransformationFunctionRegistry";
+import {OperationTransformationFunction} from "./OperationTransformationFunction";
 
-export default class OperationTransformer {
+export class OperationTransformer {
   private _tfr: TransformationFunctionRegistry;
 
   constructor(tfr: TransformationFunctionRegistry) {
@@ -55,7 +55,7 @@ export default class OperationTransformer {
   private transformIdenticalPathOperations(s: DiscreteOperation, c: DiscreteOperation): OperationPair {
     var tf: OperationTransformationFunction<any, any> = this._tfr.getOperationTransformationFunction(s, c);
     if (tf) {
-      return tf.transform(s, c);
+      return tf(s, c);
     } else {
       throw new Error(
         `No operation transformation function found for operation pair (${s.type},${s.type})`);

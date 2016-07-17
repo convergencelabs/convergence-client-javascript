@@ -1,11 +1,9 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import ObjectSetPropertyOperation from "../../ops/ObjectSetPropertyOperation";
-import OperationPair from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {ObjectSetPropertyOperation} from "../../ops/ObjectSetPropertyOperation";
+import {OperationPair} from "../OperationPair";
 
-export default class ObjectSetPropertySetPropertyOTF
-  implements OperationTransformationFunction<ObjectSetPropertyOperation, ObjectSetPropertyOperation> {
-
-  transform(s: ObjectSetPropertyOperation, c: ObjectSetPropertyOperation): OperationPair {
+export var ObjectSetPropertySetPropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation, ObjectSetPropertyOperation> =
+  (s: ObjectSetPropertyOperation, c: ObjectSetPropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-TT-1
       return new OperationPair(s, c);
@@ -16,5 +14,4 @@ export default class ObjectSetPropertySetPropertyOTF
       // O-TT-3
       return new OperationPair(s.copy({noOp: true}), c.copy({noOp: true}));
     }
-  }
-}
+  };

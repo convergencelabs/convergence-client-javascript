@@ -1,17 +1,17 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import Session from "../Session";
+import {Session} from "../Session";
 import {RealTimeModel} from "./RealTimeModel";
-import ModelFqn from "./ModelFqn";
+import {ModelFqn} from "./ModelFqn";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
 import {OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
-import MessageType from "../connection/protocol/MessageType";
-import OperationTransformer from "./ot/xform/OperationTransformer";
-import TransformationFunctionRegistry from "./ot/xform/TransformationFunctionRegistry";
-import ClientConcurrencyControl from "./ot/ClientConcurrencyControl";
+import {MessageType} from "../connection/protocol/MessageType";
+import {OperationTransformer} from "./ot/xform/OperationTransformer";
+import {TransformationFunctionRegistry} from "./ot/xform/TransformationFunctionRegistry";
+import {ClientConcurrencyControl} from "./ot/ClientConcurrencyControl";
 import {CreateRealTimeModelRequest} from "../connection/protocol/model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
-import Deferred from "../util/Deferred";
+import {Deferred} from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
 import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
@@ -22,7 +22,7 @@ import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 
-export default class ModelService extends ConvergenceEventEmitter {
+export class ModelService extends ConvergenceEventEmitter {
 
   private _openRequestsByFqn: { [key: string]: OpenRequest; } = {};
   private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};

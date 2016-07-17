@@ -1,6 +1,6 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
-import MessageType from "../../connection/protocol/MessageType";
+import {MessageType} from "../../connection/protocol/MessageType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferencePublished} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -10,7 +10,7 @@ import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeValue} from "../RealTimeValue";
-import Immutable from "../../util/Immutable";
+import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 
 export class ReferenceManager {

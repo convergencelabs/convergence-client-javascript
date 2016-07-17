@@ -1,10 +1,10 @@
-import OperationPair from "../OperationPair";
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import StringInsertOperation from "../../ops/StringInsertOperation";
-import StringRemoveOperation from "../../ops/StringRemoveOperation";
+import {OperationPair} from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {StringInsertOperation} from "../../ops/StringInsertOperation";
+import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 
-export default class StringInsertRemoveOTF implements OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> {
-  transform(s: StringInsertOperation, c: StringRemoveOperation): OperationPair {
+export var StringInsertRemoveOTF: OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> =
+  (s: StringInsertOperation, c: StringRemoveOperation) => {
     if (s.index <= c.index) {
       // S-IR-1 and S-IR-2
       return new OperationPair(s, c.copy({index: c.index + s.value.length}));
@@ -22,5 +22,4 @@ export default class StringInsertRemoveOTF implements OperationTransformationFun
           c.value.substring(offsetDelta, c.value.length)
         }));
     }
-  }
-}
+  };

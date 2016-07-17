@@ -2,8 +2,8 @@ import AbstractReceiveAction from "./AbstractReceiveAction";
 import {TimeoutCallback} from "./MockConvergenceServer";
 import {CompleteCallback} from "./MockConvergenceServer";
 import {IDoneManager} from "./doneManager";
-import MessageType from "../../main/ts/connection/protocol/MessageType";
-import EqualsUtil from "../../main/ts/util/EqualsUtil";
+import {MessageType} from "../../main/ts/connection/protocol/MessageType";
+import {EqualsUtil} from "../../main/ts/util/EqualsUtil";
 import ReceiveRequestRecord from "./ReceiveRequestRecord";
 
 export default class ReceiveRequestAction extends AbstractReceiveAction {

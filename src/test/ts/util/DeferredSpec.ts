@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import Deferred from "../../../main/ts/util/Deferred";
+import {Deferred} from "../../../main/ts/util/Deferred";
 
 
 var expect: ExpectStatic = chai.expect;

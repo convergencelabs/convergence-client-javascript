@@ -1,12 +1,10 @@
-import OperationTransformationFunction from "../OperationTransformationFunction";
-import ObjectRemovePropertyOperation from "../../ops/ObjectRemovePropertyOperation";
-import ObjectAddPropertyOperation from "../../ops/ObjectAddPropertyOperation";
-import OperationPair from "../OperationPair";
+import {OperationTransformationFunction} from "../OperationTransformationFunction";
+import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
+import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
+import {OperationPair} from "../OperationPair";
 
-export default class ObjectRemovePropertyAddPropertyOTF
-  implements OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectAddPropertyOperation> {
-
-  transform(s: ObjectRemovePropertyOperation, c: ObjectAddPropertyOperation): OperationPair {
+export var ObjectRemovePropertyAddPropertyOTF: OperationTransformationFunction<ObjectRemovePropertyOperation, ObjectAddPropertyOperation> =
+  (s: ObjectRemovePropertyOperation, c: ObjectAddPropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-RA-1
       return new OperationPair(s, c);
@@ -14,5 +12,4 @@ export default class ObjectRemovePropertyAddPropertyOTF
       // O-RA-2
       throw new Error("Remove property and add property can not target the same property");
     }
-  }
-}
+  };

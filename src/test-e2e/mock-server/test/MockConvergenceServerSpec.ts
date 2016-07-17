@@ -1,8 +1,8 @@
-import MessageType from "../../../main/ts/connection/protocol/MessageType";
+import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {MockConvergenceServer} from "./../MockConvergenceServer";
 import {DoneType} from "./../MockConvergenceServer";
 import {IMockServerOptions} from "./../MockConvergenceServer";
-import EqualsUtil from "../../../main/ts/util/EqualsUtil";
+import {EqualsUtil} from "../../../main/ts/util/EqualsUtil";
 import {ISendRecord} from "../records";
 
 describe('A MockConvergenceServer', function(): void {

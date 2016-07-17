@@ -2,7 +2,7 @@ import {IncomingProtocolRequestMessage} from "../protocol";
 import {OutgoingProtocolResponseMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
-import ModelFqn from "../../../model/ModelFqn";
+import {ModelFqn} from "../../../model/ModelFqn";
 import {DataValueSerializer} from "./dataValue";
 import {ObjectValue} from "../../../model/dataValue";
 

@@ -1,15 +1,15 @@
-import ProcessedOperationEvent from "./ProcessedOperationEvent";
-import Operation from "./ops/Operation";
-import DiscreteOperation from "./ops/DiscreteOperation";
-import UnprocessedOperationEvent from "./UnprocessedOperationEvent";
+import {ProcessedOperationEvent} from "./ProcessedOperationEvent";
+import {Operation} from "./ops/Operation";
+import {DiscreteOperation} from "./ops/DiscreteOperation";
+import {UnprocessedOperationEvent} from "./UnprocessedOperationEvent";
 import {EventEmitter} from "../../util/EventEmitter";
-import CompoundOperation from "./ops/CompoundOperation";
-import OperationTransformer from "./xform/OperationTransformer";
-import OperationPair from "./xform/OperationPair";
+import {CompoundOperation} from "./ops/CompoundOperation";
+import {OperationTransformer} from "./xform/OperationTransformer";
+import {OperationPair} from "./xform/OperationPair";
 import {ReferenceTransformer} from "./xform/ReferenceTransformer";
 import {ModelReferenceData} from "./xform/ReferenceTransformer";
 
-export default class ClientConcurrencyControl extends EventEmitter {
+export class ClientConcurrencyControl extends EventEmitter {
 
   static Events: any = {
     COMMIT_STATE_CHANGED: "commitStateChanged"

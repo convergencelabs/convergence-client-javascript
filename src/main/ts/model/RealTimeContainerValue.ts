@@ -1,6 +1,6 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {PathElement} from "./ot/Path";
-import RealTimeValueType from "./RealTimeValueType";
+import {RealTimeValueType} from "./RealTimeValueType";
 import {Path} from "./ot/Path";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";

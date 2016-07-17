@@ -1,4 +1,4 @@
-enum MessageType {
+export enum MessageType {
   ERROR = 0,
 
   PING = 1,
@@ -79,5 +79,3 @@ enum MessageType {
   PRESENCE_SESSION_AVAILABLE = 104,
   PRESENCE_SESSION_UNAVAILABLE = 105
 }
-
-export default MessageType;

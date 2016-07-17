@@ -1,9 +1,9 @@
-import Immutable from "../../../util/Immutable";
-import DiscreteOperation from "./DiscreteOperation";
+import {Immutable} from "../../../util/Immutable";
+import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
 
-export default class ObjectSetPropertyOperation extends DiscreteOperation {
+export class ObjectSetPropertyOperation extends DiscreteOperation {
 
   constructor(id: string, noOp: boolean, public prop: string, public value: DataValue) {
     super(OperationType.OBJECT_SET, id, noOp);
