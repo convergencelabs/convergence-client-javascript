@@ -2,12 +2,12 @@ import {Session} from "../Session";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
-import {ConvergenceSubject} from "./ConvergenceSubject";
 import {UserPresence} from "./UserPresence";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Observable} from "rxjs/Observable";
-import "rxjs/Operator/last";
-import "rxjs/Observable/fromPromise";
+import "rxjs/add/operator/last";
+import 'rxjs/add/observable/fromPromise';
+import 'rxjs/add/operator/map';
 import {OutgoingProtocolRequestMessage} from "../connection/protocol/protocol";
 import {MessageType} from "../connection/protocol/MessageType";
 import {PresenceAvailabilityChanged} from "../connection/protocol/presence/pressenceAvailability";
@@ -15,8 +15,9 @@ import {PresenceStateSet} from "../connection/protocol/presence/presenceState";
 import {PresenceStateCleared} from "../connection/protocol/presence/presenceState";
 import {RequestPresence} from "../connection/protocol/presence/requestPresence";
 import {RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
-import {PresenceSetState} from "../../../../build/main/ts/connection/protocol/presence/presenceState";
-import {PresenceClearState} from "../../../../build/main/ts/connection/protocol/presence/presenceState";
+import {PresenceSetState} from "../connection/protocol/presence/presenceState";
+import {PresenceClearState} from "../connection/protocol/presence/presenceState";
+import {ConvergenceSubject} from "../presence/ConvergenceSubject";
 
 export class PresenceService extends ConvergenceEventEmitter {
 
