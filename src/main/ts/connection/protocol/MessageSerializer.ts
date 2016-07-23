@@ -45,6 +45,14 @@ import {ActivitySessionJoinedDeserializer} from "./activity/sessionJoined";
 import {ActivitySessionLeftDeserializer} from "./activity/sessionLeft";
 import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
 import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
+import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
+import {PresenceStateSetDeserializer} from "./presence/presenceState";
+import {PresenceStateClearedDeserializer} from "./presence/presenceState";
+import {PresenceSetStateSerializer} from "../../../../../build/main/ts/connection/protocol/presence/presenceState";
+import {PresenceClearStateSerializer} from "../../../../../build/main/ts/connection/protocol/presence/presenceState";
+import {RequestPresenceSerializer} from "../../../../../build/main/ts/connection/protocol/presence/requestPresence";
+import {SubscribePresenceSerializer} from "../../../../../build/main/ts/connection/protocol/presence/subscribePresence";
+import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -161,6 +169,14 @@ MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LEAVE_REQUE
 MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LOCAL_STATE_SET, ActivitySetStateSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LOCAL_STATE_CLEARED, ActivityClearStateSerializer);
 
+
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SET_STATE, PresenceSetStateSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_CLEAR_STATE, PresenceClearStateSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_REQUEST, RequestPresenceSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SUBSCRIBE, SubscribePresenceSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_UNSUBSCRIBE, UnsubscribePresenceSerializer);
+
+
 // Deserializers
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PING);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PONG);
@@ -196,3 +212,8 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_SESSION_J
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_SESSION_LEFT, ActivitySessionLeftDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_STATE_SET, ActivityRemoteStateSetDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_STATE_CLEARED, ActivityRemoteStateClearedDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_AVAILABILITY_CHANGED, PresenceAvailabilityChangedDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_SET, PresenceStateSetDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
