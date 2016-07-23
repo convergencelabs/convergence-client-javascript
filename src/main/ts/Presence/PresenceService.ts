@@ -110,7 +110,8 @@ export class PresenceService extends ConvergenceEventEmitter {
     let userPresences: Observable<UserPresence>[] = [];
     for (var userId of userIds) {
       if (!this._userPresences.has(userId)) {
-        this._userPresences.set(userId, new ConvergenceSubject<UserPresence>(this._subscribeFunction(userId), this._unsubscribeFunction(userId)));
+        this._userPresences.set(userId, new ConvergenceSubject<UserPresence>(
+          this._subscribeFunction(userId), this._unsubscribeFunction(userId)));
         const presenceSubRequest: OutgoingProtocolRequestMessage = null;
         this._connection.request(presenceSubRequest).then(response => {
           // TODO: Handle Response

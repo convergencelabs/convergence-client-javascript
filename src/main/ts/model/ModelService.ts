@@ -50,15 +50,15 @@ export class ModelService extends ConvergenceEventEmitter {
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(collectionId)) {
-      return Promise.reject(new Error("collectionId must be a non-null, non empty string."));
+      return Promise.reject<RealTimeModel>(new Error("collectionId must be a non-null, non empty string."));
     }
 
     if (!Validation.nonEmptyString(modelId)) {
-      return Promise.reject(new Error("modelId must be a non-null, non empty string."));
+      return Promise.reject<RealTimeModel>(new Error("modelId must be a non-null, non empty string."));
     }
 
     if (arguments.length > 2 && typeof initializer !== "function") {
-      return Promise.reject(new Error("initializer, supplied as an argument, must be a function."));
+      return Promise.reject<RealTimeModel>(new Error("initializer, supplied as an argument, must be a function."));
     }
 
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);

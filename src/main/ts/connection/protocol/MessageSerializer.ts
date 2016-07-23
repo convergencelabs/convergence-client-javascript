@@ -46,13 +46,14 @@ import {ActivitySessionLeftDeserializer} from "./activity/sessionLeft";
 import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
 import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
 import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
-import {PresenceStateSetDeserializer} from "./presence/presenceState";
+import {
+  PresenceStateSetDeserializer, PresenceSetStateSerializer,
+  PresenceClearStateSerializer
+} from "./presence/presenceState";
 import {PresenceStateClearedDeserializer} from "./presence/presenceState";
-import {PresenceSetStateSerializer} from "../../../../../build/main/ts/connection/protocol/presence/presenceState";
-import {PresenceClearStateSerializer} from "../../../../../build/main/ts/connection/protocol/presence/presenceState";
-import {RequestPresenceSerializer} from "../../../../../build/main/ts/connection/protocol/presence/requestPresence";
-import {SubscribePresenceSerializer} from "../../../../../build/main/ts/connection/protocol/presence/subscribePresence";
 import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
+import {RequestPresenceSerializer} from "./presence/requestPresence";
+import {SubscribePresenceSerializer} from "./presence/subscribePresence";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
