@@ -1,4 +1,5 @@
 import {ConvergenceConnection} from "./connection/ConvergenceConnection";
+import {ConvergenceOptions} from "./ConvergenceOptions";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
