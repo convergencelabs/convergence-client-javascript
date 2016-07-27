@@ -25,14 +25,14 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   private _type: string;
   private _key: string;
   private _source: RealTimeValue<any>;
-  private _userId: string;
+  private _username: string;
   private _sessionId: string;
   private _local: boolean;
 
   constructor(type: string,
               key: string,
               source: RealTimeValue<any>,
-              userId: string,
+              username: string,
               sessionId: string,
               local: boolean) {
     super();
@@ -41,7 +41,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     this._type = type;
     this._key = key;
     this._source = source;
-    this._userId = userId;
+    this._username = username;
     this._sessionId = sessionId;
     this._local = local;
   }
@@ -62,8 +62,8 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     return this._local;
   }
 
-  userId(): string {
-    return this._userId;
+  username(): string {
+    return this._username;
   }
 
   sessionId(): string {

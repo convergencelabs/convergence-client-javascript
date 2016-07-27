@@ -133,7 +133,7 @@ describe('RealTimeNumber', () => {
       src: myNumber,
       name: RealTimeNumber.Events.ADD,
       sessionId: sessionId,
-      userId: username,
+      username: username,
       version: version,
       timestamp: timestamp,
       value: 5
@@ -154,7 +154,7 @@ describe('RealTimeNumber', () => {
       src: myNumber,
       name: RealTimeNumber.Events.VALUE,
       sessionId: sessionId,
-      userId: username,
+      username: username,
       version: version,
       timestamp: timestamp,
       value: 20

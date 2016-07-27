@@ -39,7 +39,6 @@ describe('IdentityService.getUser()', () => {
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
       return domain.identityService().getUser("u1");
     }).then((user: DomainUser) => {
-      expect(user.uid).to.equal("u1");
       expect(user.username).to.equal("test1");
       expect(user.firstName).to.equal("test");
       expect(user.lastName).to.equal("user");
@@ -151,14 +150,12 @@ describe('IdentityService.searchUsers()', () => {
       expect(users.length).to.equal(2);
 
       var user1: DomainUser = users[0];
-      expect(user1.uid).to.equal("u1");
       expect(user1.username).to.equal("test1");
       expect(user1.firstName).to.equal("test");
       expect(user1.lastName).to.equal("user");
       expect(user1.email).to.equal("test@example.com");
 
       var user2: DomainUser = users[1];
-      expect(user2.uid).to.equal("u2");
       expect(user2.username).to.equal("test2");
       expect(user2.firstName).to.equal("test2");
       expect(user2.lastName).to.equal("user2");

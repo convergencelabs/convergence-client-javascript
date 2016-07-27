@@ -7,7 +7,6 @@ import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
 
 export var UserField: any = {
-  USERID: "userid",
   USERNAME: "username",
   EMAIL: "email",
   FIRST_NAME: "firstname",
@@ -15,11 +14,10 @@ export var UserField: any = {
 };
 
 var validLookUpFields: string[] = [
-  UserField.USERID, UserField.USERNAME, UserField.EMAIL
+  UserField.USERNAME, UserField.EMAIL
 ];
 
 var validSearchFields: string[] = [
-  UserField.USERID,
   UserField.USERNAME,
   UserField.EMAIL,
   UserField.FIRST_NAME,
@@ -47,7 +45,7 @@ export class IdentityService {
     });
   }
 
-  getUsers(values: string | string[], field: string = UserField.USERID): Promise<DomainUser[]> {
+  getUsers(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
     } else if (validLookUpFields.indexOf(field) < 0) {

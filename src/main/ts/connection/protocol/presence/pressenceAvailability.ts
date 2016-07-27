@@ -2,13 +2,13 @@ import {IncomingProtocolNormalMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface PresenceAvailabilityChanged extends IncomingProtocolNormalMessage {
-  userId: string;
+  username: string;
   available: boolean;
 }
 
 export var PresenceAvailabilityChangedDeserializer: MessageBodyDeserializer<PresenceAvailabilityChanged> = (body: any) => {
   var result: PresenceAvailabilityChanged = {
-    userId: body.u,
+    username: body.u,
     available: body.a
   };
   return result;

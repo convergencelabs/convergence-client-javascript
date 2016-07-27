@@ -7,10 +7,10 @@ export class IndexReference extends ModelReference<number> {
 
   constructor(key: string,
               source: RealTimeValue<any>,
-              userId: string,
+              username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.INDEX, key, source, userId, sessionId, local);
+    super(ReferenceType.INDEX, key, source, username, sessionId, local);
   }
 
   _handleInsert(index: number, length: number): void {

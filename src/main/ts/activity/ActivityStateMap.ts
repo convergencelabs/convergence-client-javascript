@@ -58,7 +58,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateSetEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_SET,
-      userId: SessionIdParser.parseUserId(sessionId),
+      username: SessionIdParser.parseUsername(sessionId),
       sessionId: sessionId,
       key: key,
       value: value,
@@ -116,7 +116,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateClearedEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_CLEARED,
-      userId: SessionIdParser.parseUserId(sessionId),
+      username: SessionIdParser.parseUsername(sessionId),
       sessionId: sessionId,
       key: key,
       local: true
@@ -147,7 +147,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateSetEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_SET,
-      userId: SessionIdParser.parseUserId(message.sessionId),
+      username: SessionIdParser.parseUsername(message.sessionId),
       sessionId: message.sessionId,
       key: message.key,
       value: message.value,
@@ -160,7 +160,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
     var event: ActivityRemoteStateClearedEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_CLEARED,
-      userId: SessionIdParser.parseUserId(message.sessionId),
+      username: SessionIdParser.parseUsername(message.sessionId),
       sessionId: message.sessionId,
       key: message.key,
       local: false
@@ -170,7 +170,7 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
 }
 
 export interface ActivityRemoteStateSetEvent extends ConvergenceEvent {
-  userId: string;
+  username: string;
   sessionId: string;
   key: string;
   value: any;
@@ -178,7 +178,7 @@ export interface ActivityRemoteStateSetEvent extends ConvergenceEvent {
 }
 
 export interface ActivityRemoteStateClearedEvent extends ConvergenceEvent {
-  userId: string;
+  username: string;
   sessionId: string;
   key: string;
   local: boolean;

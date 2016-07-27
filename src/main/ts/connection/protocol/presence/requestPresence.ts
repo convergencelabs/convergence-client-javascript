@@ -4,12 +4,12 @@ import {IncomingProtocolNormalMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface RequestPresence extends OutgoingProtocolRequestMessage {
-  userIds: string[];
+  usernames: string[];
 }
 
 export var RequestPresenceSerializer: MessageBodySerializer = (request: RequestPresence) => {
   return {
-    u: request.userIds
+    u: request.usernames
   };
 };
 

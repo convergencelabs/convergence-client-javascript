@@ -42,8 +42,8 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     return true;
   }
 
-  userId(): string {
-    return this._reference.userId();
+  username(): string {
+    return this._reference.username();
   }
 
   sessionId(): string {

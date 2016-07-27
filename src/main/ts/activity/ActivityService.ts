@@ -83,19 +83,19 @@ export class ActivityService {
     };
 
     this._connection.request(openActivityMessage).then((response: ActivityOpenResponse) => {
-      var joinedSessionsByUserId: {[key: string]: RemoteSession[]} = {};
+      var joinedSessionsByUsername: {[key: string]: RemoteSession[]} = {};
       Object.keys(response.state).forEach((sessionId: string) => {
-        var userId: string = SessionIdParser.parseUserId(sessionId);
-        var userSessions: RemoteSession[] = joinedSessionsByUserId[userId];
+        var username: string = SessionIdParser.parseUsername(sessionId);
+        var userSessions: RemoteSession[] = joinedSessionsByUsername[username];
         if (userSessions === undefined) {
           userSessions = [];
-          joinedSessionsByUserId[userId] = userSessions;
+          joinedSessionsByUsername[username] = userSessions;
         }
-        userSessions.push({userId: userId, sessionId: sessionId});
+        userSessions.push({username: username, sessionId: sessionId});
       });
       var activity: Activity = new Activity(
         this._connection,
-        joinedSessionsByUserId,
+        joinedSessionsByUsername,
         response.state,
         id,
         () => {

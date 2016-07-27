@@ -12,10 +12,10 @@ export class RangeReference extends ModelReference<IndexRange> {
 
   constructor(key: string,
               source: RealTimeValue<any>,
-              userId: string,
+              username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.RANGE, key, source, userId, sessionId, local);
+    super(ReferenceType.RANGE, key, source, username, sessionId, local);
   }
 
   _handleInsert(index: number, length: number): void {

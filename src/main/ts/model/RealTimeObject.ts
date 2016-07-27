@@ -128,7 +128,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
       }
     } else {
       var session: Session = this.model().session();
-      var reference: PropertyReference = new PropertyReference(key, this, session.userId(), session.userId(), true);
+      var reference: PropertyReference = new PropertyReference(key, this, session.username(), session.sessionId(), true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalPropertyReference = new LocalPropertyReference(
@@ -247,7 +247,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
       src: this,
       name: RealTimeObject.Events.SET,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
@@ -273,7 +273,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
       src: this,
       name: RealTimeObject.Events.SET,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       key: key,
@@ -297,7 +297,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
         src: this,
         name: RealTimeObject.Events.REMOVE,
         sessionId: operationEvent.sessionId,
-        userId: operationEvent.userId,
+        username: operationEvent.username,
         version: operationEvent.version,
         timestamp: operationEvent.timestamp,
         key: key
@@ -334,7 +334,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
       src: this,
       name: RealTimeObject.Events.VALUE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value

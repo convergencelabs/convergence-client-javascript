@@ -24,7 +24,7 @@ ReferenceTypeCodes.put(3, ReferenceType.PATH);
 
 export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   sessionId: string;
-  userId: string;
+  username: string;
   resourceId: string;
   key: string;
   id: string;
@@ -49,7 +49,7 @@ export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteR
   var result: RemoteReferencePublished = {
     resourceId: body.r,
     sessionId: body.s,
-    userId: SessionIdParser.deserialize(body.s).userId,
+    username: SessionIdParser.parseUsername(body.s),
     key: body.k,
     id: body.d,
     referenceType: ReferenceTypeCodes.value(body.c)
@@ -83,7 +83,7 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
   var result: RemoteReferenceSet = {
     resourceId: body.r,
     sessionId: body.s,
-    userId: SessionIdParser.deserialize(body.s).userId,
+    username: SessionIdParser.parseUsername(body.s),
     key: body.k,
     id: body.d,
     referenceType: type,
@@ -95,7 +95,7 @@ export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferen
 var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
   var result: RemoteReferenceEvent = {
     sessionId: body.s,
-    userId: SessionIdParser.deserialize(body.s).userId,
+    username: SessionIdParser.parseUsername(body.s),
     resourceId: body.r,
     key: body.k,
     id: body.d

@@ -30,7 +30,6 @@ export var TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAu
 
 export interface AuthenticationResponse extends IncomingProtocolResponseMessage {
   success: boolean;
-  userId: string;
   username: string;
   sessionId: string;
 }
@@ -39,7 +38,6 @@ export var AuthenticationResponseDeserializer: MessageBodyDeserializer<Authentic
   return {
     success: body.s,
     username: body.n,
-    userId: body.i,
     sessionId: body.e
   };
 };

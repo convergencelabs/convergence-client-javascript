@@ -84,7 +84,7 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._messageEmitter = new EventEmitter();
 
-    this._session = new SessionImpl(domain, this, null, null, null);
+    this._session = new SessionImpl(domain, this, null, null);
   }
 
   session(): Session {
@@ -202,7 +202,6 @@ export class ConvergenceConnection extends EventEmitter {
     return this.request(authRequest).then((response: AuthenticationResponse) => {
       if (response.success === true) {
         this._session._setUsername(response.username);
-        this._session._setUserId(response.userId);
         this._session._setSessionId(response.sessionId);
         this._session.setAuthenticated(true);
         return;

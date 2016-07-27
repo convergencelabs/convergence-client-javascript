@@ -13,10 +13,10 @@ export class CellReference extends ModelReference<CellRange> {
 
   constructor(key: string,
               source: RealTimeTable,
-              userId: string,
+              username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.CELL, key, source, userId, sessionId, local);
+    super(ReferenceType.CELL, key, source, username, sessionId, local);
   }
 
   _handleInsertRow(index: number, length: number): void {

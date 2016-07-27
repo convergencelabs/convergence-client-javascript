@@ -89,7 +89,7 @@ describe('Reference Transformation E2E', () => {
       console.log(model.connectedSessions());
 
       rts.on(RealTimeString.Events.REFERENCE, function(e) {
-        console.log(e.reference.userId());
+        console.log(e.reference.username());
         refPublishAction.acknowledgeReceipt();
         e.reference.on("set", (e) => {
           referenceSetAction.acknowledgeReceipt();

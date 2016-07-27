@@ -93,7 +93,7 @@ describe('RealTimeBoolean', () => {
       src: myBoolean,
       name: RealTimeBoolean.Events.VALUE,
       sessionId: sessionId,
-      userId: username,
+      username: username,
       version: version,
       timestamp: timestamp,
       value: false

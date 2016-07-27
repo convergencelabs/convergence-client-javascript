@@ -85,14 +85,14 @@ export class ReferenceManager {
       throw new Error(`Invalid reference type for RealTimeString: ${event.referenceType}`);
     }
 
-    var userId: string = event.userId;
+    var username: string = event.username;
     var reference: ModelReference<any>;
     switch (event.referenceType) {
       case ReferenceType.INDEX:
-        reference = new IndexReference(event.key, this._source, userId, event.sessionId, false);
+        reference = new IndexReference(event.key, this._source, username, event.sessionId, false);
         break;
       case ReferenceType.RANGE:
-        reference = new RangeReference(event.key, this._source, userId, event.sessionId, false);
+        reference = new RangeReference(event.key, this._source, username, event.sessionId, false);
         break;
       default:
         break;

@@ -104,7 +104,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       }
     } else {
       var session: Session = this.model().session();
-      var reference: IndexReference = new IndexReference(key, this, session.userId(), session.userId(), true);
+      var reference: IndexReference = new IndexReference(key, this, session.username(), session.sessionId(), true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalIndexReference = new LocalIndexReference(
@@ -127,7 +127,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       }
     } else {
       var session: Session = this.model().session();
-      var reference: RangeReference = new RangeReference(key, this, session.userId(), session.userId(), true);
+      var reference: RangeReference = new RangeReference(key, this, session.username(), session.sessionId(), true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalRangeReference = new LocalRangeReference(
@@ -199,7 +199,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       src: this,
       name: RealTimeString.Events.INSERT,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       index: index,
@@ -229,7 +229,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       src: this,
       name: RealTimeString.Events.REMOVE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       index: index,
@@ -257,7 +257,7 @@ export default class RealTimeString extends RealTimeValue<String> {
       src: this,
       name: RealTimeString.Events.VALUE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value

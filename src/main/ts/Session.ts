@@ -12,11 +12,6 @@ export interface Session {
   sessionId(): string;
 
   /**
-   * @return The userId of the authenticated client or null if not authenticated
-   */
-  userId(): string;
-
-  /**
    * @return The username of the authenticated client or null if not authenticated
    */
   username(): string;

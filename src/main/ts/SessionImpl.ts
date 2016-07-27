@@ -8,14 +8,12 @@ export class SessionImpl implements Session {
   private _connection: ConvergenceConnection;
   private _sessionId: string;
   private _userame: string;
-  private _userId: string;
   private _authenticated: boolean;
 
-  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, userId: string, username: string) {
+  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
     this._domain = domain;
     this._sessionId = sessionId;
     this._userame = username;
-    this._userId = userId;
     this._connection = connection;
     this._authenticated = false;
   }
@@ -47,14 +45,6 @@ export class SessionImpl implements Session {
 
   _setUsername(username: string): void {
     this._userame = username;
-  }
-
-  userId(): string {
-    return this._userId;
-  }
-
-  _setUserId(userId: string): void {
-    this._userId = userId;
   }
 
   /**

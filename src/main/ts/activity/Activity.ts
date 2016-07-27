@@ -29,7 +29,7 @@ export class Activity extends ConvergenceEventEmitter {
 
   private _id: string;
 
-  private _joinedSessionsByUserId: {[key: string]: RemoteSession[]};
+  private _joinedSessionsByUsername: {[key: string]: RemoteSession[]};
   private _stateMap: ActivityStateMap;
 
   private _connection: ConvergenceConnection;
@@ -40,7 +40,7 @@ export class Activity extends ConvergenceEventEmitter {
   private _open: boolean;
 
   constructor(connection: ConvergenceConnection,
-              joinedSessionsByUserId: {[key: string]: RemoteSession[]},
+              joinedSessionsByUsername: {[key: string]: RemoteSession[]},
               stateMap: ActivityState,
               id: string,
               closeCallback: (id: string) => void) {
@@ -50,7 +50,7 @@ export class Activity extends ConvergenceEventEmitter {
     this._closeCallback = closeCallback;
     this._joiningDeferred = null;
     this._joined = false;
-    this._joinedSessionsByUserId = joinedSessionsByUserId;
+    this._joinedSessionsByUsername = joinedSessionsByUsername;
     this._stateMap = new ActivityStateMap(
       connection,
       this,
@@ -114,8 +114,8 @@ export class Activity extends ConvergenceEventEmitter {
 
   joinedSessions(): RemoteSession[] {
     var result: RemoteSession[] = [];
-    Object.keys(this._joinedSessionsByUserId).forEach(userId => {
-      var sessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
+    Object.keys(this._joinedSessionsByUsername).forEach(username => {
+      var sessions: RemoteSession[] = this._joinedSessionsByUsername[username];
       sessions.forEach(session => {
         result.push(session);
       });
@@ -123,12 +123,12 @@ export class Activity extends ConvergenceEventEmitter {
     return result;
   }
 
-  joinedSessionsByUserId(): {[key: string]: RemoteSession[]} {
+  joinedSessionsByUsername(): {[key: string]: RemoteSession[]} {
     var result: {[key: string]: RemoteSession[]} = {};
-    Object.keys(this._joinedSessionsByUserId).forEach(userId => {
+    Object.keys(this._joinedSessionsByUsername).forEach(username => {
       var sessions: RemoteSession[] = [];
-      result[userId] = sessions;
-      this._joinedSessionsByUserId[userId].forEach(session => {
+      result[username] = sessions;
+      this._joinedSessionsByUsername[username].forEach(session => {
         sessions.push(session);
       });
     });
@@ -181,24 +181,24 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   private _sessionJoined(sessionId: string): void {
-    var userId: string = SessionIdParser.parseUserId(sessionId);
+    var username: string = SessionIdParser.parseUsername(sessionId);
 
     var fireUserEvent: boolean = false;
-    var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
+    var userSessions: RemoteSession[] = this._joinedSessionsByUsername[username];
     if (userSessions === undefined) {
       fireUserEvent = true;
       userSessions = [];
-      this._joinedSessionsByUserId[userId] = userSessions;
+      this._joinedSessionsByUsername[username] = userSessions;
     }
 
-    userSessions.push({userId: userId, sessionId: sessionId});
+    userSessions.push({username: username, sessionId: sessionId});
 
     if (fireUserEvent) {
       var userEvent: ActivityUserJoinedEvent = {
         src: this,
         name: Activity.Events.USER_JOINED,
         activityId: this._id,
-        userId: userId,
+        username: username,
         sessionId: sessionId,
         local: sessionId === this._connection.session().sessionId()
       };
@@ -209,7 +209,7 @@ export class Activity extends ConvergenceEventEmitter {
       src: this,
       name: Activity.Events.SESSION_JOINED,
       activityId: this._id,
-      userId: userId,
+      username: username,
       sessionId: sessionId,
       local: sessionId === this._connection.session().sessionId()
     };
@@ -217,10 +217,10 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   private _sessionLeft(sessionId: string): void {
-    var userId: string = SessionIdParser.parseUserId(sessionId);
+    var username: string = SessionIdParser.parseUsername(sessionId);
 
     var fireUserEvent: boolean = false;
-    var userSessions: RemoteSession[] = this._joinedSessionsByUserId[userId];
+    var userSessions: RemoteSession[] = this._joinedSessionsByUsername[username];
     userSessions.forEach((session: RemoteSession) => {
       if (session.sessionId === sessionId) {
         userSessions.splice(userSessions.indexOf(session), 1);
@@ -229,7 +229,7 @@ export class Activity extends ConvergenceEventEmitter {
 
     if (userSessions.length === 0) {
       fireUserEvent = true;
-      delete this._joinedSessionsByUserId[userId];
+      delete this._joinedSessionsByUsername[username];
     }
 
     if (fireUserEvent) {
@@ -237,7 +237,7 @@ export class Activity extends ConvergenceEventEmitter {
         src: this,
         name: Activity.Events.USER_LEFT,
         activityId: this._id,
-        userId: userId,
+        username: username,
         sessionId: sessionId,
         local: sessionId === this._connection.session().sessionId()
       };
@@ -248,7 +248,7 @@ export class Activity extends ConvergenceEventEmitter {
       src: this,
       name: Activity.Events.SESSION_LEFT,
       activityId: this._id,
-      userId: userId,
+      username: username,
       sessionId: sessionId,
       local: sessionId === this._connection.session().sessionId()
     };
@@ -258,28 +258,28 @@ export class Activity extends ConvergenceEventEmitter {
 
 export interface ActivityUserJoinedEvent extends ConvergenceEvent {
   activityId: string;
-  userId: string;
+  username: string;
   sessionId: string;
   local: boolean;
 }
 
 export interface ActivityUserLeftEvent extends ConvergenceEvent {
   activityId: string;
-  userId: string;
+  username: string;
   sessionId: string;
   local: boolean;
 }
 
 export interface ActivitySessionJoinedEvent extends ConvergenceEvent {
   activityId: string;
-  userId: string;
+  username: string;
   sessionId: string;
   local: boolean;
 }
 
 export interface ActivitySessionLeftEvent extends ConvergenceEvent {
   activityId: string;
-  userId: string;
+  username: string;
   sessionId: string;
   local: boolean;
 }

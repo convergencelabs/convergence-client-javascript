@@ -73,7 +73,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
       src: this,
       name: RealTimeBoolean.Events.VALUE,
       sessionId: operationEvent.sessionId,
-      userId: operationEvent.userId,
+      username: operationEvent.username,
       version: operationEvent.version,
       timestamp: operationEvent.timestamp,
       value: value

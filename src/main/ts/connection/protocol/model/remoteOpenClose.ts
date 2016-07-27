@@ -4,28 +4,28 @@ import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface RemoteClientOpenedModel extends IncomingProtocolResponseMessage {
   resourceId: string;
-  userId: string;
+  username: string;
   sessionId: string;
 }
 
 export var RemoteClientOpenedModelDeserializer: MessageBodyDeserializer<RemoteClientOpenedModel> = (body: any) => {
   return {
     resourceId: body.r,
-    userId: body.u,
+    username: body.u,
     sessionId: body.s
   };
 };
 
 export interface RemoteClientClosedModel extends IncomingProtocolResponseMessage {
   resourceId: string;
-  userId: string;
+  username: string;
   sessionId: string;
 }
 
 export var RemoteClientClosedModelDeserializer: MessageBodyDeserializer<RemoteClientClosedModel> = (body: any) => {
   return {
     resourceId: body.r,
-    userId: body.u,
+    username: body.u,
     sessionId: body.s
   };
 };

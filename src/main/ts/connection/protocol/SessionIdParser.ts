@@ -1,9 +1,9 @@
 export class SessionIdParser {
   static serialize(sk: SessionKey): string {
-    return `${sk.userId}:${sk.sessionId}`;
+    return `${sk.username}:${sk.sessionId}`;
   }
 
-  static parseUserId(sk: string): string {
+  static parseUsername(sk: string): string {
     var parts: string[] = sk.split(":");
     return parts[0];
   }
@@ -11,13 +11,13 @@ export class SessionIdParser {
   static deserialize(sk: string): SessionKey {
     var parts: string[] = sk.split(":");
     return {
-      userId: parts[0],
+      username: parts[0],
       sessionId: parts[1]
     };
   }
 }
 
 export interface SessionKey {
-  userId: string;
+  username: string;
   sessionId: string;
 }

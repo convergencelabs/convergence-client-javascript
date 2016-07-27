@@ -5,7 +5,6 @@ import {MessageBodyDeserializer} from "../MessageSerializer";
 import {DomainUserDeserilizer} from "./DomainUser";
 
 var userFieldCodes: {[key: string]: number} = {
-  "userid": 0,
   "username": 1,
   "firstname": 2,
   "lastname": 3,

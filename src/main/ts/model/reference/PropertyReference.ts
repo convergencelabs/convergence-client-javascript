@@ -6,10 +6,10 @@ export class PropertyReference extends ModelReference<string> {
 
   constructor(key: string,
               source: RealTimeValue<any>,
-              userId: string,
+              username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.PROPERTY, key, source, userId, sessionId, local);
+    super(ReferenceType.PROPERTY, key, source, username, sessionId, local);
   }
 
   _handlePropertyRemoved(property: string): void {

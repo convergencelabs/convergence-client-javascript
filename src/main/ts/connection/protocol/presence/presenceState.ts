@@ -27,14 +27,14 @@ export var PresenceClearStateSerializer: MessageBodySerializer = (request: Prese
 };
 
 export interface PresenceStateSet extends IncomingProtocolNormalMessage {
-  userId: string;
+  username: string;
   key: string;
   value: any;
 }
 
 export var PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSet> = (body: any) => {
   var result: PresenceStateSet = {
-    userId: body.u,
+    username: body.u,
     key: body.k,
     value: body.v
   };
@@ -42,13 +42,13 @@ export var PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSe
 };
 
 export interface PresenceStateCleared extends IncomingProtocolNormalMessage {
-  userId: string;
+  username: string;
   key: string;
 }
 
 export var PresenceStateClearedDeserializer: MessageBodyDeserializer<PresenceStateCleared> = (body: any) => {
   var result: PresenceStateCleared = {
-    userId: body.u,
+    username: body.u,
     key: body.k
   };
   return result;

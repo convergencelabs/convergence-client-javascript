@@ -183,7 +183,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       var published: RemoteReferencePublished = {
         type: MessageType.REFERENCE_PUBLISHED,
         sessionId: ref.sessionId,
-        userId: SessionIdParser.deserialize(ref.sessionId).userId,
+        username: SessionIdParser.deserialize(ref.sessionId).username,
         resourceId: this._resourceId,
         key: ref.key,
         id: ref.id,
@@ -200,7 +200,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         var set: RemoteReferenceSet = {
           type: MessageType.REFERENCE_SET,
           sessionId: ref.sessionId,
-          userId: SessionIdParser.deserialize(ref.sessionId).userId,
+          username: SessionIdParser.deserialize(ref.sessionId).username,
           resourceId: this._resourceId,
           key: ref.key,
           id: ref.id,
@@ -215,7 +215,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   connectedSessions(): RemoteSession[] {
     return this._sessions.map((sessionId: string) => {
       return {
-        userId: SessionIdParser.parseUserId(sessionId),
+        username: SessionIdParser.parseUsername(sessionId),
         sessionId: sessionId
       };
     });
@@ -335,7 +335,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       name: RealTimeModel.Events.SESSION_OPENED,
       src: this,
       sessionId: message.sessionId,
-      userId: SessionIdParser.parseUserId(message.sessionId)
+      username: SessionIdParser.parseUsername(message.sessionId)
     };
     this.emitEvent(event);
   }
@@ -352,7 +352,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       name: RealTimeModel.Events.SESSION_CLOSED,
       src: this,
       sessionId: message.sessionId,
-      userId: SessionIdParser.parseUserId(message.sessionId)
+      username: SessionIdParser.parseUsername(message.sessionId)
     };
     this.emitEvent(event);
   }
@@ -450,7 +450,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     var clientId: string = processed.clientId;
     var contextVersion: number = processed.version;
     var timestamp: number = processed.timestamp;
-    var userId: string = SessionIdParser.parseUserId(message.sessionId);
+    var username: string = SessionIdParser.parseUsername(message.sessionId);
 
     this._version = contextVersion + 1;
     this._modifiedTime = new Date(timestamp);
@@ -458,13 +458,12 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     if (operation.type === OperationType.COMPOUND) {
       var compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
-        // TODO: Determine where to get userId
-        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, userId, contextVersion, timestamp, op);
+        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
         this._deliverToChild(modelEvent);
       });
     } else {
       var modelEvent: ModelOperationEvent =
-        new ModelOperationEvent(clientId, userId, contextVersion, timestamp, <DiscreteOperation> operation);
+        new ModelOperationEvent(clientId, username, contextVersion, timestamp, <DiscreteOperation> operation);
       this._deliverToChild(modelEvent);
     }
   }
@@ -514,12 +513,12 @@ interface RealTimeModelClosedEvent extends RealTimeModelEvent {
 }
 
 export interface RemoteSessionOpenedEvent extends ConvergenceEvent {
-  userId: string;
+  username: string;
   sessionId: string;
 }
 
 export interface RemoteSessionClosedEvent extends ConvergenceEvent {
-  userId: string;
+  username: string;
   sessionId: string;
 }
 

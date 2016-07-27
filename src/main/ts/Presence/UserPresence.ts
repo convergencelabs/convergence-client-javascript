@@ -1,13 +1,16 @@
 export class UserPresence {
-  private _userId: string;
+  private _username: string;
   private _available: boolean;
   private _state: Map<string, any>;
 
-  constructor(userId: string, available: boolean, state: Map<string, any>) {
+  constructor(username: string, available: boolean, state: Map<string, any>) {
+    this._username = username;
+    this._available = available;
+    this._state = state; // TODO copy
   }
 
-  userId(): string {
-    return this._userId;
+  username(): string {
+    return this._username;
   }
 
   available(): boolean {

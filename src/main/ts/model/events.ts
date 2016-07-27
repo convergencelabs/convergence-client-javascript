@@ -4,7 +4,7 @@ import {RealTimeValue} from "./RealTimeValue";
 export interface ModelChangeEvent extends ConvergenceEvent {
   src: RealTimeValue<any>;
   sessionId: string;
-  userId: string;
+  username: string;
   version: number;
   timestamp: number;
 }

@@ -1,4 +1,4 @@
 export interface RemoteSession {
-  userId: string;
+  username: string;
   sessionId: string;
 }
