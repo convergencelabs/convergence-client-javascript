@@ -42,18 +42,18 @@ export class IdentityService {
       } else if (users.length === 1) {
         return Promise.resolve(users[0]);
       } else {
-        return Promise.reject(new Error("Error getting user."));
+        return Promise.reject<DomainUser>(new Error("Error getting user."));
       }
     });
   }
 
   getUsers(values: string | string[], field: string = UserField.USERID): Promise<DomainUser[]> {
     if (field === undefined || field === null) {
-      return Promise.reject(new Error("Must specify a lookup field"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
     } else if (validLookUpFields.indexOf(field) < 0) {
-      return Promise.reject(new Error("invalid lookup field"));
+      return Promise.reject<DomainUser[]>(new Error("invalid lookup field"));
     } else if (values === undefined || values === null || (Array.isArray(values) && (<string[]>values).length === 0)) {
-      return Promise.reject(new Error("Must specify at least one value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify at least one value"));
     } else {
       if (!Array.isArray(values)) {
         values = [<string>values];
@@ -78,9 +78,9 @@ export class IdentityService {
               orderBy?: string,
               ascending?: boolean): Promise<DomainUser[]> {
     if (fields === undefined || fields === null || (Array.isArray(fields) && (<string[]>fields).length === 0)) {
-      return Promise.reject(new Error("Must specify at least one field to search"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (value === undefined || value === null) {
-      return Promise.reject(new Error("Must specify a search value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
     } else {
       if (!Array.isArray(fields)) {
         fields = [<string>fields];

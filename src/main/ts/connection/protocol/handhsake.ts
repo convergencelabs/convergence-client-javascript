@@ -17,7 +17,6 @@ export var HandshakeRequestSerializer: MessageBodySerializer = (request: Handsha
 
 export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
-  sessionId: string;
   reconnectToken: string;
   protocolConfig: any; // todo make interface
   error?: any;
@@ -27,7 +26,6 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
 export var HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
   return {
     success: body.s,
-    sessionId: body.i,
     reconnectToken: body.k,
     protocolConfig: body.c,
     error: body.e,
