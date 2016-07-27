@@ -47,10 +47,9 @@ import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
 import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
 import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
 import {
-  PresenceStateSetDeserializer, PresenceSetStateSerializer,
-  PresenceClearStateSerializer
+  PresenceStateClearedDeserializer, PresenceStateSetDeserializer,
+  PresenceSetStateSerializer, PresenceClearStateSerializer
 } from "./presence/presenceState";
-import {PresenceStateClearedDeserializer} from "./presence/presenceState";
 import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
 import {RequestPresenceSerializer} from "./presence/requestPresence";
 import {SubscribePresenceSerializer} from "./presence/subscribePresence";
@@ -216,5 +215,4 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_ST
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_AVAILABILITY_CHANGED, PresenceAvailabilityChangedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_SET, PresenceStateSetDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
