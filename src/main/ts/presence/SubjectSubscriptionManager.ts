@@ -1,48 +1,63 @@
 import {Observable} from "rxjs/Observable";
 import {Observer, PartialObserver} from "rxjs/Observer";
 import {Subject, Subscription, Subscriber} from "rxjs/Rx";
+import {ReplaySubject} from "rxjs/ReplaySubject";
 
 export class SubjectSubscriptionManager<T> {
   private _subjectMap: Map<string, SubscriptionSubject<T>>;
+  private _subscribeFunc: (id: string) => void;
+  private _unsubscribeFunc: (id: string) => void;
 
-  constructor(private subscribeFunc: (id: string) => void, private unsubscribeFunc: (id: string) => void) {
+  constructor(subscribeFunc: (id: string) => void, unsubscribeFunc: (id: string) => void) {
     this._subjectMap = new Map<string, SubscriptionSubject<T>>();
+    this._subscribeFunc = subscribeFunc;
+    this._unsubscribeFunc = unsubscribeFunc;
   }
 
   getObservable(id: string): Observable<T> {
-    return new ProxyObservable<T>(id, this.subscribeFunc, this.unsubscribeFunc, this._subjectMap);
+    return new ProxyObservable<T>(this._getSubjectFunc(id));
   }
 
   next(id: string, value: T): void {
-    this._subjectMap.get(id).next(value);
+    if(this._subjectMap.has(id)) {
+      this._subjectMap.get(id).next(value);
+    }
+  }
+
+  private _getSubjectFunc(id: string): () => SubscriptionSubject<T> {
+   return () => {
+     var subject: SubscriptionSubject<T> = this._subjectMap.get(id);
+     if (subject === undefined) {
+       this._subscribeFunc(id);
+       var subject = new SubscriptionSubject<T>(this._unsubscribeSubjectFunc(id));
+       this._subjectMap.set(id, subject);
+     }
+     return subject;
+   }
+  }
+
+  private _unsubscribeSubjectFunc(id: string): () => void {
+    return () => {
+        this._subjectMap.delete(id);
+        this._unsubscribeFunc(id);
+    }
   }
 }
 
 class ProxyObservable<T> extends Observable<T> {
   private _observer: Observer<T>;
-  private _id: string;
-  private _subscribeFunc: (id: string) => void;
-  private _unsubscribeFunc: (id: string) => void;
-  private _subjectMap: Map<string, SubscriptionSubject<T>>;
+  private _getSubjectFunc: () => SubscriptionSubject<T>;
 
-  constructor(id: string, subscribeFunc: (id: string) => void, unsubscribeFunc: (id: string) => void, subjectMap: Map<string, SubscriptionSubject<T>>) {
+  constructor(getSubjectFunc: () => SubscriptionSubject<T>) {
     super((observer) => {
       this._observer = observer;
     });
-    this._id = id;
-    this._subscribeFunc = subscribeFunc;
-    this._unsubscribeFunc = unsubscribeFunc;
-    this._subjectMap = subjectMap;
+    this._getSubjectFunc = getSubjectFunc;
   }
 
   subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
     var internalSubscription = super.subscribe(observerOrNext, error, complete);
-    var subject: SubscriptionSubject<T> = this._subjectMap.get(this._id);
-    if (subject === undefined) {
-      this._subscribeFunc(this._id);
-      var subject = new SubscriptionSubject<T>(this._id, this._unsubscribeFunc, this._subjectMap);
-      this._subjectMap.set(this._id, subject);
-    }
+    var subject: SubscriptionSubject<T> = this._getSubjectFunc();
     var externalSubscription = subject.subscribe(this._observer);
 
     return new Subscription(() => {
@@ -52,17 +67,14 @@ class ProxyObservable<T> extends Observable<T> {
   }
 }
 
-class SubscriptionSubject<T> extends Subject<T> {
-  private _subscriptionCount: number = 0;
-  private _unsubscribedCallback: (id: string) => void;
-  private _id: string;
-  private _subjectMap: Map<string, SubscriptionSubject<T>>;
+class SubscriptionSubject<T> extends ReplaySubject<T> {
+  private _subscriptionCount: number;
+  private _unsubscribeSubjectFunc: () => void;
 
-  constructor(id: string, unsubscribedCallback: (id: string) => void, subjectMap: Map<string, SubscriptionSubject<T>>) {
-    super();
-    this._id = id;
-    this._unsubscribedCallback = unsubscribedCallback;
-    this._subjectMap = subjectMap;
+  constructor(unsubscribeSubjectFunc: () => void) {
+    super(1);
+    this._subscriptionCount = 0;
+    this._unsubscribeSubjectFunc = unsubscribeSubjectFunc;
   }
 
   protected _subscribe(subscriber: Subscriber<T>): Subscription {
@@ -73,8 +85,7 @@ class SubscriptionSubject<T> extends Subject<T> {
 
   private _handleUnsubscribe(): void {
     if (--this._subscriptionCount === 0) {
-      this._subjectMap.delete(this._id);
-      this._unsubscribedCallback(this._id);
+      this._unsubscribeSubjectFunc();
     }
   }
 }
