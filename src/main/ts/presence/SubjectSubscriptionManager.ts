@@ -1,6 +1,6 @@
 import {Observable} from "rxjs/Observable";
 import {Observer, PartialObserver} from "rxjs/Observer";
-import {Subject, Subscription, Subscriber} from "rxjs/Rx";
+import {Subscription, Subscriber} from "rxjs/Rx";
 import {ReplaySubject} from "rxjs/ReplaySubject";
 
 export class SubjectSubscriptionManager<T> {
@@ -19,7 +19,7 @@ export class SubjectSubscriptionManager<T> {
   }
 
   next(id: string, value: T): void {
-    if(this._subjectMap.has(id)) {
+    if (this._subjectMap.has(id)) {
       this._subjectMap.get(id).next(value);
     }
   }
@@ -29,18 +29,18 @@ export class SubjectSubscriptionManager<T> {
      var subject: SubscriptionSubject<T> = this._subjectMap.get(id);
      if (subject === undefined) {
        this._subscribeFunc(id);
-       var subject = new SubscriptionSubject<T>(this._unsubscribeSubjectFunc(id));
+       subject = new SubscriptionSubject<T>(this._unsubscribeSubjectFunc(id));
        this._subjectMap.set(id, subject);
      }
      return subject;
-   }
+   };
   }
 
   private _unsubscribeSubjectFunc(id: string): () => void {
     return () => {
         this._subjectMap.delete(id);
         this._unsubscribeFunc(id);
-    }
+    };
   }
 }
 
@@ -56,9 +56,9 @@ class ProxyObservable<T> extends Observable<T> {
   }
 
   subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
-    var internalSubscription = super.subscribe(observerOrNext, error, complete);
+    var internalSubscription: Subscription = super.subscribe(observerOrNext, error, complete);
     var subject: SubscriptionSubject<T> = this._getSubjectFunc();
-    var externalSubscription = subject.subscribe(this._observer);
+    var externalSubscription: Subscription = subject.subscribe(this._observer);
 
     return new Subscription(() => {
       internalSubscription.unsubscribe();
