@@ -27,7 +27,7 @@ export class PresenceService extends ConvergenceEventEmitter {
   private _localPresence: BehaviorSubject<UserPresence>;
   private _subManager: SubjectSubscriptionManager<UserPresence>;
 
-  private _subscribeFunc = (username: string) => {
+  private _subscribeFunc: (username: string) => void = (username: string) => {
     this._connection.request(<SubscribePresenceRequest>{
       type: MessageType.PRESENCE_SUBSCRIBE_REQUEST,
       username: username
@@ -37,7 +37,7 @@ export class PresenceService extends ConvergenceEventEmitter {
     });
   };
 
-  private _unsubscribeFunc = (username: string) => {
+  private _unsubscribeFunc: (username: string) => void = (username: string) => {
     this._connection.send(<UnsubscribePresence>{
       type: MessageType.PRESENCE_UNSUBSCRIBE,
       username: username
