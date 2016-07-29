@@ -8,7 +8,6 @@ import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/last";
 import 'rxjs/add/observable/fromPromise';
 import 'rxjs/add/operator/map';
-import {OutgoingProtocolRequestMessage} from "../connection/protocol/protocol";
 import {MessageType} from "../connection/protocol/MessageType";
 import {PresenceAvailabilityChanged} from "../connection/protocol/presence/pressenceAvailability";
 import {PresenceStateSet} from "../connection/protocol/presence/presenceState";
@@ -17,21 +16,43 @@ import {RequestPresence} from "../connection/protocol/presence/requestPresence";
 import {RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
 import {PresenceSetState} from "../connection/protocol/presence/presenceState";
 import {PresenceClearState} from "../connection/protocol/presence/presenceState";
-import {ConvergenceSubject} from "../presence/ConvergenceSubject";
+import {SubjectSubscriptionManager} from "./SubjectSubscriptionManager";
+import {SubscribePresenceRequest, SubscribePresenceResponse} from "../connection/protocol/presence/subscribePresence";
+import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePresence";
 
 export class PresenceService extends ConvergenceEventEmitter {
 
   private _connection: ConvergenceConnection;
-  private _userPresences: Map<string, ConvergenceSubject<UserPresence>>;
+  private _userPresences: Map<string, UserPresence>;
   private _localPresence: BehaviorSubject<UserPresence>;
+  private _subManager: SubjectSubscriptionManager<UserPresence>;
+
+  private _subscribeFunc = (username: string) => {
+    this._connection.request(<SubscribePresenceRequest>{
+      type: MessageType.PRESENCE_SUBSCRIBE_REQUEST,
+      username: username
+    }).then((response: SubscribePresenceResponse) => {
+      this._userPresences.set(username, response.userPresence);
+      this._subManager.next(username, response.userPresence);
+    });
+  };
+
+  private _unsubscribeFunc = (username: string) => {
+    this._connection.send(<UnsubscribePresence>{
+      type: MessageType.PRESENCE_UNSUBSCRIBE,
+      username: username
+    });
+    this._userPresences.delete(username);
+  };
 
   constructor(connection: ConvergenceConnection) {
     super();
     this._connection = connection;
-    this._userPresences = new Map<string, ConvergenceSubject<UserPresence>>();
+    this._userPresences = new Map<string, UserPresence>();
     this._localPresence = new BehaviorSubject<UserPresence>(
       new UserPresence(connection.session().username(), true, new Map<string, any>())
     );
+    this._subManager = new SubjectSubscriptionManager<UserPresence>(this._subscribeFunc, this._unsubscribeFunc);
 
     this._connection.addMultipleMessageListener(
       [MessageType.PRESENCE_AVAILABILITY_CHANGED,
@@ -78,47 +99,14 @@ export class PresenceService extends ConvergenceEventEmitter {
       usernames: usernames
     };
     return Observable.fromPromise(this._connection.request(message)).map((response: RequestPresenceResponse) => {
-      // TODO: Finish this
-      return [];
+      return response.userPresences;
     });
   }
-
-  _subscribeFunction(username: string): () => void {
-    return () => {
-      // TODO: Send subscribe???
-    };
-  }
-
-  _unsubscribeFunction(username: string): () => void {
-    return () => {
-      // TODO: Send unsubscribe
-      this._userPresences.delete(username);
-    };
-  }
-
-  // presenceStream(username: string): Observable<UserPresence> {
-  //  if (!this._userPresences.has(username)) {
-  //    this._userPresences.set(username, new ConvergenceSubject(this._subscribeFunction(username), this._unsubscribeFunction(username)));
-  //    const presenceSubRequest: OutgoingProtocolRequestMessage = null;
-  //    this._connection.request(presenceSubRequest).then(response => {
-  //      // TODO: Handle Response
-  //    });
-  //  }
-  //  return this._userPresences.get(username).asObservable();
-  // }
 
   presenceStream(usernames: string[]): Observable<UserPresence>[] {
     let userPresences: Observable<UserPresence>[] = [];
     for (var username of usernames) {
-      if (!this._userPresences.has(username)) {
-        this._userPresences.set(username, new ConvergenceSubject<UserPresence>(
-          this._subscribeFunction(username), this._unsubscribeFunction(username)));
-        const presenceSubRequest: OutgoingProtocolRequestMessage = null;
-        this._connection.request(presenceSubRequest).then(response => {
-          // TODO: Handle Response
-        });
-      }
-      userPresences.push(this._userPresences.get(username).asObservable());
+      userPresences.push(this._subManager.getObservable(username));
     }
     return userPresences;
   }
@@ -142,9 +130,8 @@ export class PresenceService extends ConvergenceEventEmitter {
   }
 
   _availabilityChanged(messageEvent: PresenceAvailabilityChanged): void {
-    const subject: ConvergenceSubject<UserPresence> = this._userPresences.get(messageEvent.username);
-    const oldValue: UserPresence = subject.getValue();
-    subject.next(new UserPresence(oldValue.username(), messageEvent.available, oldValue.state()));
+    const oldValue: UserPresence = this._userPresences.get(messageEvent.username);
+    this._subManager.next(oldValue.username(), new UserPresence(oldValue.username(), messageEvent.available, oldValue.state()));
   }
 
   _stateSet(messageEvent: PresenceStateSet): void {
@@ -154,11 +141,10 @@ export class PresenceService extends ConvergenceEventEmitter {
       newState.set(messageEvent.key, messageEvent.value);
       this._localPresence.next(new UserPresence(oldValue.username(), true, newState));
     } else {
-      const subject: ConvergenceSubject<UserPresence> = this._userPresences.get(messageEvent.username);
-      const oldValue: UserPresence = subject.getValue();
+      const oldValue: UserPresence = this._userPresences.get(messageEvent.username);
       let newState: Map<string, any> = oldValue.state();
       newState.set(messageEvent.key, messageEvent.value);
-      subject.next(new UserPresence(oldValue.username(), oldValue.available(), newState));
+      this._subManager.next(oldValue.username(), new UserPresence(oldValue.username(), oldValue.available(), newState));
     }
   }
 
@@ -169,11 +155,10 @@ export class PresenceService extends ConvergenceEventEmitter {
       newState.delete(messageEvent.key);
       this._localPresence.next(new UserPresence(oldValue.username(), true, newState));
     } else {
-      const subject: ConvergenceSubject<UserPresence> = this._userPresences.get(messageEvent.username);
-      const oldValue: UserPresence = subject.getValue();
+      const oldValue: UserPresence = this._userPresences.get(messageEvent.username);
       let newState: Map<string, any> = oldValue.state();
       newState.delete(messageEvent.key);
-      subject.next(new UserPresence(oldValue.username(), oldValue.available(), newState));
+      this._subManager.next(oldValue.username(), new UserPresence(oldValue.username(), oldValue.available(), newState));
     }
   }
 }
