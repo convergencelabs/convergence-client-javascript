@@ -16,13 +16,13 @@ export var RequestPresenceSerializer: MessageBodySerializer = (request: RequestP
 };
 
 export interface RequestPresenceResponse extends IncomingProtocolNormalMessage {
-  userPresences: UserPresence[]
+  userPresences: UserPresence[];
 }
 
 export var RequestPresenceResponseDeserializer: MessageBodyDeserializer<RequestPresenceResponse> = (body: any) => {
   var userPresences: UserPresence[] = [];
   for (var userPresence of body.p) {
-    userPresences.push(UserPresenceDeserializer(userPresence))
+    userPresences.push(UserPresenceDeserializer(userPresence));
   }
   var result: RequestPresenceResponse = {
     userPresences: userPresences
