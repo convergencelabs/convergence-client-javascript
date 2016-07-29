@@ -1,7 +1,7 @@
 # Convergence Javascript Client
 
 The client is implemented in typescript.  The build system uses Rollup to bundle and transpile the
-typescript to a single file ES5.  Testing, the typescript compiler is use to compile the code
+typescript to a single minified ES5 file.  For testing, the typescript compiler is used to compile the code
 into ES5 and commonjs modules to support direct unit testing in node.
 
 

@@ -144,7 +144,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
     if (this._parent) {
       var newPath: Path = relativePath.slice(0);
-      newPath.push(this.fieldInParent);
+      newPath.unshift(this.fieldInParent);
       this._parent._bubbleModelChangedEvent(childEvent, newPath);
     }
   }

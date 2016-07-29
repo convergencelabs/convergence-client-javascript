@@ -9,6 +9,7 @@ import {ModelChangeEvent} from "../../../main/ts/model/events";
 import {ArrayInsertEvent} from "../../../main/ts/model/RealTimeArray";
 import {ArrayRemoveEvent} from "../../../main/ts/model/RealTimeArray";
 import {ArraySetEvent} from "../../../main/ts/model/RealTimeArray";
+import {ArraySetValueEvent} from "../../../main/ts/model/RealTimeArray";
 import {ArrayReorderEvent} from "../../../main/ts/model/RealTimeArray";
 import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
 
@@ -218,14 +219,14 @@ describe('RealTimeArray', () => {
     myArray._handleRemoteOperation(incomingEvent);
 
     // var expectedEvent: ArraySetValueEvent = {
-    //  src: myArray,
-    //  name: RealTimeArray.Events.VALUE,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  value: ["X", "Y", "Z"]
-    //  };
+    //   src: myArray,
+    //   name: RealTimeArray.Events.VALUE,
+    //   sessionId: sessionId,
+    //   username: username,
+    //   version: version,
+    //   timestamp: timestamp,
+    //   value: ["X", "Y", "Z"]
+    // };
     // expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -239,17 +240,17 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    //  var expectedEvent: ArrayInsertEvent = {
-    //  src: myArray,
-    //  name: RealTimeArray.Events.INSERT,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  index: 2,
-    //  value: "X"
-    //  };
-    //  expect(lastEvent).to.deep.equal(expectedEvent);
+    // var expectedEvent: ArrayInsertEvent = {
+    //   src: myArray,
+    //   name: RealTimeArray.Events.INSERT,
+    //   sessionId: sessionId,
+    //   username: username,
+    //   version: version,
+    //   timestamp: timestamp,
+    //   index: 2,
+    //   value: "X"
+    // };
+    // expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
   it('Correct event is fired after ArrayRemoveOperation', () => {
@@ -261,16 +262,16 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    // var expectedEvent: ArrayRemoveEvent = {
-    //  src: myArray,
-    //  name: RealTimeArray.Events.REMOVE,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  index: 1
-    // };
-    // expect(lastEvent).to.deep.equal(expectedEvent);
+    var expectedEvent: ArrayRemoveEvent = {
+      src: myArray,
+      name: RealTimeArray.Events.REMOVE,
+      sessionId: sessionId,
+      username: username,
+      version: version,
+      timestamp: timestamp,
+      index: 1
+    };
+    expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
   it('Correct event is fired after ArrayReplaceOperation', () => {
@@ -285,14 +286,14 @@ describe('RealTimeArray', () => {
     myArray._handleRemoteOperation(incomingEvent);
 
     // var expectedEvent: ArraySetEvent = {
-    //  src: myArray,
-    //  name: RealTimeArray.Events.SET,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  index: 1,
-    //  value: "X"
+    //   src: myArray,
+    //   name: RealTimeArray.Events.SET,
+    //   sessionId: sessionId,
+    //   username: username,
+    //   version: version,
+    //   timestamp: timestamp,
+    //   index: 1,
+    //   value: "X"
     // };
     // expect(lastEvent).to.deep.equal(expectedEvent);
   });
@@ -306,16 +307,16 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    // var expectedEvent: ArrayReorderEvent = {
-    //  src: myArray,
-    //  name: RealTimeArray.Events.REORDER,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  fromIndex: 1,
-    //  toIndex: 2
-    // };
-    // expect(lastEvent).to.deep.equal(expectedEvent);
+    var expectedEvent: ArrayReorderEvent = {
+      src: myArray,
+      name: RealTimeArray.Events.REORDER,
+      sessionId: sessionId,
+      username: username,
+      version: version,
+      timestamp: timestamp,
+      fromIndex: 1,
+      toIndex: 2
+    };
+    expect(lastEvent).to.deep.equal(expectedEvent);
   });
 });

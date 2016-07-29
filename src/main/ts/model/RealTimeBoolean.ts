@@ -15,7 +15,7 @@ import {BooleanValue} from "./dataValue";
 export default class RealTimeBoolean extends RealTimeValue<boolean> {
 
   static Events: any = {
-    VALUE: "VALUE",
+    VALUE: "value",
     DETACHED: RealTimeValue.Events.DETACHED,
     MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
