@@ -106,7 +106,11 @@ export class PresenceService extends ConvergenceEventEmitter {
   presenceStream(usernames: string[]): Observable<UserPresence>[] {
     let userPresences: Observable<UserPresence>[] = [];
     for (var username of usernames) {
-      userPresences.push(this._subManager.getObservable(username));
+      if (this.session().username() === username) {
+        userPresences.push(this._localPresence.asObservable());
+      } else {
+        userPresences.push(this._subManager.getObservable(username));
+      }
     }
     return userPresences;
   }
