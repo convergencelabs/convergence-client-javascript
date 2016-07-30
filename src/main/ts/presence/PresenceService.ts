@@ -93,7 +93,11 @@ export class PresenceService extends ConvergenceEventEmitter {
     });
   }
 
-  presence(usernames: string[]): Observable<UserPresence[]> {
+  presence(username: string): Observable<UserPresence> {
+    return this.presences([username]).map((result => result[0]));
+  }
+
+  presences(usernames: string[]): Observable<UserPresence[]> {
     const message: RequestPresence = {
       type: MessageType.PRESENCE_REQUEST,
       usernames: usernames
@@ -103,7 +107,11 @@ export class PresenceService extends ConvergenceEventEmitter {
     });
   }
 
-  presenceStream(usernames: string[]): Observable<UserPresence>[] {
+  presenceStream(username: string): Observable<UserPresence> {
+    return this.presenceStreams([username])[0];
+  }
+
+  presenceStreams(usernames: string[]): Observable<UserPresence>[] {
     let userPresences: Observable<UserPresence>[] = [];
     for (var username of usernames) {
       if (this.session().username() === username) {
