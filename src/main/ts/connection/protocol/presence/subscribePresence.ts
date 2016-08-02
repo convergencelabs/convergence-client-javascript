@@ -21,7 +21,7 @@ export interface SubscribePresenceResponse extends IncomingProtocolResponseMessa
 
 export var SubscribePresenceResponseDeserializer: MessageBodyDeserializer<SubscribePresenceResponse> = (body: any) => {
   var result: SubscribePresenceResponse = {
-    userPresence: UserPresenceDeserializer(body.u)
+    userPresence: UserPresenceDeserializer(body.p)
   };
 
   return result;
