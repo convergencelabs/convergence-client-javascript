@@ -51,9 +51,8 @@ import {
   PresenceSetStateSerializer, PresenceClearStateSerializer
 } from "./presence/presenceState";
 import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
-import {RequestPresenceSerializer} from "./presence/requestPresence";
-import {SubscribePresenceRequestSerializer} from "./presence/subscribePresence";
-import {SubscribePresenceResponseDeserializer} from "./presence/subscribePresence";
+import {RequestPresenceSerializer, RequestPresenceResponseDeserializer} from "./presence/requestPresence";
+import {SubscribePresenceRequestSerializer, SubscribePresenceResponseDeserializer} from "./presence/subscribePresence";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -217,5 +216,5 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_ST
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_AVAILABILITY_CHANGED, PresenceAvailabilityChangedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_SET, PresenceStateSetDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
-
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_RESPONSE, RequestPresenceResponseDeserializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SUBSCRIBE_RESPONSE, SubscribePresenceResponseDeserializer);
