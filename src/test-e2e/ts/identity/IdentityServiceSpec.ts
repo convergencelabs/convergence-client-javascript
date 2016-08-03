@@ -28,7 +28,7 @@ describe('IdentityService.getUser()', () => {
 
   it('must resolve with the correct user', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"}
@@ -51,7 +51,7 @@ describe('IdentityService.getUser()', () => {
 
   it('must resolve with undefined if no user is found', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
@@ -67,7 +67,7 @@ describe('IdentityService.getUser()', () => {
 
   it('must reject if more than one user is returned', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 0, v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"},
