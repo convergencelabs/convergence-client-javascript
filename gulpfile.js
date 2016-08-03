@@ -52,7 +52,7 @@ gulp.task('build', [], function () {
  * Test the code using the ES5 output from the build command.
  */
 gulp.task('test', ["build"], function () {
-  return gulp.src("build/test/**/*.js")
+  return gulp.src("build/test*/**/*.js")
     .pipe(mocha({reporter: 'progress'}));
 });
 

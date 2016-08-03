@@ -228,18 +228,20 @@ export class MockConvergenceServer {
   }
 
   stop(): void {
-    this._mockSocketServer.close();
-    this._mockSocketServer = undefined;
+    if(this._mockSocketServer !== undefined) {
+      this._mockSocketServer.close();
+      this._mockSocketServer = undefined;
 
-    this._actionQueue.forEach((action: MockServerAction) => {
-      action.complete();
-    });
+      this._actionQueue.forEach((action: MockServerAction) => {
+        action.complete();
+      });
 
-    this._reqId = 0;
-    this._actionId = 0;
-    this._actionQueue = [];
-    this._actions = [];
-    this._timeoutQueue = [];
+      this._reqId = 0;
+      this._actionId = 0;
+      this._actionQueue = [];
+      this._actions = [];
+      this._timeoutQueue = [];
+    }
   }
 
   handshake(response?: any, timeout?: number): void {
