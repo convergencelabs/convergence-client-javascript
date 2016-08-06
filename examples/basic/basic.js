@@ -188,6 +188,10 @@ var objectSetButton = document.getElementById("objectSetButton");
 var objectSetProp = document.getElementById("objectSetProp");
 var objectSetValue = document.getElementById("objectSetValue");
 
+var objectRenameButton = document.getElementById("objectRenameButton");
+var objectRenameOldProp = document.getElementById("objectRenameOldProp");
+var objectRenameNewProp = document.getElementById("objectRenameNewProp");
+
 function bindTableButtons() {
   var rtObject = model.dataAt("object");
 
@@ -198,6 +202,15 @@ function bindTableButtons() {
 
   objectSetButton.onclick = function() {
     rtObject.set(objectSetProp.value, objectSetValue.value);
+    renderTable(rtObject);
+  };
+
+  objectRenameButton.onclick = function() {
+    model.startCompound();
+    var curVal = rtObject.get(objectRenameOldProp.value).value();
+    rtObject.remove(objectRenameOldProp.value);
+    rtObject.set(objectRenameNewProp.value, curVal);
+    model.endCompound();
     renderTable(rtObject);
   };
 }
