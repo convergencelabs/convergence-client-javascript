@@ -1,13 +1,13 @@
 import {RealTimeValue} from "./RealTimeValue";
+import {ObservableUndefined} from "../observable/ObservableUndefined";
+import {ModelOperationEvent} from "../ModelOperationEvent";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {PathElement} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelValueType} from "../ModelValueType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export default class RealTimeUndefined extends RealTimeValue<void> {
+export default class RealTimeUndefined extends RealTimeValue<void> implements ObservableUndefined {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED
@@ -21,14 +21,14 @@ export default class RealTimeUndefined extends RealTimeValue<void> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Undefined, id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Undefined, id, parent, fieldInParent, callbacks, model);
   }
 
-  protected _getValue(): void {
+  protected _getData(): void {
     return undefined;
   }
 
-  protected _setValue(any: any): void {
+  protected _setData(data: any): void {
     throw new Error("Can not set the value on a Undefined type.");
   }
 

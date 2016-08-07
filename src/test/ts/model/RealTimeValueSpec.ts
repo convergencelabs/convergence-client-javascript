@@ -1,16 +1,16 @@
 import * as chai from "chai";
 import * as sinon from "sinon";
 
-import {RealTimeArray} from "../../../main/ts/model/RealTimeArray";
+import {RealTimeArray} from "../../../main/ts/model/rt/RealTimeArray";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
+import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 import {ArrayValue} from "../../../main/ts/model/dataValue";
 import {DataValue} from "../../../main/ts/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
-import {ModelChangedEvent} from "../../../main/ts/model/RealTimeValue";
+import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {ArrayReplaceOperation} from "../../../main/ts/model/ot/ops/ArrayReplaceOperation";
+import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 
 var expect: any = chai.expect;
 

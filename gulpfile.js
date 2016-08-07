@@ -167,11 +167,11 @@ function minify(src) {
 
 gulp.task('dist-umd-min', function() {
   return minify(gulp.src("dist/convergence-client.umd.js"));
-})
+});
 
 gulp.task('dist-amd-min', function() {
   return minify(gulp.src("dist/convergence-client.amd.js"));
-})
+});
 
 gulp.task('dist', ["dist-umd", "dist-amd", "dist-es6", "copyPackage"], function(cb) {
   runSequence('dist-umd-min', 'dist-amd-min', cb);

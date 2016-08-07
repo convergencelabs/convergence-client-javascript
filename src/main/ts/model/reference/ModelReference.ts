@@ -1,4 +1,4 @@
-import {RealTimeValue} from "../RealTimeValue";
+import {RealTimeValue} from "../rt/RealTimeValue";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {EqualsUtil} from "../../util/EqualsUtil";

@@ -1,5 +1,5 @@
 import {ModelReference} from "./ModelReference";
-import {RealTimeValue} from "../RealTimeValue";
+import {RealTimeValue} from "../rt/RealTimeValue";
 import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
 
 export interface ModelReferenceCallbacks {

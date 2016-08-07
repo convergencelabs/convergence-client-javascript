@@ -28,19 +28,15 @@ export interface ObservableModel extends ConvergenceEventEmitter {
   isOpen(): boolean;
 }
 
-export interface ConvergenceModelEvent extends ConvergenceEvent {
+export interface ModelEvent extends ConvergenceEvent {
   src: ObservableModel;
 }
 
-export interface RealTimeModelClosedEvent extends ConvergenceModelEvent {
+export interface ModelClosedEvent extends ModelEvent {
   local: boolean;
   reason?: string;
 }
 
-export interface VersionChangedEvent extends ConvergenceModelEvent {
+export interface VersionChangedEvent extends ModelEvent {
   version: number;
-}
-
-export interface ValueDetachedEvent extends ConvergenceModelEvent {
-  value: ObservableValue<any>;
 }

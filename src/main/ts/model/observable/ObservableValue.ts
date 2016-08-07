@@ -1,24 +1,23 @@
 import {Path} from "../ot/Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {Observable} from "rxjs/Rx";
-import {ObservalbeModel} from "./ObservableModel";
-import {ConvergenceValueType} from "../ConvergenceValueType";
+import {ObservableModel} from "./ObservableModel";
+import {ModelValueType} from "../ModelValueType";
 
 export interface ObservableValue<T>  {
 
   id(): string;
 
-  type(): ConvergenceValueType;
+  type(): ModelValueType;
 
   path(): Path;
 
-  model(): ObservalbeModel;
+  model(): ObservableModel;
 
   isDetached(): boolean;
 
-  value(): T;
+  data(): T;
 
-  events(): Observable<ConvergenceModelValueEvent>
+  // events(): Observable<ConvergenceModelValueEvent>;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
@@ -36,7 +35,7 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
   timestamp: number;
 }
 
-export interface ModelChangeEvent extends ConvergenceEvent {
+export interface ModelChangedEvent extends ConvergenceEvent {
   relativePath: Path;
   childEvent: ValueChangedEvent;
 }

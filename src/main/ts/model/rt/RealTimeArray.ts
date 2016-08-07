@@ -1,25 +1,23 @@
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {ObservableArray} from "../observable/ObservableArray";
+import {ValueChangedEvent, ObservableValue} from "../observable/ObservableValue";
 import {RealTimeValue} from "./RealTimeValue";
-import {PathElement} from "./ot/Path";
-import {ArrayInsertOperation} from "./ot/ops/ArrayInsertOperation";
-import {ArrayRemoveOperation} from "./ot/ops/ArrayRemoveOperation";
-import {ArrayReplaceOperation} from "./ot/ops/ArrayReplaceOperation";
-import {ArrayMoveOperation} from "./ot/ops/ArrayMoveOperation";
-import {ArraySetOperation} from "./ot/ops/ArraySetOperation";
-import {Path} from "./ot/Path";
-import {RealTimeObject} from "./RealTimeObject";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
+import {ArrayValue, DataValue} from "../dataValue";
+import {PathElement, Path} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelValueType} from "../ModelValueType";
 import {RealTimeValueFactory} from "./RealTimeValueFactory";
-import {ModelChangeEvent} from "./events";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {OperationType} from "./ot/ops/OperationType";
-import {ArrayValue} from "./dataValue";
-import {DataValue} from "./dataValue";
+import {ArrayReplaceOperation} from "../ot/ops/ArrayReplaceOperation";
+import {ArrayInsertOperation} from "../ot/ops/ArrayInsertOperation";
+import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
+import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
+import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
+import {RealTimeObject} from "./RealTimeObject";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export class RealTimeArray extends RealTimeContainerValue<any[]> {
+export class RealTimeArray extends RealTimeContainerValue<any[]> implements ObservableArray {
 
   static Events: any = {
     INSERT: "insert",
@@ -41,7 +39,7 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Array, data.id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Array, data.id, parent, fieldInParent, callbacks, model);
 
     this._children = [];
 
@@ -50,7 +48,7 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
     }
   }
 
-  get(index: number): RealTimeValue<any> {
+  get(index: number): ObservableValue<any> {
     return this._children[index];
   }
 
@@ -80,7 +78,7 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
 
     var operation: ArrayRemoveOperation = new ArrayRemoveOperation(this.id(), false, index);
     var child: RealTimeValue<any> = this._children[index];
-    var removeValue: Object|number|string|boolean = child.value();
+    var removeValue: Object|number|string|boolean = child.data();
     this._children.splice(index, 1);
     this.updateFieldInParent(index);
     child._detach();
@@ -129,18 +127,18 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
   // protected and private methods.
   //
 
-  protected _getValue(): Array<any> {
+  protected _getData(): Array<any> {
     var returnVal: Array<any> = [];
     this.forEach((child: RealTimeValue<any>) => {
-      returnVal.push(child.value());
+      returnVal.push(child.data());
     });
     return returnVal;
   }
 
-  protected _setValue(values: any[]): void {
-    this._validateSet(values);
+  protected _setData(data: any[]): void {
+    this._validateSet(data);
 
-    var dataValues: DataValue[] = values.map((value: any) => {
+    var dataValues: DataValue[] = data.map((value: any) => {
       return this._model._createDataValue(value);
     });
 
@@ -167,10 +165,10 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
     var index: number = <number> pathArgs[0];
     var child: RealTimeValue<any> = this._children[index];
     if (pathArgs.length > 1) {
-      if (child.type() === RealTimeValueType.Object) {
-        return (<RealTimeObject> child).dataAt(pathArgs.slice(1, pathArgs.length));
-      } else if (child.type() === RealTimeValueType.Array) {
-        return (<RealTimeArray> child).dataAt(pathArgs.slice(1, pathArgs.length));
+      if (child.type() === ModelValueType.Object) {
+        return (<RealTimeObject> child).valueAt(pathArgs.slice(1, pathArgs.length));
+      } else if (child.type() === ModelValueType.Array) {
+        return (<RealTimeArray> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
         return RealTimeValueFactory.create(undefined, null, null, this._callbacks, null);
@@ -397,25 +395,25 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> {
   }
 }
 
-export interface ArrayInsertEvent extends ModelChangeEvent {
+export interface ArrayInsertEvent extends ValueChangedEvent {
   index: number;
   value: any;
 }
 
-export interface ArrayRemoveEvent extends ModelChangeEvent {
+export interface ArrayRemoveEvent extends ValueChangedEvent {
   index: number;
 }
 
-export interface ArraySetEvent extends ModelChangeEvent {
+export interface ArraySetEvent extends ValueChangedEvent {
   index: number;
   value: any;
 }
 
-export interface ArrayReorderEvent extends ModelChangeEvent {
+export interface ArrayReorderEvent extends ValueChangedEvent {
   fromIndex: number;
   toIndex: any;
 }
 
-export interface ArraySetValueEvent extends ModelChangeEvent {
+export interface ArraySetValueEvent extends ValueChangedEvent {
   value: Array<any>;
 }

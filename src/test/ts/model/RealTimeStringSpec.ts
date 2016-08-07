@@ -1,20 +1,20 @@
-import RealTimeString from "../../../main/ts/model/RealTimeString";
+import RealTimeString from "../../../main/ts/model/rt/RealTimeString";
 import {StringSetOperation} from "../../../main/ts/model/ot/ops/StringSetOperation";
 import {StringInsertOperation} from "../../../main/ts/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../../main/ts/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {StringRemoveEvent} from "../../../main/ts/model/RealTimeString";
-import {StringInsertEvent} from "../../../main/ts/model/RealTimeString";
-import {StringSetValueEvent} from "../../../main/ts/model/RealTimeString";
-import {ModelChangeEvent} from "../../../main/ts/model/events";
-import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
+import {StringRemoveEvent} from "../../../main/ts/model/rt/RealTimeString";
+import {StringInsertEvent} from "../../../main/ts/model/rt/RealTimeString";
+import {StringSetValueEvent} from "../../../main/ts/model/rt/RealTimeString";
+import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
 import {StringValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
+import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 
 var expect: any = chai.expect;
 
@@ -49,37 +49,37 @@ describe('RealTimeString', () => {
     };
   });
 
-  var lastEvent: ModelChangeEvent = null;
-  var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
+  var lastEvent: ModelChangedEvent = null;
+  var lastEventCallback: (event: ModelChangedEvent) => void = (event: ModelChangedEvent) => {
     lastEvent = event;
   };
 
   it('Value is correct after creation', () => {
     var myString: RealTimeString = new RealTimeString(initialValue, null, null, callbacks, model);
-    expect(myString.value()).to.equal("MyString");
+    expect(myString.data()).to.equal("MyString");
   });
 
   it('Value is correct after set', () => {
     var myString: RealTimeString = new RealTimeString(initialValue, null, null, callbacks, model);
-    myString.value("AnotherString");
-    expect(myString.value()).to.equal("AnotherString");
+    myString.data("AnotherString");
+    expect(myString.data()).to.equal("AnotherString");
   });
 
   it('Value is correct after insert', () => {
     var myString: RealTimeString = new RealTimeString(initialValue, null, null, callbacks, model);
     myString.insert(2, "Edited");
-    expect(myString.value()).to.equal("MyEditedString");
+    expect(myString.data()).to.equal("MyEditedString");
   });
 
   it('Value is correct after remove', () => {
     var myString: RealTimeString = new RealTimeString(initialValue, null, null, callbacks, model);
     myString.remove(0, 2);
-    expect(myString.value()).to.equal("String");
+    expect(myString.data()).to.equal("String");
   });
 
   it('Correct operation is sent after set', () => {
     var myString: RealTimeString = new RealTimeString(initialValue, null, null, callbacks, model);
-    myString.value("AnotherString");
+    myString.data("AnotherString");
 
     var expectedOp: StringSetOperation = new StringSetOperation(initialValue.id, false, "AnotherString");
     expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
@@ -108,7 +108,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myString._handleRemoteOperation(incomingEvent);
 
-    expect(myString.value()).to.equal("AnotherString");
+    expect(myString.data()).to.equal("AnotherString");
   });
 
   it('Value is correct after StringInsertOperation', () => {
@@ -118,7 +118,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myString._handleRemoteOperation(incomingEvent);
 
-    expect(myString.value()).to.equal("MyEditedString");
+    expect(myString.data()).to.equal("MyEditedString");
   });
 
   it('Value is correct after StringRemoveOperation', () => {
@@ -128,7 +128,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myString._handleRemoteOperation(incomingEvent);
 
-    expect(myString.value()).to.equal("String");
+    expect(myString.data()).to.equal("String");
   });
 
   it('Correct event is fired after StringSetOperation', () => {

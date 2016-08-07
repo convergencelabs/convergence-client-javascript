@@ -1,7 +1,7 @@
-import {RealTimeValue} from "../RealTimeValue";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {IndexTransformer} from "../ot/xform/reference/IndexTransformer";
+import {RealTimeValue} from "../rt/RealTimeValue";
 
 export class IndexReference extends ModelReference<number> {
 

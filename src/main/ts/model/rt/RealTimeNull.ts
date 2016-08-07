@@ -1,13 +1,13 @@
 import {RealTimeValue} from "./RealTimeValue";
+import {ObservableNull} from "../observable/ObservableNull";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
+import {PathElement} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelValueType} from "../ModelValueType";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export default class RealTimeNull extends RealTimeValue<any> {
+export default class RealTimeNull extends RealTimeValue<any> implements ObservableNull {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED
@@ -21,14 +21,14 @@ export default class RealTimeNull extends RealTimeValue<any> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Null, id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Null, id, parent, fieldInParent, callbacks, model);
   }
 
-  protected _getValue(): any {
+  protected _getData(): any {
     return null;
   }
 
-  protected _setValue(any: any): void {
+  protected _setData(data: any): void {
     throw new Error("Can not set the value on a Null type.");
   }
 

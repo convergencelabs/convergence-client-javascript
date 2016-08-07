@@ -1,18 +1,17 @@
 import {RealTimeValue} from "./RealTimeValue";
+import {ObservableBoolean} from "../observable/ObservableBoolean";
+import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
+import {ModelValueType} from "../ModelValueType";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {PathElement} from "../ot/Path";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {BooleanSetOperation} from "./ot/ops/BooleanSetOperation";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {ModelChangeEvent} from "./events";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {OperationType} from "./ot/ops/OperationType";
-import {BooleanValue} from "./dataValue";
+import {BooleanValue} from "../dataValue";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {ValueChangedEvent} from "../observable/ObservableValue";
 
-
-export default class RealTimeBoolean extends RealTimeValue<boolean> {
+export default class RealTimeBoolean extends RealTimeValue<boolean> implements ObservableBoolean {
 
   static Events: any = {
     VALUE: "value",
@@ -30,7 +29,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Boolean, data.id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Boolean, data.id, parent, fieldInParent, callbacks, model);
     this._data = data.value;
   }
 
@@ -39,7 +38,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   // private and protected methods
   //
 
-  protected _setValue(value: boolean): void {
+  protected _setData(value: boolean): void {
     this._validateSet(value);
 
     var operation: BooleanSetOperation = new BooleanSetOperation(this.id(), false, value);
@@ -47,7 +46,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
     this._sendOperation(operation);
   }
 
-  protected _getValue(): boolean {
+  protected _getData(): boolean {
     return this._data;
   }
 
@@ -93,7 +92,7 @@ export default class RealTimeBoolean extends RealTimeValue<boolean> {
   }
 }
 
-export interface BooleanSetValueEvent extends ModelChangeEvent {
+export interface BooleanSetValueEvent extends ValueChangedEvent {
   src: RealTimeBoolean;
   value:  boolean;
 }

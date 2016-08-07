@@ -6,16 +6,12 @@ import {RealTimeArray} from "./RealTimeArray";
 import {RealTimeObject} from "./RealTimeObject";
 import RealTimeNumber from "./RealTimeNumber";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
 import RealTimeBoolean from "./RealTimeBoolean";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {DataValue} from "./dataValue";
-import {StringValue} from "./dataValue";
-import {ArrayValue} from "./dataValue";
-import {ObjectValue} from "./dataValue";
-import {NumberValue} from "./dataValue";
-import {BooleanValue} from "./dataValue";
+import {DataValue, StringValue, ArrayValue, ObjectValue, NumberValue, BooleanValue} from "../dataValue";
+import {PathElement} from "../ot/Path";
+
 
 export class RealTimeValueFactory {
 

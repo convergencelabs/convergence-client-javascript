@@ -1,7 +1,7 @@
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {RealTimeObject} from "../../../main/ts/model/RealTimeObject";
+import {RealTimeObject} from "../../../main/ts/model/rt/RealTimeObject";
 import {ObjectSetOperation} from "../../../main/ts/model/ot/ops/ObjectSetOperation";
-import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
+import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 import {ObjectValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
@@ -10,7 +10,7 @@ import {DataValue} from "../../../main/ts/model/dataValue";
 import * as chai from "chai";
 import * as sinon from "sinon";
 import SinonSpy = Sinon.SinonSpy;
-import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 
 var expect: any = chai.expect;
 
@@ -55,24 +55,24 @@ describe('RealTimeObject', () => {
 
   it('Value is correct after creation', () => {
     var myObject: RealTimeObject = new RealTimeObject(initialValue, null, null, null, model);
-    expect(myObject.value()).to.deep.equal({"num": 5});
+    expect(myObject.data()).to.deep.equal({"num": 5});
   });
 
   it('Value is correct after set', () => {
     var myObject: RealTimeObject = new RealTimeObject(initialValue, null, null, callbacks, model);
-    myObject.value({"string": "test"});
-    expect(myObject.value()).to.deep.equal({"string": "test"});
+    myObject.data({"string": "test"});
+    expect(myObject.data()).to.deep.equal({"string": "test"});
   });
 
   it('Value is correct after setProperty', () => {
     var myObject: RealTimeObject = new RealTimeObject(initialValue, null, null, callbacks, model);
     myObject.set("num", 10);
-    expect(myObject.get("num").value()).to.deep.equal(10);
+    expect(myObject.get("num").data()).to.deep.equal(10);
   });
 
   it('Correct operation is sent after set', () => {
     var myObject: RealTimeObject = new RealTimeObject(initialValue, null, null, callbacks, model);
-    myObject.value({string: "test"});
+    myObject.data({string: "test"});
 
     var expectedOp: ObjectSetOperation = new ObjectSetOperation(initialValue.id, false, setValue);
     // expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.be.deep.equal(expectedOp);
@@ -85,7 +85,7 @@ describe('RealTimeObject', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myObject._handleRemoteOperation(incomingEvent);
 
-    expect(myObject.value()).to.deep.equal({"string": "test"});
+    expect(myObject.data()).to.deep.equal({"string": "test"});
   });
 
   it('Correct Event is fired after ObjectSetOperation', () => {

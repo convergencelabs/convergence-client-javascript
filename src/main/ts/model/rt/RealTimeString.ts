@@ -1,31 +1,30 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {StringInsertOperation} from "./ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "./ot/ops/StringRemoveOperation";
-import {StringSetOperation} from "./ot/ops/StringSetOperation";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {ModelChangeEvent} from "./events";
-import {LocalIndexReference} from "./reference/LocalIndexReference";
-import {RealTimeModel} from "./RealTimeModel";
-import {LocalModelReference} from "./reference/LocalModelReference";
-import {ModelReference} from "./reference/ModelReference";
-import {IndexReference} from "./reference/IndexReference";
-import {Session} from "../Session";
-import {ReferenceType} from "./reference/ModelReference";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {ReferenceManager} from "./reference/ReferenceManager";
-import {OperationType} from "./ot/ops/OperationType";
-import {MessageType} from "../connection/protocol/MessageType";
-import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
-import {LocalRangeReference} from "./reference/LocalRangeReference";
-import {RangeReference} from "./reference/RangeReference";
-import {StringValue} from "./dataValue";
+import {ObservableString} from "../observable/ObservableString";
+import {ReferenceManager} from "../reference/ReferenceManager";
+import {ReferenceDisposedCallback, LocalModelReference} from "../reference/LocalModelReference";
+import {StringValue} from "../dataValue";
+import {PathElement} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelValueType} from "../ModelValueType";
+import {ReferenceType, ModelReference} from "../reference/ModelReference";
+import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
+import {IndexReference} from "../reference/IndexReference";
+import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
+import {LocalIndexReference} from "../reference/LocalIndexReference";
+import {Session} from "../../Session";
+import {LocalRangeReference} from "../reference/LocalRangeReference";
+import {RangeReference} from "../reference/RangeReference";
+import {StringSetOperation} from "../ot/ops/StringSetOperation";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {MessageType} from "../../connection/protocol/MessageType";
+import {ValueChangedEvent} from "../observable/ObservableValue";
 
 
-export default class RealTimeString extends RealTimeValue<String> {
+
+export default class RealTimeString extends RealTimeValue<String> implements ObservableString {
 
   static Events: any = {
     INSERT: "insert",
@@ -48,7 +47,7 @@ export default class RealTimeString extends RealTimeValue<String> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.String, data.id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.String, data.id, parent, fieldInParent, callbacks, model);
 
     this._data = data.value;
     this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX, ReferenceType.RANGE]);
@@ -152,11 +151,11 @@ export default class RealTimeString extends RealTimeValue<String> {
   // private and protected methods.
   /////////////////////////////////////////////////////////////////////////////
 
-  protected _setValue(value: string): void {
-    this._validateSet(value);
+  protected _setData(data: string): void {
+    this._validateSet(data);
 
-    this._data = value;
-    var operation: StringSetOperation = new StringSetOperation(this.id(), false, value);
+    this._data = data;
+    var operation: StringSetOperation = new StringSetOperation(this.id(), false, data);
     this._sendOperation(operation);
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
@@ -165,7 +164,7 @@ export default class RealTimeString extends RealTimeValue<String> {
     this._referenceManager.referenceMap().removeAll();
   }
 
-  protected _getValue(): string {
+  protected _getData(): string {
     return this._data;
   }
 
@@ -304,19 +303,19 @@ export default class RealTimeString extends RealTimeValue<String> {
   }
 }
 
-export interface StringInsertEvent extends ModelChangeEvent {
+export interface StringInsertEvent extends ValueChangedEvent {
   src: RealTimeString;
   index: number;
   value:  string;
 }
 
-export interface StringRemoveEvent extends ModelChangeEvent {
+export interface StringRemoveEvent extends ValueChangedEvent {
   src: RealTimeString;
   index: number;
   value:  string;
 }
 
-export interface StringSetValueEvent extends ModelChangeEvent {
+export interface StringSetValueEvent extends ValueChangedEvent {
   src: RealTimeString;
   value:  string;
 }

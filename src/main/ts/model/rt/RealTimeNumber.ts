@@ -1,18 +1,20 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {NumberAddOperation} from "./ot/ops/NumberAddOperation";
-import {NumberSetOperation} from "./ot/ops/NumberSetOperation";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {ModelChangeEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {OperationType} from "./ot/ops/OperationType";
-import {NumberValue} from "./dataValue";
+import {ObservableNumber} from "../observable/ObservableNumber";
+import {NumberValue} from "../dataValue";
+import {PathElement} from "../ot/Path";
+import {ModelValueType} from "../ModelValueType";
+import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
+import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {ValueChangedEvent} from "../observable/ObservableValue";
 
-export default class RealTimeNumber extends RealTimeValue<number> {
+
+export default class RealTimeNumber extends RealTimeValue<number> implements ObservableNumber {
 
   static Events: any = {
     ADD: "add",
@@ -31,7 +33,7 @@ export default class RealTimeNumber extends RealTimeValue<number> {
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Number, data.id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Number, data.id, parent, fieldInParent, callbacks, model);
 
     this._data = data.value;
   }
@@ -58,17 +60,17 @@ export default class RealTimeNumber extends RealTimeValue<number> {
     this.add(-1);
   }
 
-  protected _setValue(value: number): void {
-    if (isNaN(value)) {
+  protected _setData(data: number): void {
+    if (isNaN(data)) {
       throw new Error("Value is NaN");
     }
 
-    var operation: NumberSetOperation = new NumberSetOperation(this.id(), false, value);
-    this._data = value;
+    var operation: NumberSetOperation = new NumberSetOperation(this.id(), false, data);
+    this._data = data;
     this._sendOperation(operation);
   }
 
-  protected _getValue(): number {
+  protected _getData(): number {
     return this._data;
   }
 
@@ -136,12 +138,12 @@ export default class RealTimeNumber extends RealTimeValue<number> {
   }
 }
 
-export interface NumberSetValueEvent extends ModelChangeEvent {
+export interface NumberSetValueEvent extends ValueChangedEvent {
   src: RealTimeNumber;
   value:  number;
 }
 
-export interface NumberAddEvent extends ModelChangeEvent {
+export interface NumberAddEvent extends ValueChangedEvent {
   src: RealTimeNumber;
   value:  number;
 }

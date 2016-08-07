@@ -1,16 +1,15 @@
 import {RealTimeValue} from "./RealTimeValue";
-import {PathElement} from "./ot/Path";
-import {RealTimeValueType} from "./RealTimeValueType";
-import {Path} from "./ot/Path";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
+import {ObservableContainerValue} from "../observable/ObservableContainerValue";
+import {ModelValueType} from "../ModelValueType";
+import {PathElement, Path} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 
-export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
+export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> implements ObservableContainerValue<T> {
 
   /**
    * Constructs a new RealTimeContainer.
    */
-  constructor(modelType: RealTimeValueType,
+  constructor(modelType: ModelValueType,
               id: string,
               parent: RealTimeContainerValue<any>,
               fieldInParent: PathElement,
@@ -24,7 +23,7 @@ export abstract class RealTimeContainerValue<T> extends RealTimeValue<T> {
     super._detach();
   }
 
-  dataAt(pathArgs: any): RealTimeValue<any> {
+  valueAt(pathArgs: any): RealTimeValue<any> {
     // We're letting them pass in individual path arguments or a single array of path arguments
     var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
     if (pathArgsForReal.length === 0) {

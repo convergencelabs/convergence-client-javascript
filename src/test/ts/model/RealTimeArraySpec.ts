@@ -1,17 +1,16 @@
-import {RealTimeArray} from "../../../main/ts/model/RealTimeArray";
+import {RealTimeArray} from "../../../main/ts/model/rt/RealTimeArray";
 import {ArraySetOperation} from "../../../main/ts/model/ot/ops/ArraySetOperation";
 import {ArrayInsertOperation} from "../../../main/ts/model/ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../../../main/ts/model/ot/ops/ArrayRemoveOperation";
 import {ArrayReplaceOperation} from "../../../main/ts/model/ot/ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../../main/ts/model/ot/ops/ArrayMoveOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {ModelChangeEvent} from "../../../main/ts/model/events";
-import {ArrayInsertEvent} from "../../../main/ts/model/RealTimeArray";
-import {ArrayRemoveEvent} from "../../../main/ts/model/RealTimeArray";
-import {ArraySetEvent} from "../../../main/ts/model/RealTimeArray";
-import {ArraySetValueEvent} from "../../../main/ts/model/RealTimeArray";
-import {ArrayReorderEvent} from "../../../main/ts/model/RealTimeArray";
-import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
+import {ArrayInsertEvent} from "../../../main/ts/model/rt/RealTimeArray";
+import {ArrayRemoveEvent} from "../../../main/ts/model/rt/RealTimeArray";
+import {ArraySetEvent} from "../../../main/ts/model/rt/RealTimeArray";
+import {ArraySetValueEvent} from "../../../main/ts/model/rt/RealTimeArray";
+import {ArrayReorderEvent} from "../../../main/ts/model/rt/RealTimeArray";
+import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
@@ -19,8 +18,9 @@ import * as sinon from "sinon";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {DataValue} from "../../../main/ts/model/dataValue";
-import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {ArrayValue} from "../../../main/ts/model/dataValue";
+import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 
 var expect: any = chai.expect;
 
@@ -68,50 +68,50 @@ describe('RealTimeArray', () => {
     };
   });
 
-  var lastEvent: ModelChangeEvent = null;
-  var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
+  var lastEvent: ModelChangedEvent = null;
+  var lastEventCallback: (event: ModelChangedEvent) => void = (event: ModelChangedEvent) => {
     lastEvent = event;
   };
 
   it('Value is correct after creation', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, null, model);
-    expect(myArray.value()).to.deep.equal(primitveValue);
+    expect(myArray.data()).to.deep.equal(primitveValue);
   });
 
   it('Value is correct after set', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
-    myArray.value(["X", "Y", "Z"]);
-    expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
+    myArray.data(["X", "Y", "Z"]);
+    expect(myArray.data()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after insert', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
     myArray.insert(2, "X");
-    expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after remove', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
     myArray.remove(1);
-    expect(myArray.value()).to.deep.equal(["A", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after set', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
     myArray.set(1, "X");
-    expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after move', () => {
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
     myArray.reorder(1, 2);
-    expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
+    expect(myArray.data()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct operation is sent after set value', () => {
 
     var myArray: RealTimeArray = new RealTimeArray(arrayValue, null, null, callbacks, model);
-    myArray.value(["X", "Y", "Z"]);
+    myArray.data(["X", "Y", "Z"]);
 
     // var expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     // expect(lastOp).to.deep.equal(expectedOp);
@@ -160,7 +160,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
+    expect(myArray.data()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after ArrayInsertOperation', () => {
@@ -172,7 +172,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after ArrayRemoveOperation', () => {
@@ -182,7 +182,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    expect(myArray.value()).to.deep.equal(["A", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after ArrayReplaceOperation', () => {
@@ -194,7 +194,7 @@ describe('RealTimeArray', () => {
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
+    expect(myArray.data()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after ArrayMoveOperation', () => {
@@ -206,7 +206,7 @@ describe('RealTimeArray', () => {
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myArray._handleRemoteOperation(incomingEvent);
 
-    expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
+    expect(myArray.data()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct event is fired after ArraySetOperation', () => {

@@ -1,6 +1,5 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {Session} from "../Session";
-import {RealTimeModel} from "./RealTimeModel";
 import {ModelFqn} from "./ModelFqn";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
@@ -21,6 +20,7 @@ import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
+import {RealTimeModel} from "./rt/RealTimeModel";
 
 export class ModelService extends ConvergenceEventEmitter {
 

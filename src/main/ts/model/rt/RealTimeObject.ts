@@ -1,33 +1,29 @@
+import {ObservableObject} from "../observable/ObservableObject";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "./ot/Path";
-import {DiscreteOperation} from "./ot/ops/DiscreteOperation";
 import {RealTimeValue} from "./RealTimeValue";
-import {ObjectSetPropertyOperation} from "./ot/ops/ObjectSetPropertyOperation";
-import {ObjectAddPropertyOperation} from "./ot/ops/ObjectAddPropertyOperation";
-import {ObjectRemovePropertyOperation} from "./ot/ops/ObjectRemovePropertyOperation";
-import {ObjectSetOperation} from "./ot/ops/ObjectSetOperation";
-import {Path} from "./ot/Path";
-import {RealTimeArray} from "./RealTimeArray";
-import {ModelOperationEvent} from "./ModelOperationEvent";
-import {RealTimeValueType} from "./RealTimeValueType";
+import {ReferenceManager} from "../reference/ReferenceManager";
+import {ReferenceDisposedCallback, LocalModelReference} from "../reference/LocalModelReference";
+import {ObjectValue, DataValue} from "../dataValue";
+import {PathElement, Path} from "../ot/Path";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelValueType} from "../ModelValueType";
 import {RealTimeValueFactory} from "./RealTimeValueFactory";
-import {ModelChangeEvent} from "./events";
-import {RealTimeModel} from "./RealTimeModel";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {OperationType} from "./ot/ops/OperationType";
-import {RemoteReferenceEvent} from "../connection/protocol/model/reference/ReferenceEvent";
-import {ObjectValue} from "./dataValue";
-import {DataValue} from "./dataValue";
-import {PropertyReference} from "./reference/PropertyReference";
-import {ModelReference} from "./reference/ModelReference";
-import {ReferenceManager} from "./reference/ReferenceManager";
-import {ReferenceType} from "./reference/ModelReference";
-import {LocalModelReference} from "./reference/LocalModelReference";
-import {Session} from "../Session";
-import {LocalPropertyReference} from "./reference/LocalPropertyReference";
-import {ReferenceDisposedCallback} from "./reference/LocalModelReference";
+import {ReferenceType, ModelReference} from "../reference/ModelReference";
+import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
+import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
+import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
+import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
+import {PropertyReference} from "../reference/PropertyReference";
+import {LocalPropertyReference} from "../reference/LocalPropertyReference";
+import {Session} from "../../Session";
+import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
+import {RealTimeArray} from "./RealTimeArray";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {ValueChangedEvent} from "../observable/ObservableValue";
 
-export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> {
+export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> implements ObservableObject {
 
   static Events: any = {
     SET: "set",
@@ -49,7 +45,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
               fieldInParent: PathElement,
               callbacks: ModelEventCallbacks,
               model: RealTimeModel) {
-    super(RealTimeValueType.Object, data.id, parent, fieldInParent, callbacks, model);
+    super(ModelValueType.Object, data.id, parent, fieldInParent, callbacks, model);
 
     this._children = {};
 
@@ -153,30 +149,30 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
   // private / protected methods.
   //
 
-  protected _getValue(): { [key: string]: any; } {
+  protected _getData(): { [key: string]: any; } {
     var returnObject: Object = {};
     this.forEach((model: RealTimeValue<any>, key: string) => {
-      returnObject[key] = model.value();
+      returnObject[key] = model.data();
     });
     return returnObject;
   }
 
-  protected _setValue(value?: { [key: string]: any; }): void {
-    if (!value || typeof value !== "object") {
+  protected _setData(data?: { [key: string]: any; }): void {
+    if (!data || typeof data !== "object") {
       throw new Error("Value must be an object and cannot be null or undefined!");
     }
 
     this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
     this._children = {};
 
-    Object.getOwnPropertyNames(value).forEach((prop: string) => {
-      var val: any = value[prop];
+    Object.getOwnPropertyNames(data).forEach((prop: string) => {
+      var val: any = data[prop];
       var dataValue: DataValue = this._model._createDataValue(val);
       this._children[prop] =
         RealTimeValueFactory.create(dataValue, this, prop, this._callbacks, this._model);
     });
 
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, value);
+    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, data);
     this._sendOperation(operation);
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
@@ -193,10 +189,10 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
     var prop: string = <string> pathArgs[0];
     var child: RealTimeValue<any> = this._children[prop];
     if (pathArgs.length > 1) {
-      if (child.type() === RealTimeValueType.Object) {
-        return (<RealTimeObject> child).dataAt(pathArgs.slice(1, pathArgs.length));
-      } else if (child.type() === RealTimeValueType.Array) {
-        return (<RealTimeArray> child).dataAt(pathArgs.slice(1, pathArgs.length));
+      if (child.type() === ModelValueType.Object) {
+        return (<RealTimeObject> child).valueAt(pathArgs.slice(1, pathArgs.length));
+      } else if (child.type() === ModelValueType.Array) {
+        return (<RealTimeArray> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined
         return RealTimeValueFactory.create(undefined, null, null, this._callbacks, this.model());
@@ -366,18 +362,18 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
   }
 }
 
-export interface ObjectSetEvent extends ModelChangeEvent {
+export interface ObjectSetEvent extends ValueChangedEvent {
   src: RealTimeObject;
   key: string;
   value: any;
 }
 
-export interface ObjectRemoveEvent extends ModelChangeEvent {
+export interface ObjectRemoveEvent extends ValueChangedEvent {
   src: RealTimeObject;
   key: string;
 }
 
-export interface ObjectSetValueEvent extends ModelChangeEvent {
+export interface ObjectSetValueEvent extends ValueChangedEvent {
   src: RealTimeObject;
   value:  { [key: string]: any; };
 }

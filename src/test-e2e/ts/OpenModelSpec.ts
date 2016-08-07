@@ -1,6 +1,6 @@
 import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
-import {RealTimeModel} from "../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
 import {OpenRealTimeModelRequest} from "../../main/ts/connection/protocol/model/openRealtimeModel";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";

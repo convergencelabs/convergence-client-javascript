@@ -1,13 +1,11 @@
 import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
-import {RealTimeModel} from "../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
-import {ISendRequestRecord} from "../mock-server/records";
-import {IReceiveResponseRecord} from "../mock-server/records";
-import RealTimeString from "../../main/ts/model/RealTimeString";
+import RealTimeString from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
 
 
@@ -85,7 +83,7 @@ describe('Reference Transformation E2E', () => {
       return domain.modelService().open("collection", "model");
     }).then((model: RealTimeModel) => {
       referenceSetAction.acknowledgeReceipt();
-      var rts: RealTimeString = <RealTimeString>model.dataAt("text");
+      var rts: RealTimeString = <RealTimeString>model.valueAt("text");
       console.log(model.connectedSessions());
 
       rts.on(RealTimeString.Events.REFERENCE, function(e) {

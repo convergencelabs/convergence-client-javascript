@@ -1,18 +1,18 @@
-import RealTimeNumber from "../../../main/ts/model/RealTimeNumber";
+import RealTimeNumber from "../../../main/ts/model/rt/RealTimeNumber";
 import {NumberAddOperation} from "../../../main/ts/model/ot/ops/NumberAddOperation";
 import {NumberSetOperation} from "../../../main/ts/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {NumberSetValueEvent} from "../../../main/ts/model/RealTimeNumber";
-import {NumberAddEvent} from "../../../main/ts/model/RealTimeNumber";
-import {ModelChangeEvent} from "../../../main/ts/model/events";
+import {NumberSetValueEvent} from "../../../main/ts/model/rt/RealTimeNumber";
+import {NumberAddEvent} from "../../../main/ts/model/rt/RealTimeNumber";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
-import {ModelEventCallbacks} from "../../../main/ts/model/RealTimeModel";
+import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 import {NumberValue} from "../../../main/ts/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {RealTimeModel} from "../../../main/ts/model/RealTimeModel";
+import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
+import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 
 var expect: any = chai.expect;
 
@@ -47,32 +47,32 @@ describe('RealTimeNumber', () => {
     };
   });
 
-  var lastEvent: ModelChangeEvent = null;
-  var lastEventCallback: (event: ModelChangeEvent) => void = (event: ModelChangeEvent) => {
+  var lastEvent: ModelChangedEvent = null;
+  var lastEventCallback: (event: ModelChangedEvent) => void = (event: ModelChangedEvent) => {
     lastEvent = event;
   };
 
   it('Value is correct after creation', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(initialValue, null, null, null, model);
-    expect(myNumber.value()).to.equal(10);
+    expect(myNumber.data()).to.equal(10);
   });
 
   it('Value is correct after add', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(initialValue, null, null, callbacks, model);
     myNumber.add(5);
-    expect(myNumber.value()).to.equal(15);
+    expect(myNumber.data()).to.equal(15);
   });
 
   it('Value is correct after subtract', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(initialValue, null, null, callbacks, model);
     myNumber.subtract(5);
-    expect(myNumber.value()).to.equal(5);
+    expect(myNumber.data()).to.equal(5);
   });
 
   it('Returned value is correct after set', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(initialValue, null, null, callbacks, model);
-    myNumber.value(20);
-    expect(myNumber.value()).to.equal(20);
+    myNumber.data(20);
+    expect(myNumber.data()).to.equal(20);
   });
 
   it('Correct operation is sent after add', () => {
@@ -94,7 +94,7 @@ describe('RealTimeNumber', () => {
 
   it('Correct operation is sent after set', () => {
     var myNumber: RealTimeNumber = new RealTimeNumber(initialValue, null, null, callbacks, model);
-    myNumber.value(20);
+    myNumber.data(20);
 
     // var expectedOp: NumberSetOperation = new NumberSetOperation(initialValue.id, false, 20);
     // expect(lastOp).to.deep.equal(expectedOp);
@@ -107,7 +107,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myNumber._handleRemoteOperation(incomingEvent);
 
-    expect(myNumber.value()).to.equal(15);
+    expect(myNumber.data()).to.equal(15);
   });
 
   it('Value is correct after NumberSetOperation', () => {
@@ -117,7 +117,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     myNumber._handleRemoteOperation(incomingEvent);
 
-    expect(myNumber.value()).to.equal(20);
+    expect(myNumber.data()).to.equal(20);
   });
 
   it('Correct Event is fired after NumberAddOperation', () => {

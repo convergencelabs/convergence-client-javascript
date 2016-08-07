@@ -9,7 +9,7 @@ import {RemoteReferenceUnpublished} from "../../connection/protocol/model/refere
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
-import {RealTimeValue} from "../RealTimeValue";
+import {RealTimeValue} from "../rt/RealTimeValue";
 import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 
