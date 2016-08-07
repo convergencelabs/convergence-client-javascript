@@ -1,11 +1,10 @@
 import {Session} from "../../Session";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ObservableValue} from "./ObservableValue";
 import {ObservableObject} from "./ObservableObject";
 
 
-export interface ObservableModel extends ConvergenceEventEmitter {
+export interface ObservableModel {
 
   collectionId(): string;
 

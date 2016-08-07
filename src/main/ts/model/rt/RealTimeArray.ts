@@ -1,6 +1,6 @@
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {ObservableArray} from "../observable/ObservableArray";
-import {ValueChangedEvent, ObservableValue} from "../observable/ObservableValue";
+import {ValueChangedEvent} from "../observable/ObservableValue";
 import {RealTimeValue} from "./RealTimeValue";
 import {ArrayValue, DataValue} from "../dataValue";
 import {PathElement, Path} from "../ot/Path";
@@ -48,7 +48,7 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> implements Obse
     }
   }
 
-  get(index: number): ObservableValue<any> {
+  get(index: number): RealTimeValue<any> {
     return this._children[index];
   }
 

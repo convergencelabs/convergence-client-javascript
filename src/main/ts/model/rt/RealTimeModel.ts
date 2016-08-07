@@ -496,8 +496,6 @@ export interface ModelEventCallbacks {
   referenceEventCallbacks: ModelReferenceCallbacks;
 }
 
-
-
 export interface RemoteSessionOpenedEvent extends ModelEvent {
   username: string;
   sessionId: string;
