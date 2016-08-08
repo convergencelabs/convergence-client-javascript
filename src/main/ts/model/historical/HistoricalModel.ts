@@ -28,6 +28,23 @@ export class HistoricalModel implements ObservableModel {
     return this._model.version();
   }
 
+  maxVersion(): number {
+    // FIXME
+    return;
+  }
+
+  goto(version: number): void {
+
+  }
+
+  skipForward(delta: number): void {
+
+  }
+
+  skipBackward(delta: number): void {
+
+  }
+
   createdTime(): Date {
     return this._model.createdTime();
   }
