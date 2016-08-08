@@ -21,6 +21,7 @@ import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
+import {HistoricalModel} from "./historical/HistoricalModel";
 
 export class ModelService extends ConvergenceEventEmitter {
 
@@ -151,6 +152,10 @@ export class ModelService extends ConvergenceEventEmitter {
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
     });
+  }
+
+  history(collectionId: string, modelId: string): HistoricalModel {
+    return null;
   }
 
   _close(resourceId: string): Promise<void> {
