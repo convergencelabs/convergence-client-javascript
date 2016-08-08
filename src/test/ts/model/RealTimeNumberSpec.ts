@@ -1,4 +1,4 @@
-import RealTimeNumber from "../../../main/ts/model/rt/RealTimeNumber";
+import {RealTimeNumber} from "../../../main/ts/model/rt/RealTimeNumber";
 import {NumberAddOperation} from "../../../main/ts/model/ot/ops/NumberAddOperation";
 import {NumberSetOperation} from "../../../main/ts/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";

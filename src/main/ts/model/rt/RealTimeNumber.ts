@@ -14,7 +14,7 @@ import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/Re
 import {ValueChangedEvent} from "../observable/ObservableValue";
 
 
-export default class RealTimeNumber extends RealTimeValue<number> implements ObservableNumber {
+export class RealTimeNumber extends RealTimeValue<number> implements ObservableNumber {
 
   static Events: any = {
     ADD: "add",

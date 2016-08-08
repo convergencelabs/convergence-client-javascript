@@ -11,7 +11,7 @@ import {OperationType} from "../ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ValueChangedEvent} from "../observable/ObservableValue";
 
-export default class RealTimeBoolean extends RealTimeValue<boolean> implements ObservableBoolean {
+export class RealTimeBoolean extends RealTimeValue<boolean> implements ObservableBoolean {
 
   static Events: any = {
     VALUE: "value",

@@ -7,7 +7,7 @@ import {ModelValueType} from "../ModelValueType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export default class RealTimeNull extends RealTimeValue<any> implements ObservableNull {
+export class RealTimeNull extends RealTimeValue<any> implements ObservableNull {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED

@@ -1,4 +1,4 @@
-import RealTimeString from "../../../main/ts/model/rt/RealTimeString";
+import {RealTimeString} from "../../../main/ts/model/rt/RealTimeString";
 import {StringSetOperation} from "../../../main/ts/model/ot/ops/StringSetOperation";
 import {StringInsertOperation} from "../../../main/ts/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../../main/ts/model/ot/ops/StringRemoveOperation";

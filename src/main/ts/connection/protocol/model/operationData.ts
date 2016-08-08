@@ -147,6 +147,7 @@ export class CompoundOperationSerializer {
     for (op of operation.ops) {
       ops.push(DiscreteOperationSerializer.serialize(op));
     }
+
     return {
       t: OperationTypeCodes.code(OperationType.COMPOUND),
       o: ops
@@ -158,7 +159,7 @@ export class CompoundDeserializer {
   static deserialize(body: any): CompoundOperation {
     var ops: Array<DiscreteOperation> = [];
     var op: any;
-    for (op of body.ops) {
+    for (op of body.o) {
       ops.push(DiscreteOperationDeserializer.deserialize(op));
     }
     return new CompoundOperation(ops);

@@ -1,4 +1,4 @@
-import RealTimeBoolean from "../../../main/ts/model/rt/RealTimeBoolean";
+import {RealTimeBoolean} from "../../../main/ts/model/rt/RealTimeBoolean";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
 import {BooleanSetOperation} from "../../../main/ts/model/ot/ops/BooleanSetOperation";
 import {BooleanSetValueEvent} from "../../../main/ts/model/rt/RealTimeBoolean";

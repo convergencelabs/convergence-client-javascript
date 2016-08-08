@@ -23,8 +23,7 @@ import {MessageType} from "../../connection/protocol/MessageType";
 import {ValueChangedEvent} from "../observable/ObservableValue";
 
 
-
-export default class RealTimeString extends RealTimeValue<String> implements ObservableString {
+export class RealTimeString extends RealTimeValue<String> implements ObservableString {
 
   static Events: any = {
     INSERT: "insert",

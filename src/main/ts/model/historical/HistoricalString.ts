@@ -11,7 +11,7 @@ export class HistoricalString extends HistoricalValue<any> implements Observable
     this._string = value;
   }
 
-  length(): number{
+  length(): number {
     return this._string.length();
   }
 }

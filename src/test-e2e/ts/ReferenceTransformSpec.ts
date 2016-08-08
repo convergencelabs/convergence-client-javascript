@@ -5,7 +5,7 @@ import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
-import RealTimeString from "../../main/ts/model/rt/RealTimeString";
+import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
 
 

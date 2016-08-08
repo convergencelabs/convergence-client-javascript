@@ -7,7 +7,7 @@ import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 import {ModelValueType} from "../ModelValueType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export default class RealTimeUndefined extends RealTimeValue<void> implements ObservableUndefined {
+export class RealTimeUndefined extends RealTimeValue<void> implements ObservableUndefined {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED

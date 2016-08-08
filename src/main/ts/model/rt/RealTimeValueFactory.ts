@@ -1,12 +1,12 @@
 import {RealTimeValue} from "./RealTimeValue";
-import RealTimeNull from "./RealTimeNull";
-import RealTimeUndefined from "./RealTimeUndefined";
-import RealTimeString from "./RealTimeString";
+import {RealTimeNull} from "./RealTimeNull";
+import {RealTimeUndefined} from "./RealTimeUndefined";
+import {RealTimeString} from "./RealTimeString";
 import {RealTimeArray} from "./RealTimeArray";
 import {RealTimeObject} from "./RealTimeObject";
-import RealTimeNumber from "./RealTimeNumber";
+import {RealTimeNumber} from "./RealTimeNumber";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import RealTimeBoolean from "./RealTimeBoolean";
+import {RealTimeBoolean} from "./RealTimeBoolean";
 import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {DataValue, StringValue, ArrayValue, ObjectValue, NumberValue, BooleanValue} from "../dataValue";

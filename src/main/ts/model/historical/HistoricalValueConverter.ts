@@ -5,15 +5,15 @@ import {HistoricalObject} from "./HistoricalObject";
 import {RealTimeObject} from "../rt/RealTimeObject";
 import {RealTimeArray} from "../rt/RealTimeArray";
 import {HistoricalArray} from "./HistoricalArray";
-import RealTimeBoolean from "../rt/RealTimeBoolean";
+import {RealTimeBoolean} from "../rt/RealTimeBoolean";
 import {HistoricalBoolean} from "./HistoricalBoolean";
-import RealTimeNumber from "../rt/RealTimeNumber";
+import {RealTimeNumber} from "../rt/RealTimeNumber";
 import {HistoricalNumber} from "./HistoricalNumber";
-import RealTimeNull from "../rt/RealTimeNull";
-import RealTimeUndefined from "../rt/RealTimeUndefined";
+import {RealTimeNull} from "../rt/RealTimeNull";
+import {RealTimeUndefined} from "../rt/RealTimeUndefined";
 import {HistoricalNull} from "./HistoricalNull";
 import {HistoricalUndefined} from "./HistoricalUndefined";
-import RealTimeString from "../rt/RealTimeString";
+import {RealTimeString} from "../rt/RealTimeString";
 import {HistoricalString} from "./HistoricalString";
 
 export class HistoricalValueConverter {
