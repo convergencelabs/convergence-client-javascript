@@ -1,53 +1,74 @@
-import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs/Observable";
+import {ChatService} from "./ChatService";
+import {ChatEvent} from "./events";
 
 export class ChatRoom {
 
-  private _id: string;
-  private _connection: ConvergenceConnection;
-  private _eventStream: Observable<MessageEvent>;
+  static Events: any = ChatService.Events;
 
-  constructor(id: string, eventStream: Observable<MessageEvent>, connection: ConvergenceConnection) {
+  private _id: string;
+  private _joinCB: () => void;
+  private _leftCB: () => void;
+  private _isJoined: () => boolean;
+  private _connection: ConvergenceConnection;
+  private _eventStream: Observable<ChatEvent>;
+
+  constructor(id: string,
+              joinCB: () => void,
+              leftCB: () => void,
+              isJoined: () => boolean,
+              eventStream: Observable<ChatEvent>,
+              connection: ConvergenceConnection) {
+
     this._id = id;
+    this._joinCB = joinCB;
+    this._leftCB = leftCB;
+    this._isJoined = isJoined;
     this._eventStream = eventStream;
     this._connection = connection;
   }
 
   info(): Observable<RoomInfo> {
-    return Observable.create((observer) => observer.next(new RoomInfo(true, [], 0, Date.now())));
+    return Observable.create((observer) => observer.next(new RoomInfo([], 0, Date.now())));
   }
 
-  join(): Observable<void> {
-    return Observable.create((observer) => observer.next());
+  isJoined(): boolean {
+    return this._isJoined();
+  }
+
+  join(): void {
+    if (!this._isJoined()) {
+      this._joinCB();
+    }
   }
 
   leave(): void {
+    if (this._isJoined()) {
+      this._leftCB();
+    }
   }
 
   send(message: string): void {
+    if (!this._isJoined()) {
+      // TODO: Handle not joined error
+    }
   }
 
-  eventStream(): Observable<MessageEvent> {
+  eventStream(): Observable<ChatEvent> {
     return this._eventStream;
   }
 }
 
 export class RoomInfo {
-
-  private _isJoined: boolean;
   private _sessions: string[];
   private _messageCount: number;
   private _lastMessageTime: number;
 
-  constructor(isJoined: boolean, sessions: string[], messageCount: number, lastMessageTime: number) {
-    this._isJoined = isJoined;
+  constructor(sessions: string[], messageCount: number, lastMessageTime: number) {
     this._sessions = sessions;
     this._messageCount = messageCount;
     this._lastMessageTime = lastMessageTime;
-  }
-
-  isJoined(): boolean {
-    return this._isJoined;
   }
 
   sessions(): string[] {
