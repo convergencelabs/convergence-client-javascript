@@ -1,11 +1,8 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs/Observable";
-import {ChatService} from "./ChatService";
 import {ChatEvent} from "./events";
 
 export class ChatRoom {
-
-  static Events: any = ChatService.Events;
 
   private _id: string;
   private _joinCB: () => void;
