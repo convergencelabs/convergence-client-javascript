@@ -41,7 +41,7 @@ gulp.task('build', [], function () {
   var tsResult = gulp.src(['src/**/*.ts', "typings/main.d.ts"])
     .pipe(ts(tsProject));
 
-  return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
+  return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done.
     tsResult.dts.pipe(gulp.dest('build')),
     tsResult.js.pipe(gulp.dest('build'))
   ]);
@@ -109,6 +109,18 @@ gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
       format: 'umd',
       moduleName: 'ConvergenceDomain',
       sourceMap: true,
+      external: [
+        'rxjs/Rx',
+        'rxjs/Observable',
+        'rxjs/BehaviorSubject',
+        'rxjs/ReplaySubject'
+      ],
+      globals: {
+        'rxjs/Rx': 'Rx',
+        'rxjs/Observable': 'Rx',
+        'rxjs/BehaviorSubject': 'Rx',
+        'rxjs/ReplaySubject': 'Rx'
+      },
       //exports: 'named',
       plugins: [
         rollupTypescript()

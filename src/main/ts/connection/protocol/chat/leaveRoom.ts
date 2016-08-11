@@ -9,7 +9,7 @@ export interface LeaveRoomMessage extends OutgoingProtocolNormalMessage {
 
 export var LeaveRoomMessageSerializer: MessageBodySerializer = (request: LeaveRoomMessage) => {
   return {
-    i: request.roomId
+    r: request.roomId
   };
 };
 
@@ -25,7 +25,7 @@ export var UserLeftRoomMessageDeserializer: MessageBodyDeserializer<UserLeftRoom
     roomId: body.r,
     username: body.u,
     sessionId: body.s,
-    timestamp: body.t
+    timestamp: body.p
   };
   return result;
 };

@@ -1,6 +1,10 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs/Observable";
 import {ChatEvent} from "./events";
+import {JoinRoomMessage} from "../connection/protocol/chat/joinRoom";
+import {MessageType} from "../connection/protocol/MessageType";
+import {LeaveRoomMessage} from "../connection/protocol/chat/leaveRoom";
+import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
 
 export class ChatRoom {
 
@@ -36,12 +40,20 @@ export class ChatRoom {
 
   join(): void {
     if (!this._isJoined()) {
+      this._connection.send(<JoinRoomMessage>{
+        type: MessageType.JOIN_ROOM,
+        roomId: this._id
+      });
       this._joinCB();
     }
   }
 
   leave(): void {
     if (this._isJoined()) {
+      this._connection.send(<LeaveRoomMessage>{
+        type: MessageType.LEAVE_ROOM,
+        roomId: this._id
+      });
       this._leftCB();
     }
   }
@@ -50,6 +62,12 @@ export class ChatRoom {
     if (!this._isJoined()) {
       // TODO: Handle not joined error
     }
+
+    this._connection.send(<PublishChatMessage>{
+      type: MessageType.PUBLISH_CHAT_MESSAGE,
+      roomId: this._id,
+      message: message
+    });
   }
 
   eventStream(): Observable<ChatEvent> {

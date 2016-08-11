@@ -30,7 +30,7 @@ export var UserChatMessageDeserializer: MessageBodyDeserializer<UserChatMessage>
     message: body.m,
     username: body.u,
     sessionId: body.s,
-    timestamp: body.t
+    timestamp: body.p
   };
   return result;
 };

@@ -9,6 +9,7 @@ import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
+import {ChatService} from "./chat/ChatService";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
@@ -51,6 +52,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   private _identityService: IdentityService;
   private _activityService: ActivityService;
   private _presenceService: PresenceService;
+  private _chatService: ChatService;
   private _connection: ConvergenceConnection;
   private _options: ConvergenceOptions;
 
@@ -96,6 +98,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     this._identityService = new IdentityService(this._connection);
     this._activityService = new ActivityService(this._connection);
     this._presenceService = new PresenceService(this._connection);
+    this._chatService = new ChatService(this._connection);
   }
 
   // TODO seems like a jquery.extend approach here would be simpler.
@@ -153,6 +156,10 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   presenceService(): PresenceService {
     return this._presenceService;
+  }
+
+  chatService(): ChatService {
+    return this._chatService;
   }
 
   dispose(): void {

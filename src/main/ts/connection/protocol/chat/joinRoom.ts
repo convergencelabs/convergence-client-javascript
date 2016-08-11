@@ -9,7 +9,7 @@ export interface JoinRoomMessage extends OutgoingProtocolNormalMessage {
 
 export var JoinRoomMessageSerializer: MessageBodySerializer = (request: JoinRoomMessage) => {
   return {
-    i: request.roomId
+    r: request.roomId
   };
 };
 
@@ -25,7 +25,7 @@ export var UserJoinedRoomMessageDeserializer: MessageBodyDeserializer<UserJoined
     roomId: body.r,
     username: body.u,
     sessionId: body.s,
-    timestamp: body.t
+    timestamp: body.p
   };
   return result;
 };
