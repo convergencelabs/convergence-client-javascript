@@ -165,14 +165,16 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
     this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
     this._children = {};
 
+    var newData: {[key: string]: DataValue} = {};
+
     Object.getOwnPropertyNames(data).forEach((prop: string) => {
-      var val: any = data[prop];
-      var dataValue: DataValue = this._model._createDataValue(val);
+      var dataValue: DataValue = this._model._createDataValue(data[prop]);
+      newData[prop] = dataValue;
       this._children[prop] =
         RealTimeValueFactory.create(dataValue, this, prop, this._callbacks, this._model);
     });
 
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, data);
+    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, newData);
     this._sendOperation(operation);
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {

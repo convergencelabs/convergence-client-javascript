@@ -234,7 +234,12 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     return this._modifiedTime;
   }
 
+  // deprecated
   value(): RealTimeObject {
+    return this._data;
+  }
+
+  root(): RealTimeObject {
     return this._data;
   }
 
