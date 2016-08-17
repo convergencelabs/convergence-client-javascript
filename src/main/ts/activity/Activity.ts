@@ -167,9 +167,11 @@ export class Activity extends ConvergenceEventEmitter {
     switch (message.type) {
       case MessageType.ACTIVITY_SESSION_JOINED:
         this._sessionJoined((<ActivitySessionJoined>message).sessionId);
+        this._stateMap._handleMessage(message);
         break;
       case MessageType.ACTIVITY_SESSION_LEFT:
         this._sessionLeft((<ActivitySessionLeft>message).sessionId);
+        this._stateMap._handleMessage(message);
         break;
       case MessageType.ACTIVITY_REMOTE_STATE_SET:
       case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:

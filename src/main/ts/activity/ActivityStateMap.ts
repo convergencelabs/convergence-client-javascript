@@ -10,6 +10,8 @@ import {ActivityClearState} from "../connection/protocol/activity/activityState"
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {ActivitySetState} from "../connection/protocol/activity/activityState";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
+import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 
 
 export class ActivityStateMap extends ConvergenceEventEmitter {
@@ -138,9 +140,24 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
       case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
         this._onRemoteStateCleared(<ActivityRemoteStateCleared>message);
         break;
+      case MessageType.ACTIVITY_SESSION_JOINED:
+        this._onRemoteSessionJoined(<ActivitySessionJoined>message);
+        break;
+      case MessageType.ACTIVITY_SESSION_LEFT:
+        this._onRemoteSessionLeft(<ActivitySessionLeft>message);
+        break;
       default:
       // todo error
     }
+  }
+
+  private _onRemoteSessionJoined(message: ActivitySessionJoined): void {
+    this._state[message.sessionId] = {};
+  }
+
+  private _onRemoteSessionLeft(message: ActivitySessionLeft): void {
+    // TODO should we fire state cleared on all the state?
+    delete this._state[message.sessionId];
   }
 
   private _onRemoteStateSet(message: ActivityRemoteStateSet): void {
