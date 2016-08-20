@@ -1,10 +1,6 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/bindCallback";
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/pluck';
-import 'rxjs/add/operator/filter';
+import {Observable} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ChatRoom} from "./ChatRoom";
 import {UserJoinedRoomMessage} from "../connection/protocol/chat/joinRoom";

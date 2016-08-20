@@ -3,11 +3,8 @@ import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConn
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
 import {UserPresence} from "./UserPresence";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/last";
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/operator/map';
+import {BehaviorSubject} from "rxjs/Rx";
+import {Observable} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
 import {PresenceAvailabilityChanged} from "../connection/protocol/presence/pressenceAvailability";
 import {PresenceStateSet} from "../connection/protocol/presence/presenceState";

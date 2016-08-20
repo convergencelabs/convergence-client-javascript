@@ -1,7 +1,5 @@
-import {Observable} from "rxjs/Observable";
-import {Observer, PartialObserver} from "rxjs/Observer";
-import {Subscription, Subscriber} from "rxjs/Rx";
-import {ReplaySubject} from "rxjs/ReplaySubject";
+import {Observable, ReplaySubject, Observer, Subscription, Subscriber} from "rxjs/Rx";
+import {PartialObserver} from "rxjs/Observer";
 
 export class SubjectSubscriptionManager<T> {
   private _subjectMap: Map<string, SubscriptionSubject<T>>;

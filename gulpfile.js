@@ -111,17 +111,12 @@ gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
       sourceMap: true,
       external: [
         'rxjs/Rx',
-        'rxjs/Observable',
-        'rxjs/BehaviorSubject',
-        'rxjs/ReplaySubject'
+        'rxjs/Observable'
       ],
       globals: {
         'rxjs/Rx': 'Rx',
-        'rxjs/Observable': 'Rx',
-        'rxjs/BehaviorSubject': 'Rx',
-        'rxjs/ReplaySubject': 'Rx'
+        'rxjs/Observable': 'Rx'
       },
-      //exports: 'named',
       plugins: [
         rollupTypescript()
       ]
