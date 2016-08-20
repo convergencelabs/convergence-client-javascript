@@ -91,7 +91,10 @@ export class PresenceService extends ConvergenceEventEmitter {
   }
 
   presence(username: string): Observable<UserPresence> {
-    return this.presences([username]).map((result => result[0]));
+    return this.presences([username]).map(
+      result => {
+        return <UserPresence>result[0];
+      });
   }
 
   presences(usernames: string[]): Observable<UserPresence[]> {
@@ -100,7 +103,7 @@ export class PresenceService extends ConvergenceEventEmitter {
       usernames: usernames
     };
     return Observable.fromPromise(this._connection.request(message)).map((response: RequestPresenceResponse) => {
-      return response.userPresences;
+      return <UserPresence[]>response.userPresences;
     });
   }
 
