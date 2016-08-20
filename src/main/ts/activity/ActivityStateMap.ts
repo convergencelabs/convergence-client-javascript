@@ -161,6 +161,8 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
   }
 
   private _onRemoteStateSet(message: ActivityRemoteStateSet): void {
+    this._state[message.sessionId][message.key] = message.value;
+
     var event: ActivityRemoteStateSetEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_SET,
@@ -174,6 +176,8 @@ export class ActivityStateMap extends ConvergenceEventEmitter {
   }
 
   private _onRemoteStateCleared(message: ActivityRemoteStateCleared): void {
+    delete this._state[message.sessionId][message.key];
+
     var event: ActivityRemoteStateClearedEvent = {
       src: this,
       name: ActivityStateMap.Events.STATE_CLEARED,
