@@ -16,8 +16,6 @@ import {ParticipantsResponse} from "../connection/protocol/activity/participants
 export class Activity extends ConvergenceEventEmitter {
 
   static Events: any = {
-    USER_JOINED: "user_joined",
-    USER_LEFT: "user_left",
     SESSION_JOINED: "session_joined",
     SESSION_LEFT: "session_left",
     STATE_SET: "state_set",
@@ -88,17 +86,6 @@ export class Activity extends ConvergenceEventEmitter {
         value: value
       };
       this._connection.send(message);
-
-      // var event: ActivityRemoteStateSetEvent = {
-      //  src: this,
-      //  name: ActivityStateMap.Events.STATE_SET,
-      //  username: SessionIdParser.parseUsername(sessionId),
-      //  sessionId: sessionId,
-      //  key: key,
-      //  value: value,
-      //  local: true
-      // };
-      // this.emitEvent(event);
     }
   }
 
@@ -111,20 +98,6 @@ export class Activity extends ConvergenceEventEmitter {
       };
       this._connection.send(message);
     }
-
-    // var event: ActivityRemoteStateClearedEvent = {
-    //  src: this,
-    //  name: ActivityStateMap.Events.STATE_CLEARED,
-    //  username: SessionIdParser.parseUsername(sessionId),
-    //  sessionId: sessionId,
-    //  key: key,
-    //  local: true
-    // };
-    // this.emitEvent(event);
-  }
-
-  clearAll(): void {
-    // TODO: Implement Clear All Message
   }
 
   participants(): Observable<ActivityParticipant[]> {

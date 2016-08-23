@@ -27,4 +27,4 @@ export var ParticipantsResponseDeserializer: MessageBodyDeserializer<Participant
 /**
  * Stored by session id, then key.
  */
-export type ActivityParticipant = {[key: string]: {[key: string]: any}};
+export type ActivityParticipant = Map<string, Map<string, any>>;
