@@ -34,13 +34,10 @@ import {RemoteReferenceUnpublishedDeserializer} from "./model/reference/Referenc
 import {PublishReferenceSerializer} from "./model/reference/ReferenceEvent";
 import {RemoteClientOpenedModelDeserializer} from "./model/remoteOpenClose";
 import {RemoteClientClosedModelDeserializer} from "./model/remoteOpenClose";
-import {ActivityOpenRequestSerializer} from "./activity/openActivity";
-import {ActivityCloseRequestSerializer} from "./activity/closeActivity";
 import {ActivityJoinRequestSerializer} from "./activity/joinActivity";
 import {ActivityLeaveRequestSerializer} from "./activity/leaveActivity";
 import {ActivitySetStateSerializer} from "./activity/activityState";
 import {ActivityClearStateSerializer} from "./activity/activityState";
-import {ActivityOpenResponseDeserializer} from "./activity/openActivity";
 import {ActivitySessionJoinedDeserializer} from "./activity/sessionJoined";
 import {ActivitySessionLeftDeserializer} from "./activity/sessionLeft";
 import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
@@ -59,6 +56,8 @@ import {UserChatMessageDeserializer} from "./chat/chatMessage";
 import {JoinRoomMessageSerializer} from "./chat/joinRoom";
 import {LeaveRoomMessageSerializer} from "./chat/leaveRoom";
 import {PublishChatMessageSerializer} from "./chat/chatMessage";
+import {ParticipantsResponseDeserializer} from "./activity/participants";
+import {ParticipantsRequestSerializer} from "./activity/participants";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -168,8 +167,7 @@ MessageSerializer.registerMessageBodySerializer(MessageType.UNPUBLISH_REFERENCE,
 MessageSerializer.registerMessageBodySerializer(MessageType.USER_LOOKUP_REQUEST, UserLookUpRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.USER_SEARCH_REQUEST, UserSearchRequestSerializer);
 
-MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_OPEN_REQUEST, ActivityOpenRequestSerializer);
-MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_CLOSE_REQUEST, ActivityCloseRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_PARTICIPANTS_REQUEST, ParticipantsRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_JOIN_REQUEST, ActivityJoinRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LEAVE_REQUEST, ActivityLeaveRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LOCAL_STATE_SET, ActivitySetStateSerializer);
@@ -214,8 +212,7 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_UNPUBLIS
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDeserializer);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_OPEN_RESPONSE, ActivityOpenResponseDeserializer);
-MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ACTIVITY_CLOSE_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_PARTICIPANTS_RESPONSE, ParticipantsResponseDeserializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ACTIVITY_JOIN_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ACTIVITY_LEAVE_RESPONSE);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_SESSION_JOINED, ActivitySessionJoinedDeserializer);

@@ -1,22 +1,17 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {RemoteSession} from "../RemoteSession";
-import {ActivityStateMap} from "./ActivityStateMap";
-import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {MessageType} from "../connection/protocol/MessageType";
-import {IncomingProtocolMessage} from "../connection/protocol/protocol";
-import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
-import {ConvergenceEvent} from "../util/ConvergenceEvent";
-import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
-import {ActivityState} from "../connection/protocol/activity/openActivity";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
-import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
-import {ActivityLeaveResponse} from "../connection/protocol/activity/leaveActivity";
-import {ActivityCloseRequest} from "../connection/protocol/activity/closeActivity";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {MessageEvent} from "../connection/ConvergenceConnection";
+import {ActivityEvent} from "./events";
+import {Observable} from "rxjs/Rx";
+import {ActivitySetState} from "../connection/protocol/activity/activityState";
+import {ActivityClearState} from "../connection/protocol/activity/activityState";
+import {ActivityParticipant} from "./ActivityParticipant";
+import {ParticipantsRequest} from "../connection/protocol/activity/participants";
+import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 
 export class Activity extends ConvergenceEventEmitter {
 
@@ -24,39 +19,32 @@ export class Activity extends ConvergenceEventEmitter {
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
     SESSION_JOINED: "session_joined",
-    SESSION_LEFT: "session_left"
+    SESSION_LEFT: "session_left",
+    STATE_SET: "state_set",
+    STATE_CLEARED: "state_cleared"
   };
 
   private _id: string;
-
-  private _joinedSessionsByUsername: {[key: string]: RemoteSession[]};
-  private _stateMap: ActivityStateMap;
-
+  private _joinCB: () => void;
+  private _leftCB: () => void;
+  private _isJoined: () => boolean;
   private _connection: ConvergenceConnection;
+  private _eventStream: Observable<ActivityEvent>;
 
-  private _joiningDeferred: Deferred<void>;
-  private _joined: boolean;
-  private _closeCallback: (id: string) => void;
-  private _open: boolean;
 
-  constructor(connection: ConvergenceConnection,
-              joinedSessionsByUsername: {[key: string]: RemoteSession[]},
-              stateMap: ActivityState,
-              id: string,
-              closeCallback: (id: string) => void) {
+  constructor(id: string,
+              joinCB: () => void,
+              leftCB: () => void,
+              isJoined: () => boolean,
+              eventStream: Observable<ActivityEvent>,
+              connection: ConvergenceConnection) {
     super();
-    this._connection = connection;
     this._id = id;
-    this._closeCallback = closeCallback;
-    this._joiningDeferred = null;
-    this._joined = false;
-    this._joinedSessionsByUsername = joinedSessionsByUsername;
-    this._stateMap = new ActivityStateMap(
-      connection,
-      this,
-      stateMap);
-
-    this._open = true;
+    this._joinCB = joinCB;
+    this._leftCB = leftCB;
+    this._isJoined = isJoined;
+    this._eventStream = eventStream;
+    this._connection = connection;
   }
 
   session(): Session {
@@ -67,221 +55,98 @@ export class Activity extends ConvergenceEventEmitter {
     return this._id;
   }
 
-  join(): Promise<void> {
-    if (this.joined()) {
-      return Promise.resolve(null);
-    } else if (this._joiningDeferred !== null) {
-      return this._joiningDeferred.promise();
-    } else {
-      var deferred: Deferred<void> = new Deferred<void>();
-      var joinRequest: ActivityJoinRequest = {
+  join(): void {
+    if (!this._isJoined()) {
+      this._connection.send(<ActivityJoinRequest>{
         type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: this._id
-      };
-
-      this._connection.request(joinRequest).then((response: ActivityJoinResponse) => {
-        this._joined = true;
-        this._joiningDeferred = null;
-        this._sessionJoined(this._connection.session().sessionId());
-        deferred.resolve();
-      }).catch((error: Error) => {
-        deferred.reject(error);
       });
-      this._joiningDeferred = deferred;
-      return deferred.promise();
+      this._joinCB();
     }
   }
 
-  leave(): Promise<void> {
-    var leaveRequest: ActivityLeaveRequest = {
-      type: MessageType.ACTIVITY_LEAVE_REQUEST,
+  leave(): void {
+    if (this._isJoined()) {
+      this._connection.send(<ActivityLeaveRequest>{
+        type: MessageType.ACTIVITY_LEAVE_REQUEST,
+        activityId: this._id
+      });
+      this._leftCB();
+    }
+  }
+
+  isJoined(): boolean {
+    return this._isJoined();
+  }
+
+  publish(key: string, value: any): void {
+    if (this._isJoined()) {
+      var message: ActivitySetState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_SET,
+        activityId: this._id,
+        key: key,
+        value: value
+      };
+      this._connection.send(message);
+
+      // var event: ActivityRemoteStateSetEvent = {
+      //  src: this,
+      //  name: ActivityStateMap.Events.STATE_SET,
+      //  username: SessionIdParser.parseUsername(sessionId),
+      //  sessionId: sessionId,
+      //  key: key,
+      //  value: value,
+      //  local: true
+      // };
+      // this.emitEvent(event);
+    }
+  }
+
+  clear(key: string): void {
+    if (this._isJoined()) {
+      var message: ActivityClearState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
+        activityId: this._id,
+        key: key
+      };
+      this._connection.send(message);
+    }
+
+    // var event: ActivityRemoteStateClearedEvent = {
+    //  src: this,
+    //  name: ActivityStateMap.Events.STATE_CLEARED,
+    //  username: SessionIdParser.parseUsername(sessionId),
+    //  sessionId: sessionId,
+    //  key: key,
+    //  local: true
+    // };
+    // this.emitEvent(event);
+  }
+
+  clearAll(): void {
+    // TODO: Implement Clear All Message
+  }
+
+  participants(): Observable<ActivityParticipant[]> {
+
+    var participantRequest: ParticipantsRequest = {
+      type: MessageType.ACTIVITY_PARTICIPANTS_REQUEST,
       activityId: this._id
     };
-    var deferred: Deferred<void> = new Deferred<void>();
-    this._connection.request(leaveRequest).then((response: ActivityLeaveResponse) => {
-      this._joined = false;
-      this._sessionLeft(this._connection.session().sessionId());
-      deferred.resolve();
-    }).catch((error: Error) => {
-      deferred.reject(error);
-    });
-    return deferred.promise();
-  }
 
-  joined(): boolean {
-    return this._joined;
-  }
-
-  joinedSessions(): RemoteSession[] {
-    var result: RemoteSession[] = [];
-    Object.keys(this._joinedSessionsByUsername).forEach(username => {
-      var sessions: RemoteSession[] = this._joinedSessionsByUsername[username];
-      sessions.forEach(session => {
-        result.push(session);
+    return Observable.fromPromise(this._connection.request(participantRequest)).map((response: ParticipantsResponse) => {
+      var participants: ActivityParticipant[] = [];
+      Object.keys(response.participants).forEach((sessionId: string) => {
+        var username: string = SessionIdParser.parseUsername(sessionId);
+        participants.push(new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
       });
+      return participants;
     });
-    return result;
   }
 
-  joinedSessionsByUsername(): {[key: string]: RemoteSession[]} {
-    var result: {[key: string]: RemoteSession[]} = {};
-    Object.keys(this._joinedSessionsByUsername).forEach(username => {
-      var sessions: RemoteSession[] = [];
-      result[username] = sessions;
-      this._joinedSessionsByUsername[username].forEach(session => {
-        sessions.push(session);
-      });
-    });
-    return result;
-  }
-
-  close(): Promise<void> {
-    this._open = false;
-    var message: ActivityCloseRequest = {
-      type: MessageType.ACTIVITY_CLOSE_REQUEST,
-      activityId: this._id
-    };
-
-    this._joined = false;
-    var deferred: Deferred<void> = new Deferred<void>();
-    this._connection.request(message).then(() => {
-      this._closeCallback(this._id);
-      deferred.resolve();
-    }).catch((error: Error) => {
-      deferred.reject(error);
-    });
-    return deferred.promise();
-  }
-
-  opened(): boolean {
-    return this._open;
-  }
-
-  state(): ActivityStateMap {
-    return this._stateMap;
-  }
-
-  _handleMessage(messageEvent: MessageEvent): void {
-    var message: IncomingProtocolMessage = messageEvent.message;
-
-    switch (message.type) {
-      case MessageType.ACTIVITY_SESSION_JOINED:
-        this._sessionJoined((<ActivitySessionJoined>message).sessionId);
-        this._stateMap._handleMessage(message);
-        break;
-      case MessageType.ACTIVITY_SESSION_LEFT:
-        this._sessionLeft((<ActivitySessionLeft>message).sessionId);
-        this._stateMap._handleMessage(message);
-        break;
-      case MessageType.ACTIVITY_REMOTE_STATE_SET:
-      case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
-        this._stateMap._handleMessage(message);
-        break;
-      default:
-      // fixme error
-    }
-  }
-
-  private _sessionJoined(sessionId: string): void {
-    var username: string = SessionIdParser.parseUsername(sessionId);
-
-    var fireUserEvent: boolean = false;
-    var userSessions: RemoteSession[] = this._joinedSessionsByUsername[username];
-    if (userSessions === undefined) {
-      fireUserEvent = true;
-      userSessions = [];
-      this._joinedSessionsByUsername[username] = userSessions;
-    }
-
-    userSessions.push({username: username, sessionId: sessionId});
-
-    if (fireUserEvent) {
-      var userEvent: ActivityUserJoinedEvent = {
-        src: this,
-        name: Activity.Events.USER_JOINED,
-        activityId: this._id,
-        username: username,
-        sessionId: sessionId,
-        local: sessionId === this._connection.session().sessionId()
-      };
-      this.emitEvent(userEvent);
-    }
-
-    var sessionEvent: ActivitySessionJoinedEvent = {
-      src: this,
-      name: Activity.Events.SESSION_JOINED,
-      activityId: this._id,
-      username: username,
-      sessionId: sessionId,
-      local: sessionId === this._connection.session().sessionId()
-    };
-    this.emitEvent(sessionEvent);
-  }
-
-  private _sessionLeft(sessionId: string): void {
-    var username: string = SessionIdParser.parseUsername(sessionId);
-
-    var fireUserEvent: boolean = false;
-    var userSessions: RemoteSession[] = this._joinedSessionsByUsername[username];
-    userSessions.forEach((session: RemoteSession) => {
-      if (session.sessionId === sessionId) {
-        userSessions.splice(userSessions.indexOf(session), 1);
-      }
-    });
-
-    if (userSessions.length === 0) {
-      fireUserEvent = true;
-      delete this._joinedSessionsByUsername[username];
-    }
-
-    if (fireUserEvent) {
-      var userEvent: ActivityUserLeftEvent = {
-        src: this,
-        name: Activity.Events.USER_LEFT,
-        activityId: this._id,
-        username: username,
-        sessionId: sessionId,
-        local: sessionId === this._connection.session().sessionId()
-      };
-      this.emitEvent(userEvent);
-    }
-
-    var sessionEvent: ActivitySessionLeftEvent = {
-      src: this,
-      name: Activity.Events.SESSION_LEFT,
-      activityId: this._id,
-      username: username,
-      sessionId: sessionId,
-      local: sessionId === this._connection.session().sessionId()
-    };
-    this.emitEvent(sessionEvent);
+  events(): Observable<ActivityEvent> {
+    return this._eventStream;
   }
 }
 
-export interface ActivityUserJoinedEvent extends ConvergenceEvent {
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-}
 
-export interface ActivityUserLeftEvent extends ConvergenceEvent {
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-}
-
-export interface ActivitySessionJoinedEvent extends ConvergenceEvent {
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-}
-
-export interface ActivitySessionLeftEvent extends ConvergenceEvent {
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-}

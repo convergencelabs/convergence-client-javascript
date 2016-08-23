@@ -1,121 +1,126 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
-import {Deferred} from "../util/Deferred";
 import {MessageType} from "../connection/protocol/MessageType";
-import {ActivityOpenRequest} from "../connection/protocol/activity/openActivity";
-import {ActivityOpenResponse} from "../connection/protocol/activity/openActivity";
-import {RemoteSession} from "../RemoteSession";
-import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {MessageEvent} from "../connection/ConvergenceConnection";
+import {Observable} from "rxjs/Rx";
+import {SessionJoinedEvent, SessionLeftEvent, StateClearedEvent, StateSetEvent} from "./events";
+import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
+import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
+import {ActivityRemoteStateSet, ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
+import {ActivityEvent} from "./events";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 
 export class ActivityService {
 
   private _connection: ConvergenceConnection;
-  private _opened: {[key: string]: Activity};
-  private _opening: {[key: string]: Deferred<Activity>};
+  private _eventStream: Observable<ActivityEvent>;
+  private _joinedMap: Map<string, boolean>;
 
   constructor(connection: ConvergenceConnection) {
     this._connection = connection;
-    this._opened = {};
-    this._opening = {};
 
-    this._connection.addMultipleMessageListener(
-      [MessageType.ACTIVITY_SESSION_JOINED,
+    let messageObs: Observable<MessageEvent> = Observable.create(observer => {
+      this._connection.addMultipleMessageListener(
+        [MessageType.ACTIVITY_SESSION_JOINED,
         MessageType.ACTIVITY_SESSION_LEFT,
         MessageType.ACTIVITY_REMOTE_STATE_SET,
         MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
-      (message: MessageEvent) => this._handleMessage(message));
+        (event) => {
+        observer.next(event);
+      });
+    });
+
+    this._eventStream = messageObs.pluck("message").map(message => {
+      let msg: any = message;
+      switch (msg.type) {
+        case MessageType.ACTIVITY_SESSION_JOINED:
+          let joinedMsg: ActivitySessionJoined = <ActivitySessionJoined> message;
+          return <SessionJoinedEvent> {
+            src: this,
+            name: Activity.Events.SESSION_JOINED,
+            activityId: joinedMsg.activityId,
+            username: SessionIdParser.parseUsername(joinedMsg.sessionId),
+            sessionId: joinedMsg.sessionId,
+            local: false
+          };
+        case MessageType.ACTIVITY_SESSION_LEFT:
+          let leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
+          return <SessionLeftEvent> {
+            name: Activity.Events.USER_LEFT,
+            activityId: leftMsg.activityId,
+            username: SessionIdParser.parseUsername(leftMsg.sessionId),
+            sessionId: leftMsg.sessionId,
+            local: false
+          };
+        case MessageType.ACTIVITY_REMOTE_STATE_SET:
+          let stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
+          return <StateSetEvent> {
+            name: Activity.Events.STATE_SET,
+            activityId: stateSetMsg.activityId,
+            username: SessionIdParser.parseUsername(stateSetMsg.sessionId),
+            sessionId: stateSetMsg.sessionId,
+            key: stateSetMsg.key,
+            value: stateSetMsg.value,
+            local: false
+          };
+        case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
+          let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
+          return <StateClearedEvent> {
+            name: Activity.Events.STATE_CLEARED,
+            activityId: stateClearedMsg.activityId,
+            username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
+            sessionId: stateClearedMsg.sessionId,
+            key: stateClearedMsg.key,
+            local: false
+          };
+        default:
+        // This should be impossible
+      }
+    });
+
+    this._joinedMap = new Map<string, boolean>();
+
   }
 
   session(): Session {
     return this._connection.session();
   }
 
-  open(id: string): Promise<Activity> {
-    if (this._opened[id] !== undefined) {
-      return Promise.resolve(this._opened[id]);
-    } else if (this._opening[id] !== undefined) {
-      return this._opening[id].promise();
-    } else {
-      var deferred: Deferred<Activity> = this._loadActivity(id);
-      this._opening[id] = deferred;
-      return deferred.promise();
-    }
-  }
-
-  opened(): {[key: string]: Activity} {
-    var cloned: {[key: string]: Activity} = {};
-    Object.keys(this._opened).forEach(id => {
-      cloned[id] = this._opened[id];
-    });
-    return cloned;
-  }
-
-  isOpen(id: string): boolean {
-    return this._opened[id] !== undefined;
+  activity(id: string): Activity {
+    return new Activity(id,
+      this._joinCB(id), this._leftCB(id), this._isJoined(id),
+      this.eventStream().filter(event => {
+        return event.activityId === id;
+      }),
+      this._connection);
   }
 
   joined(): {[key: string]: Activity} {
-    var cloned: {[key: string]: Activity} = {};
-    Object.keys(this._opened).forEach(id => {
-      if (this._opened[id].joined()) {
-        cloned[id] = this._opened[id];
-      }
+    var joined: {[key: string]: Activity} = {};
+    Object.keys(this._joinedMap).forEach(id => {
+        joined[id] = this.activity(id);
     });
-    return cloned;
+    return joined;
   }
 
   isJoined(id: string): boolean {
-    return this.isOpen(id) && this._opened[id].joined();
+    return this._joinedMap.has(id);
   }
 
-  private _close(id: string): void {
-    delete this._opened[id];
+  eventStream(): Observable<ActivityEvent> {
+    return this._eventStream;
   }
 
-  private _loadActivity(id: string): Deferred<Activity> {
-    var deferred: Deferred<Activity> = new Deferred<Activity>();
+  private _joinCB: (id: string) => () => void = (id: string) => {
+    return () => this._joinedMap.set(id, true);
+  };
 
-    var openActivityMessage: ActivityOpenRequest = {
-      type: MessageType.ACTIVITY_OPEN_REQUEST,
-      activityId: id
-    };
+  private _leftCB: (id: string) => () => void = (id: string) => {
+    return () => this._joinedMap.delete(id);
+  };
 
-    this._connection.request(openActivityMessage).then((response: ActivityOpenResponse) => {
-      var joinedSessionsByUsername: {[key: string]: RemoteSession[]} = {};
-      Object.keys(response.state).forEach((sessionId: string) => {
-        var username: string = SessionIdParser.parseUsername(sessionId);
-        var userSessions: RemoteSession[] = joinedSessionsByUsername[username];
-        if (userSessions === undefined) {
-          userSessions = [];
-          joinedSessionsByUsername[username] = userSessions;
-        }
-        userSessions.push({username: username, sessionId: sessionId});
-      });
-      var activity: Activity = new Activity(
-        this._connection,
-        joinedSessionsByUsername,
-        response.state,
-        id,
-        () => {
-          this._close(id);
-        });
-      this._opened[id] = activity;
-      delete this._opening[id];
-      deferred.resolve(activity);
-    }).catch((error: Error) => {
-      deferred.reject(error);
-    });
-    return deferred;
-  }
-
-  _handleMessage(messageEvent: MessageEvent): void {
-    var activity: Activity = this._opened[messageEvent.message.activityId];
-    if (activity !== undefined) {
-      activity._handleMessage(messageEvent);
-    } else {
-      // todo error.
-    }
-  }
+  private _isJoined: (id: string) => () => boolean = (id: string) => {
+    return () => this._joinedMap.has(id);
+  };
 }

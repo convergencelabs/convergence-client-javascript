@@ -26,9 +26,6 @@ export class ChatService {
   constructor(connection: ConvergenceConnection) {
     this._connection = connection;
 
-    // var multiMessageListener: (types: EventKey[]) => Observable<MessageEvent> =
-    //  Observable.bindCallback(connection.addMultipleMessageListener.bind(connection));
-
     let messageObs: Observable<MessageEvent> = Observable.create(observer => {
       this._connection.addMultipleMessageListener([MessageType.USER_JOINED_ROOM,
         MessageType.USER_LEFT_ROOM,
