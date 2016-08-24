@@ -70,7 +70,7 @@ export class ChatRoom {
     });
   }
 
-  eventStream(): Observable<ChatEvent> {
+  events(): Observable<ChatEvent> {
     return this._eventStream;
   }
 }

@@ -14,7 +14,7 @@ function connect() {
     domain = d;
     chatRoom = domain.chatService().room(roomInput.value);
     chatRoom.join();
-    chatRoom.eventStream().subscribe(function(event) {
+    chatRoom.events().subscribe(function(event) {
       chatHistoryArea.value += JSON.stringify(event);
       chatHistoryArea.value += '\n'
     });

@@ -86,7 +86,7 @@ export class ChatService {
       this._connection);
   }
 
-  eventStream(): Observable<ChatEvent> {
+  events(): Observable<ChatEvent> {
     return this._eventStream;
   }
 
