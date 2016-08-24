@@ -18,7 +18,12 @@ export class ActivityParticipant {
     return this._sessionId;
   }
 
-  state(): Map<string, any> {
-    return this._stateMap;
+  state(): Map<string, any>
+  state(key?: string): any {
+    if (key !== undefined) {
+      return this._stateMap[key];
+    } else {
+      return this._stateMap;
+    }
   }
 }

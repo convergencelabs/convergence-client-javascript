@@ -1,6 +1,5 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
@@ -12,8 +11,9 @@ import {ActivityClearState} from "../connection/protocol/activity/activityState"
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ParticipantsRequest} from "../connection/protocol/activity/participants";
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
+import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
 
-export class Activity extends ConvergenceEventEmitter {
+export class Activity extends ObservableEventEmitter<ActivityEvent> {
 
   static Events: any = {
     SESSION_JOINED: "session_joined",
@@ -27,8 +27,6 @@ export class Activity extends ConvergenceEventEmitter {
   private _leftCB: () => void;
   private _isJoined: () => boolean;
   private _connection: ConvergenceConnection;
-  private _eventStream: Observable<ActivityEvent>;
-
 
   constructor(id: string,
               joinCB: () => void,
@@ -36,12 +34,11 @@ export class Activity extends ConvergenceEventEmitter {
               isJoined: () => boolean,
               eventStream: Observable<ActivityEvent>,
               connection: ConvergenceConnection) {
-    super();
+    super(eventStream);
     this._id = id;
     this._joinCB = joinCB;
     this._leftCB = leftCB;
     this._isJoined = isJoined;
-    this._eventStream = eventStream;
     this._connection = connection;
   }
 
@@ -101,7 +98,6 @@ export class Activity extends ConvergenceEventEmitter {
   }
 
   participants(): Observable<ActivityParticipant[]> {
-
     var participantRequest: ParticipantsRequest = {
       type: MessageType.ACTIVITY_PARTICIPANTS_REQUEST,
       activityId: this._id
@@ -116,10 +112,4 @@ export class Activity extends ConvergenceEventEmitter {
       return participants;
     });
   }
-
-  events(): Observable<ActivityEvent> {
-    return this._eventStream;
-  }
 }
-
-

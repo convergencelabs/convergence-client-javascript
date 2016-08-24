@@ -2,24 +2,32 @@ import {Observable, Subscription} from "rxjs/Rx";
 import {ConvergenceEvent} from "./ConvergenceEvent";
 export type EventKey = string | number;
 
+export type EventListener<T> = (e: T) => void;
+
 export class ObservableEventEmitter<T extends ConvergenceEvent> {
 
   private _subscriptions: {[key: string]: Subscription[]};
-  private _listeners: {[key: string]: Function[]};
+  private _listeners: {[key: string]: EventListener<T>[]};
 
   private _observable: Observable<T>;
 
-  constructor(observable: Observable<T>) {
+  constructor(observable?: Observable<T>) {
+    this._observable = observable;
+    this._subscriptions = {};
+    this._listeners = {};
+  }
+
+  protected setObservable(observable: Observable<T>): void {
     this._observable = observable;
   }
 
-  addListener(event: EventKey, listener: Function): ObservableEventEmitter<T> {
+  addListener(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T> {
     if (typeof listener !== "function") {
       throw new TypeError("Listeners must be functions");
     }
 
     event = this._resolveEventKey(event);
-    var listeners: Function[] = this._listeners[event];
+    var listeners: EventListener<T>[] = this._listeners[event];
     var subscriptions: Subscription[] = this._subscriptions[event];
     if (listeners === undefined) {
       listeners = [];
@@ -34,7 +42,7 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
     }
 
     var subscription: Subscription = this._observable.filter((e) => {
-      return e.name === event;
+      return e.name.toLowerCase() === (<string>event).toLowerCase();
     }).subscribe((e) => listener(e));
 
     listeners.push(listener);
@@ -43,14 +51,14 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
   }
 
 
-  on(event: EventKey, listener: Function): ObservableEventEmitter<T> {
+  on(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T> {
     return this.addListener(event, listener);
   }
 
-  once(event: EventKey, listener: Function): ObservableEventEmitter<T> {
-    var wrapper: Function = () => {
+  once(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T> {
+    var wrapper: EventListener<T> = (e: T) => {
       this.removeListener(event, wrapper);
-      listener();
+      listener(e);
     };
     return this.addListener(event, wrapper);
   }
@@ -74,20 +82,21 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  removeListener(event: EventKey, listener: Function): ObservableEventEmitter<T> {
+  removeListener(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T> {
     event = this._resolveEventKey(event);
-    var listeners: Function[] = this._listeners[event];
-    var subscriptions: Function[] = this._listeners[event];
+    var listeners: EventListener<T>[] = this._listeners[event];
+    var subscriptions: Subscription[] = this._subscriptions[event];
     var index: number = listeners.indexOf(listener);
     if (index !== -1) {
       listeners.splice(index, 1);
+      subscriptions[index].unsubscribe();
       subscriptions.splice(index, 1);
     }
 
     return this;
   }
 
-  off(event: EventKey, listener: Function): ObservableEventEmitter<T> {
+  off(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T> {
     return this.removeListener(event, listener);
   }
 
@@ -99,7 +108,7 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
     if (typeof event === "string") {
       return event.toLowerCase();
     } else if ((<number>event) >= 0) {
-      return event;
+      return event.toString().toLowerCase();
     } else {
       throw new Error("Event numbers must be >= 0");
     }

@@ -80,7 +80,6 @@ export class ActivityService {
     });
 
     this._joinedMap = new Map<string, boolean>();
-
   }
 
   session(): Session {
