@@ -18,7 +18,7 @@ export class ConvergenceEventEmitter extends EventEmitter {
     return <ConvergenceEventEmitter>this;
   }
 
-  eventStream(): Observable<any> {
+  events(): Observable<any> {
     return this._subject.asObservable();
   }
 }

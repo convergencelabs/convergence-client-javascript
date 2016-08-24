@@ -80,7 +80,7 @@ export class ChatService {
   room(id: string): ChatRoom {
     return new ChatRoom(id,
       this._joinCB(id), this._leftCB(id), this._isJoined(id),
-      this.eventStream().filter(event => {
+      this.events().filter(event => {
         return event.roomId === id;
       }),
       this._connection);
