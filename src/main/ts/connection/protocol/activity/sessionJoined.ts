@@ -11,7 +11,7 @@ export var ActivitySessionJoinedDeserializer: MessageBodyDeserializer<ActivitySe
   var result: ActivitySessionJoined = {
     activityId: body.i,
     sessionId: body.s,
-    state: body.t
+    state: body.v
   };
   return result;
 };
