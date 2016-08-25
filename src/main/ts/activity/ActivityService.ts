@@ -54,7 +54,7 @@ export class ActivityService {
         case MessageType.ACTIVITY_SESSION_LEFT:
           let leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
           return [<SessionLeftEvent> {
-            name: Activity.Events.USER_LEFT,
+            name: Activity.Events.SESSION_LEFT,
             activityId: leftMsg.activityId,
             username: SessionIdParser.parseUsername(leftMsg.sessionId),
             sessionId: leftMsg.sessionId,
