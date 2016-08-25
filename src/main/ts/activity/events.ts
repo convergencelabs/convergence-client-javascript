@@ -1,4 +1,5 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {ActivityParticipant} from "./ActivityParticipant";
 
 export interface ActivityEvent extends ConvergenceEvent {
   activityId: string;
@@ -8,7 +9,7 @@ export interface ActivityEvent extends ConvergenceEvent {
 }
 
 export interface SessionJoinedEvent extends ActivityEvent {
-
+  participant: ActivityParticipant;
 }
 
 export interface SessionLeftEvent extends ActivityEvent {

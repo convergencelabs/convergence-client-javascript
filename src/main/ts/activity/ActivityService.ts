@@ -10,6 +10,7 @@ import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {ActivityRemoteStateSet, ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
 import {ActivityEvent} from "./events";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {ActivityParticipant} from "./ActivityParticipant";
 
 export class ActivityService {
 
@@ -31,51 +32,62 @@ export class ActivityService {
       });
     });
 
-    this._eventStream = messageObs.pluck("message").map(message => {
+    this._eventStream = messageObs.pluck("message").concatMap(message => {
       let msg: any = message;
       switch (msg.type) {
         case MessageType.ACTIVITY_SESSION_JOINED:
           let joinedMsg: ActivitySessionJoined = <ActivitySessionJoined> message;
-          return <SessionJoinedEvent> {
+          let username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
+          let participant: ActivityParticipant = new ActivityParticipant(
+            username,
+            joinedMsg.sessionId,
+            joinedMsg.state);
+          return [<SessionJoinedEvent> {
             src: this,
             name: Activity.Events.SESSION_JOINED,
             activityId: joinedMsg.activityId,
-            username: SessionIdParser.parseUsername(joinedMsg.sessionId),
+            username: username,
             sessionId: joinedMsg.sessionId,
+            participant: participant,
             local: false
-          };
+          }];
         case MessageType.ACTIVITY_SESSION_LEFT:
           let leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
-          return <SessionLeftEvent> {
+          return [<SessionLeftEvent> {
             name: Activity.Events.USER_LEFT,
             activityId: leftMsg.activityId,
             username: SessionIdParser.parseUsername(leftMsg.sessionId),
             sessionId: leftMsg.sessionId,
             local: false
-          };
+          }];
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
           let stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
-          return <StateSetEvent> {
-            name: Activity.Events.STATE_SET,
-            activityId: stateSetMsg.activityId,
-            username: SessionIdParser.parseUsername(stateSetMsg.sessionId),
-            sessionId: stateSetMsg.sessionId,
-            key: stateSetMsg.key,
-            value: stateSetMsg.value,
-            local: false
-          };
+          return Object.keys(stateSetMsg.state).map((key) => {
+            return <StateSetEvent> {
+              name: Activity.Events.STATE_SET,
+              activityId: stateSetMsg.activityId,
+              username: SessionIdParser.parseUsername(stateSetMsg.sessionId),
+              sessionId: stateSetMsg.sessionId,
+              key: key,
+              value: stateSetMsg.state[key],
+              local: false
+            };
+          });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
-          return <StateClearedEvent> {
-            name: Activity.Events.STATE_CLEARED,
-            activityId: stateClearedMsg.activityId,
-            username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
-            sessionId: stateClearedMsg.sessionId,
-            key: stateClearedMsg.key,
-            local: false
-          };
+          return Object.keys(stateClearedMsg.keys).map((key) => {
+            return <StateClearedEvent> {
+              name: Activity.Events.STATE_CLEARED,
+              activityId: stateClearedMsg.activityId,
+              username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
+              sessionId: stateClearedMsg.sessionId,
+              key: key,
+              local: false
+            };
+          });
         default:
         // This should be impossible
+          throw new Error("Invalid activity event");
       }
     });
 

@@ -2,7 +2,7 @@ export type EventKey = string | number;
 
 export class EventEmitter {
 
-  static defaultMaxListeners: number = 10;
+  static defaultMaxListeners: number = 100;
 
   private _events: any;
   private _maxListeners: number;

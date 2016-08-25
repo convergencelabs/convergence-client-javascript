@@ -50,11 +50,18 @@ export class Activity extends ObservableEventEmitter<ActivityEvent> {
     return this._id;
   }
 
-  join(): void {
+  join(options?: ActivityJoinOptions): void {
+    if (options === undefined) {
+      options = {
+        state: new Map<string, any>()
+      };
+    }
+
     if (!this._isJoined()) {
       this._connection.send(<ActivityJoinRequest>{
         type: MessageType.ACTIVITY_JOIN_REQUEST,
-        activityId: this._id
+        activityId: this._id,
+        state: options.state
       });
       this._joinCB();
     }
@@ -74,24 +81,38 @@ export class Activity extends ObservableEventEmitter<ActivityEvent> {
     return this._isJoined();
   }
 
-  publish(key: string, value: any): void {
+  publish(state: Map<string, any>): void
+  publish(key: string, value: any): void
+  publish(): void {
+    var state: Map<string, any>;
+    if (arguments.length === 1) {
+      state = arguments[0];
+    } else if (arguments.length === 2) {
+      state = new Map<string, any>();
+      state[arguments[0]] = arguments[1];
+    }
     if (this._isJoined()) {
       var message: ActivitySetState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_SET,
         activityId: this._id,
-        key: key,
-        value: value
+        state: state
       };
       this._connection.send(message);
     }
   }
 
-  clear(key: string): void {
+  clear(key: string): void
+  clear(keys: string[]): void
+  clear(keys: string | string[]): void {
+    if (typeof keys === "string") {
+      keys = [<string>keys];
+    }
+
     if (this._isJoined()) {
       var message: ActivityClearState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
         activityId: this._id,
-        key: key
+        keys: <string[]>keys
       };
       this._connection.send(message);
     }
@@ -112,4 +133,8 @@ export class Activity extends ObservableEventEmitter<ActivityEvent> {
       return participants;
     });
   }
+}
+
+export interface ActivityJoinOptions {
+  state?: Map<string, any>;
 }
