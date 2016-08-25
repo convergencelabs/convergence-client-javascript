@@ -1,4 +1,3 @@
-import {RealTimeValue} from "../rt/RealTimeValue";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {EqualsUtil} from "../../util/EqualsUtil";
@@ -8,7 +7,8 @@ export var ReferenceType: any = {
   RANGE: "range",
   PROPERTY: "property",
   PATH: "path",
-  CELL: "cell"
+  CELL: "cell",
+  ELEMENT: ""
 };
 Object.freeze(ReferenceType);
 
@@ -24,14 +24,14 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   protected _value: V;
   private _type: string;
   private _key: string;
-  private _source: RealTimeValue<any>;
+  private _source: any;
   private _username: string;
   private _sessionId: string;
   private _local: boolean;
 
   constructor(type: string,
               key: string,
-              source: RealTimeValue<any>,
+              source: any,
               username: string,
               sessionId: string,
               local: boolean) {
@@ -54,7 +54,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     return this._key;
   }
 
-  source(): RealTimeValue<any> {
+  source(): any {
     return this._source;
   }
 

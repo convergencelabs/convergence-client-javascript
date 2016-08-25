@@ -34,6 +34,11 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {ModelEvent, VersionChangedEvent, ModelClosedEvent, ObservableModel} from "../observable/ObservableModel";
 import {Path} from "../ot/Path";
+import {ReferenceManager} from "../reference/ReferenceManager";
+import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {ReferenceType} from "../reference/ModelReference";
+import {LocalElementReference} from "../reference/LocalElementReference";
+import {ElementReference} from "../reference/ElementReference";
 
 export class RealTimeModel extends ConvergenceEventEmitter implements ObservableModel {
 
@@ -59,6 +64,10 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   private _idGenerator: () => string = () => {
     return this._vidPrefix + this._vidCounter++;
   };
+
+  private _referenceManager: ReferenceManager;
+  private _referenceDisposed: ReferenceDisposedCallback;
+  private _callbacks: ModelEventCallbacks;
 
 
   /**
@@ -157,7 +166,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       }
     };
 
-    var callbacks: ModelEventCallbacks = {
+    this._callbacks = {
       sendOperationCallback: (operation: DiscreteOperation): void => {
         var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
         if (!this._concurrencyControl.isCompoundOperationInProgress()) {
@@ -167,7 +176,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       referenceEventCallbacks: referenceCallbacks
     };
 
-    this._data = new RealTimeObject(data, null, null, callbacks, this);
+    this._data = new RealTimeObject(data, null, null, this._callbacks, this);
 
     this._open = true;
     this._committed = true;
@@ -279,6 +288,38 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   isCompoundStarted(): boolean {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
+
+  elementReference(key: string): LocalElementReference {
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    if (existing !== undefined) {
+      if (existing.reference().type() !== ReferenceType.ELEMENT) {
+        throw new Error("A reference with this key already exists, but is not an element reference");
+      } else {
+        return <LocalElementReference>existing;
+      }
+    } else {
+      var session: Session = this.session();
+      var reference: ElementReference = new ElementReference(key, this, session.username(), session.sessionId(), true);
+
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalElementReference = new LocalElementReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+      );
+      this._referenceManager.addLocalReference(local);
+      return local;
+    }
+  }
+
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceManager.referenceMap().get(sessionId, key);
+  }
+
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(sessionId, key);
+  }
+
 
   //
   // Private API
