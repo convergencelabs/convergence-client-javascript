@@ -17,7 +17,7 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
     this._listeners = {};
   }
 
-  protected setObservable(observable: Observable<T>): void {
+  protected _setObservable(observable: Observable<T>): void {
     this._observable = observable;
   }
 

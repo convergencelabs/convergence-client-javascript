@@ -137,7 +137,7 @@ class TestEmitter extends ObservableEventEmitter<TestEvent> {
   constructor() {
     super();
     this._subject = new Subject<TestEvent>();
-    this.setObservable(this._subject);
+    this._setObservable(this._subject);
   }
 
   public next(event: TestEvent): ObservableEventEmitter<TestEvent> {
