@@ -42,7 +42,7 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
     }
 
     var subscription: Subscription = this._observable.filter((e) => {
-      return e.name.toLowerCase() === (<string>event).toLowerCase();
+      return e.name.toLowerCase() === (<string>event);
     }).subscribe((e) => listener(e));
 
     listeners.push(listener);
@@ -107,10 +107,10 @@ export class ObservableEventEmitter<T extends ConvergenceEvent> {
   private _resolveEventKey(event: EventKey): EventKey {
     if (typeof event === "string") {
       return event.toLowerCase();
-    } else if ((<number>event) >= 0) {
+    } else if (typeof event === 'number' && (<number>event) >= 0) {
       return event.toString().toLowerCase();
     } else {
-      throw new Error("Event numbers must be >= 0");
+      throw new Error("Event names must be strings or numbers >= 0");
     }
   }
 }
