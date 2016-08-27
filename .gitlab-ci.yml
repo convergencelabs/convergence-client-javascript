@@ -5,8 +5,8 @@ stages:
   - build
   - publish
 
-checkout:
-  stage: checkout
+prep:
+  stage: prep
   script:
     - npm config set registry https://nexus.convergencelabs.tech/repository/npm/
     - npm config set //nexus.convergencelabs.tech/repository/npm/:_authToken=$NPM_TOKEN
