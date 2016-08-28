@@ -75,7 +75,7 @@ export class ActivityService {
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
-          return Object.keys(stateClearedMsg.keys).map((key) => {
+          return stateClearedMsg.keys.map((key) => {
             return <StateClearedEvent> {
               name: Activity.Events.STATE_CLEARED,
               activityId: stateClearedMsg.activityId,
