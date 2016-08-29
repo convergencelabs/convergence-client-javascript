@@ -74,7 +74,7 @@ describe('Reference Transformation E2E', () => {
       k: "testKey",
       d: "0:1",
       c: 0,
-      v: 10,
+      v: [10],
       t: 29}, 300);
 
     mockServer.start();

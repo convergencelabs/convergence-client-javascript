@@ -34,6 +34,12 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {ModelEvent, VersionChangedEvent, ModelClosedEvent, ObservableModel} from "../observable/ObservableModel";
 import {Path} from "../ot/Path";
+import {ReferenceManager} from "../reference/ReferenceManager";
+import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {ReferenceType} from "../reference/ModelReference";
+import {LocalElementReference} from "../reference/LocalElementReference";
+import {ElementReference} from "../reference/ElementReference";
+import {RemoteReferenceCreatedEvent} from "./RealTimeValue";
 
 export class RealTimeModel extends ConvergenceEventEmitter implements ObservableModel {
 
@@ -44,7 +50,8 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     COMMITTED: "committed",
     VERSION_CHANGED: "version_changed",
     SESSION_OPENED: "session_opened",
-    SESSION_CLOSED: "session_closed"
+    SESSION_CLOSED: "session_closed",
+    REFERENCE: "reference"
   };
 
   private _data: RealTimeObject;
@@ -59,6 +66,10 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   private _idGenerator: () => string = () => {
     return this._vidPrefix + this._vidCounter++;
   };
+
+  private _referenceManager: ReferenceManager;
+  private _referenceDisposed: ReferenceDisposedCallback;
+  private _callbacks: ModelEventCallbacks;
 
 
   /**
@@ -103,35 +114,46 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     // also move this out of this constructor.
     var referenceCallbacks: ModelReferenceCallbacks = {
       onPublish: (reference: LocalModelReference<any, any>): void => {
-        var id: string = reference.reference().source().id();
+        let source: any = reference.reference().source();
+        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+
         var event: PublishReferenceEvent = {
           type: MessageType.PUBLISH_REFERENCE,
           resourceId: this._resourceId,
           key: reference.reference().key(),
-          id: id,
+          id: vid,
           referenceType: reference.reference().type()
         };
         this._connection.send(event);
 
       },
       onUnpublish: (reference: LocalModelReference<any, any>): void => {
-        var id: string = reference.reference().source().id();
+        let source: any = reference.reference().source();
+        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+
         var event: UnpublishReferenceEvent = {
           type: MessageType.UNPUBLISH_REFERENCE,
           resourceId: this._resourceId,
           key: reference.reference().key(),
-          id: id
+          id: vid
         };
         this._connection.send(event);
       },
       onSet: (reference: LocalModelReference<any, any>): void => {
+        let source: any = reference.reference().source();
+        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+
         var refData: ModelReferenceData = {
           type: reference.reference().type(),
-          id: reference.reference().source().id(),
-          value: reference.reference().value()
+          id: vid,
+          values: reference.reference().values()
         };
 
-        refData = this._concurrencyControl.processOutgoingSetReference(refData);
+        // Only transform those that target a RealTimeValue
+        if (vid !== undefined) {
+          refData = this._concurrencyControl.processOutgoingSetReference(refData);
+        }
+
         if (refData) {
           var event: SetReferenceEvent = {
             type: MessageType.SET_REFERENCE,
@@ -139,25 +161,27 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
             key: reference.reference().key(),
             id: refData.id,
             referenceType: reference.reference().type(),
-            value: refData.value,
+            values: this._getMessageValues(refData),
             version: this._concurrencyControl.contextVersion()
           };
           this._connection.send(event);
         }
       },
       onClear: (reference: LocalModelReference<any, any>): void => {
-        var id: string = reference.reference().source().id();
+        let source: any = reference.reference().source();
+        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+
         var event: ClearReferenceEvent = {
           type: MessageType.CLEAR_REFERENCE,
           resourceId: this._resourceId,
           key: reference.reference().key(),
-          id: id
+          id: vid
         };
         this._connection.send(event);
       }
     };
 
-    var callbacks: ModelEventCallbacks = {
+    this._callbacks = {
       sendOperationCallback: (operation: DiscreteOperation): void => {
         var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
         if (!this._concurrencyControl.isCompoundOperationInProgress()) {
@@ -167,7 +191,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       referenceEventCallbacks: referenceCallbacks
     };
 
-    this._data = new RealTimeObject(data, null, null, callbacks, this);
+    this._data = new RealTimeObject(data, null, null, this._callbacks, this);
 
     this._open = true;
     this._committed = true;
@@ -184,12 +208,16 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       };
 
       // fixme refactor
-      var m: RealTimeValue<any> = this._idToValue[published.id];
-      m._handleRemoteReferenceEvent(published);
+      if (published.id !== undefined) {
+        var m: RealTimeValue<any> = this._idToValue[published.id];
+        m._handleRemoteReferenceEvent(published);
+      } else {
+        this._modelReferenceEvent(published);
+      }
       var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
       this._referencesBySession[ref.sessionId].push(r);
 
-      if (ref.value) {
+      if (ref.values) {
         var set: RemoteReferenceSet = {
           type: MessageType.REFERENCE_SET,
           sessionId: ref.sessionId,
@@ -198,9 +226,13 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
           key: ref.key,
           id: ref.id,
           referenceType: ref.referenceType,
-          value: ref.value
+          values: ref.values
         };
-        m._handleRemoteReferenceEvent(set);
+        if (set.id !== undefined) {
+          m._handleRemoteReferenceEvent(set);
+        } else {
+          this._modelReferenceEvent(set);
+        }
       }
     });
   }
@@ -280,9 +312,45 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
+  elementReference(key: string): LocalElementReference {
+    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    if (existing !== undefined) {
+      if (existing.reference().type() !== ReferenceType.ELEMENT) {
+        throw new Error("A reference with this key already exists, but is not an element reference");
+      } else {
+        return <LocalElementReference>existing;
+      }
+    } else {
+      var session: Session = this.session();
+      var reference: ElementReference = new ElementReference(key, this, session.username(), session.sessionId(), true);
+
+      this._referenceManager.referenceMap().put(reference);
+      var local: LocalElementReference = new LocalElementReference(
+        reference,
+        this._callbacks.referenceEventCallbacks,
+        this._referenceDisposed
+      );
+      this._referenceManager.addLocalReference(local);
+      return local;
+    }
+  }
+
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceManager.referenceMap().get(sessionId, key);
+  }
+
+  references(sessionId?: string, key?: string): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(sessionId, key);
+  }
+
+
   //
   // Private API
   //
+
+  _getRegisteredValue(id: string): RealTimeValue<any> {
+    return this._idToValue[id];
+  }
 
   _registerValue(value: RealTimeValue<any>): void {
     this._idToValue[value.id()] = value;
@@ -358,52 +426,57 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     var processedEvent: RemoteReferenceEvent;
 
-    var value: RealTimeValue<any> = this._idToValue[event.id];
-    if (!value) {
-      return;
-    }
+    if (event.id === undefined) {
+      this._modelReferenceEvent(event);
+    } else {
 
-    switch (event.type) {
-      case MessageType.REFERENCE_PUBLISHED:
-      case MessageType.REFERENCE_UNPUBLISHED:
-      case MessageType.REFERENCE_CLEARED:
-        processedEvent = Immutable.copy(event, {
-          path: value.path()
-        });
-        break;
-      case MessageType.REFERENCE_SET:
-        var setEvent: RemoteReferenceSet = <RemoteReferenceSet>event;
-        var data: ModelReferenceData = {
-          type: setEvent.referenceType,
-          id: setEvent.id,
-          value: setEvent.value
-        };
-        data = this._concurrencyControl.processRemoteReferenceSet(data);
-        processedEvent = Immutable.copy(event, {
-          path: value.path(),
-          value: data.value
-        });
-        break;
-      default:
-    }
+      var value: RealTimeValue<any> = this._idToValue[event.id];
+      if (!value) {
+        return;
+      }
 
-    var r: ModelReference<any>;
+      switch (event.type) {
+        case MessageType.REFERENCE_PUBLISHED:
+        case MessageType.REFERENCE_UNPUBLISHED:
+        case MessageType.REFERENCE_CLEARED:
+          processedEvent = Immutable.copy(event, {
+            path: value.path()
+          });
+          break;
+        case MessageType.REFERENCE_SET:
+          var setEvent: RemoteReferenceSet = <RemoteReferenceSet>event;
+          var data: ModelReferenceData = {
+            type: setEvent.referenceType,
+            id: setEvent.id,
+            values: setEvent.values
+          };
+          data = this._concurrencyControl.processRemoteReferenceSet(data);
+          processedEvent = Immutable.copy(event, {
+            path: value.path(),
+            values: data.values
+          });
+          break;
+        default:
+      }
 
-    if (processedEvent.type === MessageType.REFERENCE_UNPUBLISHED) {
-      r = value.reference(processedEvent.sessionId, processedEvent.key);
-      var index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
-      this._referencesBySession[processedEvent.sessionId].splice(index, 1);
-    }
+      var r: ModelReference<any>;
 
-    // TODO if we wind up being able to pause the processing of incoming
-    // operations, then we would put this in a queue.  We would also need
-    // to somehow wrap this in an object that stores the currentContext
-    // version right now, so we know when to distribute this event.
-    value._handleRemoteReferenceEvent(processedEvent);
+      if (processedEvent.type === MessageType.REFERENCE_UNPUBLISHED) {
+        r = value.reference(processedEvent.sessionId, processedEvent.key);
+        var index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
+        this._referencesBySession[processedEvent.sessionId].splice(index, 1);
+      }
 
-    if (processedEvent.type === MessageType.REFERENCE_PUBLISHED) {
-      r = value.reference(processedEvent.sessionId, processedEvent.key);
-      this._referencesBySession[processedEvent.sessionId].push(r);
+      // TODO if we wind up being able to pause the processing of incoming
+      // operations, then we would put this in a queue.  We would also need
+      // to somehow wrap this in an object that stores the currentContext
+      // version right now, so we know when to distribute this event.
+      value._handleRemoteReferenceEvent(processedEvent);
+
+      if (processedEvent.type === MessageType.REFERENCE_PUBLISHED) {
+        r = value.reference(processedEvent.sessionId, processedEvent.key);
+        this._referencesBySession[processedEvent.sessionId].push(r);
+      }
     }
   }
 
@@ -491,6 +564,38 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       version: this._version
     };
     this.emitEvent(event);
+  }
+
+  private _modelReferenceEvent(event: RemoteReferenceEvent): void {
+    this._referenceManager.handleRemoteReferenceEvent(event);
+    if (event.type === MessageType.REFERENCE_PUBLISHED) {
+      var reference: ModelReference<any> = this._referenceManager.referenceMap().get(event.sessionId, event.key);
+      this._referencesBySession[event.sessionId].push(reference);
+
+      var createdEvent: RemoteReferenceCreatedEvent = {
+        name: RealTimeModel.Events.REFERENCE,
+        src: this,
+        reference: reference
+      };
+      this.emitEvent(createdEvent);
+    }
+  }
+
+  private _getMessageValues(ref: ModelReferenceData): string[] {
+    switch (ref.type) {
+      case ReferenceType.INDEX:
+      case ReferenceType.PROPERTY:
+      case ReferenceType.RANGE:
+        return ref.values;
+      case ReferenceType.ELEMENT:
+        var elementIds: string[] = [];
+        for (var element of ref.values) {
+          elementIds.push((<RealTimeValue<any>> element).id());
+    }
+        return elementIds;
+      default:
+        throw new Error("Invalid reference type");
+    }
   }
 }
 

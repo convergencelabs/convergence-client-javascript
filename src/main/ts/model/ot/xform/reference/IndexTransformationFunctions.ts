@@ -12,14 +12,14 @@ import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 
 export var StringInsertIndexTransformationFunction: ReferenceTransformationFunction =
   function (o: StringInsertOperation, r: ModelReferenceData): ModelReferenceData {
-    var newIndex: number = IndexTransformer.handleInsert([r.value], o.index, o.value.length)[0];
-    return Immutable.copy(r, {value: newIndex});
+    var values: number[] = IndexTransformer.handleInsert(r.values, o.index, o.value.length);
+    return Immutable.copy(r, {values: values});
   };
 
 export var StringRemoveIndexTransformationFunction: ReferenceTransformationFunction =
   function (o: StringRemoveOperation, r: ModelReferenceData): ModelReferenceData {
-    var newIndex: number = IndexTransformer.handleRemove([r.value], o.index, o.value.length)[0];
-    return Immutable.copy(r, {value: newIndex});
+    var values: number[] = IndexTransformer.handleRemove(r.values, o.index, o.value.length);
+    return Immutable.copy(r, {values: values});
   };
 
 export var StringSetIndexTransformationFunction: ReferenceTransformationFunction =

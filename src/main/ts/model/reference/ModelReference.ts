@@ -1,4 +1,3 @@
-import {RealTimeValue} from "../rt/RealTimeValue";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {EqualsUtil} from "../../util/EqualsUtil";
@@ -7,8 +6,7 @@ export var ReferenceType: any = {
   INDEX: "index",
   RANGE: "range",
   PROPERTY: "property",
-  PATH: "path",
-  CELL: "cell"
+  ELEMENT: "element"
 };
 Object.freeze(ReferenceType);
 
@@ -21,23 +19,23 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   };
 
   private _disposed: boolean;
-  protected _value: V;
+  protected _values: V[];
   private _type: string;
   private _key: string;
-  private _source: RealTimeValue<any>;
+  private _source: any;
   private _username: string;
   private _sessionId: string;
   private _local: boolean;
 
   constructor(type: string,
               key: string,
-              source: RealTimeValue<any>,
+              source: any,
               username: string,
               sessionId: string,
               local: boolean) {
     super();
     this._disposed = false;
-    this._value = null;
+    this._values = [];
     this._type = type;
     this._key = key;
     this._source = source;
@@ -54,7 +52,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     return this._key;
   }
 
-  source(): RealTimeValue<any> {
+  source(): any {
     return this._source;
   }
 
@@ -85,15 +83,19 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   }
 
   value(): V {
-    return this._value;
+    return this._values[0];
+  }
+
+  values(): V[] {
+    return this._values;
   }
 
   isSet(): boolean {
-    return this._value !== null;
+    return this._values.length > 0;
   }
 
-  _set(value: V, local: boolean = false): void {
-    this._value = value;
+  _set(values: V[], local: boolean = false): void {
+    this._values = values;
     var event: ReferenceChangedEvent = {
       name: ModelReference.Events.SET,
       src: this,
@@ -103,7 +105,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
   }
 
   _clear(): void {
-    this._value = null;
+    this._values = [];
     var event: ReferenceClearedEvent = {
       name: ModelReference.Events.CLEARED,
       src: this
@@ -111,9 +113,9 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
     this.emitEvent(event);
   }
 
-  protected _setIfChanged(value: V): void {
-    if (!EqualsUtil.deepEquals(this._value, value)) {
-      this._set(value);
+  protected _setIfChanged(values: V[]): void {
+    if (!EqualsUtil.deepEquals(this._values, values)) {
+      this._set(values);
     }
   }
 }

@@ -1,5 +1,6 @@
 export class IndexTransformer {
   static handleInsert(indices: number[], insertIndex: number, length: number): number[] {
+    console.log("sdfsdafsdfsdfsdfsdfsdfsdfsdfsddf: " + indices);
     return indices.map((index: number) => {
       if (index >= insertIndex) {
         return index + length;
