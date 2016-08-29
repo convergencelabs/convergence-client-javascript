@@ -22,6 +22,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ValueChangedEvent} from "../observable/ObservableValue";
+import {Validation} from "../../util/Validation";
 
 export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> implements ObservableObject {
 
@@ -61,10 +62,13 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
   }
 
   get(key: string): RealTimeValue<any> {
+    Validation.isString(key, "key");
     return this._children[key];
   }
 
   set(key: string, value: any): RealTimeValue<any> {
+    Validation.isString(key, "key");
+
     var dataValue: DataValue = this._model._createDataValue(value);
 
     var operation: DiscreteOperation;
@@ -82,6 +86,8 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
   }
 
   remove(key: string): void {
+    Validation.isString(key, "key");
+
     if (!this._children.hasOwnProperty(key)) {
       throw new Error("Cannot remove property that is undefined!");
     }
@@ -334,8 +340,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
       sessionId: operationEvent.sessionId,
       username: operationEvent.username,
       version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      value: value
+      timestamp: operationEvent.timestamp
     };
 
     this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
@@ -367,7 +372,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
 export interface ObjectSetEvent extends ValueChangedEvent {
   src: RealTimeObject;
   key: string;
-  value: any;
+  value: RealTimeValue<any>;
 }
 
 export interface ObjectRemoveEvent extends ValueChangedEvent {
@@ -377,5 +382,4 @@ export interface ObjectRemoveEvent extends ValueChangedEvent {
 
 export interface ObjectSetValueEvent extends ValueChangedEvent {
   src: RealTimeObject;
-  value:  { [key: string]: any; };
 }
