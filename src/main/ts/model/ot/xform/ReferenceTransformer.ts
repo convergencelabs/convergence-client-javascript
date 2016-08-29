@@ -7,7 +7,7 @@ import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction
 export interface ModelReferenceData {
   type: string;
   id: string;
-  value: any;
+  values: any[];
 }
 
 export class ReferenceTransformer {

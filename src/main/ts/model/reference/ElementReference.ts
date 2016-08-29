@@ -3,7 +3,7 @@ import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
 
-export class ElementReference extends ModelReference<Array<RealTimeValue<any>>> {
+export class ElementReference extends ModelReference<RealTimeValue<any>> {
 
   constructor(key: string,
               source: RealTimeModel,
@@ -14,9 +14,9 @@ export class ElementReference extends ModelReference<Array<RealTimeValue<any>>> 
   }
 
   _handleElementRemoved(elemenet: RealTimeValue<any>): void {
-    var index: number = this.value().indexOf(elemenet, 0);
+    var index: number = this._values.indexOf(elemenet, 0);
     if (index > -1) {
-      let newElements: Array<RealTimeValue<any>> = this.value().slice(0);
+      let newElements: RealTimeValue<any>[] = this._values.slice(0);
       newElements.splice(index, 1);
       this._set(newElements);
     }

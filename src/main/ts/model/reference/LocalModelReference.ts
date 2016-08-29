@@ -58,6 +58,10 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     return this._reference.value();
   }
 
+  values(): V[] {
+    return this._reference.values();
+  }
+
   reference(): R {
     return this._reference;
   }
@@ -95,8 +99,15 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     this._disposeCallback = null;
   }
 
-  set(value: V): void {
-    this._reference._set(value, true);
+
+  set(value: V): void;
+  set(value: V[]): void;
+  set(value: V | V[]): void {
+    if (value instanceof Array) {
+      this._reference._set(value, true);
+    } else {
+      this._reference._set([value], true);
+    }
     this._fireSet();
   }
 

@@ -12,14 +12,16 @@ import {IndexReference} from "./IndexReference";
 import {RealTimeValue} from "../rt/RealTimeValue";
 import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
+import {ElementReference} from "./ElementReference";
+import {RealTimeModel} from "../rt/RealTimeModel";
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
   private _localReferences: {[key: string]: LocalModelReference<any, any>};
   private _validTypes: string[];
-  private _source: RealTimeValue<any>;
+  private _source: any;
 
-  constructor(source: RealTimeValue<any>, validTypes: string[]) {
+  constructor(source: any, validTypes: string[]) {
     this._referenceMap = new ReferenceMap();
     this._localReferences = {};
     this._validTypes = validTypes;
@@ -94,6 +96,9 @@ export class ReferenceManager {
       case ReferenceType.RANGE:
         reference = new RangeReference(event.key, this._source, username, event.sessionId, false);
         break;
+      case ReferenceType.ELEMENT:
+        reference = new ElementReference(event.key, this._source, username, event.sessionId, false);
+        break;
       default:
         break;
     }
@@ -113,6 +118,19 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
     var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
-    reference._set(event.value);
+
+    // Translate vids to RealTimeValues
+    if (reference.type() === ReferenceType.ELEMENT) {
+      let values: RealTimeValue<any>[] = [];
+      for (var id of event.values) {
+        let value: RealTimeValue<any> = (<RealTimeModel>this._source)._getRegisteredValue(id);
+        if (value !== undefined) {
+          values.push(value);
+        }
+      }
+      reference._set(values);
+    } else {
+      reference._set(event.values);
+    }
   }
 }

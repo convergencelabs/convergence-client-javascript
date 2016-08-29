@@ -4,7 +4,7 @@ import {ModelFqn} from "../../../model/ModelFqn";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {ReferenceTypeCodes} from "./reference/ReferenceEvent";
-import {deserializeReferenceValue} from "./reference/ReferenceEvent";
+import {deserializeReferenceValues} from "./reference/ReferenceEvent";
 import {DataValueDeserializer} from "./dataValue";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
@@ -49,7 +49,7 @@ export interface ReferenceData {
   id: string;
   key: string;
   referenceType: string;
-  value: any;
+  values: any;
 }
 
 function convertReferences(refs: any[]): ReferenceData[] {
@@ -63,13 +63,13 @@ function convertReferenceData(ref: any): ReferenceData {
   "use strict";
 
   var type: string = ReferenceTypeCodes.value(ref.c);
-  var value: any = deserializeReferenceValue(ref.v, type);
+  var values: any = deserializeReferenceValues(ref.v, type);
   var result: ReferenceData = {
     sessionId: ref.s,
     id: ref.d,
     key: ref.k,
     referenceType: type,
-    value: value
+    values: values
   };
   return result;
 }

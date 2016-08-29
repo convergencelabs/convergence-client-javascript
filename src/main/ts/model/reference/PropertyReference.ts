@@ -13,8 +13,11 @@ export class PropertyReference extends ModelReference<string> {
   }
 
   _handlePropertyRemoved(property: string): void {
-    if (this.value() === property) {
-      this._set(null);
+    var index: number = this._values.indexOf(property, 0);
+    if (index > -1) {
+      let newElements: string[] = this._values.slice(0);
+      newElements.splice(index, 1);
+      this._set(newElements);
     }
   }
 }

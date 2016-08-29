@@ -14,14 +14,14 @@ export class IndexReference extends ModelReference<number> {
   }
 
   _handleInsert(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleInsert([this._value], index, length)[0]);
+    this._setIfChanged(IndexTransformer.handleInsert(this._values, index, length));
   }
 
   _handleRemove(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleRemove([this._value], index, length)[0]);
+    this._setIfChanged(IndexTransformer.handleRemove(this._values, index, length));
   }
 
   _handleReorder(fromIndex: number, toIndex: number): void {
-    this._setIfChanged(IndexTransformer.handleReorder([this._value], fromIndex, toIndex)[0]);
+    this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex));
   }
 }
