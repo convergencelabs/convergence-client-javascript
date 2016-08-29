@@ -22,6 +22,7 @@ import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
 import {HistoricalModel} from "./historical/HistoricalModel";
+import {ModelQuery} from "./query/ModelQuery";
 
 export class ModelService extends ConvergenceEventEmitter {
 
@@ -47,6 +48,10 @@ export class ModelService extends ConvergenceEventEmitter {
 
   session(): Session {
     return this._connection.session();
+  }
+
+  query(): ModelQuery {
+    return new ModelQuery(this._connection, {});
   }
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
