@@ -7,7 +7,7 @@ import {ValueDetachedEvent} from "../observable/ObservableValue";
 export class ElementReference extends ModelReference<RealTimeValue<any>> {
 
   private _detachedListener: Function = (event: ValueDetachedEvent) => {
-    this._handleElementRemoved(<RealTimeValue>event.src);
+    this._handleElementRemoved(<RealTimeValue<any>>event.src);
   };
 
   constructor(key: string,
