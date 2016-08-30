@@ -5,20 +5,20 @@ import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelResult} from "../../../../model/query/ModelResult";
 import {OrderBy} from "../../../../model/query/ModelQuery";
 
-export interface ModelQueryRequest extends OutgoingProtocolRequestMessage {
+export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
   collection?: string;
   limit?: number;
   offset?: number;
   orderBy?: OrderBy;
 }
 
-export var ModelQueryRequestSerializer: MessageBodySerializer = (request: ModelQueryRequest) => {
+export var ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
   return {
     c: request.collection,
     l: request.limit,
     f: request.offset,
     o: {
-      f: request.orderBy.orderByField,
+      f: request.orderBy.field,
       a: request.orderBy.ascending
     }
   };
@@ -34,11 +34,11 @@ export var ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body
   };
 };
 
-export interface ModelQueryResponse extends IncomingProtocolResponseMessage {
+export interface ModelsQueryResponse extends IncomingProtocolResponseMessage {
   result: ModelResult[];
 }
 
-export var ModelQueryResponseDeserializer: MessageBodyDeserializer<ModelQueryResponse> = (body: any) => {
+export var ModelsQueryResponseDeserializer: MessageBodyDeserializer<ModelsQueryResponse> = (body: any) => {
   let modelResults: ModelResult[] = [];
   for (var r of body.r) {
     modelResults.push(ModelResultDeserializer(r));

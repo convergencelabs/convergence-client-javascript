@@ -58,6 +58,8 @@ import {LeaveRoomMessageSerializer} from "./chat/leaveRoom";
 import {PublishChatMessageSerializer} from "./chat/chatMessage";
 import {ParticipantsResponseDeserializer} from "./activity/participants";
 import {ParticipantsRequestSerializer} from "./activity/participants";
+import {ModelsQueryRequestSerializer} from "./model/query/modelQuery";
+import {ModelsQueryResponseDeserializer} from "./model/query/modelQuery";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -184,6 +186,8 @@ MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_ROOM, JoinRoomM
 MessageSerializer.registerMessageBodySerializer(MessageType.LEAVE_ROOM, LeaveRoomMessageSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE, PublishChatMessageSerializer);
 
+MessageSerializer.registerMessageBodySerializer(MessageType.MODELS_QUERY_REQUEST, ModelsQueryRequestSerializer);
+
 
 // Deserializers
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PING);
@@ -229,3 +233,5 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_SUBSCRIBE
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_JOINED_ROOM, UserJoinedRoomMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LEFT_ROOM, UserLeftRoomMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_MESSAGE_PUBLISHED, UserChatMessageDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.MODELS_QUERY_RESPONSE, ModelsQueryResponseDeserializer);
