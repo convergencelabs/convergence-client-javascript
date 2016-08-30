@@ -52,25 +52,29 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> implements Obse
     return this._children[index];
   }
 
-  set(index: number, value: any): void {
+  set(index: number, value: any): RealTimeValue<any> {
     this._validateReplace(index, value);
 
     var dataValue: DataValue = this._model._createDataValue(value);
     var operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.id(), false, index, dataValue);
-    var child: RealTimeValue<any> = this._children[index];
-    this._children[index] = RealTimeValueFactory.create(dataValue, this, index, this._callbacks, this.model());
+    var oldChild: RealTimeValue<any> = this._children[index];
+    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, index, this._callbacks, this.model());
+    this._children[index] = newChild;
     this.updateFieldInParent(index);
-    child._detach();
+    oldChild._detach();
     this._sendOperation(operation);
+    return newChild;
   }
 
-  insert(index: number, value: any): void {
+  insert(index: number, value: any): RealTimeValue<any> {
     this._validateInsert(index, value);
     var dataValue: DataValue = this._model._createDataValue(value);
     var operation: ArrayInsertOperation = new ArrayInsertOperation(this.id(), false, index, dataValue);
-    this._children.splice(index, 0, (RealTimeValueFactory.create(dataValue, this, index, this._callbacks, this._model)));
+    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, index, this._callbacks, this._model);
+    this._children.splice(index, 0, child);
     this.updateFieldInParent(index);
     this._sendOperation(operation);
+    return child;
   }
 
   remove(index: number): Object|number|string|boolean {
@@ -99,16 +103,16 @@ export class RealTimeArray extends RealTimeContainerValue<any[]> implements Obse
     this._sendOperation(operation);
   }
 
-  push(value: any): void {
-    this.insert(this._children.length, value);
+  push(value: any): RealTimeValue<any> {
+    return this.insert(this._children.length, value);
   }
 
   pop(): any {
     return this.remove(this._children.length - 1);
   }
 
-  unshift(value: any): void {
-    this.insert(0, value);
+  unshift(value: any): RealTimeValue<any> {
+    return this.insert(0, value);
   }
 
   shift(): any {

@@ -1,7 +1,7 @@
 import {Observable, Observer} from "rxjs/Rx";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
-import {QueryResult} from "./QueryResult";
 import {ModelQueryRequest, ModelQueryResponse} from "../../connection/protocol/model/query/modelQuery";
+import {ModelResult} from "./ModelResult";
 
 export class ModelQuery {
 
@@ -48,8 +48,8 @@ export class ModelQuery {
     return new ModelQuery(this._connection, options);
   }
 
-  execute(): Observable<QueryResult> {
-    return Observable.create((observer: Observer<QueryResult>) => {
+  execute(): Observable<ModelResult[]> {
+    return Observable.create((observer: Observer<ModelResult[]>) => {
       var message: ModelQueryRequest = {
         collection: this._collection,
         limit: this._limit,
