@@ -10,6 +10,7 @@ export class ModelQuery {
   private _limit: number;
   private _offset: number;
   private _orderByField: string;
+  private _ascending: boolean;
 
   constructor(connection: ConvergenceConnection, options?: ModelQueryOptions) {
     this._connection = connection;
@@ -18,6 +19,7 @@ export class ModelQuery {
       this._limit = options.limit;
       this._offset = options.offset;
       this._orderByField = options.orderBy;
+      this._ascending = options.ascending;
     }
   }
 
@@ -33,8 +35,8 @@ export class ModelQuery {
     return this.copy({offset: offset});
   }
 
-  orderBy(field: string): ModelQuery {
-    return this.copy({orderBy: field});
+  orderBy(field: string, ascending?: boolean): ModelQuery {
+    return this.copy({orderBy: field, ascending: (ascending !== undefined && ascending !== null) ? ascending : true});
   }
 
   private copy(updates: any): ModelQuery {
@@ -42,7 +44,8 @@ export class ModelQuery {
       collection: updates.collection !== undefined ? updates.collection : this._collection,
       limit: updates.limit !== undefined ? updates.limit : this._limit,
       offset: updates.offset !== undefined ? updates.offset : this._offset,
-      orderBy: updates.orderBy !== undefined ? updates.orderBy : this._orderByField
+      orderBy: updates.orderBy !== undefined ? updates.orderBy : this._orderByField,
+      ascending: updates.ascending !== undefined ? updates.ascending : this._ascending
     };
 
     return new ModelQuery(this._connection, options);
@@ -54,12 +57,13 @@ export class ModelQuery {
         collection: this._collection,
         limit: this._limit,
         offset: this._offset,
-        orderBy: this._orderByField
+        orderBy: this._orderByField,
+        ascending: this._ascending
       };
 
       this._connection.request(message)
         .then((response: ModelQueryResponse) => {
-          observer.next(null);
+          observer.next(response.result);
           observer.complete();
         })
         .catch(e => observer.error(e));
@@ -72,5 +76,6 @@ export interface ModelQueryOptions {
   limit?: number;
   offset?: number;
   orderBy?: string;
+  ascending?: boolean;
 }
 

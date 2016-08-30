@@ -98,7 +98,7 @@ export class EventEmitter {
   emit(event: EventKey, ...args: any[]): EventEmitter {
     event = this._resolveEventKey(event);
     var listeners: Function[] = this.listeners(event);
-    listeners.forEach(function (listener: Function): void {
+    listeners.slice(0).forEach(function (listener: Function): void {
       listener.apply(this, args || []);
     });
     return this;
