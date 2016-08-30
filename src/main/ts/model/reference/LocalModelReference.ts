@@ -1,6 +1,7 @@
 import {ModelReference} from "./ModelReference";
 import {RealTimeValue} from "../rt/RealTimeValue";
 import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
+import {ReferenceType} from "./ModelReference";
 
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
@@ -123,8 +124,10 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
   }
 
   private _ensureAttached(): void {
-    if (this.reference().source().isDetached()) {
-      throw new Error("The source model is detached");
+    if (this.type() !== ReferenceType.ELEMENT) {
+      if (this.reference().source().isDetached()) {
+        throw new Error("The source model is detached");
+      }
     }
   }
 }

@@ -100,6 +100,8 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
 
     this._idToValue = {};
 
+    this._referenceManager = new ReferenceManager(this, ReferenceType.ELEMENT);
+
     this._vidPrefix = valueIdPrefix;
     this._vidCounter = 0;
 
