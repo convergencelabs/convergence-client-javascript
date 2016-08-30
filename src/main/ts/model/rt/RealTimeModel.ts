@@ -213,11 +213,12 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       if (published.id !== undefined) {
         var m: RealTimeValue<any> = this._idToValue[published.id];
         m._handleRemoteReferenceEvent(published);
+        var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
+        this._referencesBySession[ref.sessionId].push(r);
       } else {
         this._modelReferenceEvent(published);
       }
-      var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
-      this._referencesBySession[ref.sessionId].push(r);
+
 
       if (ref.values) {
         var set: RemoteReferenceSet = {
