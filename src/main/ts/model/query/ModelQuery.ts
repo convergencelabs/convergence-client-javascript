@@ -3,14 +3,18 @@ import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelQueryRequest, ModelQueryResponse} from "../../connection/protocol/model/query/modelQuery";
 import {ModelResult} from "./ModelResult";
 
+export interface OrderBy {
+  orderByField: string;
+  ascending?: boolean;
+}
+
 export class ModelQuery {
 
   private _connection: ConvergenceConnection;
   private _collection: string;
   private _limit: number;
   private _offset: number;
-  private _orderByField: string;
-  private _ascending: boolean;
+  private _orderBy: OrderBy;
 
   constructor(connection: ConvergenceConnection, options?: ModelQueryOptions) {
     this._connection = connection;
@@ -18,8 +22,7 @@ export class ModelQuery {
       this._collection = options.collection;
       this._limit = options.limit;
       this._offset = options.offset;
-      this._orderByField = options.orderBy;
-      this._ascending = options.ascending;
+      this._orderBy = options.orderBy;
     }
   }
 
@@ -36,7 +39,13 @@ export class ModelQuery {
   }
 
   orderBy(field: string, ascending?: boolean): ModelQuery {
-    return this.copy({orderBy: field, ascending: (ascending !== undefined && ascending !== null) ? ascending : true});
+    return this.copy(
+      {
+        orderBy: {
+          orderByField: field,
+          ascending: (ascending !== undefined && ascending !== null) ? ascending : true
+        }
+      });
   }
 
   private copy(updates: any): ModelQuery {
@@ -44,8 +53,7 @@ export class ModelQuery {
       collection: updates.collection !== undefined ? updates.collection : this._collection,
       limit: updates.limit !== undefined ? updates.limit : this._limit,
       offset: updates.offset !== undefined ? updates.offset : this._offset,
-      orderBy: updates.orderBy !== undefined ? updates.orderBy : this._orderByField,
-      ascending: updates.ascending !== undefined ? updates.ascending : this._ascending
+      orderBy: updates.orderBy !== undefined ? updates.orderBy : this._orderBy,
     };
 
     return new ModelQuery(this._connection, options);
@@ -57,8 +65,7 @@ export class ModelQuery {
         collection: this._collection,
         limit: this._limit,
         offset: this._offset,
-        orderBy: this._orderByField,
-        ascending: this._ascending
+        orderBy: this._orderBy
       };
 
       this._connection.request(message)
@@ -75,7 +82,6 @@ export interface ModelQueryOptions {
   collection?: string;
   limit?: number;
   offset?: number;
-  orderBy?: string;
-  ascending?: boolean;
+  orderBy?: OrderBy;
 }
 

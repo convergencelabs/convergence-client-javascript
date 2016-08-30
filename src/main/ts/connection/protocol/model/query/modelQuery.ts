@@ -3,13 +3,13 @@ import {OutgoingProtocolRequestMessage} from "../../protocol";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelResult} from "../../../../model/query/ModelResult";
+import {OrderBy} from "../../../../model/query/ModelQuery";
 
 export interface ModelQueryRequest extends OutgoingProtocolRequestMessage {
   collection?: string;
   limit?: number;
   offset?: number;
-  orderBy?: string;
-  ascending?: boolean;
+  orderBy?: OrderBy;
 }
 
 export var ModelQueryRequestSerializer: MessageBodySerializer = (request: ModelQueryRequest) => {
@@ -17,8 +17,10 @@ export var ModelQueryRequestSerializer: MessageBodySerializer = (request: ModelQ
     c: request.collection,
     l: request.limit,
     f: request.offset,
-    o: request.orderBy,
-    a: request.ascending
+    o: {
+      f: request.orderBy.orderByField,
+      a: request.orderBy.ascending
+    }
   };
 };
 
