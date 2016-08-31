@@ -40,6 +40,7 @@ import {ReferenceType} from "../reference/ModelReference";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ElementReference} from "../reference/ElementReference";
 import {RemoteReferenceCreatedEvent} from "./RealTimeValue";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 
 export class RealTimeModel extends ConvergenceEventEmitter implements ObservableModel {
 
@@ -342,8 +343,8 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     return this._referenceManager.referenceMap().get(sessionId, key);
   }
 
-  references(sessionId?: string, key?: string): ModelReference<any>[] {
-    return this._referenceManager.referenceMap().getAll(sessionId, key);
+  references(filter?: ReferenceFilter): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(filter);
   }
 
 

@@ -21,6 +21,7 @@ import {OperationType} from "../ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {MessageType} from "../../connection/protocol/MessageType";
 import {ValueChangedEvent} from "../observable/ObservableValue";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 
 
 export class RealTimeString extends RealTimeValue<String> implements ObservableString {
@@ -142,8 +143,8 @@ export class RealTimeString extends RealTimeValue<String> implements ObservableS
     return this._referenceManager.referenceMap().get(sessionId, key);
   }
 
-  references(sessionId?: string, key?: string): ModelReference<any>[] {
-    return this._referenceManager.referenceMap().getAll(sessionId, key);
+  references(filter?: ReferenceFilter): ModelReference<any>[] {
+    return this._referenceManager.referenceMap().getAll(filter);
   }
 
   /////////////////////////////////////////////////////////////////////////////

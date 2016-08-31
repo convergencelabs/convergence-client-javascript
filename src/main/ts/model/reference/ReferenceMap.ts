@@ -1,4 +1,5 @@
 import {ModelReference} from "./ModelReference";
+import {ReferenceFilter} from "./ReferenceFilter";
 
 export class ReferenceMap {
 
@@ -35,19 +36,23 @@ export class ReferenceMap {
     }
   }
 
-  getAll(sessionId?: string, key?: string): ModelReference<any>[] {
+  getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+    if (typeof filter === "undefined") {
+      filter = {};
+    }
+
     var refs: ModelReference<any>[] = [];
 
     var sessionIds: string[];
-    if (sessionId !== undefined && sessionId !== null) {
-      sessionIds = [sessionId];
+    if (filter.sessionId !== undefined && filter.sessionId !== null) {
+      sessionIds = [filter.sessionId];
     } else {
       sessionIds = Object.getOwnPropertyNames(this._references);
     }
 
     sessionIds.forEach((sid: string) => {
       var sessionRefs: {[key: string]: ModelReference<any>} = this._references[sid];
-      var keys: string[] = key !== undefined ? [key] : Object.getOwnPropertyNames(sessionRefs);
+      var keys: string[] = filter.key !== undefined ? [filter.key] : Object.getOwnPropertyNames(sessionRefs);
       keys.forEach((k: string) => {
         refs.push(sessionRefs[k]);
       });

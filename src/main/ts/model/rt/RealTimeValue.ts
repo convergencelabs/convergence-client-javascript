@@ -13,6 +13,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "../reference/ModelReference";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter implements ObservableValue<T> {
@@ -123,7 +124,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter implement
     return;
   }
 
-  references(sessionId?: string, key?: string): ModelReference<any>[] {
+  references(filter?: ReferenceFilter): ModelReference<any>[] {
     return;
   }
 
