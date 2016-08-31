@@ -13,15 +13,20 @@ export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
 }
 
 export var ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
-  return {
+  var query: any = {
     c: request.collection,
     l: request.limit,
     f: request.offset,
-    o: {
+  };
+
+  if (request.orderBy) {
+    query.o = {
       f: request.orderBy.field,
       a: request.orderBy.ascending
-    }
-  };
+    };
+  }
+
+  return query;
 };
 
 export var ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body: any) => {
