@@ -3,7 +3,7 @@
 
 function bindToTextInput(textArea, rtString) {
   var events = ['input'];
-  textArea.value = rtString.value();
+  textArea.value = rtString.data();
 
   for (var i = 0; i < events.length; i++) {
     var event = events[i];
@@ -11,7 +11,7 @@ function bindToTextInput(textArea, rtString) {
   }
 
   function handleTextAreaEvent() {
-    processEvent(rtString.value(), textArea.value);
+    processEvent(rtString.data(), textArea.value);
   }
 
   function processEvent(oldval, newval) {
@@ -61,9 +61,9 @@ function bindToTextInput(textArea, rtString) {
 }
 
 function bindNumberInput(numberInput, numberModel) {
-  numberInput.value = numberModel.value();
+  numberInput.value = numberModel.data();
   numberInput.onchange = function (e) {
-    numberModel.value(Number(numberInput.value));
+    numberModel.data(Number(numberInput.value));
   };
 
   numberModel.on("value", function (evt) {
@@ -76,9 +76,9 @@ function bindNumberInput(numberInput, numberModel) {
 }
 
 function bindCheckboxInput(checkboxInput, booleanModel) {
-  booleanInput.checked = booleanModel.value();
+  booleanInput.checked = booleanModel.data();
   booleanInput.onchange = function (e) {
-    booleanModel.value(booleanInput.checked);
+    booleanModel.data(booleanInput.checked);
   };
 
   booleanModel.on("value", function (evt) {
