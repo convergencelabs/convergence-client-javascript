@@ -197,6 +197,10 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
 
     var prop: string = <string> pathArgs[0];
     var child: RealTimeValue<any> = this._children[prop];
+    if (typeof child === "undefined") {
+      return;
+    }
+
     if (pathArgs.length > 1) {
       if (child.type() === ModelValueType.Object) {
         return (<RealTimeObject> child).valueAt(pathArgs.slice(1, pathArgs.length));
