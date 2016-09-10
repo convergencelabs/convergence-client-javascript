@@ -2,6 +2,7 @@ import {Session} from "../../Session";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableValue} from "./ObservableValue";
 import {ObservableObject} from "./ObservableObject";
+import {RealTimeModel} from "../rt/RealTimeModel";
 
 
 export interface ObservableModel {
@@ -28,7 +29,7 @@ export interface ObservableModel {
 }
 
 export interface ModelEvent extends ConvergenceEvent {
-  src: ObservableModel;
+  src: RealTimeModel;
 }
 
 export interface ModelClosedEvent extends ModelEvent {

@@ -1,17 +1,12 @@
 import {RealTimeValue} from "./RealTimeValue";
-import {ObservableBoolean} from "../observable/ObservableBoolean";
-import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
-import {ModelValueType} from "../ModelValueType";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
-import {PathElement} from "../ot/Path";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {BooleanValue} from "../dataValue";
-import {ModelOperationEvent} from "../ModelOperationEvent";
-import {OperationType} from "../ot/ops/OperationType";
+import {BooleanNode} from "../internal/BooleanNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ValueChangedEvent} from "../observable/ObservableValue";
+import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
+import {ModelEventCallbacks} from "./RealTimeModel";
+import {BooleanNodeSetValueEvent} from "../internal/events";
 
-export class RealTimeBoolean extends RealTimeValue<boolean> implements ObservableBoolean {
+export class RealTimeBoolean extends RealTimeValue<boolean> {
 
   static Events: any = {
     VALUE: "value",
@@ -19,72 +14,26 @@ export class RealTimeBoolean extends RealTimeValue<boolean> implements Observabl
     MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
-  private _data: boolean;
-
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(data: BooleanValue,
-              parent: RealTimeContainerValue<any>,
-              fieldInParent: PathElement,
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
-    super(ModelValueType.Boolean, data.id, parent, fieldInParent, callbacks, model);
-    this._data = data.value;
-  }
+  constructor(_delegate: BooleanNode, _callbacks: ModelEventCallbacks) {
+    super(_delegate, _callbacks);
 
-
-  //
-  // private and protected methods
-  //
-
-  protected _setData(value: boolean): void {
-    this._validateSet(value);
-
-    var operation: BooleanSetOperation = new BooleanSetOperation(this.id(), false, value);
-    this._data = value;
-    this._sendOperation(operation);
-  }
-
-  protected _getData(): boolean {
-    return this._data;
-  }
-
-  // Handlers for incoming operations
-
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.BOOLEAN_VALUE) {
-      this._handleSetOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
-    var value: boolean = operation.value;
-
-    this._validateSet(value);
-    this._data = value;
-
-    var event: BooleanSetValueEvent = {
-      src: this,
-      name: RealTimeBoolean.Events.VALUE,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      value: value
-    };
-    this.emitEvent(event);
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _validateSet(value: boolean): void {
-    if (typeof value !== "boolean") {
-      throw new Error("Value must be a boolean");
-    }
+    this._delegate.on(BooleanNode.Events.VALUE, (event: BooleanNodeSetValueEvent) => {
+      if (event.local) {
+        var operation: BooleanSetOperation = new BooleanSetOperation(this.id(), false, event.value);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<BooleanSetValueEvent> {
+          src: this,
+          name: RealTimeBoolean.Events.VALUE,
+          sessionId: event.sessionId,
+          username: event.username,
+          value: event.value
+        });
+      }
+    });
   }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

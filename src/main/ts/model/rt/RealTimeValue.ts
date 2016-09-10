@@ -1,102 +1,52 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {
-  ObservableValue,
-  ValueChangedEvent,
-  ModelChangedEvent, ValueDetachedEvent
-} from "../observable/ObservableValue";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {ModelNode} from "../internal/ModelNode";
 import {ModelValueType} from "../ModelValueType";
-import {PathElement, Path} from "../ot/Path";
+import {Path} from "../ot/Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
-import {ModelOperationEvent} from "../ModelOperationEvent";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "../reference/ModelReference";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ModelEventCallbacks} from "./RealTimeModel";
 
-
-export abstract class RealTimeValue<T> extends ConvergenceEventEmitter implements ObservableValue<T> {
+export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
-    DETACHED: "detached",
+    DETACHED: ModelNode.Events.DETACHED,
     REFERENCE: "reference",
-    MODEL_CHANGED: "model_changed"
+    NODE_CHANGED: ModelNode.Events.NODE_CHANGED
   };
-
-  private _id: string;
-  private _modelType: ModelValueType;
-  protected _parent: RealTimeContainerValue<any>;
-  protected _callbacks: ModelEventCallbacks;
-  protected _model: RealTimeModel;
 
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(modelType: ModelValueType,
-              id: string,
-              parent: RealTimeContainerValue<any>,
-              public fieldInParent: PathElement, // fixme not sure I like this being public
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
+  constructor(protected _delegate: ModelNode<T>, protected _callbacks: ModelEventCallbacks) {
     super();
-    this._id = id;
-    this._modelType = modelType;
-    this._parent = parent;
-    this._callbacks = callbacks;
-    this._model = model;
-
-    this._model._registerValue(this);
   }
 
   id(): string {
-    return this._id;
+    return this._delegate.id();
   }
 
   type(): ModelValueType {
-    return this._modelType;
+    return this._delegate.type();
   }
 
   path(): Path {
-    if (this._parent == null) {
-      return [];
-    } else {
-      var path: Path = this._parent.path();
-      path.push(this.fieldInParent);
-      return path;
-    }
-  }
-
-  model(): RealTimeModel {
-    return this._model;
+    return  this._delegate.path();
   }
 
   isDetached(): boolean {
-    return this._model === null;
-  }
-
-  _detach(): void {
-    this._model._unregisterValue(this);
-
-    this._model = null;
-    this._parent = null;
-    this._callbacks = null;
-
-    var event: ValueDetachedEvent = {
-      src: this,
-      name: RealTimeValue.Events.DETACHED
-    };
-
-    this.emitEvent(event);
+    return this._delegate.isDetached();
   }
 
   data(): T
   data(value: T): void
   data(value?: T): any {
     if (arguments.length === 0) {
-      return this._getData();
+      return this._delegate.data();
     } else {
-      this._setData(value);
+      this._delegate.data(value);
       return;
     }
   }
@@ -111,12 +61,6 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter implement
     this._exceptionIfDetached();
     this._callbacks.sendOperationCallback(operation);
   }
-
-  protected abstract _getData(): T;
-
-  protected abstract _setData(value: T): void;
-
-  abstract _handleRemoteOperation(operationEvent: ModelOperationEvent): void;
 
   abstract _handleRemoteReferenceEvent(referenceEvent: RemoteReferenceEvent): void;
 
@@ -135,22 +79,6 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter implement
       reference: reference
     };
     this.emitEvent(createdEvent);
-  }
-
-  _bubbleModelChangedEvent(childEvent: ValueChangedEvent, relativePath: Path = []): void {
-    var event: ModelChangedEvent = {
-      name: RealTimeValue.Events.MODEL_CHANGED,
-      src: this,
-      relativePath: relativePath,
-      childEvent: childEvent
-    };
-    this.emitEvent(event);
-
-    if (this._parent) {
-      var newPath: Path = relativePath.slice(0);
-      newPath.unshift(this.fieldInParent);
-      this._parent._bubbleModelChangedEvent(childEvent, newPath);
-    }
   }
 }
 

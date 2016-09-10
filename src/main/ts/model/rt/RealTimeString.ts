@@ -1,30 +1,27 @@
 import {RealTimeValue} from "./RealTimeValue";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {ObservableString} from "../observable/ObservableString";
 import {ReferenceManager} from "../reference/ReferenceManager";
-import {ReferenceDisposedCallback, LocalModelReference} from "../reference/LocalModelReference";
-import {StringValue} from "../dataValue";
-import {PathElement} from "../ot/Path";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
-import {ModelValueType} from "../ModelValueType";
-import {ReferenceType, ModelReference} from "../reference/ModelReference";
-import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
+import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {StringNode} from "../internal/StringNode";
+import {ModelEventCallbacks} from "./RealTimeModel";
+import {ReferenceType} from "../reference/ModelReference";
+import {LocalModelReference} from "../reference/LocalModelReference";
+import {ModelReference} from "../reference/ModelReference";
 import {IndexReference} from "../reference/IndexReference";
+import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
-import {Session} from "../../Session";
 import {LocalRangeReference} from "../reference/LocalRangeReference";
 import {RangeReference} from "../reference/RangeReference";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
-import {ModelOperationEvent} from "../ModelOperationEvent";
-import {OperationType} from "../ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {MessageType} from "../../connection/protocol/MessageType";
 import {ValueChangedEvent} from "../observable/ObservableValue";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {StringNodeInsertEvent} from "../internal/events";
+import {StringNodeRemoveEvent} from "../internal/events";
+import {StringNodeSetValueEvent} from "../internal/events";
 
-
-export class RealTimeString extends RealTimeValue<String> implements ObservableString {
+export class RealTimeString extends RealTimeValue<String> {
 
   static Events: any = {
     INSERT: "insert",
@@ -36,56 +33,94 @@ export class RealTimeString extends RealTimeValue<String> implements ObservableS
   };
 
   private _referenceManager: ReferenceManager;
-  private _data: string;
   private _referenceDisposed: ReferenceDisposedCallback;
 
   /**
    * Constructs a new RealTimeString.
    */
-  constructor(data: StringValue,
-              parent: RealTimeContainerValue<any>,
-              fieldInParent: PathElement,
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
-    super(ModelValueType.String, data.id, parent, fieldInParent, callbacks, model);
+  constructor(protected _delegate: StringNode,
+              protected _callbacks: ModelEventCallbacks) {
+    super(_delegate, _callbacks);
 
-    this._data = data.value;
     this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX, ReferenceType.RANGE]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
       this._referenceManager.removeLocalReference(reference.key());
     };
+
+    this._delegate.on(StringNode.Events.INSERT, (event: StringNodeInsertEvent) => {
+      if (event.local) {
+        var operation: StringInsertOperation = new StringInsertOperation(this.id(), false, event.index, event.value);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<StringInsertEvent> {
+          src: this,
+          name: RealTimeString.Events.INSERT,
+          sessionId: event.sessionId,
+          username: event.username,
+          index: event.index,
+          value: event.value
+        });
+      }
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof IndexReference) {
+          ref._handleInsert(event.index, event.value.length);
+        }
+      });
+    });
+
+    this._delegate.on(StringNode.Events.REMOVE, (event: StringNodeRemoveEvent) => {
+      if (event.local) {
+        var operation: StringRemoveOperation = new StringRemoveOperation(this.id(), false, event.index, event.value);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<StringRemoveEvent> {
+          src: this,
+          name: RealTimeString.Events.REMOVE,
+          sessionId: event.sessionId,
+          username: event.username,
+          index: event.index,
+          value: event.value
+        });
+      }
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof IndexReference) {
+          ref._handleRemove(event.index, event.value.length);
+        }
+      });
+    });
+
+    this._delegate.on(StringNode.Events.VALUE, (event: StringNodeSetValueEvent) => {
+      if (event.local) {
+        var operation: StringSetOperation = new StringSetOperation(this.id(), false, event.value);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<StringSetValueEvent> {
+          src: this,
+          name: RealTimeString.Events.VALUE,
+          sessionId: event.sessionId,
+          username: event.username,
+          value: event.value
+        });
+      }
+
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        ref._dispose();
+      });
+      this._referenceManager.referenceMap().removeAll();
+    });
+
   }
 
   insert(index: number, value: string): void {
-    this._validateInsert(index, value);
-
-    var operation: StringInsertOperation = new StringInsertOperation(this.id(), false, index, value);
-    this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
-    this._sendOperation(operation);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      if (ref instanceof IndexReference) {
-        ref._handleInsert(index, value.length);
-      }
-    });
+    this._delegate.insert(index, value);
   }
 
   remove(index: number, length: number): void {
-    this._validateRemove(index, length);
-
-    var operation: StringRemoveOperation = new StringRemoveOperation(this.id(), false, index, this._data.substr(index, length));
-    this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
-    this._sendOperation(operation);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      if (ref instanceof IndexReference) {
-        ref._handleRemove(index, length);
-      }
-    });
+    this._delegate.remove(index, length);
   }
 
   length(): number {
-    return this._data.length;
+    return this._delegate.length();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -102,8 +137,7 @@ export class RealTimeString extends RealTimeValue<String> implements ObservableS
         return <LocalIndexReference>existing;
       }
     } else {
-      var session: Session = this.model().session();
-      var reference: IndexReference = new IndexReference(key, this, session.username(), session.sessionId(), true);
+      var reference: IndexReference = new IndexReference(key, this, this._delegate.username, this._delegate.sessionId, true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalIndexReference = new LocalIndexReference(
@@ -125,8 +159,7 @@ export class RealTimeString extends RealTimeValue<String> implements ObservableS
         return <LocalRangeReference>existing;
       }
     } else {
-      var session: Session = this.model().session();
-      var reference: RangeReference = new RangeReference(key, this, session.username(), session.sessionId(), true);
+      var reference: RangeReference = new RangeReference(key, this, this._delegate.username, this._delegate.sessionId, true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalRangeReference = new LocalRangeReference(
@@ -150,149 +183,6 @@ export class RealTimeString extends RealTimeValue<String> implements ObservableS
   /////////////////////////////////////////////////////////////////////////////
   // private and protected methods.
   /////////////////////////////////////////////////////////////////////////////
-
-  protected _setData(data: string): void {
-    this._validateSet(data);
-
-    this._data = data;
-    var operation: StringSetOperation = new StringSetOperation(this.id(), false, data);
-    this._sendOperation(operation);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      ref._dispose();
-    });
-    this._referenceManager.referenceMap().removeAll();
-  }
-
-  protected _getData(): string {
-    return this._data;
-  }
-
-  //
-  // Operations
-  //
-
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.STRING_INSERT) {
-      this._handleInsertOperation(operationEvent);
-    } else if (type === OperationType.STRING_REMOVE) {
-      this._handleRemoveOperation(operationEvent);
-    } else if (type === OperationType.STRING_VALUE) {
-      this._handleSetOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
-  private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
-    var index: number = operation.index;
-    var value: string = operation.value;
-
-    this._validateInsert(index, value);
-
-    this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
-
-    var event: StringInsertEvent = {
-      src: this,
-      name: RealTimeString.Events.INSERT,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      index: index,
-      value: value
-    };
-    this.emitEvent(event);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      if (ref instanceof IndexReference) {
-        ref._handleInsert(index, value.length);
-      }
-    });
-
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
-    var index: number = operation.index;
-    var value: string = operation.value;
-
-    this._validateRemove(index, value.length);
-
-    this._data = this._data.slice(0, index) + this._data.slice(index + value.length, this._data.length);
-
-    var event: StringRemoveEvent = {
-      src: this,
-      name: RealTimeString.Events.REMOVE,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      index: index,
-      value: value
-    };
-    this.emitEvent(event);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      if (ref instanceof IndexReference) {
-        ref._handleRemove(index, value.length);
-      }
-    });
-
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
-    var value: string = operation.value;
-
-    this._validateSet(value);
-    this._data = value;
-
-    var event: StringSetValueEvent = {
-      src: this,
-      name: RealTimeString.Events.VALUE,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      value: value
-    };
-    this.emitEvent(event);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      ref._clear();
-    });
-
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _validateInsert(index: number, value: string): void {
-    // TODO: Add integer check
-    if (this._data.length < index || index < 0) {
-      throw new Error("Index out of bounds: " + index);
-    }
-
-    if (typeof value !== "string") {
-      throw new Error("Value must be a string");
-    }
-  }
-
-  private _validateRemove(index: number, length: number): void {
-    // TODO: Add integer check
-    if (this._data.length < index + length || index < 0) {
-      throw new Error("Index out of bounds!");
-    }
-  }
-
-  private _validateSet(value: string): void {
-    if (typeof value !== "string") {
-      throw new Error("Value must be a string");
-    }
-  }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(event);

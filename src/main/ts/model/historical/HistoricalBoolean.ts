@@ -1,9 +1,8 @@
-import {RealTimeBoolean} from "../rt/RealTimeBoolean";
 import {HistoricalValue} from "./HistoricalValue";
-import {ObservableBoolean} from "../observable/ObservableBoolean";
+import {BooleanNode} from "../internal/BooleanNode";
 
-export class HistoricalBoolean extends HistoricalValue<any> implements ObservableBoolean {
-  constructor(value: RealTimeBoolean) {
-    super(value);
+export class HistoricalBoolean extends HistoricalValue<any> {
+  constructor(_delegate: BooleanNode) {
+    super(_delegate);
   }
 }

@@ -1,13 +1,9 @@
 import {RealTimeValue} from "./RealTimeValue";
-import {ObservableUndefined} from "../observable/ObservableUndefined";
-import {ModelOperationEvent} from "../ModelOperationEvent";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
-import {ModelValueType} from "../ModelValueType";
+import {UndefinedNode} from "../internal/UndefinedNode";
+import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 
-export class RealTimeUndefined extends RealTimeValue<void> implements ObservableUndefined {
+export class RealTimeUndefined extends RealTimeValue<void> {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED
@@ -16,24 +12,13 @@ export class RealTimeUndefined extends RealTimeValue<void> implements Observable
   /**
    * Constructs a new RealTimeUndefined.
    */
-  constructor(id: string,
-              parent: RealTimeContainerValue<any>,
-              fieldInParent: PathElement,
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
-    super(ModelValueType.Undefined, id, parent, fieldInParent, callbacks, model);
-  }
-
-  protected _getData(): void {
-    return undefined;
+  constructor(_delegate: UndefinedNode,
+              _callbacks: ModelEventCallbacks) {
+    super(_delegate, _callbacks);
   }
 
   protected _setData(data: any): void {
     throw new Error("Can not set the value on a Undefined type.");
-  }
-
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
-    throw new Error("Undefined values do not process operations");
   }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

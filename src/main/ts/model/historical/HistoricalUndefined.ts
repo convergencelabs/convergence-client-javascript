@@ -1,9 +1,8 @@
-import {RealTimeUndefined} from "../rt/RealTimeUndefined";
 import {HistoricalValue} from "./HistoricalValue";
-import {ObservableUndefined} from "../observable/ObservableUndefined";
+import {UndefinedNode} from "../internal/UndefinedNode";
 
-export class HistoricalUndefined extends HistoricalValue<any> implements ObservableUndefined {
-  constructor(value: RealTimeUndefined) {
-    super(value);
+export class HistoricalUndefined extends HistoricalValue<any> {
+  constructor(_delegate: UndefinedNode) {
+    super(_delegate);
   }
 }

@@ -2,6 +2,7 @@ import {Path} from "../ot/Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableModel} from "./ObservableModel";
 import {ModelValueType} from "../ModelValueType";
+import {RealTimeValue} from "../rt/RealTimeValue";
 
 export interface ObservableValue<T>  {
 
@@ -21,18 +22,16 @@ export interface ObservableValue<T>  {
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: ObservableValue<any>;
+  src: RealTimeValue<any>;
 }
 
 export interface ValueDetachedEvent extends ConvergenceModelValueEvent {
-  src: ObservableValue<any>;
+  src: RealTimeValue<any>;
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
   sessionId: string;
   username: string;
-  version: number;
-  timestamp: number;
 }
 
 export interface ModelChangedEvent extends ConvergenceEvent {

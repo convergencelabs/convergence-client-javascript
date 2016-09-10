@@ -23,6 +23,8 @@ describe('Open Real Time Model E2E', () => {
       return "" + id++;
     };
 
+    var dataValueFactory: DataValueFactory = new DataValueFactory(idGen);
+
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
 
     var fqn: ModelFqn = new ModelFqn("collection", "model");
@@ -42,7 +44,7 @@ describe('Open Real Time Model E2E', () => {
       c: new Date().getTime(),
       m: new Date().getTime(),
       d: {
-        d: DataValueSerializer(DataValueFactory.createDataValue({num: 10}, idGen)),
+        d: DataValueSerializer(dataValueFactory.createDataValue({num: 10})),
         s: [],
         r: []
       },

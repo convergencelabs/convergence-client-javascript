@@ -1,5 +1,6 @@
 import {ObservableValue, ValueChangedEvent} from "./ObservableValue";
 import {ObservableContainerValue} from "./ObservableContainerValue";
+import {RealTimeObject} from "../rt/RealTimeObject";
 
 export interface ObservableObject extends ObservableContainerValue<{ [key: string]: any; }> {
 
@@ -13,17 +14,17 @@ export interface ObservableObject extends ObservableContainerValue<{ [key: strin
 }
 
 export interface ObjectSetEvent extends ValueChangedEvent {
-  src: ObservableObject;
+  src: RealTimeObject;
   key: string;
   value: any;
 }
 
 export interface ObjectRemoveEvent extends ValueChangedEvent {
-  src: ObservableObject;
+  src: RealTimeObject;
   key: string;
 }
 
 export interface ObjectSetValueEvent extends ValueChangedEvent {
-  src: ObservableObject;
+  src: RealTimeObject;
   value: { [key: string]: any; };
 }

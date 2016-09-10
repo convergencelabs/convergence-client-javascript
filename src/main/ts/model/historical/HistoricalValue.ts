@@ -1,40 +1,31 @@
-import {ObservableValue} from "../observable/ObservableValue";
-import {RealTimeValue} from "../rt/RealTimeValue";
 import {ModelValueType} from "../ModelValueType";
-import {ObservableModel} from "../observable/ObservableModel";
 import {Path} from "../ot/Path";
+import {ModelNode} from "../internal/ModelNode";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
-export abstract class HistoricalValue<T> implements ObservableValue<T> {
+export abstract class HistoricalValue<T> extends ConvergenceEventEmitter {
 
-  protected _value: RealTimeValue<T>;
-
-  constructor(value: RealTimeValue<T>) {
-    this._value = value;
+  constructor(protected _delegate: ModelNode<T>) {
+    super();
   }
 
   id(): string {
-    return this._value.id();
+    return this._delegate.id();
   }
 
   type(): ModelValueType {
-    return this._value.type();
+    return this._delegate.type();
   }
 
   path(): Path {
-    return this._value.path();
-  }
-
-  model(): ObservableModel {
-    return this._value.model();
+    return  this._delegate.path();
   }
 
   isDetached(): boolean {
-    return this._value.isDetached();
+    return this._delegate.isDetached();
   }
 
-  data(): T
-  data(value: T): void
-  data(value?: T): any {
-    return this._value.data(value);
+  data(): T {
+    return this._delegate.data();
   }
 }

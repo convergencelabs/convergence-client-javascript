@@ -21,7 +21,6 @@ import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
-import {HistoricalModel} from "./historical/HistoricalModel";
 import {ModelQuery} from "./query/ModelQuery";
 
 export class ModelService extends ConvergenceEventEmitter {
@@ -132,9 +131,10 @@ export class ModelService extends ConvergenceEventEmitter {
   create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var idGen: InitialIdGenerator = new InitialIdGenerator();
-    var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+    var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
     });
+    var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
     var request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
@@ -159,7 +159,7 @@ export class ModelService extends ConvergenceEventEmitter {
     });
   }
 
-  history(collectionId: string, modelId: string): HistoricalModel {
+  history(collectionId: string, modelId: string): Promise<any> {
     return null;
   }
 
@@ -207,9 +207,10 @@ export class ModelService extends ConvergenceEventEmitter {
     } else {
       var data: any = openReq.initializer();
       var idGen: InitialIdGenerator = new InitialIdGenerator();
-      var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+      var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
         return idGen.id();
       });
+      var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
       var response: ModelDataResponse = {
         data: dataValue,
         type: MessageType.MODEL_DATA_RESPONSE

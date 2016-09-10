@@ -7,8 +7,10 @@ import {NumberValue} from "./dataValue";
 import {BooleanValue} from "./dataValue";
 
 export class DataValueFactory {
-  static createDataValue(data: any, idGenerator: () => string): DataValue {
-    var id: string = idGenerator();
+  constructor(private idGenerator: () => string) {}
+
+  createDataValue(data: any): DataValue {
+    var id: string = this.idGenerator();
     var type: string = typeof data;
     if (data === null) {
       var nullValue: NullValue = {id: id, type: "null"};
@@ -18,14 +20,14 @@ export class DataValueFactory {
       return stringValue;
     } else if (Array.isArray(data)) {
       var list: DataValue[] = data.map((child: any) => {
-        return DataValueFactory.createDataValue(child, idGenerator);
+        return this.createDataValue(child);
       });
       var arrayValue: ArrayValue = {id: id, type: "array", children: list};
       return arrayValue;
     } else if (type === "object") {
       var props: {[key: string]: DataValue} = {};
       Object.getOwnPropertyNames(data).forEach((prop: string) => {
-        props[prop] = DataValueFactory.createDataValue(data[prop], idGenerator);
+        props[prop] = this.createDataValue(data[prop]);
       });
       var objectValue: ObjectValue = {id: id, type: type, children: props};
       return objectValue;

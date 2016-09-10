@@ -1,31 +1,29 @@
-import {ObservableObject} from "../observable/ObservableObject";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeContainerValue} from "./RealTimeContainerValue";
 import {ReferenceManager} from "../reference/ReferenceManager";
-import {ReferenceDisposedCallback, LocalModelReference} from "../reference/LocalModelReference";
-import {ObjectValue, DataValue} from "../dataValue";
-import {PathElement, Path} from "../ot/Path";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
-import {ModelValueType} from "../ModelValueType";
-import {RealTimeValueFactory} from "./RealTimeValueFactory";
-import {ReferenceType, ModelReference} from "../reference/ModelReference";
+import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {ObjectNode} from "../internal/ObjectNode";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {ModelEventCallbacks} from "./RealTimeModel";
+import {ReferenceType} from "../reference/ModelReference";
+import {LocalModelReference} from "../reference/LocalModelReference";
+import {ObjectNodeSetValueEvent} from "../internal/events";
+import {ModelReference} from "../reference/ModelReference";
+import {ObjectNodeRemoveEvent} from "../internal/events";
+import {PropertyReference} from "../reference/PropertyReference";
+import {ModelNode} from "../internal/ModelNode";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
 import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
-import {PropertyReference} from "../reference/PropertyReference";
 import {LocalPropertyReference} from "../reference/LocalPropertyReference";
-import {Session} from "../../Session";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
-import {RealTimeArray} from "./RealTimeArray";
-import {ModelOperationEvent} from "../ModelOperationEvent";
-import {OperationType} from "../ot/ops/OperationType";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ValueChangedEvent} from "../observable/ObservableValue";
-import {Validation} from "../../util/Validation";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {ObjectNodeSetEvent} from "../internal/events";
 
-export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any; }> implements ObservableObject {
+export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> implements RealTimeContainerValue<{ [key: string]: any; }> {
 
   static Events: any = {
     SET: "set",
@@ -35,90 +33,122 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
     MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
-  private _children: { [key: string]: RealTimeValue<any>; };
   private _referenceManager: ReferenceManager;
   private _referenceDisposed: ReferenceDisposedCallback;
 
   /**
    * Constructs a new RealTimeObject.
    */
-  constructor(data: ObjectValue,
-              parent: RealTimeContainerValue<any>,
-              fieldInParent: PathElement,
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
-    super(ModelValueType.Object, data.id, parent, fieldInParent, callbacks, model);
-
-    this._children = {};
-
-    Object.getOwnPropertyNames(data.children).forEach((prop: string) => {
-      this._children[prop] =
-        RealTimeValueFactory.create(data.children[prop], this, prop, this._callbacks, model);
-    });
+  constructor(protected _delegate: ObjectNode,
+              private _wrapperFactory: RealTimeWrapperFactory,
+              protected _callbacks: ModelEventCallbacks) {
+    super(_delegate, _callbacks);
 
     this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
       this._referenceManager.removeLocalReference(reference.key());
     };
+
+    this._delegate.on(ObjectNode.Events.VALUE, (event: ObjectNodeSetValueEvent) => {
+      if (event.local) {
+        var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<ObjectSetValueEvent> {
+          src: this,
+          name: RealTimeObject.Events.VALUE,
+          sessionId: event.sessionId,
+          username: event.username
+        });
+      }
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        ref._dispose();
+      });
+      this._referenceManager.referenceMap().removeAll();
+      this._referenceManager.removeAllLocalReferences();
+    });
+
+    this._delegate.on(ObjectNode.Events.REMOVE, (event: ObjectNodeRemoveEvent) => {
+      if (event.local) {
+        var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.id(), false, event.key);
+        this._sendOperation(operation);
+      } else {
+        this.emitEvent(<ObjectRemoveEvent> {
+          src: this,
+          name: RealTimeObject.Events.REMOVE,
+          sessionId: event.sessionId,
+          username: event.username,
+          key: event.key
+        });
+      }
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(event.key);
+        }
+      });
+    });
+
+    this._delegate.on(ObjectNode.Events.SET, (event: ObjectNodeSetEvent) => {
+      if (event.local) {
+        // Operation Handled Bellow
+        // Fixme: Refactor event so we can tell if value replaced or added
+      } else {
+        this.emitEvent(<ObjectSetEvent> {
+          src: this,
+          name: RealTimeObject.Events.REMOVE,
+          sessionId: event.sessionId,
+          username: event.username,
+          key: event.key,
+          value: this._wrapperFactory.wrap(event.value)
+        });
+      }
+      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(event.key);
+        }
+      });
+    });
+
   }
 
   get(key: string): RealTimeValue<any> {
-    Validation.isString(key, "key");
-    return this._children[key];
+    return this._wrapperFactory.wrap(this._delegate.get(key));
   }
 
   set(key: string, value: any): RealTimeValue<any> {
-    Validation.isString(key, "key");
-
-    var dataValue: DataValue = this._model._createDataValue(value);
+    let delegateChild: ModelNode<any> = this._delegate.set(key, value);
 
     var operation: DiscreteOperation;
-    if (this._children.hasOwnProperty(key)) {
-      operation = new ObjectSetPropertyOperation(this.id(), false, key, dataValue);
-      this._children[key]._detach();
+    if (this._delegate.hasKey(key)) {
+      operation = new ObjectSetPropertyOperation(this.id(), false, key, delegateChild.dataValue());
     } else {
-      operation = new ObjectAddPropertyOperation(this.id(), false, key, dataValue);
+      operation = new ObjectAddPropertyOperation(this.id(), false, key, delegateChild.dataValue());
     }
 
-    var child: RealTimeValue<any> = RealTimeValueFactory.create(dataValue, this, key, this._callbacks, this._model);
-    this._children[key] = child;
     this._sendOperation(operation);
-    return child;
+    return this._wrapperFactory.wrap(delegateChild);
   }
 
   remove(key: string): void {
-    Validation.isString(key, "key");
-
-    if (!this._children.hasOwnProperty(key)) {
-      throw new Error("Cannot remove property that is undefined!");
-    }
-    var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.id(), false, key);
-
-    this._children[key]._detach();
-    delete this._children[key];
-    this._sendOperation(operation);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      if (ref instanceof PropertyReference) {
-        ref._handlePropertyRemoved(key);
-      }
-    });
+    this._delegate.remove(key);
   }
 
   keys(): string[] {
-    return Object.getOwnPropertyNames(this._children);
+    return this._delegate.keys();
   }
 
   hasKey(key: string): boolean {
-    return this._children.hasOwnProperty(key);
+    return this._delegate.hasKey(key);
   }
 
   forEach(callback: (model: RealTimeValue<any>, key?: string) => void): void {
-    for (var key in this._children) {
-      if (this._children.hasOwnProperty(key)) {
-        callback(this._children[key], key);
-      }
-    }
+    this._delegate.forEach((modelNode, key) => {
+      callback(this._wrapperFactory.wrap(modelNode), key);
+    });
+  }
+
+  valueAt(pathArgs: any): RealTimeValue<any> {
+    return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 
   propertyReference(key: string): LocalPropertyReference {
@@ -130,8 +160,7 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
         return <LocalPropertyReference>existing;
       }
     } else {
-      var session: Session = this.model().session();
-      var reference: PropertyReference = new PropertyReference(key, this, session.username(), session.sessionId(), true);
+      var reference: PropertyReference = new PropertyReference(key, this, this._delegate.username, this._delegate.sessionId, true);
 
       this._referenceManager.referenceMap().put(reference);
       var local: LocalPropertyReference = new LocalPropertyReference(
@@ -150,218 +179,6 @@ export class RealTimeObject extends RealTimeContainerValue<{ [key: string]: any;
 
   references(filter: ReferenceFilter): ModelReference<any>[] {
     return this._referenceManager.referenceMap().getAll(filter);
-  }
-
-  //
-  // private / protected methods.
-  //
-
-  protected _getData(): { [key: string]: any; } {
-    var returnObject: Object = {};
-    this.forEach((model: RealTimeValue<any>, key: string) => {
-      returnObject[key] = model.data();
-    });
-    return returnObject;
-  }
-
-  protected _setData(data?: { [key: string]: any; }): void {
-    if (!data || typeof data !== "object") {
-      throw new Error("Value must be an object and cannot be null or undefined!");
-    }
-
-    this.forEach((oldChild: RealTimeValue<any>) => oldChild._detach());
-    this._children = {};
-
-    var newData: {[key: string]: DataValue} = {};
-
-    Object.getOwnPropertyNames(data).forEach((prop: string) => {
-      var dataValue: DataValue = this._model._createDataValue(data[prop]);
-      newData[prop] = dataValue;
-      this._children[prop] =
-        RealTimeValueFactory.create(dataValue, this, prop, this._callbacks, this._model);
-    });
-
-    var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, newData);
-    this._sendOperation(operation);
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      ref._dispose();
-    });
-    this._referenceManager.referenceMap().removeAll();
-  }
-
-  _path(pathArgs: Path): RealTimeValue<any> {
-    if (pathArgs.length === 0) {
-      return this;
-    }
-
-    var prop: string = <string> pathArgs[0];
-    var child: RealTimeValue<any> = this._children[prop];
-    if (typeof child === "undefined") {
-      return;
-    }
-
-    if (pathArgs.length > 1) {
-      if (child.type() === ModelValueType.Object) {
-        return (<RealTimeObject> child).valueAt(pathArgs.slice(1, pathArgs.length));
-      } else if (child.type() === ModelValueType.Array) {
-        return (<RealTimeArray> child).valueAt(pathArgs.slice(1, pathArgs.length));
-      } else {
-        // TODO: Determine correct way to handle undefined
-        return RealTimeValueFactory.create(undefined, null, null, this._callbacks, this.model());
-      }
-    } else {
-      return child;
-    }
-  }
-
-  protected _detachChildren(): void {
-    this.forEach((child: RealTimeValue<any>) => {
-      child._detach();
-    });
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Handlers for incoming operations
-  /////////////////////////////////////////////////////////////////////////////
-
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
-    switch (operationEvent.operation.type) {
-      case OperationType.OBJECT_ADD:
-        this._handleAddPropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_SET:
-        this._handleSetPropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_REMOVE:
-        this._handleRemovePropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_VALUE:
-        this._handleSetOperation(operationEvent);
-        break;
-      default:
-        throw new Error("Invalid operation for RealTimeObject");
-    }
-  }
-
-  private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
-    var key: string = operation.prop;
-    var value: DataValue = operation.value;
-
-    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
-    this._children[key] = newChild;
-
-    var event: ObjectSetEvent = {
-      src: this,
-      name: RealTimeObject.Events.SET,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      key: key,
-      value: newChild
-    };
-
-    this.emitEvent(event);
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectSetPropertyOperation = <ObjectSetPropertyOperation> operationEvent.operation;
-    var key: string = operation.prop;
-    var value: DataValue = operation.value;
-
-    var oldChild: RealTimeValue<any> = this._children[key];
-    oldChild._detach();
-
-    var newChild: RealTimeValue<any> = RealTimeValueFactory.create(value, this, key, this._callbacks, this.model());
-    this._children[key] = newChild;
-
-    var event: ObjectSetEvent = {
-      src: this,
-      name: RealTimeObject.Events.SET,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp,
-      key: key,
-      value: newChild
-    };
-
-    this.emitEvent(event);
-    this._bubbleModelChangedEvent(event);
-  }
-
-  private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
-    var key: string = operation.prop;
-
-    var oldChild: RealTimeValue<any> = this._children[key];
-
-    if (oldChild) {
-      delete this._children[key];
-
-      var event: ObjectRemoveEvent = {
-        src: this,
-        name: RealTimeObject.Events.REMOVE,
-        sessionId: operationEvent.sessionId,
-        username: operationEvent.username,
-        version: operationEvent.version,
-        timestamp: operationEvent.timestamp,
-        key: key
-      };
-
-      this.emitEvent(event);
-      oldChild._detach();
-
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        if (ref instanceof PropertyReference) {
-          ref._handlePropertyRemoved(key);
-        }
-      });
-
-      this._bubbleModelChangedEvent(event);
-    }
-  }
-
-  private _handleSetOperation(operationEvent: ModelOperationEvent): ObjectSetValueEvent {
-    var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
-    var value: {[key: string]: DataValue} = operation.value;
-
-    var oldChildren: Object = this._children;
-
-    this._children = {};
-
-    for (var prop in value) {
-      if (value.hasOwnProperty(prop)) {
-        this._children[prop] = RealTimeValueFactory.create(value[prop], this, prop, this._callbacks, this.model());
-      }
-    }
-
-    var event: ObjectSetValueEvent = {
-      src: this,
-      name: RealTimeObject.Events.VALUE,
-      sessionId: operationEvent.sessionId,
-      username: operationEvent.username,
-      version: operationEvent.version,
-      timestamp: operationEvent.timestamp
-    };
-
-    this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-      ref._dispose();
-    });
-    this._referenceManager.referenceMap().removeAll();
-    this._referenceManager.removeAllLocalReferences();
-
-    this.emitEvent(event);
-
-    for (var key in oldChildren) {
-      if (oldChildren.hasOwnProperty(key)) {
-        oldChildren[key]._detach();
-      }
-    }
-    return event;
   }
 
   /////////////////////////////////////////////////////////////////////////////

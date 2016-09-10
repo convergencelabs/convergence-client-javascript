@@ -1,9 +1,8 @@
-import {RealTimeNumber} from "../rt/RealTimeNumber";
 import {HistoricalValue} from "./HistoricalValue";
-import {ObservableNumber} from "../observable/ObservableNumber";
+import {NumberNode} from "../internal/NumberNode";
 
-export class HistoricalNumber extends HistoricalValue<any> implements ObservableNumber {
-  constructor(value: RealTimeNumber) {
-    super(value);
+export class HistoricalNumber extends HistoricalValue<any> {
+  constructor(_delegate: NumberNode) {
+    super(_delegate);
   }
 }
