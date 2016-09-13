@@ -20,21 +20,3 @@ export interface ObservableValue<T>  {
 
   // events(): Observable<ConvergenceModelValueEvent>;
 }
-
-export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: RealTimeValue<any>;
-}
-
-export interface ValueDetachedEvent extends ConvergenceModelValueEvent {
-  src: RealTimeValue<any>;
-}
-
-export interface ValueChangedEvent extends ConvergenceModelValueEvent {
-  sessionId: string;
-  username: string;
-}
-
-export interface ModelChangedEvent extends ConvergenceEvent {
-  relativePath: Path;
-  childEvent: ValueChangedEvent;
-}

@@ -9,7 +9,6 @@ import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
 import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
 import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ValueChangedEvent} from "../observable/ObservableValue";
 import {ModelNodeEvent} from "../internal/events";
 import {ArrayNodeInsertEvent} from "../internal/events";
 import {ArrayNodeRemoveEvent} from "../internal/events";
@@ -118,27 +117,4 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Arrays to do have references yet.");
   }
-}
-
-export interface ArrayInsertEvent extends ValueChangedEvent {
-  index: number;
-  value: RealTimeValue<any>;
-}
-
-export interface ArrayRemoveEvent extends ValueChangedEvent {
-  index: number;
-}
-
-export interface ArraySetEvent extends ValueChangedEvent {
-  index: number;
-  value: any;
-}
-
-export interface ArrayReorderEvent extends ValueChangedEvent {
-  fromIndex: number;
-  toIndex: any;
-}
-
-export interface ArraySetValueEvent extends ValueChangedEvent {
-  value: Array<any>;
 }

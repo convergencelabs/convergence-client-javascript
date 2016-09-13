@@ -1,5 +1,3 @@
-
-
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
@@ -49,8 +47,8 @@ import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {VersionChangedEvent} from "../observable/ObservableModel";
-import {RemoteReferenceCreatedEvent} from "./RealTimeValue";
 import {MessageEvent} from "../../connection/ConvergenceConnection";
+import {RemoteReferenceCreatedEvent} from "./events";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 

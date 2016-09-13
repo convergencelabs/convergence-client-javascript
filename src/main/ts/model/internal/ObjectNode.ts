@@ -219,7 +219,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
       child.on(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
 
-    var event: ObjectNodeSetValueEvent = new ObjectNodeSetValueEvent(this, local, this.sessionId, this.username);
+    var event: ObjectNodeSetValueEvent = new ObjectNodeSetValueEvent(this, local, this.data(), this.sessionId, this.username);
 
     this._emitValueEvent(event);
 

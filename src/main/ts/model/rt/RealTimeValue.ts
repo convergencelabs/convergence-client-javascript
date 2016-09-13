@@ -9,6 +9,7 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {RemoteReferenceCreatedEvent} from "./events";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
@@ -84,8 +85,4 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     };
     this.emitEvent(createdEvent);
   }
-}
-
-export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  reference: ModelReference<any>;
 }

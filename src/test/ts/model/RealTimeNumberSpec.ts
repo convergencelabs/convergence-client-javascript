@@ -2,8 +2,6 @@ import {RealTimeNumber} from "../../../main/ts/model/rt/RealTimeNumber";
 import {NumberAddOperation} from "../../../main/ts/model/ot/ops/NumberAddOperation";
 import {NumberSetOperation} from "../../../main/ts/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {NumberSetValueEvent} from "../../../main/ts/model/rt/RealTimeNumber";
-import {NumberAddEvent} from "../../../main/ts/model/rt/RealTimeNumber";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
@@ -12,10 +10,12 @@ import {NumberValue} from "../../../main/ts/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
-import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {NumberNode} from "../../../main/ts/model/internal/NumberNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
+import {ModelChangedEvent} from "../../../main/ts/model/rt/events";
+import {NumberAddEvent} from "../../../main/ts/model/rt/events";
+import {NumberSetValueEvent} from "../../../main/ts/model/rt/events";
 
 var expect: any = chai.expect;
 
@@ -152,13 +152,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: NumberAddEvent = {
-      src: myNumber,
-      name: RealTimeNumber.Events.ADD,
-      sessionId: sessionId,
-      username: username,
-      value: 5
-    };
+    var expectedEvent: NumberAddEvent = new NumberAddEvent(myNumber, 5, sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -173,13 +167,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: NumberSetValueEvent = {
-      src: myNumber,
-      name: RealTimeNumber.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-      value: 20
-    };
+    var expectedEvent: NumberSetValueEvent = new NumberSetValueEvent(myNumber, 20, sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 

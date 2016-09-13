@@ -1,7 +1,6 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {BooleanNode} from "../internal/BooleanNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ValueChangedEvent} from "../observable/ObservableValue";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {BooleanNodeSetValueEvent} from "../internal/events";
@@ -42,9 +41,4 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }
-}
-
-export interface BooleanSetValueEvent extends ValueChangedEvent {
-  src: RealTimeBoolean;
-  value:  boolean;
 }

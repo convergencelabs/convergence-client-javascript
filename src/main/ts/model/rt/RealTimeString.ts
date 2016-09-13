@@ -16,7 +16,6 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {MessageType} from "../../connection/protocol/MessageType";
-import {ValueChangedEvent} from "../observable/ObservableValue";
 import {StringNodeInsertEvent} from "../internal/events";
 import {StringNodeRemoveEvent} from "../internal/events";
 import {StringNodeSetValueEvent} from "../internal/events";
@@ -167,21 +166,4 @@ export class RealTimeString extends RealTimeValue<String> {
       this._fireReferenceCreated(reference);
     }
   }
-}
-
-export interface StringInsertEvent extends ValueChangedEvent {
-  src: RealTimeString;
-  index: number;
-  value:  string;
-}
-
-export interface StringRemoveEvent extends ValueChangedEvent {
-  src: RealTimeString;
-  index: number;
-  value:  string;
-}
-
-export interface StringSetValueEvent extends ValueChangedEvent {
-  src: RealTimeString;
-  value:  string;
 }

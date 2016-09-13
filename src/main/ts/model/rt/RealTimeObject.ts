@@ -20,7 +20,6 @@ import {LocalPropertyReference} from "../reference/LocalPropertyReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ValueChangedEvent} from "../observable/ObservableValue";
 import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
@@ -171,19 +170,4 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     // fixme implement when we have object references.
     throw new Error("Objects to do have references yet.");
   }
-}
-
-export interface ObjectSetEvent extends ValueChangedEvent {
-  src: RealTimeObject;
-  key: string;
-  value: RealTimeValue<any>;
-}
-
-export interface ObjectRemoveEvent extends ValueChangedEvent {
-  src: RealTimeObject;
-  key: string;
-}
-
-export interface ObjectSetValueEvent extends ValueChangedEvent {
-  src: RealTimeObject;
 }

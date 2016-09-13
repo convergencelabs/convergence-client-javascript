@@ -1,7 +1,6 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {NumberNode} from "../internal/NumberNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ValueChangedEvent} from "../observable/ObservableValue";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {NumberNodeSetValueEvent} from "../internal/events";
@@ -62,14 +61,4 @@ export class RealTimeNumber extends RealTimeValue<number>  {
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Number values do not process references");
   }
-}
-
-export interface NumberSetValueEvent extends ValueChangedEvent {
-  src: RealTimeNumber;
-  value:  number;
-}
-
-export interface NumberAddEvent extends ValueChangedEvent {
-  src: RealTimeNumber;
-  value:  number;
 }

@@ -5,11 +5,6 @@ import {ArrayRemoveOperation} from "../../../main/ts/model/ot/ops/ArrayRemoveOpe
 import {ArrayReplaceOperation} from "../../../main/ts/model/ot/ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../../main/ts/model/ot/ops/ArrayMoveOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {ArrayInsertEvent} from "../../../main/ts/model/rt/RealTimeArray";
-import {ArrayRemoveEvent} from "../../../main/ts/model/rt/RealTimeArray";
-import {ArraySetEvent} from "../../../main/ts/model/rt/RealTimeArray";
-import {ArraySetValueEvent} from "../../../main/ts/model/rt/RealTimeArray";
-import {ArrayReorderEvent} from "../../../main/ts/model/rt/RealTimeArray";
 import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 
 import * as chai from "chai";
@@ -20,10 +15,14 @@ import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {DataValue} from "../../../main/ts/model/dataValue";
 import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {ArrayValue} from "../../../main/ts/model/dataValue";
-import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {ArrayNode} from "../../../main/ts/model/internal/ArrayNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
+import {ArraySetValueEvent} from "../../../main/ts/model/rt/events";
+import {ArrayInsertEvent} from "../../../main/ts/model/rt/events";
+import {ArrayRemoveEvent} from "../../../main/ts/model/rt/events";
+import {ArraySetEvent} from "../../../main/ts/model/rt/events";
+import {ArrayReorderEvent} from "../../../main/ts/model/rt/events";
 
 var expect: any = chai.expect;
 
@@ -248,13 +247,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-     var expectedEvent: ArraySetValueEvent = {
-       src: myArray,
-       name: RealTimeArray.Events.VALUE,
-       sessionId: sessionId,
-       username: username,
-       value: ["X", "Y", "Z"]
-     };
+     var expectedEvent: ArraySetValueEvent = new ArraySetValueEvent(myArray, ["X", "Y", "Z"], sessionId, username);
      expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -270,15 +263,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: ArrayInsertEvent = {
-      src: myArray,
-      name: RealTimeArray.Events.INSERT,
-      sessionId: sessionId,
-      username: username,
-      index: 2,
-      value: myArray.get(2)
-    };
-
+    var expectedEvent: ArrayInsertEvent = new ArrayInsertEvent(myArray, 2, myArray.get(2), sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -293,14 +278,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: ArrayRemoveEvent = {
-      src: myArray,
-      name: RealTimeArray.Events.REMOVE,
-      sessionId: sessionId,
-      username: username,
-      index: 1
-    };
-
+    var expectedEvent: ArrayRemoveEvent = new ArrayRemoveEvent(myArray, 1, sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -317,14 +295,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-     var expectedEvent: ArraySetEvent = {
-       src: myArray,
-       name: RealTimeArray.Events.SET,
-       sessionId: sessionId,
-       username: username,
-       index: 1,
-       value: "X"
-     };
+     var expectedEvent: ArraySetEvent = new ArraySetEvent(myArray, 1, "X", sessionId, username);
      expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -339,14 +310,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: ArrayReorderEvent = {
-      src: myArray,
-      name: RealTimeArray.Events.REORDER,
-      sessionId: sessionId,
-      username: username,
-      fromIndex: 1,
-      toIndex: 2
-    };
+    var expectedEvent: ArrayReorderEvent = new ArrayReorderEvent(myArray, 1, 2, sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 });

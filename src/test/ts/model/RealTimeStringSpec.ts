@@ -3,9 +3,6 @@ import {StringSetOperation} from "../../../main/ts/model/ot/ops/StringSetOperati
 import {StringInsertOperation} from "../../../main/ts/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../../main/ts/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {StringRemoveEvent} from "../../../main/ts/model/rt/RealTimeString";
-import {StringInsertEvent} from "../../../main/ts/model/rt/RealTimeString";
-import {StringSetValueEvent} from "../../../main/ts/model/rt/RealTimeString";
 import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 
 import * as chai from "chai";
@@ -14,10 +11,13 @@ import {StringValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
-import {ModelChangedEvent} from "../../../main/ts/model/observable/ObservableValue";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {StringNode} from "../../../main/ts/model/internal/StringNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
+import {ModelChangedEvent} from "../../../main/ts/model/rt/events";
+import {StringSetValueEvent} from "../../../main/ts/model/rt/events";
+import {StringInsertEvent} from "../../../main/ts/model/rt/events";
+import {StringRemoveEvent} from "../../../main/ts/model/rt/events";
 
 var expect: any = chai.expect;
 
@@ -166,13 +166,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: StringSetValueEvent = {
-      src: myString,
-      name: RealTimeString.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-      value: "AnotherString"
-    };
+    var expectedEvent: StringSetValueEvent = new StringSetValueEvent(myString, "AnotherString", sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -187,14 +181,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: StringInsertEvent = {
-      src: myString,
-      name: RealTimeString.Events.INSERT,
-      sessionId: sessionId,
-      username: username,
-      index: 2,
-      value: "Edited"
-    };
+    var expectedEvent: StringInsertEvent = new StringInsertEvent(myString, 2, "Edited", sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
@@ -209,15 +196,7 @@ describe('RealTimeString', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: StringRemoveEvent = {
-      src: myString,
-      name: RealTimeString.Events.REMOVE,
-      sessionId: sessionId,
-      username: username,
-      index: 0,
-      value: "My"
-    };
-
+    var expectedEvent: StringRemoveEvent = new StringRemoveEvent(myString, 0, "My", sessionId, username);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
