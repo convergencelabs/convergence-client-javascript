@@ -22,6 +22,9 @@ import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ValueChangedEvent} from "../observable/ObservableValue";
 import {ObjectNodeSetEvent} from "../internal/events";
+import {ModelNodeEvent} from "../internal/events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {EventConverter} from "./EventConverter";
 
 export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> implements RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -40,75 +43,54 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
    * Constructs a new RealTimeObject.
    */
   constructor(protected _delegate: ObjectNode,
-              private _wrapperFactory: RealTimeWrapperFactory,
-              protected _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+              protected _callbacks: ModelEventCallbacks,
+              protected _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
 
     this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
       this._referenceManager.removeLocalReference(reference.key());
     };
 
-    this._delegate.on(ObjectNode.Events.VALUE, (event: ObjectNodeSetValueEvent) => {
-      if (event.local) {
-        var operation: ObjectSetOperation = new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<ObjectSetValueEvent> {
-          src: this,
-          name: RealTimeObject.Events.VALUE,
-          sessionId: event.sessionId,
-          username: event.username
-        });
-      }
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        ref._dispose();
-      });
-      this._referenceManager.referenceMap().removeAll();
-      this._referenceManager.removeAllLocalReferences();
-    });
+    this._delegate.events().subscribe((event: ModelNodeEvent) => {
 
-    this._delegate.on(ObjectNode.Events.REMOVE, (event: ObjectNodeRemoveEvent) => {
-      if (event.local) {
-        var operation: ObjectRemovePropertyOperation = new ObjectRemovePropertyOperation(this.id(), false, event.key);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<ObjectRemoveEvent> {
-          src: this,
-          name: RealTimeObject.Events.REMOVE,
-          sessionId: event.sessionId,
-          username: event.username,
-          key: event.key
-        });
+      if (!event.local) {
+        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+        this.emitEvent(convertedEvent);
       }
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        if (ref instanceof PropertyReference) {
-          ref._handlePropertyRemoved(event.key);
+
+      if (event instanceof ObjectNodeSetValueEvent) {
+        if (event.local) {
+          this._sendOperation(new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children));
         }
-      });
-    });
 
-    this._delegate.on(ObjectNode.Events.SET, (event: ObjectNodeSetEvent) => {
-      if (event.local) {
-        // Operation Handled Bellow
-        // Fixme: Refactor event so we can tell if value replaced or added
-      } else {
-        this.emitEvent(<ObjectSetEvent> {
-          src: this,
-          name: RealTimeObject.Events.REMOVE,
-          sessionId: event.sessionId,
-          username: event.username,
-          key: event.key,
-          value: this._wrapperFactory.wrap(event.value)
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          ref._dispose();
+        });
+        this._referenceManager.referenceMap().removeAll();
+        this._referenceManager.removeAllLocalReferences();
+
+      } else if (event instanceof ObjectNodeRemoveEvent) {
+        if (event.local) {
+          this._sendOperation(new ObjectRemovePropertyOperation(this.id(), false, event.key));
+        }
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          if (ref instanceof PropertyReference) {
+            ref._handlePropertyRemoved(event.key);
+          }
+        });
+      } else if (event instanceof ObjectNodeSetEvent) {
+        if (event.local) {
+          // Operation Handled Bellow
+          // Fixme: Refactor event so we can tell if value replaced or added
+        }
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          if (ref instanceof PropertyReference) {
+            ref._handlePropertyRemoved(event.key);
+          }
         });
       }
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        if (ref instanceof PropertyReference) {
-          ref._handlePropertyRemoved(event.key);
-        }
-      });
     });
-
   }
 
   get(key: string): RealTimeValue<any> {

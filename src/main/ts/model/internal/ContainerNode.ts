@@ -18,13 +18,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     var newPath: Path = event.relativePath.slice(0);
     newPath.unshift(this._idToPathElement.get(event.src.id()));
 
-    var newEvent: NodeChangedEvent = <NodeChangedEvent> {
-      name: ContainerNode.Events.NODE_CHANGED,
-      src: this,
-      local: event.local,
-      relativePath: newPath,
-      childEvent: event.childEvent
-    };
+    var newEvent: NodeChangedEvent = new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
 
     this.emitEvent(newEvent);
   };

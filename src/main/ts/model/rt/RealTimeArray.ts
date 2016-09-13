@@ -16,6 +16,8 @@ import {ArrayNodeRemoveEvent} from "../internal/events";
 import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
+import {EventConverter} from "./EventConverter";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 
 export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeContainerValue<any[]> {
 
@@ -33,98 +35,27 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
    * Constructs a new RealTimeArray.
    */
   constructor(protected _delegate: ArrayNode,
-              private _wrapperFactory: RealTimeWrapperFactory,
-              protected _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+              protected _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
-      switch (event.name) {
-        case(ArrayNode.Events.INSERT):
-          let insertEvent: ArrayNodeInsertEvent = <ArrayNodeInsertEvent> event;
-          if (insertEvent.local) {
-            let operation: ArrayInsertOperation = new ArrayInsertOperation(
-              this.id(),
-              false,
-              insertEvent.index,
-              insertEvent.src.get(insertEvent.index).dataValue());
-            this._sendOperation(operation);
-          } else {
-            this.emitEvent(<ArrayInsertEvent> {
-              src: this,
-              name: RealTimeArray.Events.INSERT,
-              sessionId: insertEvent.sessionId,
-              username: insertEvent.username,
-              index: insertEvent.index,
-              value: insertEvent.value
-            });
-          }
-          break;
-        case(ArrayNode.Events.REMOVE):
-          let removeEvent: ArrayNodeRemoveEvent = <ArrayNodeRemoveEvent> event;
-          if (removeEvent.local) {
-            let operation: ArrayRemoveOperation = new ArrayRemoveOperation(this.id(), false, removeEvent.index);
-            this._sendOperation(operation);
-          } else {
-            this.emitEvent(<ArrayRemoveEvent> {
-              src: this,
-              name: RealTimeArray.Events.REMOVE,
-              sessionId: removeEvent.sessionId,
-              username: removeEvent.username,
-              index: removeEvent.index
-            });
-          }
-          break;
-        case(ArrayNode.Events.REORDER):
-          let reorderEvent: ArrayNodeReorderEvent = <ArrayNodeReorderEvent> event;
-          if (reorderEvent.local) {
-            let operation: ArrayMoveOperation = new ArrayMoveOperation(this.id(), false, reorderEvent.fromIndex, reorderEvent.toIndex);
-            this._sendOperation(operation);
-          } else {
-            this.emitEvent(<ArrayReorderEvent> {
-              src: this,
-              name: RealTimeArray.Events.REORDER,
-              sessionId: reorderEvent.sessionId,
-              username: reorderEvent.username,
-              fromIndex: reorderEvent.fromIndex,
-              toIndex: reorderEvent.toIndex
-            });
-          }
-          break;
-        case(ArrayNode.Events.SET):
-          let setEvent: ArrayNodeSetEvent = <ArrayNodeSetEvent> event;
-          if (setEvent.local) {
-            let index: number = setEvent.index;
-            let operation: ArrayReplaceOperation = new ArrayReplaceOperation(this.id(), false, index,
-              setEvent.src.get(index).dataValue());
-            this._sendOperation(operation);
-          } else {
-            this.emitEvent(<ArraySetEvent> {
-              src: this,
-              name: RealTimeArray.Events.SET,
-              sessionId: setEvent.sessionId,
-              username: setEvent.username,
-              index: setEvent.index,
-              value: setEvent.value
-            });
-          }
-          break;
-        case(ArrayNode.Events.VALUE):
-          let setValueEvent: ArrayNodeSetValueEvent = <ArrayNodeSetValueEvent> event;
-          if (setValueEvent.local) {
-            let operation: ArraySetOperation = new ArraySetOperation(this.id(), false, setValueEvent.src.dataValue().children);
-            this._sendOperation(operation);
-          } else {
-            this.emitEvent(<ArraySetValueEvent> {
-              src: this,
-              name: RealTimeArray.Events.VALUE,
-              sessionId: setValueEvent.sessionId,
-              username: setValueEvent.username,
-              value: setValueEvent.value
-            });
-          }
-          break;
-        default:
-        // Ignore unknown events
+      if (event.local) {
+        if (event instanceof ArrayNodeInsertEvent) {
+          this._sendOperation(new ArrayInsertOperation(this.id(), false, event.index, event.src.get(event.index).dataValue()));
+        } else if (event instanceof ArrayNodeRemoveEvent) {
+          this._sendOperation(new ArrayRemoveOperation(this.id(), false, event.index));
+        } else if (event instanceof ArrayNodeReorderEvent) {
+          this._sendOperation(new ArrayMoveOperation(this.id(), false, event.fromIndex, event.toIndex));
+        } else if (event instanceof ArrayNodeSetEvent) {
+          let index: number = event.index;
+          this._sendOperation(new ArrayReplaceOperation(this.id(), false, index, event.src.get(index).dataValue()));
+        } else if (event instanceof ArrayNodeSetValueEvent) {
+          this._sendOperation(new ArraySetOperation(this.id(), false, event.src.dataValue().children));
+        }
+      } else {
+        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+        this.emitEvent(convertedEvent);
       }
     });
   }
@@ -191,7 +122,7 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
 
 export interface ArrayInsertEvent extends ValueChangedEvent {
   index: number;
-  value: any;
+  value: RealTimeValue<any>;
 }
 
 export interface ArrayRemoveEvent extends ValueChangedEvent {

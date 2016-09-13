@@ -184,16 +184,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._children.splice(index, 0, child);
     this._updateIdToPathElementMap(index);
 
-    var event: ArrayNodeInsertEvent = {
-      src: this,
-      local: local,
-      name: ArrayNode.Events.INSERT,
-      sessionId: sessionId,
-      username: username,
-      index: index,
-      value: child
-    };
-
+    var event: ArrayNodeInsertEvent = new ArrayNodeInsertEvent(this, local, index, child, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -211,15 +202,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._updateIdToPathElementMap(index);
     oldChild._detach();
 
-    var event: ArrayNodeSetEvent = {
-      src: this,
-      local: local,
-      name: ArrayNode.Events.SET,
-      sessionId: sessionId,
-      username: username,
-      index: index,
-      value: value
-    };
+    var event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild.data(), sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -232,14 +215,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._updateIdToPathElementMap(index);
     child._detach();
 
-    var event: ArrayNodeRemoveEvent = {
-      src: this,
-      local: local,
-      name: ArrayNode.Events.REMOVE,
-      sessionId: sessionId,
-      username: username,
-      index: index
-    };
+    var event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -257,15 +233,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       child.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
 
-    var event: ArrayNodeSetValueEvent = {
-      src: this,
-      local: local,
-      name: ArrayNode.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-      value: data
-    };
-
+    var event: ArrayNodeSetValueEvent = new ArrayNodeSetValueEvent(this, local, this.data(), sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -278,16 +246,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
     this._updateIdToPathElementMap(Math.min(fromIndex, toIndex));
 
-    var event: ArrayNodeReorderEvent = {
-      src: this,
-      local: local,
-      name: ArrayNode.Events.REORDER,
-      sessionId: sessionId,
-      username: username,
-      fromIndex: fromIndex,
-      toIndex: toIndex
-    };
-
+    var event: ArrayNodeReorderEvent = new ArrayNodeReorderEvent(this, local, fromIndex, toIndex, sessionId, username);
     this._emitValueEvent(event);
   }
 

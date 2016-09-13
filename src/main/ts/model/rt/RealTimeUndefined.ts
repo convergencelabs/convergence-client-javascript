@@ -2,6 +2,7 @@ import {RealTimeValue} from "./RealTimeValue";
 import {UndefinedNode} from "../internal/UndefinedNode";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 
 export class RealTimeUndefined extends RealTimeValue<void> {
 
@@ -13,8 +14,9 @@ export class RealTimeUndefined extends RealTimeValue<void> {
    * Constructs a new RealTimeUndefined.
    */
   constructor(_delegate: UndefinedNode,
-              _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+              _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
   }
 
   protected _setData(data: any): void {

@@ -5,6 +5,10 @@ import {ValueChangedEvent} from "../observable/ObservableValue";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {BooleanNodeSetValueEvent} from "../internal/events";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {ModelNodeEvent} from "../internal/events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {EventConverter} from "./EventConverter";
 
 export class RealTimeBoolean extends RealTimeValue<boolean> {
 
@@ -17,21 +21,20 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(_delegate: BooleanNode, _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+  constructor(_delegate: BooleanNode,
+              _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
 
-    this._delegate.on(BooleanNode.Events.VALUE, (event: BooleanNodeSetValueEvent) => {
+
+    this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
-        var operation: BooleanSetOperation = new BooleanSetOperation(this.id(), false, event.value);
-        this._sendOperation(operation);
+        if (event instanceof BooleanNodeSetValueEvent) {
+          this._sendOperation(new BooleanSetOperation(this.id(), false, event.value));
+        }
       } else {
-        this.emitEvent(<BooleanSetValueEvent> {
-          src: this,
-          name: RealTimeBoolean.Events.VALUE,
-          sessionId: event.sessionId,
-          username: event.username,
-          value: event.value
-        });
+        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+        this.emitEvent(convertedEvent);
       }
     });
   }

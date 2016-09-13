@@ -54,14 +54,7 @@ export class BooleanNode extends ModelNode<boolean> {
     this._validateSet(value);
     this._data = value;
 
-    var event: BooleanNodeSetValueEvent = {
-      src: this,
-      local: local,
-      name: BooleanNode.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-      value: value
-    };
+    var event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, username);
 
     this._emitValueEvent(event);
   }

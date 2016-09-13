@@ -75,15 +75,7 @@ export class StringNode extends ModelNode<String> {
 
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
 
-    var event: StringNodeInsertEvent = {
-      src: this,
-      local: local,
-      name: StringNode.Events.INSERT,
-      sessionId: sessionId,
-      username: username,
-      index: index,
-      value: value
-    };
+    var event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -93,15 +85,7 @@ export class StringNode extends ModelNode<String> {
     let removedVal: string = this._data.slice(index, index + length);
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
 
-    var event: StringNodeRemoveEvent = {
-      src: this,
-      local: local,
-      name: StringNode.Events.REMOVE,
-      sessionId: sessionId,
-      username: username,
-      index: index,
-      value: removedVal
-    };
+    var event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -110,14 +94,7 @@ export class StringNode extends ModelNode<String> {
 
     this._data = value;
 
-    var event: StringNodeSetValueEvent = {
-      src: this,
-      local: local,
-      name: StringNode.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-      value: value
-    };
+    var event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, username);
     this._emitValueEvent(event);
   }
 

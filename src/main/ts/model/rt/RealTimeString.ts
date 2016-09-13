@@ -20,6 +20,10 @@ import {ValueChangedEvent} from "../observable/ObservableValue";
 import {StringNodeInsertEvent} from "../internal/events";
 import {StringNodeRemoveEvent} from "../internal/events";
 import {StringNodeSetValueEvent} from "../internal/events";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {ModelNodeEvent} from "../internal/events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {EventConverter} from "./EventConverter";
 
 export class RealTimeString extends RealTimeValue<String> {
 
@@ -39,76 +43,48 @@ export class RealTimeString extends RealTimeValue<String> {
    * Constructs a new RealTimeString.
    */
   constructor(protected _delegate: StringNode,
-              protected _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+              protected _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
 
     this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX, ReferenceType.RANGE]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
       this._referenceManager.removeLocalReference(reference.key());
     };
 
-    this._delegate.on(StringNode.Events.INSERT, (event: StringNodeInsertEvent) => {
-      if (event.local) {
-        var operation: StringInsertOperation = new StringInsertOperation(this.id(), false, event.index, event.value);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<StringInsertEvent> {
-          src: this,
-          name: RealTimeString.Events.INSERT,
-          sessionId: event.sessionId,
-          username: event.username,
-          index: event.index,
-          value: event.value
-        });
+    this._delegate.events().subscribe((event: ModelNodeEvent) => {
+      if (!event.local) {
+        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+        this.emitEvent(convertedEvent);
       }
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        if (ref instanceof IndexReference) {
-          ref._handleInsert(event.index, event.value.length);
+      if (event instanceof StringNodeInsertEvent) {
+        if (event.local) {
+          this._sendOperation(new StringInsertOperation(this.id(), false, event.index, event.value));
         }
-      });
-    });
-
-    this._delegate.on(StringNode.Events.REMOVE, (event: StringNodeRemoveEvent) => {
-      if (event.local) {
-        var operation: StringRemoveOperation = new StringRemoveOperation(this.id(), false, event.index, event.value);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<StringRemoveEvent> {
-          src: this,
-          name: RealTimeString.Events.REMOVE,
-          sessionId: event.sessionId,
-          username: event.username,
-          index: event.index,
-          value: event.value
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          if (ref instanceof IndexReference) {
+            ref._handleInsert(event.index, event.value.length);
+          }
         });
-      }
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        if (ref instanceof IndexReference) {
-          ref._handleRemove(event.index, event.value.length);
+      } else if (event instanceof StringNodeRemoveEvent) {
+        if (event.local) {
+          this._sendOperation(new StringRemoveOperation(this.id(), false, event.index, event.value));
         }
-      });
-    });
-
-    this._delegate.on(StringNode.Events.VALUE, (event: StringNodeSetValueEvent) => {
-      if (event.local) {
-        var operation: StringSetOperation = new StringSetOperation(this.id(), false, event.value);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<StringSetValueEvent> {
-          src: this,
-          name: RealTimeString.Events.VALUE,
-          sessionId: event.sessionId,
-          username: event.username,
-          value: event.value
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          if (ref instanceof IndexReference) {
+            ref._handleRemove(event.index, event.value.length);
+          }
         });
+      } else if (event instanceof StringNodeSetValueEvent) {
+        if (event.local) {
+          this._sendOperation(new StringSetOperation(this.id(), false, event.value));
+        }
+        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
+          ref._dispose();
+        });
+        this._referenceManager.referenceMap().removeAll();
       }
-
-      this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-        ref._dispose();
-      });
-      this._referenceManager.referenceMap().removeAll();
     });
-
   }
 
   insert(index: number, value: string): void {

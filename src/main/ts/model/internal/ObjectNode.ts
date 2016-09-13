@@ -181,16 +181,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
     this._children.set(key, child);
     this._idToPathElement.set(child.id(), key);
 
-    var event: ObjectNodeSetEvent = {
-      src: this,
-      local: local,
-      name: ObjectNode.Events.SET,
-      sessionId: this.sessionId,
-      username: this.username,
-      key: key,
-      value: child
-    };
-
+    var event: ObjectNodeSetEvent = new ObjectNodeSetEvent(this, local, key, child, this.sessionId, this.username);
     this._emitValueEvent(event);
   }
 
@@ -203,14 +194,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
       this._children.get(key)._detach();
       this._children.delete(key);
 
-      var event: ObjectNodeRemoveEvent = {
-        src: this,
-        local: local,
-        name: ObjectNode.Events.REMOVE,
-        sessionId: this.sessionId,
-        username: this.username,
-        key: key
-      };
+      var event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
     }
 
     this._emitValueEvent(event);
@@ -235,13 +219,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
       child.on(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
 
-    var event: ObjectNodeSetValueEvent = {
-      src: this,
-      local: local,
-      name: ObjectNode.Events.VALUE,
-      sessionId: sessionId,
-      username: username,
-    };
+    var event: ObjectNodeSetValueEvent = new ObjectNodeSetValueEvent(this, local, this.sessionId, this.username);
 
     this._emitValueEvent(event);
 

@@ -97,7 +97,6 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
     this._model = new Model(this.session().sessionId(), this.session().username(), valueIdPrefix, data);
 
-
     // we keep a map of all references by session so we can easily dispose of them
     // when a session disconnects.  It might be possible to do this by walking the
     // model as well.

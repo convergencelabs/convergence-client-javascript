@@ -72,14 +72,7 @@ export class NumberNode extends ModelNode<number> {
     if (value !== 0) {
       this._data += value;
 
-      var event: NumberNodeAddEvent = {
-        src: this,
-        local: local,
-        name: NumberNode.Events.ADD,
-        sessionId: this.sessionId,
-        username: this.username,
-        value: value
-      };
+      var event: NumberNodeAddEvent = new NumberNodeAddEvent(this, local, value, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
   }
@@ -90,14 +83,7 @@ export class NumberNode extends ModelNode<number> {
     }
     this._data = value;
 
-    var event: NumberNodeSetValueEvent = {
-      src: this,
-      local: local,
-      name: NumberNode.Events.VALUE,
-      sessionId: this.sessionId,
-      username: this.username,
-      value: value
-    };
+    var event: NumberNodeSetValueEvent = new NumberNodeSetValueEvent(this, local, value, this.sessionId, this.username);
     this._emitValueEvent(event);
   }
 

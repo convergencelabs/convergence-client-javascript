@@ -8,7 +8,6 @@ import {NodeChangedEvent} from "./events";
 import {NodeDetachedEvent} from "./events";
 import {DataValue} from "../dataValue";
 
-
 export abstract class ModelNode<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
@@ -85,15 +84,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter {
 
   protected _emitValueEvent(event: NodeValueChangedEvent): void {
     this.emitEvent(event);
-
-    var nodeChangedEvent: NodeChangedEvent = {
-      name: ModelNode.Events.NODE_CHANGED,
-      src: this,
-      local: event.local,
-      relativePath: [],
-      childEvent: event
-    };
-    this.emitEvent(nodeChangedEvent);
+    this.emitEvent(new NodeChangedEvent(this, event.local, [], event, this.sessionId, this.username));
   }
 
   protected _exceptionIfDetached(): void {

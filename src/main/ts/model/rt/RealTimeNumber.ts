@@ -7,6 +7,10 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {NumberNodeSetValueEvent} from "../internal/events";
 import {NumberNodeAddEvent} from "../internal/events";
 import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {ModelNodeEvent} from "../internal/events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {EventConverter} from "./EventConverter";
 
 export class RealTimeNumber extends RealTimeValue<number>  {
 
@@ -21,36 +25,20 @@ export class RealTimeNumber extends RealTimeValue<number>  {
    * Constructs a new RealTimeNumber.
    */
   constructor(protected _delegate: NumberNode,
-              protected _callbacks: ModelEventCallbacks) {
-    super(_delegate, _callbacks);
+              protected _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
 
-    this._delegate.on(NumberNode.Events.VALUE, (event: NumberNodeSetValueEvent) => {
+    this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
-        var operation: NumberSetOperation = new NumberSetOperation(this.id(), false, event.value);
-        this._sendOperation(operation);
+        if (event instanceof NumberNodeSetValueEvent) {
+          this._sendOperation(new NumberSetOperation(this.id(), false, event.value));
+        } else if (event instanceof NumberNodeAddEvent) {
+          this._sendOperation(new NumberAddOperation(this.id(), false, event.value));
+        }
       } else {
-        this.emitEvent(<NumberSetValueEvent> {
-          src: this,
-          name: RealTimeNumber.Events.VALUE,
-          sessionId: event.sessionId,
-          username: event.username,
-          value: event.value
-        });
-      }
-    });
-
-    this._delegate.on(NumberNode.Events.ADD, (event: NumberNodeAddEvent) => {
-      if (event.local) {
-        var operation: NumberAddOperation = new NumberAddOperation(this.id(), false, event.value);
-        this._sendOperation(operation);
-      } else {
-        this.emitEvent(<NumberAddEvent> {
-          src: this,
-          name: RealTimeNumber.Events.ADD,
-          sessionId: event.sessionId,
-          username: event.username,
-          value: event.value
-        });
+        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+        this.emitEvent(convertedEvent);
       }
     });
   }

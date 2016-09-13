@@ -8,19 +8,22 @@ import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   static Events: any = {
-    DETACHED: ModelNode.Events.DETACHED,
+    DETACHED: "detached",
     REFERENCE: "reference",
-    NODE_CHANGED: ModelNode.Events.NODE_CHANGED
+    MODEL_CHANGED: "model_changed"
   };
 
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(protected _delegate: ModelNode<T>, protected _callbacks: ModelEventCallbacks) {
+  constructor(protected _delegate: ModelNode<T>,
+              protected _callbacks: ModelEventCallbacks,
+              protected _wrapperFactory: RealTimeWrapperFactory) {
     super();
   }
 
@@ -33,7 +36,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
   }
 
   path(): Path {
-    return  this._delegate.path();
+    return this._delegate.path();
   }
 
   isDetached(): boolean {
@@ -61,6 +64,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
     this._exceptionIfDetached();
     this._callbacks.sendOperationCallback(operation);
   }
+
 
   abstract _handleRemoteReferenceEvent(referenceEvent: RemoteReferenceEvent): void;
 
