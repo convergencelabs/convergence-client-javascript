@@ -72,11 +72,11 @@ export class IdentityService {
   }
 
   search(fields: string | string[],
-              value: string,
-              offset?: number,
-              limit?: number,
-              orderBy?: string,
-              ascending?: boolean): Promise<DomainUser[]> {
+         value: string,
+         offset?: number,
+         limit?: number,
+         orderBy?: string,
+         ascending?: boolean): Promise<DomainUser[]> {
     if (fields === undefined || fields === null || (Array.isArray(fields) && (<string[]>fields).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (value === undefined || value === null) {
