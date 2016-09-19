@@ -5,8 +5,8 @@ import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
 export class HistoricalArray extends HistoricalValue<any[]> implements HistoricalContainerValue<any[]> {
 
-  constructor(protected _delegate: ArrayNode, private _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate);
+  constructor(protected _delegate: ArrayNode, _wrapperFactory: HistoricalWrapperFactory) {
+    super(_delegate, _wrapperFactory);
   }
 
   get(index: number): HistoricalValue<any> {

@@ -1,38 +1,27 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {Path} from "../ot/Path";
-import {RealTimeValue} from "./RealTimeValue";
-import {RealTimeArray} from "./RealTimeArray";
-import {RealTimeBoolean} from "./RealTimeBoolean";
-import {RealTimeNumber} from "./RealTimeNumber";
-import {RealTimeObject} from "./RealTimeObject";
-import {RealTimeString} from "./RealTimeString";
+
 import {ModelReference} from "../reference/ModelReference";
-import {RealTimeModel} from "./RealTimeModel";
-
-export interface ModelEvent extends ConvergenceEvent {
-  src: RealTimeModel;
-}
-
-export interface ModelClosedEvent extends ModelEvent {
-  local: boolean;
-  reason?: string;
-}
-
-export interface VersionChangedEvent extends ModelEvent {
-  version: number;
-}
+import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalArray} from "./HistoricalArray";
+import {HistoricalBoolean} from "./HistoricalBoolean";
+import {HistoricalNumber} from "./HistoricalNumber";
+import {HistoricalObject} from "./HistoricalObject";
+import {HistoricalString} from "./HistoricalString";
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
   reference: ModelReference<any>;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: RealTimeValue<any>;
+  src: HistoricalValue<any>;
 }
 
 export class ValueDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
-  constructor(public src: RealTimeValue<any>) {}
+
+  constructor(public src: HistoricalValue<any>) {
+  }
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
@@ -43,136 +32,168 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
 export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
   public name: string = "model_changed";
-  constructor(public src: RealTimeValue<any>,
+
+  constructor(public src: HistoricalValue<any>,
               public relativePath: Path,
               public childEvent: ValueChangedEvent,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ArrayInsertEvent implements ValueChangedEvent {
   public name: string = "insert";
-  constructor(public src: RealTimeArray,
+
+  constructor(public src: HistoricalArray,
               public index: number,
-              public value: RealTimeValue<any>,
+              public value: HistoricalValue<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeArray,
+
+  constructor(public src: HistoricalArray,
               public index: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ArraySetEvent implements ValueChangedEvent {
   public name: string = "set";
-  constructor(public src: RealTimeArray,
+
+  constructor(public src: HistoricalArray,
               public index: number,
               public value: any,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ArrayReorderEvent implements ValueChangedEvent {
   public name: string = "reorder";
-  constructor(public src: RealTimeArray,
+
+  constructor(public src: HistoricalArray,
               public fromIndex: number,
               public toIndex: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ArraySetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeArray,
+
+  constructor(public src: HistoricalArray,
               public value: Array<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeBoolean,
+
+  constructor(public src: HistoricalBoolean,
               public value: boolean,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class NumberSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeNumber,
+
+  constructor(public src: HistoricalNumber,
               public value: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class NumberAddEvent implements ValueChangedEvent {
   public name: string = "add";
-  constructor(public src: RealTimeNumber,
+
+  constructor(public src: HistoricalNumber,
               public value: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 
 export class ObjectSetEvent implements ValueChangedEvent {
   public name: string = "set";
-  constructor(public src: RealTimeObject,
+
+  constructor(public src: HistoricalObject,
               public key: string,
-              public value: RealTimeValue<any>,
+              public value: HistoricalValue<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeObject,
+
+  constructor(public src: HistoricalObject,
               public key: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeObject,
+
+  constructor(public src: HistoricalObject,
               public value: { [key: string]: any; },
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class NodeSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeObject,
+
+  constructor(public src: HistoricalObject,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class StringInsertEvent implements ValueChangedEvent {
   public name: string = "insert";
-  constructor(public src: RealTimeString,
+
+  constructor(public src: HistoricalString,
               public index: number,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class StringRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeString,
+
+  constructor(public src: HistoricalString,
               public index: number,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }
 
 export class StringSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeString,
+
+  constructor(public src: HistoricalString,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string) {
+  }
 }

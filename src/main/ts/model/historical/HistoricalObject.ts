@@ -2,10 +2,10 @@ import {HistoricalValue} from "./HistoricalValue";
 import {ObjectNode} from "../internal/ObjectNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export class HistoricalObject extends HistoricalValue<any> {
+export class HistoricalObject extends HistoricalValue<{ [key: string]: any; }> {
 
-  constructor(protected _delegate: ObjectNode, private _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate);
+  constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
+    super(_delegate, _wrapperFactory);
   }
 
   get(key: string): HistoricalValue<any> {

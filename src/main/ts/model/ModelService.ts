@@ -22,6 +22,9 @@ import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
 import {ModelQuery} from "./query/ModelQuery";
+import {HistoricalModel} from "./historical/HistoricalModel";
+import {HistoricalDataRequest} from "../connection/protocol/model/historical/historicalDataRequest";
+import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";
 
 export class ModelService extends ConvergenceEventEmitter {
 
@@ -159,8 +162,18 @@ export class ModelService extends ConvergenceEventEmitter {
     });
   }
 
-  history(collectionId: string, modelId: string): Promise<any> {
-    return null;
+  history(collectionId: string, modelId: string): Promise<HistoricalModel> {
+    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+
+    var request: HistoricalDataRequest = {
+      type: MessageType.HISTORICAL_DATA_REQUEST,
+      modelFqn: fqn
+    };
+
+    return this._connection.request(request).then((response: HistoricalDataResponse) => {
+      return new HistoricalModel(response.data, response.version, response.modifiedTime, response.createdTime,
+        request.modelFqn, this._connection, this.session());
+    });
   }
 
   _close(resourceId: string): Promise<void> {

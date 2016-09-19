@@ -6,7 +6,6 @@ import {BooleanNode} from "./BooleanNode";
 import {NumberNode} from "./NumberNode";
 import {ObjectNode} from "./ObjectNode";
 import {StringNode} from "./StringNode";
-import {DataValue} from "../dataValue";
 
 export interface ModelNodeEvent extends ConvergenceEvent {
   src: ModelNode<any>;
@@ -134,7 +133,7 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
   constructor(public src: ObjectNode,
               public local: boolean,
-              public value: {[key: string]: any;},
+              public value: { [key: string]: any; },
               public sessionId: string,
               public username: string) {}
 }

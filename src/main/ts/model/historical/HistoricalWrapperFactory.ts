@@ -30,15 +30,15 @@ export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalValue
       case ModelValueType.Object:
         return new HistoricalObject(<ObjectNode> node, this);
       case ModelValueType.Boolean:
-          return new HistoricalBoolean(<BooleanNode> node);
+          return new HistoricalBoolean(<BooleanNode> node, this);
       case ModelValueType.Null:
-        return new HistoricalNull(<NullNode> node);
+        return new HistoricalNull(<NullNode> node, this);
       case ModelValueType.Number:
-        return new HistoricalNumber(<NumberNode> node);
+        return new HistoricalNumber(<NumberNode> node, this);
       case ModelValueType.String:
-        return new HistoricalString(<StringNode> node);
+        return new HistoricalString(<StringNode> node, this);
       case ModelValueType.Undefined:
-        return new HistoricalUndefined(<UndefinedNode> node);
+        return new HistoricalUndefined(<UndefinedNode> node, this);
       default:
         return null;
       }

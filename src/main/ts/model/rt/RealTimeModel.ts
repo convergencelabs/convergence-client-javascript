@@ -12,7 +12,6 @@ import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
 import {ReferenceType} from "../reference/ModelReference";
-import {ModelEvent} from "../observable/ObservableModel";
 import {ModelReferenceCallbacks} from "../reference/LocalModelReference";
 import {LocalModelReference} from "../reference/LocalModelReference";
 import {PublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -29,7 +28,6 @@ import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
-import {ModelClosedEvent} from "../observable/ObservableModel";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ElementReference} from "../reference/ElementReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
@@ -46,9 +44,11 @@ import {OperationType} from "../ot/ops/OperationType";
 import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
-import {VersionChangedEvent} from "../observable/ObservableModel";
 import {MessageEvent} from "../../connection/ConvergenceConnection";
 import {RemoteReferenceCreatedEvent} from "./events";
+import {ModelEvent} from "./events";
+import {ModelClosedEvent} from "./events";
+import {VersionChangedEvent} from "./events";
 
 export class RealTimeModel extends ConvergenceEventEmitter {
 
