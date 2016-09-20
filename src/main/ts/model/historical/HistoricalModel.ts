@@ -129,7 +129,7 @@ export class HistoricalModel {
     var request: HistoricalOperationsRequest = {
       type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
       modelFqn: this._modelFqn,
-      version: this._version,
+      version: this._version + 1,
       limit: delta
     };
 
@@ -150,9 +150,8 @@ export class HistoricalModel {
               new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
           }
         }
-        this._version = op.version;
       });
-
+      this._version = this._version + response.operations.length;
       return; // convert to Promise<void>
     });
   }
@@ -184,9 +183,8 @@ export class HistoricalModel {
                 <AppliedDiscreteOperation> op.operation.inverse()));
           }
         }
-        this._version = op.version;
       });
-
+      this._version = this._version - response.operations.length;
       return; // convert to Promise<void>
     });
   }
