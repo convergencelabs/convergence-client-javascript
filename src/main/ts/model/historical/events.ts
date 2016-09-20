@@ -1,17 +1,12 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {Path} from "../ot/Path";
 
-import {ModelReference} from "../reference/ModelReference";
 import {HistoricalValue} from "./HistoricalValue";
 import {HistoricalArray} from "./HistoricalArray";
 import {HistoricalBoolean} from "./HistoricalBoolean";
 import {HistoricalNumber} from "./HistoricalNumber";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalString} from "./HistoricalString";
-
-export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  reference: ModelReference<any>;
-}
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
   src: HistoricalValue<any>;

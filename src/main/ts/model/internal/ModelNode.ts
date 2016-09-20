@@ -63,10 +63,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter {
     this._model._unregisterValue(this);
     this._model = null;
 
-    var event: NodeDetachedEvent = {
-      src: this,
-      name: ModelNode.Events.DETACHED
-    };
+    var event: NodeDetachedEvent = new NodeDetachedEvent(this);
 
     this.emitEvent(event);
   }
