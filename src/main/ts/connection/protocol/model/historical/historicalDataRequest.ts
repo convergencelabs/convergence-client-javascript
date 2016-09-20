@@ -17,7 +17,6 @@ export var HistoricalDataRequestSerializer: MessageBodySerializer = (request: Hi
 };
 
 export interface HistoricalDataResponse extends IncomingProtocolResponseMessage {
-  resourceId: string;
   version: number;
   createdTime: Date;
   modifiedTime: Date;
@@ -26,10 +25,9 @@ export interface HistoricalDataResponse extends IncomingProtocolResponseMessage 
 
 export var HistoricalDataResponseDeserializer: MessageBodyDeserializer<HistoricalDataResponse> = (body: any) => {
   return {
-    resourceId: body.r,
     version: body.v,
     createdTime: body.c,
     modifiedTime: body.m,
-    data: DataValueDeserializer(body.d.d)
+    data: DataValueDeserializer(body.d)
   };
 };

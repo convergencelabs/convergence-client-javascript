@@ -97,10 +97,10 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
   }
 
   set(key: string, value: any): RealTimeValue<any> {
+    let propSet: boolean = this._delegate.hasKey(key);
     let delegateChild: ModelNode<any> = this._delegate.set(key, value);
-
-    var operation: DiscreteOperation;
-    if (this._delegate.hasKey(key)) {
+    let operation: DiscreteOperation;
+    if (propSet) {
       operation = new ObjectSetPropertyOperation(this.id(), false, key, delegateChild.dataValue());
     } else {
       operation = new ObjectAddPropertyOperation(this.id(), false, key, delegateChild.dataValue());
