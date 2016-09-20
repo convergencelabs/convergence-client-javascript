@@ -16,7 +16,6 @@ export class Model extends ConvergenceEventEmitter {
   private _data: ObjectNode;
   private _idToValue: Map<string, ModelNode<any>>;
 
-  private _vidPrefix: string;
   private _vidCounter: number;
 
   /**
@@ -32,8 +31,8 @@ export class Model extends ConvergenceEventEmitter {
     this._vidCounter = 0;
 
     var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return this._vidPrefix + this._vidCounter++;
-    });
+      return this.valueIdPrefix + this._vidCounter++;
+  });
 
     this._data = new ObjectNode(data, () => {
       return [];
