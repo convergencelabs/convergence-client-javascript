@@ -63,12 +63,11 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     REFERENCE: "reference"
   };
 
-  private _data: RealTimeObject;
   private _open: boolean;
   private _committed: boolean;
   private _referencesBySession: {[key: string]: ModelReference<any>[]};
   private _sessions: string[];
-  private _idToValue: {[key: string]: RealTimeValue<any>};
+  private _wrapperFactory: RealTimeWrapperFactory;
 
   private _referenceManager: ReferenceManager;
   private _referenceDisposed: ReferenceDisposedCallback;
@@ -103,8 +102,6 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     this._sessions.forEach((sessionId: string) => {
       this._referencesBySession[sessionId] = [];
     });
-
-    this._idToValue = {};
 
     this._referenceManager = new ReferenceManager(this, ReferenceType.ELEMENT);
 
@@ -196,8 +193,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       referenceEventCallbacks: referenceCallbacks
     };
 
-    let wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(this._callbacks);
-    this._data = <RealTimeObject> wrapperFactory.wrap(this._model.root());
+    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks);
 
     this._open = true;
     this._committed = true;
@@ -215,7 +211,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
       // fixme refactor
       if (published.id !== undefined) {
-        var m: RealTimeValue<any> = this._idToValue[published.id];
+        var m: RealTimeValue<any> = this._wrapperFactory.wrap(this._model._getRegisteredValue(published.id));
         m._handleRemoteReferenceEvent(published);
         var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
         this._referencesBySession[ref.sessionId].push(r);
@@ -275,11 +271,11 @@ export class RealTimeModel extends ConvergenceEventEmitter {
 
   // deprecated
   value(): RealTimeObject {
-    return this._data;
+    return this.root();
   }
 
   root(): RealTimeObject {
-    return this._data;
+    return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
   valueAt(path: any): RealTimeValue<any> {
@@ -355,16 +351,9 @@ export class RealTimeModel extends ConvergenceEventEmitter {
   //
 
   _getRegisteredValue(id: string): RealTimeValue<any> {
-    return this._idToValue[id];
+    return this._wrapperFactory.wrap(this._model._getRegisteredValue(id));
   }
 
-  _registerValue(value: RealTimeValue<any>): void {
-    this._idToValue[value.id()] = value;
-  }
-
-  _unregisterValue(value: RealTimeValue<any>): void {
-    delete this._idToValue[value.id()];
-  }
 
   _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
@@ -432,7 +421,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       this._modelReferenceEvent(event);
     } else {
 
-      var value: RealTimeValue<any> = this._idToValue[event.id];
+      var value: RealTimeValue<any> = this._getRegisteredValue(event.id);
       if (!value) {
         return;
       }
