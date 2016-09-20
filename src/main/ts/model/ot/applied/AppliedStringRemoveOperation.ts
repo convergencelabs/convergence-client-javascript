@@ -1,21 +1,13 @@
-import {StringRemoveOperation} from "../ops/StringRemoveOperation";
 import {AppliedStringInsertOperation} from "./AppliedStringInsertOperation";
-import {AppliedOperation} from "./AppliedOperation";
-import {Immutable} from "../../../util/Immutable";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {StringRemove} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedStringRemoveOperation extends StringRemoveOperation implements AppliedOperation {
+export class AppliedStringRemoveOperation extends AppliedDiscreteOperation implements StringRemove {
 
-  constructor(id: string, noOp: boolean, index: number, value: string) {
-    super(id, noOp, index, value);
+  constructor(id: string, noOp: boolean, public index: number, public value: string) {
+    super(OperationType.STRING_REMOVE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedStringRemoveOperation {
-    return new AppliedStringRemoveOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.index, updates.index),
-      Immutable.update(this.value, updates.value));
   }
 
   inverse(): AppliedStringInsertOperation {

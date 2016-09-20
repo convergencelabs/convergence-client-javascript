@@ -1,20 +1,12 @@
-import {Immutable} from "../../../util/Immutable";
-import {NumberSetOperation} from "../ops/NumberSetOperation";
-import {AppliedOperation} from "./AppliedOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {OperationType} from "../ops/OperationType";
+import {NumberSet} from "../ops/operationChanges";
 
-export class AppliedNumberSetOperation extends NumberSetOperation implements AppliedOperation {
+export class AppliedNumberSetOperation extends AppliedDiscreteOperation implements NumberSet {
 
-  constructor(id: string, noOp: boolean, value: number, public oldValue: number) {
-    super(id, noOp, value);
+  constructor(id: string, noOp: boolean, public value: number, public oldValue: number) {
+    super(OperationType.NUMBER_VALUE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedNumberSetOperation {
-    return new AppliedNumberSetOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.value, updates.value),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedNumberSetOperation {

@@ -1,8 +1,9 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
+import {BooleanSet} from "./operationChanges";
 
-export class BooleanSetOperation extends DiscreteOperation {
+export class BooleanSetOperation extends DiscreteOperation implements BooleanSet {
 
   constructor(id: string, noOp: boolean, public value: boolean) {
     super(OperationType.BOOLEAN_VALUE, id, noOp);

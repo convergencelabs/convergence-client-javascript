@@ -1,22 +1,17 @@
 import {AppliedOperation} from "./AppliedOperation";
-import {CompoundOperation} from "../ops/CompoundOperation";
-import {DiscreteOperation} from "../ops/DiscreteOperation";
-import {Immutable} from "../../../util/Immutable";
+import {BatchChange} from "../ops/operationChanges";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedCompoundOperation extends CompoundOperation implements AppliedOperation {
-  constructor(ops: DiscreteOperation[]) {
-    super(ops);
+export class AppliedCompoundOperation extends AppliedOperation implements BatchChange {
+  constructor(public ops: AppliedDiscreteOperation[]) {
+    super(OperationType.COMPOUND);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedCompoundOperation {
-    return new AppliedCompoundOperation(Immutable.update(this.ops, updates.ops));
   }
 
   inverse(): AppliedCompoundOperation {
     return new AppliedCompoundOperation(this.ops.map((op) => {
-      // fixme: Figure out how to do this correctly
-      return <DiscreteOperation>(<any>(<AppliedOperation> (<any> op))).inverse();
+      return <AppliedDiscreteOperation> op.inverse();
     }));
   }
 }

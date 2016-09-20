@@ -1,21 +1,13 @@
-import {Immutable} from "../../../util/Immutable";
 import {DataValue} from "../../dataValue";
-import {ObjectSetOperation} from "../ops/ObjectSetOperation";
-import {AppliedOperation} from "./AppliedOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ObjectSet} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedObjectSetOperation extends ObjectSetOperation implements AppliedOperation {
+export class AppliedObjectSetOperation extends AppliedDiscreteOperation implements ObjectSet {
 
-  constructor(id: string, noOp: boolean, value: {[key: string]: DataValue}, public oldValue: {[key: string]: DataValue}) {
-    super(id, noOp, value);
+  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue}, public oldValue: {[key: string]: DataValue}) {
+    super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedObjectSetOperation {
-    return new AppliedObjectSetOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.value, updates.value),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedObjectSetOperation {

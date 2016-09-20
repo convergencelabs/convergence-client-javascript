@@ -1,22 +1,14 @@
 import {DataValue} from "../../dataValue";
-import {ArrayInsertOperation} from "../ops/ArrayInsertOperation";
-import {AppliedOperation} from "./AppliedOperation";
 import {AppliedArrayRemoveOperation} from "./AppliedArrayRemoveOperation";
-import {Immutable} from "../../../util/Immutable";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ArrayInsert} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedArrayInsertOperation extends ArrayInsertOperation implements AppliedOperation {
+export class AppliedArrayInsertOperation extends AppliedDiscreteOperation implements ArrayInsert {
 
-  constructor(id: string, noOp: boolean, index: number, value: DataValue) {
-    super(id, noOp, index, value);
+  constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {
+    super(OperationType.ARRAY_INSERT, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedArrayInsertOperation {
-    return new AppliedArrayInsertOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.index, updates.index),
-      Immutable.update(this.value, updates.value));
   }
 
   inverse(): AppliedArrayRemoveOperation {

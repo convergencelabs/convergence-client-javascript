@@ -2,11 +2,11 @@ import {ModelNode} from "./ModelNode";
 import {BooleanValue} from "../dataValue";
 import {ModelValueType} from "../ModelValueType";
 import {Model} from "./Model";
-import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../ot/Path";
 import {BooleanNodeSetValueEvent} from "./events";
+import {BooleanSet} from "../ot/ops/operationChanges";
 
 export class BooleanNode extends ModelNode<boolean> {
 
@@ -71,7 +71,7 @@ export class BooleanNode extends ModelNode<boolean> {
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: BooleanSetOperation = <BooleanSetOperation> operationEvent.operation;
+    var operation: BooleanSet = <BooleanSet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

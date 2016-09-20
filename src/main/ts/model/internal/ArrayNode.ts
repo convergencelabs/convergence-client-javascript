@@ -4,11 +4,6 @@ import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
 import {ModelValueType} from "../ModelValueType";
 import {DataValue} from "../dataValue";
-import {ArrayReplaceOperation} from "../ot/ops/ArrayReplaceOperation";
-import {ArrayInsertOperation} from "../ot/ops/ArrayInsertOperation";
-import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
-import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
-import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
 import {Path} from "../ot/Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -19,6 +14,11 @@ import {ArrayNodeRemoveEvent} from "./events";
 import {ArrayNodeSetEvent} from "./events";
 import {ArrayNodeSetValueEvent} from "./events";
 import {DataValueFactory} from "../DataValueFactory";
+import {ArrayInsert} from "../ot/ops/operationChanges";
+import {ArrayMove} from "../ot/ops/operationChanges";
+import {ArrayRemove} from "../ot/ops/operationChanges";
+import {ArrayReplace} from "../ot/ops/operationChanges";
+import {ArraySet} from "../ot/ops/operationChanges";
 
 export class ArrayNode extends ContainerNode<any[]> {
 
@@ -268,27 +268,27 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayInsertOperation = <ArrayInsertOperation> operationEvent.operation;
+    var operation: ArrayInsert = <ArrayInsert> operationEvent.operation;
     this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleReorderOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayMoveOperation = <ArrayMoveOperation> operationEvent.operation;
+    var operation: ArrayMove = <ArrayMove> operationEvent.operation;
     this._applyReorder(operation.fromIndex, operation.toIndex, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayRemoveOperation = <ArrayRemoveOperation> operationEvent.operation;
+    var operation: ArrayRemove = <ArrayRemove> operationEvent.operation;
     this._applyRemove(operation.index, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayReplaceOperation = <ArrayReplaceOperation> operationEvent.operation;
+    var operation: ArrayReplace = <ArrayReplace> operationEvent.operation;
     this._applySet(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetValueOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArraySetOperation = <ArraySetOperation> operationEvent.operation;
+    var operation: ArraySet = <ArraySet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

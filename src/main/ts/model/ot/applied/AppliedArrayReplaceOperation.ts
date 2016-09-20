@@ -1,22 +1,13 @@
-import {Immutable} from "../../../util/Immutable";
 import {DataValue} from "../../dataValue";
-import {ArrayReplaceOperation} from "../ops/ArrayReplaceOperation";
-import {AppliedOperation} from "./AppliedOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ArrayReplace} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedArrayReplaceOperation extends ArrayReplaceOperation implements AppliedOperation {
+export class AppliedArrayReplaceOperation extends AppliedDiscreteOperation implements ArrayReplace {
 
-  constructor(id: string, noOp: boolean, index: number, value: DataValue, public oldValue: DataValue) {
-    super(id, noOp, index, value);
+  constructor(id: string, noOp: boolean, public index: number, public value: DataValue, public oldValue: DataValue) {
+    super(OperationType.ARRAY_SET, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedArrayReplaceOperation {
-    return new AppliedArrayReplaceOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.index, updates.index),
-      Immutable.update(this.value, updates.value),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedArrayReplaceOperation {

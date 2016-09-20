@@ -1,20 +1,12 @@
-import {ArrayMoveOperation} from "../ops/ArrayMoveOperation";
-import {AppliedOperation} from "./AppliedOperation";
-import {Immutable} from "../../../util/Immutable";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ArrayMove} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedArrayMoveOperation extends ArrayMoveOperation implements AppliedOperation {
+export class AppliedArrayMoveOperation extends AppliedDiscreteOperation implements ArrayMove {
 
-  constructor(id: string, noOp: boolean, fromIndex: number, toIndex: number) {
-    super(id, noOp, fromIndex, toIndex);
+  constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {
+    super(OperationType.ARRAY_REORDER, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedArrayMoveOperation {
-    return new AppliedArrayMoveOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.fromIndex, updates.fromIndex),
-      Immutable.update(this.toIndex, updates.toIndex));
   }
 
   inverse(): AppliedArrayMoveOperation {

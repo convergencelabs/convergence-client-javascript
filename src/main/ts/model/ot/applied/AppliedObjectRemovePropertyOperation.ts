@@ -1,24 +1,16 @@
-import {Immutable} from "../../../util/Immutable";
-import {ObjectRemovePropertyOperation} from "../ops/ObjectRemovePropertyOperation";
 import {DataValue} from "../../dataValue";
-import {AppliedOperation} from "./AppliedOperation";
 import {AppliedObjectAddPropertyOperation} from "./AppliedObjectAddPropertyOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ObjectRemoveProperty} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedObjectRemovePropertyOperation extends ObjectRemovePropertyOperation implements AppliedOperation {
+export class AppliedObjectRemovePropertyOperation extends AppliedDiscreteOperation implements ObjectRemoveProperty {
 
   protected _prop: string;
 
-  constructor(id: string, noOp: boolean, prop: string, public oldValue: DataValue) {
-    super(id, noOp, prop);
+  constructor(id: string, noOp: boolean, public prop: string, public oldValue: DataValue) {
+    super(OperationType.OBJECT_REMOVE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedObjectRemovePropertyOperation {
-    return new AppliedObjectRemovePropertyOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.prop, updates.prop),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedObjectAddPropertyOperation {

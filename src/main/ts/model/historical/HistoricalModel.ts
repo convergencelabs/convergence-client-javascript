@@ -11,7 +11,9 @@ import {MessageType} from "../../connection/protocol/MessageType";
 import {HistoricalOperationsResponse} from "../../connection/protocol/model/historical/historicalOperationsRequest";
 import {ModelOperation} from "../ot/applied/ModelOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
-import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
+import {OperationType} from "../ot/ops/OperationType";
+import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
+import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 
 export class HistoricalModel {
 
@@ -80,16 +82,43 @@ export class HistoricalModel {
     return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
       if (version < this._version) {
         response.operations.reverse().forEach((op: ModelOperation) => {
-          this._model.handleModelOperationEvent(
-            new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-              <DiscreteOperation><any>op.operation.inverse()));
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+              if (!discreteOp.noOp) {
+                this._model.handleModelOperationEvent(
+                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                    <AppliedDiscreteOperation> discreteOp.inverse()));
+              }
+            });
+          } else {
+            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+            if (!discreteOperation.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                  <AppliedDiscreteOperation> op.operation.inverse()));
+            }
+          }
         });
       } else {
         response.operations.forEach((op: ModelOperation) => {
-          this._model.handleModelOperationEvent(
-            new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-              <DiscreteOperation><any>op.operation));
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+              if (!discreteOp.noOp) {
+                this._model.handleModelOperationEvent(
+                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
+              }
+            });
+          } else {
+            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+            if (!discreteOperation.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
+            }
+          }
         });
+        this._version = version;
       }
 
       return; // convert to Promise<void>
@@ -106,9 +135,22 @@ export class HistoricalModel {
 
     return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
       response.operations.forEach((op: ModelOperation) => {
-        this._model.handleModelOperationEvent(
-          new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-            <DiscreteOperation><any>op.operation));
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+            if (!discreteOp.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
+            }
+          });
+        } else {
+          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+          if (!discreteOperation.noOp) {
+            this._model.handleModelOperationEvent(
+              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
+          }
+        }
+        this._version = op.version;
       });
 
       return; // convert to Promise<void>
@@ -119,15 +161,30 @@ export class HistoricalModel {
     var request: HistoricalOperationsRequest = {
       type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
       modelFqn: this._modelFqn,
-      version: this._version - delta,
+      version: this._version - delta + 1,
       limit: delta
     };
 
     return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
       response.operations.reverse().forEach((op: ModelOperation) => {
-        this._model.handleModelOperationEvent(
-          new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-            <DiscreteOperation><any>op.operation.inverse()));
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+            if (!discreteOp.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                  <AppliedDiscreteOperation> discreteOp.inverse()));
+            }
+          });
+        } else {
+          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+          if (!discreteOperation.noOp) {
+            this._model.handleModelOperationEvent(
+              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                <AppliedDiscreteOperation> op.operation.inverse()));
+          }
+        }
+        this._version = op.version;
       });
 
       return; // convert to Promise<void>

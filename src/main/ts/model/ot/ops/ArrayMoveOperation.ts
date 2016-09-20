@@ -1,8 +1,9 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
+import {ArrayMove} from "./operationChanges";
 
-export class ArrayMoveOperation extends DiscreteOperation {
+export class ArrayMoveOperation extends DiscreteOperation implements ArrayMove {
 
   constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {
     super(OperationType.ARRAY_REORDER, id, noOp);

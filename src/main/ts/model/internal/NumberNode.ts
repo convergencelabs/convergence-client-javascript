@@ -2,13 +2,13 @@ import {ModelNode} from "./ModelNode";
 import {NumberValue} from "../dataValue";
 import {Model} from "./Model";
 import {ModelValueType} from "../ModelValueType";
-import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
-import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../ot/Path";
 import {NumberNodeAddEvent} from "./events";
 import {NumberNodeSetValueEvent} from "./events";
+import {NumberAdd} from "../ot/ops/operationChanges";
+import {NumberSet} from "../ot/ops/operationChanges";
 
 export class NumberNode extends ModelNode<number> {
 
@@ -101,12 +101,12 @@ export class NumberNode extends ModelNode<number> {
   }
 
   private _handleAddOperation(operationEvent: ModelOperationEvent): void {
-    var operation: NumberAddOperation = <NumberAddOperation> operationEvent.operation;
+    var operation: NumberAdd = <NumberAdd> operationEvent.operation;
     this._applyAdd(operation.value, false);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: NumberSetOperation = <NumberSetOperation> operationEvent.operation;
+    var operation: NumberSet = <NumberSet> operationEvent.operation;
     this._applySet(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

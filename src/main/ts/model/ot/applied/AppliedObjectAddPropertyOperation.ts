@@ -1,22 +1,14 @@
 import {DataValue} from "../../dataValue";
-import {ObjectAddPropertyOperation} from "../ops/ObjectAddPropertyOperation";
-import {AppliedOperation} from "./AppliedOperation";
 import {AppliedObjectRemovePropertyOperation} from "./AppliedObjectRemovePropertyOperation";
-import {Immutable} from "../../../util/Immutable";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ObjectAddProperty} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedObjectAddPropertyOperation extends ObjectAddPropertyOperation implements AppliedOperation {
+export class AppliedObjectAddPropertyOperation extends AppliedDiscreteOperation implements ObjectAddProperty {
 
-  constructor(id: string, noOp: boolean, prop: string, value: DataValue) {
-    super(id, noOp, prop, value);
+  constructor(id: string, noOp: boolean, public prop: string, public value: DataValue) {
+    super(OperationType.OBJECT_ADD, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedObjectAddPropertyOperation {
-    return new AppliedObjectAddPropertyOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.prop, updates.prop),
-      Immutable.update(this.value, updates.value));
   }
 
   inverse(): AppliedObjectRemovePropertyOperation {

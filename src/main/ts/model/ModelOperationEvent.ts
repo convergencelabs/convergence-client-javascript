@@ -1,4 +1,4 @@
-import {DiscreteOperation} from "./ot/ops/DiscreteOperation";
+import {DiscreteChange} from "./ot/ops/operationChanges";
 
 export class ModelOperationEvent {
   /**
@@ -8,7 +8,7 @@ export class ModelOperationEvent {
               public username: string,
               public version: number,
               public timestamp: number,
-              public operation: DiscreteOperation) {
+              public operation: DiscreteChange) {
 
     Object.freeze(this);
   }

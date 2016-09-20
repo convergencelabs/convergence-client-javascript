@@ -1,20 +1,12 @@
-import {Immutable} from "../../../util/Immutable";
-import {BooleanSetOperation} from "../ops/BooleanSetOperation";
-import {AppliedOperation} from "./AppliedOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {BooleanSet} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedBooleanSetOperation extends BooleanSetOperation implements AppliedOperation {
+export class AppliedBooleanSetOperation extends AppliedDiscreteOperation implements BooleanSet {
 
-  constructor(id: string, noOp: boolean, value: boolean, public oldValue: boolean) {
-    super(id, noOp, value);
+  constructor(id: string, noOp: boolean, public value: boolean, public oldValue: boolean) {
+    super(OperationType.BOOLEAN_VALUE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedBooleanSetOperation {
-    return new AppliedBooleanSetOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.value, updates.value),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedBooleanSetOperation {

@@ -1,21 +1,13 @@
-import {Immutable} from "../../../util/Immutable";
 import {DataValue} from "../../dataValue";
-import {ArraySetOperation} from "../ops/ArraySetOperation";
-import {AppliedOperation} from "./AppliedOperation";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {ArraySet} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedArraySetOperation extends ArraySetOperation implements AppliedOperation {
+export class AppliedArraySetOperation extends AppliedDiscreteOperation implements ArraySet {
 
-  constructor(id: string, noOp: boolean, value: DataValue[], public oldValue: DataValue[]) {
-    super(id, noOp, value);
+  constructor(id: string, noOp: boolean, public value: DataValue[], public oldValue: DataValue[]) {
+    super(OperationType.ARRAY_VALUE, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedArraySetOperation {
-    return new AppliedArraySetOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.value, updates.value),
-      Immutable.update(this.oldValue, updates.oldValue));
   }
 
   inverse(): AppliedArraySetOperation {

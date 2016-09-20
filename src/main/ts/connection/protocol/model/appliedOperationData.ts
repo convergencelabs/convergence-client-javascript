@@ -1,7 +1,6 @@
 import {AppliedOperation} from "../../../model/ot/applied/AppliedOperation";
 import {OperationType} from "../../../model/ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../../../model/ot/applied/AppliedCompoundOperation";
-import {DiscreteOperation} from "../../../model/ot/ops/DiscreteOperation";
 import {AppliedArrayInsertOperation} from "../../../model/ot/applied/AppliedArrayInsertOperation";
 import {DataValueDeserializer} from "./dataValue";
 import {AppliedArrayMoveOperation} from "../../../model/ot/applied/AppliedArrayMoveOperation";
@@ -22,6 +21,7 @@ import {CodeMap} from "../../../util/CodeMap";
 import {mapObject} from "../../../util/ObjectUtils";
 import {ModelOperation} from "../../../model/ot/applied/ModelOperation";
 import {ModelFqn} from "../../../model/ModelFqn";
+import {AppliedDiscreteOperation} from "../../../model/ot/applied/AppliedDiscreteOperation";
 
 var OperationTypeCodes: CodeMap = new CodeMap();
 OperationTypeCodes.put(0, OperationType.COMPOUND);
@@ -93,10 +93,10 @@ export class AppliedOperationDeserializer {
 
 export class AppliedCompoundDeserializer {
   static deserialize(body: any): AppliedCompoundOperation {
-    var ops: Array<DiscreteOperation> = [];
-    var op: any;
+    var ops: Array<AppliedDiscreteOperation> = [];
+    var op: AppliedDiscreteOperation;
     for (op of body.o) {
-      ops.push(<DiscreteOperation><any>AppliedOperationDeserializer.deserialize(op));
+      ops.push(<AppliedDiscreteOperation> AppliedOperationDeserializer.deserialize(op));
     }
     return new AppliedCompoundOperation(ops);
   }

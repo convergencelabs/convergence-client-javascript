@@ -1,21 +1,14 @@
-import {NumberAddOperation} from "../ops/NumberAddOperation";
-import {AppliedOperation} from "./AppliedOperation";
-import {Immutable} from "../../../util/Immutable";
+import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
+import {NumberAdd} from "../ops/operationChanges";
+import {OperationType} from "../ops/OperationType";
 
-export class AppliedNumberAddOperation extends NumberAddOperation implements AppliedOperation {
+export class AppliedNumberAddOperation extends AppliedDiscreteOperation implements NumberAdd {
 
   protected _value: number;
 
-  constructor(id: string, noOp: boolean, value: number) {
-    super(id, noOp, value);
+  constructor(id: string, noOp: boolean, public value: number) {
+    super(OperationType.NUMBER_ADD, id, noOp);
     Object.freeze(this);
-  }
-
-  copy(updates: any): AppliedNumberAddOperation {
-    return new AppliedNumberAddOperation(
-      Immutable.update(this.id, updates.id),
-      Immutable.update(this.noOp, updates.noOp),
-      Immutable.update(this.value, updates.value));
   }
 
   inverse(): AppliedNumberAddOperation {

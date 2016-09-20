@@ -4,10 +4,6 @@ import {ModelNode} from "./ModelNode";
 import {ObjectValue} from "../dataValue";
 import {Validation} from "../../util/Validation";
 import {DataValue} from "../dataValue";
-import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
-import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
-import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
-import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {Path} from "../ot/Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -17,6 +13,10 @@ import {ObjectNodeRemoveEvent} from "./events";
 import {ObjectNodeSetValueEvent} from "./events";
 import {ContainerNode} from "./ContainerNode";
 import {DataValueFactory} from "../DataValueFactory";
+import {ObjectAddProperty} from "../ot/ops/operationChanges";
+import {ObjectSetProperty} from "../ot/ops/operationChanges";
+import {ObjectRemoveProperty} from "../ot/ops/operationChanges";
+import {ObjectSet} from "../ot/ops/operationChanges";
 
 export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
 
@@ -188,16 +188,15 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
   private _applyRemove(key: string, local: boolean, sessionId: string, username: string): void {
     Validation.isString(key, "key");
 
-    if (!this._children.has(key)) {
+    if (this._children.has(key)) {
       this._idToPathElement.delete(key);
       this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
       this._children.get(key)._detach();
       this._children.delete(key);
 
       var event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
+      this._emitValueEvent(event);
     }
-
-    this._emitValueEvent(event);
   }
 
   private _applySetValue(values: {[key: string]: DataValue}, local: boolean, sessionId: string, username: string): void {
@@ -253,22 +252,22 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
   }
 
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectAddPropertyOperation = <ObjectAddPropertyOperation> operationEvent.operation;
+    var operation: ObjectAddProperty = <ObjectAddProperty> operationEvent.operation;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectSetPropertyOperation = <ObjectSetPropertyOperation> operationEvent.operation;
+    var operation: ObjectSetProperty = <ObjectSetProperty> operationEvent.operation;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectRemovePropertyOperation = <ObjectRemovePropertyOperation> operationEvent.operation;
+    var operation: ObjectRemoveProperty = <ObjectRemoveProperty> operationEvent.operation;
     this._applyRemove(operation.prop, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectSetOperation = <ObjectSetOperation> operationEvent.operation;
+    var operation: ObjectSet = <ObjectSet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 }

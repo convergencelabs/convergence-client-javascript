@@ -529,15 +529,20 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     this._modifiedTime = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
-      var compoundOp: CompoundOperation = <CompoundOperation> operation;
+      let compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
-        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
-        this._deliverToChild(modelEvent);
+        if (!op.noOp) {
+          var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
+          this._deliverToChild(modelEvent);
+        }
       });
     } else {
-      var modelEvent: ModelOperationEvent =
-        new ModelOperationEvent(clientId, username, contextVersion, timestamp, <DiscreteOperation> operation);
-      this._deliverToChild(modelEvent);
+      let discreteOp: DiscreteOperation = <DiscreteOperation> operation;
+      if (!discreteOp.noOp) {
+        var modelEvent: ModelOperationEvent =
+          new ModelOperationEvent(clientId, username, contextVersion, timestamp, discreteOp);
+        this._deliverToChild(modelEvent);
+      }
     }
   }
 
