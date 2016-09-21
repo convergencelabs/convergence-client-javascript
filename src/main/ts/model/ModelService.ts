@@ -21,8 +21,10 @@ import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
-import {HistoricalModel} from "./historical/HistoricalModel";
 import {ModelQuery} from "./query/ModelQuery";
+import {HistoricalModel} from "./historical/HistoricalModel";
+import {HistoricalDataRequest} from "../connection/protocol/model/historical/historicalDataRequest";
+import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";
 
 export class ModelService extends ConvergenceEventEmitter {
 
@@ -132,9 +134,10 @@ export class ModelService extends ConvergenceEventEmitter {
   create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
     var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     var idGen: InitialIdGenerator = new InitialIdGenerator();
-    var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+    var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
     });
+    var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
     var request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
@@ -159,8 +162,18 @@ export class ModelService extends ConvergenceEventEmitter {
     });
   }
 
-  history(collectionId: string, modelId: string): HistoricalModel {
-    return null;
+  history(collectionId: string, modelId: string): Promise<HistoricalModel> {
+    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+
+    var request: HistoricalDataRequest = {
+      type: MessageType.HISTORICAL_DATA_REQUEST,
+      modelFqn: fqn
+    };
+
+    return this._connection.request(request).then((response: HistoricalDataResponse) => {
+      return new HistoricalModel(response.data, response.version, response.modifiedTime, response.createdTime,
+        request.modelFqn, this._connection, this.session());
+    });
   }
 
   _close(resourceId: string): Promise<void> {
@@ -207,9 +220,10 @@ export class ModelService extends ConvergenceEventEmitter {
     } else {
       var data: any = openReq.initializer();
       var idGen: InitialIdGenerator = new InitialIdGenerator();
-      var dataValue: ObjectValue = <ObjectValue>DataValueFactory.createDataValue(data, () => {
+      var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
         return idGen.id();
       });
+      var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
       var response: ModelDataResponse = {
         data: dataValue,
         type: MessageType.MODEL_DATA_RESPONSE

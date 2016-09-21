@@ -1,17 +1,15 @@
-import {RealTimeString} from "../rt/RealTimeString";
 import {HistoricalValue} from "./HistoricalValue";
-import {ObservableString} from "../observable/ObservableString";
+import {StringNode} from "../internal/StringNode";
+import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export class HistoricalString extends HistoricalValue<any> implements ObservableString {
+export class HistoricalString extends HistoricalValue<any> {
 
-  private _string: RealTimeString;
 
-  constructor(value: RealTimeString) {
-    super(value);
-    this._string = value;
+  constructor(protected _delegate: StringNode, _wrapperFactory: HistoricalWrapperFactory) {
+    super(_delegate, _wrapperFactory);
   }
 
   length(): number {
-    return this._string.length();
+    return this._delegate.length();
   }
 }

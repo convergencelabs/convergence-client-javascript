@@ -2,8 +2,9 @@ import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
+import {ArrayInsert} from "./operationChanges";
 
-export class ArrayInsertOperation extends DiscreteOperation {
+export class ArrayInsertOperation extends DiscreteOperation implements ArrayInsert {
 
   constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {
     super(OperationType.ARRAY_INSERT, id, noOp);

@@ -1,35 +1,32 @@
-import {ObservableObject} from "../observable/ObservableObject";
-import {ObservableValue} from "../observable/ObservableValue";
-import {HistoricalValueConverter} from "./HistoricalValueConverter";
-import {RealTimeObject} from "../rt/RealTimeObject";
 import {HistoricalValue} from "./HistoricalValue";
+import {ObjectNode} from "../internal/ObjectNode";
+import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export class HistoricalObject extends HistoricalValue<any> implements ObservableObject {
+export class HistoricalObject extends HistoricalValue<{ [key: string]: any; }> {
 
-  private _object: RealTimeObject;
-
-  constructor(value: RealTimeObject) {
-    super(value);
-    this._object = value;
+  constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
+    super(_delegate, _wrapperFactory);
   }
 
-  get(key: string): ObservableValue<any> {
-    return HistoricalValueConverter.wrapValue(this._object.get(key));
+  get(key: string): HistoricalValue<any> {
+    return this._wrapperFactory.wrap(this._delegate.get(key));
   }
 
   keys(): string[] {
-    return this._object.keys();
+    return this._delegate.keys();
   }
 
   hasKey(key: string): boolean {
-    return this._object.hasKey(key);
+    return this._delegate.hasKey(key);
   }
 
-  forEach(callback: (value: ObservableValue<any>, key?: string) => void): void {
-    this._object.forEach(callback);
+  forEach(callback: (model: HistoricalValue<any>, key?: string) => void): void {
+    this._delegate.forEach((modelNode, key) => {
+      callback(this._wrapperFactory.wrap(modelNode), key);
+    });
   }
 
-  valueAt(pathArgs: any): ObservableValue<any> {
-    return HistoricalValueConverter.wrapValue(this._object.valueAt(pathArgs));
+  valueAt(pathArgs: any): HistoricalValue<any> {
+    return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 }

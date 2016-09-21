@@ -60,6 +60,10 @@ import {ParticipantsResponseDeserializer} from "./activity/participants";
 import {ParticipantsRequestSerializer} from "./activity/participants";
 import {ModelsQueryRequestSerializer} from "./model/query/modelQuery";
 import {ModelsQueryResponseDeserializer} from "./model/query/modelQuery";
+import {HistoricalDataResponseDeserializer} from "./model/historical/historicalDataRequest";
+import {HistoricalOperationsResponseDeserializer} from "./model/historical/historicalOperationsRequest";
+import {HistoricalDataRequestSerializer} from "./model/historical/historicalDataRequest";
+import {HistoricalOperationsRequestSerializer} from "./model/historical/historicalOperationsRequest";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -189,6 +193,9 @@ MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE
 MessageSerializer.registerMessageBodySerializer(MessageType.MODELS_QUERY_REQUEST, ModelsQueryRequestSerializer);
 
 
+MessageSerializer.registerMessageBodySerializer(MessageType.HISTORICAL_DATA_REQUEST, HistoricalDataRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.HISTORICAL_OPERATIONS_REQUEST, HistoricalOperationsRequestSerializer);
+
 // Deserializers
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PING);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PONG);
@@ -235,3 +242,6 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LEFT_ROOM, Us
 MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_MESSAGE_PUBLISHED, UserChatMessageDeserializer);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.MODELS_QUERY_RESPONSE, ModelsQueryResponseDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_DATA_RESPONSE, HistoricalDataResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_OPERATIONS_RESPONSE, HistoricalOperationsResponseDeserializer);

@@ -1,40 +1,40 @@
-import {ObservableValue} from "../observable/ObservableValue";
-import {RealTimeValue} from "../rt/RealTimeValue";
 import {ModelValueType} from "../ModelValueType";
-import {ObservableModel} from "../observable/ObservableModel";
 import {Path} from "../ot/Path";
+import {ModelNode} from "../internal/ModelNode";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ModelNodeEvent} from "../internal/events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {HistoricalEventConverter} from "./HistoricalEventConverter";
+import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export abstract class HistoricalValue<T> implements ObservableValue<T> {
+export abstract class HistoricalValue<T> extends ConvergenceEventEmitter {
 
-  protected _value: RealTimeValue<T>;
+  constructor(protected _delegate: ModelNode<T>, protected _wrapperFactory: HistoricalWrapperFactory) {
+    super();
 
-  constructor(value: RealTimeValue<T>) {
-    this._value = value;
+    this._delegate.events().subscribe((event: ModelNodeEvent) => {
+      let convertedEvent: ConvergenceEvent = HistoricalEventConverter.convertEvent(event, this._wrapperFactory);
+      this.emitEvent(convertedEvent);
+    });
   }
 
   id(): string {
-    return this._value.id();
+    return this._delegate.id();
   }
 
   type(): ModelValueType {
-    return this._value.type();
+    return this._delegate.type();
   }
 
   path(): Path {
-    return this._value.path();
-  }
-
-  model(): ObservableModel {
-    return this._value.model();
+    return  this._delegate.path();
   }
 
   isDetached(): boolean {
-    return this._value.isDetached();
+    return this._delegate.isDetached();
   }
 
-  data(): T
-  data(value: T): void
-  data(value?: T): any {
-    return this._value.data(value);
+  data(): T {
+    return this._delegate.data();
   }
 }

@@ -2,7 +2,7 @@ import {RealTimeValue} from "../rt/RealTimeValue";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
-import {ValueDetachedEvent} from "../observable/ObservableValue";
+import {ValueDetachedEvent} from "../rt/events";
 
 export class ElementReference extends ModelReference<RealTimeValue<any>> {
 

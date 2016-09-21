@@ -2,29 +2,41 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
 import {RealTimeValue} from "./RealTimeValue";
-import {ObjectValue, DataValue} from "../dataValue";
+import {ReferenceManager} from "../reference/ReferenceManager";
+import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {Model} from "../internal/Model";
+import {ObjectValue} from "../dataValue";
 import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
 import {ModelFqn} from "../ModelFqn";
 import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
-import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
+import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
-import {ModelReferenceCallbacks, LocalModelReference} from "../reference/LocalModelReference";
-import {
-  PublishReferenceEvent, UnpublishReferenceEvent,
-  SetReferenceEvent, ClearReferenceEvent, RemoteReferencePublished, RemoteReferenceSet, RemoteReferenceEvent
-} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {ReferenceType} from "../reference/ModelReference";
+import {ModelReferenceCallbacks} from "../reference/LocalModelReference";
+import {LocalModelReference} from "../reference/LocalModelReference";
+import {PublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {MessageType} from "../../connection/protocol/MessageType";
+import {UnpublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReferenceData} from "../ot/xform/ReferenceTransformer";
+import {SetReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {ClearReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "../ot/UnprocessedOperationEvent";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {RemoteReferencePublished} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
+import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
-import {DataValueFactory} from "../DataValueFactory";
+import {LocalElementReference} from "../reference/LocalElementReference";
+import {ElementReference} from "../reference/ElementReference";
+import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ForceCloseRealTimeModel} from "../../connection/protocol/model/forceCloseRealtimeModel";
 import {RemoteOperation} from "../../connection/protocol/model/remoteOperation";
+import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {OperationAck} from "../../connection/protocol/model/operationAck";
-import {RemoteClientOpenedModel, RemoteClientClosedModel} from "../../connection/protocol/model/remoteOpenClose";
+import {RemoteClientOpenedModel} from "../../connection/protocol/model/remoteOpenClose";
+import {RemoteClientClosedModel} from "../../connection/protocol/model/remoteOpenClose";
 import {Immutable} from "../../util/Immutable";
 import {ProcessedOperationEvent} from "../ot/ProcessedOperationEvent";
 import {Operation} from "../ot/ops/Operation";
@@ -32,17 +44,13 @@ import {OperationType} from "../ot/ops/OperationType";
 import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
-import {ModelEvent, VersionChangedEvent, ModelClosedEvent, ObservableModel} from "../observable/ObservableModel";
-import {Path} from "../ot/Path";
-import {ReferenceManager} from "../reference/ReferenceManager";
-import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
-import {ReferenceType} from "../reference/ModelReference";
-import {LocalElementReference} from "../reference/LocalElementReference";
-import {ElementReference} from "../reference/ElementReference";
-import {RemoteReferenceCreatedEvent} from "./RealTimeValue";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {MessageEvent} from "../../connection/ConvergenceConnection";
+import {RemoteReferenceCreatedEvent} from "./events";
+import {ModelEvent} from "./events";
+import {ModelClosedEvent} from "./events";
+import {VersionChangedEvent} from "./events";
 
-export class RealTimeModel extends ConvergenceEventEmitter implements ObservableModel {
+export class RealTimeModel extends ConvergenceEventEmitter {
 
   static Events: any = {
     CLOSED: "closed",
@@ -55,23 +63,17 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     REFERENCE: "reference"
   };
 
-  private _data: RealTimeObject;
   private _open: boolean;
   private _committed: boolean;
   private _referencesBySession: {[key: string]: ModelReference<any>[]};
   private _sessions: string[];
-  private _idToValue: {[key: string]: RealTimeValue<any>};
-
-  private _vidPrefix: string;
-  private _vidCounter: number;
-  private _idGenerator: () => string = () => {
-    return this._vidPrefix + this._vidCounter++;
-  };
+  private _wrapperFactory: RealTimeWrapperFactory;
 
   private _referenceManager: ReferenceManager;
   private _referenceDisposed: ReferenceDisposedCallback;
   private _callbacks: ModelEventCallbacks;
 
+  private _model: Model;
 
   /**
    * Constructs a new RealTimeModel.
@@ -90,6 +92,8 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
               private _modelService: ModelService) {
     super();
 
+    this._model = new Model(this.session().sessionId(), this.session().username(), valueIdPrefix, data);
+
     // we keep a map of all references by session so we can easily dispose of them
     // when a session disconnects.  It might be possible to do this by walking the
     // model as well.
@@ -99,12 +103,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       this._referencesBySession[sessionId] = [];
     });
 
-    this._idToValue = {};
-
     this._referenceManager = new ReferenceManager(this, ReferenceType.ELEMENT);
-
-    this._vidPrefix = valueIdPrefix;
-    this._vidCounter = 0;
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this._committed = committed;
@@ -194,7 +193,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       referenceEventCallbacks: referenceCallbacks
     };
 
-    this._data = new RealTimeObject(data, null, null, this._callbacks, this);
+    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks);
 
     this._open = true;
     this._committed = true;
@@ -212,7 +211,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
 
       // fixme refactor
       if (published.id !== undefined) {
-        var m: RealTimeValue<any> = this._idToValue[published.id];
+        var m: RealTimeValue<any> = this._wrapperFactory.wrap(this._model._getRegisteredValue(published.id));
         m._handleRemoteReferenceEvent(published);
         var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
         this._referencesBySession[ref.sessionId].push(r);
@@ -272,16 +271,15 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
 
   // deprecated
   value(): RealTimeObject {
-    return this._data;
+    return this.root();
   }
 
   root(): RealTimeObject {
-    return this._data;
+    return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
   valueAt(path: any): RealTimeValue<any> {
-    var pathArgs: Path = Array.isArray(path) ? path : arguments;
-    return this._data._path(pathArgs);
+    return this.root().valueAt(path);
   }
 
   session(): Session {
@@ -353,20 +351,9 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   //
 
   _getRegisteredValue(id: string): RealTimeValue<any> {
-    return this._idToValue[id];
+    return this._wrapperFactory.wrap(this._model._getRegisteredValue(id));
   }
 
-  _registerValue(value: RealTimeValue<any>): void {
-    this._idToValue[value.id()] = value;
-  }
-
-  _unregisterValue(value: RealTimeValue<any>): void {
-    delete this._idToValue[value.id()];
-  }
-
-  _createDataValue(data: any): DataValue {
-    return DataValueFactory.createDataValue(data, this._idGenerator);
-  }
 
   _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
@@ -434,7 +421,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
       this._modelReferenceEvent(event);
     } else {
 
-      var value: RealTimeValue<any> = this._idToValue[event.id];
+      var value: RealTimeValue<any> = this._getRegisteredValue(event.id);
       if (!value) {
         return;
       }
@@ -495,7 +482,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
   }
 
   private _close(event: ModelClosedEvent): void {
-    this._data._detach();
+    this._model.root()._detach();
     this._open = false;
     this._connection = null;
     this.emitEvent(event);
@@ -531,23 +518,25 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
     this._modifiedTime = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
-      var compoundOp: CompoundOperation = <CompoundOperation> operation;
+      let compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
-        var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
-        this._deliverToChild(modelEvent);
+        if (!op.noOp) {
+          var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
+          this._deliverToChild(modelEvent);
+        }
       });
     } else {
-      var modelEvent: ModelOperationEvent =
-        new ModelOperationEvent(clientId, username, contextVersion, timestamp, <DiscreteOperation> operation);
-      this._deliverToChild(modelEvent);
+      let discreteOp: DiscreteOperation = <DiscreteOperation> operation;
+      if (!discreteOp.noOp) {
+        var modelEvent: ModelOperationEvent =
+          new ModelOperationEvent(clientId, username, contextVersion, timestamp, discreteOp);
+        this._deliverToChild(modelEvent);
+      }
     }
   }
 
   private _deliverToChild(modelEvent: ModelOperationEvent): void {
-    var child: RealTimeValue<any> = this._idToValue[modelEvent.operation.id];
-    if (child) {
-      child._handleRemoteOperation(modelEvent);
-    }
+    this._model.handleModelOperationEvent(modelEvent);
   }
 
   private _sendOperation(opEvent: UnprocessedOperationEvent): void {
@@ -595,7 +584,7 @@ export class RealTimeModel extends ConvergenceEventEmitter implements Observable
         var elementIds: string[] = [];
         for (var element of ref.values) {
           elementIds.push((<RealTimeValue<any>> element).id());
-    }
+        }
         return elementIds;
       default:
         throw new Error("Invalid reference type");

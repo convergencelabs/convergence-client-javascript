@@ -2,8 +2,9 @@ import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
+import {ArrayReplace} from "./operationChanges";
 
-export class ArrayReplaceOperation extends DiscreteOperation {
+export class ArrayReplaceOperation extends DiscreteOperation implements ArrayReplace {
 
   constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {
     super(OperationType.ARRAY_SET, id, noOp);

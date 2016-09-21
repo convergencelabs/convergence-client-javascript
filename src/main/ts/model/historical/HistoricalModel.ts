@@ -1,79 +1,207 @@
-import {ObservableModel} from "../observable/ObservableModel";
-import {RealTimeModel} from "../rt/RealTimeModel";
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalValue} from "./HistoricalValue";
-import {HistoricalValueConverter} from "./HistoricalValueConverter";
-import {ModelService} from "../ModelService";
+import {ModelFqn} from "../ModelFqn";
+import {Model} from "../internal/Model";
+import {ObjectValue} from "../dataValue";
+import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
+import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
+import {HistoricalOperationsRequest} from "../../connection/protocol/model/historical/historicalOperationsRequest";
+import {MessageType} from "../../connection/protocol/MessageType";
+import {HistoricalOperationsResponse} from "../../connection/protocol/model/historical/historicalOperationsRequest";
+import {ModelOperation} from "../ot/applied/ModelOperation";
+import {ModelOperationEvent} from "../ModelOperationEvent";
+import {OperationType} from "../ot/ops/OperationType";
+import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
+import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 
-export class HistoricalModel implements ObservableModel {
+export class HistoricalModel {
 
-  private _model: RealTimeModel;
-  private _modelService: ModelService;
+  private _maxVersion: number;
+  private _version: number;
+  private _modifiedTime: Date;
+  private _model: Model;
+  private _wrapperFactory: HistoricalWrapperFactory;
 
-  constructor(model: RealTimeModel, modelService: ModelService) {
-    this._model = model;
-    this._modelService = modelService;
+  constructor(data: ObjectValue,
+              version: number,
+              modifiedTime: Date,
+              private _createdTime: Date,
+              private _modelFqn: ModelFqn,
+              private _connection: ConvergenceConnection,
+              private _session: Session) {
+
+    this._maxVersion = version;
+    this._version = version;
+    this._modifiedTime = modifiedTime;
+    this._model = new Model(this.session().sessionId(), this.session().username(), null, data);
+    this._wrapperFactory = new HistoricalWrapperFactory();
   }
 
   collectionId(): string {
-    return this._model.collectionId();
+    return this._modelFqn.collectionId;
   }
 
   modelId(): string {
-    return this._model.modelId();
+    return this._modelFqn.modelId;
   }
 
   version(): number {
-    return this._model.version();
+    return this._version;
   }
 
   maxVersion(): number {
-    // FIXME
-    return;
+    return this._maxVersion;
   }
 
-  goto(version: number): void {
-
+  root(): HistoricalObject {
+    return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  skipForward(delta: number): void {
+  goto(version: number): Promise<void> {
+    let gotoVersion: number;
+    let limit: number;
 
+    if (version === this._version) {
+      return Promise.resolve();
+    } else if (version > this._version) {
+      gotoVersion = this._version;
+      limit = version - this._version;
+    } else {
+      gotoVersion = version;
+      limit = this._version - version;
+    }
+
+    var request: HistoricalOperationsRequest = {
+      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
+      modelFqn: this._modelFqn,
+      version: gotoVersion,
+      limit: limit
+    };
+
+    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+      if (version < this._version) {
+        response.operations.reverse().forEach((op: ModelOperation) => {
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+              if (!discreteOp.noOp) {
+                this._model.handleModelOperationEvent(
+                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                    <AppliedDiscreteOperation> discreteOp.inverse()));
+              }
+            });
+          } else {
+            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+            if (!discreteOperation.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                  <AppliedDiscreteOperation> op.operation.inverse()));
+            }
+          }
+        });
+      } else {
+        response.operations.forEach((op: ModelOperation) => {
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+              if (!discreteOp.noOp) {
+                this._model.handleModelOperationEvent(
+                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
+              }
+            });
+          } else {
+            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+            if (!discreteOperation.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
+            }
+          }
+        });
+        this._version = version;
+      }
+
+      return; // convert to Promise<void>
+    });
   }
 
-  skipBackward(delta: number): void {
+  forward(delta: number = 1): Promise<void> {
+    var request: HistoricalOperationsRequest = {
+      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
+      modelFqn: this._modelFqn,
+      version: this._version + 1,
+      limit: delta
+    };
 
+    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+      response.operations.forEach((op: ModelOperation) => {
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+            if (!discreteOp.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
+            }
+          });
+        } else {
+          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+          if (!discreteOperation.noOp) {
+            this._model.handleModelOperationEvent(
+              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
+          }
+        }
+      });
+      this._version = this._version + response.operations.length;
+      return; // convert to Promise<void>
+    });
+  }
+
+  backward(delta: number = 1): Promise<void> {
+    var request: HistoricalOperationsRequest = {
+      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
+      modelFqn: this._modelFqn,
+      version: this._version - delta + 1,
+      limit: delta
+    };
+
+    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+      response.operations.reverse().forEach((op: ModelOperation) => {
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+            if (!discreteOp.noOp) {
+              this._model.handleModelOperationEvent(
+                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                  <AppliedDiscreteOperation> discreteOp.inverse()));
+            }
+          });
+        } else {
+          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
+          if (!discreteOperation.noOp) {
+            this._model.handleModelOperationEvent(
+              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
+                <AppliedDiscreteOperation> op.operation.inverse()));
+          }
+        }
+      });
+      this._version = this._version - response.operations.length;
+      return; // convert to Promise<void>
+    });
   }
 
   createdTime(): Date {
-    return this._model.createdTime();
+    return this._createdTime;
   }
 
   modifiedTime(): Date {
-    return this._model.modifiedTime();
-  }
-
-  value(): HistoricalObject {
-    return <HistoricalObject>HistoricalValueConverter.wrapValue(this._model.value());
+    return this._modifiedTime;
   }
 
   valueAt(path: any): HistoricalValue<any> {
-    return HistoricalValueConverter.wrapValue(this._model.valueAt(path));
+    return this._wrapperFactory.wrap(this._model.valueAt(path));
   }
 
   session(): Session {
-    return this._model.session();
-  }
-
-  close(): Promise<void> {
-    return;
-  }
-
-  isOpen(): boolean {
-    return this._model.isOpen();
-  }
-
-  _handleMessage(messageEvent: MessageEvent): void {
-
+    return this._session;
   }
 }

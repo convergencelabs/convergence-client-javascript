@@ -1,8 +1,9 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
+import {StringRemove} from "./operationChanges";
 
-export class StringRemoveOperation extends DiscreteOperation {
+export class StringRemoveOperation extends DiscreteOperation implements StringRemove {
 
   constructor(id: string, noOp: boolean, public index: number, public value: string) {
     super(OperationType.STRING_REMOVE, id, noOp);

@@ -1,9 +1,9 @@
-import {RealTimeNull} from "../rt/RealTimeNull";
 import {HistoricalValue} from "./HistoricalValue";
-import {ObservableNull} from "../observable/ObservableNull";
+import {NullNode} from "../internal/NullNode";
+import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export class HistoricalNull extends HistoricalValue<any> implements ObservableNull {
-  constructor(value: RealTimeNull) {
-    super(value);
+export class HistoricalNull extends HistoricalValue<any>  {
+  constructor(_delegate: NullNode, _wrapperFactory: HistoricalWrapperFactory) {
+    super(_delegate, _wrapperFactory);
   }
 }

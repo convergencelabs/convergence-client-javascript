@@ -33,8 +33,9 @@ export class IdentityService {
     return this._connection.session();
   }
 
-  getUser(value: string, field?: string): Promise<DomainUser> {
-    return this.getUsers(value, field).then((users: DomainUser[]) => {
+  user(value: string, field: string = UserField.USERNAME): Promise<DomainUser> {
+    // TODO It is only valid to look up by email / username.
+    return this.users(value, field).then((users: DomainUser[]) => {
       if (users.length === 0) {
         return Promise.resolve(<DomainUser>undefined);
       } else if (users.length === 1) {
@@ -45,7 +46,8 @@ export class IdentityService {
     });
   }
 
-  getUsers(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
+  users(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
+    // TODO It is only valid to look up by email / username.
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
     } else if (validLookUpFields.indexOf(field) < 0) {
@@ -69,12 +71,12 @@ export class IdentityService {
     }
   }
 
-  searchUsers(fields: string | string[],
-              value: string,
-              offset?: number,
-              limit?: number,
-              orderBy?: string,
-              ascending?: boolean): Promise<DomainUser[]> {
+  search(fields: string | string[],
+         value: string,
+         offset?: number,
+         limit?: number,
+         orderBy?: string,
+         ascending?: boolean): Promise<DomainUser[]> {
     if (fields === undefined || fields === null || (Array.isArray(fields) && (<string[]>fields).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (value === undefined || value === null) {

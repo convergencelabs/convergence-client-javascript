@@ -1,10 +1,11 @@
 import {DiscreteOperation} from "./DiscreteOperation";
 import {Immutable} from "../../../util/Immutable";
 import {OperationType} from "./OperationType";
+import {StringSet} from "./operationChanges";
 
-export class StringSetOperation extends DiscreteOperation {
+export class StringSetOperation extends DiscreteOperation implements StringSet {
 
-  constructor(id: string, public noOp: boolean, public value: string) {
+  constructor(id: string, noOp: boolean, public value: string) {
     super(OperationType.STRING_VALUE, id, noOp);
     Object.freeze(this);
   }

@@ -1,13 +1,10 @@
 import {RealTimeValue} from "./RealTimeValue";
-import {ObservableNull} from "../observable/ObservableNull";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {PathElement} from "../ot/Path";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
-import {ModelValueType} from "../ModelValueType";
-import {ModelOperationEvent} from "../ModelOperationEvent";
+import {NullNode} from "../internal/NullNode";
+import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 
-export class RealTimeNull extends RealTimeValue<any> implements ObservableNull {
+export class RealTimeNull extends RealTimeValue<any> {
 
   static Events: any = {
     DETACHED: RealTimeValue.Events.DETACHED
@@ -16,24 +13,10 @@ export class RealTimeNull extends RealTimeValue<any> implements ObservableNull {
   /**
    * Constructs a new RealTimeNull.
    */
-  constructor(id: string,
-              parent: RealTimeContainerValue<any>,
-              fieldInParent: PathElement,
-              callbacks: ModelEventCallbacks,
-              model: RealTimeModel) {
-    super(ModelValueType.Null, id, parent, fieldInParent, callbacks, model);
-  }
-
-  protected _getData(): any {
-    return null;
-  }
-
-  protected _setData(data: any): void {
-    throw new Error("Can not set the value on a Null type.");
-  }
-
-  _handleRemoteOperation(operationEvent: ModelOperationEvent): void {
-    throw new Error("Null values do not process operations");
+  constructor(_delegate: NullNode,
+              _callbacks: ModelEventCallbacks,
+              _wrapperFactory: RealTimeWrapperFactory) {
+    super(_delegate, _callbacks, _wrapperFactory);
   }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

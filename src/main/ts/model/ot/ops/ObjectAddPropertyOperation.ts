@@ -2,8 +2,9 @@ import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
+import {ObjectAddProperty} from "./operationChanges";
 
-export class ObjectAddPropertyOperation extends DiscreteOperation {
+export class ObjectAddPropertyOperation extends DiscreteOperation implements ObjectAddProperty {
 
   constructor(id: string, noOp: boolean, public prop: string, public value: DataValue) {
     super(OperationType.OBJECT_ADD, id, noOp);
