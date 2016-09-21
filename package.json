@@ -46,6 +46,7 @@
     "gulp-rollup": "^1.8.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-tslint": "^4.3.5",
+    "gulp-typedoc": "^2.0.0",
     "gulp-typescript": "2.13.4",
     "gulp-uglify": "^1.5.3",
     "merge2": "^1.0.2",
@@ -57,9 +58,10 @@
     "run-sequence": "^1.2.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "tslint": "^3.7.4",
-    "typescript": "^1.8.10",
     "ts-node": "0.9.3 ",
+    "tslint": "^3.7.4",
+    "typedoc": "^0.4.5",
+    "typescript": "^1.8.10",
     "typings": "^0.8.1",
     "uglify-js": "^2.6.2"
   }

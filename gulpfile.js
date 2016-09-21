@@ -213,3 +213,25 @@ gulp.task('copyPackage', function(){
 gulp.task('clean', function () {
   return del(['dist/', "build"]);
 });
+
+
+var typedoc = require("gulp-typedoc");
+gulp.task("typedoc", function() {
+  return gulp
+    .src(["api/*.ts"])
+    .pipe(typedoc({
+      // TypeScript options (see typescript docs)
+      module: "es6",
+      target: "es6",
+      includeDeclarations: true,
+
+      // Output options (see typedoc docs)
+      out: "./build/docs",
+
+      // TypeDoc options (see typedoc docs)
+      name: "Convergence Client",
+      ignoreCompilerErrors: true,
+      version: true
+    }))
+    ;
+});

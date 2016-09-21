@@ -107,8 +107,8 @@ export class ActivityService {
       this._connection);
   }
 
-  joined(): {[key: string]: Activity} {
-    var joined: {[key: string]: Activity} = {};
+  joined(): Map<string, Activity> {
+    var joined: Map<string, Activity> = new Map();
     Object.keys(this._joinedMap).forEach(id => {
         joined[id] = this.activity(id);
     });
