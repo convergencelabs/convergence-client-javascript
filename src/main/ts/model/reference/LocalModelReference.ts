@@ -1,7 +1,8 @@
 import {ModelReference} from "./ModelReference";
 import {RealTimeValue} from "../rt/RealTimeValue";
-import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
 import {ReferenceType} from "./ModelReference";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
@@ -12,7 +13,7 @@ export interface ModelReferenceCallbacks {
 
 export type ReferenceDisposedCallback = (reference: LocalModelReference<any, any>) => void;
 
-export abstract class LocalModelReference<V, R extends ModelReference<V>> extends DelegatingEventEmitter {
+export abstract class LocalModelReference<V, R extends ModelReference<V>> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _published: boolean;
   private _callbacks: ModelReferenceCallbacks;
@@ -20,7 +21,9 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
   private _disposeCallback: ReferenceDisposedCallback;
 
   constructor(reference: R, callbacks: ModelReferenceCallbacks, disposeCallback: ReferenceDisposedCallback) {
-    super(reference);
+    super();
+
+    this._emitFrom(reference.events());
     this._reference = reference;
     this._published = false;
     this._callbacks = callbacks;

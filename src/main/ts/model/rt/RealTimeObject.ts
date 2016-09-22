@@ -55,7 +55,7 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
 
       if (!event.local) {
         let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this.emitEvent(convertedEvent);
+        this._emitEvent(convertedEvent);
       }
 
       if (event instanceof ObjectNodeSetValueEvent) {

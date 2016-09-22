@@ -11,9 +11,9 @@ import {ActivityClearState} from "../connection/protocol/activity/activityState"
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ParticipantsRequest} from "../connection/protocol/activity/participants";
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export class Activity extends ObservableEventEmitter<ActivityEvent> {
+export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   static Events: any = {
     SESSION_JOINED: "session_joined",
@@ -34,7 +34,8 @@ export class Activity extends ObservableEventEmitter<ActivityEvent> {
               isJoined: () => boolean,
               eventStream: Observable<ActivityEvent>,
               connection: ConvergenceConnection) {
-    super(eventStream);
+    super();
+    this._emitFrom(eventStream);
     this._id = id;
     this._joinCB = joinCB;
     this._leftCB = leftCB;

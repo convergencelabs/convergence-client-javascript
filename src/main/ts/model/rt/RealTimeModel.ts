@@ -49,8 +49,9 @@ import {RemoteReferenceCreatedEvent} from "./events";
 import {ModelEvent} from "./events";
 import {ModelClosedEvent} from "./events";
 import {VersionChangedEvent} from "./events";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 
-export class RealTimeModel extends ConvergenceEventEmitter {
+export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   static Events: any = {
     CLOSED: "closed",
@@ -109,7 +110,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       this._committed = committed;
       var name: string = this._committed ? RealTimeModel.Events.COMMITTED : RealTimeModel.Events.MODIFIED;
       var evt: ModelEvent = {src: this, name: name};
-      this.emit(name, evt);
+      this._emitEvent(evt);
     });
 
     // fixme these should have versions unless we move to GUIDs.
@@ -394,7 +395,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       sessionId: message.sessionId,
       username: SessionIdParser.parseUsername(message.sessionId)
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   private _handleClientClosed(message: RemoteClientClosedModel): void {
@@ -411,7 +412,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       sessionId: message.sessionId,
       username: SessionIdParser.parseUsername(message.sessionId)
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
@@ -485,7 +486,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
     this._model.root()._detach();
     this._open = false;
     this._connection = null;
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   private _handelOperationAck(message: OperationAck): void {
@@ -556,7 +557,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
       src: this,
       version: this._version
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   private _modelReferenceEvent(event: RemoteReferenceEvent): void {
@@ -570,7 +571,7 @@ export class RealTimeModel extends ConvergenceEventEmitter {
         src: this,
         reference: reference
       };
-      this.emitEvent(createdEvent);
+      this._emitEvent(createdEvent);
     }
   }
 

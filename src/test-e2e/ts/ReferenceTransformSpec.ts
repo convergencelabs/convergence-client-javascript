@@ -7,6 +7,7 @@ import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
 import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
+import {RemoteReferenceCreatedEvent} from "../../main/ts/model/rt/events";
 
 
 describe('Reference Transformation E2E', () => {
@@ -86,7 +87,7 @@ describe('Reference Transformation E2E', () => {
       var rts: RealTimeString = <RealTimeString>model.valueAt("text");
       console.log(model.connectedSessions());
 
-      rts.on(RealTimeString.Events.REFERENCE, function(e) {
+      rts.on(RealTimeString.Events.REFERENCE, function(e: RemoteReferenceCreatedEvent) {
         console.log(e.reference.username());
         refPublishAction.acknowledgeReceipt();
         e.reference.on("set", (e) => {

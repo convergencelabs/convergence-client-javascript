@@ -5,9 +5,9 @@ import {JoinRoomMessage} from "../connection/protocol/chat/joinRoom";
 import {MessageType} from "../connection/protocol/MessageType";
 import {LeaveRoomMessage} from "../connection/protocol/chat/leaveRoom";
 import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export class ChatRoom extends ObservableEventEmitter<ChatEvent> {
+export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
 
   private _id: string;
   private _joinCB: () => void;
@@ -21,8 +21,8 @@ export class ChatRoom extends ObservableEventEmitter<ChatEvent> {
               isJoined: () => boolean,
               eventStream: Observable<ChatEvent>,
               connection: ConvergenceConnection) {
-    super(eventStream);
-
+    super();
+    this._emitFrom(eventStream);
     this._id = id;
     this._joinCB = joinCB;
     this._leftCB = leftCB;
