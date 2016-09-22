@@ -54,7 +54,7 @@ export class RealTimeString extends RealTimeValue<String> {
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (!event.local) {
         let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this.emitEvent(convertedEvent);
+        this._emitEvent(convertedEvent);
       }
       if (event instanceof StringNodeInsertEvent) {
         if (event.local) {

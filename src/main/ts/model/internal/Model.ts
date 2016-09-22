@@ -1,12 +1,13 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path} from "../ot/Path";
 import {ModelNode} from "./ModelNode";
 import {DataValueFactory} from "../DataValueFactory";
 import {ObjectNode} from "./ObjectNode";
 import {ObjectValue} from "../dataValue";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
-export class Model extends ConvergenceEventEmitter {
+export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   static Events: any = {
     DELETED: "deleted",

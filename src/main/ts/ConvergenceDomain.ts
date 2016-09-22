@@ -4,14 +4,14 @@ import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {debugFlags as flags} from "./Debug";
-import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
+import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 
-export default class ConvergenceDomain extends ConvergenceEventEmitter {
+export default class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private static DefaultOptions: ConvergenceOptions = {
     connectionTimeout: 5,
@@ -78,20 +78,20 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
     );
 
     this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
-      this.emitEvent({src: this, name: ConvergenceDomain.Events.CONNECTED}));
+      this._emitEvent({src: this, name: ConvergenceDomain.Events.CONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
-      this.emitEvent({src: this, name: ConvergenceDomain.Events.INTERRUPTED}));
+      this._emitEvent({src: this, name: ConvergenceDomain.Events.INTERRUPTED}));
 
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
-      this.emitEvent({src: this, name: ConvergenceDomain.Events.DISCONNECTED}));
+      this._emitEvent({src: this, name: ConvergenceDomain.Events.DISCONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
-      this.emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
+      this._emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
       var evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error: error};
-      this.emitEvent(evt);
+      this._emitEvent(evt);
     });
 
     this._modelService = new ModelService(this._connection);

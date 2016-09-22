@@ -1,4 +1,3 @@
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {Session} from "../Session";
 import {ModelFqn} from "./ModelFqn";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
@@ -25,8 +24,10 @@ import {ModelQuery} from "./query/ModelQuery";
 import {HistoricalModel} from "./historical/HistoricalModel";
 import {HistoricalDataRequest} from "../connection/protocol/model/historical/historicalDataRequest";
 import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
-export class ModelService extends ConvergenceEventEmitter {
+export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _openRequestsByFqn: { [key: string]: OpenRequest; } = {};
   private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};

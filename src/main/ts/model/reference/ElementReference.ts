@@ -6,7 +6,7 @@ import {ValueDetachedEvent} from "../rt/events";
 
 export class ElementReference extends ModelReference<RealTimeValue<any>> {
 
-  private _detachedListener: Function = (event: ValueDetachedEvent) => {
+  private _detachedListener: (event: ValueDetachedEvent) => void = (event: ValueDetachedEvent) => {
     this._handleElementRemoved(<RealTimeValue<any>>event.src);
   };
 

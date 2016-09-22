@@ -1,6 +1,6 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {EqualsUtil} from "../../util/EqualsUtil";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
 export var ReferenceType: any = {
   INDEX: "index",
@@ -10,7 +10,7 @@ export var ReferenceType: any = {
 };
 Object.freeze(ReferenceType);
 
-export abstract class ModelReference<V> extends ConvergenceEventEmitter {
+export abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   static Events: any = {
     SET: "set",
@@ -78,7 +78,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
       name: ModelReference.Events.DISPOSED,
       src: this
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
     this.removeAllListenersForAllEvents();
   }
 
@@ -101,7 +101,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
       src: this,
       local: local
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   _clear(): void {
@@ -110,7 +110,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter {
       name: ModelReference.Events.CLEARED,
       src: this
     };
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   protected _setIfChanged(values: V[]): void {

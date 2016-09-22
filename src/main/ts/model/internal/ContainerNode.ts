@@ -20,7 +20,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
 
     var newEvent: NodeChangedEvent = new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
 
-    this.emitEvent(newEvent);
+    this._emitEvent(newEvent);
   };
 
   /**

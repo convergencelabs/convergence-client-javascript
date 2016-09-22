@@ -1,4 +1,4 @@
-import {ObservableEventEmitter, EventListener} from "../../../main/ts/util/ObservableEventEmitter";
+import {ConvergenceEventEmitter, EventListener} from "../../../main/ts/util/ConvergenceEventEmitter";
 import {Subject} from "rxjs/Rx";
 import {ConvergenceEvent} from "../../../main/ts/util/ConvergenceEvent";
 
@@ -131,17 +131,14 @@ describe('EventEmitter', () => {
   });
 });
 
-class TestEmitter extends ObservableEventEmitter<TestEvent> {
-  private _subject: Subject<TestEvent>;
+class TestEmitter extends ConvergenceEventEmitter<TestEvent> {
 
   constructor() {
     super();
-    this._subject = new Subject<TestEvent>();
-    this._setObservable(this._subject);
   }
 
-  public next(event: TestEvent): ObservableEventEmitter<TestEvent> {
-    this._subject.next(event);
+  public next(event: TestEvent): ConvergenceEventEmitter<TestEvent> {
+    this._emitEvent(event);
     return this;
   }
 }

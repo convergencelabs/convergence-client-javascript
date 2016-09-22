@@ -16,8 +16,9 @@ import {PresenceClearState} from "../connection/protocol/presence/presenceState"
 import {SubjectSubscriptionManager} from "./SubjectSubscriptionManager";
 import {SubscribePresenceRequest, SubscribePresenceResponse} from "../connection/protocol/presence/subscribePresence";
 import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePresence";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
-export class PresenceService extends ConvergenceEventEmitter {
+export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _connection: ConvergenceConnection;
   private _userPresences: Map<string, UserPresence>;

@@ -1,4 +1,3 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelValueType} from "../ModelValueType";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
@@ -7,8 +6,10 @@ import {NodeValueChangedEvent} from "./events";
 import {NodeChangedEvent} from "./events";
 import {NodeDetachedEvent} from "./events";
 import {DataValue} from "../dataValue";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
-export abstract class ModelNode<T> extends ConvergenceEventEmitter {
+export abstract class ModelNode<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   static Events: any = {
     DETACHED: "detached",
@@ -65,7 +66,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter {
 
     var event: NodeDetachedEvent = new NodeDetachedEvent(this);
 
-    this.emitEvent(event);
+    this._emitEvent(event);
   }
 
   data(): T
@@ -80,8 +81,8 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter {
   }
 
   protected _emitValueEvent(event: NodeValueChangedEvent): void {
-    this.emitEvent(event);
-    this.emitEvent(new NodeChangedEvent(this, event.local, [], event, this.sessionId, this.username));
+    this._emitEvent(event);
+    this._emitEvent(new NodeChangedEvent(this, event.local, [], event, this.sessionId, this.username));
   }
 
   protected _exceptionIfDetached(): void {

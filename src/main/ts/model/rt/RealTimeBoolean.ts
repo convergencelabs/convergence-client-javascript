@@ -33,7 +33,7 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
         }
       } else {
         let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this.emitEvent(convertedEvent);
+        this._emitEvent(convertedEvent);
       }
     });
   }

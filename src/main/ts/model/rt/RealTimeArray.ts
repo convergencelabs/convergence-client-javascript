@@ -54,7 +54,7 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
         }
       } else {
         let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this.emitEvent(convertedEvent);
+        this._emitEvent(convertedEvent);
       }
     });
   }
