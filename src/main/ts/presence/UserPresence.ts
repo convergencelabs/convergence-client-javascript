@@ -19,7 +19,7 @@ export class UserPresence {
 
   state(key: string): any
   state(): Map<string, any>
-  state(key?: string): any{
+  state(key?: string): any {
     // FIXME make result be cloned / immutable.
     if (typeof key === "undefined") {
       return this._state;

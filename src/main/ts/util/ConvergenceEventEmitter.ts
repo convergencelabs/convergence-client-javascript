@@ -25,7 +25,7 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
       },
       (error: Error) => {
         this._subject.error(error);
-      })
+      });
   }
 
   addListener(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
