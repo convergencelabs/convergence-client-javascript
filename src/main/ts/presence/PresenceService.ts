@@ -63,6 +63,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._connection.session();
   }
 
+  isAvailable(): boolean {
+    return this._localPresence.value.available();
+  }
+
   // TODO: Use some sort of immutability or cloned object
   publish(key: string, value: any): void {
     const oldValue: UserPresence = this._localPresence.getValue();
@@ -91,36 +95,50 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  localPresence(): Observable<UserPresence> {
-    return this.presence(this.session().username());
+  state(key: string): any
+  state(): Map<string, any>
+  state(key?: string): any {
+    return this._localPresence.value.state(key);
   }
 
-  presence(username: string): Observable<UserPresence> {
-    return this.presences([username]).map(
-      result => {
+  presence(username: string): Promise<UserPresence>
+  presence(usernames: string[]): Promise<UserPresence[]>
+  presence(usernames: string | string[]): Promise<UserPresence> | Promise<UserPresence[]> {
+    if (typeof usernames === "string") {
+      return this._get([usernames]).then(result => {
         return <UserPresence>result[0];
       });
+    } else {
+      return this._get(<string[]>usernames);
+    }
   }
 
-  presences(usernames: string[]): Observable<UserPresence[]> {
+  presenceStream(username: string): Observable<UserPresence>
+  presenceStream(usernames: string[]): Observable<UserPresence>[]
+  presenceStream(usernames: string | string[]): Observable<UserPresence> | Observable<UserPresence>[] {
+    if (typeof usernames === "string") {
+      return this._stream([<string>usernames])[0];
+    } else {
+      return this._stream(<string[]>usernames);
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Private Methods
+  /////////////////////////////////////////////////////////////////////////////
+
+  private _get(usernames: string[]): Promise<UserPresence[]> {
     const message: RequestPresence = {
       type: MessageType.PRESENCE_REQUEST,
       usernames: usernames
     };
-    return Observable.fromPromise(this._connection.request(message)).map((response: RequestPresenceResponse) => {
-      return <UserPresence[]>response.userPresences;
+
+    return this._connection.request(message).then((response: RequestPresenceResponse) => {
+      return response.userPresences;
     });
   }
 
-  localPresenceStream(): Observable<UserPresence> {
-    return this.presenceStream(this.session().username());
-  }
-
-  presenceStream(username: string): Observable<UserPresence> {
-    return this.presenceStreams([username])[0];
-  }
-
-  presenceStreams(usernames: string[]): Observable<UserPresence>[] {
+  private _stream(usernames: string[]): Observable<UserPresence>[] {
     let userPresences: Observable<UserPresence>[] = [];
     for (var username of usernames) {
       if (this.session().username() === username) {
@@ -132,7 +150,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return userPresences;
   }
 
-  _handleMessage(messageEvent: MessageEvent): void {
+  private _handleMessage(messageEvent: MessageEvent): void {
     var message: IncomingProtocolMessage = messageEvent.message;
 
     switch (message.type) {
@@ -150,12 +168,12 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  _availabilityChanged(messageEvent: PresenceAvailabilityChanged): void {
+  private _availabilityChanged(messageEvent: PresenceAvailabilityChanged): void {
     const oldValue: UserPresence = this._userPresences.get(messageEvent.username);
     this._subManager.next(oldValue.username(), new UserPresence(oldValue.username(), messageEvent.available, oldValue.state()));
   }
 
-  _stateSet(messageEvent: PresenceStateSet): void {
+  private _stateSet(messageEvent: PresenceStateSet): void {
     if (this.session().username() === messageEvent.username) {
       const oldValue: UserPresence = this._localPresence.getValue();
       let newState: Map<string, any> = oldValue.state();
@@ -169,7 +187,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  _stateCleared(messageEvent: PresenceStateCleared): void {
+  private _stateCleared(messageEvent: PresenceStateCleared): void {
     if (this.session().username() === messageEvent.username) {
       const oldValue: UserPresence = this._localPresence.getValue();
       let newState: Map<string, any> = oldValue.state();
