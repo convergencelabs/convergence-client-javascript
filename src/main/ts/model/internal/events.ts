@@ -7,24 +7,28 @@ import {NumberNode} from "./NumberNode";
 import {ObjectNode} from "./ObjectNode";
 import {StringNode} from "./StringNode";
 
+
 export interface ModelNodeEvent extends ConvergenceEvent {
   src: ModelNode<any>;
   local: boolean;
 }
 
-export class NodeDetachedEvent implements ConvergenceEvent {
+export class NodeDetachedEvent implements ModelNodeEvent {
   public name: string = "detached";
-  constructor(public src: ModelNode<any>) {}
+
+  constructor(public src: ModelNode<any>,
+              public local: boolean) {}
 }
 
 export interface NodeValueChangedEvent extends ModelNodeEvent {
-  sessionId: string;
-  username: string;
+   sessionId: string;
+   username: string;
 }
 
 export class NodeChangedEvent implements ModelNodeEvent {
 
   public name: string = "node_changed";
+
   constructor(public src: ModelNode<any>,
               public local: boolean,
               public relativePath: Path,
@@ -35,6 +39,7 @@ export class NodeChangedEvent implements ModelNodeEvent {
 
 export class ArrayNodeInsertEvent implements NodeValueChangedEvent {
   public name: string = "insert";
+
   constructor(public src: ArrayNode,
               public local: boolean,
               public index: number,
@@ -45,6 +50,7 @@ export class ArrayNodeInsertEvent implements NodeValueChangedEvent {
 
 export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
   public name: string = "remove";
+
   constructor(public src: ArrayNode,
               public local: boolean,
               public index: number,
@@ -54,6 +60,7 @@ export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
 
 export class ArrayNodeSetEvent implements NodeValueChangedEvent {
   public name: string = "set";
+
   constructor(public src: ArrayNode,
               public local: boolean,
               public index: number,
@@ -64,6 +71,7 @@ export class ArrayNodeSetEvent implements NodeValueChangedEvent {
 
 export class ArrayNodeReorderEvent implements NodeValueChangedEvent {
   public name: string = "reorder";
+
   constructor(public src: ArrayNode,
               public local: boolean,
               public fromIndex: number,
@@ -74,6 +82,7 @@ export class ArrayNodeReorderEvent implements NodeValueChangedEvent {
 
 export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
+
   constructor(public src: ArrayNode,
               public local: boolean,
               public value: Array<any>,
@@ -84,6 +93,7 @@ export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
 
 export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
+
   constructor(public src: BooleanNode,
               public local: boolean,
               public value: boolean,
@@ -93,6 +103,7 @@ export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
 
 export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
+
   constructor(public src: NumberNode,
               public local: boolean,
               public value: number,
@@ -102,6 +113,7 @@ export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
 
 export class NumberNodeAddEvent implements NodeValueChangedEvent {
   public name: string = "add";
+
   constructor(public src: NumberNode,
               public local: boolean,
               public value: number,
@@ -112,6 +124,7 @@ export class NumberNodeAddEvent implements NodeValueChangedEvent {
 
 export class ObjectNodeSetEvent implements NodeValueChangedEvent {
   public name: string = "set";
+
   constructor(public src: ObjectNode,
               public local: boolean,
               public key: string,
@@ -122,6 +135,7 @@ export class ObjectNodeSetEvent implements NodeValueChangedEvent {
 
 export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
   public name: string = "remove";
+
   constructor(public src: ObjectNode,
               public local: boolean,
               public key: string,
@@ -131,6 +145,7 @@ export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
 
 export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
+
   constructor(public src: ObjectNode,
               public local: boolean,
               public value: { [key: string]: any; },
@@ -140,6 +155,7 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
 
 export class StringNodeInsertEvent implements NodeValueChangedEvent {
   public name: string = "insert";
+
   constructor(public src: StringNode,
               public local: boolean,
               public index: number,
@@ -150,6 +166,7 @@ export class StringNodeInsertEvent implements NodeValueChangedEvent {
 
 export class StringNodeRemoveEvent implements NodeValueChangedEvent {
   public name: string = "remove";
+
   constructor(public src: StringNode,
               public local: boolean,
               public index: number,
@@ -160,6 +177,7 @@ export class StringNodeRemoveEvent implements NodeValueChangedEvent {
 
 export class StringNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
+
   constructor(public src: StringNode,
               public local: boolean,
               public value: string,

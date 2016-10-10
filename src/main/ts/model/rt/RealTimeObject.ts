@@ -22,8 +22,7 @@ import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {EventConverter} from "./EventConverter";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> implements RealTimeContainerValue<{ [key: string]: any; }> {
 
@@ -43,8 +42,9 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
    */
   constructor(protected _delegate: ObjectNode,
               protected _callbacks: ModelEventCallbacks,
-              protected _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              protected _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
 
     this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
@@ -52,11 +52,6 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     };
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
-
-      if (!event.local) {
-        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this._emitEvent(convertedEvent);
-      }
 
       if (event instanceof ObjectNodeSetValueEvent) {
         if (event.local) {

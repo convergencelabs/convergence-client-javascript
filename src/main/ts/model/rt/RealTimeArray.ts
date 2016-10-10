@@ -15,8 +15,7 @@ import {ArrayNodeRemoveEvent} from "../internal/events";
 import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
-import {EventConverter} from "./EventConverter";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeContainerValue<any[]> {
 
@@ -35,8 +34,9 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
    */
   constructor(protected _delegate: ArrayNode,
               protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
@@ -52,9 +52,6 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
         } else if (event instanceof ArrayNodeSetValueEvent) {
           this._sendOperation(new ArraySetOperation(this.id(), false, event.src.dataValue().children));
         }
-      } else {
-        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this._emitEvent(convertedEvent);
       }
     });
   }

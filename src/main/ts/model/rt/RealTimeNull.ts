@@ -3,6 +3,7 @@ import {NullNode} from "../internal/NullNode";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeNull extends RealTimeValue<any> {
 
@@ -15,8 +16,9 @@ export class RealTimeNull extends RealTimeValue<any> {
    */
   constructor(_delegate: NullNode,
               _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
   }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

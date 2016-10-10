@@ -8,7 +8,6 @@ import {ArrayNodeRemoveEvent} from "../internal/events";
 import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
-import {ModelNodeEvent} from "../internal/events";
 import {NodeDetachedEvent} from "../internal/events";
 import {BooleanNodeSetValueEvent} from "../internal/events";
 import {HistoricalBoolean} from "./HistoricalBoolean";
@@ -43,7 +42,7 @@ import {StringSetValueEvent} from "./events";
 
 export class HistoricalEventConverter {
 
-  public static convertEvent(event: ModelNodeEvent, wrapperFactory: NodeWrapperFactory<HistoricalValue<any>>): ConvergenceEvent {
+  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<HistoricalValue<any>>): ConvergenceEvent {
     if (event instanceof  NodeDetachedEvent) {
       return new ValueDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {

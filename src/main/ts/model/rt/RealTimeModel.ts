@@ -75,6 +75,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _callbacks: ModelEventCallbacks;
 
   private _model: Model;
+  private _emitLocal: boolean = false;
 
   /**
    * Constructs a new RealTimeModel.
@@ -194,7 +195,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       referenceEventCallbacks: referenceCallbacks
     };
 
-    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks);
+    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks, this);
 
     this._open = true;
     this._committed = true;
@@ -239,6 +240,17 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
         }
       }
     });
+  }
+
+  emitLocalEvents(): boolean
+  emitLocalEvents(emit: boolean): void
+  emitLocalEvents(emit?: boolean): any {
+    if (arguments.length === 0) {
+      return this._emitLocal;
+    } else {
+      this._emitLocal = emit;
+      return;
+    }
   }
 
   connectedSessions(): RemoteSession[] {
@@ -483,7 +495,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _close(event: ModelClosedEvent): void {
-    this._model.root()._detach();
+    this._model.root()._detach(false);
     this._open = false;
     this._connection = null;
     this._emitEvent(event);

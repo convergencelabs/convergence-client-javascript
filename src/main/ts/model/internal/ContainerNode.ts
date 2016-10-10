@@ -37,9 +37,9 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     this._idToPathElement = new Map<string, PathElement>();
   }
 
-  _detach(): void {
-    this._detachChildren();
-    super._detach();
+  _detach(local: boolean): void {
+    this._detachChildren(local);
+    super._detach(local);
   }
 
   valueAt(pathArgs: any): ModelNode<any> {
@@ -53,5 +53,5 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
 
   abstract _valueAt(pathArgs: Path): ModelNode<any>;
 
-  protected abstract _detachChildren(): void;
+  protected abstract _detachChildren(local: boolean): void;
 }

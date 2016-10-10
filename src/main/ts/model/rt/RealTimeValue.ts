@@ -9,7 +9,11 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RemoteReferenceCreatedEvent} from "./events";
+import {RealTimeModel} from "./RealTimeModel";
+import {EventConverter} from "./EventConverter";
+import {ModelNodeEvent} from "../internal/events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {NodeDetachedEvent} from "../internal/events";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -24,8 +28,27 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
    */
   constructor(protected _delegate: ModelNode<T>,
               protected _callbacks: ModelEventCallbacks,
-              protected _wrapperFactory: RealTimeWrapperFactory) {
+              protected _wrapperFactory: RealTimeWrapperFactory,
+              private _model: RealTimeModel) {
+
     super();
+
+    this._delegate.events().filter((event: ModelNodeEvent) => {
+      if (this._model.emitLocalEvents()) {
+        return true;
+      } else if (event instanceof NodeDetachedEvent || !event.local) {
+        return true;
+      } else {
+        return false;
+      }
+    }).subscribe((event: ModelNodeEvent) => {
+      let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+      this._emitEvent(convertedEvent);
+    });
+  }
+
+  model(): RealTimeModel {
+    return this._model;
   }
 
   id(): string {

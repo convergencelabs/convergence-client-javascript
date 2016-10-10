@@ -33,6 +33,10 @@ describe('RealTimeObject', () => {
   });
 
   var model: Model = <Model><any>sinon.createStubInstance(Model);
+  var rtModel: RealTimeModel = <RealTimeModel><any>sinon.createStubInstance(RealTimeModel);
+  rtModel.emitLocalEvents = () => {
+    return false;
+  };
 
   var initialValue: ObjectValue =
     <ObjectValue>dataValueFactory.createDataValue({"num": 5});
@@ -54,14 +58,14 @@ describe('RealTimeObject', () => {
   });
 
   it('Value is correct after creation', () => {
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     expect(myObject.data()).to.deep.equal({"num": 5});
   });
 
   it('Value is correct after set', () => {
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.data({"string": "test"});
@@ -69,7 +73,7 @@ describe('RealTimeObject', () => {
   });
 
   it('Value is correct after setProperty', () => {
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.set("num", 10);
@@ -77,7 +81,7 @@ describe('RealTimeObject', () => {
   });
 
   it('Correct operation is sent after set', () => {
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.data({string: "test"});
@@ -87,7 +91,7 @@ describe('RealTimeObject', () => {
   });
 
   it('Value is correct after ObjectSetOperation', () => {
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
 
@@ -100,7 +104,7 @@ describe('RealTimeObject', () => {
 
   it('Correct Event is fired after ObjectSetOperation', () => {
     var eventCallback: SinonSpy = sinon.spy();
-    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks);
+    var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.on(RealTimeObject.Events.VALUE, eventCallback);

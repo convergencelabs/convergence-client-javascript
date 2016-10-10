@@ -6,10 +6,10 @@ import {NodeValueChangedEvent} from "./events";
 import {NodeChangedEvent} from "./events";
 import {NodeDetachedEvent} from "./events";
 import {DataValue} from "../dataValue";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ModelNodeEvent} from "./events";
 
-export abstract class ModelNode<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEvent> {
 
   static Events: any = {
     DETACHED: "detached",
@@ -60,11 +60,11 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ConvergenceEv
     return this._model === null;
   }
 
-  _detach(): void {
+  _detach(local: boolean): void {
     this._model._unregisterValue(this);
     this._model = null;
 
-    var event: NodeDetachedEvent = new NodeDetachedEvent(this);
+    var event: NodeDetachedEvent = new NodeDetachedEvent(this, local);
 
     this._emitEvent(event);
   }

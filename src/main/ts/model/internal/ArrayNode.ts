@@ -140,10 +140,10 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._applySetValue(dataValues, true, this.sessionId, this.username);
   }
 
-  protected _detachChildren(): void {
+  protected _detachChildren(local: boolean): void {
     this._idToPathElement.clear();
     this.forEach((child: ModelNode<any>) => {
-      child._detach();
+      child._detach(local);
       child.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
   }
@@ -200,7 +200,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     newChild.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children[index] = newChild;
     this._updateIdToPathElementMap(index);
-    oldChild._detach();
+    oldChild._detach(local);
 
     var event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild.data(), sessionId, username);
     this._emitValueEvent(event);
@@ -213,7 +213,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     child.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children.splice(index, 1);
     this._updateIdToPathElementMap(index);
-    child._detach();
+    child._detach(local);
 
     var event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, sessionId, username);
     this._emitValueEvent(event);
@@ -222,7 +222,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   private _applySetValue(data: DataValue[], local: boolean, sessionId: string, username: string): void {
     this._validateSet(data);
 
-    this._detachChildren();
+    this._detachChildren(local);
     this._children = data.map((value: any, i: number) => {
       this._idToPathElement.set(value.id, i);
       return ModelNodeFactory.create(value, this._pathCB(value.id), this.model(), this.sessionId,

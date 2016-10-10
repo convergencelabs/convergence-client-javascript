@@ -21,8 +21,7 @@ import {StringNodeRemoveEvent} from "../internal/events";
 import {StringNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {EventConverter} from "./EventConverter";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeString extends RealTimeValue<String> {
 
@@ -43,8 +42,9 @@ export class RealTimeString extends RealTimeValue<String> {
    */
   constructor(protected _delegate: StringNode,
               protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
 
     this._referenceManager = new ReferenceManager(this, [ReferenceType.INDEX, ReferenceType.RANGE]);
     this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
@@ -52,10 +52,6 @@ export class RealTimeString extends RealTimeValue<String> {
     };
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
-      if (!event.local) {
-        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this._emitEvent(convertedEvent);
-      }
       if (event instanceof StringNodeInsertEvent) {
         if (event.local) {
           this._sendOperation(new StringInsertOperation(this.id(), false, event.index, event.value));

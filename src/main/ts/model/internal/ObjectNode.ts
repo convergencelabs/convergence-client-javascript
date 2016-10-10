@@ -152,9 +152,9 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
     }
   }
 
-  protected _detachChildren(): void {
+  protected _detachChildren(local: boolean): void {
     this.forEach((child: ModelNode<any>) => {
-      child._detach();
+      child._detach(local);
     });
   }
 
@@ -172,7 +172,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
 
     if (this._children.has(key)) {
       this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-      this._children.get(key)._detach();
+      this._children.get(key)._detach(local);
     }
 
     var child: ModelNode<any> = ModelNodeFactory.create(value, this._pathCB(value.id), this._model,
@@ -191,7 +191,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
     if (this._children.has(key)) {
       this._idToPathElement.delete(key);
       this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-      this._children.get(key)._detach();
+      this._children.get(key)._detach(local);
       this._children.delete(key);
 
       var event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
@@ -223,7 +223,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
     this._emitValueEvent(event);
 
     oldChildren.forEach((child: ModelNode<any>) => {
-      child._detach();
+      child._detach(local);
       child.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
   }

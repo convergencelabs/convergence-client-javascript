@@ -8,8 +8,7 @@ import {NumberNodeAddEvent} from "../internal/events";
 import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {EventConverter} from "./EventConverter";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeNumber extends RealTimeValue<number>  {
 
@@ -25,8 +24,9 @@ export class RealTimeNumber extends RealTimeValue<number>  {
    */
   constructor(protected _delegate: NumberNode,
               protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
@@ -35,9 +35,6 @@ export class RealTimeNumber extends RealTimeValue<number>  {
         } else if (event instanceof NumberNodeAddEvent) {
           this._sendOperation(new NumberAddOperation(this.id(), false, event.value));
         }
-      } else {
-        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this._emitEvent(convertedEvent);
       }
     });
   }

@@ -28,6 +28,7 @@ export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
   src: RealTimeValue<any>;
+  local: boolean;
 }
 
 export class ValueDetachedEvent implements ConvergenceEvent {
@@ -47,7 +48,8 @@ export class ModelChangedEvent implements ConvergenceModelValueEvent {
               public relativePath: Path,
               public childEvent: ValueChangedEvent,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ArrayInsertEvent implements ValueChangedEvent {
@@ -56,7 +58,8 @@ export class ArrayInsertEvent implements ValueChangedEvent {
               public index: number,
               public value: RealTimeValue<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
@@ -64,7 +67,8 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
   constructor(public src: RealTimeArray,
               public index: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ArraySetEvent implements ValueChangedEvent {
@@ -73,7 +77,8 @@ export class ArraySetEvent implements ValueChangedEvent {
               public index: number,
               public value: any,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ArrayReorderEvent implements ValueChangedEvent {
@@ -82,7 +87,8 @@ export class ArrayReorderEvent implements ValueChangedEvent {
               public fromIndex: number,
               public toIndex: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ArraySetValueEvent implements ValueChangedEvent {
@@ -90,7 +96,8 @@ export class ArraySetValueEvent implements ValueChangedEvent {
   constructor(public src: RealTimeArray,
               public value: Array<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 
@@ -99,7 +106,8 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
   constructor(public src: RealTimeBoolean,
               public value: boolean,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class NumberSetValueEvent implements ValueChangedEvent {
@@ -107,7 +115,8 @@ export class NumberSetValueEvent implements ValueChangedEvent {
   constructor(public src: RealTimeNumber,
               public value: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class NumberAddEvent implements ValueChangedEvent {
@@ -115,7 +124,8 @@ export class NumberAddEvent implements ValueChangedEvent {
   constructor(public src: RealTimeNumber,
               public value: number,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 
@@ -125,7 +135,8 @@ export class ObjectSetEvent implements ValueChangedEvent {
               public key: string,
               public value: RealTimeValue<any>,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
@@ -133,7 +144,8 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
   constructor(public src: RealTimeObject,
               public key: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
@@ -141,14 +153,16 @@ export class ObjectSetValueEvent implements ValueChangedEvent {
   constructor(public src: RealTimeObject,
               public value: { [key: string]: any; },
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class NodeSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeObject,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class StringInsertEvent implements ValueChangedEvent {
@@ -157,7 +171,8 @@ export class StringInsertEvent implements ValueChangedEvent {
               public index: number,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class StringRemoveEvent implements ValueChangedEvent {
@@ -166,7 +181,8 @@ export class StringRemoveEvent implements ValueChangedEvent {
               public index: number,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }
 
 export class StringSetValueEvent implements ValueChangedEvent {
@@ -174,5 +190,6 @@ export class StringSetValueEvent implements ValueChangedEvent {
   constructor(public src: RealTimeString,
               public value: string,
               public sessionId: string,
-              public username: string) {}
+              public username: string,
+              public local: boolean) {}
 }

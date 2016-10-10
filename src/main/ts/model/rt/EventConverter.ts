@@ -8,7 +8,6 @@ import {ArrayNodeRemoveEvent} from "../internal/events";
 import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
-import {ModelNodeEvent} from "../internal/events";
 import {NodeDetachedEvent} from "../internal/events";
 import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeBoolean} from "./RealTimeBoolean";
@@ -43,54 +42,54 @@ import {StringSetValueEvent} from "./events";
 
 export class EventConverter {
 
-  public static convertEvent(event: ModelNodeEvent, wrapperFactory: NodeWrapperFactory<RealTimeValue<any>>): ConvergenceEvent {
+  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<RealTimeValue<any>>): ConvergenceEvent {
     if (event instanceof  NodeDetachedEvent) {
       return new ValueDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
       return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
-        <ValueChangedEvent> this.convertEvent(event.childEvent, wrapperFactory), event.sessionId, event.username);
+        <ValueChangedEvent> this.convertEvent(event.childEvent, wrapperFactory), event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeInsertEvent) {
       return new ArrayInsertEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.index,
-        wrapperFactory.wrap(event.value), event.sessionId, event.username);
+        wrapperFactory.wrap(event.value), event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeRemoveEvent) {
       return new ArrayRemoveEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.index,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeReorderEvent) {
       return new ArrayReorderEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.fromIndex, event.toIndex,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     }  else if (event instanceof ArrayNodeSetEvent) {
       return new ArraySetEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.index, event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeSetValueEvent) {
       return new ArraySetValueEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof BooleanNodeSetValueEvent) {
       return new BooleanSetValueEvent(<RealTimeBoolean> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof NumberNodeSetValueEvent) {
       return new NumberSetValueEvent(<RealTimeNumber> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof NumberNodeAddEvent) {
       return new NumberAddEvent(<RealTimeNumber> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ObjectNodeSetValueEvent) {
       return new ObjectSetValueEvent(<RealTimeObject> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ObjectNodeRemoveEvent) {
       return new ObjectRemoveEvent(<RealTimeObject> wrapperFactory.wrap(event.src), event.key,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ObjectNodeSetEvent) {
       return new ObjectSetEvent(<RealTimeObject> wrapperFactory.wrap(event.src), event.key,
-        wrapperFactory.wrap(event.value), event.sessionId, event.username);
+        wrapperFactory.wrap(event.value), event.sessionId, event.username, event.local);
     } else if (event instanceof StringNodeInsertEvent) {
       return new StringInsertEvent(<RealTimeString> wrapperFactory.wrap(event.src), event.index, event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof StringNodeRemoveEvent) {
       return new StringRemoveEvent(<RealTimeString> wrapperFactory.wrap(event.src), event.index, event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else if (event instanceof StringNodeSetValueEvent) {
       return new StringSetValueEvent(<RealTimeString> wrapperFactory.wrap(event.src), event.value,
-        event.sessionId, event.username);
+        event.sessionId, event.username, event.local);
     } else {
       throw new Error("Unable to convert event: " + event.name);
     }

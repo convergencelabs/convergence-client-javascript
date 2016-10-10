@@ -6,8 +6,7 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {EventConverter} from "./EventConverter";
+import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeBoolean extends RealTimeValue<boolean> {
 
@@ -22,8 +21,9 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
    */
   constructor(_delegate: BooleanNode,
               _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory) {
-    super(_delegate, _callbacks, _wrapperFactory);
+              _wrapperFactory: RealTimeWrapperFactory,
+              _model: RealTimeModel) {
+    super(_delegate, _callbacks, _wrapperFactory, _model);
 
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
@@ -31,9 +31,6 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
         if (event instanceof BooleanNodeSetValueEvent) {
           this._sendOperation(new BooleanSetOperation(this.id(), false, event.value));
         }
-      } else {
-        let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
-        this._emitEvent(convertedEvent);
       }
     });
   }

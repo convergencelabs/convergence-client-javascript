@@ -1,7 +1,6 @@
 import {ModelValueType} from "../ModelValueType";
 import {Path} from "../ot/Path";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelNodeEvent} from "../internal/events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {HistoricalEventConverter} from "./HistoricalEventConverter";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
@@ -12,7 +11,7 @@ export abstract class HistoricalValue<T> extends ConvergenceEventEmitter<Converg
   constructor(protected _delegate: ModelNode<T>, protected _wrapperFactory: HistoricalWrapperFactory) {
     super();
 
-    this._delegate.events().subscribe((event: ModelNodeEvent) => {
+    this._delegate.events().subscribe((event: ConvergenceEvent) => {
       let convertedEvent: ConvergenceEvent = HistoricalEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
