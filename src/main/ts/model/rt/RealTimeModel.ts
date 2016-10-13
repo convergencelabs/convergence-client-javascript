@@ -444,7 +444,23 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
       switch (event.type) {
         case MessageType.REFERENCE_PUBLISHED:
-          // fixme need to do the ot stuff here if the thing has a value.
+          processedEvent = Immutable.copy(event, {
+            path: value.path()
+          });
+
+          const publishEvent: RemoteReferencePublished = <RemoteReferencePublished>event;
+          if (publishEvent.values !== undefined) {
+            let data: ModelReferenceData = {
+              type: publishEvent.referenceType,
+              id: publishEvent.id,
+              values: publishEvent.values
+            };
+            data = this._concurrencyControl.processRemoteReferenceSet(data);
+            processedEvent = Immutable.copy(processedEvent, {
+              values: data.values
+            });
+          }
+          break;
         case MessageType.REFERENCE_UNPUBLISHED:
         case MessageType.REFERENCE_CLEARED:
           processedEvent = Immutable.copy(event, {
@@ -452,8 +468,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
           });
           break;
         case MessageType.REFERENCE_SET:
-          var setEvent: RemoteReferenceSet = <RemoteReferenceSet>event;
-          var data: ModelReferenceData = {
+          const setEvent: RemoteReferenceSet = <RemoteReferenceSet>event;
+          let data: ModelReferenceData = {
             type: setEvent.referenceType,
             id: setEvent.id,
             values: setEvent.values
