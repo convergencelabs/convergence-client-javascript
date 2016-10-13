@@ -103,6 +103,10 @@ export class ReferenceManager {
         break;
     }
 
+    if (event.values !== undefined) {
+      this._setReferenceValues(reference, event.values);
+    }
+
     this._referenceMap.put(reference);
   }
 
@@ -118,19 +122,22 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
     var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
+    this._setReferenceValues(reference, event.values)
+  }
 
+  private _setReferenceValues(reference, values) {
     // Translate vids to RealTimeValues
     if (reference.type() === ReferenceType.ELEMENT) {
-      let values: RealTimeValue<any>[] = [];
-      for (var id of event.values) {
+      const rtvs: RealTimeValue<any>[] = [];
+      for (var id of values) {
         let value: RealTimeValue<any> = (<RealTimeModel>this._source)._getRegisteredValue(id);
         if (value !== undefined) {
-          values.push(value);
+          rtvs.push(value);
         }
       }
-      reference._set(values);
+      reference._set(rtvs);
     } else {
-      reference._set(event.values);
+      reference._set(values);
     }
   }
 }

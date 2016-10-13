@@ -74,9 +74,6 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     this._ensureAttached();
     this._published = true;
     this._callbacks.onPublish(this);
-    if (this.reference().isSet()) {
-      this._fireSet();
-    }
   }
 
   unpublish(): void {
@@ -107,23 +104,21 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
   set(value: V): void;
   set(value: V[]): void;
   set(value: V | V[]): void {
+    this._ensureAttached();
+
     if (value instanceof Array) {
       this._reference._set(value, true);
     } else {
       this._reference._set([value], true);
     }
-    this._fireSet();
+
+    if (this.isPublished()) {
+      this._callbacks.onSet(this);
+    }
   }
 
   isSet(): boolean {
     return this._reference.isSet();
-  }
-
-  protected _fireSet(): void {
-    this._ensureAttached();
-    if (this.isPublished()) {
-      this._callbacks.onSet(this);
-    }
   }
 
   private _ensureAttached(): void {

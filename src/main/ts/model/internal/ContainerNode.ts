@@ -14,11 +14,11 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
 
   _idToPathElement: Map<string, PathElement>;
 
-  protected _nodeChangedHandler = (event: NodeChangedEvent) => {
-    var newPath: Path = event.relativePath.slice(0);
+  protected _nodeChangedHandler: (event: NodeChangedEvent) => any = (event: NodeChangedEvent) => {
+    const newPath: Path = event.relativePath.slice(0);
     newPath.unshift(this._idToPathElement.get(event.src.id()));
 
-    var newEvent: NodeChangedEvent = new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
+    const newEvent: NodeChangedEvent = new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
 
     this._emitEvent(newEvent);
   };
@@ -44,7 +44,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
 
   valueAt(pathArgs: any): ModelNode<any> {
     // We're letting them pass in individual path arguments or a single array of path arguments
-    var pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
+    const pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
     if (pathArgsForReal.length === 0) {
       throw new Error("relative path of child must contain at least one element.");
     }

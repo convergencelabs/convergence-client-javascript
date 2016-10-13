@@ -32,6 +32,7 @@ export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
 
 export interface RemoteReferencePublished extends RemoteReferenceEvent {
   referenceType: string;
+  values?: any;
 }
 
 export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
@@ -46,13 +47,17 @@ export interface RemoteReferenceCleared extends RemoteReferenceEvent {
 }
 
 export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
+  var type: string = ReferenceTypeCodes.value(body.c);
+  var values: any = deserializeReferenceValues(body.v, type);
+
   var result: RemoteReferencePublished = {
     resourceId: body.r,
     sessionId: body.s,
     username: SessionIdParser.parseUsername(body.s),
     key: body.k,
     id: body.d,
-    referenceType: ReferenceTypeCodes.value(body.c)
+    referenceType: type,
+    values: values
   };
   return result;
 };
@@ -77,12 +82,12 @@ export function deserializeReferenceValues(values: any, type: string): any {
           end: range[1]
         });
       }
-      ;
+
       return ranges;
     default:
       throw new Error("Invalid reference type");
   }
-};
+}
 
 export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
   var type: string = ReferenceTypeCodes.value(body.c);
@@ -126,6 +131,8 @@ export interface OutgoingReferenceEvent extends OutgoingProtocolNormalMessage {
 
 export interface PublishReferenceEvent extends OutgoingReferenceEvent {
   referenceType: string;
+  values?: any;
+  version?: number;
 }
 
 export interface UnpublishReferenceEvent extends OutgoingReferenceEvent {
@@ -146,7 +153,9 @@ export var PublishReferenceSerializer: MessageBodySerializer = (message: Publish
     r: message.resourceId,
     d: message.id,
     k: message.key,
-    c: ReferenceTypeCodes.code(message.referenceType)
+    c: ReferenceTypeCodes.code(message.referenceType),
+    v: serializeReferenceValue(message.values, message.referenceType),
+    s: message.version
   };
 };
 
@@ -158,8 +167,12 @@ export var UnpublishReferenceSerializer: MessageBodySerializer = (message: Unpub
   };
 };
 
-function seserializeReferenceValue(values: any, type: string): any {
+function serializeReferenceValue(values: any, type: string): any {
   "use strict";
+  if (values === undefined) {
+    return;
+  }
+
   switch (type) {
     case ReferenceType.INDEX:
     case ReferenceType.PROPERTY:
@@ -174,7 +187,7 @@ function seserializeReferenceValue(values: any, type: string): any {
     default:
       throw new Error("Invalid reference type");
   }
-};
+}
 
 export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
@@ -182,7 +195,7 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
     d: message.id,
     k: message.key,
     c: ReferenceTypeCodes.code(message.referenceType),
-    v: seserializeReferenceValue(message.values, message.referenceType),
+    v: serializeReferenceValue(message.values, message.referenceType),
     s: message.version
   };
 };

@@ -126,7 +126,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
           resourceId: this._resourceId,
           key: reference.reference().key(),
           id: vid,
-          referenceType: reference.reference().type()
+          referenceType: reference.reference().type(),
+          values: reference.values(),
+          version: this._concurrencyControl.contextVersion()
         };
         this._connection.send(event);
 
@@ -208,7 +210,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
         resourceId: this._resourceId,
         key: ref.key,
         id: ref.id,
-        referenceType: ref.referenceType
+        referenceType: ref.referenceType,
+        values: ref.values
       };
 
       // fixme refactor
@@ -441,6 +444,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
       switch (event.type) {
         case MessageType.REFERENCE_PUBLISHED:
+          // fixme need to do the ot stuff here if the thing has a value.
         case MessageType.REFERENCE_UNPUBLISHED:
         case MessageType.REFERENCE_CLEARED:
           processedEvent = Immutable.copy(event, {
