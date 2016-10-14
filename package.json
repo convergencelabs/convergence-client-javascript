@@ -19,10 +19,10 @@
   "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "gulp",
+    "dist": "gulp",
     "test": "gulp test",
-    "typings": "typings install",
-    "timestamp": "gulp bump"
+    "clean": "gulp clean",
+    "typings": "typings install"
   },
   "publishConfig": {
     "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"

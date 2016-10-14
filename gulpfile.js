@@ -171,34 +171,33 @@ function minify(src) {
     .pipe(gulp.dest("dist"));
 }
 
-gulp.task('dist-umd-min', function() {
+gulp.task('dist-umd-min', ['dist-umd'], function() {
   return minify(gulp.src("dist/convergence-client.umd.js"));
 });
 
-gulp.task('dist-amd-min', function() {
+gulp.task('dist-amd-min', ['dist-amd'], function() {
   return minify(gulp.src("dist/convergence-client.amd.js"));
 });
 
-gulp.task('dist', ["dist-umd", "dist-amd", "dist-es6", "copyPackage"], function(cb) {
-  runSequence('dist-umd-min', 'dist-amd-min', cb);
+gulp.task('dist', ["dist-umd-min", "dist-amd-min", "dist-es6", "copyPackage"], function(cb) {
+  if (packageJson.version.endsWith('SNAPSHOT')) {
+    return gulp.src('dist/package.json')
+      .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
+      .pipe(gulp.dest('dist/'));
+  }
 });
 
-gulp.task('bump', function(){
-    gulp.src('./package.json')
-        .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
-        .pipe(gulp.dest('./'));
-});
 
 gulp.task('copyPackage', function(){
-    gulp.src('./package.json')
-        .pipe((gulp.dest('dist')))
+    return gulp.src('./package.json')
+        .pipe((gulp.dest('dist')));
 });
 
 /**
  * Removes all build artifacts.
  */
 gulp.task('clean', function () {
-  return del(['dist/', "build"]);
+  return del(['dist', "build"]);
 });
 
 

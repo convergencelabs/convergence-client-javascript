@@ -22,8 +22,7 @@ node {
 
       stage 'Compile'
       sh '''
-        npm run timestamp
-        npm run build
+        npm run dist
       '''
 
       stage 'Publish'
