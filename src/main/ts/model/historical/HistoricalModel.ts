@@ -65,10 +65,10 @@ export class HistoricalModel {
     if (version === this._version) {
       return Promise.resolve();
     } else if (version > this._version) {
-      gotoVersion = this._version;
+      gotoVersion = this._version + 1;
       limit = version - this._version;
     } else {
-      gotoVersion = version;
+      gotoVersion = version + 1;
       limit = this._version - version;
     }
 
