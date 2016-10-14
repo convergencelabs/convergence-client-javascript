@@ -187,7 +187,7 @@ export class AppliedStringInsertOperationDeserializer {
 
 export class AppliedStringRemoveOperationDeserializer {
   static deserialize(body: any): AppliedStringRemoveOperation {
-    return new AppliedStringRemoveOperation(body.d, body.n, body.i, body.v);
+    return new AppliedStringRemoveOperation(body.d, body.n, body.i, body.v, body.o);
   }
 }
 

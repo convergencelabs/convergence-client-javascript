@@ -11,6 +11,6 @@ export class AppliedStringInsertOperation extends AppliedDiscreteOperation imple
   }
 
   inverse(): AppliedStringRemoveOperation {
-    return new AppliedStringRemoveOperation(this.id, this.noOp, this.index, this.value);
+    return new AppliedStringRemoveOperation(this.id, this.noOp, this.index, this.value.length, this.value);
   }
 }

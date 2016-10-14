@@ -5,7 +5,7 @@ import {OperationType} from "../ops/OperationType";
 
 export class AppliedStringRemoveOperation extends AppliedDiscreteOperation implements StringRemove {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: string) {
+  constructor(id: string, noOp: boolean, public index: number, public length: number, public value: string) {
     super(OperationType.STRING_REMOVE, id, noOp);
     Object.freeze(this);
   }
