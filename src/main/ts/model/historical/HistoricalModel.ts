@@ -16,26 +16,48 @@ import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 
 export class HistoricalModel {
+  private _session: Session;
+  private _connection: ConvergenceConnection;
 
-  private _maxVersion: number;
-  private _version: number;
-  private _modifiedTime: Date;
+  private _modelFqn: ModelFqn;
   private _model: Model;
   private _wrapperFactory: HistoricalWrapperFactory;
+
+  private _version: number;
+  private _targetVersion: number;
+  private _maxVersion: number;
+
+  private _createdTime: Date;
+  private _modifiedTime: Date;
+  private _currentTime: Date;
 
   constructor(data: ObjectValue,
               version: number,
               modifiedTime: Date,
-              private _createdTime: Date,
-              private _modelFqn: ModelFqn,
-              private _connection: ConvergenceConnection,
-              private _session: Session) {
+              createdTime: Date,
+              modelFqn: ModelFqn,
+              connection: ConvergenceConnection,
+              session: Session) {
 
-    this._maxVersion = version;
-    this._version = version;
-    this._modifiedTime = modifiedTime;
+    this._session = session;
+    this._connection = connection;
+
+    this._modelFqn = modelFqn;
     this._model = new Model(this.session().sessionId(), this.session().username(), null, data);
     this._wrapperFactory = new HistoricalWrapperFactory();
+
+    this._version = version;
+    this._targetVersion = version;
+    this._maxVersion = version;
+
+    // todo if we can pass in a version, I suppose we need to get the time too?
+    this._currentTime = modifiedTime;
+    this._modifiedTime = modifiedTime;
+    this._createdTime = createdTime;
+  }
+
+  session(): Session {
+    return this._session;
   }
 
   collectionId(): string {
@@ -46,150 +68,6 @@ export class HistoricalModel {
     return this._modelFqn.modelId;
   }
 
-  version(): number {
-    return this._version;
-  }
-
-  maxVersion(): number {
-    return this._maxVersion;
-  }
-
-  root(): HistoricalObject {
-    return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
-  }
-
-  goto(version: number): Promise<void> {
-    let gotoVersion: number;
-    let limit: number;
-
-    if (version === this._version) {
-      return Promise.resolve();
-    } else if (version > this._version) {
-      gotoVersion = this._version + 1;
-      limit = version - this._version;
-    } else {
-      gotoVersion = version + 1;
-      limit = this._version - version;
-    }
-
-    var request: HistoricalOperationsRequest = {
-      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelFqn: this._modelFqn,
-      version: gotoVersion,
-      limit: limit
-    };
-
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
-      if (version < this._version) {
-        response.operations.reverse().forEach((op: ModelOperation) => {
-          if (op.operation.type === OperationType.COMPOUND) {
-            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
-              if (!discreteOp.noOp) {
-                this._model.handleModelOperationEvent(
-                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-                    <AppliedDiscreteOperation> discreteOp.inverse()));
-              }
-            });
-          } else {
-            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
-            if (!discreteOperation.noOp) {
-              this._model.handleModelOperationEvent(
-                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-                  <AppliedDiscreteOperation> op.operation.inverse()));
-            }
-          }
-        });
-        this._version = version;
-      } else {
-        response.operations.forEach((op: ModelOperation) => {
-          if (op.operation.type === OperationType.COMPOUND) {
-            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
-              if (!discreteOp.noOp) {
-                this._model.handleModelOperationEvent(
-                  new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
-              }
-            });
-          } else {
-            let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
-            if (!discreteOperation.noOp) {
-              this._model.handleModelOperationEvent(
-                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
-            }
-          }
-        });
-        this._version = version;
-      }
-
-      return; // convert to Promise<void>
-    });
-  }
-
-  forward(delta: number = 1): Promise<void> {
-    var request: HistoricalOperationsRequest = {
-      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelFqn: this._modelFqn,
-      version: this._version + 1,
-      limit: delta
-    };
-
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
-      response.operations.forEach((op: ModelOperation) => {
-        if (op.operation.type === OperationType.COMPOUND) {
-          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
-            if (!discreteOp.noOp) {
-              this._model.handleModelOperationEvent(
-                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOp));
-            }
-          });
-        } else {
-          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
-          if (!discreteOperation.noOp) {
-            this._model.handleModelOperationEvent(
-              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, discreteOperation));
-          }
-        }
-      });
-      this._version = this._version + response.operations.length;
-      return; // convert to Promise<void>
-    });
-  }
-
-  backward(delta: number = 1): Promise<void> {
-    var request: HistoricalOperationsRequest = {
-      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelFqn: this._modelFqn,
-      version: this._version - delta + 1,
-      limit: delta
-    };
-
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
-      response.operations.reverse().forEach((op: ModelOperation) => {
-        if (op.operation.type === OperationType.COMPOUND) {
-          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
-            if (!discreteOp.noOp) {
-              this._model.handleModelOperationEvent(
-                new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-                  <AppliedDiscreteOperation> discreteOp.inverse()));
-            }
-          });
-        } else {
-          let discreteOperation: AppliedDiscreteOperation = <AppliedDiscreteOperation> op.operation;
-          if (!discreteOperation.noOp) {
-            this._model.handleModelOperationEvent(
-              new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp,
-                <AppliedDiscreteOperation> op.operation.inverse()));
-          }
-        }
-      });
-      this._version = this._version - response.operations.length;
-      return; // convert to Promise<void>
-    });
-  }
-
   createdTime(): Date {
     return this._createdTime;
   }
@@ -198,11 +76,119 @@ export class HistoricalModel {
     return this._modifiedTime;
   }
 
+  currentTime(): Date {
+    return this.currentTime();
+  }
+
+  // todo should this be currentTime?
+  version(): number {
+    return this._version;
+  }
+
+  targetVersion(): number {
+    return this._version;
+  }
+
+  maxVersion(): number {
+    return this._maxVersion;
+  }
+
+  isTransitioning(): boolean {
+    return this._targetVersion === this._version;
+  }
+
+  root(): HistoricalObject {
+    return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
+  }
+
   valueAt(path: any): HistoricalValue<any> {
     return this._wrapperFactory.wrap(this._model.valueAt(path));
   }
 
-  session(): Session {
-    return this._session;
+  playTo(version: number): Promise<void> {
+    let firstVersion: number;
+    let lastVersion: number;
+
+    if (version === this._targetVersion) {
+      return Promise.resolve();
+    } else if (version > this._targetVersion) {
+      // going forwards
+      firstVersion = this._targetVersion + 1;
+      lastVersion = version;
+    } else {
+      // going backwards
+      firstVersion = version + 1;
+      lastVersion = this._targetVersion;
+    }
+
+    this._targetVersion = version;
+
+    var request: HistoricalOperationsRequest = {
+      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
+      modelFqn: this._modelFqn,
+      first: firstVersion,
+      last: lastVersion
+    };
+
+    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+      // Going backwards
+      if (version < this._version) {
+        response.operations.reverse().forEach((op: ModelOperation) => {
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.reverse().forEach((discreteOp: AppliedDiscreteOperation) => {
+              this._playDiscreteOp(op, discreteOp, true);
+            });
+          } else {
+            this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, true);
+          }
+        });
+      } else {
+        // Going forwards
+        response.operations.forEach((op: ModelOperation) => {
+          if (op.operation.type === OperationType.COMPOUND) {
+            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+              this._playDiscreteOp(op, discreteOp, false);
+            });
+          } else {
+            this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, false);
+          }
+        });
+      }
+
+      return; // convert to Promise<void>
+    });
+  }
+
+  _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
+    if (!discreteOp.noOp) {
+      let dOp = null;
+      
+      if (inverse) {
+        dOp = <AppliedDiscreteOperation>discreteOp.inverse();
+      } else {
+        dOp = discreteOp;
+      }
+
+      this._model.handleModelOperationEvent(
+        new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, dOp));
+    }
+
+    if (inverse) {
+      this._version = op.version - 1;
+    } else {
+      this._version = op.version;
+    }
+  }
+
+  forward(delta: number = 1): Promise<void> {
+    const desiredVersion: number = this._targetVersion + delta;
+    return this.playTo(desiredVersion);
+  }
+
+  backward(delta: number = 1): Promise<void> {
+    const desiredVersion: number = this._targetVersion - delta;
+    return this.playTo(desiredVersion);
   }
 }

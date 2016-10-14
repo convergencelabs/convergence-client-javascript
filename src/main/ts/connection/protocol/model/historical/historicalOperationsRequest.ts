@@ -8,16 +8,16 @@ import {ModelOperationDeserializer} from "../appliedOperationData";
 
 export interface HistoricalOperationsRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
-  version: number;
-  limit: number;
+  first: number;
+  last: number;
 }
 
 export var HistoricalOperationsRequestSerializer: MessageBodySerializer = (request: HistoricalOperationsRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,
-    v: request.version,
-    l: request.limit
+    f: request.first,
+    l: request.last
   };
 };
 
