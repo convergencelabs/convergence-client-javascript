@@ -100,6 +100,7 @@ export class HistoricalModel {
             }
           }
         });
+        this._version = version;
       } else {
         response.operations.forEach((op: ModelOperation) => {
           if (op.operation.type === OperationType.COMPOUND) {

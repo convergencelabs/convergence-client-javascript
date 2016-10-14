@@ -4,7 +4,6 @@ const bump = require('gulp-bump');
 const concat = require('gulp-concat');
 const del = require('del');
 const merge = require('merge2');
-const release = require('gulp-github-release');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
 const runSequence = require('run-sequence');
@@ -182,18 +181,6 @@ gulp.task('dist-amd-min', function() {
 
 gulp.task('dist', ["dist-umd", "dist-amd", "dist-es6", "copyPackage"], function(cb) {
   runSequence('dist-umd-min', 'dist-amd-min', cb);
-});
-
-gulp.task('release', ['dist'], function () {
-  // you will need to have the environment var GITHUB_TOKEN set to a personal access token from
-  // https://github.com/settings/tokens
-  gulp.src(["dist/convergence-client.min.js", "dist/convergence-client.d.ts"])
-    .pipe(release({
-      manifest: require('./package.json')
-    }))
-    .on('error', function (err) {
-      console.error(err)
-    });
 });
 
 gulp.task('bump', function(){

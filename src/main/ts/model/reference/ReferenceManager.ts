@@ -122,10 +122,10 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
     var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
-    this._setReferenceValues(reference, event.values)
+    this._setReferenceValues(reference, event.values);
   }
 
-  private _setReferenceValues(reference, values) {
+  private _setReferenceValues(reference: ModelReference<any> , values: any): void {
     // Translate vids to RealTimeValues
     if (reference.type() === ReferenceType.ELEMENT) {
       const rtvs: RealTimeValue<any>[] = [];

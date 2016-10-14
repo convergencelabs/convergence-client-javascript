@@ -32,7 +32,7 @@ export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
 
 export interface RemoteReferencePublished extends RemoteReferenceEvent {
   referenceType: string;
-  values?: any;
+  values?: any; // fixme should this be any[]?
 }
 
 export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
@@ -40,7 +40,7 @@ export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
 
 export interface RemoteReferenceSet extends RemoteReferenceEvent {
   referenceType: string;
-  values: any;
+  values: any; // fixme should this be any[]?
 }
 
 export interface RemoteReferenceCleared extends RemoteReferenceEvent {
