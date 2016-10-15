@@ -59,6 +59,8 @@ export class RealTimeString extends RealTimeValue<String> {
         this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
           if (ref instanceof IndexReference) {
             ref._handleInsert(event.index, event.value.length);
+          } else if (ref instanceof RangeReference) {
+            ref._handleInsert(event.index, event.value.length);
           }
         });
       } else if (event instanceof StringNodeRemoveEvent) {
@@ -67,6 +69,8 @@ export class RealTimeString extends RealTimeValue<String> {
         }
         this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
           if (ref instanceof IndexReference) {
+            ref._handleRemove(event.index, event.value.length);
+          } else if (ref instanceof RangeReference) {
             ref._handleRemove(event.index, event.value.length);
           }
         });
