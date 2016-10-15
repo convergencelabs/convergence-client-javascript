@@ -163,8 +163,8 @@ export class HistoricalModel {
 
   _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
     if (!discreteOp.noOp) {
-      let dOp = null;
-      
+      let dOp: AppliedDiscreteOperation = null;
+
       if (inverse) {
         dOp = <AppliedDiscreteOperation>discreteOp.inverse();
       } else {

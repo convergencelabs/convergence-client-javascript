@@ -183,6 +183,14 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       resourceId: resourceId
     };
 
+    var model: RealTimeModel = this._openModelsByRid[resourceId];
+    delete this._openModelsByRid[resourceId];
+
+    var fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
+    var k: string = fqn.hash();
+
+    delete this._openModelsByFqn[k];
+
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
     });
