@@ -4,7 +4,7 @@ export interface Session {
   /**
    * @return The ConvergenceDomain for this session
    */
-  getConvergenceDomain(): ConvergenceDomain;
+  domain(): ConvergenceDomain;
 
   /**
    * @return The sessionId of the connected client

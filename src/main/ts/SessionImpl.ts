@@ -7,13 +7,13 @@ export class SessionImpl implements Session {
   private _domain: ConvergenceDomain;
   private _connection: ConvergenceConnection;
   private _sessionId: string;
-  private _userame: string;
+  private _username: string;
   private _authenticated: boolean;
 
   constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
     this._domain = domain;
     this._sessionId = sessionId;
-    this._userame = username;
+    this._username = username;
     this._connection = connection;
     this._authenticated = false;
   }
@@ -21,7 +21,7 @@ export class SessionImpl implements Session {
   /**
    * @return The ConvergenceDomain for this session
    */
-  getConvergenceDomain(): ConvergenceDomain {
+  domain(): ConvergenceDomain {
     return this._domain;
   }
 
@@ -40,11 +40,11 @@ export class SessionImpl implements Session {
    * @return The username of the authenticated client or null if not authenticated
    */
   username(): string {
-    return this._userame;
+    return this._username;
   }
 
   _setUsername(username: string): void {
-    this._userame = username;
+    this._username = username;
   }
 
   /**
