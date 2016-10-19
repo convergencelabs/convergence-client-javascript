@@ -77,7 +77,7 @@ export class HistoricalModel {
   }
 
   currentTime(): Date {
-    return this.currentTime();
+    return this._currentTime;
   }
 
   // todo should this be currentTime?
@@ -180,6 +180,9 @@ export class HistoricalModel {
     } else {
       this._version = op.version;
     }
+
+    // fixme this is wrong.  Might be the op before.
+    this._currentTime = new Date(op.timestamp);
   }
 
   forward(delta: number = 1): Promise<void> {
