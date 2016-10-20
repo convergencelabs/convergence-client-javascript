@@ -15,6 +15,12 @@ import {OperationType} from "../ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 
+interface OperationRequest {
+  forward: boolean;
+  completed: boolean;
+  operations: ModelOperation[];
+}
+
 export class HistoricalModel {
   private _session: Session;
   private _connection: ConvergenceConnection;
@@ -30,6 +36,8 @@ export class HistoricalModel {
   private _createdTime: Date;
   private _modifiedTime: Date;
   private _currentTime: Date;
+
+  private _opRequests: OperationRequest[];
 
   constructor(data: ObjectValue,
               version: number,
@@ -54,6 +62,8 @@ export class HistoricalModel {
     this._currentTime = modifiedTime;
     this._modifiedTime = modifiedTime;
     this._createdTime = createdTime;
+
+    this._opRequests = [];
   }
 
   session(): Session {
@@ -80,13 +90,13 @@ export class HistoricalModel {
     return this._currentTime;
   }
 
-  // todo should this be currentTime?
+  // todo should this be currentVersion?
   version(): number {
     return this._version;
   }
 
   targetVersion(): number {
-    return this._version;
+    return this._targetVersion;
   }
 
   maxVersion(): number {
@@ -106,8 +116,15 @@ export class HistoricalModel {
   }
 
   playTo(version: number): Promise<void> {
+    if (version < 0) {
+      throw new Error(`Version must be >= 0: ${version}`);
+    } else if (version > this._maxVersion) {
+      throw new Error(`Version must be <= maxVersion: ${version}`);
+    }
+
     let firstVersion: number;
     let lastVersion: number;
+    let forward: boolean = null;
 
     if (version === this._targetVersion) {
       return Promise.resolve();
@@ -115,50 +132,78 @@ export class HistoricalModel {
       // going forwards
       firstVersion = this._targetVersion + 1;
       lastVersion = version;
+      forward = true;
     } else {
       // going backwards
       firstVersion = version + 1;
       lastVersion = this._targetVersion;
+      forward = false;
     }
 
     this._targetVersion = version;
 
-    var request: HistoricalOperationsRequest = {
+    const request: HistoricalOperationsRequest = {
       type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
       modelFqn: this._modelFqn,
       first: firstVersion,
       last: lastVersion
     };
 
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
-      // Going backwards
-      if (version < this._version) {
-        response.operations.reverse().forEach((op: ModelOperation) => {
-          if (op.operation.type === OperationType.COMPOUND) {
-            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-            compoundOp.ops.reverse().forEach((discreteOp: AppliedDiscreteOperation) => {
-              this._playDiscreteOp(op, discreteOp, true);
-            });
-          } else {
-            this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, true);
-          }
-        });
-      } else {
-        // Going forwards
-        response.operations.forEach((op: ModelOperation) => {
-          if (op.operation.type === OperationType.COMPOUND) {
-            let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
-            compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
-              this._playDiscreteOp(op, discreteOp, false);
-            });
-          } else {
-            this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, false);
-          }
-        });
-      }
+    const opRequest: OperationRequest = {
+      forward: forward,
+      completed: false,
+      operations: null
+    };
 
-      return; // convert to Promise<void>
+    this._opRequests.push(opRequest);
+
+    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+      opRequest.completed = true;
+      opRequest.operations = response.operations;
+
+      this._checkAndProcess();
+
+      return;
     });
+  }
+
+  _checkAndProcess(): void {
+    if (this._opRequests.length === 0) {
+      throw new Error("There are no operation requests to process");
+    }
+
+    while (this._opRequests.length > 0 && this._opRequests[0].completed) {
+      this._playOperations(this._opRequests[0].operations, this._opRequests[0].forward);
+      this._opRequests.shift();
+    }
+  }
+
+  _playOperations(operations: ModelOperation[], forward: boolean): void {
+    // Going backwards
+    if (!forward) {
+      operations.reverse().forEach((op: ModelOperation) => {
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.reverse().forEach((discreteOp: AppliedDiscreteOperation) => {
+            this._playDiscreteOp(op, discreteOp, true);
+          });
+        } else {
+          this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, true);
+        }
+      });
+    } else {
+      // Going forwards
+      operations.forEach((op: ModelOperation) => {
+        if (op.operation.type === OperationType.COMPOUND) {
+          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
+            this._playDiscreteOp(op, discreteOp, false);
+          });
+        } else {
+          this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, false);
+        }
+      });
+    }
   }
 
   _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
@@ -186,11 +231,24 @@ export class HistoricalModel {
   }
 
   forward(delta: number = 1): Promise<void> {
+    if (delta < 1) {
+      throw new Error("delta must be > 0");
+    } else if (this._targetVersion + delta > this._maxVersion) {
+      throw new Error(`Cannot move forward by ${delta}, because that would exceed the model's maxVersion.`);
+    }
+
     const desiredVersion: number = this._targetVersion + delta;
     return this.playTo(desiredVersion);
+
   }
 
   backward(delta: number = 1): Promise<void> {
+    if (delta < 1) {
+      throw new Error("delta must be > 0");
+    } else if (this._targetVersion - delta < 0) {
+      throw new Error(`Cannot move backawrd by ${delta}, because that would move beyond version 0.`);
+    }
+
     const desiredVersion: number = this._targetVersion - delta;
     return this.playTo(desiredVersion);
   }
