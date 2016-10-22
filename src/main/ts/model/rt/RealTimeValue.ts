@@ -14,6 +14,8 @@ import {EventConverter} from "./EventConverter";
 import {ModelNodeEvent} from "../internal/events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
+import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
+import {MessageType} from "../../connection/protocol/MessageType";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -23,25 +25,39 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
     MODEL_CHANGED: "model_changed"
   };
 
+  protected _delegate: ModelNode<T>;
+  protected _callbacks: ModelEventCallbacks;
+  protected _wrapperFactory: RealTimeWrapperFactory;
+  protected _referenceManager: ReferenceManager;
+  private _model: RealTimeModel;
+
   /**
    * Constructs a new RealTimeValue.
    */
-  constructor(protected _delegate: ModelNode<T>,
-              protected _callbacks: ModelEventCallbacks,
-              protected _wrapperFactory: RealTimeWrapperFactory,
-              private _model: RealTimeModel) {
+  constructor(delegate: ModelNode<T>,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              referenceTypes: string[]) {
 
     super();
 
-    this._delegate.events().filter((event: ModelNodeEvent) => {
-      if (this._model.emitLocalEvents()) {
-        return true;
-      } else if (event instanceof NodeDetachedEvent || !event.local) {
-        return true;
-      } else {
-        return false;
-      }
-    }).subscribe((event: ModelNodeEvent) => {
+    this._delegate = delegate;
+    this._callbacks = callbacks;
+    this._wrapperFactory = wrapperFactory;
+    this._model = model;
+
+    const onRemoteReference: OnRemoteReference = (ref) => {
+      this._fireReferenceCreated(ref);
+    };
+
+    this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference);
+
+    this._delegate.events().filter(event => {
+      return this._model.emitLocalEvents() ||
+        !event.local ||
+        event instanceof NodeDetachedEvent;
+    }).subscribe(event => {
       let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
@@ -78,10 +94,16 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
     }
   }
 
-  private _exceptionIfDetached(): void {
-    if (this.isDetached()) {
-      throw Error("Can not perform actions on a detached RealTimeValue.");
-    }
+  reference(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceManager.get(sessionId, key);
+  }
+
+  references(filter?: ReferenceFilter): ModelReference<any>[] {
+    return this._referenceManager.getAll(filter);
+  }
+
+  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    this._referenceManager.handleRemoteReferenceEvent(event);
   }
 
   protected _sendOperation(operation: DiscreteOperation): void {
@@ -89,23 +111,18 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
     this._callbacks.sendOperationCallback(operation);
   }
 
-
-  abstract _handleRemoteReferenceEvent(referenceEvent: RemoteReferenceEvent): void;
-
-  reference(sessionId: string, key: string): ModelReference<any> {
-    return;
-  }
-
-  references(filter?: ReferenceFilter): ModelReference<any>[] {
-    return;
-  }
-
-  protected _fireReferenceCreated(reference: ModelReference<any>): void {
+  private _fireReferenceCreated(reference: ModelReference<any>): void {
     var createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeValue.Events.REFERENCE,
       src: this,
       reference: reference
     };
     this._emitEvent(createdEvent);
+  }
+
+  private _exceptionIfDetached(): void {
+    if (this.isDetached()) {
+      throw Error("Can not perform actions on a detached RealTimeValue.");
+    }
   }
 }

@@ -18,7 +18,7 @@ export class RealTimeNull extends RealTimeValue<any> {
               _callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model);
+    super(_delegate, _callbacks, _wrapperFactory, _model, []);
   }
 
   _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

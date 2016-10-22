@@ -14,42 +14,56 @@ import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 import {ElementReference} from "./ElementReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
+import {PropertyReference} from "./PropertyReference";
+import {ReferenceFilter} from "./ReferenceFilter";
+
+export type OnRemoteReference = (reference: ModelReference<any>) => void;
 
 export class ReferenceManager {
   private _referenceMap: ReferenceMap;
   private _localReferences: {[key: string]: LocalModelReference<any, any>};
   private _validTypes: string[];
   private _source: any;
+  private _onRemoteReference: OnRemoteReference;
 
-  constructor(source: any, validTypes: string[]) {
+  constructor(source: any, validTypes: string[], onRemoteReference: OnRemoteReference) {
     this._referenceMap = new ReferenceMap();
     this._localReferences = {};
     this._validTypes = validTypes;
     this._source = source;
+    this._onRemoteReference = onRemoteReference;
   }
 
-  referenceMap(): ReferenceMap {
-    return this._referenceMap;
+  get(sessionId: string, key: string): ModelReference<any> {
+    return this._referenceMap.get(sessionId, key);
+  }
+
+  getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+    return this._referenceMap.getAll(filter);
+  }
+
+  removeAll(): void {
+    this.getAll().forEach(ref => ref._dispose());
   }
 
   addLocalReference(reference: LocalModelReference<any, any>): void {
-    var key: string = reference.reference().key();
+    const key: string = reference.reference().key();
     if (this._localReferences[key] !== undefined) {
       throw new Error(`Local reference already set for key: ${key}`);
     }
     this._localReferences[key] = reference;
+    this._referenceMap.put(reference.reference());
   }
 
   removeLocalReference(key: string): void {
-    var current: LocalModelReference<any, any> = this._localReferences[key];
+    const current: LocalModelReference<any, any> = this._localReferences[key];
     if (current !== undefined) {
       current.dispose();
-      delete this._localReferences[key];
     }
   }
 
   removeAllLocalReferences(): void {
-    var keys: string[] = Object.getOwnPropertyNames(this._localReferences);
+    const keys: string[] = Object.getOwnPropertyNames(this._localReferences);
     keys.forEach((key: string) => {
       this.removeLocalReference(key);
     });
@@ -84,23 +98,26 @@ export class ReferenceManager {
 
   private _handleRemoteReferencePublished(event: RemoteReferencePublished): void {
     if (this._validTypes.indexOf(event.referenceType) < 0) {
-      throw new Error(`Invalid reference type for RealTimeString: ${event.referenceType}`);
+      throw new Error(`Invalid reference type: ${event.referenceType}`);
     }
 
-    var username: string = event.username;
-    var reference: ModelReference<any>;
+    const username: string = event.username;
+    let reference: ModelReference<any>;
     switch (event.referenceType) {
       case ReferenceType.INDEX:
-        reference = new IndexReference(event.key, this._source, username, event.sessionId, false);
+        reference = new IndexReference(this, event.key, this._source, username, event.sessionId, false);
         break;
       case ReferenceType.RANGE:
-        reference = new RangeReference(event.key, this._source, username, event.sessionId, false);
+        reference = new RangeReference(this, event.key, this._source, username, event.sessionId, false);
         break;
       case ReferenceType.ELEMENT:
-        reference = new ElementReference(event.key, this._source, username, event.sessionId, false);
+        reference = new ElementReference(this, event.key, this._source, username, event.sessionId, false);
+        break;
+      case ReferenceType.PROPERTY:
+        reference = new PropertyReference(this, event.key, this._source, username, event.sessionId, false);
         break;
       default:
-        break;
+        throw new Error("Unknown reference type: " + event.referenceType);
     }
 
     if (event.values !== undefined) {
@@ -108,20 +125,21 @@ export class ReferenceManager {
     }
 
     this._referenceMap.put(reference);
+    this._onRemoteReference(reference);
   }
 
   private _handleRemoteReferenceUnpublished(event: RemoteReferenceUnpublished): void {
-    var reference: ModelReference<any> = this._referenceMap.remove(event.sessionId, event.key);
+    const reference: ModelReference<any> = this._referenceMap.remove(event.sessionId, event.key);
     reference._dispose();
   }
 
   private _handleRemoteReferenceCleared(event: RemoteReferenceCleared): void {
-    var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
+    const reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
     reference._clear();
   }
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
-    var reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
+    const reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
     this._setReferenceValues(reference, event.values);
   }
 
@@ -138,6 +156,13 @@ export class ReferenceManager {
       reference._set(rtvs);
     } else {
       reference._set(values);
+    }
+  }
+
+  _handleReferenceDisposed(reference: ModelReference<any>) {
+    this._referenceMap.remove(reference.sessionId(), reference.key());
+    if (reference.isLocal()) {
+      delete this._localReferences[reference.key()];
     }
   }
 }

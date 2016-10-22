@@ -2,6 +2,7 @@ import {RealTimeValue} from "../rt/RealTimeValue";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
+import {ReferenceManager} from "./ReferenceManager";
 
 export interface IndexRange {
   start: number;
@@ -10,12 +11,13 @@ export interface IndexRange {
 
 export class RangeReference extends ModelReference<IndexRange> {
 
-  constructor(key: string,
+  constructor(referenceManager: ReferenceManager,
+              key: string,
               source: RealTimeValue<any>,
               username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.RANGE, key, source, username, sessionId, local);
+    super(referenceManager, ReferenceType.RANGE, key, source, username, sessionId, local);
   }
 
   _handleInsert(index: number, length: number): void {

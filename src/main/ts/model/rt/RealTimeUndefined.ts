@@ -18,7 +18,7 @@ export class RealTimeUndefined extends RealTimeValue<void> {
               _callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model);
+    super(_delegate, _callbacks, _wrapperFactory, _model, []);
   }
 
   protected _setData(data: any): void {

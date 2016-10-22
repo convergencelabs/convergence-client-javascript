@@ -36,7 +36,7 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
               protected _callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model);
+    super(_delegate, _callbacks, _wrapperFactory, _model, []);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {

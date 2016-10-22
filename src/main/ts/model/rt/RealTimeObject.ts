@@ -1,7 +1,5 @@
 import {RealTimeValue} from "./RealTimeValue";
 import {RealTimeContainerValue} from "./RealTimeContainerValue";
-import {ReferenceManager} from "../reference/ReferenceManager";
-import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelEventCallbacks} from "./RealTimeModel";
@@ -34,9 +32,6 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
   };
 
-  private _referenceManager: ReferenceManager;
-  private _referenceDisposed: ReferenceDisposedCallback;
-
   /**
    * Constructs a new RealTimeObject.
    */
@@ -44,47 +39,9 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
               protected _callbacks: ModelEventCallbacks,
               protected _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model);
+    super(_delegate, _callbacks, _wrapperFactory, _model, [ReferenceType.PROPERTY]);
 
-    this._referenceManager = new ReferenceManager(this, [ReferenceType.PROPERTY]);
-    this._referenceDisposed = (reference: LocalModelReference<any, any>) => {
-      this._referenceManager.removeLocalReference(reference.key());
-    };
-
-    this._delegate.events().subscribe((event: ModelNodeEvent) => {
-
-      if (event instanceof ObjectNodeSetValueEvent) {
-        if (event.local) {
-          this._sendOperation(new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children));
-        }
-
-        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-          ref._dispose();
-        });
-        this._referenceManager.referenceMap().removeAll();
-        this._referenceManager.removeAllLocalReferences();
-
-      } else if (event instanceof ObjectNodeRemoveEvent) {
-        if (event.local) {
-          this._sendOperation(new ObjectRemovePropertyOperation(this.id(), false, event.key));
-        }
-        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-          if (ref instanceof PropertyReference) {
-            ref._handlePropertyRemoved(event.key);
-          }
-        });
-      } else if (event instanceof ObjectNodeSetEvent) {
-        if (event.local) {
-          // Operation Handled Bellow
-          // Fixme: Refactor event so we can tell if value replaced or added
-        }
-        this._referenceManager.referenceMap().getAll().forEach((ref: ModelReference<any>) => {
-          if (ref instanceof PropertyReference) {
-            ref._handlePropertyRemoved(event.key);
-          }
-        });
-      }
-    });
+    this._delegate.events().subscribe(event => this._handleReferenceEvents(event));
   }
 
   get(key: string): RealTimeValue<any> {
@@ -136,33 +93,48 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
         return <LocalPropertyReference>existing;
       }
     } else {
-      var reference: PropertyReference = new PropertyReference(key, this, this._delegate.username, this._delegate.sessionId, true);
+      var reference: PropertyReference = new PropertyReference(this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
 
-      this._referenceManager.referenceMap().put(reference);
       var local: LocalPropertyReference = new LocalPropertyReference(
         reference,
-        this._callbacks.referenceEventCallbacks,
-        this._referenceDisposed
+        this._callbacks.referenceEventCallbacks
       );
       this._referenceManager.addLocalReference(local);
       return local;
     }
   }
 
-  reference(sessionId: string, key: string): ModelReference<any> {
-    return this._referenceManager.referenceMap().get(sessionId, key);
+  private _handleReferenceEvents(event: ModelNodeEvent) {
+    if (event instanceof ObjectNodeSetValueEvent) {
+      if (event.local) {
+        this._sendOperation(new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children));
+      }
+
+      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
+        ref._dispose();
+      });
+      this._referenceManager.removeAll();
+      this._referenceManager.removeAllLocalReferences();
+    } else if (event instanceof ObjectNodeRemoveEvent) {
+      if (event.local) {
+        this._sendOperation(new ObjectRemovePropertyOperation(this.id(), false, event.key));
+      }
+      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(event.key);
+        }
+      });
+    } else if (event instanceof ObjectNodeSetEvent) {
+      if (event.local) {
+        // Operation Handled Bellow
+        // Fixme: Refactor event so we can tell if value replaced or added
+      }
+      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
+        if (ref instanceof PropertyReference) {
+          ref._handlePropertyRemoved(event.key);
+        }
+      });
+    }
   }
 
-  references(filter: ReferenceFilter): ModelReference<any>[] {
-    return this._referenceManager.referenceMap().getAll(filter);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Handlers for incoming operations
-  /////////////////////////////////////////////////////////////////////////////
-
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
-    // fixme implement when we have object references.
-    throw new Error("Objects to do have references yet.");
-  }
 }

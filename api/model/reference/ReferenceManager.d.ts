@@ -1,6 +1,7 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+
 export declare class ReferenceManager {
   private _referenceMap;
   private _localReferences;

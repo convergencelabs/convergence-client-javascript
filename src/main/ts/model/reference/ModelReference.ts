@@ -1,6 +1,7 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {EqualsUtil} from "../../util/EqualsUtil";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ReferenceManager} from "./ReferenceManager";
 
 export var ReferenceType: any = {
   INDEX: "index",
@@ -18,6 +19,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     DISPOSED: "disposed"
   };
 
+  private _referenceManager: ReferenceManager;
   private _disposed: boolean;
   protected _values: V[];
   private _type: string;
@@ -27,13 +29,15 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
   private _sessionId: string;
   private _local: boolean;
 
-  constructor(type: string,
+  constructor(referenceManager: ReferenceManager,
+              type: string,
               key: string,
               source: any,
               username: string,
               sessionId: string,
               local: boolean) {
     super();
+    this._referenceManager = referenceManager;
     this._disposed = false;
     this._values = [];
     this._type = type;
@@ -80,6 +84,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     };
     this._emitEvent(event);
     this.removeAllListenersForAllEvents();
+    this._referenceManager._handleReferenceDisposed(this);
   }
 
   value(): V {

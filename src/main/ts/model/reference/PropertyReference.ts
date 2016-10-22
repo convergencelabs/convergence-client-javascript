@@ -1,15 +1,17 @@
 import {RealTimeValue} from "../rt/RealTimeValue";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
+import {ReferenceManager} from "./ReferenceManager";
 
 export class PropertyReference extends ModelReference<string> {
 
-  constructor(key: string,
+  constructor(referenceManager: ReferenceManager,
+              key: string,
               source: RealTimeValue<any>,
               username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.PROPERTY, key, source, username, sessionId, local);
+    super(referenceManager, ReferenceType.PROPERTY, key, source, username, sessionId, local);
   }
 
   _handlePropertyRemoved(property: string): void {

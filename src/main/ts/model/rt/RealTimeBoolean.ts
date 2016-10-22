@@ -23,7 +23,7 @@ export class RealTimeBoolean extends RealTimeValue<boolean> {
               _callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model);
+    super(_delegate, _callbacks, _wrapperFactory, _model, []);
 
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {

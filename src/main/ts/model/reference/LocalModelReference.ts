@@ -11,23 +11,19 @@ export interface ModelReferenceCallbacks {
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
 
-export type ReferenceDisposedCallback = (reference: LocalModelReference<any, any>) => void;
-
 export abstract class LocalModelReference<V, R extends ModelReference<V>> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _published: boolean;
   private _callbacks: ModelReferenceCallbacks;
   protected _reference: R;
-  private _disposeCallback: ReferenceDisposedCallback;
 
-  constructor(reference: R, callbacks: ModelReferenceCallbacks, disposeCallback: ReferenceDisposedCallback) {
+  constructor(reference: R, callbacks: ModelReferenceCallbacks) {
     super();
 
     this._emitFrom(reference.events());
     this._reference = reference;
     this._published = false;
     this._callbacks = callbacks;
-    this._disposeCallback = disposeCallback;
   }
 
   type(): string {
@@ -95,9 +91,8 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
   dispose(): void {
     this._ensureAttached();
     this.unpublish();
-    this._disposeCallback(this);
+    this._reference._dispose();
     this._callbacks = null;
-    this._disposeCallback = null;
   }
 
 

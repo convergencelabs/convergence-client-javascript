@@ -3,6 +3,7 @@ import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
 import {ValueDetachedEvent} from "../rt/events";
+import {ReferenceManager} from "./ReferenceManager";
 
 export class ElementReference extends ModelReference<RealTimeValue<any>> {
 
@@ -10,12 +11,13 @@ export class ElementReference extends ModelReference<RealTimeValue<any>> {
     this._handleElementRemoved(<RealTimeValue<any>>event.src);
   };
 
-  constructor(key: string,
+  constructor(referenceManager: ReferenceManager,
+              key: string,
               source: RealTimeModel,
               username: string,
               sessionId: string,
               local: boolean) {
-    super(ReferenceType.ELEMENT, key, source, username, sessionId, local);
+    super(referenceManager, ReferenceType.ELEMENT, key, source, username, sessionId, local);
   }
 
   _set(values: RealTimeValue<any>[], local: boolean = false): void {

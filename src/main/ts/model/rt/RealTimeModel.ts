@@ -2,8 +2,7 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
 import {RealTimeValue} from "./RealTimeValue";
-import {ReferenceManager} from "../reference/ReferenceManager";
-import {ReferenceDisposedCallback} from "../reference/LocalModelReference";
+import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
@@ -71,7 +70,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _wrapperFactory: RealTimeWrapperFactory;
 
   private _referenceManager: ReferenceManager;
-  private _referenceDisposed: ReferenceDisposedCallback;
   private _callbacks: ModelEventCallbacks;
 
   private _model: Model;
@@ -105,7 +103,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       this._referencesBySession[sessionId] = [];
     });
 
-    this._referenceManager = new ReferenceManager(this, ReferenceType.ELEMENT);
+    const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
+    this._referenceManager = new ReferenceManager(this, [ReferenceType.ELEMENT], onRemoteReference);
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this._committed = committed;
@@ -245,6 +244,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
+  // fixme inconsistent with isOpen()
   emitLocalEvents(): boolean
   emitLocalEvents(emit: boolean): void
   emitLocalEvents(emit?: boolean): any {
@@ -340,13 +340,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       }
     } else {
       var session: Session = this.session();
-      var reference: ElementReference = new ElementReference(key, this, session.username(), session.sessionId(), true);
+      var reference: ElementReference = new ElementReference(this._referenceManager, key, this, session.username(), session.sessionId(), true);
 
-      this._referenceManager.referenceMap().put(reference);
       var local: LocalElementReference = new LocalElementReference(
         reference,
-        this._callbacks.referenceEventCallbacks,
-        this._referenceDisposed
+        this._callbacks.referenceEventCallbacks
       );
       this._referenceManager.addLocalReference(local);
       return local;
@@ -354,11 +352,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   reference(sessionId: string, key: string): ModelReference<any> {
-    return this._referenceManager.referenceMap().get(sessionId, key);
+    return this._referenceManager.get(sessionId, key);
   }
 
   references(filter?: ReferenceFilter): ModelReference<any>[] {
-    return this._referenceManager.referenceMap().getAll(filter);
+    return this._referenceManager.getAll(filter);
   }
 
 
@@ -431,13 +429,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
-    var processedEvent: RemoteReferenceEvent;
+    let processedEvent: RemoteReferenceEvent;
 
     if (event.id === undefined) {
       this._modelReferenceEvent(event);
     } else {
-
-      var value: RealTimeValue<any> = this._getRegisteredValue(event.id);
+      const value: RealTimeValue<any> = this._getRegisteredValue(event.id);
       if (!value) {
         return;
       }
@@ -594,17 +591,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _modelReferenceEvent(event: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(event);
-    if (event.type === MessageType.REFERENCE_PUBLISHED) {
-      var reference: ModelReference<any> = this._referenceManager.referenceMap().get(event.sessionId, event.key);
-      this._referencesBySession[event.sessionId].push(reference);
+  }
 
-      var createdEvent: RemoteReferenceCreatedEvent = {
-        name: RealTimeModel.Events.REFERENCE,
-        src: this,
-        reference: reference
-      };
-      this._emitEvent(createdEvent);
-    }
+  private _onRemoteReferencePublished(reference: ModelReference<any>) {
+    this._referencesBySession[reference.sessionId()].push(reference);
+    var createdEvent: RemoteReferenceCreatedEvent = {
+      name: RealTimeModel.Events.REFERENCE,
+      src: this,
+      reference: reference
+    };
+    this._emitEvent(createdEvent);
   }
 
   private _getMessageValues(ref: ModelReferenceData): string[] {
