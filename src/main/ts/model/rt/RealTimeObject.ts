@@ -15,9 +15,7 @@ import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
 import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
 import {LocalPropertyReference} from "../reference/LocalPropertyReference";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
@@ -93,7 +91,8 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
         return <LocalPropertyReference>existing;
       }
     } else {
-      var reference: PropertyReference = new PropertyReference(this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+      var reference: PropertyReference = new PropertyReference(
+        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
 
       var local: LocalPropertyReference = new LocalPropertyReference(
         reference,
@@ -104,7 +103,7 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     }
   }
 
-  private _handleReferenceEvents(event: ModelNodeEvent) {
+  private _handleReferenceEvents(event: ModelNodeEvent): void {
     if (event instanceof ObjectNodeSetValueEvent) {
       if (event.local) {
         this._sendOperation(new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children));

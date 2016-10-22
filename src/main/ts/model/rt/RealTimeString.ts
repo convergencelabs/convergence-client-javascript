@@ -10,10 +10,7 @@ import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
 import {LocalRangeReference} from "../reference/LocalRangeReference";
 import {RangeReference} from "../reference/RangeReference";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {MessageType} from "../../connection/protocol/MessageType";
 import {StringNodeInsertEvent} from "../internal/events";
 import {StringNodeRemoveEvent} from "../internal/events";
 import {StringNodeSetValueEvent} from "../internal/events";
@@ -70,7 +67,8 @@ export class RealTimeString extends RealTimeValue<String> {
         return <LocalIndexReference>existing;
       }
     } else {
-      var reference: IndexReference = new IndexReference(this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+      var reference: IndexReference = new IndexReference(
+        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
       var local: LocalIndexReference = new LocalIndexReference(
         reference,
         this._callbacks.referenceEventCallbacks
@@ -89,7 +87,8 @@ export class RealTimeString extends RealTimeValue<String> {
         return <LocalRangeReference>existing;
       }
     } else {
-      var reference: RangeReference = new RangeReference(this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+      var reference: RangeReference = new RangeReference(
+        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
       var local: LocalRangeReference = new LocalRangeReference(
         reference,
         this._callbacks.referenceEventCallbacks
@@ -99,7 +98,7 @@ export class RealTimeString extends RealTimeValue<String> {
     }
   }
 
-  _handleReferenceModelEvents(event: ModelNodeEvent) {
+  _handleReferenceModelEvents(event: ModelNodeEvent): void {
     if (event instanceof StringNodeInsertEvent) {
       if (event.local) {
         this._sendOperation(new StringInsertOperation(this.id(), false, event.index, event.value));
@@ -132,6 +131,4 @@ export class RealTimeString extends RealTimeValue<String> {
       this._referenceManager.removeAll();
     }
   }
-
-
 }

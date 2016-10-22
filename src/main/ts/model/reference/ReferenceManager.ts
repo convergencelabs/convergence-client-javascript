@@ -159,7 +159,7 @@ export class ReferenceManager {
     }
   }
 
-  _handleReferenceDisposed(reference: ModelReference<any>) {
+  _handleReferenceDisposed(reference: ModelReference<any>): void {
     this._referenceMap.remove(reference.sessionId(), reference.key());
     if (reference.isLocal()) {
       delete this._localReferences[reference.key()];

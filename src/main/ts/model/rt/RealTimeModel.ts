@@ -340,7 +340,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       }
     } else {
       var session: Session = this.session();
-      var reference: ElementReference = new ElementReference(this._referenceManager, key, this, session.username(), session.sessionId(), true);
+      var reference: ElementReference = new ElementReference(
+        this._referenceManager, key, this, session.username(), session.sessionId(), true);
 
       var local: LocalElementReference = new LocalElementReference(
         reference,
@@ -593,7 +594,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._referenceManager.handleRemoteReferenceEvent(event);
   }
 
-  private _onRemoteReferencePublished(reference: ModelReference<any>) {
+  private _onRemoteReferencePublished(reference: ModelReference<any>): void {
     this._referencesBySession[reference.sessionId()].push(reference);
     var createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeModel.Events.REFERENCE,

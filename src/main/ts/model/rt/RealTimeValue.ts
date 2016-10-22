@@ -11,11 +11,9 @@ import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RemoteReferenceCreatedEvent} from "./events";
 import {RealTimeModel} from "./RealTimeModel";
 import {EventConverter} from "./EventConverter";
-import {ModelNodeEvent} from "../internal/events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
-import {MessageType} from "../../connection/protocol/MessageType";
 
 export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
