@@ -3,13 +3,11 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/Rx";
 
-export declare class PresenceServiceA extends ConvergenceEventEmitter {
+export declare class PresenceService extends ConvergenceEventEmitter {
 
   session(): Session;
 
-
   isAvailable(): boolean;
-
 
   publish(key: string, value: any): void;
 
@@ -17,7 +15,6 @@ export declare class PresenceServiceA extends ConvergenceEventEmitter {
 
   state(key: string): any;
   state(): Map<string,any>;
-
 
   presence(username: string): Promise<UserPresence>;
   presence(usernames: string[]): Promise<UserPresence[]>;

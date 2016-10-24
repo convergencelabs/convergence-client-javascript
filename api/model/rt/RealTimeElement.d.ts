@@ -3,8 +3,9 @@ import {ModelValueType} from "../ModelValueType";
 import {Path} from "../Path";
 import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
-export declare abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
+export declare abstract class RealTimeElement<T> extends ConvergenceEventEmitter {
 
   static Events: any;
 
@@ -14,10 +15,14 @@ export declare abstract class RealTimeValue<T> extends ConvergenceEventEmitter {
 
   path(): Path;
 
+  isAttached(): boolean;
+
   isDetached(): boolean;
 
-  data(): T;
-  data(value: T): void;
+  parent(): RealTimeContainerElement<any>
+
+  value(): T;
+  value(value: T): void;
 
   reference(sessionId: string, key: string): ModelReference<any>;
 

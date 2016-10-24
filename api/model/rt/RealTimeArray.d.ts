@@ -1,32 +1,47 @@
-import {RealTimeValue} from "./RealTimeValue";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {RealTimeElement} from "./RealTimeElement";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
+import {RealTimeValue} from "../../../src/main/ts/model/rt/RealTimeValue";
 
 
-export declare class RealTimeArray extends RealTimeValue<any[]> implements RealTimeContainerValue<any[]> {
+export declare class RealTimeArray extends RealTimeElement<any[]> implements RealTimeContainerElement<any[]> {
 
   static Events: any;
 
-  get(index: number): RealTimeValue<any>;
+  get(index: number): RealTimeElement<any>;
 
-  set(index: number, value: any): RealTimeValue<any>;
 
-  insert(index: number, value: any): RealTimeValue<any>;
+  set(index: number, value: any): RealTimeElement<any>;
+
+  insert(index: number, value: any): RealTimeElement<any>;
 
   remove(index: number): Object | number | string | boolean;
 
   reorder(fromIndex: number, toIndex: number): void;
 
-  push(value: any): RealTimeValue<any>;
+
+  push(value: any): RealTimeElement<any>;
 
   pop(): any;
 
-  unshift(value: any): RealTimeValue<any>;
+  unshift(value: any): RealTimeElement<any>;
 
   shift(): any;
 
+
   length(): number;
 
-  forEach(callback: (value: RealTimeValue<any>, index?: number) => void): void;
 
-  elementAt(pathArgs: any): RealTimeValue<any>;
+  some(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
+
+  every(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
+
+  find(callback: (element: RealTimeElement<any>, index: number) => boolean): RealTimeValue<any>
+
+  findIndex(callback: (element: RealTimeElement<any>, index: number) => boolean): number;
+
+
+  forEach(callback: (value: RealTimeElement<any>, index: number) => void): void;
+
+
+  elementAt(pathArgs: any): RealTimeElement<any>;
 }

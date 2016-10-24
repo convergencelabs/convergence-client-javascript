@@ -1,7 +1,7 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
@@ -12,7 +12,10 @@ export declare class RealTimeModel extends ConvergenceEventEmitter {
 
   static Events: any;
 
-  connectedSessions(): RemoteSession[]; // fixme rename to sessions
+  session(): Session;
+
+  connectedSessions(): RemoteSession[]; // fixme name??
+
   collectionId(): string;
 
   modelId(): string;
@@ -25,9 +28,9 @@ export declare class RealTimeModel extends ConvergenceEventEmitter {
   
   root(): RealTimeObject;
 
-  elementAt(path: any): RealTimeValue<any>;
+  element(id: string): RealTimeElement<any>
 
-  session(): Session;
+  elementAt(path: any): RealTimeElement<any>;
 
   isOpen(): boolean;
 

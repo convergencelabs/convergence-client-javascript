@@ -1,4 +1,3 @@
-import {Observable} from "rxjs/Rx";
 import {ModelResult} from "./ModelResult";
 
 export interface OrderBy {
@@ -15,7 +14,7 @@ export declare class ModelQuery {
 
   orderBy(field: string, ascending?: boolean): ModelQuery;
 
-  execute(): Observable<ModelResult[]>;
+  execute(): Promise<ModelResult[]>;
 }
 
 export interface ModelQueryOptions {

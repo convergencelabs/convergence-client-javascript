@@ -1,5 +1,5 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 
-export declare class RealTimeUndefined extends RealTimeValue<void> {
+export declare class RealTimeUndefined extends RealTimeElement<void> {
   static Events: any;
 }

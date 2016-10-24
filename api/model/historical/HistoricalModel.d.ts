@@ -4,6 +4,8 @@ import {HistoricalValue} from "./HistoricalValue";
 
 export declare class HistoricalModel {
 
+  session(): Session;
+
   collectionId(): string;
 
   modelId(): string;
@@ -12,19 +14,19 @@ export declare class HistoricalModel {
 
   maxVersion(): number;
 
-  root(): HistoricalObject;
-
-  goto(version: number): Promise<void>;
-
-  forward(delta?: number): Promise<void>;
-
-  backward(delta?: number): Promise<void>;
-
   createdTime(): Date;
 
   modifiedTime(): Date;
 
-  valueAt(path: any): HistoricalValue<any>;
+  currentTime(): Date;
 
-  session(): Session;
+  root(): HistoricalObject;
+
+  elementAt(path: any): HistoricalValue<any>;
+
+  playTo(version: number): Promise<void>;
+
+  forward(delta?: number): Promise<void>;
+
+  backward(delta?: number): Promise<void>;
 }

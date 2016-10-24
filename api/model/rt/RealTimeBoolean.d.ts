@@ -1,5 +1,5 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 
-export declare class RealTimeBoolean extends RealTimeValue<boolean> {
+export declare class RealTimeBoolean extends RealTimeElement<boolean> {
   static Events: any;
 }

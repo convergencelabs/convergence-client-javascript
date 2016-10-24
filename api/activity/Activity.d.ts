@@ -11,8 +11,6 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
 
   id(): string;
 
-  join(options?: ActivityJoinOptions): void;
-
   leave(): void;
 
   isJoined(): boolean;
@@ -23,7 +21,11 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   clear(key: string): void;
   clear(keys: string[]): void;
 
-  participants(): Observable<ActivityParticipant[]>;
+  participants(): ActivityParticipant[];
+  participantsStream(): Observable<ActivityParticipant[]>;
+
+  participant(sessionId: string): ActivityParticipant;
+  participantStream(sessionId: string): Observable<ActivityParticipant>;
 
   // todo there is some work here, we need to discuss this common pattern
 }

@@ -1,10 +1,10 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {ModelReference} from "../reference/ModelReference";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
 import {LocalRangeReference} from "../reference/LocalRangeReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 
-export declare class RealTimeString extends RealTimeValue<string> {
+export declare class RealTimeString extends RealTimeElement<string> {
 
   static Events: any;
 

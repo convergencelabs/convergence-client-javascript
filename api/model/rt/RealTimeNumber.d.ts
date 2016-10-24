@@ -1,11 +1,11 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 
-export declare class RealTimeNumber extends RealTimeValue<number> {
+export declare class RealTimeNumber extends RealTimeElement<number> {
   static Events: any;
 
-  add(value: number): void;
+  add(num: number): void;
 
-  subtract(value: number): void;
+  subtract(num: number): void;
 
   increment(): void;
 

@@ -1,6 +1,6 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {Path} from "../Path";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeArray} from "./RealTimeArray";
 import {RealTimeBoolean} from "./RealTimeBoolean";
 import {RealTimeNumber} from "./RealTimeNumber";
@@ -22,37 +22,37 @@ export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
   reference: ModelReference<any>;
 }
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: RealTimeValue<any>;
+  src: RealTimeElement<any>;
 }
 export declare class ValueDetachedEvent implements ConvergenceEvent {
-  src: RealTimeValue<any>;
+  src: RealTimeElement<any>;
   name: string;
 
-  constructor(src: RealTimeValue<any>);
+  constructor(src: RealTimeElement<any>);
 }
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
   sessionId: string;
   username: string;
 }
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
-  src: RealTimeValue<any>;
+  src: RealTimeElement<any>;
   relativePath: Path;
   childEvent: ValueChangedEvent;
   sessionId: string;
   username: string;
   name: string;
 
-  constructor(src: RealTimeValue<any>, relativePath: Path, childEvent: ValueChangedEvent, sessionId: string, username: string);
+  constructor(src: RealTimeElement<any>, relativePath: Path, childEvent: ValueChangedEvent, sessionId: string, username: string);
 }
 export declare class ArrayInsertEvent implements ValueChangedEvent {
   src: RealTimeArray;
   index: number;
-  value: RealTimeValue<any>;
+  value: RealTimeElement<any>;
   sessionId: string;
   username: string;
   name: string;
 
-  constructor(src: RealTimeArray, index: number, value: RealTimeValue<any>, sessionId: string, username: string);
+  constructor(src: RealTimeArray, index: number, value: RealTimeElement<any>, sessionId: string, username: string);
 }
 export declare class ArrayRemoveEvent implements ValueChangedEvent {
   src: RealTimeArray;
@@ -122,12 +122,12 @@ export declare class NumberAddEvent implements ValueChangedEvent {
 export declare class ObjectSetEvent implements ValueChangedEvent {
   src: RealTimeObject;
   key: string;
-  value: RealTimeValue<any>;
+  value: RealTimeElement<any>;
   sessionId: string;
   username: string;
   name: string;
 
-  constructor(src: RealTimeObject, key: string, value: RealTimeValue<any>, sessionId: string, username: string);
+  constructor(src: RealTimeObject, key: string, value: RealTimeElement<any>, sessionId: string, username: string);
 }
 export declare class ObjectRemoveEvent implements ValueChangedEvent {
   src: RealTimeObject;

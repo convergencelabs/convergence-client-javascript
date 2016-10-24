@@ -1,5 +1,5 @@
 import {ModelReference} from "./ModelReference";
-import {RealTimeValue} from "../rt/RealTimeValue";
+import {RealTimeElement} from "../rt/RealTimeElement";
 import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
@@ -20,7 +20,7 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
 
   key(): string;
 
-  source(): RealTimeValue<any>;
+  source(): RealTimeElement<any>;
 
   isLocal(): boolean;
 
