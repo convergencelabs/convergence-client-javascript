@@ -13,6 +13,11 @@ import {ParticipantsRequest} from "../connection/protocol/activity/participants"
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {SessionJoinedEvent} from "./events";
+import {SessionLeftEvent} from "./events";
+import {StateSetEvent} from "./events";
+import {StateClearedEvent} from "./events";
+import set = Reflect.set;
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -43,8 +48,43 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     this._joined = true;
     this._connection = connection;
 
-    this.events().subscribe(event => {
-      //TODO: handle updating the behavior subject
+    this.events().subscribe((event: ActivityEvent) => {
+      switch (event.name) {
+        case Activity.Events.SESSION_JOINED:
+          let joinedEvent = <SessionJoinedEvent> event;
+          //TODO: Clone Map
+          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          newMap.set(joinedEvent.sessionId, joinedEvent.participant);
+          this._participants.next(newMap);
+          break;
+        case Activity.Events.SESSION_LEFT:
+          let leftEvent = <SessionLeftEvent> event;
+          //TODO: Clone Map
+          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          newMap.delete(leftEvent.sessionId);
+          this._participants.next(newMap);
+          break;
+        case Activity.Events.STATE_SET:
+          let setEvent = <StateSetEvent> event;
+          //TODO: Clone Map
+          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          //TODO: Clone Map
+          let newState: Map<string, any> = newMap.get(setEvent.sessionId).state();
+          newState.set(setEvent.key, setEvent.value);
+          newMap.set(setEvent.sessionId, new ActivityParticipant(setEvent.username, setEvent.sessionId, newState));
+          this._participants.next(newMap);
+          break;
+        case Activity.Events.STATE_CLEARED:
+          let clearEvent = <StateClearedEvent> event;
+          //TODO: Clone Map
+          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          //TODO: Clone Map
+          let newState: Map<string, any> = newMap.get(clearEvent.sessionId).state();
+          newState.delete(clearEvent.key);
+          newMap.set(clearEvent.sessionId, new ActivityParticipant(clearEvent.username, clearEvent.sessionId, newState));
+          this._participants.next(newMap);
+          break;
+      }
     });
 
   }
