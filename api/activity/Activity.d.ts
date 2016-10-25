@@ -21,11 +21,10 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   clear(key: string): void;
   clear(keys: string[]): void;
 
-  participants(): ActivityParticipant[];
-  participantsStream(): Observable<ActivityParticipant[]>;
-
   participant(sessionId: string): ActivityParticipant;
-  participantStream(sessionId: string): Observable<ActivityParticipant>;
+  participants(): ActivityParticipant[];
+
+  asStream(): Observable<ActivityParticipant[]>;
 
   // todo there is some work here, we need to discuss this common pattern
 }
