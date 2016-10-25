@@ -8,7 +8,7 @@ export declare class ChatService {
 
   session(): Session;
 
-  room(id: string): ChatRoom;
+  joinRoom(id: string): Promise<ChatRoom>;
 
   events(): Observable<ChatEvent>;
 }

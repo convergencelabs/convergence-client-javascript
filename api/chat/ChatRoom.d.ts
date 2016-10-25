@@ -3,11 +3,9 @@ import {ChatEvent} from "./events";
 import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
 
 export declare class ChatRoom extends ObservableEventEmitter<ChatEvent> {
-  info(): Observable<RoomInfo>;
+  info(): RoomInfo;
 
   isJoined(): boolean;
-
-  join(): void;
 
   leave(): void;
 
@@ -17,6 +15,5 @@ export declare class ChatRoom extends ObservableEventEmitter<ChatEvent> {
 export declare class RoomInfo {
   sessions(): string[]; // fixme we have been using a RemoteSession class
   messageCount(): number;
-
   lastMessageTime(): number;
 }
