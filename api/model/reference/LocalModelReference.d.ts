@@ -1,6 +1,7 @@
 import {ModelReference} from "./ModelReference";
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
+import {RealTimeModel} from "../rt/RealTimeModel";
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
   onUnpublish: (reference: LocalModelReference<any, any>) => void;
@@ -20,7 +21,7 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
 
   key(): string;
 
-  source(): RealTimeElement<any>;
+  source(): RealTimeElement<any> | RealTimeModel;
 
   isLocal(): boolean;
 
@@ -31,8 +32,10 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
   isDisposed(): boolean;
 
   value(): V;
+  value(value: V): void;
 
   values(): V[];
+  values(values: V[]): void;
 
   reference(): R;
 
@@ -45,9 +48,6 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
   clear(): void;
 
   dispose(): void;
-
-  set(value: V): void;
-  set(value: V[]): void;
 
   isSet(): boolean;
 
