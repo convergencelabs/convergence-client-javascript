@@ -12,6 +12,7 @@ import {ActivityParticipant} from "./ActivityParticipant";
 import {ParticipantsRequest} from "../connection/protocol/activity/participants";
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -23,24 +24,29 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   };
 
   private _id: string;
-  private _joinCB: () => void;
+  private _connection: () => void;
   private _leftCB: () => void;
-  private _isJoined: () => boolean;
+  private _joined: boolean;
   private _connection: ConvergenceConnection;
+  private _participants: BehaviorSubject<Map<string, ActivityParticipant>>;
 
   constructor(id: string,
-              joinCB: () => void,
+              participants: Map<string, ActivityParticipant>,
               leftCB: () => void,
-              isJoined: () => boolean,
               eventStream: Observable<ActivityEvent>,
               connection: ConvergenceConnection) {
     super();
     this._emitFrom(eventStream);
     this._id = id;
-    this._joinCB = joinCB;
+    this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(participants);
     this._leftCB = leftCB;
-    this._isJoined = isJoined;
+    this._joined = true;
     this._connection = connection;
+
+    this.events().subscribe(event => {
+      //TODO: handle updating the behavior subject
+    });
+
   }
 
   session(): Session {
@@ -51,25 +57,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return this._id;
   }
 
-  join(options?: ActivityJoinOptions): void {
-    if (options === undefined) {
-      options = {
-        state: new Map<string, any>()
-      };
-    }
-
-    if (!this._isJoined()) {
-      this._connection.send(<ActivityJoinRequest>{
-        type: MessageType.ACTIVITY_JOIN_REQUEST,
-        activityId: this._id,
-        state: options.state
-      });
-      this._joinCB();
-    }
-  }
-
   leave(): void {
-    if (this._isJoined()) {
+    if (this.isJoined()) {
+      this._joined = true;
       this._connection.send(<ActivityLeaveRequest>{
         type: MessageType.ACTIVITY_LEAVE_REQUEST,
         activityId: this._id
@@ -79,7 +69,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   }
 
   isJoined(): boolean {
-    return this._isJoined();
+    return this._joined;
   }
 
   publish(state: Map<string, any>): void
@@ -92,7 +82,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       state = new Map<string, any>();
       state[arguments[0]] = arguments[1];
     }
-    if (this._isJoined()) {
+    if (this.isJoined()) {
       var message: ActivitySetState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_SET,
         activityId: this._id,
@@ -109,7 +99,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       keys = [<string>keys];
     }
 
-    if (this._isJoined()) {
+    if (this.isJoined()) {
       var message: ActivityClearState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
         activityId: this._id,
@@ -119,20 +109,17 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  participants(): Observable<ActivityParticipant[]> {
-    var participantRequest: ParticipantsRequest = {
-      type: MessageType.ACTIVITY_PARTICIPANTS_REQUEST,
-      activityId: this._id
-    };
+  participant(id): ActivityParticipant {
+    return this._participants.getValue().get(id);
+  }
 
-    return Observable.fromPromise(this._connection.request(participantRequest)).map((response: ParticipantsResponse) => {
-      var participants: ActivityParticipant[] = [];
-      Object.keys(response.participants).forEach((sessionId: string) => {
-        var username: string = SessionIdParser.parseUsername(sessionId);
-        participants.push(new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
-      });
-      return participants;
-    });
+  participants(): ActivityParticipant[] {
+    return this._participants.getValue().values();
+  }
+
+  asObservable(): Observable<ActivityParticipant[]> {
+    //TODO: probably need to order this so we get consistent results on subsequent calls
+    return this._participants.asObservable().map(mappedValues => mappedValues.values());
   }
 }
 
