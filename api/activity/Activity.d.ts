@@ -18,17 +18,14 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   publish(state: Map<string, any>): void;
   publish(key: string, value: any): void;
 
+  // fixme how do I set the state all at once?
+
   clear(key: string): void;
   clear(keys: string[]): void;
+  clear(): void; // fixme clears all the state?
 
   participant(sessionId: string): ActivityParticipant;
   participants(): ActivityParticipant[];
 
-  asStream(): Observable<ActivityParticipant[]>;
-
-  // todo there is some work here, we need to discuss this common pattern
-}
-
-export interface ActivityJoinOptions {
-  state?: Map<string, any>;
+  asObservable(): Observable<ActivityParticipant[]>;
 }
