@@ -16,14 +16,15 @@ import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity"
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export class ActivityService {
+export class ActivityService extends ConvergenceEventEmitter {
 
   private _connection: ConvergenceConnection;
-  private _eventStream: Observable<ActivityEvent>;
   private _joinedMap: Map<string, Deferred<Activity>>;
 
   constructor(connection: ConvergenceConnection) {
+    super();
     this._connection = connection;
 
     let messageObs: Observable<MessageEvent> = Observable.create(observer => {
@@ -37,7 +38,7 @@ export class ActivityService {
         });
     });
 
-    this._eventStream = messageObs.pluck("message").concatMap(message => {
+    let eventStream = messageObs.pluck("message").concatMap(message => {
       let msg: any = message;
       switch (msg.type) {
         case MessageType.ACTIVITY_SESSION_JOINED:
@@ -96,7 +97,8 @@ export class ActivityService {
       }
     });
 
-    this._joinedMap = new Map<string, Deferred<Activity>>();
+    this._emitFrom(eventStream);
+    this._joinedMap = new Map();
   }
 
   session(): Session {
@@ -106,7 +108,7 @@ export class ActivityService {
   join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
     if (!this.isJoined(id)) {
       if (options === undefined) {
-        options = {
+        options = <ActivityJoinOptions> {
           state: new Map<string, any>()
         };
       }
@@ -124,7 +126,7 @@ export class ActivityService {
           participants.set(sessionId, new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
         });
 
-        deferred.resolve(new Activity(id, participants, this._leftCB(id), this.eventStream().filter(event => {
+        deferred.resolve(new Activity(id, participants, this._leftCB(id), this.events().filter(event => {
             return event.activityId === id;
           }),
           this._connection));
@@ -141,10 +143,6 @@ export class ActivityService {
 
   isJoined(id: string): boolean {
     return this._joinedMap.has(id);
-  }
-
-  eventStream(): Observable<ActivityEvent> {
-    return this._eventStream;
   }
 
   private _leftCB: (id: string) => () => void = (id: string) => {

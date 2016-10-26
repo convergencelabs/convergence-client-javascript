@@ -103,7 +103,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     if (arguments.length === 1) {
       state = arguments[0];
     } else if (arguments.length === 2) {
-      state = new Map<string, any>();
+      state = new Map();
       state[arguments[0]] = arguments[1];
     }
     if (this.isJoined()) {
