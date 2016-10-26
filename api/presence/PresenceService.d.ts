@@ -12,6 +12,8 @@ export declare class PresenceService extends ConvergenceEventEmitter {
   publish(key: string, value: any): void;
 
   clear(key: string): void;
+  
+  // fixme the activity api has multiple variants of publish and clear do we want those?
 
   state(key: string): any;
   state(): Map<string,any>;

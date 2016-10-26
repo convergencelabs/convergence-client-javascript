@@ -24,6 +24,8 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   clear(keys: string[]): void;
   clear(): void; // fixme clears all the state?
 
+  // fixme the presence api has a way to get your own state.  Do we need that??
+
   participant(sessionId: string): ActivityParticipant;
   participants(): ActivityParticipant[];
 
