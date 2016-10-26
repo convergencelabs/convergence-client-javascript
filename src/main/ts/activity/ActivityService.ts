@@ -15,12 +15,13 @@ import {ActivityJoinOptions} from "./Activity";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
 import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
+import {Deferred} from "../util/Deferred";
 
 export class ActivityService {
 
   private _connection: ConvergenceConnection;
   private _eventStream: Observable<ActivityEvent>;
-  private _joinedMap: Map<string, Activity>;
+  private _joinedMap: Map<string, Deferred<Activity>>;
 
   constructor(connection: ConvergenceConnection) {
     this._connection = connection;
@@ -95,7 +96,7 @@ export class ActivityService {
       }
     });
 
-    this._joinedMap = new Map<string, Activity>();
+    this._joinedMap = new Map<string, Deferred<Activity>>();
   }
 
   session(): Session {
@@ -103,15 +104,15 @@ export class ActivityService {
   }
 
   join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
-    //TODO: need to handle join before previous join completed
     if (!this.isJoined(id)) {
       if (options === undefined) {
         options = {
           state: new Map<string, any>()
         };
       }
-
-      return this._connection.request(<ActivityJoinRequest>{
+      let deferred: Deferred<Activity> = new Deferred<Activity>();
+      this._joinedMap.set(id, deferred);
+      this._connection.request(<ActivityJoinRequest>{
         type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: id,
         state: options.state
@@ -123,19 +124,19 @@ export class ActivityService {
           participants.set(sessionId, new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
         });
 
-        return new Activity(id, participants, this._leftCB(id), this.eventStream().filter(event => {
+        deferred.resolve(new Activity(id, participants, this._leftCB(id), this.eventStream().filter(event => {
             return event.activityId === id;
           }),
-          this._connection);
+          this._connection));
       });
-    } else {
-      return Promise.resolve(this._joinedMap.get(id));
     }
+
+    //TODO: validate that this works
+    return this._joinedMap.get(id).promise();
   }
 
   joined(): Map<string, Activity> {
-    //TODO: clone this
-    return this._joinedMap;
+    return Object.assign({}, this._joinedMap);
   }
 
   isJoined(id: string): boolean {

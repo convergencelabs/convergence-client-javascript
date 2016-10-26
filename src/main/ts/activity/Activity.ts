@@ -1,23 +1,13 @@
-import {Session} from "../Session";
-import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {MessageType} from "../connection/protocol/MessageType";
-import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
-import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
-import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {ActivityEvent} from "./events";
-import {Observable} from "rxjs/Rx";
-import {ActivitySetState} from "../connection/protocol/activity/activityState";
-import {ActivityClearState} from "../connection/protocol/activity/activityState";
-import {ActivityParticipant} from "./ActivityParticipant";
-import {ParticipantsRequest} from "../connection/protocol/activity/participants";
-import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {SessionJoinedEvent} from "./events";
-import {SessionLeftEvent} from "./events";
-import {StateSetEvent} from "./events";
-import {StateClearedEvent} from "./events";
-import set = Reflect.set;
+import {ActivityParticipant} from "./ActivityParticipant";
+import {Observable} from "rxjs/Observable";
+import {ActivityEvent, SessionJoinedEvent, SessionLeftEvent, StateSetEvent, StateClearedEvent} from "./events";
+import {Session} from "../Session";
+import {MessageType} from "../connection/protocol/MessageType";
+import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
+import {ActivitySetState, ActivityClearState} from "../connection/protocol/activity/activityState";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -52,34 +42,28 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       switch (event.name) {
         case Activity.Events.SESSION_JOINED:
           let joinedEvent = <SessionJoinedEvent> event;
-          //TODO: Clone Map
-          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
           newMap.set(joinedEvent.sessionId, joinedEvent.participant);
           this._participants.next(newMap);
           break;
         case Activity.Events.SESSION_LEFT:
           let leftEvent = <SessionLeftEvent> event;
-          //TODO: Clone Map
-          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
           newMap.delete(leftEvent.sessionId);
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_SET:
           let setEvent = <StateSetEvent> event;
-          //TODO: Clone Map
-          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
-          //TODO: Clone Map
-          let newState: Map<string, any> = newMap.get(setEvent.sessionId).state();
+          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
+          let newState: Map<string, any> = Object.assign({},newMap.get(setEvent.sessionId).state());
           newState.set(setEvent.key, setEvent.value);
           newMap.set(setEvent.sessionId, new ActivityParticipant(setEvent.username, setEvent.sessionId, newState));
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_CLEARED:
           let clearEvent = <StateClearedEvent> event;
-          //TODO: Clone Map
-          let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
-          //TODO: Clone Map
-          let newState: Map<string, any> = newMap.get(clearEvent.sessionId).state();
+          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
+          let newState: Map<string, any> = Object.assign({},newMap.get(clearEvent.sessionId).state());
           newState.delete(clearEvent.key);
           newMap.set(clearEvent.sessionId, new ActivityParticipant(clearEvent.username, clearEvent.sessionId, newState));
           this._participants.next(newMap);
@@ -99,7 +83,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   leave(): void {
     if (this.isJoined()) {
-      this._joined = true;
+      this._joined = false;
       this._connection.send(<ActivityLeaveRequest>{
         type: MessageType.ACTIVITY_LEAVE_REQUEST,
         activityId: this._id
@@ -112,9 +96,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joined;
   }
 
-  publish(state: Map<string, any>): void
-  publish(key: string, value: any): void
-  publish(): void {
+  set(state: Map<string, any>): void
+  set(key: string, value: any): void
+  set(): void {
     var state: Map<string, any>;
     if (arguments.length === 1) {
       state = arguments[0];
@@ -132,9 +116,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  clear(key: string): void
-  clear(keys: string[]): void
-  clear(keys: string | string[]): void {
+  remove(key: string): void
+  remove(keys: string[]): void
+  remove(keys: string | string[]): void {
     if (typeof keys === "string") {
       keys = [<string>keys];
     }
@@ -149,6 +133,10 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
+  clear(): void {
+    //TODO: Handle Clear
+  }
+
   participant(id): ActivityParticipant {
     return this._participants.getValue().get(id);
   }
@@ -158,11 +146,12 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   }
 
   asObservable(): Observable<ActivityParticipant[]> {
-    //TODO: probably need to order this so we get consistent results on subsequent calls
     return this._participants.asObservable().map(mappedValues => mappedValues.values());
   }
 }
 
+
+//TODO: is this really necessary right now, could we just use state? in the method call
 export interface ActivityJoinOptions {
   state?: Map<string, any>;
 }
