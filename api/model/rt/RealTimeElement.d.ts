@@ -1,11 +1,11 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ObservableEventEmitter} from "../../util/ObservableEventEmitter";
 import {ModelValueType} from "../ModelValueType";
 import {Path} from "../Path";
 import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
-export declare abstract class RealTimeElement<T> extends ConvergenceEventEmitter {
+export declare abstract class RealTimeElement<T> extends ObservableEventEmitter<any> {
 
   static Events: any;
 

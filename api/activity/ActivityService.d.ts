@@ -1,8 +1,6 @@
-import {Session} from "../Session";
-import {Activity, ActivityJoinOptions} from "./Activity";
-import {Observable} from "rxjs/Rx";
-import {ActivityEvent} from "./events";
 import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {Session} from "../Session";
+import {Activity} from "./Activity";
 
 export declare class ActivityService extends ObservableEventEmitter {
   session(): Session;

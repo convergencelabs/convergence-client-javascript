@@ -3,14 +3,7 @@ import {ConvergenceEvent} from "./ConvergenceEvent";
 export declare type EventKey = string | number;
 export declare type EventListener<T> = (e: T) => void;
 export declare class ObservableEventEmitter<T extends ConvergenceEvent> {
-  private _subscriptions;
-  private _listeners;
-  private _observable;
-
-  constructor(observable?: Observable<T>);
-
-  protected _setObservable(observable: Observable<T>): void;
-
+  
   addListener(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T>;
 
   on(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T>;
@@ -26,6 +19,4 @@ export declare class ObservableEventEmitter<T extends ConvergenceEvent> {
   off(event: EventKey, listener: EventListener<T>): ObservableEventEmitter<T>;
 
   events(): Observable<T>;
-
-  private _resolveEventKey(event);
 }

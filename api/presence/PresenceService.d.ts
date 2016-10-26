@@ -1,7 +1,7 @@
 import {Session} from "../Session";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {UserPresence} from "./UserPresence";
-import {Observable} from "rxjs/Rx";
+import {UserPresenceGroup} from "./UserPresenceGroup";
 
 export declare class PresenceService extends ConvergenceEventEmitter {
 
@@ -9,11 +9,16 @@ export declare class PresenceService extends ConvergenceEventEmitter {
 
   isAvailable(): boolean;
 
-  publish(key: string, value: any): void;
+  set(state: Map<string, any>): void;
+  set(key: string, value: any): void;
 
-  clear(key: string): void;
-  
-  // fixme the activity api has multiple variants of publish and clear do we want those?
+  remove(key: string): void;
+  remove(keys: string[]): void;
+
+  clear(): void;
+
+  // name this
+  replace(state: Map<string, any>);
 
   state(key: string): any;
   state(): Map<string,any>;
@@ -21,6 +26,5 @@ export declare class PresenceService extends ConvergenceEventEmitter {
   presence(username: string): Promise<UserPresence>;
   presence(usernames: string[]): Promise<UserPresence[]>;
 
-  presenceStream(username: string): Observable<UserPresence>;
-  presenceStream(usernames: string[]): Observable<UserPresence>[];
+  group(usernames: string[]): Promise<UserPresenceGroup>;
 }

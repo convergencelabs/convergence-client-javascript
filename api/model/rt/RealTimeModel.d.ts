@@ -1,20 +1,19 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
 import {RealTimeElement} from "./RealTimeElement";
-import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ModelEvent} from "./events";
+import {ObservableEventEmitter} from "../../util/ObservableEventEmitter";
 
-export declare class RealTimeModel extends ConvergenceEventEmitter {
+export declare class RealTimeModel extends ObservableEventEmitter<any> {
 
   static Events: any;
 
   session(): Session;
 
-  connectedSessions(): RemoteSession[]; // fixme name??
+  collaborators(): ModelCollaborator[];
 
   collectionId(): string;
 
@@ -24,7 +23,7 @@ export declare class RealTimeModel extends ConvergenceEventEmitter {
 
   createdTime(): Date;
 
-  modifiedTime(): Date;
+  lastModifiedTime(): Date;
   
   root(): RealTimeObject;
 
@@ -49,13 +48,15 @@ export declare class RealTimeModel extends ConvergenceEventEmitter {
   references(filter?: ReferenceFilter): ModelReference<any>[];
 }
 
-// fixme how do we use these.
-export interface RemoteSessionOpenedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+export declare class ModelCollaborator {
+  sessionId();
+  username();
 }
 
-export interface RemoteSessionClosedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+export interface OpenedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
+}
+
+export interface ClosedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
 }

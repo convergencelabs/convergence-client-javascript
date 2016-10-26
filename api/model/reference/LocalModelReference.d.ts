@@ -36,11 +36,11 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
 
   reference(): R;
 
-  publish(): void;
+  share(): void;
 
-  unpublish(): void;
+  unshare(): void;
 
-  isPublished(): boolean;
+  isShared(): boolean;
 
   clear(): void;
 

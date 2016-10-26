@@ -1,8 +1,7 @@
-export declare class UserPresence {
+export class UserPresence {
   username(): string;
 
-  // todo should we be doing isAvailable()?
-  available(): boolean;
+  isAvailable(): boolean;
 
   state(): Map<string, any>;
 }

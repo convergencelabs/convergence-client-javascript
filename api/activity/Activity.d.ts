@@ -12,19 +12,23 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   id(): string;
 
   leave(): void;
-
   isJoined(): boolean;
 
-  publish(state: Map<string, any>): void;
-  publish(key: string, value: any): void;
 
-  // fixme how do I set the state all at once?
+  set(state: Map<string, any>): void;
+  set(key: string, value: any): void;
 
-  clear(key: string): void;
-  clear(keys: string[]): void;
-  clear(): void; // fixme clears all the state?
+  remove(key: string): void;
+  remove(keys: string[]): void;
 
-  // fixme the presence api has a way to get your own state.  Do we need that??
+  clear(): void;
+
+  // fixme name this
+  replace(state: Map<string, any>);
+
+  state(key: string): any;
+  state(): Map<string,any>;
+
 
   participant(sessionId: string): ActivityParticipant;
   participants(): ActivityParticipant[];
