@@ -83,13 +83,13 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
-          return <StateClearedEvent> {
+          return [<StateClearedEvent> {
             name: Activity.Events.STATE_CLEARED,
             activityId: stateClearedMsg.activityId,
             username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
             sessionId: stateClearedMsg.sessionId,
             local: false
-          };
+          }];
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
           let stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
           return stateRemovedMsg.keys.map((key) => {
