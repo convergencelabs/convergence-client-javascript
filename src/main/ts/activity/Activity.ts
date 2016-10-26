@@ -8,6 +8,7 @@ import {Session} from "../Session";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
 import {ActivitySetState, ActivityClearState} from "../connection/protocol/activity/activityState";
+import {ActivityRemoveState} from "../connection/protocol/activity/activityState";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -124,8 +125,8 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
 
     if (this.isJoined()) {
-      var message: ActivityClearState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
+      var message: ActivityRemoveState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_REMOVED,
         activityId: this._id,
         keys: <string[]>keys
       };
@@ -134,7 +135,13 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   }
 
   clear(): void {
-    //TODO: Handle Clear
+    if (this.isJoined()) {
+      var message: ActivityClearState = {
+        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
+        activityId: this._id,
+      };
+      this._connection.send(message);
+    }
   }
 
   participant(id): ActivityParticipant {

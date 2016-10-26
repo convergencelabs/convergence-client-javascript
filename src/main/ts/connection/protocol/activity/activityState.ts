@@ -16,15 +16,25 @@ export var ActivitySetStateSerializer: MessageBodySerializer = (request: Activit
   };
 };
 
-export interface ActivityClearState extends OutgoingProtocolNormalMessage {
+export interface ActivityRemoveState extends OutgoingProtocolNormalMessage {
   activityId: string;
   keys: string[];
+}
+
+export var ActivityRemoveStateSerializer: MessageBodySerializer = (request: ActivityRemoveState) => {
+  return {
+    i: request.activityId,
+    k: request.keys
+  };
+};
+
+export interface ActivityClearState extends OutgoingProtocolNormalMessage {
+  activityId: string;
 }
 
 export var ActivityClearStateSerializer: MessageBodySerializer = (request: ActivityClearState) => {
   return {
     i: request.activityId,
-    k: request.keys
   };
 };
 
@@ -43,17 +53,30 @@ export var ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<ActivityR
   return result;
 };
 
-export interface ActivityRemoteStateCleared extends IncomingProtocolNormalMessage {
+export interface ActivityRemoteStateRemoved extends IncomingProtocolNormalMessage {
   activityId: string;
   sessionId: string;
   keys: string[];
+}
+
+export var ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<ActivityRemoteStateRemoved> = (body: any) => {
+  var result: ActivityRemoteStateRemoved = {
+    activityId: body.i,
+    sessionId: body.s,
+    keys: body.k
+  };
+  return result;
+};
+
+export interface ActivityRemoteStateCleared extends IncomingProtocolNormalMessage {
+  activityId: string;
+  sessionId: string;
 }
 
 export var ActivityRemoteStateClearedDeserializer: MessageBodyDeserializer<ActivityRemoteStateCleared> = (body: any) => {
   var result: ActivityRemoteStateCleared = {
     activityId: body.i,
     sessionId: body.s,
-    keys: body.k
   };
   return result;
 };

@@ -17,6 +17,7 @@ import {ParticipantsResponse} from "../connection/protocol/activity/participants
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
 
 export class ActivityService extends ConvergenceEventEmitter {
 
@@ -32,6 +33,7 @@ export class ActivityService extends ConvergenceEventEmitter {
         [MessageType.ACTIVITY_SESSION_JOINED,
           MessageType.ACTIVITY_SESSION_LEFT,
           MessageType.ACTIVITY_REMOTE_STATE_SET,
+          MessageType.ACTIVITY_REMOTE_STATE_REMOVED,
           MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
         (event) => {
           observer.next(event);
@@ -81,6 +83,15 @@ export class ActivityService extends ConvergenceEventEmitter {
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
+          return <StateClearedEvent> {
+            name: Activity.Events.STATE_CLEARED,
+            activityId: stateClearedMsg.activityId,
+            username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
+            sessionId: stateClearedMsg.sessionId,
+            local: false
+          };
+        case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
+          let stateClearedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
           return stateClearedMsg.keys.map((key) => {
             return <StateClearedEvent> {
               name: Activity.Events.STATE_CLEARED,
