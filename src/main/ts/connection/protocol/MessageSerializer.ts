@@ -66,6 +66,7 @@ import {HistoricalDataRequestSerializer} from "./model/historical/historicalData
 import {HistoricalOperationsRequestSerializer} from "./model/historical/historicalOperationsRequest";
 import {ActivityRemoveStateSerializer} from "./activity/activityState";
 import {ActivityRemoteStateRemovedDeserializer} from "./activity/activityState";
+import {ActivityJoinResponseDeserializer} from "./activity/joinActivity";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -227,8 +228,8 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_UNPUBLIS
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDeserializer);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_PARTICIPANTS_RESPONSE, ParticipantsResponseDeserializer);
-MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ACTIVITY_JOIN_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ACTIVITY_LEAVE_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_JOIN_RESPONSE, ActivityJoinResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_SESSION_JOINED, ActivitySessionJoinedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_SESSION_LEFT, ActivitySessionLeftDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_STATE_SET, ActivityRemoteStateSetDeserializer);

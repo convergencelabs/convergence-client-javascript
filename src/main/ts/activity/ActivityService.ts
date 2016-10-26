@@ -8,18 +8,18 @@ import {SessionJoinedEvent, SessionLeftEvent, StateClearedEvent, StateSetEvent} 
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {ActivityRemoteStateSet, ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
-import {ActivityEvent} from "./events";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ActivityJoinOptions} from "./Activity";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
-import {ParticipantsResponse} from "../connection/protocol/activity/participants";
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
+import {ActivityEvent} from "./events";
+import {StateRemovedEvent} from "./events";
 
-export class ActivityService extends ConvergenceEventEmitter {
+export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
   private _connection: ConvergenceConnection;
   private _joinedMap: Map<string, Deferred<Activity>>;
@@ -40,7 +40,7 @@ export class ActivityService extends ConvergenceEventEmitter {
         });
     });
 
-    let eventStream = messageObs.pluck("message").concatMap(message => {
+    let eventStream: Observable<any> = messageObs.pluck("message").concatMap(message => {
       let msg: any = message;
       switch (msg.type) {
         case MessageType.ACTIVITY_SESSION_JOINED:
@@ -91,13 +91,13 @@ export class ActivityService extends ConvergenceEventEmitter {
             local: false
           };
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
-          let stateClearedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
-          return stateClearedMsg.keys.map((key) => {
-            return <StateClearedEvent> {
-              name: Activity.Events.STATE_CLEARED,
-              activityId: stateClearedMsg.activityId,
-              username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
-              sessionId: stateClearedMsg.sessionId,
+          let stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
+          return stateRemovedMsg.keys.map((key) => {
+            return <StateRemovedEvent> {
+              name: Activity.Events.STATE_REMOVED,
+              activityId: stateRemovedMsg.activityId,
+              username: SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
+              sessionId: stateRemovedMsg.sessionId,
               key: key,
               local: false
             };
@@ -109,7 +109,7 @@ export class ActivityService extends ConvergenceEventEmitter {
     });
 
     this._emitFrom(eventStream);
-    this._joinedMap = new Map();
+    this._joinedMap = new Map<string, Deferred<Activity>>();
   }
 
   session(): Session {
@@ -129,22 +129,21 @@ export class ActivityService extends ConvergenceEventEmitter {
         type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: id,
         state: options.state
-      }).then(function (response: ActivityJoinResponse) {
-        this._joinedMap.set(id, true);
-        var participants: Map<string, ActivityParticipant> = new Map();
+      }).then((response: ActivityJoinResponse) => {
+        var participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
         Object.keys(response.participants).forEach((sessionId: string) => {
           var username: string = SessionIdParser.parseUsername(sessionId);
           participants.set(sessionId, new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
         });
 
-        deferred.resolve(new Activity(id, participants, this._leftCB(id), this.events().filter(event => {
+        deferred.resolve(new Activity(id, participants, this._leftCB(id).bind(this), this.events().filter(event => {
             return event.activityId === id;
           }),
           this._connection));
       });
     }
 
-    //TODO: validate that this works
+    // TODO: validate that this works
     return this._joinedMap.get(id).promise();
   }
 

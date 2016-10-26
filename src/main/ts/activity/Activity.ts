@@ -9,6 +9,7 @@ import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
 import {ActivitySetState, ActivityClearState} from "../connection/protocol/activity/activityState";
 import {ActivityRemoveState} from "../connection/protocol/activity/activityState";
+import {StateRemovedEvent} from "./events";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -16,11 +17,11 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     SESSION_JOINED: "session_joined",
     SESSION_LEFT: "session_left",
     STATE_SET: "state_set",
+    STATE_REMOVED: "state_removed",
     STATE_CLEARED: "state_cleared"
   };
 
   private _id: string;
-  private _connection: () => void;
   private _leftCB: () => void;
   private _joined: boolean;
   private _connection: ConvergenceConnection;
@@ -40,35 +41,40 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     this._connection = connection;
 
     this.events().subscribe((event: ActivityEvent) => {
+      let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
       switch (event.name) {
         case Activity.Events.SESSION_JOINED:
-          let joinedEvent = <SessionJoinedEvent> event;
-          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
+          let joinedEvent: SessionJoinedEvent = <SessionJoinedEvent> event;
           newMap.set(joinedEvent.sessionId, joinedEvent.participant);
           this._participants.next(newMap);
           break;
         case Activity.Events.SESSION_LEFT:
-          let leftEvent = <SessionLeftEvent> event;
-          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
+          let leftEvent: SessionLeftEvent = <SessionLeftEvent> event;
           newMap.delete(leftEvent.sessionId);
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_SET:
-          let setEvent = <StateSetEvent> event;
-          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
-          let newState: Map<string, any> = Object.assign({},newMap.get(setEvent.sessionId).state());
-          newState.set(setEvent.key, setEvent.value);
-          newMap.set(setEvent.sessionId, new ActivityParticipant(setEvent.username, setEvent.sessionId, newState));
+          let setEvent: StateSetEvent = <StateSetEvent> event;
+          let setState: Map<string, any> = Object.assign({}, newMap.get(setEvent.sessionId).state());
+          setState.set(setEvent.key, setEvent.value);
+          newMap.set(setEvent.sessionId, new ActivityParticipant(setEvent.username, setEvent.sessionId, setState));
+          this._participants.next(newMap);
+          break;
+        case Activity.Events.STATE_REMOVED:
+          let removeEvent: StateRemovedEvent = <StateRemovedEvent> event;
+          let removeState: Map<string, any> = Object.assign({}, newMap.get(removeEvent.sessionId).state());
+          removeState.delete(removeEvent.key);
+          newMap.set(removeEvent.sessionId, new ActivityParticipant(removeEvent.username, removeEvent.sessionId, removeState));
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_CLEARED:
-          let clearEvent = <StateClearedEvent> event;
-          let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
-          let newState: Map<string, any> = Object.assign({},newMap.get(clearEvent.sessionId).state());
-          newState.delete(clearEvent.key);
-          newMap.set(clearEvent.sessionId, new ActivityParticipant(clearEvent.username, clearEvent.sessionId, newState));
+          let clearEvent: StateClearedEvent = <StateClearedEvent> event;
+          newMap.set(clearEvent.sessionId, new ActivityParticipant(clearEvent.username, clearEvent.sessionId, new Map<string, any>()));
           this._participants.next(newMap);
           break;
+        default:
+          // This should be impossible
+          throw new Error("Invalid activity event");
       }
     });
 
@@ -104,7 +110,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     if (arguments.length === 1) {
       state = arguments[0];
     } else if (arguments.length === 2) {
-      state = new Map();
+      state = new Map<string, any>();
       state[arguments[0]] = arguments[1];
     }
     if (this.isJoined()) {
@@ -144,21 +150,21 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  participant(id): ActivityParticipant {
+  participant(id: string): ActivityParticipant {
     return this._participants.getValue().get(id);
   }
 
   participants(): ActivityParticipant[] {
-    return this._participants.getValue().values();
+    return Array.from(this._participants.getValue().values());
   }
 
   asObservable(): Observable<ActivityParticipant[]> {
-    return this._participants.asObservable().map(mappedValues => mappedValues.values());
+    return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
 }
 
 
-//TODO: is this really necessary right now, could we just use state? in the method call
+// TODO: is this really necessary right now, could we just use state? in the method call
 export interface ActivityJoinOptions {
   state?: Map<string, any>;
 }
