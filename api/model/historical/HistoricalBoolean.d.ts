@@ -1,5 +1,5 @@
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 
-export declare class HistoricalBoolean extends HistoricalValue<any> {
+export declare class HistoricalBoolean extends HistoricalElement<any> {
 
 }

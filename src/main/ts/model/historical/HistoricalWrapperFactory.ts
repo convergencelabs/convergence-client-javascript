@@ -8,7 +8,7 @@ import {NullNode} from "../internal/NullNode";
 import {NumberNode} from "../internal/NumberNode";
 import {StringNode} from "../internal/StringNode";
 import {UndefinedNode} from "../internal/UndefinedNode";
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalArray} from "./HistoricalArray";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalBoolean} from "./HistoricalBoolean";
@@ -17,13 +17,13 @@ import {HistoricalNumber} from "./HistoricalNumber";
 import {HistoricalString} from "./HistoricalString";
 import {HistoricalUndefined} from "./HistoricalUndefined";
 
-export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalValue<any>> {
+export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalElement<any>> {
 
   constructor() {
     super();
   }
 
-  protected _createWrapper(node: ModelNode<any>): HistoricalValue<any> {
+  protected _createWrapper(node: ModelNode<any>): HistoricalElement<any> {
     switch (node.type()) {
       case ModelElementType.Array:
         return new HistoricalArray(<ArrayNode> node, this);

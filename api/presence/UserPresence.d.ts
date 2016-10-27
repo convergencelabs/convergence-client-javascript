@@ -3,5 +3,7 @@ export class UserPresence {
 
   isAvailable(): boolean;
 
+  state(key: string): any;
+
   state(): Map<string, any>;
 }
