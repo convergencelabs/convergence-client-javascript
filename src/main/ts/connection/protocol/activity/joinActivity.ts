@@ -17,12 +17,22 @@ export var ActivityJoinRequestSerializer: MessageBodySerializer = (request: Acti
 };
 
 export interface ActivityJoinResponse extends IncomingProtocolResponseMessage {
-  participants: ActivityParticipant;
+  participants: ActivityParticipant[];
 }
 
 export var ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
+  var participants: ActivityParticipant[] = [];
+
+  for (var participant of body.s) {
+    let state: Map<string, any> = new Map<string, any>();
+    for (let k of Object.keys(participant.state)) {
+      state.set(k, participant.state[k]);
+    }
+    participants.push(new ActivityParticipant(participant.username, participant.session, state));
+  }
+
   var result: ActivityJoinResponse = {
-    participants: body.s
+    participants: participants
   };
   return result;
 };
