@@ -2,7 +2,7 @@ import {ModelNode} from "./ModelNode";
 import {ArrayValue} from "../dataValue";
 import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {DataValue} from "../dataValue";
 import {Path} from "../ot/Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -43,7 +43,7 @@ export class ArrayNode extends ContainerNode<any[]> {
               sessionId: string,
               username: string,
               private dataValueFactory: DataValueFactory) {
-    super(ModelValueType.Array, data.id, path, model, sessionId, username);
+    super(ModelElementType.Array, data.id, path, model, sessionId, username);
 
     this._children = [];
 
@@ -156,7 +156,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     var index: number = <number> pathArgs[0];
     var child: ModelNode<any> = this._children[index];
     if (pathArgs.length > 1) {
-      if (child.type() === ModelValueType.Object || child.type() === ModelValueType.Array) {
+      if (child.type() === ModelElementType.Object || child.type() === ModelElementType.Array) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined

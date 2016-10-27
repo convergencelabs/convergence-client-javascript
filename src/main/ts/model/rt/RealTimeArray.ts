@@ -1,5 +1,5 @@
-import {RealTimeValue} from "./RealTimeValue";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {RealTimeElement} from "./RealTimeElement";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelEventCallbacks} from "./RealTimeModel";
@@ -17,7 +17,7 @@ import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeContainerValue<any[]> {
+export class RealTimeArray extends RealTimeElement<any[]> implements RealTimeContainerElement<any[]> {
 
   static Events: any = {
     INSERT: "insert",
@@ -25,8 +25,8 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
     SET: "set",
     REORDER: "reorder",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED,
-    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
+    DETACHED: RealTimeElement.Events.DETACHED,
+    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
   };
 
   /**
@@ -56,16 +56,16 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
     });
   }
 
-  get(index: number): RealTimeValue<any> {
+  get(index: number): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(index));
   }
 
 
-  set(index: number, value: any): RealTimeValue<any> {
+  set(index: number, value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.set(index, value));
   }
 
-  insert(index: number, value: any): RealTimeValue<any> {
+  insert(index: number, value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.insert(index, value));
   }
 
@@ -77,7 +77,7 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
     this._delegate.reorder(fromIndex, toIndex);
   }
 
-  push(value: any): RealTimeValue<any> {
+  push(value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.push(value));
   }
 
@@ -85,7 +85,7 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
     return this._delegate.pop();
   }
 
-  unshift(value: any): RealTimeValue<any> {
+  unshift(value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.unshift(value));
   }
 
@@ -97,13 +97,13 @@ export class RealTimeArray extends RealTimeValue<any[]> implements RealTimeConta
     return this._delegate.length();
   }
 
-  forEach(callback: (value: RealTimeValue<any>, index?: number) => void): void {
+  forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
-  valueAt(pathArgs: any): RealTimeValue<any> {
+  valueAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 

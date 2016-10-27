@@ -1,7 +1,7 @@
 import {ChatEvent} from "./events";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export declare class ChatRoom extends ObservableEventEmitter<ChatEvent> {
+export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
   info(): RoomInfo;
 
   isJoined(): boolean;

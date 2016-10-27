@@ -5,9 +5,10 @@ import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ModelEvent} from "./events";
-import {ObservableEventEmitter} from "../../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ModelCollaborator} from "./ModelCollaborator";
 
-export declare class RealTimeModel extends ObservableEventEmitter<any> {
+export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
 
   static Events: any;
 
@@ -46,11 +47,6 @@ export declare class RealTimeModel extends ObservableEventEmitter<any> {
   reference(sessionId: string, key: string): ModelReference<any>;
 
   references(filter?: ReferenceFilter): ModelReference<any>[];
-}
-
-export declare class ModelCollaborator {
-  sessionId();
-  username();
 }
 
 export interface OpenedEvent extends ModelEvent {

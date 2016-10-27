@@ -2,9 +2,9 @@ import {Session} from "../Session";
 import {ActivityEvent} from "./events";
 import {Observable} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
+export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   static Events: any;
 
   session(): Session;

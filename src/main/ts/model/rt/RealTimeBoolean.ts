@@ -1,4 +1,4 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {BooleanNode} from "../internal/BooleanNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
@@ -8,12 +8,12 @@ import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeBoolean extends RealTimeValue<boolean> {
+export class RealTimeBoolean extends RealTimeElement<boolean> {
 
   static Events: any = {
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED,
-    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
+    DETACHED: RealTimeElement.Events.DETACHED,
+    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
   };
 
   /**

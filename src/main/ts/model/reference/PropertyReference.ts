@@ -1,4 +1,4 @@
-import {RealTimeValue} from "../rt/RealTimeValue";
+import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {ReferenceManager} from "./ReferenceManager";
@@ -7,7 +7,7 @@ export class PropertyReference extends ModelReference<string> {
 
   constructor(referenceManager: ReferenceManager,
               key: string,
-              source: RealTimeValue<any>,
+              source: RealTimeElement<any>,
               username: string,
               sessionId: string,
               local: boolean) {

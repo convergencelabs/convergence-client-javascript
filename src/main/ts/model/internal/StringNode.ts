@@ -1,7 +1,7 @@
 import {ModelNode} from "./ModelNode";
 import {StringValue} from "../dataValue";
 import {Model} from "./Model";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
@@ -32,7 +32,7 @@ export class StringNode extends ModelNode<String> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelValueType.String, data.id, path, model, sessionId, username);
+    super(ModelElementType.String, data.id, path, model, sessionId, username);
 
     this._data = data.value;
   }

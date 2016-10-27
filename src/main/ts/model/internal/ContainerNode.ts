@@ -1,4 +1,4 @@
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {PathElement} from "../ot/Path";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
@@ -26,7 +26,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
   /**
    * Constructs a new RealTimeContainer.
    */
-  constructor(modelType: ModelValueType,
+  constructor(modelType: ModelElementType,
               id: string,
               path: () => Path,
               model: Model,

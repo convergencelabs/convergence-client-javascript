@@ -85,7 +85,6 @@ describe('Reference Transformation E2E', () => {
     }).then((model: RealTimeModel) => {
       referenceSetAction.acknowledgeReceipt();
       var rts: RealTimeString = <RealTimeString>model.valueAt("text");
-      console.log(model.connectedSessions());
 
       rts.on(RealTimeString.Events.REFERENCE, function(e: RemoteReferenceCreatedEvent) {
         console.log(e.reference.username());

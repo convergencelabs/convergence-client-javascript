@@ -1,6 +1,6 @@
 import {ModelNode} from "./ModelNode";
 import {Model} from "./Model";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path} from "../ot/Path";
 import {DataValue} from "../dataValue";
@@ -19,7 +19,7 @@ export class UndefinedNode extends ModelNode<void> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelValueType.Undefined, id, path, model, sessionId, username);
+    super(ModelElementType.Undefined, id, path, model, sessionId, username);
   }
 
   dataValue(): DataValue {

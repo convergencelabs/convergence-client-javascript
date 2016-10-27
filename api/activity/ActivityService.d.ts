@@ -1,8 +1,8 @@
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {Session} from "../Session";
 import {Activity} from "./Activity";
 
-export declare class ActivityService extends ObservableEventEmitter {
+export declare class ActivityService extends ConvergenceEventEmitter {
   session(): Session;
 
   join(id: string, options?: ActivityJoinOptions): Promise<Activity>;

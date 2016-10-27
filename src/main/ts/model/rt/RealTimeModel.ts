@@ -1,7 +1,7 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
@@ -25,7 +25,6 @@ import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RemoteReferencePublished} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ElementReference} from "../reference/ElementReference";
@@ -49,6 +48,7 @@ import {ModelEvent} from "./events";
 import {ModelClosedEvent} from "./events";
 import {VersionChangedEvent} from "./events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ModelCollaborator} from "./ModelCollaborator";
 
 export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -115,10 +115,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     // fixme these should have versions unless we move to GUIDs.
     // also move this out of this constructor.
-    var referenceCallbacks: ModelReferenceCallbacks = {
+    const referenceCallbacks: ModelReferenceCallbacks = {
       onPublish: (reference: LocalModelReference<any, any>): void => {
-        let source: any = reference.reference().source();
-        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+        const source: any = reference.reference().source();
+        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
         var event: PublishReferenceEvent = {
           type: MessageType.PUBLISH_REFERENCE,
@@ -133,10 +133,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
       },
       onUnpublish: (reference: LocalModelReference<any, any>): void => {
-        let source: any = reference.reference().source();
-        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+        const source: any = reference.reference().source();
+        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
-        var event: UnpublishReferenceEvent = {
+        const event: UnpublishReferenceEvent = {
           type: MessageType.UNPUBLISH_REFERENCE,
           resourceId: this._resourceId,
           key: reference.reference().key(),
@@ -145,22 +145,22 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
         this._connection.send(event);
       },
       onSet: (reference: LocalModelReference<any, any>): void => {
-        let source: any = reference.reference().source();
-        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+        const source: any = reference.reference().source();
+        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
-        var refData: ModelReferenceData = {
+        let refData: ModelReferenceData = {
           type: reference.reference().type(),
           id: vid,
           values: reference.reference().values()
         };
 
-        // Only transform those that target a RealTimeValue
+        // Only transform those that target a RealTimeElement
         if (vid !== undefined) {
           refData = this._concurrencyControl.processOutgoingSetReference(refData);
         }
 
         if (refData) {
-          var event: SetReferenceEvent = {
+          const event: SetReferenceEvent = {
             type: MessageType.SET_REFERENCE,
             resourceId: this._resourceId,
             key: reference.reference().key(),
@@ -173,10 +173,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
         }
       },
       onClear: (reference: LocalModelReference<any, any>): void => {
-        let source: any = reference.reference().source();
-        var vid: string = (source instanceof RealTimeValue) ? source.id() : null;
+        const source: any = reference.reference().source();
+        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
-        var event: ClearReferenceEvent = {
+        const event: ClearReferenceEvent = {
           type: MessageType.CLEAR_REFERENCE,
           resourceId: this._resourceId,
           key: reference.reference().key(),
@@ -188,7 +188,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     this._callbacks = {
       sendOperationCallback: (operation: DiscreteOperation): void => {
-        var opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
+        const opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
         if (!this._concurrencyControl.isCompoundOperationInProgress()) {
           this._sendOperation(opEvent);
         }
@@ -202,7 +202,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._committed = true;
 
     references.forEach((ref: ReferenceData) => {
-      var published: RemoteReferencePublished = {
+      const published: RemoteReferencePublished = {
         type: MessageType.REFERENCE_PUBLISHED,
         sessionId: ref.sessionId,
         username: SessionIdParser.deserialize(ref.sessionId).username,
@@ -215,9 +215,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
       // fixme refactor
       if (published.id !== undefined) {
-        var m: RealTimeValue<any> = this._wrapperFactory.wrap(this._model._getRegisteredValue(published.id));
+        // fixme this var is pretty bad, it is used below.
+        var m: RealTimeElement<any> = this._wrapperFactory.wrap(this._model._getRegisteredValue(published.id));
         m._handleRemoteReferenceEvent(published);
-        var r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
+        const r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
         this._referencesBySession[ref.sessionId].push(r);
       } else {
         this._modelReferenceEvent(published);
@@ -225,7 +226,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
 
       if (ref.values) {
-        var set: RemoteReferenceSet = {
+        const set: RemoteReferenceSet = {
           type: MessageType.REFERENCE_SET,
           sessionId: ref.sessionId,
           username: SessionIdParser.deserialize(ref.sessionId).username,
@@ -235,6 +236,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
           referenceType: ref.referenceType,
           values: ref.values
         };
+
         if (set.id !== undefined) {
           m._handleRemoteReferenceEvent(set);
         } else {
@@ -256,12 +258,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  connectedSessions(): RemoteSession[] {
+  collaborators(): ModelCollaborator[] {
     return this._sessions.map((sessionId: string) => {
-      return {
-        username: SessionIdParser.parseUsername(sessionId),
-        sessionId: sessionId
-      };
+      return new ModelCollaborator(
+        SessionIdParser.parseUsername(sessionId),
+        sessionId
+      );
     });
   }
 
@@ -281,20 +283,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._createdTime;
   }
 
-  modifiedTime(): Date {
+  lastModifiedTime(): Date {
     return this._modifiedTime;
-  }
-
-  // deprecated
-  value(): RealTimeObject {
-    return this.root();
   }
 
   root(): RealTimeObject {
     return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  valueAt(path: any): RealTimeValue<any> {
+  valueAt(path: any): RealTimeElement<any> {
     return this.root().valueAt(path);
   }
 
@@ -308,7 +305,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   close(): Promise<void> {
     return this._modelService._close(this._resourceId).then(() => {
-      var event: ModelClosedEvent = {
+      const event: ModelClosedEvent = {
         src: this,
         name: RealTimeModel.Events.CLOSED,
         local: true
@@ -317,21 +314,21 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  startCompound(): void {
+  startBatch(): void {
     this._concurrencyControl.startCompoundOperation();
   }
 
-  endCompound(): void {
-    var opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
+  endBatch(): void {
+    const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
     this._sendOperation(opEvent);
   }
 
-  isCompoundStarted(): boolean {
+  isBatchStarted(): boolean {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
   elementReference(key: string): LocalElementReference {
-    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+    const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.ELEMENT) {
         throw new Error("A reference with this key already exists, but is not an element reference");
@@ -339,11 +336,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
         return <LocalElementReference>existing;
       }
     } else {
-      var session: Session = this.session();
-      var reference: ElementReference = new ElementReference(
+      const session: Session = this.session();
+      const reference: ElementReference = new ElementReference(
         this._referenceManager, key, this, session.username(), session.sessionId(), true);
 
-      var local: LocalElementReference = new LocalElementReference(
+      const local: LocalElementReference = new LocalElementReference(
         reference,
         this._callbacks.referenceEventCallbacks
       );
@@ -365,7 +362,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   // Private API
   //
 
-  _getRegisteredValue(id: string): RealTimeValue<any> {
+  _getRegisteredValue(id: string): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._model._getRegisteredValue(id));
   }
 
@@ -403,7 +400,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _handleClientOpen(message: RemoteClientOpenedModel): void {
     this._referencesBySession[message.sessionId] = [];
-    var event: RemoteSessionOpenedEvent = {
+    const event: RemoteSessionOpenedEvent = {
       name: RealTimeModel.Events.SESSION_OPENED,
       src: this,
       sessionId: message.sessionId,
@@ -413,14 +410,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleClientClosed(message: RemoteClientClosedModel): void {
-    var refs: ModelReference<any>[] = this._referencesBySession[message.sessionId];
+    const refs: ModelReference<any>[] = this._referencesBySession[message.sessionId];
     delete this._referencesBySession[message.sessionId];
 
     refs.forEach((ref: ModelReference<any>) => {
       ref._dispose();
     });
 
-    var event: RemoteSessionClosedEvent = {
+    const event: RemoteSessionClosedEvent = {
       name: RealTimeModel.Events.SESSION_CLOSED,
       src: this,
       sessionId: message.sessionId,
@@ -435,7 +432,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     if (event.id === undefined) {
       this._modelReferenceEvent(event);
     } else {
-      const value: RealTimeValue<any> = this._getRegisteredValue(event.id);
+      const value: RealTimeElement<any> = this._getRegisteredValue(event.id);
       if (!value) {
         return;
       }
@@ -485,7 +482,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
       if (processedEvent.type === MessageType.REFERENCE_UNPUBLISHED) {
         r = value.reference(processedEvent.sessionId, processedEvent.key);
-        var index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
+        const index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
         this._referencesBySession[processedEvent.sessionId].splice(index, 1);
       }
 
@@ -503,7 +500,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleForceClose(message: ForceCloseRealTimeModel): void {
-    var event: ModelClosedEvent = {
+    const event: ModelClosedEvent = {
       src: this,
       name: RealTimeModel.Events.CLOSED,
       local: false,
@@ -527,7 +524,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleRemoteOperation(message: RemoteOperation): void {
-    var unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
+    const unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       message.sessionId,
       -1, // fixme not needed, this is only needed when going to the server.  Perhaps
       // this should probalby go in the op submission message.
@@ -537,29 +534,29 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     );
 
     this._concurrencyControl.processRemoteOperation(unprocessed);
-    var processed: ProcessedOperationEvent = this._concurrencyControl.getNextIncomingOperation();
+    const processed: ProcessedOperationEvent = this._concurrencyControl.getNextIncomingOperation();
 
-    var operation: Operation = processed.operation;
-    var clientId: string = processed.clientId;
-    var contextVersion: number = processed.version;
-    var timestamp: number = processed.timestamp;
-    var username: string = SessionIdParser.parseUsername(message.sessionId);
+    const operation: Operation = processed.operation;
+    const clientId: string = processed.clientId;
+    const contextVersion: number = processed.version;
+    const timestamp: number = processed.timestamp;
+    const username: string = SessionIdParser.parseUsername(message.sessionId);
 
     this._version = contextVersion + 1;
     this._modifiedTime = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
-      let compoundOp: CompoundOperation = <CompoundOperation> operation;
+      const compoundOp: CompoundOperation = <CompoundOperation> operation;
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         if (!op.noOp) {
-          var modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
+          const modelEvent: ModelOperationEvent = new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
           this._deliverToChild(modelEvent);
         }
       });
     } else {
-      let discreteOp: DiscreteOperation = <DiscreteOperation> operation;
+      const discreteOp: DiscreteOperation = <DiscreteOperation> operation;
       if (!discreteOp.noOp) {
-        var modelEvent: ModelOperationEvent =
+        const modelEvent: ModelOperationEvent =
           new ModelOperationEvent(clientId, username, contextVersion, timestamp, discreteOp);
         this._deliverToChild(modelEvent);
       }
@@ -571,7 +568,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _sendOperation(opEvent: UnprocessedOperationEvent): void {
-    var opSubmission: OperationSubmission = {
+    const opSubmission: OperationSubmission = {
       resourceId: this._resourceId,
       seqNo: opEvent.seqNo,
       version: opEvent.contextVersion,
@@ -582,7 +579,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _emitVersionChanged(): void {
-    var event: VersionChangedEvent = {
+    const event: VersionChangedEvent = {
       name: RealTimeModel.Events.VERSION_CHANGED,
       src: this,
       version: this._version
@@ -596,7 +593,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _onRemoteReferencePublished(reference: ModelReference<any>): void {
     this._referencesBySession[reference.sessionId()].push(reference);
-    var createdEvent: RemoteReferenceCreatedEvent = {
+    const createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeModel.Events.REFERENCE,
       src: this,
       reference: reference
@@ -611,9 +608,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       case ReferenceType.RANGE:
         return ref.values;
       case ReferenceType.ELEMENT:
-        var elementIds: string[] = [];
-        for (var element of ref.values) {
-          elementIds.push((<RealTimeValue<any>> element).id());
+        const elementIds: string[] = [];
+        for (let element of ref.values) {
+          elementIds.push((<RealTimeElement<any>> element).id());
         }
         return elementIds;
       default:

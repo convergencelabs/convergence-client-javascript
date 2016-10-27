@@ -1,4 +1,4 @@
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {Path} from "../ot/Path";
 import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
@@ -21,7 +21,7 @@ export abstract class HistoricalValue<T> extends ConvergenceEventEmitter<Converg
     return this._delegate.id();
   }
 
-  type(): ModelValueType {
+  type(): ModelElementType {
     return this._delegate.type();
   }
 

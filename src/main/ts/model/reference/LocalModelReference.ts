@@ -1,8 +1,9 @@
 import {ModelReference} from "./ModelReference";
-import {RealTimeValue} from "../rt/RealTimeValue";
+import {RealTimeElement} from "../rt/RealTimeElement";
 import {ReferenceType} from "./ModelReference";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {RealTimeModel} from "../rt/RealTimeModel";
 
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
@@ -34,7 +35,7 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     return this._reference.key();
   }
 
-  source(): RealTimeValue<any> {
+  source(): RealTimeElement<any> | RealTimeModel {
     return this._reference.source();
   }
 
@@ -66,35 +67,21 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     return this._reference;
   }
 
-  publish(): void {
+  share(): void {
     this._ensureAttached();
     this._published = true;
     this._callbacks.onPublish(this);
   }
 
-  unpublish(): void {
+  unshare(): void {
     this._ensureAttached();
     this._published = false;
     this._callbacks.onUnpublish(this);
   }
 
-  isPublished(): boolean {
+  isShared(): boolean {
     return this._published;
   }
-
-  clear(): void {
-    this._ensureAttached();
-    this._reference._clear();
-    this._callbacks.onClear(this);
-  }
-
-  dispose(): void {
-    this._ensureAttached();
-    this.unpublish();
-    this._reference._dispose();
-    this._callbacks = null;
-  }
-
 
   set(value: V): void;
   set(value: V[]): void;
@@ -107,13 +94,26 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
       this._reference._set([value], true);
     }
 
-    if (this.isPublished()) {
+    if (this.isShared()) {
       this._callbacks.onSet(this);
     }
   }
 
+  clear(): void {
+    this._ensureAttached();
+    this._reference._clear();
+    this._callbacks.onClear(this);
+  }
+
   isSet(): boolean {
     return this._reference.isSet();
+  }
+
+  dispose(): void {
+    this._ensureAttached();
+    this.unshare();
+    this._reference._dispose();
+    this._callbacks = null;
   }
 
   private _ensureAttached(): void {

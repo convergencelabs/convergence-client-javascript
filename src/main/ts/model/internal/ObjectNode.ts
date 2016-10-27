@@ -1,5 +1,5 @@
 import {Model} from "./Model";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
 import {ObjectValue} from "../dataValue";
 import {Validation} from "../../util/Validation";
@@ -40,7 +40,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
               sessionId: string,
               username: string,
               private dataValueFactory: DataValueFactory) {
-    super(ModelValueType.Object, data.id, path, model, sessionId, username);
+    super(ModelElementType.Object, data.id, path, model, sessionId, username);
 
     this._children = new Map<string, ModelNode<any>>();
 
@@ -139,7 +139,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
     }
 
     if (pathArgs.length > 1) {
-      if (child.type() === ModelValueType.Object || child.type() === ModelValueType.Array) {
+      if (child.type() === ModelElementType.Object || child.type() === ModelElementType.Array) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined

@@ -6,9 +6,9 @@ import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
-import {ObservableEventEmitter} from "./util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 
-export default class ConvergenceDomain extends ObservableEventEmitter {
+export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static Events: any;
 

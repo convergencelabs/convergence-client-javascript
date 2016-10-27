@@ -30,9 +30,10 @@ export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   id: string;
 }
 
+// fixme this should be shared, not publish.  This is in a bunch of places.
 export interface RemoteReferencePublished extends RemoteReferenceEvent {
   referenceType: string;
-  values?: any; // fixme should this be any[]?
+  values?: any[];
 }
 
 export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
@@ -40,7 +41,7 @@ export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
 
 export interface RemoteReferenceSet extends RemoteReferenceEvent {
   referenceType: string;
-  values: any; // fixme should this be any[]?
+  values: any[];
 }
 
 export interface RemoteReferenceCleared extends RemoteReferenceEvent {

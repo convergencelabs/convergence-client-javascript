@@ -1,6 +1,6 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {Path} from "../ot/Path";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeArray} from "./RealTimeArray";
 import {RealTimeBoolean} from "./RealTimeBoolean";
 import {RealTimeNumber} from "./RealTimeNumber";
@@ -27,13 +27,13 @@ export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: RealTimeValue<any>;
+  src: RealTimeElement<any>;
   local: boolean;
 }
 
 export class ValueDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
-  constructor(public src: RealTimeValue<any>) {}
+  constructor(public src: RealTimeElement<any>) {}
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
@@ -44,7 +44,7 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
 export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
   public name: string = "model_changed";
-  constructor(public src: RealTimeValue<any>,
+  constructor(public src: RealTimeElement<any>,
               public relativePath: Path,
               public childEvent: ValueChangedEvent,
               public sessionId: string,
@@ -56,7 +56,7 @@ export class ArrayInsertEvent implements ValueChangedEvent {
   public name: string = "insert";
   constructor(public src: RealTimeArray,
               public index: number,
-              public value: RealTimeValue<any>,
+              public value: RealTimeElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -133,7 +133,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
   public name: string = "set";
   constructor(public src: RealTimeObject,
               public key: string,
-              public value: RealTimeValue<any>,
+              public value: RealTimeElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}

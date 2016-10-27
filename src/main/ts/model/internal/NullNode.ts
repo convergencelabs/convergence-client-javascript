@@ -1,5 +1,5 @@
 import {ModelNode} from "./ModelNode";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
@@ -19,7 +19,7 @@ export class NullNode extends ModelNode<void> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelValueType.Null, id, path, model, sessionId, username);
+    super(ModelElementType.Null, id, path, model, sessionId, username);
   }
 
   dataValue(): NullValue {

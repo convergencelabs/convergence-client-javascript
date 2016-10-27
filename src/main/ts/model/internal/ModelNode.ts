@@ -1,4 +1,4 @@
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -18,14 +18,14 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
   };
 
   private _id: string;
-  private _modelType: ModelValueType;
+  private _modelType: ModelElementType;
   protected _model: Model;
   protected _path: () => Path;
 
   /**
-   * Constructs a new RealTimeValue.
+   * Constructs a new RealTimeElement.
    */
-  constructor(modelType: ModelValueType,
+  constructor(modelType: ModelElementType,
               id: string,
               path: () => Path,
               model: Model,
@@ -44,7 +44,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     return this._id;
   }
 
-  type(): ModelValueType {
+  type(): ModelElementType {
     return this._modelType;
   }
 

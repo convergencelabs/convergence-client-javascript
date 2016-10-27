@@ -1,6 +1,6 @@
 import {NodeWrapperFactory} from "../internal/NodeWrapperFactory";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ArrayNode} from "../internal/ArrayNode";
 import {ObjectNode} from "../internal/ObjectNode";
 import {BooleanNode} from "../internal/BooleanNode";
@@ -25,19 +25,19 @@ export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalValue
 
   protected _createWrapper(node: ModelNode<any>): HistoricalValue<any> {
     switch (node.type()) {
-      case ModelValueType.Array:
+      case ModelElementType.Array:
         return new HistoricalArray(<ArrayNode> node, this);
-      case ModelValueType.Object:
+      case ModelElementType.Object:
         return new HistoricalObject(<ObjectNode> node, this);
-      case ModelValueType.Boolean:
+      case ModelElementType.Boolean:
           return new HistoricalBoolean(<BooleanNode> node, this);
-      case ModelValueType.Null:
+      case ModelElementType.Null:
         return new HistoricalNull(<NullNode> node, this);
-      case ModelValueType.Number:
+      case ModelElementType.Number:
         return new HistoricalNumber(<NumberNode> node, this);
-      case ModelValueType.String:
+      case ModelElementType.String:
         return new HistoricalString(<StringNode> node, this);
-      case ModelValueType.Undefined:
+      case ModelElementType.Undefined:
         return new HistoricalUndefined(<UndefinedNode> node, this);
       default:
         return null;

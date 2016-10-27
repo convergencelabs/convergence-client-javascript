@@ -1,6 +1,6 @@
 import {ModelNode} from "./ModelNode";
 import {BooleanValue} from "../dataValue";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -26,7 +26,7 @@ export class BooleanNode extends ModelNode<boolean> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelValueType.Boolean, data.id, path, model, sessionId, username);
+    super(ModelElementType.Boolean, data.id, path, model, sessionId, username);
     this._data = data.value;
   }
 
