@@ -55,14 +55,14 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           break;
         case Activity.Events.STATE_SET:
           let setEvent: StateSetEvent = <StateSetEvent> event;
-          let setState: Map<string, any> = Object.assign({}, newMap.get(setEvent.sessionId).state());
+          let setState: Map<string, any> =  newMap.get(setEvent.sessionId).state();
           setState.set(setEvent.key, setEvent.value);
           newMap.set(setEvent.sessionId, new ActivityParticipant(setEvent.username, setEvent.sessionId, setState));
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_REMOVED:
           let removeEvent: StateRemovedEvent = <StateRemovedEvent> event;
-          let removeState: Map<string, any> = Object.assign({}, newMap.get(removeEvent.sessionId).state());
+          let removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state();
           removeState.delete(removeEvent.key);
           newMap.set(removeEvent.sessionId, new ActivityParticipant(removeEvent.username, removeEvent.sessionId, removeState));
           this._participants.next(newMap);
