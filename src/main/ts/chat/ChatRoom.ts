@@ -31,6 +31,7 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   info(): Observable<RoomInfo> {
+    // fixme this is not implemented.
     return Observable.create((observer) => observer.next(new RoomInfo([], 0, Date.now())));
   }
 
@@ -72,18 +73,18 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
 }
 
 export class RoomInfo {
-  private _sessions: string[];
+  private _members: ChatMember[];
   private _messageCount: number;
   private _lastMessageTime: number;
 
-  constructor(sessions: string[], messageCount: number, lastMessageTime: number) {
-    this._sessions = sessions;
+  constructor(members: ChatMember[], messageCount: number, lastMessageTime: number) {
+    this._members = members;
     this._messageCount = messageCount;
     this._lastMessageTime = lastMessageTime;
   }
 
-  sessions(): string[] {
-    return this._sessions;
+  members(): ChatMember[] {
+    return this._members;
   }
 
   messageCount(): number {
@@ -92,5 +93,25 @@ export class RoomInfo {
 
   lastMessageTime(): number {
     return this._lastMessageTime;
+  }
+}
+
+export class ChatMember {
+
+  private _username: string;
+  private _sessionId: string;
+
+  constructor(username, sessionId) {
+    this._username = username;
+    this._sessionId = sessionId;
+    Object.freeze(this);
+  }
+
+  username() {
+    return this._sessionId;
+  }
+
+  sessionId(): string {
+    return this._username;
   }
 }
