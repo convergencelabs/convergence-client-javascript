@@ -101,13 +101,13 @@ export class ChatMember {
   private _username: string;
   private _sessionId: string;
 
-  constructor(username, sessionId) {
+  constructor(username: string, sessionId: string) {
     this._username = username;
     this._sessionId = sessionId;
     Object.freeze(this);
   }
 
-  username() {
+  username(): string {
     return this._sessionId;
   }
 
