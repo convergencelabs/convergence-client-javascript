@@ -1,6 +1,6 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {BehaviorSubject} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {Observable} from "rxjs/Observable";
 import {ActivityEvent, SessionJoinedEvent, SessionLeftEvent, StateSetEvent, StateClearedEvent} from "./events";
@@ -41,7 +41,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     this._connection = connection;
 
     this.events().subscribe((event: ActivityEvent) => {
-      let newMap: Map<string, ActivityParticipant> = Object.assign({}, this._participants.getValue());
+      let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
       switch (event.name) {
         case Activity.Events.SESSION_JOINED:
           let joinedEvent: SessionJoinedEvent = <SessionJoinedEvent> event;
