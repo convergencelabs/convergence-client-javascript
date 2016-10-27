@@ -18,7 +18,7 @@ import {ObjectSetProperty} from "../ot/ops/operationChanges";
 import {ObjectRemoveProperty} from "../ot/ops/operationChanges";
 import {ObjectSet} from "../ot/ops/operationChanges";
 
-export class ObjectNode extends ContainerNode<{ [key: string]: any; }> {
+export class ObjectNode extends ContainerNode<Map<string, any>> {
 
   static Events: any = {
     SET: "set",

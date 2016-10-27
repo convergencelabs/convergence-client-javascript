@@ -63,6 +63,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     REFERENCE: "reference"
   };
 
+  private _resourceId: string;
+
   private _open: boolean;
   private _committed: boolean;
   private _referencesBySession: {[key: string]: ModelReference<any>[]};
@@ -75,22 +77,39 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _model: Model;
   private _emitLocal: boolean = false;
 
+  private _version: number;
+  private _createdTime: Date;
+  private _modifiedTime: Date;
+  private _modelFqn: ModelFqn;
+  private _concurrencyControl: ClientConcurrencyControl;
+  private _connection: ConvergenceConnection;
+  private _modelService: ModelService;
+
   /**
    * Constructs a new RealTimeModel.
    */
-  constructor(private _resourceId: string,
+  constructor(resourceId: string,
               valueIdPrefix: string,
               data: ObjectValue,
               sessions: string[],
               references: ReferenceData[],
-              private _version: number,
-              private _createdTime: Date,
-              private _modifiedTime: Date,
-              private _modelFqn: ModelFqn,
-              private _concurrencyControl: ClientConcurrencyControl,
-              private _connection: ConvergenceConnection,
-              private _modelService: ModelService) {
+              version: number,
+              createdTime: Date,
+              modifiedTime: Date,
+              modelFqn: ModelFqn,
+              concurrencyControl: ClientConcurrencyControl,
+              connection: ConvergenceConnection,
+              modelService: ModelService) {
     super();
+
+    this._resourceId = resourceId;
+    this._version = version;
+    this._createdTime = createdTime;
+    this._modifiedTime = modifiedTime;
+    this._modelFqn = modelFqn;
+    this._concurrencyControl = concurrencyControl;
+    this._connection = connection;
+    this._modelService = modelService;
 
     this._model = new Model(this.session().sessionId(), this.session().username(), valueIdPrefix, data);
 

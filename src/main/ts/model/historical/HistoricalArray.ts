@@ -23,7 +23,7 @@ export class HistoricalArray extends HistoricalElement<any[]> implements Histori
     });
   }
 
-  valueAt(pathArgs: any): HistoricalElement<any> {
+  elementAt(pathArgs: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 }

@@ -27,7 +27,7 @@ export class HistoricalObject extends HistoricalElement<Map<string, any>> implem
     });
   }
 
-  valueAt(pathArgs: any): HistoricalElement<any> {
+  elementAt(pathArgs: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 }
