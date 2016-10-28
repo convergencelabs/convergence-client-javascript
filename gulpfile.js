@@ -16,7 +16,6 @@ const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
 
 const rollup = require('rollup');
-const gulpRollup = require('gulp-rollup');
 const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
@@ -83,8 +82,8 @@ gulp.task('coverage', ["build"], function () {
  */
 gulp.task('lint', function () {
   return gulp.src('src/main/ts/**/*.ts')
-    .pipe(tsLint())
-    .pipe(tsLint.report('prose'));
+    .pipe(tsLint({formatter: 'prose'}))
+    .pipe(tsLint.report());
 });
 
 gulp.task('dist-ts', ["build"], function () {
@@ -202,26 +201,4 @@ gulp.task('copyPackage', function(){
  */
 gulp.task('clean', function () {
   return del(['dist', "build"]);
-});
-
-
-var typedoc = require("gulp-typedoc");
-gulp.task("typedoc", function() {
-  return gulp
-    .src(["api/*.ts"])
-    .pipe(typedoc({
-      // TypeScript options (see typescript docs)
-      module: "es6",
-      target: "es6",
-      includeDeclarations: true,
-
-      // Output options (see typedoc docs)
-      out: "./build/docs",
-
-      // TypeDoc options (see typedoc docs)
-      name: "Convergence Client",
-      ignoreCompilerErrors: true,
-      version: true
-    }))
-    ;
 });
