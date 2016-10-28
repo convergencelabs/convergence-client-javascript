@@ -24,9 +24,9 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
 
   time(): Date;
 
-  createdTime(): Date;
+  minVersion(): number;
 
-  lastModifiedTime(): Date;
+  createdTime(): Date;
   
   root(): RealTimeObject;
 

@@ -12,12 +12,15 @@ export declare class HistoricalModel {
 
   version(): number;
 
+  time(): Date;
+
   minVersion(): number;
+
+  createdTime(): Date;
+
   maxVersion(): number;
 
-  time(): Date;
-  createdTime(): Date;
-  lastModifiedTime(): Date;
+  maxTime(): Date;
 
   root(): HistoricalObject;
 
