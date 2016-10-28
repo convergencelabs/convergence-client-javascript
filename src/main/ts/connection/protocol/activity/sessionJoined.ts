@@ -8,10 +8,14 @@ export interface ActivitySessionJoined extends IncomingProtocolNormalMessage {
 }
 
 export var ActivitySessionJoinedDeserializer: MessageBodyDeserializer<ActivitySessionJoined> = (body: any) => {
+  let state: Map<string, any> = new Map<string, any>();
+  for (let k of Object.keys(body.v)) {
+    state.set(k, body.v[k]);
+  }
   var result: ActivitySessionJoined = {
     activityId: body.i,
     sessionId: body.s,
-    state: body.v
+    state: state
   };
   return result;
 };

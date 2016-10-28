@@ -1,19 +1,23 @@
-import {Observable} from "rxjs/Observable";
 import {ChatEvent} from "./events";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export declare class ChatRoom extends ObservableEventEmitter<ChatEvent> {
-  info(): RoomInfo;
+export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
+  id(): string;
 
   isJoined(): boolean;
 
   leave(): void;
 
   send(message: string): void;
+
+  members(): ChatMember[];
+
+  messageCount(): number;
+
+  lastMessageTime(): number;
 }
 
-export declare class RoomInfo {
-  sessions(): string[]; // fixme we have been using a RemoteSession class
-  messageCount(): number;
-  lastMessageTime(): number;
+export declare class ChatMember {
+  sessionId();
+  username();
 }

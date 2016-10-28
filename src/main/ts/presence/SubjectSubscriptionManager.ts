@@ -23,21 +23,21 @@ export class SubjectSubscriptionManager<T> {
   }
 
   private _getSubjectFunc(id: string): () => SubscriptionSubject<T> {
-   return () => {
-     var subject: SubscriptionSubject<T> = this._subjectMap.get(id);
-     if (subject === undefined) {
-       this._subscribeFunc(id);
-       subject = new SubscriptionSubject<T>(this._unsubscribeSubjectFunc(id));
-       this._subjectMap.set(id, subject);
-     }
-     return subject;
-   };
+    return () => {
+      var subject: SubscriptionSubject<T> = this._subjectMap.get(id);
+      if (subject === undefined) {
+        this._subscribeFunc(id);
+        subject = new SubscriptionSubject<T>(this._unsubscribeSubjectFunc(id));
+        this._subjectMap.set(id, subject);
+      }
+      return subject;
+    };
   }
 
   private _unsubscribeSubjectFunc(id: string): () => void {
     return () => {
-        this._subjectMap.delete(id);
-        this._unsubscribeFunc(id);
+      this._subjectMap.delete(id);
+      this._unsubscribeFunc(id);
     };
   }
 }
@@ -53,8 +53,11 @@ class ProxyObservable<T> extends Observable<T> {
     this._getSubjectFunc = getSubjectFunc;
   }
 
-  subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
-    var internalSubscription: Subscription = super.subscribe(observerOrNext, error, complete);
+  subscribe(): Subscription;
+  subscribe(observer: PartialObserver<T>): Subscription;
+  subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+  subscribe(next?: any, error?: (error: any) => void, complete?: () => void): Subscription {
+    var internalSubscription: Subscription = super.subscribe(next, error, complete);
     var subject: SubscriptionSubject<T> = this._getSubjectFunc();
     var externalSubscription: Subscription = subject.subscribe(this._observer);
 

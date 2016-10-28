@@ -1,14 +1,14 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {NullNode} from "../internal/NullNode";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeNull extends RealTimeValue<any> {
+export class RealTimeNull extends RealTimeElement<any> {
 
   static Events: any = {
-    DETACHED: RealTimeValue.Events.DETACHED
+    DETACHED: RealTimeElement.Events.DETACHED
   };
 
   /**

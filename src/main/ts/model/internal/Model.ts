@@ -45,7 +45,7 @@ export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   valueAt(path: any): ModelNode<any> {
-    var pathArgs: Path = Array.isArray(path) ? path : arguments;
+    var pathArgs: Path = <Path>(Array.isArray(path) ? path : arguments);
     return this._data._valueAt(pathArgs);
   }
 

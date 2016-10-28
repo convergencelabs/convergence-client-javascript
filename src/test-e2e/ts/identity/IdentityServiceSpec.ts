@@ -4,7 +4,7 @@ import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
-import DomainUser from "../../../main/ts/identity/DomainUser";
+import {DomainUser} from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 import {UserField} from "../../../main/ts/identity/IdentityService";
@@ -31,7 +31,7 @@ describe('IdentityService.user()', () => {
     var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
-        {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"}
+        {i: "u1", n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"}
       ]
     });
     mockServer.start();
@@ -42,6 +42,7 @@ describe('IdentityService.user()', () => {
       expect(user.username).to.equal("test1");
       expect(user.firstName).to.equal("test");
       expect(user.lastName).to.equal("user");
+      expect(user.displayName).to.equal("test user");
       expect(user.email).to.equal("test@example.com");
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -70,8 +71,8 @@ describe('IdentityService.user()', () => {
     var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
-        {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"},
-        {i: "u2", n: "test2", f: "test2", l: "user2", e: "test2@example.com"}
+        {i: "u1", n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"},
+        {i: "u2", n: "test2", f: "test2", l: "user2", d: "test2 user2", e: "test2@example.com"}
       ]
     });
     mockServer.start();
@@ -114,9 +115,9 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must send field code 4 if USERNAME is specified', (done: MochaDone) => {
+  it('must send field code 5 if EMAIL is specified', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 4, v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 5, v: ["u1"]});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
@@ -138,8 +139,8 @@ describe('IdentityService.search()', () => {
 
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
-        {i: "u1", n: "test1", f: "test", l: "user", e: "test@example.com"},
-        {i: "u2", n: "test2", f: "test2", l: "user2", e: "test2@example.com"}
+        {i: "u1", n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"},
+        {i: "u2", n: "test2", f: "test2", l: "user2", d: "test2 user2", e: "test2@example.com"}
       ]
     });
     mockServer.start();
@@ -153,12 +154,14 @@ describe('IdentityService.search()', () => {
       expect(user1.username).to.equal("test1");
       expect(user1.firstName).to.equal("test");
       expect(user1.lastName).to.equal("user");
+      expect(user1.displayName).to.equal("test user");
       expect(user1.email).to.equal("test@example.com");
 
       var user2: DomainUser = users[1];
       expect(user2.username).to.equal("test2");
       expect(user2.firstName).to.equal("test2");
       expect(user2.lastName).to.equal("user2");
+      expect(user2.displayName).to.equal("test2 user2");
       expect(user2.email).to.equal("test2@example.com");
 
       mockServer.doneManager().testSuccess();

@@ -1,6 +1,6 @@
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 
 export declare class HistoricalModel {
 
@@ -12,17 +12,19 @@ export declare class HistoricalModel {
 
   version(): number;
 
-  maxVersion(): number;
+  time(): Date;
+
+  minVersion(): number;
 
   createdTime(): Date;
 
-  modifiedTime(): Date;
+  maxVersion(): number;
 
-  currentTime(): Date;
+  maxTime(): Date;
 
   root(): HistoricalObject;
 
-  elementAt(path: any): HistoricalValue<any>;
+  elementAt(path: any): HistoricalElement<any>;
 
   playTo(version: number): Promise<void>;
 

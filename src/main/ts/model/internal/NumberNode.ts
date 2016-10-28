@@ -1,7 +1,7 @@
 import {ModelNode} from "./ModelNode";
 import {NumberValue} from "../dataValue";
 import {Model} from "./Model";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../ot/Path";
@@ -29,7 +29,7 @@ export class NumberNode extends ModelNode<number> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelValueType.Number, data.id, path, model, sessionId, username);
+    super(ModelElementType.Number, data.id, path, model, sessionId, username);
 
     this._data = data.value;
   }

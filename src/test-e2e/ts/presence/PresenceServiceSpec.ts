@@ -4,10 +4,9 @@ import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
-import DomainUser from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import {UserField} from "../../../main/ts/identity/IdentityService";
+
 
 var expect: ExpectStatic = chai.expect;
 

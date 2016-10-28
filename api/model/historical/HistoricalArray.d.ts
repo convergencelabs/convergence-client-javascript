@@ -1,12 +1,12 @@
-import {HistoricalValue} from "./HistoricalValue";
-import {HistoricalContainerValue} from "./HistoricalContainerValue";
+import {HistoricalElement} from "./HistoricalElement";
+import {HistoricalContainerElement} from "./HistoricalContainerElement";
 
-export declare class HistoricalArray extends HistoricalValue<any[]> implements HistoricalContainerValue<any[]> {
-  get(index: number): HistoricalValue<any>;
+export declare class HistoricalArray extends HistoricalElement<any[]> implements HistoricalContainerElement<any[]> {
+  get(index: number): HistoricalElement<any>;
 
   length(): number;
 
-  forEach(callback: (value: HistoricalValue<any>, index?: number) => void): void;
+  forEach(callback: (value: HistoricalElement<any>, index?: number) => void): void;
 
-  elementAt(pathArgs: any): HistoricalValue<any>;
+  elementAt(pathArgs: any): HistoricalElement<any>;
 }

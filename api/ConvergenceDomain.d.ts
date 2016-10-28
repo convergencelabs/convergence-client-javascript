@@ -6,6 +6,7 @@ import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
+import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
@@ -30,6 +31,4 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
   dispose(): void;
 
   isDisposed(): boolean;
-
-  // todo do we need an event stream here?  Change the event emitter?
 }

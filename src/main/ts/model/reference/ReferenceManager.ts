@@ -9,7 +9,7 @@ import {RemoteReferenceUnpublished} from "../../connection/protocol/model/refere
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
-import {RealTimeValue} from "../rt/RealTimeValue";
+import {RealTimeElement} from "../rt/RealTimeElement";
 import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 import {ElementReference} from "./ElementReference";
@@ -144,11 +144,11 @@ export class ReferenceManager {
   }
 
   private _setReferenceValues(reference: ModelReference<any> , values: any): void {
-    // Translate vids to RealTimeValues
+    // Translate vids to RealTimeElements
     if (reference.type() === ReferenceType.ELEMENT) {
-      const rtvs: RealTimeValue<any>[] = [];
+      const rtvs: RealTimeElement<any>[] = [];
       for (var id of values) {
-        let value: RealTimeValue<any> = (<RealTimeModel>this._source)._getRegisteredValue(id);
+        let value: RealTimeElement<any> = (<RealTimeModel>this._source)._getRegisteredValue(id);
         if (value !== undefined) {
           rtvs.push(value);
         }

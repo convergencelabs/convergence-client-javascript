@@ -1,6 +1,6 @@
 import {NodeWrapperFactory} from "../internal/NodeWrapperFactory";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 import {NodeChangedEvent} from "../internal/events";
 import {HistoricalArray} from "./HistoricalArray";
 import {ArrayNodeInsertEvent} from "../internal/events";
@@ -42,7 +42,7 @@ import {StringSetValueEvent} from "./events";
 
 export class HistoricalEventConverter {
 
-  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<HistoricalValue<any>>): ConvergenceEvent {
+  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<HistoricalElement<any>>): ConvergenceEvent {
     if (event instanceof  NodeDetachedEvent) {
       return new ValueDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {

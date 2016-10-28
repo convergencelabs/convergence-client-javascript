@@ -1,6 +1,6 @@
 import {NodeWrapperFactory} from "../internal/NodeWrapperFactory";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {ArrayNode} from "../internal/ArrayNode";
 import {ObjectNode} from "../internal/ObjectNode";
 import {BooleanNode} from "../internal/BooleanNode";
@@ -8,7 +8,7 @@ import {NullNode} from "../internal/NullNode";
 import {NumberNode} from "../internal/NumberNode";
 import {StringNode} from "../internal/StringNode";
 import {UndefinedNode} from "../internal/UndefinedNode";
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalArray} from "./HistoricalArray";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalBoolean} from "./HistoricalBoolean";
@@ -17,27 +17,27 @@ import {HistoricalNumber} from "./HistoricalNumber";
 import {HistoricalString} from "./HistoricalString";
 import {HistoricalUndefined} from "./HistoricalUndefined";
 
-export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalValue<any>> {
+export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalElement<any>> {
 
   constructor() {
     super();
   }
 
-  protected _createWrapper(node: ModelNode<any>): HistoricalValue<any> {
+  protected _createWrapper(node: ModelNode<any>): HistoricalElement<any> {
     switch (node.type()) {
-      case ModelValueType.Array:
+      case ModelElementType.Array:
         return new HistoricalArray(<ArrayNode> node, this);
-      case ModelValueType.Object:
+      case ModelElementType.Object:
         return new HistoricalObject(<ObjectNode> node, this);
-      case ModelValueType.Boolean:
+      case ModelElementType.Boolean:
           return new HistoricalBoolean(<BooleanNode> node, this);
-      case ModelValueType.Null:
+      case ModelElementType.Null:
         return new HistoricalNull(<NullNode> node, this);
-      case ModelValueType.Number:
+      case ModelElementType.Number:
         return new HistoricalNumber(<NumberNode> node, this);
-      case ModelValueType.String:
+      case ModelElementType.String:
         return new HistoricalString(<StringNode> node, this);
-      case ModelValueType.Undefined:
+      case ModelElementType.Undefined:
         return new HistoricalUndefined(<UndefinedNode> node, this);
       default:
         return null;

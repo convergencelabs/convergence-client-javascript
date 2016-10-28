@@ -1,6 +1,5 @@
 import {RealTimeElement} from "./RealTimeElement";
 
-// fixme should this be <void>
-export declare class RealTimeNull extends RealTimeElement<any> {
+export declare class RealTimeNull extends RealTimeElement<void> {
   static Events: any;
 }

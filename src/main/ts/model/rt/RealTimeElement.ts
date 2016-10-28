@@ -1,6 +1,6 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {Path} from "../ot/Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -15,7 +15,7 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 
-export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   static Events: any = {
     DETACHED: "detached",
@@ -30,7 +30,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
   private _model: RealTimeModel;
 
   /**
-   * Constructs a new RealTimeValue.
+   * Constructs a new RealTimeElement.
    */
   constructor(delegate: ModelNode<T>,
               callbacks: ModelEventCallbacks,
@@ -69,7 +69,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
     return this._delegate.id();
   }
 
-  type(): ModelValueType {
+  type(): ModelElementType {
     return this._delegate.type();
   }
 
@@ -111,7 +111,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
 
   private _fireReferenceCreated(reference: ModelReference<any>): void {
     var createdEvent: RemoteReferenceCreatedEvent = {
-      name: RealTimeValue.Events.REFERENCE,
+      name: RealTimeElement.Events.REFERENCE,
       src: this,
       reference: reference
     };
@@ -120,7 +120,7 @@ export abstract class RealTimeValue<T> extends ConvergenceEventEmitter<Convergen
 
   private _exceptionIfDetached(): void {
     if (this.isDetached()) {
-      throw Error("Can not perform actions on a detached RealTimeValue.");
+      throw Error("Can not perform actions on a detached RealTimeElement.");
     }
   }
 }

@@ -20,6 +20,9 @@ export interface StateSetEvent extends ActivityEvent {
   value: any;
 }
 
-export interface StateClearedEvent extends ActivityEvent {
+export interface StateRemovedEvent extends ActivityEvent {
   key: string;
+}
+
+export interface StateClearedEvent extends ActivityEvent {
 }

@@ -1,31 +1,45 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/ModelReference";
 import {RealTimeElement} from "./RealTimeElement";
-import {RemoteSession} from "../../RemoteSession";
 import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ModelEvent} from "./events";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ModelCollaborator} from "./ModelCollaborator";
 
-export declare class RealTimeModel extends ConvergenceEventEmitter {
+export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
 
   static Events: any;
 
   session(): Session;
 
-  connectedSessions(): RemoteSession[]; // fixme name??
+  collaborators(): ModelCollaborator[];
 
   collectionId(): string;
 
   modelId(): string;
 
+  /**
+   * The current, latest version of the model.
+   */
   version(): number;
 
+  /**
+   * The current, latest time of the model.
+   */
+  time(): Date;
+
+  /**
+   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   */
+  minVersion(): number;
+
+  /**
+   * The time the model was created.
+   */
   createdTime(): Date;
 
-  modifiedTime(): Date;
-  
   root(): RealTimeObject;
 
   element(id: string): RealTimeElement<any>
@@ -49,13 +63,10 @@ export declare class RealTimeModel extends ConvergenceEventEmitter {
   references(filter?: ReferenceFilter): ModelReference<any>[];
 }
 
-// fixme how do we use these.
-export interface RemoteSessionOpenedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+export interface OpenedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
 }
 
-export interface RemoteSessionClosedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+export interface ClosedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
 }

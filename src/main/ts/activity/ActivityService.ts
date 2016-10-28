@@ -8,31 +8,39 @@ import {SessionJoinedEvent, SessionLeftEvent, StateClearedEvent, StateSetEvent} 
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {ActivityRemoteStateSet, ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
-import {ActivityEvent} from "./events";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {ActivityParticipant} from "./ActivityParticipant";
+import {ActivityJoinOptions} from "./Activity";
+import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
+import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
+import {Deferred} from "../util/Deferred";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
+import {ActivityEvent} from "./events";
+import {StateRemovedEvent} from "./events";
 
-export class ActivityService {
+export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
   private _connection: ConvergenceConnection;
-  private _eventStream: Observable<ActivityEvent>;
-  private _joinedMap: Map<string, boolean>;
+  private _joinedMap: Map<string, Deferred<Activity>>;
 
   constructor(connection: ConvergenceConnection) {
+    super();
     this._connection = connection;
 
     let messageObs: Observable<MessageEvent> = Observable.create(observer => {
       this._connection.addMultipleMessageListener(
         [MessageType.ACTIVITY_SESSION_JOINED,
-        MessageType.ACTIVITY_SESSION_LEFT,
-        MessageType.ACTIVITY_REMOTE_STATE_SET,
-        MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
+          MessageType.ACTIVITY_SESSION_LEFT,
+          MessageType.ACTIVITY_REMOTE_STATE_SET,
+          MessageType.ACTIVITY_REMOTE_STATE_REMOVED,
+          MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
         (event) => {
-        observer.next(event);
-      });
+          observer.next(event);
+        });
     });
 
-    this._eventStream = messageObs.pluck("message").concatMap(message => {
+    let eventStream: Observable<any> = messageObs.pluck("message").concatMap(message => {
       let msg: any = message;
       switch (msg.type) {
         case MessageType.ACTIVITY_SESSION_JOINED:
@@ -75,63 +83,79 @@ export class ActivityService {
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
-          return stateClearedMsg.keys.map((key) => {
-            return <StateClearedEvent> {
-              name: Activity.Events.STATE_CLEARED,
-              activityId: stateClearedMsg.activityId,
-              username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
-              sessionId: stateClearedMsg.sessionId,
+          return [<StateClearedEvent> {
+            name: Activity.Events.STATE_CLEARED,
+            activityId: stateClearedMsg.activityId,
+            username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
+            sessionId: stateClearedMsg.sessionId,
+            local: false
+          }];
+        case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
+          let stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
+          return stateRemovedMsg.keys.map((key) => {
+            return <StateRemovedEvent> {
+              name: Activity.Events.STATE_REMOVED,
+              activityId: stateRemovedMsg.activityId,
+              username: SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
+              sessionId: stateRemovedMsg.sessionId,
               key: key,
               local: false
             };
           });
         default:
-        // This should be impossible
+          // This should be impossible
           throw new Error("Invalid activity event");
       }
     });
 
-    this._joinedMap = new Map<string, boolean>();
+    this._emitFrom(eventStream);
+    this._joinedMap = new Map<string, Deferred<Activity>>();
   }
 
   session(): Session {
     return this._connection.session();
   }
 
-  activity(id: string): Activity {
-    return new Activity(id,
-      this._joinCB(id), this._leftCB(id), this._isJoined(id),
-      this.eventStream().filter(event => {
-        return event.activityId === id;
-      }),
-      this._connection);
+  join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
+    if (!this.isJoined(id)) {
+      if (options === undefined) {
+        options = <ActivityJoinOptions> {
+          state: new Map<string, any>()
+        };
+      }
+      let deferred: Deferred<Activity> = new Deferred<Activity>();
+      this._joinedMap.set(id, deferred);
+      this._connection.request(<ActivityJoinRequest>{
+        type: MessageType.ACTIVITY_JOIN_REQUEST,
+        activityId: id,
+        state: options.state
+      }).then((response: ActivityJoinResponse) => {
+        var participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
+
+        for (var participant of response.participants) {
+          participants.set(participant.sessionId(), participant);
+        }
+
+        deferred.resolve(new Activity(id, participants, this._leftCB(id).bind(this), this.events().filter(event => {
+            return event.activityId === id;
+          }),
+          this._connection));
+      });
+    }
+
+    // TODO: validate that this works
+    return this._joinedMap.get(id).promise();
   }
 
   joined(): Map<string, Activity> {
-    var joined: Map<string, Activity> = new Map<string, any>();
-    Object.keys(this._joinedMap).forEach(id => {
-        joined[id] = this.activity(id);
-    });
-    return joined;
+    return Object.assign({}, this._joinedMap);
   }
 
   isJoined(id: string): boolean {
     return this._joinedMap.has(id);
   }
 
-  eventStream(): Observable<ActivityEvent> {
-    return this._eventStream;
-  }
-
-  private _joinCB: (id: string) => () => void = (id: string) => {
-    return () => this._joinedMap.set(id, true);
-  };
-
   private _leftCB: (id: string) => () => void = (id: string) => {
     return () => this._joinedMap.delete(id);
-  };
-
-  private _isJoined: (id: string) => () => boolean = (id: string) => {
-    return () => this._joinedMap.has(id);
   };
 }

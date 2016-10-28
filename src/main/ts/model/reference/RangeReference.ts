@@ -1,4 +1,4 @@
-import {RealTimeValue} from "../rt/RealTimeValue";
+import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
@@ -13,7 +13,7 @@ export class RangeReference extends ModelReference<IndexRange> {
 
   constructor(referenceManager: ReferenceManager,
               key: string,
-              source: RealTimeValue<any>,
+              source: RealTimeElement<any>,
               username: string,
               sessionId: string,
               local: boolean) {

@@ -1,7 +1,7 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {Path} from "../ot/Path";
 
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalArray} from "./HistoricalArray";
 import {HistoricalBoolean} from "./HistoricalBoolean";
 import {HistoricalNumber} from "./HistoricalNumber";
@@ -9,13 +9,13 @@ import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalString} from "./HistoricalString";
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: HistoricalValue<any>;
+  src: HistoricalElement<any>;
 }
 
 export class ValueDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
 
-  constructor(public src: HistoricalValue<any>) {
+  constructor(public src: HistoricalElement<any>) {
   }
 }
 
@@ -28,7 +28,7 @@ export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
   public name: string = "model_changed";
 
-  constructor(public src: HistoricalValue<any>,
+  constructor(public src: HistoricalElement<any>,
               public relativePath: Path,
               public childEvent: ValueChangedEvent,
               public sessionId: string,
@@ -41,7 +41,7 @@ export class ArrayInsertEvent implements ValueChangedEvent {
 
   constructor(public src: HistoricalArray,
               public index: number,
-              public value: HistoricalValue<any>,
+              public value: HistoricalElement<any>,
               public sessionId: string,
               public username: string) {
   }
@@ -126,7 +126,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
 
   constructor(public src: HistoricalObject,
               public key: string,
-              public value: HistoricalValue<any>,
+              public value: HistoricalElement<any>,
               public sessionId: string,
               public username: string) {
   }

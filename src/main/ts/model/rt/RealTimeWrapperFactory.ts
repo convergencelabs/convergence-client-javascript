@@ -1,7 +1,7 @@
 import {NodeWrapperFactory} from "../internal/NodeWrapperFactory";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelValueType} from "../ModelValueType";
+import {ModelElementType} from "../ModelElementType";
 import {RealTimeArray} from "./RealTimeArray";
 import {ArrayNode} from "../internal/ArrayNode";
 import {ObjectNode} from "../internal/ObjectNode";
@@ -18,27 +18,27 @@ import {UndefinedNode} from "../internal/UndefinedNode";
 import {RealTimeUndefined} from "./RealTimeUndefined";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeValue<any>> {
+export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<any>> {
 
   constructor(private _callbacks: any, private _model: RealTimeModel) {
     super();
   }
 
-  protected _createWrapper(node: ModelNode<any>): RealTimeValue<any> {
+  protected _createWrapper(node: ModelNode<any>): RealTimeElement<any> {
     switch (node.type()) {
-      case ModelValueType.Array:
+      case ModelElementType.Array:
         return new RealTimeArray(<ArrayNode> node, this._callbacks, this, this._model);
-      case ModelValueType.Object:
+      case ModelElementType.Object:
         return new RealTimeObject(<ObjectNode> node, this._callbacks, this, this._model);
-      case ModelValueType.Boolean:
+      case ModelElementType.Boolean:
           return new RealTimeBoolean(<BooleanNode> node, this._callbacks, this, this._model);
-      case ModelValueType.Null:
+      case ModelElementType.Null:
         return new RealTimeNull(<NullNode> node, this._callbacks, this, this._model);
-      case ModelValueType.Number:
+      case ModelElementType.Number:
         return new RealTimeNumber(<NumberNode> node, this._callbacks, this, this._model);
-      case ModelValueType.String:
+      case ModelElementType.String:
         return new RealTimeString(<StringNode> node, this._callbacks, this, this._model);
-      case ModelValueType.Undefined:
+      case ModelElementType.Undefined:
         return new RealTimeUndefined(<UndefinedNode> node, this._callbacks, this, this._model);
       default:
         return null;

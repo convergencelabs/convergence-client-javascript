@@ -1,6 +1,6 @@
 import {NodeWrapperFactory} from "../internal/NodeWrapperFactory";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {NodeChangedEvent} from "../internal/events";
 import {RealTimeArray} from "./RealTimeArray";
 import {ArrayNodeInsertEvent} from "../internal/events";
@@ -42,7 +42,7 @@ import {StringSetValueEvent} from "./events";
 
 export class EventConverter {
 
-  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<RealTimeValue<any>>): ConvergenceEvent {
+  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<RealTimeElement<any>>): ConvergenceEvent {
     if (event instanceof  NodeDetachedEvent) {
       return new ValueDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {

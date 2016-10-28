@@ -1,15 +1,15 @@
-import {HistoricalValue} from "./HistoricalValue";
-import {HistoricalContainerValue} from "./HistoricalContainerValue";
+import {HistoricalElement} from "./HistoricalElement";
+import {HistoricalContainerElement} from "./HistoricalContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 
-export class HistoricalArray extends HistoricalValue<any[]> implements HistoricalContainerValue<any[]> {
+export class HistoricalArray extends HistoricalElement<any[]> implements HistoricalContainerElement<any[]> {
 
   constructor(protected _delegate: ArrayNode, _wrapperFactory: HistoricalWrapperFactory) {
     super(_delegate, _wrapperFactory);
   }
 
-  get(index: number): HistoricalValue<any> {
+  get(index: number): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(index));
   }
 
@@ -17,13 +17,13 @@ export class HistoricalArray extends HistoricalValue<any[]> implements Historica
     return this._delegate.length();
   }
 
-  forEach(callback: (value: HistoricalValue<any>, index?: number) => void): void {
+  forEach(callback: (value: HistoricalElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
-  valueAt(pathArgs: any): HistoricalValue<any> {
+  elementAt(pathArgs: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 }

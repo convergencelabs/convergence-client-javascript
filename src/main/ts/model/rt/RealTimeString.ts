@@ -1,4 +1,4 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {StringNode} from "../internal/StringNode";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {ReferenceType} from "../reference/ModelReference";
@@ -18,15 +18,15 @@ import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeString extends RealTimeValue<String> {
+export class RealTimeString extends RealTimeElement<String> {
 
   static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED,
-    REFERENCE: RealTimeValue.Events.REFERENCE,
-    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
+    DETACHED: RealTimeElement.Events.DETACHED,
+    REFERENCE: RealTimeElement.Events.REFERENCE,
+    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
   };
 
   /**

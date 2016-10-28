@@ -1,7 +1,7 @@
 import {Session} from "../Session";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {UserPresence} from "./UserPresence";
-import {UserPresenceGroup} from "./UserPresenceGroup";
+import {UserPresenceSubscription} from "./UserPresenceSubscription";
 
 export declare class PresenceService extends ConvergenceEventEmitter {
 
@@ -17,14 +17,15 @@ export declare class PresenceService extends ConvergenceEventEmitter {
 
   clear(): void;
 
-  // fixme name this
   replace(state: Map<string, any>);
 
   state(key: string): any;
   state(): Map<string,any>;
 
+
   presence(username: string): Promise<UserPresence>;
   presence(usernames: string[]): Promise<UserPresence[]>;
 
-  group(usernames: string[]): Promise<UserPresenceGroup>;
+  subscribe(username: string): Promise<UserPresenceSubscription>;
+  subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>;
 }

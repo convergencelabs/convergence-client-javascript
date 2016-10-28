@@ -1,4 +1,4 @@
-export declare enum ModelValueType {
+export declare enum ModelElementType {
   Object = 0,
   Array = 1,
   String = 2,

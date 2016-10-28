@@ -1,10 +1,11 @@
-import DomainUser from "../../../identity/DomainUser";
+import {DomainUser} from "../../../identity/DomainUser";
 
-export var DomainUserDeserilizer: (user: any) => DomainUser =  (body: any) => {
+export var DomainUserDeserializer: (user: any) => DomainUser =  (body: any) => {
   return new DomainUser(
     body.n,
     body.f,
     body.l,
+    body.d,
     body.e
   );
 };

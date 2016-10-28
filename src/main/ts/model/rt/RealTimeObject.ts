@@ -1,5 +1,5 @@
-import {RealTimeValue} from "./RealTimeValue";
-import {RealTimeContainerValue} from "./RealTimeContainerValue";
+import {RealTimeElement} from "./RealTimeElement";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelEventCallbacks} from "./RealTimeModel";
@@ -20,14 +20,14 @@ import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> implements RealTimeContainerValue<{ [key: string]: any; }> {
+export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> implements RealTimeContainerElement<{ [key: string]: any; }> {
 
   static Events: any = {
     SET: "set",
     REMOVE: "remove",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED,
-    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
+    DETACHED: RealTimeElement.Events.DETACHED,
+    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
   };
 
   /**
@@ -42,11 +42,11 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     this._delegate.events().subscribe(event => this._handleReferenceEvents(event));
   }
 
-  get(key: string): RealTimeValue<any> {
+  get(key: string): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(key));
   }
 
-  set(key: string, value: any): RealTimeValue<any> {
+  set(key: string, value: any): RealTimeElement<any> {
     let propSet: boolean = this._delegate.hasKey(key);
     let delegateChild: ModelNode<any> = this._delegate.set(key, value);
     let operation: DiscreteOperation;
@@ -72,13 +72,13 @@ export class RealTimeObject extends RealTimeValue<{ [key: string]: any; }> imple
     return this._delegate.hasKey(key);
   }
 
-  forEach(callback: (model: RealTimeValue<any>, key?: string) => void): void {
+  forEach(callback: (model: RealTimeElement<any>, key?: string) => void): void {
     this._delegate.forEach((modelNode, key) => {
       callback(this._wrapperFactory.wrap(modelNode), key);
     });
   }
 
-  valueAt(pathArgs: any): RealTimeValue<any> {
+  valueAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 

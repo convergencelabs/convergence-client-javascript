@@ -1,9 +1,7 @@
 import {ConvergenceEventEmitter, EventListener} from "../../../main/ts/util/ConvergenceEventEmitter";
-import {Subject} from "rxjs/Rx";
 import {ConvergenceEvent} from "../../../main/ts/util/ConvergenceEvent";
 
 import * as chai from "chai";
-import {fail} from "assert";
 import ExpectStatic = Chai.ExpectStatic;
 var expect: ExpectStatic = chai.expect;
 
@@ -25,7 +23,7 @@ describe('EventEmitter', () => {
   it('A listener is not notified after it is removed', () => {
     var emitter: TestEmitter = new TestEmitter();
     var listener: EventListener<TestEvent> = (e: TestEvent) => {
-      fail();
+      throw new Error();
     };
     emitter.on("event", listener);
     emitter.off("event", listener);
@@ -38,10 +36,10 @@ describe('EventEmitter', () => {
     var emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
 
     emitter.on("event2", () => {
@@ -60,10 +58,10 @@ describe('EventEmitter', () => {
     var emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
     emitter.on("event2", () => {
-      fail();
+      throw new Error();
     });
 
     emitter.removeAllListenersForAllEvents();

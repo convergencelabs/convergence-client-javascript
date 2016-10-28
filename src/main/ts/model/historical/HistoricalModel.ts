@@ -1,6 +1,6 @@
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
-import {HistoricalValue} from "./HistoricalValue";
+import {HistoricalElement} from "./HistoricalElement";
 import {ModelFqn} from "../ModelFqn";
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
@@ -111,7 +111,7 @@ export class HistoricalModel {
     return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  valueAt(path: any): HistoricalValue<any> {
+  valueAt(path: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._model.valueAt(path));
   }
 

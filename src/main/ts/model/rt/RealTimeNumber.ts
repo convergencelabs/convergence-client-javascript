@@ -1,4 +1,4 @@
-import {RealTimeValue} from "./RealTimeValue";
+import {RealTimeElement} from "./RealTimeElement";
 import {NumberNode} from "../internal/NumberNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
@@ -10,13 +10,13 @@ import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeNumber extends RealTimeValue<number>  {
+export class RealTimeNumber extends RealTimeElement<number>  {
 
   static Events: any = {
     ADD: "add",
     VALUE: "value",
-    DETACHED: RealTimeValue.Events.DETACHED,
-    MODEL_CHANGED: RealTimeValue.Events.MODEL_CHANGED
+    DETACHED: RealTimeElement.Events.DETACHED,
+    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
   };
 
   /**

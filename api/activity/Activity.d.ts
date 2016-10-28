@@ -2,9 +2,9 @@ import {Session} from "../Session";
 import {ActivityEvent} from "./events";
 import {Observable} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
-import {ObservableEventEmitter} from "../util/ObservableEventEmitter";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
-export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
+export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   static Events: any;
 
   session(): Session;
@@ -12,23 +12,26 @@ export declare class Activity extends ObservableEventEmitter<ActivityEvent> {
   id(): string;
 
   leave(): void;
-
   isJoined(): boolean;
 
-  publish(state: Map<string, any>): void;
-  publish(key: string, value: any): void;
 
-  clear(key: string): void;
-  clear(keys: string[]): void;
+  set(state: Map<string, any>): void;
+  set(key: string, value: any): void;
+
+  remove(key: string): void;
+  remove(keys: string[]): void;
+
+  clear(): void;
+
+  // fixme name this
+  replace(state: Map<string, any>);
+
+  state(key: string): any;
+  state(): Map<string,any>;
+
 
   participant(sessionId: string): ActivityParticipant;
   participants(): ActivityParticipant[];
 
-  asStream(): Observable<ActivityParticipant[]>;
-
-  // todo there is some work here, we need to discuss this common pattern
-}
-
-export interface ActivityJoinOptions {
-  state?: Map<string, any>;
+  asObservable(): Observable<ActivityParticipant[]>;
 }
