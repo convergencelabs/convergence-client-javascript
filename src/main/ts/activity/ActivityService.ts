@@ -131,10 +131,10 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         state: options.state
       }).then((response: ActivityJoinResponse) => {
         var participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
-        Object.keys(response.participants).forEach((sessionId: string) => {
-          var username: string = SessionIdParser.parseUsername(sessionId);
-          participants.set(sessionId, new ActivityParticipant(username, sessionId, <Map<string, any>>response.participants[sessionId]));
-        });
+
+        for (var participant of response.participants) {
+          participants.set(participant.sessionId(), participant);
+        }
 
         deferred.resolve(new Activity(id, participants, this._leftCB(id).bind(this), this.events().filter(event => {
             return event.activityId === id;

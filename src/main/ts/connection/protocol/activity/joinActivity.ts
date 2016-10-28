@@ -3,6 +3,7 @@ import {MessageBodySerializer} from "../MessageSerializer";
 import {IncomingProtocolResponseMessage} from "../protocol";
 import {ActivityParticipant} from "../../../activity/ActivityParticipant";
 import {MessageBodyDeserializer} from "../MessageSerializer";
+import {SessionIdParser} from "../SessionIdParser";
 
 export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
@@ -23,12 +24,13 @@ export interface ActivityJoinResponse extends IncomingProtocolResponseMessage {
 export var ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
   var participants: ActivityParticipant[] = [];
 
-  for (var participant of body.s) {
-    let state: Map<string, any> = new Map<string, any>();
-    for (let k of Object.keys(participant.state)) {
-      state.set(k, participant.state[k]);
+  for (var sessionId of Object.keys(body.s)) {
+    let state: any = body.s[sessionId];
+    let stateMap: Map<string, any> = new Map<string, any>();
+    for (let key of Object.keys(state)) {
+      stateMap.set(key, state[key]);
     }
-    participants.push(new ActivityParticipant(participant.username, participant.session, state));
+    participants.push(new ActivityParticipant(SessionIdParser.parseUsername(sessionId), sessionId, stateMap));
   }
 
   var result: ActivityJoinResponse = {
