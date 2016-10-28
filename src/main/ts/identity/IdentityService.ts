@@ -6,7 +6,7 @@ import {UserLookUpRequest} from "../connection/protocol/user/userLookUps";
 import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
 
-//fixme should the props be camelcase
+// fixme should the props be camelcase
 export var UserField: any = {
   USERNAME: "username",
   EMAIL: "email",
@@ -109,12 +109,11 @@ export class IdentityService {
   private _sanitizeSearchFields(fields: string[]): string[] {
     var result: string[] = [];
     fields.forEach((field: string) => {
-      var lower: string = field.toLowerCase();
-      if (validSearchFields.indexOf(lower) < 0) {
-        throw new Error("Invalid user search field: " + lower);
+      if (validSearchFields.indexOf(field) < 0) {
+        throw new Error("Invalid user search field: " + field);
       }
-      if (result.indexOf(lower) < 0) {
-        result.push(lower);
+      if (result.indexOf(field) < 0) {
+        result.push(field);
       }
     });
     return result;
