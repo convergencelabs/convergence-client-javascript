@@ -21,8 +21,11 @@ const rollupTypescript = require('rollup-plugin-typescript');
 const sourceMaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const fs = require('fs');
-
+const typescript = require('typescript');
+const rollupStream = require('rollup-stream');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
+const source = require('vinyl-source-stream');
+const vinyBuffer = require('vinyl-buffer');
 
 gulp.task('default', ["dist"]);
 
@@ -37,8 +40,8 @@ gulp.task('build', [], function () {
   // can't put this in the tsconfig because the other steps bomb out.
   tsProject.options.declaration = true;
 
-  var tsResult = gulp.src(['src/**/*.ts', "typings/main.d.ts"])
-    .pipe(ts(tsProject));
+  var tsResult = gulp.src(['src/**/*.ts', "typings/index.d.ts"])
+    .pipe(tsProject());
 
   return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done.
     tsResult.dts.pipe(gulp.dest('build')),
@@ -100,10 +103,9 @@ gulp.task('dist-ts', ["build"], function () {
     });
 });
 
-
 gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
-  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(gulpRollup({
+  return rollupStream({
+      entry: 'src/main/ts/ConvergenceDomain.ts',
       rollup: rollup,
       format: 'umd',
       moduleName: 'ConvergenceDomain',
@@ -117,10 +119,12 @@ gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
         'rxjs/Observable': 'Rx'
       },
       plugins: [
-        rollupTypescript()
+        rollupTypescript({typescript: typescript})
       ]
-    }))
-    .pipe(rename("convergence-client.umd.js"))
+    })
+    .pipe(source("convergence-client.umd.js"))
+    .pipe(vinyBuffer())
+    .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("dist"));
 });
@@ -179,14 +183,14 @@ gulp.task('dist-amd-min', ['dist-amd'], function() {
   return minify(gulp.src("dist/convergence-client.amd.js"));
 });
 
-gulp.task('dist', ["dist-umd-min", "dist-amd-min", "dist-es6", "copyPackage"], function(cb) {
+// gulp.task('dist', ["dist-umd-min", "dist-amd-min", "dist-es6", "copyPackage"], function(cb) {
+gulp.task('dist', ["dist-umd-min"], function(cb) {
   if (packageJson.version.endsWith('SNAPSHOT')) {
     return gulp.src('dist/package.json')
       .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
       .pipe(gulp.dest('dist/'));
   }
 });
-
 
 gulp.task('copyPackage', function(){
     return gulp.src('./package.json')

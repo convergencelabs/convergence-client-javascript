@@ -1,7 +1,6 @@
 import * as chai from "chai";
 import {EventEmitter} from "../../../main/ts/util/EventEmitter";
 import ExpectStatic = Chai.ExpectStatic;
-import {fail} from "assert";
 
 var expect: ExpectStatic = chai.expect;
 
@@ -23,7 +22,7 @@ describe('EventEmitter', () => {
   it('A listener is not notified after it is removed', () => {
     var emitter: TestEmitter = new TestEmitter();
     var listener: Function = (v: number) => {
-      fail();
+      throw new Error();
     };
     emitter.on("event", listener);
     emitter.off("event", listener);
@@ -36,10 +35,10 @@ describe('EventEmitter', () => {
     var emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
 
     emitter.on("event2", () => {
@@ -58,10 +57,10 @@ describe('EventEmitter', () => {
     var emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
-      fail();
+      throw new Error();
     });
     emitter.on("event2", () => {
-      fail();
+      throw new Error();
     });
 
     emitter.removeAllListenersForAllEvents();

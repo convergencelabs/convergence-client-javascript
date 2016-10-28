@@ -44,7 +44,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
 
   valueAt(pathArgs: any): ModelNode<any> {
     // We're letting them pass in individual path arguments or a single array of path arguments
-    const pathArgsForReal: Path = Array.isArray(pathArgs) ? pathArgs : arguments;
+    const pathArgsForReal: Path = <Path>(Array.isArray(pathArgs) ? pathArgs : arguments);
     if (pathArgsForReal.length === 0) {
       throw new Error("relative path of child must contain at least one element.");
     }
