@@ -47,7 +47,7 @@
     "gulp-sourcemaps": "1.6.0",
     "gulp-tslint": "4.3.5",
     "gulp-typedoc": "2.0.0",
-    "gulp-typescript": "3.1n.0",
+    "gulp-typescript": "3.1.0",
     "gulp-uglify": "1.5.3",
     "merge2": "1.0.2",
     "mkdirp": "0.5.0",
@@ -64,7 +64,7 @@
     "typescript": "2.0.6",
     "typings": "1.4.0",
     "uglify-js": "2.6.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-buffer": "1.0.0",
+    "vinyl-source-stream": "1.1.0"
   }
 }
