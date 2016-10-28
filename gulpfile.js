@@ -183,7 +183,7 @@ gulp.task('dist-amd-min', ['dist-amd'], function() {
 });
 
 // gulp.task('dist', ["dist-umd-min", "dist-amd-min", "dist-es6", "copyPackage"], function(cb) {
-gulp.task('dist', ["dist-umd-min"], function(cb) {
+gulp.task('dist', ["dist-umd-min", "copyPackage"], function(cb) {
   if (packageJson.version.endsWith('SNAPSHOT')) {
     return gulp.src('dist/package.json')
       .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
