@@ -17,7 +17,7 @@ export declare class PresenceService extends ConvergenceEventEmitter {
 
   clear(): void;
 
-  // name this
+  // fixme name this
   replace(state: Map<string, any>);
 
   state(key: string): any;

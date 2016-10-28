@@ -2,13 +2,14 @@ import {OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import DomainUser from "../../../identity/DomainUser";
 import {MessageBodyDeserializer} from "../MessageSerializer";
-import {DomainUserDeserilizer} from "./DomainUser";
+import {DomainUserDeserializer} from "./DomainUser";
 
 var userFieldCodes: {[key: string]: number} = {
   "username": 1,
-  "firstname": 2,
-  "lastname": 3,
-  "email": 4
+  "firstName": 2,
+  "lastName": 3,
+  "displayName": 4,
+  "email": 5
 };
 
 export interface UserLookUpRequest extends OutgoingProtocolRequestMessage {
@@ -59,7 +60,7 @@ export interface UserListResponse {
 
 export var UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
   var users: DomainUser[] = (<any[]>body.u).map((u: any) => {
-    return DomainUserDeserilizer(u);
+    return DomainUserDeserializer(u);
   });
 
   return {

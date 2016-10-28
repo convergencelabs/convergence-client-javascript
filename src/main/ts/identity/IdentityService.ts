@@ -1,16 +1,18 @@
 import {Session} from "../Session";
-import DomainUser from "./DomainUser";
+import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
 import {UserLookUpRequest} from "../connection/protocol/user/userLookUps";
 import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
 
+//fixme should the props be camelcase
 export var UserField: any = {
   USERNAME: "username",
   EMAIL: "email",
-  FIRST_NAME: "firstname",
-  LAST_NAME: "lastname"
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  DISPLAY_NAME: "displayName"
 };
 
 var validLookUpFields: string[] = [
@@ -21,7 +23,8 @@ var validSearchFields: string[] = [
   UserField.USERNAME,
   UserField.EMAIL,
   UserField.FIRST_NAME,
-  UserField.LAST_NAME];
+  UserField.LAST_NAME,
+  UserField.DISPLAY_NAME];
 
 
 export class IdentityService {
