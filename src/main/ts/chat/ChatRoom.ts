@@ -30,6 +30,10 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
     this._connection = connection;
   }
 
+  id(): string {
+    return this._id;
+  }
+
   info(): Observable<RoomInfo> {
     // fixme this is not implemented.
     return Observable.create((observer) => observer.next(new RoomInfo([], 0, Date.now())));

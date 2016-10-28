@@ -20,14 +20,26 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
 
   modelId(): string;
 
+  /**
+   * The current, latest version of the model.
+   */
   version(): number;
 
+  /**
+   * The current, latest time of the model.
+   */
   time(): Date;
 
+  /**
+   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   */
   minVersion(): number;
 
+  /**
+   * The time the model was created.
+   */
   createdTime(): Date;
-  
+
   root(): RealTimeObject;
 
   element(id: string): RealTimeElement<any>
