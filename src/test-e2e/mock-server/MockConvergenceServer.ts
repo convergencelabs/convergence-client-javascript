@@ -269,7 +269,8 @@ export class MockConvergenceServer {
       response = {
         s: true,
         u: "userId",
-        t: MessageType.AUTHENTICATE_RESPONSE
+        t: MessageType.AUTHENTICATE_RESPONSE,
+        p: []
       };
     }
     var requestRecord: IReceiveRequestRecord = this.expectRequest(

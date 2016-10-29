@@ -39,7 +39,7 @@ describe('PresenceService.presence()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.presenceService().presence("notFound");
+      return domain.presence().presence("notFound");
     }).then(userPresence => {
       expect(userPresence.username()).to.equal("notFound");
       expect(userPresence.isAvailable()).to.equal(false);
@@ -65,7 +65,7 @@ describe('PresenceService.subscribe()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.presenceService().subscribe("u1").then(userPresence => {
+      return domain.presence().subscribe("u1").then(userPresence => {
         expect(userPresence.username()).to.equal("u1");
         expect(userPresence.isAvailable()).to.equal(false);
         expect(userPresence.state()).to.deep.equal({});

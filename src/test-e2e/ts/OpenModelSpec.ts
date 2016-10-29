@@ -53,7 +53,7 @@ describe('Open Real Time Model E2E', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.modelService().open("collection", "model");
+      return domain.models().open("collection", "model");
     }).then((model: RealTimeModel) => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {

@@ -12,7 +12,7 @@ describe('Authentication E2E', () => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     var authExpected: any = {t: MessageType.PASSWORD_AUTH_REQUEST, u: "test", p: "password"};
     var authRequest: IReceiveRequestRecord = mockServer.expectRequest(authExpected, 200);
-    mockServer.sendReplyTo(authRequest, {t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test"});
+    mockServer.sendReplyTo(authRequest, {t: MessageType.AUTHENTICATE_RESPONSE, s: true, u: "test", p: {}});
     mockServer.start();
 
     ConvergenceDomain.connect(mockServer.url(), "test", "password").then(domain => {

@@ -14,7 +14,7 @@ var url = ConvergenceConfig.DOMAIN_URL;
 ConvergenceDomain.debugFlags.protocol.messages = true;
 
 ConvergenceDomain.connect(url, "test1", "password").then(function(domain) { 
-  return domain.modelService().open("foo", "basic-example", function (collectionId, modelId) {
+  return domain.models().open("foo", "basic-example", function (collectionId, modelId) {
     return {
       "string": "test value",
       "number": 10,

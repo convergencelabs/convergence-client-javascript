@@ -154,45 +154,21 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     return this._modelService;
   }
 
-  modelService(): ModelService {
-    console.log("ConvergenceDomain.modelService() is deprecated, use ConvergenceDomain.models() instead");
-    return this.models();
-  }
 
   identity(): IdentityService {
     return this._identityService;
-  }
-
-  identityService(): IdentityService {
-    console.log("ConvergenceDomain.identityService() is deprecated, use ConvergenceDomain.identity() instead");
-    return this.identity();
   }
 
   activities(): ActivityService {
     return this._activityService;
   }
 
-  activityService(): ActivityService {
-    console.log("ConvergenceDomain.activityService() is deprecated, use ConvergenceDomain.activities() instead");
-    return this.activities();
-  }
-
   presence(): PresenceService {
     return this._presenceService;
   }
 
-  presenceService(): PresenceService {
-    console.log("ConvergenceDomain.presenceService() is deprecated, use ConvergenceDomain.presence() instead");
-    return this.presence();
-  }
-
   chat(): ChatService {
     return this._chatService;
-  }
-
-  chatService(): ChatService {
-    console.log("ConvergenceDomain.chatService() is deprecated, use ConvergenceDomain.chat() instead");
-    return this.chat();
   }
 
   dispose(): void {
