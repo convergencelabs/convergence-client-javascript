@@ -42,7 +42,7 @@ describe('PresenceService.presence()', () => {
       return domain.presenceService().presence("notFound");
     }).then(userPresence => {
       expect(userPresence.username()).to.equal("notFound");
-      expect(userPresence.available()).to.equal(false);
+      expect(userPresence.isAvailable()).to.equal(false);
       expect(userPresence.state()).to.deep.equal({});
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -51,24 +51,23 @@ describe('PresenceService.presence()', () => {
   });
 });
 
-describe('PresenceService.presenceStream()', () => {
+describe('PresenceService.subscribe()', () => {
   it('must return resolve with the correct user', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_SUBSCRIBE_REQUEST, u: "u1"});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_SUBSCRIBE_REQUEST, u: ["u1"]});
     mockServer.sendReplyTo(req, {
-      t: MessageType.PRESENCE_SUBSCRIBE_RESPONSE, p: {
+      t: MessageType.PRESENCE_SUBSCRIBE_RESPONSE, p: [{
         username: "u1",
         available: false,
-        state: {},
-        clients: []
-      }
+        state: {}
+      }]
     });
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.presenceService().presenceStream("u1").subscribe(userPresence => {
+      return domain.presenceService().subscribe("u1").then(userPresence => {
         expect(userPresence.username()).to.equal("u1");
-        expect(userPresence.available()).to.equal(false);
+        expect(userPresence.isAvailable()).to.equal(false);
         expect(userPresence.state()).to.deep.equal({});
         mockServer.doneManager().testSuccess();
       });

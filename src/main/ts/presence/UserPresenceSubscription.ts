@@ -1,5 +1,5 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {UserPresence, UserPresence} from "./UserPresence";
+import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
 
@@ -8,6 +8,7 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<any> imple
   private _manager: UserPresenceManager;
 
   constructor(delegate: UserPresenceManager) {
+    super();
     this._manager = delegate;
     this._emitFrom(delegate.events());
   }
@@ -30,7 +31,7 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<any> imple
     return this._manager.asObservable();
   }
 
-  unsubscribe() {
+  unsubscribe(): void {
     this._manager.unsubscribe(this);
   }
 }

@@ -1,4 +1,4 @@
-import {ConvergenceConnection} from "./connection/ConvergenceConnection";
+import {ConvergenceConnection, AuthResponse} from "./connection/ConvergenceConnection";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
@@ -10,6 +10,9 @@ import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
 import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
+import {UserPresence} from "./presence/UserPresence";
+import {objectToMap} from "./util/ObjectUtils";
+import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -93,12 +96,6 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
       var evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error: error};
       this._emitEvent(evt);
     });
-
-    this._modelService = new ModelService(this._connection);
-    this._identityService = new IdentityService(this._connection);
-    this._activityService = new ActivityService(this._connection);
-    this._presenceService = new PresenceService(this._connection);
-    this._chatService = new ChatService(this._connection);
   }
 
   // TODO seems like a jquery.extend approach here would be simpler.
@@ -131,11 +128,22 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
   }
 
   private _authenticateWithPassword(username: string, password: string): Promise<void> {
-    return this._connection.authenticateWithPassword(username, password);
+    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
   }
 
   private _authenticateWithToken(token: string): Promise<void> {
-    return this._connection.authenticateWithToken(token);
+    return this._connection.authenticateWithToken(token).then(m => this._init(m));
+  }
+
+  private _init(m: AuthResponse): void {
+    const session: Session = this._connection.session();
+    const presenceState: Map<string, any> = objectToMap(m.state);
+    const initialPresence: UserPresence = new UserPresenceImpl(session.username(), true, presenceState);
+    this._modelService = new ModelService(this._connection);
+    this._identityService = new IdentityService(this._connection);
+    this._activityService = new ActivityService(this._connection);
+    this._presenceService = new PresenceService(this._connection, initialPresence);
+    this._chatService = new ChatService(this._connection);
   }
 
   session(): Session {

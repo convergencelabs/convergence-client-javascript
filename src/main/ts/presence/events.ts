@@ -1,57 +1,56 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
-abstract class PresenceSubscriptionEvent implements ConvergenceEvent {
-  constructor(public username: string) {
-  }
+export interface  PresenceSubscriptionEvent extends ConvergenceEvent {
+  username: string;
 }
 
-export class PresenceStateSetEvent extends PresenceSubscriptionEvent {
-  static get NAME() { return "state_set";};
+export class PresenceStateSetEvent implements PresenceSubscriptionEvent {
+  static get NAME(): string {
+    return "state_set";
+  };
 
   public name: string = PresenceStateSetEvent.NAME;
 
-  constructor(
-    username: string,
-    public state: Map<string, any>) {
-    super(username);
+  constructor(public username: string,
+              public state: Map<string, any>) {
     Object.freeze(this);
   }
 }
 
-export class PresenceStateRemovedEvent extends PresenceSubscriptionEvent {
-  static get NAME() { return "state_removed";};
+export class PresenceStateRemovedEvent implements PresenceSubscriptionEvent {
+  static get NAME(): string {
+    return "state_removed";
+  };
 
   public name: string = PresenceStateRemovedEvent.NAME;
 
-  constructor(
-    username: string,
-    public keys: string[]) {
-    super(username);
+  constructor(public username: string,
+              public keys: string[]) {
     Object.freeze(this);
   }
 }
 
-export class PresenceStateClearedEvent extends PresenceSubscriptionEvent {
-  static get NAME() { return "state_cleared";};
+export class PresenceStateClearedEvent implements PresenceSubscriptionEvent {
+  static get NAME(): string {
+    return "state_cleared";
+  };
 
   public name: string = PresenceStateClearedEvent.NAME;
 
-  constructor(
-    username: string) {
-    super(username);
+  constructor(public username: string) {
     Object.freeze(this);
   }
 }
 
-export class PresenceAvailabilityChangedEvent extends PresenceSubscriptionEvent {
-  static get NAME() { return "availability_changed";};
+export class PresenceAvailabilityChangedEvent implements PresenceSubscriptionEvent {
+  static get NAME(): string {
+    return "availability_changed";
+  };
 
   public name: string = PresenceAvailabilityChangedEvent.NAME;
 
-  constructor(
-    username: string,
-    public available: boolean) {
-    super(username);
+  constructor(public username: string,
+              public available: boolean) {
     Object.freeze(this);
   }
 }

@@ -47,7 +47,7 @@ export class ConvergenceConnection extends EventEmitter {
   private _protocolConnection: ProtocolConnection;
   private _url: string;
   private _messageEmitter: EventEmitter;
-  private _messageSubject: Subject;
+  private _messageSubject: Subject<MessageEvent>;
 
   /**
    *
@@ -153,7 +153,7 @@ export class ConvergenceConnection extends EventEmitter {
     return this._protocolConnection.request(message);
   }
 
-  authenticateWithPassword(username: string, password: string): Promise<void> {
+  authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
     var authRequest: PasswordAuthRequest = {
       type: MessageType.PASSWORD_AUTH_REQUEST,
       username: username,
@@ -162,7 +162,7 @@ export class ConvergenceConnection extends EventEmitter {
     return this._authenticate(authRequest);
   }
 
-  authenticateWithToken(token: string): Promise<void> {
+  authenticateWithToken(token: string): Promise<AuthResponse> {
     var authRequest: TokenAuthRequest = {
       type: MessageType.TOKEN_AUTH_REQUEST,
       token: token
@@ -188,38 +188,43 @@ export class ConvergenceConnection extends EventEmitter {
     if (typeof eventFilter === "undefined") {
       return this._messageSubject.asObservable();
     } else {
-      const filter = eventFilter.slice(0);
+      const filter: MessageType[] = eventFilter.slice(0);
       return this._messageSubject.asObservable().filter(m => {
-        return filter.some(t => {return m.type === t;});
+        return filter.some(t => {
+          return m.message.type === t;
+        });
       });
     }
   }
 
-  private _authenticate(authRequest: AuthRequest): Promise<void> {
+  private _authenticate(authRequest: AuthRequest): Promise<AuthResponse> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Promise.reject(new Error("User already authenticated."));
+      return Promise.reject<AuthResponse>(new Error("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
     } else if (this._connectionDeferred != null) {
       // We are connecting so defer this until after we connect.
-      return this._connectionDeferred.promise().then( () => {
+      return this._connectionDeferred.promise().then(() => {
         return this._sendAuthRequest(authRequest);
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject(new Error("Must be connected or connecting to authenticate."));
+      return Promise.reject<AuthResponse>(new Error("Must be connected or connecting to authenticate."));
     }
   }
 
-  private _sendAuthRequest(authRequest: AuthRequest): Promise<void> {
+  private _sendAuthRequest(authRequest: AuthRequest): Promise<AuthResponse> {
     return this.request(authRequest).then((response: AuthenticationResponse) => {
       if (response.success === true) {
         this._session._setUsername(response.username);
         this._session._setSessionId(response.sessionId);
         this._session.setAuthenticated(true);
-        return;
+        const resp: AuthResponse = {
+          state: response.state
+        };
+        return resp;
       } else {
         throw new Error("Authentication failed");
       }
@@ -333,6 +338,10 @@ export interface MessageEvent {
   message: any; // Model Message??
   request: boolean;
   callback?: ReplyCallback;
+}
+
+export interface AuthResponse {
+  state: {[key: string]: void};
 }
 
 

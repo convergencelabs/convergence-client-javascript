@@ -6,25 +6,25 @@ export type EventListener<T> = (e: T) => void;
 
 export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
-  private _subscriptions: {[key: string]: Subscription[]};
+  private _eventSubscriptions: {[key: string]: Subscription[]};
   private _listeners: {[key: string]: EventListener<T>[]};
 
-  private _subject: Subject<T>;
+  private _defaultSubject: Subject<T>;
   private _observable: Observable<T>;
 
   constructor() {
-    this._subject = new Subject<T>();
-    this._observable = this._subject.asObservable();
-    this._subscriptions = {};
+    this._defaultSubject = new Subject<T>();
+    this._observable = this._defaultSubject.asObservable();
+    this._eventSubscriptions = {};
     this._listeners = {};
   }
 
   protected _emitFrom(observable: Observable<T>): Subscription {
     return observable.subscribe((value: T) => {
-        this._subject.next(value);
+        this._defaultSubject.next(value);
       },
       (error: Error) => {
-        this._subject.error(error);
+        this._defaultSubject.error(error);
       });
   }
 
@@ -35,12 +35,12 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
     event = this._resolveEventKey(event);
     var listeners: EventListener<T>[] = this._listeners[event];
-    var subscriptions: Subscription[] = this._subscriptions[event];
+    var subscriptions: Subscription[] = this._eventSubscriptions[event];
     if (listeners === undefined) {
       listeners = [];
       this._listeners[event] = listeners;
       subscriptions = [];
-      this._subscriptions[event] = subscriptions;
+      this._eventSubscriptions[event] = subscriptions;
     }
 
     if (listeners.indexOf(listener) >= 0) {
@@ -79,11 +79,11 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
   removeAllListeners(event: EventKey): ConvergenceEventEmitter<T> {
     event = this._resolveEventKey(event);
-    var subscriptions: Subscription[] = this._subscriptions[event];
+    var subscriptions: Subscription[] = this._eventSubscriptions[event];
     subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
     });
-    delete this._subscriptions[event];
+    delete this._eventSubscriptions[event];
     delete this._listeners[event];
 
     return this;
@@ -92,7 +92,7 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
   removeListener(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     event = this._resolveEventKey(event);
     var listeners: EventListener<T>[] = this._listeners[event];
-    var subscriptions: Subscription[] = this._subscriptions[event];
+    var subscriptions: Subscription[] = this._eventSubscriptions[event];
     var index: number = listeners.indexOf(listener);
     if (index !== -1) {
       listeners.splice(index, 1);
@@ -108,7 +108,7 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
   }
 
   protected _emitEvent(value: T): void {
-    this._subject.next(value);
+    this._defaultSubject.next(value);
   }
 
   events(): Observable<T> {

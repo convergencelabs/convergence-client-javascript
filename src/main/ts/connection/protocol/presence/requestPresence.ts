@@ -27,5 +27,5 @@ export var RequestPresenceResponseDeserializer: MessageBodyDeserializer<RequestP
 export interface UserPresenceData {
   username: string;
   available: boolean;
-  state: {[key: string]: any}
+  state: {[key: string]: any};
 }

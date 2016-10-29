@@ -7,7 +7,7 @@ import {Observable} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
 import {RequestPresence} from "../connection/protocol/presence/requestPresence";
 import {RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
-import {PresenceSetState} from "../connection/protocol/presence/presenceState";
+import {PresenceSetState, PresenceRemoveState} from "../connection/protocol/presence/presenceState";
 import {PresenceClearState} from "../connection/protocol/presence/presenceState";
 import {SubscribePresenceRequest, SubscribePresenceResponse} from "../connection/protocol/presence/subscribePresence";
 import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePresence";
@@ -27,25 +27,27 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _managers: Map<string, UserPresenceManager>;
   private _presenceStreams: Map<string, Observable<MessageEvent>>;
 
-  constructor(connection: ConvergenceConnection, localPresence: UserPresence) {
+  constructor(connection: ConvergenceConnection, presence: UserPresence) {
     super();
 
     this._connection = connection;
 
-    this._managers = new Map();
-    this._presenceStreams = new Map();
+    this._managers = new Map<string, UserPresenceManager>();
+    this._presenceStreams = new Map<string, Observable<MessageEvent>>();
 
     this._messageStream = this._connection.messages([
-        MessageType.PRESENCE_AVAILABILITY_CHANGED,
-        MessageType.PRESENCE_STATE_SET,
-        MessageType.PRESENCE_STATE_CLEARED]);
+      MessageType.PRESENCE_AVAILABILITY_CHANGED,
+      MessageType.PRESENCE_STATE_SET,
+      MessageType.PRESENCE_STATE_CLEARED]);
 
     const username: string = this.session().username();
 
-    const localStream =  this._streamForUsername(username);
+    const localStream: Observable<MessageEvent> = this._streamForUsername(username);
     this._presenceStreams.set(username, localStream);
 
-    this._localManager = new UserPresenceManager(localPresence, localStream, () => {});
+    this._localManager = new UserPresenceManager(presence, localStream, () => {
+    });
+
     this._managers.set(username, this._localManager);
 
     this._localPresence = this._localManager.subscribe();
@@ -84,7 +86,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   remove(key: string): void
   remove(keys: string[]): void
   remove(keys: string | string[]): void {
-    let stateKeys = null;
+    let stateKeys: string[] = null;
 
     if (typeof keys === "string") {
       keys = [<string>keys];
@@ -94,7 +96,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     this._localManager.removeState(stateKeys);
 
-    const message: PresenceClearState = {
+    const message: PresenceRemoveState = {
       type: MessageType.PRESENCE_REMOVE_STATE,
       keys: stateKeys
     };
@@ -141,7 +143,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
 
     return this._subscribe(requested).then(() => {
-      const subscriptions = requested.map(username => this._managers.get(username).subscribe());
+      const subscriptions: UserPresenceSubscription[] = requested.map(username => this._managers.get(username).subscribe());
 
       if (typeof usernames === "string") {
         return subscriptions[0];
@@ -164,40 +166,40 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     return this._connection.request(message).then((response: RequestPresenceResponse) => {
       return response.userPresences.map(p =>
-        new UserPresenceImpl(p.username, p.available, new Map(objectToMap(p.state)))
+        new UserPresenceImpl(p.username, p.available, objectToMap(p.state))
       );
     });
   }
 
 
-  private _streamForUsername(username: string) {
+  private _streamForUsername(username: string): Observable<MessageEvent> {
     return this._messageStream.filter(m => m.message.username === username);
   }
 
   private _subscribe(usernames: string[]): Promise<void> {
-    let notSubscribed = usernames.filter(username => {
-      return this._presenceStreams.get(username) === undefined
+    let notSubscribed: string[] = usernames.filter(username => {
+      return this._presenceStreams.get(username) === undefined;
     });
 
     if (notSubscribed.length > 0) {
       notSubscribed.forEach(username => {
-        const stream = this._streamForUsername(username);
+        const stream: Observable<MessageEvent> = this._streamForUsername(username);
         this._presenceStreams.set(username, stream);
       });
 
-      const message = SubscribePresenceRequest = {
+      const message: SubscribePresenceRequest = {
         type: MessageType.PRESENCE_SUBSCRIBE_REQUEST,
         usernames: notSubscribed
       };
 
       return this._connection.request(message).then((response: SubscribePresenceResponse) => {
         response.userPresences.forEach(presence => {
-          const manager = new UserPresenceManager(
-            presence,
-            this._presenceStreams.get(presence.username()),
+          const manager: UserPresenceManager = new UserPresenceManager(
+            new UserPresenceImpl(presence.username, presence.available, objectToMap(presence.state)),
+            this._presenceStreams.get(presence.username),
             (username) => this._unsubscribe(username)
           );
-          this._managers.set(presence.username(), manager);
+          this._managers.set(presence.username, manager);
         });
       });
     } else {
