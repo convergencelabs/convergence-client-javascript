@@ -53,7 +53,6 @@ import {SubscribePresenceRequestSerializer, SubscribePresenceResponseDeserialize
 import {UserJoinedRoomMessageDeserializer} from "./chat/joinRoom";
 import {UserLeftRoomMessageDeserializer} from "./chat/leaveRoom";
 import {UserChatMessageDeserializer} from "./chat/chatMessage";
-import {JoinRoomMessageSerializer} from "./chat/joinRoom";
 import {LeaveRoomMessageSerializer} from "./chat/leaveRoom";
 import {PublishChatMessageSerializer} from "./chat/chatMessage";
 import {ParticipantsResponseDeserializer} from "./activity/participants";
@@ -67,6 +66,8 @@ import {HistoricalOperationsRequestSerializer} from "./model/historical/historic
 import {ActivityRemoveStateSerializer} from "./activity/activityState";
 import {ActivityRemoteStateRemovedDeserializer} from "./activity/activityState";
 import {ActivityJoinResponseDeserializer} from "./activity/joinActivity";
+import {JoinRoomRequestMessageSerializer} from "./chat/joinRoom";
+import {JoinRoomResponseMessageDeserializer} from "./chat/joinRoom";
 
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
@@ -190,7 +191,7 @@ MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_REQUEST, Re
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SUBSCRIBE_REQUEST, SubscribePresenceRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_UNSUBSCRIBE, UnsubscribePresenceSerializer);
 
-MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_ROOM, JoinRoomMessageSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_ROOM_REQUEST, JoinRoomRequestMessageSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.LEAVE_ROOM, LeaveRoomMessageSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE, PublishChatMessageSerializer);
 
@@ -242,6 +243,7 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLE
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_RESPONSE, RequestPresenceResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_SUBSCRIBE_RESPONSE, SubscribePresenceResponseDeserializer);
 
+MessageSerializer.registerMessageBodyDeserializer(MessageType.JOIN_ROOM_RESPONSE, JoinRoomResponseMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_JOINED_ROOM, UserJoinedRoomMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LEFT_ROOM, UserLeftRoomMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_MESSAGE_PUBLISHED, UserChatMessageDeserializer);
