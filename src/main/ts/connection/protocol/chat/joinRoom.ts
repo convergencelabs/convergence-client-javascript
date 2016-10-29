@@ -22,7 +22,7 @@ export interface JoinRoomResponseMessage extends IncomingProtocolResponseMessage
 
 export var JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoomResponseMessage> = (body: any) => {
   var result: JoinRoomResponseMessage = {
-    members: body.m,
+    members: body.p,
     messageCount: body.c,
     lastMessageTime: body.l
   };

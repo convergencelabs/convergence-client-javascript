@@ -8,16 +8,18 @@ var chatRoom;
 var domain;
 
 function connect() {
-  var url = "http://localhost:8080/domain/namespace1/domain1";
+  var url = "http://localhost:8080/domain/test/example";
   ConvergenceDomain.debugFlags.protocol.messages = true;
   ConvergenceDomain.connect(url, usernameInput.value, "password").then(function(d) {
     domain = d;
-    chatRoom = domain.chatService().room(roomInput.value);
-    chatRoom.join();
-    chatRoom.events().subscribe(function(event) {
-      chatHistoryArea.value += JSON.stringify(event);
-      chatHistoryArea.value += '\n'
+    domain.chatService().joinRoom(roomInput.value).then(function(room) {
+      chatRoom = room;
+      chatRoom.events().subscribe(function(event) {
+        chatHistoryArea.value += JSON.stringify(event);
+        chatHistoryArea.value += '\n';
+      });
     });
+
 });
 }
 
@@ -28,7 +30,7 @@ function connect() {
 function sendChat() {
   chatRoom.send(messageInput.value);
   chatHistoryArea.value += "You Sent: " + messageInput.value;
-  chatHistoryArea.value += '\n'
+  chatHistoryArea.value += '\n';
   messageInput.value = "";
 }
 
