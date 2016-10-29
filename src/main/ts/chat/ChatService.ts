@@ -6,9 +6,16 @@ import {ChatRoom} from "./ChatRoom";
 import {UserJoinedRoomMessage} from "../connection/protocol/chat/joinRoom";
 import {UserLeftRoomMessage} from "../connection/protocol/chat/leaveRoom";
 import {UserChatMessage} from "../connection/protocol/chat/chatMessage";
-import {ChatMessageEvent, UserLeftEvent, ChatEvent, UserJoinedEvent} from "./events";
+import {ChatMessageEvent, UserLeftEvent, UserJoinedEvent} from "./events";
+import {Deferred} from "../util/Deferred";
+import {JoinRoomRequestMessage} from "../connection/protocol/chat/joinRoom";
+import {JoinRoomResponseMessage} from "../connection/protocol/chat/joinRoom";
+import {SessionIdParser} from "../connection/protocol/SessionIdParser";
+import {ChatMember} from "./ChatRoom";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ChatEvent} from "./events";
 
-export class ChatService {
+export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   static Events: any = {
     MESSAGE: "message",
@@ -19,11 +26,11 @@ export class ChatService {
   };
 
   private _connection: ConvergenceConnection;
-  private _eventStream: Observable<ChatEvent>;
-  private _joinedMap: Map<string, boolean>;
+  private _joinedMap: Map<string, Deferred<ChatRoom>>;
 
 
   constructor(connection: ConvergenceConnection) {
+    super();
     this._connection = connection;
 
     let messageObs: Observable<MessageEvent> = Observable.create(observer => {
@@ -34,7 +41,7 @@ export class ChatService {
       });
     });
 
-    this._eventStream = messageObs.pluck("message").map(message => {
+    let eventStream: Observable<ChatEvent> = messageObs.pluck("message").map(message => {
       let msg: any = message;
       switch (msg.type) {
         case MessageType.USER_JOINED_ROOM:
@@ -70,35 +77,40 @@ export class ChatService {
       }
     });
 
-    this._joinedMap = new Map<string, boolean>();
+    this._emitFrom(eventStream);
+
+    this._joinedMap = new Map<string, Deferred<ChatRoom>>();
   }
 
   session(): Session {
     return this._connection.session();
   }
 
-  room(id: string): ChatRoom {
-    return new ChatRoom(id,
-      this._joinCB(id), this._leftCB(id), this._isJoined(id),
-      this.events().filter(event => {
-        return event.roomId === id;
-      }),
-      this._connection);
-  }
+  joinRoom(id: string): Promise<ChatRoom> {
+    if (!this._joinedMap.has(id)) {
+      this._joinedMap.set(id, new Deferred<ChatRoom>());
 
-  events(): Observable<ChatEvent> {
-    return this._eventStream;
-  }
+      this._connection.request(<JoinRoomRequestMessage>{
+        type: MessageType.JOIN_ROOM_REQUEST,
+        roomId: id
+      }).then((response: JoinRoomResponseMessage) => {
+        this._joinedMap.get(id).resolve(new ChatRoom(id,
+          response.members.map(sessionId => {
+            return new ChatMember(SessionIdParser.parseUsername(sessionId), sessionId);
+          }),
+          response.messageCount,
+          response.lastMessageTime,
+          this._leftCB(id),
+          this.events().filter(event => {
+            return event.roomId === id;
+          }), this._connection));
+      });
+    }
 
-  private _joinCB: (id: string) => () => void = (id: string) => {
-    return () => this._joinedMap.set(id, true);
-  };
+    return this._joinedMap.get(id).promise();
+  }
 
   private _leftCB: (id: string) => () => void = (id: string) => {
     return () => this._joinedMap.delete(id);
-  };
-
-  private _isJoined: (id: string) => () => boolean = (id: string) => {
-    return () => this._joinedMap.has(id);
   };
 }

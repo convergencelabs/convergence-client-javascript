@@ -1,17 +1,35 @@
 import {MessageBodySerializer} from "../MessageSerializer";
-import {OutgoingProtocolNormalMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {IncomingProtocolNormalMessage} from "../protocol";
+import {OutgoingProtocolRequestMessage} from "../protocol";
+import {IncomingProtocolResponseMessage} from "../protocol";
 
-export interface JoinRoomMessage extends OutgoingProtocolNormalMessage {
+export interface JoinRoomRequestMessage extends OutgoingProtocolRequestMessage {
   roomId: string;
 }
 
-export var JoinRoomMessageSerializer: MessageBodySerializer = (request: JoinRoomMessage) => {
+export var JoinRoomRequestMessageSerializer: MessageBodySerializer = (request: JoinRoomRequestMessage) => {
   return {
     r: request.roomId
   };
 };
+
+export interface JoinRoomResponseMessage extends IncomingProtocolResponseMessage {
+  members: string[];
+  messageCount: number;
+  lastMessageTime: number;
+}
+
+export var JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoomResponseMessage> = (body: any) => {
+  var result: JoinRoomResponseMessage = {
+    members: body.m,
+    messageCount: body.c,
+    lastMessageTime: body.l
+  };
+
+  return result;
+};
+
 
 export interface UserJoinedRoomMessage extends IncomingProtocolNormalMessage {
   roomId: string;
