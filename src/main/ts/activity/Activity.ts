@@ -106,13 +106,14 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   set(state: Map<string, any>): void
   set(key: string, value: any): void
   set(): void {
-    var state: Map<string, any>;
+    let state: Map<string, any>;
     if (arguments.length === 1) {
       state = arguments[0];
     } else if (arguments.length === 2) {
       state = new Map<string, any>();
       state[arguments[0]] = arguments[1];
     }
+
     if (this.isJoined()) {
       var message: ActivitySetState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_SET,

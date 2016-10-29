@@ -2,8 +2,6 @@ import {OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {IncomingProtocolNormalMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
-import {UserPresence} from "../../../presence/UserPresence";
-import {UserPresenceDeserializer} from "./userPresence";
 
 export interface RequestPresence extends OutgoingProtocolRequestMessage {
   usernames: string[];
@@ -16,16 +14,18 @@ export var RequestPresenceSerializer: MessageBodySerializer = (request: RequestP
 };
 
 export interface RequestPresenceResponse extends IncomingProtocolNormalMessage {
-  userPresences: UserPresence[];
+  userPresences: UserPresenceData[];
 }
 
 export var RequestPresenceResponseDeserializer: MessageBodyDeserializer<RequestPresenceResponse> = (body: any) => {
-  var userPresences: UserPresence[] = [];
-  for (var userPresence of body.p) {
-    userPresences.push(UserPresenceDeserializer(userPresence));
-  }
-  var result: RequestPresenceResponse = {
-    userPresences: userPresences
+  const result: RequestPresenceResponse = {
+    userPresences: body.p
   };
   return result;
 };
+
+export interface UserPresenceData {
+  username: string;
+  available: boolean;
+  state: {[key: string]: any}
+}

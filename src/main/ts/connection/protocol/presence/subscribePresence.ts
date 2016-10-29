@@ -6,22 +6,22 @@ import {IncomingProtocolResponseMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
 export interface SubscribePresenceRequest extends OutgoingProtocolRequestMessage {
-  username: string;
+  usernames: string[];
 }
 
 export var SubscribePresenceRequestSerializer: MessageBodySerializer = (request: SubscribePresenceRequest) => {
   return {
-    u: request.username
+    u: request.usernames
   };
 };
 
 export interface SubscribePresenceResponse extends IncomingProtocolResponseMessage {
-  userPresence: UserPresence;
+  userPresences: UserPresence[];
 }
 
 export var SubscribePresenceResponseDeserializer: MessageBodyDeserializer<SubscribePresenceResponse> = (body: any) => {
   var result: SubscribePresenceResponse = {
-    userPresence: UserPresenceDeserializer(body.p)
+    userPresences: body.p.forEach( p => UserPresenceDeserializer(p))
   };
 
   return result;

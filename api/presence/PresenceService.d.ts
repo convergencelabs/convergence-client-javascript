@@ -12,12 +12,12 @@ export declare class PresenceService extends ConvergenceEventEmitter {
   set(state: Map<string, any>): void;
   set(key: string, value: any): void;
 
+  replaceAll(state: Map<string, any>);
+
   remove(key: string): void;
   remove(keys: string[]): void;
 
   clear(): void;
-
-  replace(state: Map<string, any>);
 
   state(key: string): any;
   state(): Map<string,any>;

@@ -5,51 +5,64 @@ import {MessageBodyDeserializer} from "../MessageSerializer";
 
 
 export interface PresenceSetState extends OutgoingProtocolNormalMessage {
-  key: string;
-  value: any;
+  state: {[key: string]: any};
+  all: boolean;
 }
 
 export var PresenceSetStateSerializer: MessageBodySerializer = (request: PresenceSetState) => {
   return {
-    k: request.key,
-    v: request.value
+    s: request.state,
+    a: request.all
+  };
+};
+
+export interface PresenceRemoveState extends OutgoingProtocolNormalMessage {
+  keys: string[];
+}
+
+export var PresenceRemoveStateSerializer: MessageBodySerializer = (request: PresenceRemoveState) => {
+  return {
+    k: request.keys
   };
 };
 
 export interface PresenceClearState extends OutgoingProtocolNormalMessage {
-  key: string;
 }
 
-export var PresenceClearStateSerializer: MessageBodySerializer = (request: PresenceClearState) => {
-  return {
-    k: request.key
-  };
-};
 
 export interface PresenceStateSet extends IncomingProtocolNormalMessage {
   username: string;
-  key: string;
-  value: any;
+  state: Map<string, any>;
 }
 
 export var PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSet> = (body: any) => {
   var result: PresenceStateSet = {
     username: body.u,
-    key: body.k,
-    value: body.v
+    state: body.s
+  };
+  return result;
+};
+
+export interface PresenceStateRemoved extends IncomingProtocolNormalMessage {
+  username: string;
+  keys: string[];
+}
+
+export var PresenceStateRemovedDeserializer: MessageBodyDeserializer<PresenceStateRemoved> = (body: any) => {
+  var result: PresenceStateRemoved = {
+    username: body.u,
+    keys: body.k
   };
   return result;
 };
 
 export interface PresenceStateCleared extends IncomingProtocolNormalMessage {
   username: string;
-  key: string;
 }
 
 export var PresenceStateClearedDeserializer: MessageBodyDeserializer<PresenceStateCleared> = (body: any) => {
   var result: PresenceStateCleared = {
-    username: body.u,
-    key: body.k
+    username: body.u
   };
   return result;
 };

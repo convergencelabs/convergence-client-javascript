@@ -18,6 +18,7 @@ import {AuthenticationResponse} from "./protocol/authentication";
 import {Deferred} from "../util/Deferred";
 import {ReplyCallback} from "./ProtocolConnection";
 import {EventKey} from "../util/EventEmitter";
+import {Observable, Subject} from "rxjs/Rx";
 
 export class ConvergenceConnection extends EventEmitter {
 
@@ -46,6 +47,7 @@ export class ConvergenceConnection extends EventEmitter {
   private _protocolConnection: ProtocolConnection;
   private _url: string;
   private _messageEmitter: EventEmitter;
+  private _messageSubject: Subject;
 
   /**
    *
@@ -82,7 +84,9 @@ export class ConvergenceConnection extends EventEmitter {
       }
     };
 
+    // todo migrate away from this.
     this._messageEmitter = new EventEmitter();
+    this._messageSubject = new Subject();
 
     this._session = new SessionImpl(domain, this, null, null);
   }
@@ -180,6 +184,17 @@ export class ConvergenceConnection extends EventEmitter {
     this._messageEmitter.off(type, listener);
   }
 
+  messages(eventFilter?: MessageType[]): Observable<MessageEvent> {
+    if (typeof eventFilter === "undefined") {
+      return this._messageSubject.asObservable();
+    } else {
+      const filter = eventFilter.slice(0);
+      return this._messageSubject.asObservable().filter(m => {
+        return filter.some(t => {return m.type === t;});
+      });
+    }
+  }
+
   private _authenticate(authRequest: AuthRequest): Promise<void> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
@@ -246,6 +261,7 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._protocolConnection.on(ProtocolConnection.Events.MESSAGE, (event: MessageEvent) => {
       this._messageEmitter.emit(event.message.type, event);
+      this._messageSubject.next(event);
     });
 
     this._protocolConnection.connect().then(() => {
