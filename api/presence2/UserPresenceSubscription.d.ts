@@ -1,10 +1,9 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {UserPresence} from "./UserPresence";
+import {UserPresence, UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/Rx";
 
-export declare class UserPresenceSubscription extends ConvergenceEventEmitter<any> {
+export declare class UserPresenceSubscription extends ConvergenceEventEmitter<any> implements UserPresence {
 
-  // todo we could to this set of funcitons fro the user presence
   username(): string;
 
   isAvailable(): boolean;
@@ -12,12 +11,6 @@ export declare class UserPresenceSubscription extends ConvergenceEventEmitter<an
   state(key: string): any;
 
   state(): Map<string, any>;
-
-  // todo or we could just do this
-
-  presence(): UserPresence;
-
-
 
   asObservable(): Observable<UserPresence>;
 

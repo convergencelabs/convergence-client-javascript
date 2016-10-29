@@ -1,4 +1,6 @@
-export interface UserPresence {
+import {UserPresence} from "./UserPresence";
+
+export class UserPresenceImpl implements UserPresence {
   username(): string;
 
   isAvailable(): boolean;
