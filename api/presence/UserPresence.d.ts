@@ -1,4 +1,4 @@
-export class UserPresence {
+export interface UserPresence {
   username(): string;
 
   isAvailable(): boolean;
