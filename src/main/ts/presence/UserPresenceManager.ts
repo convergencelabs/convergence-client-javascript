@@ -82,26 +82,25 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
 
   private _handleMessage(messageEvent: MessageEvent): void {
     var message: IncomingProtocolMessage = messageEvent.message;
-
     switch (message.type) {
       case MessageType.PRESENCE_AVAILABILITY_CHANGED:
-        this.setAvailability((<PresenceAvailabilityChanged>message).available);
+        this.availability((<PresenceAvailabilityChanged>message).available);
         break;
       case MessageType.PRESENCE_STATE_SET:
-        this.setState((<PresenceStateSet>message).state);
+        this.set((<PresenceStateSet>message).state);
         break;
       case MessageType.PRESENCE_STATE_CLEARED:
-        this.clearState();
+        this.clear();
         break;
       case MessageType.PRESENCE_STATE_REMOVED:
-        this.removeState((<PresenceStateRemoved>message).keys);
+        this.remove((<PresenceStateRemoved>message).keys);
         break;
       default:
       // fixme error
     }
   }
 
-  setAvailability(availability: boolean): void {
+  availability(availability: boolean): void {
     this._presence =
       new UserPresenceImpl(this._presence.username(), availability, this._presence.state());
 
@@ -110,7 +109,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject.next(this._presence);
   }
 
-  setState(state: Map<string, any>): void {
+  set(state: Map<string, any>): void {
     // fixme clone
     let newState: Map<string, any> = this._presence.state();
     state.forEach((v, k) => newState.set(k, v));
@@ -125,7 +124,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject.next(this._presence);
   }
 
-  removeState(keys: string[]): void {
+  remove(keys: string[]): void {
     // fixme clone
     let newState: Map<string, any> = this._presence.state();
     keys.forEach(k => newState.delete(k));
@@ -140,7 +139,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject.next(this._presence);
   }
 
-  clearState(): void {
+  clear(): void {
     this._presence = new UserPresenceImpl(
       this._presence.username(),
       this._presence.isAvailable(),

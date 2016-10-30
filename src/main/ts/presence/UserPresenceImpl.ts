@@ -27,7 +27,7 @@ export class UserPresenceImpl implements UserPresence {
     if (typeof key === "undefined") {
       return this._state;
     } else {
-      return this._state[key];
+      return this._state.get(key);
     }
   }
 }

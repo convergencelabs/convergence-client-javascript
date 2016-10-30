@@ -74,7 +74,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
       state.set(arguments[0], arguments[1]);
     }
 
-    this._localManager.setState(state);
+    this._localManager.set(state);
 
     const message: PresenceSetState = {
       type: MessageType.PRESENCE_SET_STATE,
@@ -96,7 +96,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
       stateKeys = <string[]>keys;
     }
 
-    this._localManager.removeState(stateKeys);
+    this._localManager.remove(stateKeys);
 
     const message: PresenceRemoveState = {
       type: MessageType.PRESENCE_REMOVE_STATE,
@@ -107,7 +107,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   clear(): void {
-    this._localManager.clearState();
+    this._localManager.clear();
 
     const message: PresenceClearState = {
       type: MessageType.PRESENCE_CLEAR_STATE
