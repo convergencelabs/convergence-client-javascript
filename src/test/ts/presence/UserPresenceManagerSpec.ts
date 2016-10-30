@@ -99,26 +99,25 @@ describe('UserPresenceManager', () => {
     const initialPresence = new UserPresenceImpl("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
-    let firedEvent: boolean = false;
-
+    let firedEvent: number = 0;
     mgr.on("state_set", (e) => {
-      firedEvent = true;
+      firedEvent++;
       expect(e.name).to.equal("state_set");
       expect(e.state.size).to.equal(1);
       expect(e.state.get("key")).to.equal("value");
     });
 
-    let firedObserver: boolean = false;
+    let firedObserver: number = 0;
     mgr.events().filter(e => e.name === "state_set").subscribe((e) => {
-      firedObserver = true;
+      firedObserver++;
     });
 
     const add = new Map<string, any>();
     add.set("key", "value");
     mgr.set(add);
 
-    expect(firedEvent).to.be.true;
-    expect(firedObserver).to.be.true;
+    expect(firedEvent).to.equal(1);
+    expect(firedObserver).to.equal(1);
   });
 
   it('clear fires the proper event', () => {
@@ -128,20 +127,20 @@ describe('UserPresenceManager', () => {
     const initialPresence = new UserPresenceImpl("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
-    let firedEvent: boolean = false;
+    let firedEvent: number = 0;
     mgr.on("state_cleared", (e) => {
-      firedEvent = true;
+      firedEvent++;
     });
 
-    let firedObserver: boolean = false;
+    let firedObserver: number = 0;
     mgr.events().filter(e => e.name === "state_cleared").subscribe((e) => {
-      firedObserver = true;
+      firedObserver++;
     });
 
     mgr.clear();
 
-    expect(firedEvent).to.be.true;
-    expect(firedObserver).to.be.true;
+    expect(firedEvent).to.equal(1);
+    expect(firedObserver).to.equal(1);
   });
 
   it('remove fires the proper event', () => {
@@ -151,22 +150,22 @@ describe('UserPresenceManager', () => {
     const initialPresence = new UserPresenceImpl("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
-    let firedEvent: boolean = false;
+    let firedEvent: number = 0;
     mgr.on("state_removed", (e) => {
-      firedEvent = true;
+      firedEvent++;
       expect(e.name).to.equal("state_removed");
       expect(e.keys).to.deep.equal(["k1", "k2"]);
     });
 
-    let firedObserver: boolean = false;
+    let firedObserver: number = 0;
     mgr.events().filter(e => e.name === "state_removed").subscribe((e) => {
-      firedObserver = true;
+      firedObserver++;
     });
 
     mgr.remove(["k1", "k2"]);
 
-    expect(firedEvent).to.be.true;
-    expect(firedObserver).to.be.true;
+    expect(firedEvent).to.equal(1);
+    expect(firedObserver).to.equal(1);
   });
 
   it('subscription has correct state', () => {
@@ -184,5 +183,29 @@ describe('UserPresenceManager', () => {
     expect(s.state().size).to.equal(1);
     expect(s.state().get("key")).to.equal(9);
     expect(s.state("key")).to.equal(9);
+  });
+
+  it('unsubscribe correctly called', () => {
+    const state = new Map<string, any>();
+
+    let called: number = 0;
+
+    const testSubject = new Subject<MessageEvent>();
+    const initialPresence = new UserPresenceImpl("test", false, state);
+    const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), (username) => {
+      called++;
+      expect(username).to.equal(initialPresence.username());
+    });
+
+    const s1 = mgr.subscribe();
+    const s2 = mgr.subscribe();
+
+    s1.unsubscribe();
+    expect(called).to.equal(0);
+
+    s2.unsubscribe();
+    expect(called).to.equal(1);
+
+    s2.unsubscribe();
   });
 });

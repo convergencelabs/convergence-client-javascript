@@ -37,14 +37,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     );
 
     this._subscriptions = [];
-
     this._onUnsubscribe = onUnsubscribe;
-
-    this._messageSubscription = eventStream.subscribe(message => {
-      this._handleMessage(message);
-      this._subject.next(this._presence);
-    });
-
+    this._messageSubscription = eventStream.subscribe(message => this._handleMessage(message));
     this._subject = new BehaviorSubject(this._presence);
   }
 
@@ -77,6 +71,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     if (this._subscriptions.length === 0) {
       this._messageSubscription.unsubscribe();
       this._subject.complete();
+      this._onUnsubscribe(this.username());
     }
   }
 

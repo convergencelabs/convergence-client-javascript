@@ -32,6 +32,9 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<any> imple
   }
 
   unsubscribe(): void {
-    this._manager.unsubscribe(this);
+    if (this._manager !== null) {
+      this._manager.unsubscribe(this);
+    }
+    this._manager = null;
   }
 }
