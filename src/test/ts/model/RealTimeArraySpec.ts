@@ -82,15 +82,15 @@ describe('RealTimeArray', () => {
     var wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
-    expect(myArray.data()).to.deep.equal(primitveValue);
+    expect(myArray.value()).to.deep.equal(primitveValue);
   });
 
   it('Value is correct after set', () => {
     var wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
-    myArray.data(["X", "Y", "Z"]);
-    expect(myArray.data()).to.deep.equal(["X", "Y", "Z"]);
+    myArray.value(["X", "Y", "Z"]);
+    expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after insert', () => {
@@ -98,7 +98,7 @@ describe('RealTimeArray', () => {
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.insert(2, "X");
-    expect(myArray.data()).to.deep.equal(["A", "B", "X", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after remove', () => {
@@ -106,7 +106,7 @@ describe('RealTimeArray', () => {
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.remove(1);
-    expect(myArray.data()).to.deep.equal(["A", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after set', () => {
@@ -114,7 +114,7 @@ describe('RealTimeArray', () => {
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.set(1, "X");
-    expect(myArray.data()).to.deep.equal(["A", "X", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after move', () => {
@@ -122,14 +122,14 @@ describe('RealTimeArray', () => {
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.reorder(1, 2);
-    expect(myArray.data()).to.deep.equal(["A", "C", "B"]);
+    expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct operation is sent after set value', () => {
     var wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ArrayNode = new ArrayNode(arrayValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
-    myArray.data(["X", "Y", "Z"]);
+    myArray.value(["X", "Y", "Z"]);
 
     // var expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
     // expect(lastOp).to.deep.equal(expectedOp);
@@ -185,7 +185,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myArray.data()).to.deep.equal(["X", "Y", "Z"]);
+    expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
   });
 
   it('Value is correct after ArrayInsertOperation', () => {
@@ -199,7 +199,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myArray.data()).to.deep.equal(["A", "B", "X", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
   });
 
   it('Value is correct after ArrayRemoveOperation', () => {
@@ -211,7 +211,7 @@ describe('RealTimeArray', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myArray.data()).to.deep.equal(["A", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "C"]);
   });
 
   it('Value is correct after ArrayReplaceOperation', () => {
@@ -225,7 +225,7 @@ describe('RealTimeArray', () => {
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myArray.data()).to.deep.equal(["A", "X", "C"]);
+    expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
   });
 
   it('Value is correct after ArrayMoveOperation', () => {
@@ -239,7 +239,7 @@ describe('RealTimeArray', () => {
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myArray.data()).to.deep.equal(["A", "C", "B"]);
+    expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
   });
 
   it('Correct event is fired after ArraySetOperation', () => {

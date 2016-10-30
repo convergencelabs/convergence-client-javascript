@@ -165,7 +165,7 @@ function minify(src) {
   return src.pipe(sourceMaps.init())
     .pipe(uglify({
       mangleProperties: {
-        regex: /^_/
+        regex: /(^_.*|.*Operation.*|.*transform.*|serverOp|clientOp)/
       }
     }))
     .pipe(rename({

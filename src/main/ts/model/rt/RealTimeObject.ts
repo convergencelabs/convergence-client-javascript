@@ -78,7 +78,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> imp
     });
   }
 
-  valueAt(pathArgs: any): RealTimeElement<any> {
+  elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 

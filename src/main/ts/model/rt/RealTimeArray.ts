@@ -103,7 +103,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements RealTimeCon
     });
   }
 
-  valueAt(pathArgs: any): RealTimeElement<any> {
+  elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 

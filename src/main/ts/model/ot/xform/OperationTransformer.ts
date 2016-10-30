@@ -58,7 +58,7 @@ export class OperationTransformer {
       return tf(s, c);
     } else {
       throw new Error(
-        `No operation transformation function found for operation pair (${s.type},${s.type})`);
+        `No function found for: (${s.type},${s.type})`);
     }
   }
 }

@@ -64,7 +64,7 @@ describe('RealTimeNumber', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
-    expect(myNumber.data()).to.equal(10);
+    expect(myNumber.value()).to.equal(10);
   });
 
   it('Value is correct after add', () => {
@@ -72,7 +72,7 @@ describe('RealTimeNumber', () => {
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.add(5);
-    expect(myNumber.data()).to.equal(15);
+    expect(myNumber.value()).to.equal(15);
   });
 
   it('Value is correct after subtract', () => {
@@ -80,15 +80,15 @@ describe('RealTimeNumber', () => {
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.subtract(5);
-    expect(myNumber.data()).to.equal(5);
+    expect(myNumber.value()).to.equal(5);
   });
 
   it('Returned value is correct after set', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
-    myNumber.data(20);
-    expect(myNumber.data()).to.equal(20);
+    myNumber.value(20);
+    expect(myNumber.value()).to.equal(20);
   });
 
   it('Correct operation is sent after add', () => {
@@ -115,7 +115,7 @@ describe('RealTimeNumber', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
-    myNumber.data(20);
+    myNumber.value(20);
 
     // var expectedOp: NumberSetOperation = new NumberSetOperation(initialValue.id, false, 20);
     // expect(lastOp).to.deep.equal(expectedOp);
@@ -130,7 +130,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myNumber.data()).to.equal(15);
+    expect(myNumber.value()).to.equal(15);
   });
 
   it('Value is correct after NumberSetOperation', () => {
@@ -142,7 +142,7 @@ describe('RealTimeNumber', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myNumber.data()).to.equal(20);
+    expect(myNumber.value()).to.equal(20);
   });
 
   it('Correct Event is fired after NumberAddOperation', () => {

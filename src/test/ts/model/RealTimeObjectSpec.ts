@@ -61,15 +61,15 @@ describe('RealTimeObject', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
-    expect(myObject.data()).to.deep.equal({"num": 5});
+    expect(myObject.value()).to.deep.equal({"num": 5});
   });
 
   it('Value is correct after set', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
-    myObject.data({"string": "test"});
-    expect(myObject.data()).to.deep.equal({"string": "test"});
+    myObject.value({"string": "test"});
+    expect(myObject.value()).to.deep.equal({"string": "test"});
   });
 
   it('Value is correct after setProperty', () => {
@@ -77,14 +77,14 @@ describe('RealTimeObject', () => {
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.set("num", 10);
-    expect(myObject.get("num").data()).to.deep.equal(10);
+    expect(myObject.get("num").value()).to.deep.equal(10);
   });
 
   it('Correct operation is sent after set', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: ObjectNode = new ObjectNode(initialValue, () => {return [];}, model, sessionId, username, dataValueFactory);
     var myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
-    myObject.data({string: "test"});
+    myObject.value({string: "test"});
 
     var expectedOp: ObjectSetOperation = new ObjectSetOperation(initialValue.id, false, setValue);
     // expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.be.deep.equal(expectedOp);
@@ -99,7 +99,7 @@ describe('RealTimeObject', () => {
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    expect(myObject.data()).to.deep.equal({"string": "test"});
+    expect(myObject.value()).to.deep.equal({"string": "test"});
   });
 
   it('Correct Event is fired after ObjectSetOperation', () => {

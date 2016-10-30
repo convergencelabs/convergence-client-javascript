@@ -166,7 +166,7 @@ export class TransformationFunctionRegistry {
   (s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
     var key: string = s + c;
     if (this._otfs[key]) {
-      throw new Error("Transformation function already registered for " + s + ", " + c);
+      throw new Error("Function already registered for " + s + ", " + c);
     } else {
       this._otfs[key] = otf;
     }
@@ -175,7 +175,7 @@ export class TransformationFunctionRegistry {
   registerRtf<S extends DiscreteOperation>(r: string, s: string, rtf: ReferenceTransformationFunction): void {
     var key: string = s + r;
     if (this._rtfs[key]) {
-      throw new Error("Transformation function already registered for " + s + ", " + r);
+      throw new Error("Function already registered for " + s + ", " + r);
     } else {
       this._rtfs[key] = rtf;
     }

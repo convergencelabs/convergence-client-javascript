@@ -310,8 +310,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  valueAt(path: any): RealTimeElement<any> {
-    return this.root().valueAt(path);
+  elementAt(path: any): RealTimeElement<any> {
+    return this.root().elementAt(path);
   }
 
   session(): Session {

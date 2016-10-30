@@ -81,9 +81,9 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
     return this._delegate.isDetached();
   }
 
-  data(): T
-  data(value: T): void
-  data(value?: T): any {
+  value(): T
+  value(value: T): void
+  value(value?: T): any {
     if (arguments.length === 0) {
       return this._delegate.data();
     } else {

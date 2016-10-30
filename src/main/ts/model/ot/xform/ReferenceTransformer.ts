@@ -49,7 +49,7 @@ export class ReferenceTransformer {
       return tf(o, r);
     } else {
       throw new Error(
-        `No operation transformation function found for operation pair (${o.type},${r.type})`);
+        `No function found for: (${o.type},${r.type})`);
     }
   }
 }

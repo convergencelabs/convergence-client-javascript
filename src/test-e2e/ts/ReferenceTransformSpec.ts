@@ -85,7 +85,7 @@ describe('Reference Transformation E2E', () => {
       return domain.models().open("collection", "model");
     }).then((model: RealTimeModel) => {
       referenceSetAction.acknowledgeReceipt();
-      var rts: RealTimeString = <RealTimeString>model.valueAt("text");
+      var rts: RealTimeString = <RealTimeString>model.elementAt("text");
 
       rts.on(RealTimeString.Events.REFERENCE, function (e: RemoteReferenceCreatedEvent) {
         console.log(e.reference.username());
