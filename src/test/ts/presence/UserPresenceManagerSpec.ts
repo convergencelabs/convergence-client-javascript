@@ -1,4 +1,4 @@
-import {Observable, Subscription, Subject} from "rxjs/Rx";
+import {Subject} from "rxjs/Rx";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
@@ -103,6 +103,7 @@ describe('UserPresenceManager', () => {
     mgr.on("state_set", (e) => {
       firedEvent++;
       expect(e.name).to.equal("state_set");
+      expect(e.username).to.equal(initialPresence.username());
       expect(e.state.size).to.equal(1);
       expect(e.state.get("key")).to.equal("value");
     });
@@ -129,6 +130,8 @@ describe('UserPresenceManager', () => {
 
     let firedEvent: number = 0;
     mgr.on("state_cleared", (e) => {
+      expect(e.name).to.equal("state_cleared");
+      expect(e.username).to.equal(initialPresence.username());
       firedEvent++;
     });
 
@@ -153,6 +156,7 @@ describe('UserPresenceManager', () => {
     let firedEvent: number = 0;
     mgr.on("state_removed", (e) => {
       firedEvent++;
+      expect(e.username).to.equal(initialPresence.username());
       expect(e.name).to.equal("state_removed");
       expect(e.keys).to.deep.equal(["k1", "k2"]);
     });
