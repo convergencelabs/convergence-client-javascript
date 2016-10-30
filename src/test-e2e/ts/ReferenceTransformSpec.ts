@@ -55,17 +55,17 @@ describe('Reference Transformation E2E', () => {
     });
 
     var expectOp: any = {
-      r:"1",
-      s:0,
-      v:0,
-      o:{
-        t:13,
-        d:"0:1",
-        n:false,
-        i:0,
-        v:"x"
+      r: "1",
+      s: 0,
+      v: 0,
+      o: {
+        t: 13,
+        d: "0:1",
+        n: false,
+        i: 0,
+        v: "x"
       },
-      t:22
+      t: MessageType.OPERATION_SUBMISSION
     };
     mockServer.expect(expectOp, 300);
 
@@ -76,7 +76,8 @@ describe('Reference Transformation E2E', () => {
       d: "0:1",
       c: 0,
       v: [10],
-      t: 29}, 300);
+      t: MessageType.REFERENCE_SET
+    }, 300);
 
     mockServer.start();
 
@@ -86,7 +87,7 @@ describe('Reference Transformation E2E', () => {
       referenceSetAction.acknowledgeReceipt();
       var rts: RealTimeString = <RealTimeString>model.valueAt("text");
 
-      rts.on(RealTimeString.Events.REFERENCE, function(e: RemoteReferenceCreatedEvent) {
+      rts.on(RealTimeString.Events.REFERENCE, function (e: RemoteReferenceCreatedEvent) {
         console.log(e.reference.username());
         refPublishAction.acknowledgeReceipt();
         e.reference.on("set", (e) => {

@@ -168,4 +168,21 @@ describe('UserPresenceManager', () => {
     expect(firedEvent).to.be.true;
     expect(firedObserver).to.be.true;
   });
+
+  it('subscription has correct state', () => {
+    const state = new Map<string, any>();
+    state.set("key", 9);
+
+    const testSubject = new Subject<MessageEvent>();
+    const initialPresence = new UserPresenceImpl("test", false, state);
+    const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
+
+    const s = mgr.subscribe();
+
+    expect(s.username()).to.equal(initialPresence.username());
+    expect(s.isAvailable()).to.equal(initialPresence.isAvailable());
+    expect(s.state().size).to.equal(1);
+    expect(s.state().get("key")).to.equal(9);
+    expect(s.state("key")).to.equal(9);
+  });
 });
