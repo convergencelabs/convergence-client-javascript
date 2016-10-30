@@ -45,7 +45,7 @@ import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
 import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
 import {
   PresenceStateClearedDeserializer, PresenceStateSetDeserializer,
-  PresenceSetStateSerializer
+  PresenceSetStateSerializer, PresenceRemoveStateSerializer, PresenceStateRemovedDeserializer
 } from "./presence/presenceState";
 import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
 import {RequestPresenceSerializer, RequestPresenceResponseDeserializer} from "./presence/requestPresence";
@@ -186,7 +186,9 @@ MessageSerializer.registerMessageBodySerializer(MessageType.ACTIVITY_LOCAL_STATE
 
 
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SET_STATE, PresenceSetStateSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_REMOVE_STATE, PresenceRemoveStateSerializer);
 MessageSerializer.registerDefaultMessageBodySerializer(MessageType.PRESENCE_CLEAR_STATE);
+
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_REQUEST, RequestPresenceSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SUBSCRIBE_REQUEST, SubscribePresenceRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_UNSUBSCRIBE, UnsubscribePresenceSerializer);
@@ -239,6 +241,7 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.ACTIVITY_REMOTE_ST
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_AVAILABILITY_CHANGED, PresenceAvailabilityChangedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_SET, PresenceStateSetDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_REMOVED, PresenceStateRemovedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_STATE_CLEARED, PresenceStateClearedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_RESPONSE, RequestPresenceResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_SUBSCRIBE_RESPONSE, SubscribePresenceResponseDeserializer);

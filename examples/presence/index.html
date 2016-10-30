@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Convergence - Presence</title>
+  <script src="../../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../../dist/convergence-client.umd.js"></script>
+</head>
+<body>
+
+<div>
+  <label for="username">Username</label>
+  <input type="text" id="username">
+  <button onclick="connect()">Connect</button><button onclick="disconnect()">Disconnect</button>
+</div>
+<br />
+<div>
+  <label for="setKey">Key: </label>
+  <input type="text" id="setKey">
+  <label for="setValue">Value: </label>
+  <input type="text" id="setValue">
+  <button onclick="setState()">Set State</button>
+</div>
+<br />
+<div>
+  <label for="removeKey">Key: </label>
+  <input type="text" id="removeKey">
+  <button onclick="removeState()">Remove State</button>
+</div>
+<br />
+<button onclick="clearState()">Clear State</button>
+<br />
+<br />
+Available: <span id="localAvailability"></span><br />
+State: <span id="localState"></span>
+
+<ul id="users">
+
+</ul>
+
+<script src="presence.js"></script>
+</body>
+</html>

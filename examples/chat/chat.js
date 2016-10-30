@@ -12,14 +12,13 @@ function connect() {
   ConvergenceDomain.debugFlags.protocol.messages = true;
   ConvergenceDomain.connect(url, usernameInput.value, "password").then(function(d) {
     domain = d;
-    domain.chatService().joinRoom(roomInput.value).then(function(room) {
+    domain.chat().joinRoom(roomInput.value).then(function(room) {
       chatRoom = room;
       chatRoom.events().subscribe(function(event) {
         chatHistoryArea.value += JSON.stringify(event);
         chatHistoryArea.value += '\n';
       });
     });
-
 });
 }
 

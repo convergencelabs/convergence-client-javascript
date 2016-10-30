@@ -14,7 +14,7 @@ import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePr
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
-import {objectToMap} from "../util/ObjectUtils";
+import {objectToMap, mapToObject} from "../util/ObjectUtils";
 
 export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -29,6 +29,8 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   constructor(connection: ConvergenceConnection, presence: UserPresence) {
     super();
+
+    console.log(presence);
 
     this._connection = connection;
 
@@ -76,7 +78,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     const message: PresenceSetState = {
       type: MessageType.PRESENCE_SET_STATE,
-      state: state,
+      state: mapToObject(state),
       all: false
     };
 
@@ -89,7 +91,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     let stateKeys: string[] = null;
 
     if (typeof keys === "string") {
-      keys = [<string>keys];
+      stateKeys = [<string>keys];
     } else {
       stateKeys = <string[]>keys;
     }
