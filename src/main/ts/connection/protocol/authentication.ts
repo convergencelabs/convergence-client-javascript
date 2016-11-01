@@ -46,7 +46,6 @@ export interface AuthenticationResponse extends IncomingProtocolResponseMessage 
 }
 
 export var AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
-  console.log(body);
   return {
     success: body.s,
     username: body.n,

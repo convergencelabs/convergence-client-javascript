@@ -30,8 +30,6 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   constructor(connection: ConvergenceConnection, presence: UserPresence) {
     super();
 
-    console.log(presence);
-
     this._connection = connection;
 
     this._managers = new Map<string, UserPresenceManager>();
