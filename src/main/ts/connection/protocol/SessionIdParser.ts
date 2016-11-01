@@ -4,15 +4,15 @@ export class SessionIdParser {
   }
 
   static parseUsername(sk: string): string {
-    var parts: string[] = sk.split(":");
-    return parts[0];
+    return SessionIdParser.deserialize(sk).username;
   }
 
   static deserialize(sk: string): SessionKey {
-    var parts: string[] = sk.split(":");
+    const index: number = sk.lastIndexOf(":");
+
     return {
-      username: parts[0],
-      sessionId: parts[1]
+      username: sk.substring(0, index),
+      sessionId: sk.substring(index + 1, sk.length)
     };
   }
 }

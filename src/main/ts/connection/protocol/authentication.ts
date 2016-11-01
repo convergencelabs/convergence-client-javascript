@@ -28,6 +28,16 @@ export var TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAu
   };
 };
 
+export interface AnonymousAuthRequest extends AuthRequest {
+  displayName?: string;
+}
+
+export var AnonymousAuthRequestSerializer: MessageBodySerializer = (request: AnonymousAuthRequest) => {
+  return {
+    d: request.displayName
+  };
+};
+
 export interface AuthenticationResponse extends IncomingProtocolResponseMessage {
   success: boolean;
   username: string;

@@ -42,6 +42,15 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     });
   }
 
+  static connectAnonymously(url: string, displayName?: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    return domain._connect().then((response) => {
+      return domain._authenticateAnonymously(displayName);
+    }).then((v) => {
+      return domain;
+    });
+  }
+
   static connectWithToken(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
     var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
@@ -133,6 +142,10 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
 
   private _authenticateWithToken(token: string): Promise<void> {
     return this._connection.authenticateWithToken(token).then(m => this._init(m));
+  }
+
+  private _authenticateAnonymously(displayName?: string): Promise<void> {
+    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
   }
 
   private _init(m: AuthResponse): void {

@@ -11,7 +11,7 @@ var presence;
 function connect() {
   var url = "http://localhost:8080/domain/test/example";
   ConvergenceDomain.debugFlags.protocol.messages = true;
-  ConvergenceDomain.connect(url, usernameInput.value, "password").then(function(d) {
+  ConvergenceDomain.connectAnonymously(url, usernameInput.value).then(function(d) {
     domain = d;
     presence = domain.presence();
     updateLocal();

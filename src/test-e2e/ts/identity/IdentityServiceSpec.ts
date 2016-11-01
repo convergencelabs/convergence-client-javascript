@@ -39,11 +39,11 @@ describe('IdentityService.user()', () => {
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
       return domain.identity().user("u1");
     }).then((user: DomainUser) => {
-      expect(user.username).to.equal("test1");
-      expect(user.firstName).to.equal("test");
-      expect(user.lastName).to.equal("user");
-      expect(user.displayName).to.equal("test user");
-      expect(user.email).to.equal("test@example.com");
+      expect(user.username()).to.equal("test1");
+      expect(user.firstName()).to.equal("test");
+      expect(user.lastName()).to.equal("user");
+      expect(user.displayName()).to.equal("test user");
+      expect(user.email()).to.equal("test@example.com");
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
       mockServer.doneManager().testFailure(error);
@@ -151,18 +151,18 @@ describe('IdentityService.search()', () => {
       expect(users.length).to.equal(2);
 
       var user1: DomainUser = users[0];
-      expect(user1.username).to.equal("test1");
-      expect(user1.firstName).to.equal("test");
-      expect(user1.lastName).to.equal("user");
-      expect(user1.displayName).to.equal("test user");
-      expect(user1.email).to.equal("test@example.com");
+      expect(user1.username()).to.equal("test1");
+      expect(user1.firstName()).to.equal("test");
+      expect(user1.lastName()).to.equal("user");
+      expect(user1.displayName()).to.equal("test user");
+      expect(user1.email()).to.equal("test@example.com");
 
       var user2: DomainUser = users[1];
-      expect(user2.username).to.equal("test2");
-      expect(user2.firstName).to.equal("test2");
-      expect(user2.lastName).to.equal("user2");
-      expect(user2.displayName).to.equal("test2 user2");
-      expect(user2.email).to.equal("test2@example.com");
+      expect(user2.username()).to.equal("test2");
+      expect(user2.firstName()).to.equal("test2");
+      expect(user2.lastName()).to.equal("user2");
+      expect(user2.displayName()).to.equal("test2 user2");
+      expect(user2.email()).to.equal("test2@example.com");
 
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {

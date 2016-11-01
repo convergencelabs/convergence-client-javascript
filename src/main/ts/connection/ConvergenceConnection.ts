@@ -10,7 +10,7 @@ import {EventEmitter} from "../util/EventEmitter";
 import {SessionImpl} from "../SessionImpl";
 import ConvergenceDomain from "../ConvergenceDomain";
 import {Session} from "../Session";
-import {PasswordAuthRequest} from "./protocol/authentication";
+import {PasswordAuthRequest, AnonymousAuthRequest} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
 import {TokenAuthRequest} from "./protocol/authentication";
 import {AuthRequest} from "./protocol/authentication";
@@ -166,6 +166,14 @@ export class ConvergenceConnection extends EventEmitter {
     var authRequest: TokenAuthRequest = {
       type: MessageType.TOKEN_AUTH_REQUEST,
       token: token
+    };
+    return this._authenticate(authRequest);
+  }
+
+  authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
+    var authRequest: AnonymousAuthRequest = {
+      type: MessageType.ANONYMOUS_AUTH_REQUEST,
+      displayName: displayName
     };
     return this._authenticate(authRequest);
   }
