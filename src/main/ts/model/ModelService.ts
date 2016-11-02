@@ -26,6 +26,8 @@ import {HistoricalDataRequest} from "../connection/protocol/model/historical/his
 import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {ModelResult} from "./query/ModelResult";
+import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -53,8 +55,18 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._connection.session();
   }
 
-  query(): ModelQuery {
-    return new ModelQuery(this._connection, {});
+  query(query: ModelQuery): Promise<ModelResult[]> {
+    const message: ModelsQueryRequest = {
+      type: MessageType.MODELS_QUERY_REQUEST,
+      collection: query.collection,
+      limit: query.limit,
+      offset: query.offset,
+      orderBy: query.orderBy
+    };
+
+    return this._connection.request(message).then((response: ModelsQueryResponse) => {
+      return response.result;
+    });
   }
 
   open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {

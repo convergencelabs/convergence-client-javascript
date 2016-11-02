@@ -1,25 +1,11 @@
-import {ModelResult} from "./ModelResult";
-
-export interface OrderBy {
-  field: string;
-  ascending?: boolean;
-}
-
-export declare class ModelQuery {
-  collection(collection: string): ModelQuery;
-
-  limit(limit: number): ModelQuery;
-
-  offset(offset: number): ModelQuery;
-
-  orderBy(field: string, ascending?: boolean): ModelQuery;
-
-  execute(): Promise<ModelResult[]>;
-}
-
-export interface ModelQueryOptions {
+export interface ModelQuery {
   collection?: string;
   limit?: number;
   offset?: number;
   orderBy?: OrderBy;
+}
+
+export interface OrderBy {
+  field: string;
+  ascending?: boolean;
 }
