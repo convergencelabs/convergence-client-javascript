@@ -5,6 +5,7 @@ import {MessageType} from "../connection/protocol/MessageType";
 import {UserLookUpRequest} from "../connection/protocol/user/userLookUps";
 import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
+import {UserQuery} from "./UserQuery";
 
 // fixme should the props be camelcase
 export var UserField: any = {
@@ -36,9 +37,12 @@ export class IdentityService {
     return this._connection.session();
   }
 
-  user(value: string, field: string = UserField.USERNAME): Promise<DomainUser> {
-    // TODO It is only valid to look up by email / username.
-    return this.users(value, field).then((users: DomainUser[]) => {
+  user(username: string): Promise<DomainUser> {
+    if (typeof username !== 'string') {
+      return Promise.reject<DomainUser>('Must specify a username.');
+    }
+
+    return this.users([username]).then((users: DomainUser[]) => {
       if (users.length === 0) {
         return Promise.resolve(<DomainUser>undefined);
       } else if (users.length === 1) {
@@ -49,7 +53,58 @@ export class IdentityService {
     });
   }
 
-  users(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
+  userByEmail(email: string): Promise<DomainUser> {
+    return this.usersByEmail([email]).then((users: DomainUser[]) => {
+      if (users.length === 0) {
+        return Promise.resolve(<DomainUser>undefined);
+      } else if (users.length === 1) {
+        return Promise.resolve(users[0]);
+      } else {
+        return Promise.reject<DomainUser>(new Error("Error getting user."));
+      }
+    });
+  }
+
+  users(usernames: string[]): Promise<DomainUser[]> {
+    return this._users(usernames, UserField.USERNAME);
+  }
+
+  usersByEmail(emails: string[]): Promise<DomainUser[]> {
+    return this._users(emails, UserField.EMAIL);
+  }
+
+  search(query: UserQuery): Promise<DomainUser[]> {
+    if (query.fields === undefined || query.fields === null ||
+      (Array.isArray(query.fields) && (<string[]>query.fields).length === 0)) {
+      return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
+    } else if (query.term === undefined || query.term === null) {
+      return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
+    } else {
+      let fields: string[] | string = query.fields;
+      if (!Array.isArray(query.fields)) {
+        fields = [<string>query.fields];
+      }
+
+      const orderBy: any = query.orderBy || {};
+
+      const sanitized: string[] = this._sanitizeSearchFields(<string[]>fields);
+      const message: UserSearchRequest = {
+        type: MessageType.USER_SEARCH_REQUEST,
+        fields: sanitized,
+        value: query.term,
+        offset: query.offset,
+        limit: query.limit,
+        orderBy: orderBy.field,
+        ascending: orderBy.ascending
+      };
+
+      return this._connection.request(message).then((response: UserListResponse) => {
+        return response.users;
+      });
+    }
+  }
+
+  private _users(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
     // TODO It is only valid to look up by email / username.
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
@@ -66,38 +121,6 @@ export class IdentityService {
         type: MessageType.USER_LOOKUP_REQUEST,
         field: field,
         values: <string[]>values
-      };
-
-      return this._connection.request(message).then((response: UserListResponse) => {
-        return response.users;
-      });
-    }
-  }
-
-  search(fields: string | string[],
-         value: string,
-         offset?: number,
-         limit?: number,
-         orderBy?: string,
-         ascending?: boolean): Promise<DomainUser[]> {
-    if (fields === undefined || fields === null || (Array.isArray(fields) && (<string[]>fields).length === 0)) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
-    } else if (value === undefined || value === null) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
-    } else {
-      if (!Array.isArray(fields)) {
-        fields = [<string>fields];
-      }
-
-      var sanitized: string[] = this._sanitizeSearchFields(<string[]>fields);
-      var message: UserSearchRequest = {
-        type: MessageType.USER_SEARCH_REQUEST,
-        fields: sanitized,
-        value: value,
-        offset: offset,
-        limit: limit,
-        orderBy: orderBy,
-        ascending: ascending
       };
 
       return this._connection.request(message).then((response: UserListResponse) => {

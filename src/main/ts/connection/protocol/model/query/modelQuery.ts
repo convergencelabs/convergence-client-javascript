@@ -3,7 +3,7 @@ import {OutgoingProtocolRequestMessage} from "../../protocol";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelResult} from "../../../../model/query/ModelResult";
-import {OrderBy} from "../../../../model/query/ModelQuery";
+import {OrderBy} from "../../../../util/OrderBy";
 
 export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
   collection?: string;

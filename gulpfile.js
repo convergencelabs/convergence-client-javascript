@@ -102,63 +102,49 @@ gulp.task('dist-ts', ["build"], function () {
     });
 });
 
+const baseRollupConfig = {
+  entry: 'src/main/ts/ConvergenceDomain.ts',
+  rollup: rollup,
+  format: 'umd',
+  moduleName: 'ConvergenceDomain',
+  sourceMap: true,
+  external: [
+    'rxjs/Rx',
+    'rxjs/Observable'
+  ],
+  globals: {
+    'rxjs/Rx': 'Rx',
+    'rxjs/Observable': 'Rx'
+  },
+  plugins: [
+    rollupTypescript({typescript: typescript})
+  ]
+};
+
 gulp.task('dist-umd', ["dist-ts", "lint", "test"], function () {
-  return rollupStream({
-      entry: 'src/main/ts/ConvergenceDomain.ts',
-      rollup: rollup,
-      format: 'umd',
-      moduleName: 'ConvergenceDomain',
-      sourceMap: true,
-      external: [
-        'rxjs/Rx',
-        'rxjs/Observable'
-      ],
-      globals: {
-        'rxjs/Rx': 'Rx',
-        'rxjs/Observable': 'Rx'
-      },
-      plugins: [
-        rollupTypescript({typescript: typescript})
-      ]
-    })
-    .pipe(source("convergence-client.umd.js"))
+  const config = Object.assign({}, baseRollupConfig);
+  config.format = 'umd';
+  config.exports = "default";
+
+  return rollupStream(config)
+    .pipe(source("dist/umd/convergence.js"))
     .pipe(vinyBuffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
-    .pipe(gulp.dest("dist"));
+    .pipe(gulp.dest("./"));
 });
 
-gulp.task('dist-amd', ["dist-ts", "lint", "test"], function () {
-  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(gulpRollup({
-      rollup: rollup,
-      format: 'amd',
-      moduleName: 'ConvergenceDomain',
-      sourceMap: true,
-      exports: 'named',
-      plugins: [
-        rollupTypescript()
-      ]
-    }))
-    .pipe(rename("convergence-client.amd.js"))
-    .pipe(sourceMaps.write("."))
-    .pipe(gulp.dest("dist"));
-});
+gulp.task('dist-cjs', ["dist-ts", "lint", "test"], function () {
+  const config = Object.assign({}, baseRollupConfig);
+  config.format = 'cjs';
+  config.exports = "named";
 
-gulp.task('dist-es6', ["lint", "test"], function () {
-  return gulp.src('src/main/ts/ConvergenceDomain.ts', {read: false})
-    .pipe(gulpRollup({
-      rollup: rollup,
-      format: 'es6',
-      moduleName: 'ConvergenceDomain',
-      sourceMap: true,
-      plugins: [
-        rollupTypescript()
-      ]
-    }))
-    .pipe(rename("convergence-client.es2015.js"))
+  return rollupStream(config)
+    .pipe(source("dist/cjs/convergence.js"))
+    .pipe(vinyBuffer())
+    .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
-    .pipe(gulp.dest("dist"));
+    .pipe(gulp.dest("./"));
 });
 
 function minify(src) {
@@ -170,20 +156,18 @@ function minify(src) {
     }))
     .pipe(rename({
       extname: '.min.js'
-    }))
-    .pipe(gulp.dest("dist"));
+    }));
 }
 
-gulp.task('dist-umd-min', ['dist-umd'], function() {
-  return minify(gulp.src("dist/convergence-client.umd.js"));
+gulp.task('dist-umd-min', ['dist-umd'], function () {
+  return minify(gulp.src("dist/umd/convergence.js")).pipe(gulp.dest("dist/umd"));
 });
 
-gulp.task('dist-amd-min', ['dist-amd'], function() {
-  return minify(gulp.src("dist/convergence-client.amd.js"));
+gulp.task('dist-cjs-min', ['dist-cjs'], function () {
+  return minify(gulp.src("dist/cjs/convergence.js")).pipe(gulp.dest("dist/cjs"));
 });
 
-// gulp.task('dist', ["dist-umd-min", "dist-amd-min", "dist-es6", "copyPackage"], function(cb) {
-gulp.task('dist', ["dist-umd-min", "copyPackage"], function(cb) {
+gulp.task('dist', ["dist-cjs-min", "dist-umd-min", "copyPackage"], function (cb) {
   if (packageJson.version.endsWith('SNAPSHOT')) {
     return gulp.src('dist/package.json')
       .pipe(bump({version: packageJson.version + '.' + new Date().getTime()}))
@@ -191,9 +175,9 @@ gulp.task('dist', ["dist-umd-min", "copyPackage"], function(cb) {
   }
 });
 
-gulp.task('copyPackage', function(){
-    return gulp.src('./package.json')
-        .pipe((gulp.dest('dist')));
+gulp.task('copyPackage', function () {
+  return gulp.src('./package.json')
+    .pipe((gulp.dest('dist')));
 });
 
 /**

@@ -1,13 +1,16 @@
 import {Session} from "../Session";
 import DomainUser from "./DomainUser";
+import {UserQuery} from "./UserQuery";
 
 export declare var UserField: any;
 export declare class IdentityService {
   session(): Session;
 
-  user(value: string, field?: string): Promise<DomainUser>;
+  user(username: string): Promise<DomainUser>;
+  userByEmail(email: string): Promise<DomainUser>;
 
-  users(values: string | string[], field?: string): Promise<DomainUser[]>;
+  users(values: string[]): Promise<DomainUser[]>;
+  usersByEmail(values: string[]): Promise<DomainUser[]>;
 
-  search(fields: string | string[], value: string, offset?: number, limit?: number, orderBy?: string, ascending?: boolean): Promise<DomainUser[]>;
+  search(query: UserQuery): Promise<DomainUser[]>;
 }

@@ -9,7 +9,7 @@ var domain;
 var presence;
 
 function connect() {
-  var url = "http://localhost:8080/domain/test/example";
+  var url = "https://localhost/realtime/domain/test/example";
   ConvergenceDomain.debugFlags.protocol.messages = true;
   ConvergenceDomain.connectAnonymously(url, usernameInput.value).then(function(d) {
     domain = d;
@@ -34,7 +34,7 @@ function setState() {
 
 function removeState() {
   var key = document.getElementById("removeKey").value;
-  presence.remove(key);
+  presence.remove(kMey);
 }
 
 function clearState() {

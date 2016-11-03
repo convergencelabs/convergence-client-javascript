@@ -14,8 +14,7 @@
     "type": "git",
     "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
   },
-  "main": "convergence-client.umd.js",
-  "jsnext:main": "convergence-client.es2015.js",
+  "main": "cjs/convergence.min.js",
   "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
   "license": "UNLICENSED",
   "scripts": {

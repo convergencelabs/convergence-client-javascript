@@ -107,7 +107,7 @@ describe('IdentityService.user()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().user("u1", UserField.USERNAME);
+      return domain.identity().user("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -122,7 +122,7 @@ describe('IdentityService.user()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().user("u1", UserField.EMAIL);
+      return domain.identity().userByEmail("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
@@ -146,7 +146,10 @@ describe('IdentityService.search()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().search(["firstName", "lastName"], "keyword");
+      return domain.identity().search({
+        term: "keyword",
+        fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
+      });
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(2);
 
@@ -178,7 +181,10 @@ describe('IdentityService.search()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().search([UserField.FIRST_NAME, UserField.LAST_NAME], "keyword");
+      return domain.identity().search({
+        term: "keyword",
+        fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
+      });
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(0);
       mockServer.doneManager().testSuccess();
@@ -192,7 +198,7 @@ describe('IdentityService.search()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().search([], "keyword");
+      return domain.identity().search({term: "keyword", fields: []});
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {
@@ -205,7 +211,7 @@ describe('IdentityService.search()', () => {
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().search("username", null);
+      return domain.identity().search({fields: "username", term: null});
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
     }).catch((error: Error) => {
