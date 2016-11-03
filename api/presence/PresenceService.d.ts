@@ -9,18 +9,18 @@ export declare class PresenceService extends ConvergenceEventEmitter {
 
   isAvailable(): boolean;
 
-  set(state: Map<string, any>): void;
-  set(key: string, value: any): void;
+  setState(state: {[key: string]: any}): void;
+  setState(key: string, value: any): void;
 
-  replaceAll(state: Map<string, any>);
+  //replace(state: Map<string, any>);
 
-  remove(key: string): void;
-  remove(keys: string[]): void;
+  removeState(key: string): void;
+  removeState(keys: string[]): void;
 
-  clear(): void;
+  clearState(): void;
 
   state(key: string): any;
-  state(): Map<string,any>;
+  state(): {[key: string]: any};
 
 
   presence(username: string): Promise<UserPresence>;

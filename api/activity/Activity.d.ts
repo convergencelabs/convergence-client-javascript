@@ -15,19 +15,19 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   isJoined(): boolean;
 
 
-  set(state: Map<string, any>): void;
-  set(key: string, value: any): void;
+  setState(state: {[key: string]: any}): void;
+  setState(key: string, value: any): void;
 
-  remove(key: string): void;
-  remove(keys: string[]): void;
+  removeState(key: string): void;
+  removeState(keys: string[]): void;
 
-  clear(): void;
+  clearState(): void;
 
-  // fixme name this
-  replace(state: Map<string, any>);
+  // TODO
+  //replaceState(state: Map<string, any>);
 
   state(key: string): any;
-  state(): Map<string,any>;
+  state(): {[key: string]: any};
 
 
   participant(sessionId: string): ActivityParticipant;

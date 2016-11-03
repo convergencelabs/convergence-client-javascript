@@ -10,7 +10,6 @@ import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {ActivityRemoteStateSet, ActivityRemoteStateCleared} from "../connection/protocol/activity/activityState";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {ActivityParticipant} from "./ActivityParticipant";
-import {ActivityJoinOptions} from "./Activity";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
@@ -158,4 +157,8 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
   private _leftCB: (id: string) => () => void = (id: string) => {
     return () => this._joinedMap.delete(id);
   };
+}
+
+export interface ActivityJoinOptions {
+  state?: Map<string, any>;
 }

@@ -77,7 +77,6 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           throw new Error("Invalid activity event");
       }
     });
-
   }
 
   session(): Session {
@@ -103,9 +102,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joined;
   }
 
-  set(state: Map<string, any>): void
-  set(key: string, value: any): void
-  set(): void {
+  setState(state: {[key: string]: any}): void
+  setState(key: string, value: any): void
+  setState(): void {
     let state: Map<string, any>;
     if (arguments.length === 1) {
       state = arguments[0];
@@ -124,9 +123,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  remove(key: string): void
-  remove(keys: string[]): void
-  remove(keys: string | string[]): void {
+  removeState(key: string): void
+  removeState(keys: string[]): void
+  removeState(keys: string | string[]): void {
     if (typeof keys === "string") {
       keys = [<string>keys];
     }
@@ -141,7 +140,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  clear(): void {
+  clearState(): void {
     if (this.isJoined()) {
       var message: ActivityClearState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
@@ -162,10 +161,4 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   asObservable(): Observable<ActivityParticipant[]> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
-}
-
-
-// TODO: is this really necessary right now, could we just use state? in the method call
-export interface ActivityJoinOptions {
-  state?: Map<string, any>;
 }

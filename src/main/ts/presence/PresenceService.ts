@@ -61,12 +61,12 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._localPresence.isAvailable();
   }
 
-  set(state: Map<string, any>): void
-  set(key: string, value: any): void
-  set(): void {
+  setState(state: {[key: string]: any}): void
+  setState(key: string, value: any): void
+  setState(): void {
     let state: Map<string, any>;
     if (arguments.length === 1) {
-      state = arguments[0];
+      state = objectToMap(arguments[0]);
     } else if (arguments.length === 2) {
       state = new Map<string, any>();
       state.set(arguments[0], arguments[1]);
@@ -83,9 +83,9 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  remove(key: string): void
-  remove(keys: string[]): void
-  remove(keys: string | string[]): void {
+  removeState(key: string): void
+  removeState(keys: string[]): void
+  removeState(keys: string | string[]): void {
     let stateKeys: string[] = null;
 
     if (typeof keys === "string") {
@@ -104,7 +104,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  clear(): void {
+  clearState(): void {
     this._localManager.clear();
 
     const message: PresenceClearState = {
@@ -114,10 +114,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  state(): Map<string, any>
+  state(): {[key: string]: any}
   state(key: string): any
   state(key?: string): any {
-    return this._localPresence.state(key);
+    return mapToObject(this._localPresence.state(key));
   }
 
   presence(username: string): Promise<UserPresence>
