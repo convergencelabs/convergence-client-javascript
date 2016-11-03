@@ -119,8 +119,8 @@ export class NumberSetValueEvent implements ValueChangedEvent {
               public local: boolean) {}
 }
 
-export class NumberAddEvent implements ValueChangedEvent {
-  public name: string = "add";
+export class NumberDeltaEvent implements ValueChangedEvent {
+  public name: string = "delta";
   constructor(public src: RealTimeNumber,
               public value: number,
               public sessionId: string,

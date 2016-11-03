@@ -13,7 +13,7 @@ import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeBoolean} from "./RealTimeBoolean";
 import {NumberNodeSetValueEvent} from "../internal/events";
 import {RealTimeNumber} from "./RealTimeNumber";
-import {NumberNodeAddEvent} from "../internal/events";
+import {NumberNodeDeltaEvent} from "../internal/events";
 import {ObjectNodeSetValueEvent} from "../internal/events";
 import {RealTimeObject} from "./RealTimeObject";
 import {ObjectNodeRemoveEvent} from "../internal/events";
@@ -32,7 +32,7 @@ import {ArraySetEvent} from "./events";
 import {ArraySetValueEvent} from "./events";
 import {BooleanSetValueEvent} from "./events";
 import {NumberSetValueEvent} from "./events";
-import {NumberAddEvent} from "./events";
+import {NumberDeltaEvent} from "./events";
 import {ObjectSetValueEvent} from "./events";
 import {ObjectRemoveEvent} from "./events";
 import {ObjectSetEvent} from "./events";
@@ -69,8 +69,8 @@ export class EventConverter {
     } else if (event instanceof NumberNodeSetValueEvent) {
       return new NumberSetValueEvent(<RealTimeNumber> wrapperFactory.wrap(event.src), event.value,
         event.sessionId, event.username, event.local);
-    } else if (event instanceof NumberNodeAddEvent) {
-      return new NumberAddEvent(<RealTimeNumber> wrapperFactory.wrap(event.src), event.value,
+    } else if (event instanceof NumberNodeDeltaEvent) {
+      return new NumberDeltaEvent(<RealTimeNumber> wrapperFactory.wrap(event.src), event.value,
         event.sessionId, event.username, event.local);
     } else if (event instanceof ObjectNodeSetValueEvent) {
       return new ObjectSetValueEvent(<RealTimeObject> wrapperFactory.wrap(event.src), event.value,

@@ -111,8 +111,8 @@ export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
               public username: string) {}
 }
 
-export class NumberNodeAddEvent implements NodeValueChangedEvent {
-  public name: string = "add";
+export class NumberNodeDeltaEvent implements NodeValueChangedEvent {
+  public name: string = "delta";
 
   constructor(public src: NumberNode,
               public local: boolean,

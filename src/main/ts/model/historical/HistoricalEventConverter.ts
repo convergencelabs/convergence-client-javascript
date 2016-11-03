@@ -13,7 +13,7 @@ import {BooleanNodeSetValueEvent} from "../internal/events";
 import {HistoricalBoolean} from "./HistoricalBoolean";
 import {NumberNodeSetValueEvent} from "../internal/events";
 import {HistoricalNumber} from "./HistoricalNumber";
-import {NumberNodeAddEvent} from "../internal/events";
+import {NumberNodeDeltaEvent} from "../internal/events";
 import {ObjectNodeSetValueEvent} from "../internal/events";
 import {HistoricalObject} from "./HistoricalObject";
 import {ObjectNodeRemoveEvent} from "../internal/events";
@@ -69,7 +69,7 @@ export class HistoricalEventConverter {
     } else if (event instanceof NumberNodeSetValueEvent) {
       return new NumberSetValueEvent(<HistoricalNumber> wrapperFactory.wrap(event.src), event.value,
         event.sessionId, event.username);
-    } else if (event instanceof NumberNodeAddEvent) {
+    } else if (event instanceof NumberNodeDeltaEvent) {
       return new NumberAddEvent(<HistoricalNumber> wrapperFactory.wrap(event.src), event.value,
         event.sessionId, event.username);
     } else if (event instanceof ObjectNodeSetValueEvent) {

@@ -5,7 +5,7 @@ import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../ot/Path";
-import {NumberNodeAddEvent} from "./events";
+import {NumberNodeDeltaEvent} from "./events";
 import {NumberNodeSetValueEvent} from "./events";
 import {NumberAdd} from "../ot/ops/operationChanges";
 import {NumberSet} from "../ot/ops/operationChanges";
@@ -13,7 +13,7 @@ import {NumberSet} from "../ot/ops/operationChanges";
 export class NumberNode extends ModelNode<number> {
 
   static Events: any = {
-    ADD: "add",
+    DELTA: "delta",
     VALUE: "value",
     DETACHED: ModelNode.Events.DETACHED,
     MODEL_CHANGED: ModelNode.Events.MODEL_CHANGED
@@ -72,7 +72,7 @@ export class NumberNode extends ModelNode<number> {
     if (value !== 0) {
       this._data += value;
 
-      var event: NumberNodeAddEvent = new NumberNodeAddEvent(this, local, value, this.sessionId, this.username);
+      var event: NumberNodeDeltaEvent = new NumberNodeDeltaEvent(this, local, value, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
   }

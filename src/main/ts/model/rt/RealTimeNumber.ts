@@ -4,7 +4,7 @@ import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/Re
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {NumberNodeSetValueEvent} from "../internal/events";
-import {NumberNodeAddEvent} from "../internal/events";
+import {NumberNodeDeltaEvent} from "../internal/events";
 import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
@@ -13,7 +13,7 @@ import {RealTimeModel} from "./RealTimeModel";
 export class RealTimeNumber extends RealTimeElement<number>  {
 
   static Events: any = {
-    ADD: "add",
+    DELTA: "delta",
     VALUE: "value",
     DETACHED: RealTimeElement.Events.DETACHED,
     MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
@@ -32,7 +32,7 @@ export class RealTimeNumber extends RealTimeElement<number>  {
       if (event.local) {
         if (event instanceof NumberNodeSetValueEvent) {
           this._sendOperation(new NumberSetOperation(this.id(), false, event.value));
-        } else if (event instanceof NumberNodeAddEvent) {
+        } else if (event instanceof NumberNodeDeltaEvent) {
           this._sendOperation(new NumberAddOperation(this.id(), false, event.value));
         }
       }

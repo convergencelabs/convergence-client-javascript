@@ -14,7 +14,7 @@ import {Model} from "../../../main/ts/model/internal/Model";
 import {NumberNode} from "../../../main/ts/model/internal/NumberNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
 import {ModelChangedEvent} from "../../../main/ts/model/rt/events";
-import {NumberAddEvent} from "../../../main/ts/model/rt/events";
+import {NumberDeltaEvent} from "../../../main/ts/model/rt/events";
 import {NumberSetValueEvent} from "../../../main/ts/model/rt/events";
 
 var expect: any = chai.expect;
@@ -150,13 +150,13 @@ describe('RealTimeNumber', () => {
     var wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     var delegate: NumberNode = new NumberNode(initialValue, () => {return [];}, model, sessionId, username);
     var myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
-    myNumber.on(RealTimeNumber.Events.ADD, lastEventCallback);
+    myNumber.on(RealTimeNumber.Events.DELTA, lastEventCallback);
 
     var incomingOp: NumberAddOperation = new NumberAddOperation(initialValue.id, false, 5);
     var incomingEvent: ModelOperationEvent = new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    var expectedEvent: NumberAddEvent = new NumberAddEvent(myNumber, 5, sessionId, username, false);
+    var expectedEvent: NumberDeltaEvent = new NumberDeltaEvent(myNumber, 5, sessionId, username, false);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
