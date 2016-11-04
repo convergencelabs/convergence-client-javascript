@@ -12,7 +12,7 @@ export interface ConvergenceModelValueEvent extends ConvergenceEvent {
   src: HistoricalElement<any>;
 }
 
-export class ValueDetachedEvent implements ConvergenceEvent {
+export class ElementDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
 
   constructor(public src: HistoricalElement<any>) {

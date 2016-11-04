@@ -102,6 +102,7 @@ gulp.task('dist-ts', ["build"], function () {
     });
 });
 
+// fixme I think the external and gloabs might not be needed anymore.
 const baseRollupConfig = {
   entry: 'src/main/ts/ConvergenceDomain.ts',
   rollup: rollup,
@@ -110,11 +111,13 @@ const baseRollupConfig = {
   sourceMap: true,
   external: [
     'rxjs/Rx',
-    'rxjs/Observable'
+    'rxjs/Observable',
+    'rxjs/Subject'
   ],
   globals: {
     'rxjs/Rx': 'Rx',
-    'rxjs/Observable': 'Rx'
+    'rxjs/Observable': 'Rx',
+    'rxjs/Subject': 'Rx'
   },
   plugins: [
     rollupTypescript({typescript: typescript})

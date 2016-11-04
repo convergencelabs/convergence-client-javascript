@@ -135,5 +135,4 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> imp
       });
     }
   }
-
 }

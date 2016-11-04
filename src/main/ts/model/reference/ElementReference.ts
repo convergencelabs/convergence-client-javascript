@@ -2,12 +2,12 @@ import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
 import {ReferenceType} from "./ModelReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
-import {ValueDetachedEvent} from "../rt/events";
+import {ElementDetachedEvent} from "../rt/events";
 import {ReferenceManager} from "./ReferenceManager";
 
 export class ElementReference extends ModelReference<RealTimeElement<any>> {
 
-  private _detachedListener: (event: ValueDetachedEvent) => void = (event: ValueDetachedEvent) => {
+  private _detachedListener: (event: ElementDetachedEvent) => void = (event: ElementDetachedEvent) => {
     this._handleElementRemoved(<RealTimeElement<any>>event.src);
   };
 

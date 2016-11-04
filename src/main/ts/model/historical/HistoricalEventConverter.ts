@@ -22,7 +22,7 @@ import {StringNodeInsertEvent} from "../internal/events";
 import {HistoricalString} from "./HistoricalString";
 import {StringNodeRemoveEvent} from "../internal/events";
 import {StringNodeSetValueEvent} from "../internal/events";
-import {ValueDetachedEvent} from "./events";
+import {ElementDetachedEvent} from "./events";
 import {ModelChangedEvent} from "./events";
 import {ValueChangedEvent} from "./events";
 import {ArrayInsertEvent} from "./events";
@@ -40,11 +40,12 @@ import {StringInsertEvent} from "./events";
 import {StringRemoveEvent} from "./events";
 import {StringSetValueEvent} from "./events";
 
+// fixme does this really need to be different than the real time one.
 export class HistoricalEventConverter {
 
   public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<HistoricalElement<any>>): ConvergenceEvent {
     if (event instanceof  NodeDetachedEvent) {
-      return new ValueDetachedEvent(wrapperFactory.wrap(event.src));
+      return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
       return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
         <ValueChangedEvent> this.convertEvent(event.childEvent, wrapperFactory), event.sessionId, event.username);

@@ -31,7 +31,7 @@ export interface ConvergenceModelValueEvent extends ConvergenceEvent {
   local: boolean;
 }
 
-export class ValueDetachedEvent implements ConvergenceEvent {
+export class ElementDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
   constructor(public src: RealTimeElement<any>) {}
 }
