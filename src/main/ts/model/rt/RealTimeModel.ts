@@ -49,6 +49,8 @@ import {ModelClosedEvent} from "./events";
 import {VersionChangedEvent} from "./events";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelCollaborator} from "./ModelCollaborator";
+import {Observable} from "rxjs/Observable";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -84,6 +86,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _concurrencyControl: ClientConcurrencyControl;
   private _connection: ConvergenceConnection;
   private _modelService: ModelService;
+
+  private _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
 
   /**
    * Constructs a new RealTimeModel.
@@ -121,6 +125,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._sessions.forEach((sessionId: string) => {
       this._referencesBySession[sessionId] = [];
     });
+
+    this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
     const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
     this._referenceManager = new ReferenceManager(this, [ReferenceType.ELEMENT], onRemoteReference);
@@ -266,9 +272,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   // fixme inconsistent with isOpen()
-  emitLocalEvents(): boolean
-  emitLocalEvents(emit: boolean): void
-  emitLocalEvents(emit?: boolean): any {
+  public emitLocalEvents(): boolean
+  public emitLocalEvents(emit: boolean): void
+  public emitLocalEvents(emit?: boolean): any {
     if (arguments.length === 0) {
       return this._emitLocal;
     } else {
@@ -277,7 +283,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  collaborators(): ModelCollaborator[] {
+  public collaborators(): ModelCollaborator[] {
     return this._sessions.map((sessionId: string) => {
       return new ModelCollaborator(
         SessionIdParser.parseUsername(sessionId),
@@ -286,43 +292,47 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  collectionId(): string {
+  public collaboratorsAsObservable(): Observable<ModelCollaborator[]> {
+    return this._collaboratorsSubject.asObservable();
+  }
+
+  public collectionId(): string {
     return this._modelFqn.collectionId;
   }
 
-  modelId(): string {
+  public modelId(): string {
     return this._modelFqn.modelId;
   }
 
-  version(): number {
+  public version(): number {
     return this._version;
   }
 
-  createdTime(): Date {
+  public createdTime(): Date {
     return this._createdTime;
   }
 
-  lastModifiedTime(): Date {
+  public lastModifiedTime(): Date {
     return this._modifiedTime;
   }
 
-  root(): RealTimeObject {
+  public root(): RealTimeObject {
     return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  elementAt(path: any): RealTimeElement<any> {
+  public elementAt(path: any): RealTimeElement<any> {
     return this.root().elementAt(path);
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  isOpen(): boolean {
+  public isOpen(): boolean {
     return this._open;
   }
 
-  close(): Promise<void> {
+  public close(): Promise<void> {
     return this._modelService._close(this._resourceId).then(() => {
       const event: ModelClosedEvent = {
         src: this,
@@ -333,20 +343,20 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  startBatch(): void {
+  public startBatch(): void {
     this._concurrencyControl.startCompoundOperation();
   }
 
-  endBatch(): void {
+  public endBatch(): void {
     const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
     this._sendOperation(opEvent);
   }
 
-  isBatchStarted(): boolean {
+  public isBatchStarted(): boolean {
     return this._concurrencyControl.isCompoundOperationInProgress();
   }
 
-  elementReference(key: string): LocalElementReference {
+  public elementReference(key: string): LocalElementReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.ELEMENT) {
@@ -368,11 +378,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  reference(sessionId: string, key: string): ModelReference<any> {
+  public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
   }
 
-  references(filter?: ReferenceFilter): ModelReference<any>[] {
+  public references(filter?: ReferenceFilter): ModelReference<any>[] {
     return this._referenceManager.getAll(filter);
   }
 
@@ -418,16 +428,21 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleClientOpen(message: RemoteClientOpenedModel): void {
+    this._sessions.push(message.sessionId);
+
     this._referencesBySession[message.sessionId] = [];
     const event: CollaboratorOpenedEvent = {
-      name: RealTimeModel.Events.SESSION_OPENED,
+      name: RealTimeModel.Events.COLLABORATOR_OPENED,
       src: this,
       collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
     };
     this._emitEvent(event);
+    this._collaboratorsSubject.next(this.collaborators());
   }
 
   private _handleClientClosed(message: RemoteClientClosedModel): void {
+    this._sessions = this._sessions.filter(s => s !== message.sessionId);
+
     const refs: ModelReference<any>[] = this._referencesBySession[message.sessionId];
     delete this._referencesBySession[message.sessionId];
 
@@ -436,11 +451,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
 
     const event: CollaboratorClosedEvent = {
-      name: RealTimeModel.Events.SESSION_CLOSED,
+      name: RealTimeModel.Events.COLLABORATOR_CLOSED,
       src: this,
       collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
     };
     this._emitEvent(event);
+
+    // todo we could make this more performant by not calc'ing every time.
+    this._collaboratorsSubject.next(this.collaborators());
   }
 
   private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
