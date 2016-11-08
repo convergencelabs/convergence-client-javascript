@@ -58,8 +58,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     MODIFIED: "modified",
     COMMITTED: "committed",
     VERSION_CHANGED: "version_changed",
-    SESSION_OPENED: "session_opened",
-    SESSION_CLOSED: "session_closed",
+    COLLABORATOR_OPENED: "collaborator_opened",
+    COLLABORATOR_CLOSED: "collaborator_closed",
     REFERENCE: "reference"
   };
 
@@ -419,11 +419,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _handleClientOpen(message: RemoteClientOpenedModel): void {
     this._referencesBySession[message.sessionId] = [];
-    const event: RemoteSessionOpenedEvent = {
+    const event: CollaboratorOpenedEvent = {
       name: RealTimeModel.Events.SESSION_OPENED,
       src: this,
-      sessionId: message.sessionId,
-      username: SessionIdParser.parseUsername(message.sessionId)
+      collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
     };
     this._emitEvent(event);
   }
@@ -436,11 +435,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
       ref._dispose();
     });
 
-    const event: RemoteSessionClosedEvent = {
+    const event: CollaboratorClosedEvent = {
       name: RealTimeModel.Events.SESSION_CLOSED,
       src: this,
-      sessionId: message.sessionId,
-      username: SessionIdParser.parseUsername(message.sessionId)
+      collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
     };
     this._emitEvent(event);
   }
@@ -645,13 +643,12 @@ export interface ModelEventCallbacks {
   referenceEventCallbacks: ModelReferenceCallbacks;
 }
 
-export interface RemoteSessionOpenedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+
+export interface CollaboratorOpenedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
 }
 
-export interface RemoteSessionClosedEvent extends ModelEvent {
-  username: string;
-  sessionId: string;
+export interface CollaboratorClosedEvent extends ModelEvent {
+  collaborator: ModelCollaborator;
 }
 
