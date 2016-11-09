@@ -20,15 +20,15 @@ export class RangeReference extends ModelReference<IndexRange> {
     super(referenceManager, ReferenceType.RANGE, key, source, username, sessionId, local);
   }
 
-  _handleInsert(index: number, length: number): void {
+  public _handleInsert(index: number, length: number): void {
     this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length));
   }
 
-  _handleRemove(index: number, length: number): void {
+  public _handleRemove(index: number, length: number): void {
     this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length));
   }
 
-  _handleReorder(fromIndex: number, toIndex: number): void {
+  public _handleReorder(fromIndex: number, toIndex: number): void {
     this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex));
   }
 }

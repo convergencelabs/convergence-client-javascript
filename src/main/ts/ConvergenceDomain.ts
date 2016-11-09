@@ -16,16 +16,9 @@ import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  private static DefaultOptions: ConvergenceOptions = {
-    connectionTimeout: 5,
-    maxReconnectAttempts: -1,
-    reconnectInterval: 5,
-    retryOnOpen: true
-  };
+  public static debugFlags: any = flags;
 
-  static debugFlags: any = flags;
-
-  static Events: any = {
+  public static Events: any = {
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
@@ -33,8 +26,9 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     ERROR: "error"
   };
 
-  static connect(url: string, username: string, password: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+  public static connect(url: string, username: string, password: string,
+                        options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithPassword(username, password);
     }).then((v) => {
@@ -42,8 +36,9 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     });
   }
 
-  static connectAnonymously(url: string, displayName?: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+  public static connectAnonymously(url: string, displayName?: string,
+                                   options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateAnonymously(displayName);
     }).then((v) => {
@@ -59,6 +54,13 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
       return domain;
     });
   }
+
+  private static DefaultOptions: ConvergenceOptions = {
+    connectionTimeout: 5,
+    maxReconnectAttempts: -1,
+    reconnectInterval: 5,
+    retryOnOpen: true
+  };
 
   private _modelService: ModelService;
   private _identityService: IdentityService;
@@ -102,9 +104,43 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
       this._emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
-      var evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error: error};
+      const evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error};
       this._emitEvent(evt);
     });
+  }
+
+  public session(): Session {
+    return this._connection.session();
+  }
+
+  public models(): ModelService {
+    return this._modelService;
+  }
+
+  public identity(): IdentityService {
+    return this._identityService;
+  }
+
+  public activities(): ActivityService {
+    return this._activityService;
+  }
+
+  public presence(): PresenceService {
+    return this._presenceService;
+  }
+
+  public chat(): ChatService {
+    return this._chatService;
+  }
+
+  public dispose(): void {
+    this._modelService._dispose();
+    this._connection.disconnect();
+    this._connection = undefined;
+  }
+
+  public isDisposed(): boolean {
+    return this._connection === undefined;
   }
 
   // TODO seems like a jquery.extend approach here would be simpler.
@@ -157,41 +193,6 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     this._activityService = new ActivityService(this._connection);
     this._presenceService = new PresenceService(this._connection, initialPresence);
     this._chatService = new ChatService(this._connection);
-  }
-
-  session(): Session {
-    return this._connection.session();
-  }
-
-  models(): ModelService {
-    return this._modelService;
-  }
-
-
-  identity(): IdentityService {
-    return this._identityService;
-  }
-
-  activities(): ActivityService {
-    return this._activityService;
-  }
-
-  presence(): PresenceService {
-    return this._presenceService;
-  }
-
-  chat(): ChatService {
-    return this._chatService;
-  }
-
-  dispose(): void {
-    this._modelService._dispose();
-    this._connection.disconnect();
-    this._connection = undefined;
-  }
-
-  isDisposed(): boolean {
-    return this._connection === undefined;
   }
 }
 

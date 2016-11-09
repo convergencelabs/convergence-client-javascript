@@ -22,41 +22,41 @@ export class DomainUser {
     this._lastName = lastName;
     this._displayName = displayName;
     this._email = email;
-    this._anonymous = userType === 'anonymous';
-    this._admin = userType === 'anonymous';
+    this._anonymous = userType === "anonymous";
+    this._admin = userType === "anonymous";
 
     Object.freeze(this);
   }
 
-  userType(): string {
+  public userType(): string {
     return this._userType;
   }
 
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  firstName(): string {
+  public firstName(): string {
     return this._firstName;
   }
 
-  lastName(): string {
+  public lastName(): string {
     return this._lastName;
   }
 
-  displayName(): string {
+  public displayName(): string {
     return this._displayName;
   }
 
-  email(): string {
+  public email(): string {
     return this._email;
   }
 
-  isAdmin(): boolean {
+  public isAdmin(): boolean {
     return this._admin;
   }
 
-  isAnonymous(): boolean {
+  public isAnonymous(): boolean {
     return this._anonymous;
   }
 }

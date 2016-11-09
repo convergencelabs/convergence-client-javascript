@@ -17,23 +17,23 @@ export abstract class HistoricalElement<T> extends ConvergenceEventEmitter<Conve
     });
   }
 
-  id(): string {
+  public id(): string {
     return this._delegate.id();
   }
 
-  type(): ModelElementType {
+  public type(): ModelElementType {
     return this._delegate.type();
   }
 
-  path(): Path {
+  public path(): Path {
     return  this._delegate.path();
   }
 
-  isDetached(): boolean {
+  public isDetached(): boolean {
     return this._delegate.isDetached();
   }
 
-  value(): T {
+  public value(): T {
     return this._delegate.data();
   }
 }

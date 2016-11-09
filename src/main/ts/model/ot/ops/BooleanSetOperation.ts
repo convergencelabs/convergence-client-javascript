@@ -10,7 +10,7 @@ export class BooleanSetOperation extends DiscreteOperation implements BooleanSet
     Object.freeze(this);
   }
 
-  copy(updates: any): BooleanSetOperation {
+  public copy(updates: any): BooleanSetOperation {
     return new BooleanSetOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

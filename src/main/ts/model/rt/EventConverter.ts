@@ -42,12 +42,14 @@ import {StringSetValueEvent} from "./events";
 
 export class EventConverter {
 
-  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<RealTimeElement<any>>): ConvergenceEvent {
-    if (event instanceof  NodeDetachedEvent) {
+  public static convertEvent(event: ConvergenceEvent,
+                             wrapperFactory: NodeWrapperFactory<RealTimeElement<any>>): ConvergenceEvent {
+    if (event instanceof NodeDetachedEvent) {
       return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
       return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
-        <ValueChangedEvent> this.convertEvent(event.childEvent, wrapperFactory), event.sessionId, event.username, event.local);
+        <ValueChangedEvent> this.convertEvent(event.childEvent, wrapperFactory),
+        event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeInsertEvent) {
       return new ArrayInsertEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.index,
         wrapperFactory.wrap(event.value), event.sessionId, event.username, event.local);
@@ -57,7 +59,7 @@ export class EventConverter {
     } else if (event instanceof ArrayNodeReorderEvent) {
       return new ArrayReorderEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.fromIndex, event.toIndex,
         event.sessionId, event.username, event.local);
-    }  else if (event instanceof ArrayNodeSetEvent) {
+    } else if (event instanceof ArrayNodeSetEvent) {
       return new ArraySetEvent(<RealTimeArray> wrapperFactory.wrap(event.src), event.index, event.value,
         event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeSetValueEvent) {

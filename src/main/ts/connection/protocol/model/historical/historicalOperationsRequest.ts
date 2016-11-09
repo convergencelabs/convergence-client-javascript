@@ -25,10 +25,11 @@ export interface HistoricalOperationsResponse extends IncomingProtocolResponseMe
   operations: ModelOperation[];
 }
 
-export var HistoricalOperationsResponseDeserializer: MessageBodyDeserializer<HistoricalOperationsResponse> = (body: any) => {
-  return {
-    operations: (<any[]>body.o).map((op) => {
-      return ModelOperationDeserializer.deserialize(op);
-    })
+export var HistoricalOperationsResponseDeserializer: MessageBodyDeserializer<HistoricalOperationsResponse> =
+  (body: any) => {
+    return {
+      operations: (<any[]> body.o).map((op) => {
+        return ModelOperationDeserializer.deserialize(op);
+      })
+    };
   };
-};

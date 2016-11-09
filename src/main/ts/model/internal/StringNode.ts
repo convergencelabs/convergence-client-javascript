@@ -14,7 +14,7 @@ import {StringNodeSetValueEvent} from "./events";
 
 export class StringNode extends ModelNode<String> {
 
-  static Events: any = {
+  public static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
     VALUE: "value",
@@ -37,7 +37,7 @@ export class StringNode extends ModelNode<String> {
     this._data = data.value;
   }
 
-  dataValue(): StringValue {
+  public dataValue(): StringValue {
     return <StringValue> {
       id: this.id(),
       type: "string",
@@ -45,16 +45,29 @@ export class StringNode extends ModelNode<String> {
     };
   }
 
-  insert(index: number, value: string): void {
+  public insert(index: number, value: string): void {
     this._applyInsert(index, value, true, this.sessionId, this.username);
   }
 
-  remove(index: number, length: number): void {
+  public remove(index: number, length: number): void {
     this._applyRemove(index, length, true, this.sessionId, this.username);
   }
 
-  length(): number {
+  public length(): number {
     return this._data.length;
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    const type: string = operationEvent.operation.type;
+    if (type === OperationType.STRING_INSERT) {
+      this._handleInsertOperation(operationEvent);
+    } else if (type === OperationType.STRING_REMOVE) {
+      this._handleRemoveOperation(operationEvent);
+    } else if (type === OperationType.STRING_VALUE) {
+      this._handleSetOperation(operationEvent);
+    } else {
+      throw new Error("Invalid operation!");
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -69,13 +82,12 @@ export class StringNode extends ModelNode<String> {
     return this._data;
   }
 
-
   private _applyInsert(index: number, value: string, local: boolean, sessionId: string, username: string): void {
     this._validateInsert(index, value);
 
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
 
-    var event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, username);
+    const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -85,7 +97,7 @@ export class StringNode extends ModelNode<String> {
     let removedVal: string = this._data.slice(index, index + length);
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
 
-    var event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, username);
+    const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -94,7 +106,7 @@ export class StringNode extends ModelNode<String> {
 
     this._data = value;
 
-    var event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, username);
+    const event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -102,31 +114,19 @@ export class StringNode extends ModelNode<String> {
   // Operations
   //
 
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.STRING_INSERT) {
-      this._handleInsertOperation(operationEvent);
-    } else if (type === OperationType.STRING_REMOVE) {
-      this._handleRemoveOperation(operationEvent);
-    } else if (type === OperationType.STRING_VALUE) {
-      this._handleSetOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
+    const operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
     this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
-    this._applyRemove(operation.index, operation.value.length, false, operationEvent.sessionId, operationEvent.username);
+    const operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
+    this._applyRemove(operation.index, operation.value.length, false,
+      operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
+    const operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

@@ -19,7 +19,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeArray extends RealTimeElement<any[]> implements RealTimeContainerElement<any[]> {
 
-  static Events: any = {
+  public static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
     SET: "set",
@@ -41,7 +41,8 @@ export class RealTimeArray extends RealTimeElement<any[]> implements RealTimeCon
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
         if (event instanceof ArrayNodeInsertEvent) {
-          this._sendOperation(new ArrayInsertOperation(this.id(), false, event.index, event.src.get(event.index).dataValue()));
+          this._sendOperation(new ArrayInsertOperation(this.id(), false,
+            event.index, event.src.get(event.index).dataValue()));
         } else if (event instanceof ArrayNodeRemoveEvent) {
           this._sendOperation(new ArrayRemoveOperation(this.id(), false, event.index));
         } else if (event instanceof ArrayNodeReorderEvent) {
@@ -56,62 +57,57 @@ export class RealTimeArray extends RealTimeElement<any[]> implements RealTimeCon
     });
   }
 
-  get(index: number): RealTimeElement<any> {
+  public get(index: number): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(index));
   }
 
-
-  set(index: number, value: any): RealTimeElement<any> {
+  public set(index: number, value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.set(index, value));
   }
 
-  insert(index: number, value: any): RealTimeElement<any> {
+  public insert(index: number, value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.insert(index, value));
   }
 
-  remove(index: number): Object|number|string|boolean {
+  public remove(index: number): Object|number|string|boolean {
     return this._delegate.remove(index);
   }
 
-  reorder(fromIndex: number, toIndex: number): void {
+  public reorder(fromIndex: number, toIndex: number): void {
     this._delegate.reorder(fromIndex, toIndex);
   }
 
-  push(value: any): RealTimeElement<any> {
+  public push(value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.push(value));
   }
 
-  pop(): any {
+  public pop(): any {
     return this._delegate.pop();
   }
 
-  unshift(value: any): RealTimeElement<any> {
+  public unshift(value: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.unshift(value));
   }
 
-  shift(): any {
+  public shift(): any {
     return this._delegate.shift();
   }
 
-  length(): number {
+  public length(): number {
     return this._delegate.length();
   }
 
-  forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
+  public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
-  elementAt(pathArgs: any): RealTimeElement<any> {
+  public elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 
-  //
-  // protected and private methods.
-  //
-
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Arrays to do have references yet.");
   }
 }

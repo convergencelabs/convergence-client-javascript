@@ -13,7 +13,7 @@ export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
 }
 
 export var ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
-  var query: any = {
+  const query: any = {
     c: request.collection,
     l: request.limit,
     f: request.offset,
@@ -45,7 +45,7 @@ export interface ModelsQueryResponse extends IncomingProtocolResponseMessage {
 
 export var ModelsQueryResponseDeserializer: MessageBodyDeserializer<ModelsQueryResponse> = (body: any) => {
   let modelResults: ModelResult[] = [];
-  for (var r of body.r) {
+  for (let r of body.r) {
     modelResults.push(ModelResultDeserializer(r));
   }
 

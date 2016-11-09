@@ -10,7 +10,7 @@ export class StringInsertOperation extends DiscreteOperation implements StringIn
     Object.freeze(this);
   }
 
-  copy(updates: any): StringInsertOperation {
+  public copy(updates: any): StringInsertOperation {
     return new StringInsertOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

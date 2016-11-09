@@ -16,7 +16,6 @@ import {
   PresenceAvailabilityChangedEvent
 } from "./events";
 
-
 export class UserPresenceManager extends ConvergenceEventEmitter<any> implements UserPresence {
 
   private _presence: UserPresence;
@@ -42,31 +41,31 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject = new BehaviorSubject(this._presence);
   }
 
-  username(): string {
+  public username(): string {
     return this._presence.username();
   }
 
-  isAvailable(): boolean {
+  public isAvailable(): boolean {
     return this._presence.isAvailable();
   }
 
-  state(key: string): any
-  state(): Map<string, any>
-  state(key?: string): any {
+  public state(key: string): any
+  public state(): Map<string, any>
+  public state(key?: string): any {
     return this._presence.state(key);
   }
 
-  asObservable(): Observable<UserPresence> {
+  public asObservable(): Observable<UserPresence> {
     return this._subject.asObservable();
   }
 
-  subscribe(): UserPresenceSubscription {
+  public subscribe(): UserPresenceSubscription {
     const subscription: UserPresenceSubscription = new UserPresenceSubscription(this);
     this._subscriptions.push(subscription);
     return subscription;
   }
 
-  unsubscribe(subscription: UserPresenceSubscription): void {
+  public unsubscribe(subscription: UserPresenceSubscription): void {
     this._subscriptions = this._subscriptions.filter(s => s !== subscription);
     if (this._subscriptions.length === 0) {
       this._messageSubscription.unsubscribe();
@@ -75,36 +74,17 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     }
   }
 
-  private _handleMessage(messageEvent: MessageEvent): void {
-    var message: IncomingProtocolMessage = messageEvent.message;
-    switch (message.type) {
-      case MessageType.PRESENCE_AVAILABILITY_CHANGED:
-        this.availability((<PresenceAvailabilityChanged>message).available);
-        break;
-      case MessageType.PRESENCE_STATE_SET:
-        this.set((<PresenceStateSet>message).state);
-        break;
-      case MessageType.PRESENCE_STATE_CLEARED:
-        this.clear();
-        break;
-      case MessageType.PRESENCE_STATE_REMOVED:
-        this.remove((<PresenceStateRemoved>message).keys);
-        break;
-      default:
-      // fixme error
-    }
-  }
-
-  availability(availability: boolean): void {
+  public availability(availability: boolean): void {
     this._presence =
       new UserPresenceImpl(this._presence.username(), availability, this._presence.state());
 
-    const event: PresenceAvailabilityChangedEvent = new PresenceAvailabilityChangedEvent(this._presence.username(), availability);
+    const event: PresenceAvailabilityChangedEvent =
+      new PresenceAvailabilityChangedEvent(this._presence.username(), availability);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
 
-  set(state: Map<string, any>): void {
+  public set(state: Map<string, any>): void {
     // fixme clone
     let newState: Map<string, any> = this._presence.state();
     state.forEach((v, k) => newState.set(k, v));
@@ -119,7 +99,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject.next(this._presence);
   }
 
-  remove(keys: string[]): void {
+  public remove(keys: string[]): void {
     // fixme clone
     let newState: Map<string, any> = this._presence.state();
     keys.forEach(k => newState.delete(k));
@@ -134,7 +114,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     this._subject.next(this._presence);
   }
 
-  clear(): void {
+  public clear(): void {
     this._presence = new UserPresenceImpl(
       this._presence.username(),
       this._presence.isAvailable(),
@@ -143,5 +123,25 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
     const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.username());
     this._emitEvent(event);
     this._subject.next(this._presence);
+  }
+
+  private _handleMessage(messageEvent: MessageEvent): void {
+    const message: IncomingProtocolMessage = messageEvent.message;
+    switch (message.type) {
+      case MessageType.PRESENCE_AVAILABILITY_CHANGED:
+        this.availability((<PresenceAvailabilityChanged> message).available);
+        break;
+      case MessageType.PRESENCE_STATE_SET:
+        this.set((<PresenceStateSet> message).state);
+        break;
+      case MessageType.PRESENCE_STATE_CLEARED:
+        this.clear();
+        break;
+      case MessageType.PRESENCE_STATE_REMOVED:
+        this.remove((<PresenceStateRemoved> message).keys);
+        break;
+      default:
+      // fixme error
+    }
   }
 }

@@ -43,8 +43,9 @@ import {StringSetValueEvent} from "./events";
 // fixme does this really need to be different than the real time one.
 export class HistoricalEventConverter {
 
-  public static convertEvent(event: ConvergenceEvent, wrapperFactory: NodeWrapperFactory<HistoricalElement<any>>): ConvergenceEvent {
-    if (event instanceof  NodeDetachedEvent) {
+  public static convertEvent(event: ConvergenceEvent,
+                             wrapperFactory: NodeWrapperFactory<HistoricalElement<any>>): ConvergenceEvent {
+    if (event instanceof NodeDetachedEvent) {
       return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
       return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
@@ -58,7 +59,7 @@ export class HistoricalEventConverter {
     } else if (event instanceof ArrayNodeReorderEvent) {
       return new ArrayReorderEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.fromIndex, event.toIndex,
         event.sessionId, event.username);
-    }  else if (event instanceof ArrayNodeSetEvent) {
+    } else if (event instanceof ArrayNodeSetEvent) {
       return new ArraySetEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.index, event.value,
         event.sessionId, event.username);
     } else if (event instanceof ArrayNodeSetValueEvent) {

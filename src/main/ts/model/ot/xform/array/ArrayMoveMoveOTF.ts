@@ -8,8 +8,8 @@ import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
 
 export var ArrayMoveMoveOTF: OperationTransformationFunction<ArrayMoveOperation, ArrayMoveOperation> =
   (s: ArrayMoveOperation, c: ArrayMoveOperation) => {
-    var sMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(s);
-    var cMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(c);
+    const sMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(s);
+    const cMoveType: MoveDirection = ArrayMoveHelper.getMoveDirection(c);
 
     if (sMoveType === MoveDirection.Forward) {
       if (cMoveType === MoveDirection.Forward) {
@@ -39,7 +39,7 @@ export var ArrayMoveMoveOTF: OperationTransformationFunction<ArrayMoveOperation,
   };
 
 function transformServerForwardMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
     case RangeRangeRelationship.Precedes:
@@ -87,7 +87,7 @@ function transformServerForwardMoveWithClientForwardMove(s: ArrayMoveOperation, 
 }
 
 function transformServerForwardMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
     case RangeRangeRelationship.Precedes:
@@ -135,7 +135,7 @@ function transformServerForwardMoveWithClientBackwardMove(s: ArrayMoveOperation,
 }
 
 function transformServerForwardMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.fromIndex)) {
     case RangeIndexRelationship.Before:
@@ -155,7 +155,7 @@ function transformServerForwardMoveWithClientIdentityMove(s: ArrayMoveOperation,
 }
 
 function transformServerBackwardMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
     case RangeRangeRelationship.Precedes:
@@ -202,8 +202,9 @@ function transformServerBackwardMoveWithClientForwardMove(s: ArrayMoveOperation,
   }
 }
 
-function transformServerBackwardMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+function transformServerBackwardMoveWithClientBackwardMove(s: ArrayMoveOperation,
+                                                           c: ArrayMoveOperation): OperationPair {
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeRelationship(s, c)) {
     case RangeRangeRelationship.Precedes:
@@ -250,8 +251,9 @@ function transformServerBackwardMoveWithClientBackwardMove(s: ArrayMoveOperation
   }
 }
 
-function transformServerBackwardMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+function transformServerBackwardMoveWithClientIdentityMove(s: ArrayMoveOperation,
+                                                           c: ArrayMoveOperation): OperationPair {
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.fromIndex)) {
     case RangeIndexRelationship.Before:
@@ -271,7 +273,7 @@ function transformServerBackwardMoveWithClientIdentityMove(s: ArrayMoveOperation
 }
 
 function transformServerIdentityMoveWithClientForwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.fromIndex)) {
     case RangeIndexRelationship.Before:
@@ -290,8 +292,9 @@ function transformServerIdentityMoveWithClientForwardMove(s: ArrayMoveOperation,
   }
 }
 
-function transformServerIdentityMoveWithClientBackwardMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+function transformServerIdentityMoveWithClientBackwardMove(s: ArrayMoveOperation,
+                                                           c: ArrayMoveOperation): OperationPair {
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.fromIndex)) {
     case RangeIndexRelationship.Before:
@@ -310,8 +313,9 @@ function transformServerIdentityMoveWithClientBackwardMove(s: ArrayMoveOperation
   }
 }
 
-function transformServerIdentityMoveWithClientIdentityMove(s: ArrayMoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+function transformServerIdentityMoveWithClientIdentityMove(s: ArrayMoveOperation,
+                                                           c: ArrayMoveOperation): OperationPair {
+  "use strict";
 
   // A-MM-II-1
   return new OperationPair(s, c);

@@ -2,7 +2,7 @@ import {IndexRange} from "../../../reference/RangeReference";
 import {IndexTransformer} from "./IndexTransformer";
 
 export class RangeTransformer {
-  static handleInsert(ranges: IndexRange[], insertIndex: number, length: number): IndexRange[] {
+  public static handleInsert(ranges: IndexRange[], insertIndex: number, length: number): IndexRange[] {
     return ranges.map(range => {
       const indices: number[] = RangeTransformer._rangeToTuple(range);
       const xFormed: number[] = IndexTransformer.handleInsert(indices, insertIndex, length);
@@ -10,7 +10,7 @@ export class RangeTransformer {
     });
   }
 
-  static handleReorder(ranges: IndexRange[], fromIndex: number, toIndex: number): IndexRange[] {
+  public static handleReorder(ranges: IndexRange[], fromIndex: number, toIndex: number): IndexRange[] {
     return ranges.map(range => {
       const indices: number[] = RangeTransformer._rangeToTuple(range);
       const xFormed: number[] = IndexTransformer.handleReorder(indices, fromIndex, toIndex);
@@ -18,7 +18,7 @@ export class RangeTransformer {
     });
   }
 
-  static handleRemove(ranges: IndexRange[], removeIndex: number, length: number): IndexRange[] {
+  public static handleRemove(ranges: IndexRange[], removeIndex: number, length: number): IndexRange[] {
     return ranges.map(range => {
       const indices: number[] = RangeTransformer._rangeToTuple(range);
       const xFormed: number[] = IndexTransformer.handleRemove(indices, removeIndex, length);

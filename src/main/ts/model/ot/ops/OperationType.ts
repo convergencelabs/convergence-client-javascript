@@ -1,4 +1,4 @@
-var types: {[key: string]: string}  = {
+const types: {[key: string]: string}  = {
   COMPOUND: "compound",
   ARRAY_INSERT: "ArrayInsert",
   ARRAY_REORDER: "ArrayReorder",

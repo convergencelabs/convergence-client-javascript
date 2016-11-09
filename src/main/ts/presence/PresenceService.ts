@@ -46,6 +46,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._presenceStreams.set(username, localStream);
 
     this._localManager = new UserPresenceManager(presence, localStream, () => {
+      // TODO: do we need to do something on unsubscribe
     });
 
     this._managers.set(username, this._localManager);
@@ -53,17 +54,17 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._localPresence = this._localManager.subscribe();
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  isAvailable(): boolean {
+  public isAvailable(): boolean {
     return this._localPresence.isAvailable();
   }
 
-  setState(state: {[key: string]: any}): void
-  setState(key: string, value: any): void
-  setState(): void {
+  public setState(state: {[key: string]: any}): void
+  public setState(key: string, value: any): void
+  public setState(): void {
     let state: Map<string, any>;
     if (arguments.length === 1) {
       state = objectToMap(arguments[0]);
@@ -83,15 +84,15 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  removeState(key: string): void
-  removeState(keys: string[]): void
-  removeState(keys: string | string[]): void {
+  public removeState(key: string): void
+  public removeState(keys: string[]): void
+  public removeState(keys: string | string[]): void {
     let stateKeys: string[] = null;
 
     if (typeof keys === "string") {
-      stateKeys = [<string>keys];
+      stateKeys = [<string> keys];
     } else {
-      stateKeys = <string[]>keys;
+      stateKeys = <string[]> keys;
     }
 
     this._localManager.remove(stateKeys);
@@ -104,7 +105,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  clearState(): void {
+  public clearState(): void {
     this._localManager.clear();
 
     const message: PresenceClearState = {
@@ -114,36 +115,38 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  state(): {[key: string]: any}
-  state(key: string): any
-  state(key?: string): any {
+  public state(): {[key: string]: any}
+  public state(key: string): any
+  public state(key?: string): any {
     return mapToObject(this._localPresence.state(key));
   }
 
-  presence(username: string): Promise<UserPresence>
-  presence(usernames: string[]): Promise<UserPresence[]>
-  presence(usernames: string | string[]): Promise<UserPresence> | Promise<UserPresence[]> {
+  public presence(username: string): Promise<UserPresence>
+  public presence(usernames: string[]): Promise<UserPresence[]>
+  public presence(usernames: string | string[]): Promise<UserPresence> | Promise<UserPresence[]> {
     if (typeof usernames === "string") {
       return this._get([usernames]).then(result => {
-        return <UserPresence>result[0];
+        return <UserPresence> result[0];
       });
     } else {
-      return this._get(<string[]>usernames);
+      return this._get(<string[]> usernames);
     }
   }
 
-  subscribe(username: string): Promise<UserPresenceSubscription>
-  subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>
-  subscribe(usernames: string | string[]): Promise<UserPresenceSubscription> | Promise<UserPresenceSubscription[]> {
+  public subscribe(username: string): Promise<UserPresenceSubscription>
+  public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>
+  public subscribe(
+    usernames: string | string[]): Promise<UserPresenceSubscription> | Promise<UserPresenceSubscription[]> {
     let requested: string[];
     if (typeof usernames === "string") {
-      requested = [<string>usernames];
+      requested = [<string> usernames];
     } else {
       requested = usernames;
     }
 
     return this._subscribe(requested).then(() => {
-      const subscriptions: UserPresenceSubscription[] = requested.map(username => this._managers.get(username).subscribe());
+      const subscriptions: UserPresenceSubscription[] =
+        requested.map(username => this._managers.get(username).subscribe());
 
       if (typeof usernames === "string") {
         return subscriptions[0];
@@ -153,7 +156,6 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Private Methods
   /////////////////////////////////////////////////////////////////////////////
@@ -161,7 +163,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _get(usernames: string[]): Promise<UserPresence[]> {
     const message: RequestPresence = {
       type: MessageType.PRESENCE_REQUEST,
-      usernames: usernames
+      usernames
     };
 
     return this._connection.request(message).then((response: RequestPresenceResponse) => {
@@ -170,7 +172,6 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
       );
     });
   }
-
 
   private _streamForUsername(username: string): Observable<MessageEvent> {
     return this._messageStream.filter(m => m.message.username === username);
@@ -210,7 +211,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   private _unsubscribe(username: string): void {
     const message: UnsubscribePresence = {
       type: MessageType.PRESENCE_UNSUBSCRIBE,
-      username: username
+      username
     };
 
     this._connection.send(message);

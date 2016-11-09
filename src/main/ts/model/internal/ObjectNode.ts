@@ -20,7 +20,7 @@ import {ObjectSet} from "../ot/ops/operationChanges";
 
 export class ObjectNode extends ContainerNode<Map<string, any>> {
 
-  static Events: any = {
+  public static Events: any = {
     SET: "set",
     REMOVE: "remove",
     VALUE: "value",
@@ -56,7 +56,7 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
     });
   }
 
-  dataValue(): ObjectValue {
+  public dataValue(): ObjectValue {
     let values: {[key: string]: DataValue} = {};
     this._children.forEach((value, key) => {
       values[key] = value.dataValue();
@@ -69,22 +69,22 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
     };
   }
 
-  get(key: string): ModelNode<any> {
+  public get(key: string): ModelNode<any> {
     Validation.isString(key, "key");
     return this._children.get(key);
   }
 
-  set(key: string, value: any): ModelNode<any> {
-    var dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+  public set(key: string, value: any): ModelNode<any> {
+    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
     this._applySet(key, dataValue, true, this.sessionId, this.username);
     return this.get(key);
   }
 
-  remove(key: string): void {
+  public remove(key: string): void {
     this._applyRemove(key, true, this.sessionId, this.username);
   }
 
-  keys(): string[] {
+  public keys(): string[] {
     let keys: string[] = [];
     this._children.forEach((v, k) => {
       keys.push(k);
@@ -92,14 +92,33 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
     return keys;
   }
 
-  hasKey(key: string): boolean {
+  public hasKey(key: string): boolean {
     return this._children.has(key);
   }
 
-  forEach(callback: (model: ModelNode<any>, key?: string) => void): void {
+  public forEach(callback: (model: ModelNode<any>, key?: string) => void): void {
     this._children.forEach((value, key) => {
       callback(value, key);
     });
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    switch (operationEvent.operation.type) {
+      case OperationType.OBJECT_ADD:
+        this._handleAddPropertyOperation(operationEvent);
+        break;
+      case OperationType.OBJECT_SET:
+        this._handleSetPropertyOperation(operationEvent);
+        break;
+      case OperationType.OBJECT_REMOVE:
+        this._handleRemovePropertyOperation(operationEvent);
+        break;
+      case OperationType.OBJECT_VALUE:
+        this._handleSetOperation(operationEvent);
+        break;
+      default:
+        throw new Error("Invalid operation for RealTimeObject");
+    }
   }
 
   //
@@ -107,7 +126,7 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
   //
 
   protected _getData(): Map<string, any> {
-    var returnObject: Map<string, any> = new Map<string, ModelNode<any>>();
+    const returnObject: Map<string, any> = new Map<string, ModelNode<any>>();
     this.forEach((model: ModelNode<any>, key: string) => {
       returnObject[key] = model.data();
     });
@@ -117,7 +136,7 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
   protected _setData(data?: {[key: string]: any}): void {
     let values: {[key: string]: DataValue} = {};
 
-    for (var prop in data) {
+    for (let prop in data) {
       if (data.hasOwnProperty(prop)) {
         let dataValue: DataValue = this.dataValueFactory.createDataValue(data[prop]);
         values[prop] = dataValue;
@@ -127,13 +146,13 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
     this._applySetValue(values, true, this.sessionId, this.username);
   }
 
-  _valueAt(pathArgs: Path): ModelNode<any> {
+  protected _valueAt(pathArgs: Path): ModelNode<any> {
     if (pathArgs.length === 0) {
       return this;
     }
 
-    var prop: string = <string> pathArgs[0];
-    var child: ModelNode<any> = this._children.get(prop);
+    const prop: string = <string> pathArgs[0];
+    const child: ModelNode<any> = this._children.get(prop);
     if (typeof child === "undefined") {
       return;
     }
@@ -175,13 +194,13 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
       this._children.get(key)._detach(local);
     }
 
-    var child: ModelNode<any> = ModelNodeFactory.create(value, this._pathCB(value.id), this._model,
+    const child: ModelNode<any> = ModelNodeFactory.create(value, this._pathCB(value.id), this._model,
       this.sessionId, this.username, this.dataValueFactory);
     child.on(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children.set(key, child);
     this._idToPathElement.set(child.id(), key);
 
-    var event: ObjectNodeSetEvent = new ObjectNodeSetEvent(this, local, key, child, this.sessionId, this.username);
+    const event: ObjectNodeSetEvent = new ObjectNodeSetEvent(this, local, key, child, this.sessionId, this.username);
     this._emitValueEvent(event);
   }
 
@@ -194,17 +213,18 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
       this._children.get(key)._detach(local);
       this._children.delete(key);
 
-      var event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
+      const event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
   }
 
-  private _applySetValue(values: {[key: string]: DataValue}, local: boolean, sessionId: string, username: string): void {
+  private _applySetValue(values: {[key: string]: DataValue},
+                         local: boolean, sessionId: string, username: string): void {
     let oldChildren: Map<string, ModelNode<any>> = this._children;
 
     this._children = new Map<string, ModelNode<any>>();
 
-    for (var prop in values) {
+    for (const prop in values) {
       if (values.hasOwnProperty(prop)) {
         let dataValue: DataValue = values[prop];
         this._idToPathElement.set(dataValue.id, prop);
@@ -218,8 +238,8 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
       child.on(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
 
-    var event: ObjectNodeSetValueEvent = new ObjectNodeSetValueEvent(this, local, this.data(), this.sessionId, this.username);
-
+    const event: ObjectNodeSetValueEvent =
+      new ObjectNodeSetValueEvent(this, local, this.data(), this.sessionId, this.username);
     this._emitValueEvent(event);
 
     oldChildren.forEach((child: ModelNode<any>) => {
@@ -232,42 +252,23 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
   // Handlers for incoming operations
   /////////////////////////////////////////////////////////////////////////////
 
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    switch (operationEvent.operation.type) {
-      case OperationType.OBJECT_ADD:
-        this._handleAddPropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_SET:
-        this._handleSetPropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_REMOVE:
-        this._handleRemovePropertyOperation(operationEvent);
-        break;
-      case OperationType.OBJECT_VALUE:
-        this._handleSetOperation(operationEvent);
-        break;
-      default:
-        throw new Error("Invalid operation for RealTimeObject");
-    }
-  }
-
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectAddProperty = <ObjectAddProperty> operationEvent.operation;
+    const operation: ObjectAddProperty = <ObjectAddProperty> operationEvent.operation;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectSetProperty = <ObjectSetProperty> operationEvent.operation;
+    const operation: ObjectSetProperty = <ObjectSetProperty> operationEvent.operation;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectRemoveProperty = <ObjectRemoveProperty> operationEvent.operation;
+    const operation: ObjectRemoveProperty = <ObjectRemoveProperty> operationEvent.operation;
     this._applyRemove(operation.prop, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ObjectSet = <ObjectSet> operationEvent.operation;
+    const operation: ObjectSet = <ObjectSet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 }

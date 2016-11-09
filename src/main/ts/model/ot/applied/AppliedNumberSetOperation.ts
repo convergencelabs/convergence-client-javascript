@@ -9,7 +9,7 @@ export class AppliedNumberSetOperation extends AppliedDiscreteOperation implemen
     Object.freeze(this);
   }
 
-  inverse(): AppliedNumberSetOperation {
+  public inverse(): AppliedNumberSetOperation {
     return new AppliedNumberSetOperation(this.id, this.noOp, this.oldValue, this.value);
   }
 }

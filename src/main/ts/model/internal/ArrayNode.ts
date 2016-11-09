@@ -22,7 +22,7 @@ import {ArraySet} from "../ot/ops/operationChanges";
 
 export class ArrayNode extends ContainerNode<any[]> {
 
-  static Events: any = {
+  public static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
     SET: "set",
@@ -47,10 +47,11 @@ export class ArrayNode extends ContainerNode<any[]> {
 
     this._children = [];
 
-    for (var i: number = 0; i < data.children.length; i++) {
+    for (let i: number = 0; i < data.children.length; i++) {
       let child: DataValue = data.children[i];
       this._idToPathElement.set(child.id, i);
-      this._children.push(ModelNodeFactory.create(child, this._pathCB(child.id), model, sessionId, username, dataValueFactory));
+      this._children.push(ModelNodeFactory.create(child,
+        this._pathCB(child.id), model, sessionId, username, dataValueFactory));
     }
 
     this._children.forEach((child: ModelNode<any>) => {
@@ -58,7 +59,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     });
   }
 
-  dataValue(): ArrayValue {
+  public dataValue(): ArrayValue {
     let values: DataValue[] = this._children.map((node: ModelNode<any>) => {
       return node.dataValue();
     });
@@ -69,63 +70,79 @@ export class ArrayNode extends ContainerNode<any[]> {
     };
   }
 
-  get(index: number): ModelNode<any> {
+  public get(index: number): ModelNode<any> {
     return this._children[index];
   }
 
-  set(index: number, value: any): ModelNode<any> {
-    var dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+  public set(index: number, value: any): ModelNode<any> {
+    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
     this._applySet(index, dataValue, true, this.sessionId, this.username);
     return this.get(index);
 
   }
 
-  insert(index: number, value: any): ModelNode<any> {
-    var dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+  public insert(index: number, value: any): ModelNode<any> {
+    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
     this._applyInsert(index, dataValue, true, this.sessionId, this.username);
     return this.get(index);
   }
 
-  remove(index: number): Object|number|string|boolean {
-    let oldValue: Object|number|string|boolean = this.get(index).data();
+  public remove(index: number): Object|number|string|boolean {
+    const oldValue: Object|number|string|boolean = this.get(index).data();
     this._applyRemove(index, true, this.sessionId, this.username);
     return oldValue;
   }
 
-  reorder(fromIndex: number, toIndex: number): void {
+  public reorder(fromIndex: number, toIndex: number): void {
     this._applyReorder(fromIndex, toIndex, true, this.sessionId, this.username);
   }
 
-  push(value: any): ModelNode<any> {
+  public push(value: any): ModelNode<any> {
     return this.insert(this._children.length, value);
   }
 
-  pop(): any {
+  public pop(): any {
     return this.remove(this._children.length - 1);
   }
 
-  unshift(value: any): ModelNode<any> {
+  public unshift(value: any): ModelNode<any> {
     return this.insert(0, value);
   }
 
-  shift(): any {
+  public shift(): any {
     return this.remove(0);
   }
 
-  length(): number {
+  public length(): number {
     return this._children.length;
   }
 
-  forEach(callback: (value: ModelNode<any>, index?: number) => void): void {
+  public forEach(callback: (value: ModelNode<any>, index?: number) => void): void {
     this._children.forEach(callback);
   }
 
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    const type: string = operationEvent.operation.type;
+    if (type === OperationType.ARRAY_INSERT) {
+      this._handleInsertOperation(operationEvent);
+    } else if (type === OperationType.ARRAY_REORDER) {
+      this._handleReorderOperation(operationEvent);
+    } else if (type === OperationType.ARRAY_REMOVE) {
+      this._handleRemoveOperation(operationEvent);
+    } else if (type === OperationType.ARRAY_SET) {
+      this._handleSetOperation(operationEvent);
+    } else if (type === OperationType.ARRAY_VALUE) {
+      this._handleSetValueOperation(operationEvent);
+    } else {
+      throw new Error("Invalid operation!");
+    }
+  }
   //
   // protected and private methods.
   //
 
   protected _getData(): Array<any> {
-    var returnVal: Array<any> = [];
+    const returnVal: Array<any> = [];
     this.forEach((child: ModelNode<any>) => {
       returnVal.push(child.data());
     });
@@ -133,7 +150,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   protected _setData(data: any[]): void {
-    var dataValues: DataValue[] = data.map((value: any) => {
+    const dataValues: DataValue[] = data.map((value: any) => {
       return this.dataValueFactory.createDataValue(value);
     });
 
@@ -148,13 +165,13 @@ export class ArrayNode extends ContainerNode<any[]> {
     });
   }
 
-  _valueAt(pathArgs: Path): ModelNode<any> {
+  protected _valueAt(pathArgs: Path): ModelNode<any> {
     if (pathArgs.length === 0) {
       return this;
     }
 
-    var index: number = <number> pathArgs[0];
-    var child: ModelNode<any> = this._children[index];
+    const index: number = <number> pathArgs[0];
+    const child: ModelNode<any> = this._children[index];
     if (pathArgs.length > 1) {
       if (child.type() === ModelElementType.Object || child.type() === ModelElementType.Array) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
@@ -173,7 +190,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._validateInsert(index, value);
 
     this._idToPathElement.set(value.id, index);
-    var child: ModelNode<any> = ModelNodeFactory.create(
+    const child: ModelNode<any> = ModelNodeFactory.create(
       value,
       this._pathCB(value.id),
       this._model,
@@ -184,38 +201,38 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._children.splice(index, 0, child);
     this._updateIdToPathElementMap(index);
 
-    var event: ArrayNodeInsertEvent = new ArrayNodeInsertEvent(this, local, index, child, sessionId, username);
+    const event: ArrayNodeInsertEvent = new ArrayNodeInsertEvent(this, local, index, child, sessionId, username);
     this._emitValueEvent(event);
   }
 
   private _applySet(index: number, value: DataValue, local: boolean, sessionId: string, username: string): void {
     this._validateReplace(index, value);
 
-    var oldChild: ModelNode<any> = this._children[index];
+    const oldChild: ModelNode<any> = this._children[index];
     oldChild.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
 
     this._idToPathElement.set(value.id, index);
-    var newChild: ModelNode<any> = ModelNodeFactory.create(value,
+    const newChild: ModelNode<any> = ModelNodeFactory.create(value,
       this._pathCB(value.id), this.model(), this.sessionId, this.username, this.dataValueFactory);
     newChild.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children[index] = newChild;
     this._updateIdToPathElementMap(index);
     oldChild._detach(local);
 
-    var event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild.data(), sessionId, username);
+    const event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild.data(), sessionId, username);
     this._emitValueEvent(event);
   }
 
   private _applyRemove(index: number, local: boolean, sessionId: string, username: string): void {
     this._validateRemove(index);
 
-    var child: ModelNode<any> = this._children[index];
+    const child: ModelNode<any> = this._children[index];
     child.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children.splice(index, 1);
     this._updateIdToPathElementMap(index);
     child._detach(local);
 
-    var event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, sessionId, username);
+    const event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -233,62 +250,47 @@ export class ArrayNode extends ContainerNode<any[]> {
       child.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
 
-    var event: ArrayNodeSetValueEvent = new ArrayNodeSetValueEvent(this, local, this.data(), sessionId, username);
+    const event: ArrayNodeSetValueEvent = new ArrayNodeSetValueEvent(this, local, this.data(), sessionId, username);
     this._emitValueEvent(event);
   }
 
   private _applyReorder(fromIndex: number, toIndex: number, local: boolean, sessionId: string, username: string): void {
     this._validateMove(fromIndex, toIndex);
 
-    var child: ModelNode<any> = this._children[fromIndex];
+    const child: ModelNode<any> = this._children[fromIndex];
     this._children.splice(fromIndex, 1);
     this._children.splice(toIndex, 0, child);
 
     this._updateIdToPathElementMap(Math.min(fromIndex, toIndex));
 
-    var event: ArrayNodeReorderEvent = new ArrayNodeReorderEvent(this, local, fromIndex, toIndex, sessionId, username);
+    const event: ArrayNodeReorderEvent =
+      new ArrayNodeReorderEvent(this, local, fromIndex, toIndex, sessionId, username);
     this._emitValueEvent(event);
   }
 
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.ARRAY_INSERT) {
-      this._handleInsertOperation(operationEvent);
-    } else if (type === OperationType.ARRAY_REORDER) {
-      this._handleReorderOperation(operationEvent);
-    } else if (type === OperationType.ARRAY_REMOVE) {
-      this._handleRemoveOperation(operationEvent);
-    } else if (type === OperationType.ARRAY_SET) {
-      this._handleSetOperation(operationEvent);
-    } else if (type === OperationType.ARRAY_VALUE) {
-      this._handleSetValueOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayInsert = <ArrayInsert> operationEvent.operation;
+    const operation: ArrayInsert = <ArrayInsert> operationEvent.operation;
     this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleReorderOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayMove = <ArrayMove> operationEvent.operation;
-    this._applyReorder(operation.fromIndex, operation.toIndex, false, operationEvent.sessionId, operationEvent.username);
+    const operation: ArrayMove = <ArrayMove> operationEvent.operation;
+    this._applyReorder(operation.fromIndex, operation.toIndex, false,
+      operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayRemove = <ArrayRemove> operationEvent.operation;
+    const operation: ArrayRemove = <ArrayRemove> operationEvent.operation;
     this._applyRemove(operation.index, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArrayReplace = <ArrayReplace> operationEvent.operation;
+    const operation: ArrayReplace = <ArrayReplace> operationEvent.operation;
     this._applySet(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetValueOperation(operationEvent: ModelOperationEvent): void {
-    var operation: ArraySet = <ArraySet> operationEvent.operation;
+    const operation: ArraySet = <ArraySet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
@@ -309,7 +311,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       throw new Error("Index out of bounds!");
     }
 
-    if (typeof value === 'undefined' || typeof value === 'function') {
+    if (typeof value === "undefined" || typeof value === "function") {
       throw new Error("Invalid value for insert!");
     }
   }
@@ -334,7 +336,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       throw new Error("Index out of bounds!");
     }
 
-    if (typeof value === 'undefined' || typeof value === 'function') {
+    if (typeof value === "undefined" || typeof value === "function") {
       throw new Error("Illegal argument!");
     }
   }
@@ -351,8 +353,8 @@ export class ArrayNode extends ContainerNode<any[]> {
    * @param {number} start
    */
   private _updateIdToPathElementMap(start: number): void {
-    for (var i: number = start; i < this._children.length; i++) {
-      var child: ModelNode<any> = this._children[i];
+    for (let i: number = start; i < this._children.length; i++) {
+      let child: ModelNode<any> = this._children[i];
       this._idToPathElement.set(child.id(), i);
     }
   }

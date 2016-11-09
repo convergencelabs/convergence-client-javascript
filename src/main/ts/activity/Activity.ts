@@ -14,7 +14,7 @@ import { mapToObject } from "../util/ObjectUtils";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
-  static Events: any = {
+  public static Events: any = {
     SESSION_JOINED: "session_joined",
     SESSION_LEFT: "session_left",
     STATE_SET: "state_set",
@@ -65,12 +65,14 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           let removeEvent: StateRemovedEvent = <StateRemovedEvent> event;
           let removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state();
           removeState.delete(removeEvent.key);
-          newMap.set(removeEvent.sessionId, new ActivityParticipant(removeEvent.username, removeEvent.sessionId, removeState));
+          newMap.set(removeEvent.sessionId,
+            new ActivityParticipant(removeEvent.username, removeEvent.sessionId, removeState));
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_CLEARED:
           let clearEvent: StateClearedEvent = <StateClearedEvent> event;
-          newMap.set(clearEvent.sessionId, new ActivityParticipant(clearEvent.username, clearEvent.sessionId, new Map<string, any>()));
+          newMap.set(clearEvent.sessionId,
+            new ActivityParticipant(clearEvent.username, clearEvent.sessionId, new Map<string, any>()));
           this._participants.next(newMap);
           break;
         default:
@@ -80,18 +82,18 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     });
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  id(): string {
+  public id(): string {
     return this._id;
   }
 
-  leave(): void {
+  public leave(): void {
     if (this.isJoined()) {
       this._joined = false;
-      this._connection.send(<ActivityLeaveRequest>{
+      this._connection.send(<ActivityLeaveRequest> {
         type: MessageType.ACTIVITY_LEAVE_REQUEST,
         activityId: this._id
       });
@@ -99,14 +101,15 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  isJoined(): boolean {
+  public isJoined(): boolean {
     return this._joined;
   }
 
-  state(key: string): any;
-  state(): {[key: string]: any};
-  state(key?: string): any {
-    const localParticipant: ActivityParticipant = this._participants.getValue().get(this._connection.session().sessionId());
+  public state(key: string): any;
+  public state(): {[key: string]: any};
+  public state(key?: string): any {
+    const localParticipant: ActivityParticipant =
+      this._participants.getValue().get(this._connection.session().sessionId());
     if (typeof key === "undefined") {
       return mapToObject(localParticipant.state());
     } else {
@@ -114,9 +117,9 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  setState(state: {[key: string]: any}): void
-  setState(key: string, value: any): void
-  setState(): void {
+  public setState(state: {[key: string]: any}): void
+  public setState(key: string, value: any): void
+  public setState(): void {
     if (this.isJoined()) {
       let state: Map<string, any>;
       if (arguments.length === 1) {
@@ -126,10 +129,10 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
         state[arguments[0]] = arguments[1];
       }
 
-      var message: ActivitySetState = {
+      const message: ActivitySetState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_SET,
         activityId: this._id,
-        state: state
+        state
       };
       this._connection.send(message);
 
@@ -139,7 +142,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           activityId: this.id(),
           username: this._connection.session().username(),
           sessionId: this._connection.session().sessionId(),
-          key: key,
+          key,
           value: state[key],
           local: true
         });
@@ -147,18 +150,18 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  removeState(key: string): void
-  removeState(keys: string[]): void
-  removeState(keys: string | string[]): void {
+  public removeState(key: string): void
+  public removeState(keys: string[]): void
+  public removeState(keys: string | string[]): void {
     if (this.isJoined()) {
       if (typeof keys === "string") {
-        keys = [<string>keys];
+        keys = [<string> keys];
       }
 
-      var message: ActivityRemoveState = {
+      const message: ActivityRemoveState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_REMOVED,
         activityId: this._id,
-        keys: <string[]>keys
+        keys: <string[]> keys
       };
       this._connection.send(message);
 
@@ -168,16 +171,16 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           activityId: this.id(),
           username: this._connection.session().username(),
           sessionId: this._connection.session().sessionId(),
-          key: key,
+          key,
           local: true
         });
       });
     }
   }
 
-  clearState(): void {
+  public clearState(): void {
     if (this.isJoined()) {
-      var message: ActivityClearState = {
+      const message: ActivityClearState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
         activityId: this._id,
       };
@@ -193,15 +196,15 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  participant(id: string): ActivityParticipant {
+  public participant(id: string): ActivityParticipant {
     return this._participants.getValue().get(id);
   }
 
-  participants(): ActivityParticipant[] {
+  public participants(): ActivityParticipant[] {
     return Array.from(this._participants.getValue().values());
   }
 
-  participantsAsObservable(): Observable<ActivityParticipant[]> {
+  public participantsAsObservable(): Observable<ActivityParticipant[]> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
 }

@@ -10,7 +10,7 @@ export class ArrayRemoveOperation extends DiscreteOperation implements ArrayRemo
     Object.freeze(this);
   }
 
-  copy(updates: any): ArrayRemoveOperation {
+  public copy(updates: any): ArrayRemoveOperation {
     return new ArrayRemoveOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

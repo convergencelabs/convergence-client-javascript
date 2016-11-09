@@ -12,7 +12,7 @@ import {NumberSet} from "../ot/ops/operationChanges";
 
 export class NumberNode extends ModelNode<number> {
 
-  static Events: any = {
+  public static Events: any = {
     DELTA: "delta",
     VALUE: "value",
     DETACHED: ModelNode.Events.DETACHED,
@@ -34,7 +34,7 @@ export class NumberNode extends ModelNode<number> {
     this._data = data.value;
   }
 
-  dataValue(): NumberValue {
+  public dataValue(): NumberValue {
     return <NumberValue> {
       id: this.id(),
       type: "number",
@@ -42,20 +42,31 @@ export class NumberNode extends ModelNode<number> {
     };
   }
 
-  add(value: number): void {
+  public add(value: number): void {
     this._applyAdd(value, true);
   }
 
-  subtract(value: number): void {
+  public subtract(value: number): void {
     this.add(-value);
   }
 
-  increment(): void {
+  public increment(): void {
     this.add(1);
   }
 
-  decrement(): void {
+  public decrement(): void {
     this.add(-1);
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    const type: string = operationEvent.operation.type;
+    if (type === OperationType.NUMBER_ADD) {
+      this._handleAddOperation(operationEvent);
+    } else if (type === OperationType.NUMBER_VALUE) {
+      this._handleSetOperation(operationEvent);
+    } else {
+      throw new Error("Invalid operation!");
+    }
   }
 
   protected _setData(data: number): void {
@@ -72,7 +83,7 @@ export class NumberNode extends ModelNode<number> {
     if (value !== 0) {
       this._data += value;
 
-      var event: NumberNodeDeltaEvent = new NumberNodeDeltaEvent(this, local, value, this.sessionId, this.username);
+      const event: NumberNodeDeltaEvent = new NumberNodeDeltaEvent(this, local, value, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
   }
@@ -83,30 +94,19 @@ export class NumberNode extends ModelNode<number> {
     }
     this._data = value;
 
-    var event: NumberNodeSetValueEvent = new NumberNodeSetValueEvent(this, local, value, this.sessionId, this.username);
+    const event: NumberNodeSetValueEvent =
+      new NumberNodeSetValueEvent(this, local, value, this.sessionId, this.username);
     this._emitValueEvent(event);
   }
 
   // Handlers for incoming operations
-
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.NUMBER_ADD) {
-      this._handleAddOperation(operationEvent);
-    } else if (type === OperationType.NUMBER_VALUE) {
-      this._handleSetOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
   private _handleAddOperation(operationEvent: ModelOperationEvent): void {
-    var operation: NumberAdd = <NumberAdd> operationEvent.operation;
+    const operation: NumberAdd = <NumberAdd> operationEvent.operation;
     this._applyAdd(operation.value, false);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: NumberSet = <NumberSet> operationEvent.operation;
+    const operation: NumberSet = <NumberSet> operationEvent.operation;
     this._applySet(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

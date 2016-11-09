@@ -12,16 +12,16 @@ export class CodeMap {
     });
   }
 
-  put(code: number, value: string): void {
+  public put(code: number, value: string): void {
     this._map[value] = code;
     this._reverse[code] = value;
   }
 
-  code(value: string): number {
+  public code(value: string): number {
     return this._map[value];
   }
 
-  value(code: number): string {
+  public value(code: number): string {
     return this._reverse[code];
   }
 }

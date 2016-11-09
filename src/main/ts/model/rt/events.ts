@@ -100,7 +100,6 @@ export class ArraySetValueEvent implements ValueChangedEvent {
               public local: boolean) {}
 }
 
-
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeBoolean,
@@ -127,7 +126,6 @@ export class NumberDeltaEvent implements ValueChangedEvent {
               public username: string,
               public local: boolean) {}
 }
-
 
 export class ObjectSetEvent implements ValueChangedEvent {
   public name: string = "set";

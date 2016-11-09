@@ -10,8 +10,8 @@ export default class PathComparator {
    *
    * @return True if the two path lists represent the same path, false otherwise.
    */
-  static areEqual(p1: Path, p2: Path): boolean {
-    return (p1.length === p2.length) && p1.every(function (element: any, index: number): boolean {
+  public static areEqual(p1: Path, p2: Path): boolean {
+    return (p1.length === p2.length) && p1.every((element: any, index: number) => {
         return element === p2[index];
       });
   }
@@ -28,12 +28,12 @@ export default class PathComparator {
    *
    * @return True if the p1 is a direct child of p2
    */
-  static isChildOf(p1: Path, p2: Path): boolean {
+  public static isChildOf(p1: Path, p2: Path): boolean {
     if (p1.length !== p2.length + 1) {
       return false;
     } else {
       // parent is shorter by one.
-      return p2.every(function (element: any, index: number): boolean {
+      return p2.every((element: any, index: number) => {
         return element === p1[index];
       });
     }
@@ -51,7 +51,7 @@ export default class PathComparator {
    *
    * @return True if the p1 is a direct parent of p2
    */
-  static isParentOf(p1: Path, p2: Path): boolean {
+  public static isParentOf(p1: Path, p2: Path): boolean {
     return this.isChildOf(p2, p1);
   }
 
@@ -66,12 +66,12 @@ export default class PathComparator {
    *
    * @return True if the p1 is a descendant of p2
    */
-  static isDescendantOf(p1: Path, p2: Path): boolean {
+  public static isDescendantOf(p1: Path, p2: Path): boolean {
     if (p1.length <= p2.length) {
       return false;
     } else {
       // descendant is longer, so the ancestor length is the potentially common length.
-      return p2.every(function (element: any, index: number): boolean {
+      return p2.every((element: any, index: number) => {
         return element === p1[index];
       });
     }
@@ -88,7 +88,7 @@ export default class PathComparator {
    *
    * @return True if the p1 is a ancestor of p2
    */
-  static isAncestorOf(p1: Path, p2: Path): boolean {
+  public static isAncestorOf(p1: Path, p2: Path): boolean {
     return this.isDescendantOf(p2, p1);
   }
 
@@ -103,7 +103,7 @@ export default class PathComparator {
    *
    * @return True if the paths are siblings, false otherwise.
    */
-  static areSiblings(p1: Path, p2: Path): boolean {
+  public static areSiblings(p1: Path, p2: Path): boolean {
     if (p1.length !== p2.length) {
       return false;
     } else if (p1.length === 0) {
@@ -111,7 +111,7 @@ export default class PathComparator {
     } else if (p1[p1.length - 1] === p2[p2.length - 1]) {
       return false;
     } else {
-      return p1.every(function (element: any, index: number): boolean {
+      return p1.every((element: any, index: number) => {
         return index === p2.length - 1 || element === p1[index];
       });
     }

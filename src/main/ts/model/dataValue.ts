@@ -1,4 +1,4 @@
-var types: {[key: string]: string}  = {
+const types: {[key: string]: string}  = {
   OBJECT: "object",
   ARRAY: "array",
   STRING: "string",

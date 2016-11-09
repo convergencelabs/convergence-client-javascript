@@ -7,7 +7,7 @@ import {DataValue} from "../dataValue";
 
 export class UndefinedNode extends ModelNode<void> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: ModelNode.Events.DETACHED
   };
 
@@ -22,8 +22,12 @@ export class UndefinedNode extends ModelNode<void> {
     super(ModelElementType.Undefined, id, path, model, sessionId, username);
   }
 
-  dataValue(): DataValue {
+  public dataValue(): DataValue {
     return undefined;
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    throw new Error("Undefined values do not process operations");
   }
 
   protected _getData(): void {
@@ -32,10 +36,5 @@ export class UndefinedNode extends ModelNode<void> {
 
   protected _setData(data: any): void {
     throw new Error("Can not set the value on a Undefined type.");
-  }
-
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    throw new Error("Undefined values do not process operations");
-
   }
 }

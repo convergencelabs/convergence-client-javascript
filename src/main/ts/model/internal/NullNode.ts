@@ -7,7 +7,7 @@ import {NullValue} from "../dataValue";
 
 export class NullNode extends ModelNode<void> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: ModelNode.Events.DETACHED
   };
 
@@ -22,12 +22,16 @@ export class NullNode extends ModelNode<void> {
     super(ModelElementType.Null, id, path, model, sessionId, username);
   }
 
-  dataValue(): NullValue {
+  public dataValue(): NullValue {
     return <NullValue> {
       id: this.id(),
       type: "null",
       value: this.data()
     };
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    throw new Error("Null values do not process operations");
   }
 
   protected _getData(): any {
@@ -36,9 +40,5 @@ export class NullNode extends ModelNode<void> {
 
   protected _setData(data: any): void {
     throw new Error("Can not set the value on a Null type.");
-  }
-
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    throw new Error("Null values do not process operations");
   }
 }

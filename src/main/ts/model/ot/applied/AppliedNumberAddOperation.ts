@@ -11,8 +11,7 @@ export class AppliedNumberAddOperation extends AppliedDiscreteOperation implemen
     Object.freeze(this);
   }
 
-  inverse(): AppliedNumberAddOperation {
+  public inverse(): AppliedNumberAddOperation {
     return new AppliedNumberAddOperation(this.id, this.noOp, -this.value);
   }
 }
-

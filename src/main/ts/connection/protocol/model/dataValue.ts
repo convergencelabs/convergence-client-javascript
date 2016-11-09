@@ -7,7 +7,7 @@ import {NumberValue} from "../../../model/dataValue";
 import {BooleanValue} from "../../../model/dataValue";
 import {ArrayValue} from "../../../model/dataValue";
 
-var DataValueTypeCodes: CodeMap = new CodeMap();
+const DataValueTypeCodes: CodeMap = new CodeMap();
 DataValueTypeCodes.put(0, DataValueType.OBJECT);
 DataValueTypeCodes.put(1, DataValueType.ARRAY);
 DataValueTypeCodes.put(2, DataValueType.STRING);
@@ -16,30 +16,30 @@ DataValueTypeCodes.put(4, DataValueType.BOOLEAN);
 DataValueTypeCodes.put(5, DataValueType.NULL);
 
 export var DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
-  var result: any = {i: dv.id, "?": "" + DataValueTypeCodes.code(dv.type)};
+  const result: any = {i: dv.id, "?": "" + DataValueTypeCodes.code(dv.type)};
 
   switch (dv.type) {
     case DataValueType.OBJECT:
-      var objVal: ObjectValue = <ObjectValue>dv;
-      var mapped: any = {};
+      const objVal: ObjectValue = <ObjectValue> dv;
+      const mapped: any = {};
       Object.getOwnPropertyNames(objVal.children).forEach((prop: string) => {
         mapped[prop] = DataValueSerializer(objVal.children[prop]);
       });
       result.c = mapped;
       break;
     case DataValueType.ARRAY:
-      result.c = (<ArrayValue>dv).children.map((child: DataValue) => {
+      result.c = (<ArrayValue> dv).children.map((child: DataValue) => {
         return DataValueSerializer(child);
       });
       break;
     case DataValueType.STRING:
-      result.v = (<StringValue>dv).value;
+      result.v = (<StringValue> dv).value;
       break;
     case DataValueType.NUMBER:
-      result.v = (<NumberValue>dv).value;
+      result.v = (<NumberValue> dv).value;
       break;
     case DataValueType.BOOLEAN:
-      result.v = (<BooleanValue>dv).value;
+      result.v = (<BooleanValue> dv).value;
       break;
     case DataValueType.NULL:
       // No Op
@@ -51,41 +51,41 @@ export var DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
 };
 
 export var DataValueDeserializer: (dv: any) => DataValue = (dv: any) => {
-  var id: string = dv.i;
-  var type: string = DataValueTypeCodes.value(Number(dv["?"]));
+  const id: string = dv.i;
+  const type: string = DataValueTypeCodes.value(Number(dv["?"]));
 
   switch (type) {
     case DataValueType.OBJECT:
-      var objectChildren: {[key: string]: DataValue} = {};
+      const objectChildren: {[key: string]: DataValue} = {};
       Object.getOwnPropertyNames(dv.c).forEach((prop: string) => {
         objectChildren[prop] = DataValueDeserializer(dv.c[prop]);
       });
-      return <ObjectValue>{
-        id: id,
-        type: type,
+      return <ObjectValue> {
+        id,
+        type,
         children: objectChildren
       };
     case DataValueType.ARRAY:
-      var arrayChildren: DataValue[] = dv.c.map((child: any) => {
+      const arrayChildren: DataValue[] = dv.c.map((child: any) => {
         return DataValueDeserializer(child);
       });
-      return <ArrayValue>{
-        id: id,
-        type: type,
+      return <ArrayValue> {
+        id,
+        type,
         children: arrayChildren
       };
     case DataValueType.STRING:
     case DataValueType.NUMBER:
     case DataValueType.BOOLEAN:
-      return <DataValue>{
-        id: id,
-        type: type,
+      return <DataValue> {
+        id,
+        type,
         value: dv.v
       };
     case DataValueType.NULL:
-      return <DataValue>{
-        id: id,
-        type: type
+      return <DataValue> {
+        id,
+        type
       };
     default:
       throw new Error("Unknown data value type: " + dv.type);

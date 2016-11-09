@@ -22,30 +22,30 @@ export class HeartbeatHelper {
     this._started = false;
   }
 
-  setPingInterval(pingInterval: number): void {
+  public setPingInterval(pingInterval: number): void {
     this._pingInterval = pingInterval;
   }
 
-  getPingInterval(): number {
+  public getPingInterval(): number {
     return this._pingInterval;
   }
 
-  setPongTimeout(pongTimeout: number): void {
+  public setPongTimeout(pongTimeout: number): void {
     this._pongTimeout = pongTimeout;
   }
 
-  getPongTimeout(): number {
+  public getPongTimeout(): number {
     return this._pongTimeout;
   }
 
-  messageReceived(): void {
+  public messageReceived(): void {
     if (this._started) {
       this.cancelPongTimeout();
       this.restartPingTimeout();
     }
   }
 
-  start(): void {
+  public start(): void {
     if (this._handler == null) {
       throw "Can't start the HeartbeatManager unless the callback is set.";
     }
@@ -60,7 +60,7 @@ export class HeartbeatHelper {
     this.messageReceived();
   }
 
-  stop(): void {
+  public stop(): void {
     this._started = false;
     this.stopPingTimer();
     this.cancelPongTimeout();
@@ -78,7 +78,7 @@ export class HeartbeatHelper {
     return !this._started;
   }
 
-  dispose(): void {
+  public dispose(): void {
     this.stop();
   }
 
@@ -88,9 +88,9 @@ export class HeartbeatHelper {
   }
 
   private schedulePongTimeout(): void {
-    var self: HeartbeatHelper = this;
+    const self: HeartbeatHelper = this;
     this._timeoutFuture = setTimeout(
-      function (): void {
+      () => {
         self._handler.onTimeout();
       },
       this._pongTimeout * 1000);
@@ -112,9 +112,9 @@ export class HeartbeatHelper {
 
   private restartPingTimeout(): void {
     this.stopPingTimer();
-    var self: HeartbeatHelper = this;
+    const self: HeartbeatHelper = this;
     this._pingFuture = setTimeout(
-      function (): void {
+      () => {
         self.sendPing();
       },
       this._pingInterval * 1000);

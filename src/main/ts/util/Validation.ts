@@ -1,9 +1,9 @@
 export class Validation {
-  static nonEmptyString(value: string): boolean {
+  public static nonEmptyString(value: string): boolean {
     return typeof value === "string" && value.length > 0;
   }
 
-  static isString(value: string, name?: string): void {
+  public static isString(value: string, name?: string): void {
     if (name === undefined) {
       name = "value";
     }

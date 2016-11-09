@@ -10,11 +10,10 @@ export class StringSetOperation extends DiscreteOperation implements StringSet {
     Object.freeze(this);
   }
 
-  copy(updates: any): StringSetOperation {
+  public copy(updates: any): StringSetOperation {
     return new StringSetOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),
       Immutable.update(this.value, updates.value));
   }
 }
-

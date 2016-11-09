@@ -11,16 +11,17 @@ import {ModelNodeEvent} from "./events";
 
 export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEvent> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: "detached",
     NODE_CHANGED: "node_changed",
     OPERATION: "operation"
   };
 
-  private _id: string;
-  private _modelType: ModelElementType;
   protected _model: Model;
   protected _path: () => Path;
+
+  private _id: string;
+  private _modelType: ModelElementType;
 
   /**
    * Constructs a new RealTimeElement.
@@ -40,38 +41,37 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     this._model._registerValue(this);
   }
 
-  id(): string {
+  public id(): string {
     return this._id;
   }
 
-  type(): ModelElementType {
+  public type(): ModelElementType {
     return this._modelType;
   }
 
-  path(): Path {
+  public path(): Path {
    return this._path();
   }
 
-  model(): Model {
+  public model(): Model {
     return this._model;
   }
 
-  isDetached(): boolean {
+  public isDetached(): boolean {
     return this._model === null;
   }
 
-  _detach(local: boolean): void {
+  public _detach(local: boolean): void {
     this._model._unregisterValue(this);
     this._model = null;
 
-    var event: NodeDetachedEvent = new NodeDetachedEvent(this, local);
-
+    const event: NodeDetachedEvent = new NodeDetachedEvent(this, local);
     this._emitEvent(event);
   }
 
-  data(): T
-  data(value: T): void
-  data(value?: T): any {
+  public data(): T
+  public data(value: T): void
+  public data(value?: T): any {
     if (arguments.length === 0) {
       return this._getData();
     } else {
@@ -79,6 +79,10 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
       return;
     }
   }
+
+  public abstract dataValue(): DataValue
+
+  public abstract _handleModelOperationEvent(operationEvent: ModelOperationEvent): void;
 
   protected _emitValueEvent(event: NodeValueChangedEvent): void {
     this._emitEvent(event);
@@ -91,11 +95,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     }
   }
 
-  abstract dataValue(): DataValue
-
   protected abstract _getData(): T;
 
   protected abstract _setData(value: T): void;
-
-  abstract _handleModelOperationEvent(operationEvent: ModelOperationEvent): void;
 }

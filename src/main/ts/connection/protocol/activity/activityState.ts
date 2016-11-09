@@ -1,8 +1,7 @@
-import {IncomingProtocolNormalMessage} from "../protocol";
-import {OutgoingProtocolNormalMessage} from "../protocol";
-import {MessageBodySerializer} from "../MessageSerializer";
-import {MessageBodyDeserializer} from "../MessageSerializer";
-
+import { IncomingProtocolNormalMessage } from "../protocol";
+import { OutgoingProtocolNormalMessage } from "../protocol";
+import { MessageBodySerializer } from "../MessageSerializer";
+import { MessageBodyDeserializer } from "../MessageSerializer";
 
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {
   activityId: string;
@@ -45,7 +44,7 @@ export interface ActivityRemoteStateSet extends IncomingProtocolNormalMessage {
 }
 
 export var ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<ActivityRemoteStateSet> = (body: any) => {
-  var result: ActivityRemoteStateSet = {
+  const result: ActivityRemoteStateSet = {
     activityId: body.i,
     sessionId: body.s,
     state: body.v
@@ -59,24 +58,26 @@ export interface ActivityRemoteStateRemoved extends IncomingProtocolNormalMessag
   keys: string[];
 }
 
-export var ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<ActivityRemoteStateRemoved> = (body: any) => {
-  var result: ActivityRemoteStateRemoved = {
-    activityId: body.i,
-    sessionId: body.s,
-    keys: body.k
+export var ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<ActivityRemoteStateRemoved> =
+  (body: any) => {
+    const result: ActivityRemoteStateRemoved = {
+      activityId: body.i,
+      sessionId: body.s,
+      keys: body.k
+    };
+    return result;
   };
-  return result;
-};
 
 export interface ActivityRemoteStateCleared extends IncomingProtocolNormalMessage {
   activityId: string;
   sessionId: string;
 }
 
-export var ActivityRemoteStateClearedDeserializer: MessageBodyDeserializer<ActivityRemoteStateCleared> = (body: any) => {
-  var result: ActivityRemoteStateCleared = {
-    activityId: body.i,
-    sessionId: body.s,
+export var ActivityRemoteStateClearedDeserializer: MessageBodyDeserializer<ActivityRemoteStateCleared> =
+  (body: any) => {
+    const result: ActivityRemoteStateCleared = {
+      activityId: body.i,
+      sessionId: body.s,
+    };
+    return result;
   };
-  return result;
-};

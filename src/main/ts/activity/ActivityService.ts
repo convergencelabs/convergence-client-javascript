@@ -53,9 +53,9 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             src: this,
             name: Activity.Events.SESSION_JOINED,
             activityId: joinedMsg.activityId,
-            username: username,
+            username,
             sessionId: joinedMsg.sessionId,
-            participant: participant,
+            participant,
             local: false
           }];
         case MessageType.ACTIVITY_SESSION_LEFT:
@@ -75,7 +75,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
               activityId: stateSetMsg.activityId,
               username: SessionIdParser.parseUsername(stateSetMsg.sessionId),
               sessionId: stateSetMsg.sessionId,
-              key: key,
+              key,
               value: stateSetMsg.state[key],
               local: false
             };
@@ -97,7 +97,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
               activityId: stateRemovedMsg.activityId,
               username: SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
               sessionId: stateRemovedMsg.sessionId,
-              key: key,
+              key,
               local: false
             };
           });
@@ -111,11 +111,11 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     this._joinedMap = new Map<string, Deferred<Activity>>();
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
+  public join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
     if (!this.isJoined(id)) {
       if (options === undefined) {
         options = <ActivityJoinOptions> {
@@ -124,14 +124,14 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
       }
       let deferred: Deferred<Activity> = new Deferred<Activity>();
       this._joinedMap.set(id, deferred);
-      this._connection.request(<ActivityJoinRequest>{
+      this._connection.request(<ActivityJoinRequest> {
         type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: id,
         state: options.state
       }).then((response: ActivityJoinResponse) => {
-        var participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
+        const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
 
-        for (var participant of response.participants) {
+        for (let participant of response.participants) {
           participants.set(participant.sessionId(), participant);
         }
 
@@ -146,11 +146,11 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joinedMap.get(id).promise();
   }
 
-  joined(): Map<string, Activity> {
+  public joined(): Map<string, Activity> {
     return Object.assign({}, this._joinedMap);
   }
 
-  isJoined(id: string): boolean {
+  public isJoined(id: string): boolean {
     return this._joinedMap.has(id);
   }
 

@@ -89,7 +89,6 @@ export class ArraySetValueEvent implements ValueChangedEvent {
   }
 }
 
-
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
@@ -119,7 +118,6 @@ export class NumberAddEvent implements ValueChangedEvent {
               public username: string) {
   }
 }
-
 
 export class ObjectSetEvent implements ValueChangedEvent {
   public name: string = "set";

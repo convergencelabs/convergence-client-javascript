@@ -17,7 +17,7 @@ import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager
 
 export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: "detached",
     REFERENCE: "reference",
     MODEL_CHANGED: "model_changed"
@@ -61,29 +61,29 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
     });
   }
 
-  model(): RealTimeModel {
+  public model(): RealTimeModel {
     return this._model;
   }
 
-  id(): string {
+  public id(): string {
     return this._delegate.id();
   }
 
-  type(): ModelElementType {
+  public type(): ModelElementType {
     return this._delegate.type();
   }
 
-  path(): Path {
+  public path(): Path {
     return this._delegate.path();
   }
 
-  isDetached(): boolean {
+  public isDetached(): boolean {
     return this._delegate.isDetached();
   }
 
-  value(): T
-  value(value: T): void
-  value(value?: T): any {
+  public value(): T
+  public value(value: T): void
+  public value(value?: T): any {
     if (arguments.length === 0) {
       return this._delegate.data();
     } else {
@@ -92,15 +92,15 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
     }
   }
 
-  reference(sessionId: string, key: string): ModelReference<any> {
+  public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
   }
 
-  references(filter?: ReferenceFilter): ModelReference<any>[] {
+  public references(filter?: ReferenceFilter): ModelReference<any>[] {
     return this._referenceManager.getAll(filter);
   }
 
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(event);
   }
 
@@ -110,10 +110,10 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
   }
 
   private _fireReferenceCreated(reference: ModelReference<any>): void {
-    var createdEvent: RemoteReferenceCreatedEvent = {
+    const createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeElement.Events.REFERENCE,
       src: this,
-      reference: reference
+      reference
     };
     this._emitEvent(createdEvent);
   }

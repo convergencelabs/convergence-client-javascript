@@ -10,7 +10,7 @@ export class StringRemoveOperation extends DiscreteOperation implements StringRe
     Object.freeze(this);
   }
 
-  copy(updates: any): StringRemoveOperation {
+  public copy(updates: any): StringRemoveOperation {
     return new StringRemoveOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

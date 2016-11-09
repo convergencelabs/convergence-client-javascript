@@ -12,11 +12,12 @@ export interface ModelReferenceCallbacks {
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
 
-export abstract class LocalModelReference<V, R extends ModelReference<V>> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export abstract class LocalModelReference<V, R extends ModelReference<V>>
+extends ConvergenceEventEmitter<ConvergenceEvent> {
 
+  protected _reference: R;
   private _published: boolean;
   private _callbacks: ModelReferenceCallbacks;
-  protected _reference: R;
 
   constructor(reference: R, callbacks: ModelReferenceCallbacks) {
     super();
@@ -27,65 +28,65 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     this._callbacks = callbacks;
   }
 
-  type(): string {
+  public type(): string {
     return this._reference.type();
   }
 
-  key(): string {
+  public key(): string {
     return this._reference.key();
   }
 
-  source(): RealTimeElement<any> | RealTimeModel {
+  public source(): RealTimeElement<any> | RealTimeModel {
     return this._reference.source();
   }
 
-  isLocal(): boolean {
+  public isLocal(): boolean {
     return true;
   }
 
-  username(): string {
+  public username(): string {
     return this._reference.username();
   }
 
-  sessionId(): string {
+  public sessionId(): string {
     return this._reference.sessionId();
   }
 
-  isDisposed(): boolean {
+  public isDisposed(): boolean {
     return this._reference.isDisposed();
   }
 
-  value(): V {
+  public value(): V {
     return this._reference.value();
   }
 
-  values(): V[] {
+  public values(): V[] {
     return this._reference.values();
   }
 
-  reference(): R {
+  public reference(): R {
     return this._reference;
   }
 
-  share(): void {
+  public share(): void {
     this._ensureAttached();
     this._published = true;
     this._callbacks.onPublish(this);
   }
 
-  unshare(): void {
+  public unshare(): void {
     this._ensureAttached();
     this._published = false;
     this._callbacks.onUnpublish(this);
   }
 
-  isShared(): boolean {
+  public isShared(): boolean {
     return this._published;
   }
 
-  set(value: V): void;
-  set(value: V[]): void;
-  set(value: V | V[]): void {
+  public set(value: V): void;
+  public set(value: V[]): void;
+  public set(value: V | V[]): void {
     this._ensureAttached();
 
     if (value instanceof Array) {
@@ -99,17 +100,17 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>> extend
     }
   }
 
-  clear(): void {
+  public clear(): void {
     this._ensureAttached();
     this._reference._clear();
     this._callbacks.onClear(this);
   }
 
-  isSet(): boolean {
+  public isSet(): boolean {
     return this._reference.isSet();
   }
 
-  dispose(): void {
+  public dispose(): void {
     this._ensureAttached();
     this.unshare();
     this._reference._dispose();

@@ -10,7 +10,7 @@ export class NumberSetOperation extends DiscreteOperation implements NumberSet {
     Object.freeze(this);
   }
 
-  copy(updates: any): NumberSetOperation {
+  public copy(updates: any): NumberSetOperation {
     return new NumberSetOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

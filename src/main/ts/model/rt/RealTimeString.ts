@@ -20,7 +20,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeString extends RealTimeElement<String> {
 
-  static Events: any = {
+  public static Events: any = {
     INSERT: "insert",
     REMOVE: "remove",
     VALUE: "value",
@@ -41,15 +41,15 @@ export class RealTimeString extends RealTimeElement<String> {
     this._delegate.events().subscribe(e => this._handleReferenceModelEvents(e) );
   }
 
-  insert(index: number, value: string): void {
+  public insert(index: number, value: string): void {
     this._delegate.insert(index, value);
   }
 
-  remove(index: number, length: number): void {
+  public remove(index: number, length: number): void {
     this._delegate.remove(index, length);
   }
 
-  length(): number {
+  public length(): number {
     return this._delegate.length();
   }
 
@@ -58,18 +58,18 @@ export class RealTimeString extends RealTimeElement<String> {
   /////////////////////////////////////////////////////////////////////////////
 
   // fixme the index and range reference methods are almost the same.  can we refactor?
-  indexReference(key: string): LocalIndexReference {
-    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+  public indexReference(key: string): LocalIndexReference {
+    const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.INDEX) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
-        return <LocalIndexReference>existing;
+        return <LocalIndexReference> existing;
       }
     } else {
-      var reference: IndexReference = new IndexReference(
+      const reference: IndexReference = new IndexReference(
         this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
-      var local: LocalIndexReference = new LocalIndexReference(
+      const local: LocalIndexReference = new LocalIndexReference(
         reference,
         this._callbacks.referenceEventCallbacks
       );
@@ -78,18 +78,18 @@ export class RealTimeString extends RealTimeElement<String> {
     }
   }
 
-  rangeReference(key: string): LocalRangeReference {
-    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+  public rangeReference(key: string): LocalRangeReference {
+    const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.RANGE) {
         throw new Error("A reference with this key already exists, but is not a range reference");
       } else {
-        return <LocalRangeReference>existing;
+        return <LocalRangeReference> existing;
       }
     } else {
-      var reference: RangeReference = new RangeReference(
+      const reference: RangeReference = new RangeReference(
         this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
-      var local: LocalRangeReference = new LocalRangeReference(
+      const local: LocalRangeReference = new LocalRangeReference(
         reference,
         this._callbacks.referenceEventCallbacks
       );
@@ -98,7 +98,7 @@ export class RealTimeString extends RealTimeElement<String> {
     }
   }
 
-  _handleReferenceModelEvents(event: ModelNodeEvent): void {
+  public _handleReferenceModelEvents(event: ModelNodeEvent): void {
     if (event instanceof StringNodeInsertEvent) {
       if (event.local) {
         this._sendOperation(new StringInsertOperation(this.id(), false, event.index, event.value));

@@ -3,7 +3,6 @@ import {OutgoingProtocolNormalMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
-
 export interface PublishChatMessage extends OutgoingProtocolNormalMessage {
   roomId: string;
   message: string;
@@ -25,7 +24,7 @@ export interface UserChatMessage extends IncomingProtocolNormalMessage {
 }
 
 export var UserChatMessageDeserializer: MessageBodyDeserializer<UserChatMessage> = (body: any) => {
-  var result: UserChatMessage = {
+  const result: UserChatMessage = {
     roomId: body.r,
     message: body.m,
     username: body.u,

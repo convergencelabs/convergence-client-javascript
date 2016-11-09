@@ -17,7 +17,7 @@ import {ChatEvent} from "./events";
 
 export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
-  static Events: any = {
+  public static Events: any = {
     MESSAGE: "message",
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
@@ -27,7 +27,6 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   private _connection: ConvergenceConnection;
   private _joinedMap: Map<string, Deferred<ChatRoom>>;
-
 
   constructor(connection: ConvergenceConnection) {
     super();
@@ -82,15 +81,15 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     this._joinedMap = new Map<string, Deferred<ChatRoom>>();
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  joinRoom(id: string): Promise<ChatRoom> {
+  public joinRoom(id: string): Promise<ChatRoom> {
     if (!this._joinedMap.has(id)) {
       this._joinedMap.set(id, new Deferred<ChatRoom>());
 
-      this._connection.request(<JoinRoomRequestMessage>{
+      this._connection.request(<JoinRoomRequestMessage> {
         type: MessageType.JOIN_ROOM_REQUEST,
         roomId: id
       }).then((response: JoinRoomResponseMessage) => {

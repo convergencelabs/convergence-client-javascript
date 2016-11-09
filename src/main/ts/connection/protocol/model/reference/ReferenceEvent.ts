@@ -17,7 +17,6 @@ ReferenceTypeCodes.put(1, ReferenceType.RANGE);
 ReferenceTypeCodes.put(2, ReferenceType.PROPERTY);
 ReferenceTypeCodes.put(3, ReferenceType.ELEMENT);
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Incoming References
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,17 +47,17 @@ export interface RemoteReferenceCleared extends RemoteReferenceEvent {
 }
 
 export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
-  var type: string = ReferenceTypeCodes.value(body.c);
-  var values: any = deserializeReferenceValues(body.v, type);
+  const type: string = ReferenceTypeCodes.value(body.c);
+  const values: any = deserializeReferenceValues(body.v, type);
 
-  var result: RemoteReferencePublished = {
+  const result: RemoteReferencePublished = {
     resourceId: body.r,
     sessionId: body.s,
     username: SessionIdParser.parseUsername(body.s),
     key: body.k,
     id: body.d,
     referenceType: type,
-    values: values
+    values
   };
   return result;
 };
@@ -77,7 +76,7 @@ export function deserializeReferenceValues(values: any, type: string): any {
     case ReferenceType.RANGE:
       let ranges: IndexRange[] = [];
 
-      for (var range of values) {
+      for (let range of values) {
         ranges.push({
           start: range[0],
           end: range[1]
@@ -91,22 +90,22 @@ export function deserializeReferenceValues(values: any, type: string): any {
 }
 
 export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
-  var type: string = ReferenceTypeCodes.value(body.c);
-  var values: any = deserializeReferenceValues(body.v, type);
-  var result: RemoteReferenceSet = {
+  const type: string = ReferenceTypeCodes.value(body.c);
+  const values: any = deserializeReferenceValues(body.v, type);
+  const result: RemoteReferenceSet = {
     resourceId: body.r,
     sessionId: body.s,
     username: SessionIdParser.parseUsername(body.s),
     key: body.k,
     id: body.d,
     referenceType: type,
-    values: values
+    values
   };
   return result;
 };
 
-var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
-  var result: RemoteReferenceEvent = {
+const ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
+  const result: RemoteReferenceEvent = {
     sessionId: body.s,
     username: SessionIdParser.parseUsername(body.s),
     resourceId: body.r,
@@ -116,9 +115,10 @@ var ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> 
   return result;
 };
 
-export var RemoteReferenceClearedDeserializer: MessageBodyDeserializer<RemoteReferenceCleared> = ReferenceMessageDeserializer;
-export var RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<RemoteReferenceUnpublished> = ReferenceMessageDeserializer;
-
+export var RemoteReferenceClearedDeserializer: MessageBodyDeserializer<RemoteReferenceCleared> =
+  ReferenceMessageDeserializer;
+export var RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<RemoteReferenceUnpublished> =
+  ReferenceMessageDeserializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Outgoing References
@@ -147,7 +147,6 @@ export interface SetReferenceEvent extends OutgoingReferenceEvent {
 
 export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 }
-
 
 export var PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
@@ -180,8 +179,8 @@ function serializeReferenceValue(values: any, type: string): any {
     case ReferenceType.ELEMENT:
       return values;
     case ReferenceType.RANGE:
-      var ranges: number[][] = [];
-      for (var range of values) {
+      const ranges: number[][] = [];
+      for (let range of values) {
         ranges.push([range.start, range.end]);
       }
       return ranges;

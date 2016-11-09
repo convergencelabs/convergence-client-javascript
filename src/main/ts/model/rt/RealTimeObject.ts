@@ -20,9 +20,10 @@ import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> implements RealTimeContainerElement<{ [key: string]: any; }> {
+export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
+implements RealTimeContainerElement<{ [key: string]: any; }> {
 
-  static Events: any = {
+  public static Events: any = {
     SET: "set",
     REMOVE: "remove",
     VALUE: "value",
@@ -42,11 +43,11 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> imp
     this._delegate.events().subscribe(event => this._handleReferenceEvents(event));
   }
 
-  get(key: string): RealTimeElement<any> {
+  public get(key: string): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(key));
   }
 
-  set(key: string, value: any): RealTimeElement<any> {
+  public set(key: string, value: any): RealTimeElement<any> {
     let propSet: boolean = this._delegate.hasKey(key);
     let delegateChild: ModelNode<any> = this._delegate.set(key, value);
     let operation: DiscreteOperation;
@@ -60,41 +61,41 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }> imp
     return this._wrapperFactory.wrap(delegateChild);
   }
 
-  remove(key: string): void {
+  public remove(key: string): void {
     this._delegate.remove(key);
   }
 
-  keys(): string[] {
+  public keys(): string[] {
     return this._delegate.keys();
   }
 
-  hasKey(key: string): boolean {
+  public hasKey(key: string): boolean {
     return this._delegate.hasKey(key);
   }
 
-  forEach(callback: (model: RealTimeElement<any>, key?: string) => void): void {
+  public forEach(callback: (model: RealTimeElement<any>, key?: string) => void): void {
     this._delegate.forEach((modelNode, key) => {
       callback(this._wrapperFactory.wrap(modelNode), key);
     });
   }
 
-  elementAt(pathArgs: any): RealTimeElement<any> {
+  public elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 
-  propertyReference(key: string): LocalPropertyReference {
-    var existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
+  public propertyReference(key: string): LocalPropertyReference {
+    const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.PROPERTY) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
-        return <LocalPropertyReference>existing;
+        return <LocalPropertyReference> existing;
       }
     } else {
-      var reference: PropertyReference = new PropertyReference(
+      const reference: PropertyReference = new PropertyReference(
         this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
 
-      var local: LocalPropertyReference = new LocalPropertyReference(
+      const local: LocalPropertyReference = new LocalPropertyReference(
         reference,
         this._callbacks.referenceEventCallbacks
       );

@@ -10,7 +10,7 @@ import {BooleanSet} from "../ot/ops/operationChanges";
 
 export class BooleanNode extends ModelNode<boolean> {
 
-  static Events: any = {
+  public static Events: any = {
     VALUE: "value",
     DETACHED: ModelNode.Events.DETACHED,
     MODEL_CHANGED: ModelNode.Events.MODEL_CHANGED
@@ -30,12 +30,21 @@ export class BooleanNode extends ModelNode<boolean> {
     this._data = data.value;
   }
 
-  dataValue(): BooleanValue {
+  public dataValue(): BooleanValue {
     return <BooleanValue> {
       id: this.id(),
       type: "boolean",
       value: this.data()
     };
+  }
+
+  public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
+    const type: string = operationEvent.operation.type;
+    if (type === OperationType.BOOLEAN_VALUE) {
+      this._handleSetOperation(operationEvent);
+    } else {
+      throw new Error("Invalid operation!");
+    }
   }
 
   //
@@ -54,24 +63,15 @@ export class BooleanNode extends ModelNode<boolean> {
     this._validateSet(value);
     this._data = value;
 
-    var event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, username);
+    const event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, username);
 
     this._emitValueEvent(event);
   }
 
   // Handlers for incoming operations
 
-  _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
-    var type: string = operationEvent.operation.type;
-    if (type === OperationType.BOOLEAN_VALUE) {
-      this._handleSetOperation(operationEvent);
-    } else {
-      throw new Error("Invalid operation!");
-    }
-  }
-
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    var operation: BooleanSet = <BooleanSet> operationEvent.operation;
+    const operation: BooleanSet = <BooleanSet> operationEvent.operation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

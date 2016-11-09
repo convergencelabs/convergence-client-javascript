@@ -10,7 +10,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeBoolean extends RealTimeElement<boolean> {
 
-  static Events: any = {
+  public static Events: any = {
     VALUE: "value",
     DETACHED: RealTimeElement.Events.DETACHED,
     MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
@@ -25,7 +25,6 @@ export class RealTimeBoolean extends RealTimeElement<boolean> {
               _model: RealTimeModel) {
     super(_delegate, _callbacks, _wrapperFactory, _model, []);
 
-
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
         if (event instanceof BooleanNodeSetValueEvent) {
@@ -35,7 +34,7 @@ export class RealTimeBoolean extends RealTimeElement<boolean> {
     });
   }
 
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }
 }

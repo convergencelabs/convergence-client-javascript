@@ -22,9 +22,9 @@ export interface ActivityJoinResponse extends IncomingProtocolResponseMessage {
 }
 
 export var ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
-  var participants: ActivityParticipant[] = [];
+  const participants: ActivityParticipant[] = [];
 
-  for (var sessionId of Object.keys(body.s)) {
+  for (let sessionId of Object.keys(body.s)) {
     let state: any = body.s[sessionId];
     let stateMap: Map<string, any> = new Map<string, any>();
     for (let key of Object.keys(state)) {
@@ -33,8 +33,6 @@ export var ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoi
     participants.push(new ActivityParticipant(SessionIdParser.parseUsername(sessionId), sessionId, stateMap));
   }
 
-  var result: ActivityJoinResponse = {
-    participants: participants
-  };
+  const result: ActivityJoinResponse = {participants};
   return result;
 };

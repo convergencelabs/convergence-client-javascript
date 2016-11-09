@@ -11,18 +11,18 @@ import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 ///////////////////////////////////////////////////////////////////////////////
 
 export const StringInsertIndexTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringInsertOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringInsertOperation, r: ModelReferenceData) => {
     const values: number[] = IndexTransformer.handleInsert(r.values, o.index, o.value.length);
-    return Immutable.copy(r, {values: values});
+    return Immutable.copy(r, {values});
   };
 
 export const StringRemoveIndexTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringRemoveOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringRemoveOperation, r: ModelReferenceData) => {
     const values: number[] = IndexTransformer.handleRemove(r.values, o.index, o.value.length);
-    return Immutable.copy(r, {values: values});
+    return Immutable.copy(r, {values});
   };
 
 export const StringSetIndexTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringSetOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringSetOperation, r: ModelReferenceData) => {
     return null;
   };

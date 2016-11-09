@@ -8,7 +8,7 @@ export abstract class NodeWrapperFactory<T> {
     this._wrappers = new Map<string, T>();
   }
 
-  wrap(node: ModelNode<any>): T {
+  public wrap(node: ModelNode<any>): T {
     let wrapper: T = this._wrappers[node.id()];
     if (typeof wrapper === "undefined") {
       wrapper = this._createWrapper(node);

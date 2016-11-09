@@ -10,16 +10,16 @@ export class ActivityParticipant {
     this._stateMap = stateMap;
   }
 
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  sessionId(): string {
+  public sessionId(): string {
     return this._sessionId;
   }
 
-  state(): Map<string, any>
-  state(key?: string): any {
+  public state(): Map<string, any>
+  public state(key?: string): any {
     if (key !== undefined) {
       return this._stateMap[key];
     } else {

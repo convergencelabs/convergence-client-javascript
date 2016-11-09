@@ -9,11 +9,11 @@ export class ModelCollaborator {
     Object.freeze(this);
   }
 
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  sessionId(): string {
+  public sessionId(): string {
     return this._sessionId;
   }
 }

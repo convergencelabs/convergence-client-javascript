@@ -12,7 +12,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeNumber extends RealTimeElement<number>  {
 
-  static Events: any = {
+  public static Events: any = {
     DELTA: "delta",
     VALUE: "value",
     DETACHED: RealTimeElement.Events.DETACHED,
@@ -39,23 +39,23 @@ export class RealTimeNumber extends RealTimeElement<number>  {
     });
   }
 
-  add(value: number): void {
+  public add(value: number): void {
     this._delegate.add(value);
   }
 
-  subtract(value: number): void {
+  public subtract(value: number): void {
     this._delegate.subtract(value);
   }
 
-  increment(): void {
+  public increment(): void {
     this._delegate.increment();
   }
 
-  decrement(): void {
+  public decrement(): void {
     this._delegate.decrement();
   }
 
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Number values do not process references");
   }
 }

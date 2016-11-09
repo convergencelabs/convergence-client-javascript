@@ -21,7 +21,7 @@ export var ArrayMoveInsertOTF: OperationTransformationFunction<ArrayMoveOperatio
   };
 
 function transformAgainstForwardMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
     case RangeIndexRelationship.Before:
@@ -41,7 +41,7 @@ function transformAgainstForwardMove(s: ArrayMoveOperation, c: ArrayInsertOperat
 }
 
 function transformAgainstBackwardMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
     case RangeIndexRelationship.Before:
@@ -61,7 +61,7 @@ function transformAgainstBackwardMove(s: ArrayMoveOperation, c: ArrayInsertOpera
 }
 
 function transformAgainstIdentityMove(s: ArrayMoveOperation, c: ArrayInsertOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(s, c.index)) {
     case RangeIndexRelationship.After:

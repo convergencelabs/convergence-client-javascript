@@ -4,7 +4,7 @@ import {Deferred} from "../util/Deferred";
 
 export default class ConvergenceSocket extends EventEmitter {
 
-  static Events: any = {
+  public static Events: any = {
     MESSAGE: "message",
     ERROR: "error",
     CLOSE: "close"
@@ -17,13 +17,17 @@ export default class ConvergenceSocket extends EventEmitter {
 
   constructor(url: string) {
     super();
-    var tmp: string = url;
+    let tmp: string = url;
     tmp = tmp.replace(/https:/i, "wss:");
     tmp = tmp.replace(/http:/i, "ws:");
     this._url = tmp;
   }
 
-  open(): Promise<void> {
+  get url(): string {
+    return this._url;
+  }
+
+  public open(): Promise<void> {
     this._openDeferred = new Deferred<void>();
 
     if (this._socket && this._socket.readyState === WebSocket.CONNECTING) {
@@ -40,16 +44,16 @@ export default class ConvergenceSocket extends EventEmitter {
     return this._openDeferred.promise();
   }
 
-  close(): Promise<void> {
+  public close(): Promise<void> {
     return this.doClose(true);
   }
 
-  terminate(reason: string): Promise<void> {
+  public terminate(reason: string): Promise<void> {
     return this.doClose(false, reason);
   }
 
-  doClose(clean: boolean, reason?: string): Promise<void> {
-    var localDeferred: Deferred<void> = new Deferred<void>();
+  public doClose(clean: boolean, reason?: string): Promise<void> {
+    const localDeferred: Deferred<void> = new Deferred<void>();
 
     if (!this._socket || this._socket.readyState === WebSocket.CLOSED) {
       if (debugFlags.socket.connection) {
@@ -77,7 +81,7 @@ export default class ConvergenceSocket extends EventEmitter {
       this._socket = null;
 
       if (this._openDeferred !== null) {
-        var tmp: Deferred<void> = this._openDeferred;
+        const tmp: Deferred<void> = this._openDeferred;
         this._openDeferred = null;
         tmp.reject(new Error("Web Socket connection aborted while opening"));
       }
@@ -114,16 +118,16 @@ export default class ConvergenceSocket extends EventEmitter {
     return localDeferred.promise();
   }
 
-  isOpen(): boolean {
+  public isOpen(): boolean {
     return this._socket != null && this._socket.readyState === WebSocket.OPEN;
   }
 
-  send(message: any): void {
+  public send(message: any): void {
     if (!this.isOpen()) {
       throw new Error("Can't send protocol while socket is not open.");
     }
 
-    var encodedMessage: string = JSON.stringify(message);
+    const encodedMessage: string = JSON.stringify(message);
     if (debugFlags.socket.messages) {
       console.log("S: " + encodedMessage);
     }
@@ -141,7 +145,7 @@ export default class ConvergenceSocket extends EventEmitter {
     socket.onmessage = (evt: MessageEvent) => {
       try {
 
-        var decoded: any = JSON.parse(evt.data);
+        const decoded: any = JSON.parse(evt.data);
         if (debugFlags.socket.messages) {
           console.log("R: " + evt.data);
         }
@@ -219,9 +223,5 @@ export default class ConvergenceSocket extends EventEmitter {
         console.log("Error handling web socket close event.", e);
       }
     };
-  }
-
-  get url(): string {
-    return this._url;
   }
 }

@@ -8,4 +8,3 @@ export var ArraySetInsertOTF: OperationTransformationFunction<ArraySetOperation,
     // A-SI-1
     return new OperationPair(s, c.copy({noOp: true}));
   };
-

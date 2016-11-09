@@ -9,33 +9,33 @@ import {BooleanValue} from "./dataValue";
 export class DataValueFactory {
   constructor(private idGenerator: () => string) {}
 
-  createDataValue(data: any): DataValue {
-    var id: string = this.idGenerator();
-    var type: string = typeof data;
+  public createDataValue(data: any): DataValue {
+    const id: string = this.idGenerator();
+    const type: string = typeof data;
     if (data === null) {
-      var nullValue: NullValue = {id: id, type: "null"};
+      const nullValue: NullValue = {id, type: "null"};
       return nullValue;
     } else if (type === "string") {
-      var stringValue: StringValue = {id: id, type: type, value: data};
+      const stringValue: StringValue = {id, type, value: data};
       return stringValue;
     } else if (Array.isArray(data)) {
-      var list: DataValue[] = data.map((child: any) => {
+      const list: DataValue[] = data.map((child: any) => {
         return this.createDataValue(child);
       });
-      var arrayValue: ArrayValue = {id: id, type: "array", children: list};
+      const arrayValue: ArrayValue = {id, type: "array", children: list};
       return arrayValue;
     } else if (type === "object") {
-      var props: {[key: string]: DataValue} = {};
+      const props: {[key: string]: DataValue} = {};
       Object.getOwnPropertyNames(data).forEach((prop: string) => {
         props[prop] = this.createDataValue(data[prop]);
       });
-      var objectValue: ObjectValue = {id: id, type: type, children: props};
+      const objectValue: ObjectValue = {id, type, children: props};
       return objectValue;
     } else if (type === "number") {
-      var numberValue: NumberValue = {id: id, type: type, value: data};
+      const numberValue: NumberValue = {id, type, value: data};
       return numberValue;
     } else if (type === "boolean") {
-      var booleanValue: BooleanValue = {id: id, type: type, value: data};
+      const booleanValue: BooleanValue = {id, type, value: data};
       return booleanValue;
     } else {
       throw new Error("Invalid data type: " + type);

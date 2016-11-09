@@ -23,8 +23,7 @@ import {mapObject} from "../../../util/ObjectUtils";
 import {DataValue} from "../../../model/dataValue";
 import {DataValueDeserializer} from "./dataValue";
 
-
-var OperationTypeCodes: CodeMap = new CodeMap();
+const OperationTypeCodes: CodeMap = new CodeMap();
 OperationTypeCodes.put(0, OperationType.COMPOUND);
 OperationTypeCodes.put(1, OperationType.ARRAY_INSERT);
 OperationTypeCodes.put(2, OperationType.ARRAY_REORDER);
@@ -43,7 +42,7 @@ OperationTypeCodes.put(14, OperationType.STRING_REMOVE);
 OperationTypeCodes.put(15, OperationType.STRING_VALUE);
 
 export class OperationSerializer {
-  static serialize(operation: Operation): any {
+  public static serialize(operation: Operation): any {
     if (operation instanceof CompoundOperation) {
       return CompoundOperationSerializer.serialize(operation);
     } else if (operation instanceof DiscreteOperation) {
@@ -53,7 +52,7 @@ export class OperationSerializer {
 }
 
 export class OperationDeserializer {
-  static deserialize(body: any): Operation {
+  public static deserialize(body: any): Operation {
     switch (OperationTypeCodes.value(body.t)) {
       case OperationType.COMPOUND:
         return CompoundDeserializer.deserialize(body);
@@ -64,7 +63,7 @@ export class OperationDeserializer {
 }
 
 export class DiscreteOperationSerializer {
-  static serialize(operation: DiscreteOperation): any {
+  public static serialize(operation: DiscreteOperation): any {
     if (operation instanceof ArrayInsertOperation) {
       return ArrayInsertOperationSerializer.serialize(operation);
     } else if (operation instanceof ArrayMoveOperation) {
@@ -100,7 +99,7 @@ export class DiscreteOperationSerializer {
 }
 
 export class DiscreteOperationDeserializer {
-  static deserialize(body: any): DiscreteOperation {
+  public static deserialize(body: any): DiscreteOperation {
     switch (OperationTypeCodes.value(body.t)) {
       case OperationType.ARRAY_INSERT:
         return ArrayInsertOperationDeserializer.deserialize(body);
@@ -138,11 +137,10 @@ export class DiscreteOperationDeserializer {
   }
 }
 
-
 export class CompoundOperationSerializer {
-  static serialize(operation: CompoundOperation): any {
-    var ops: Array<any> = [];
-    var op: DiscreteOperation;
+  public static serialize(operation: CompoundOperation): any {
+    const ops: Array<any> = [];
+    let op: DiscreteOperation;
 
     for (op of operation.ops) {
       ops.push(DiscreteOperationSerializer.serialize(op));
@@ -156,9 +154,9 @@ export class CompoundOperationSerializer {
 }
 
 export class CompoundDeserializer {
-  static deserialize(body: any): CompoundOperation {
-    var ops: Array<DiscreteOperation> = [];
-    var op: any;
+  public static deserialize(body: any): CompoundOperation {
+    const ops: Array<DiscreteOperation> = [];
+    let op: any;
     for (op of body.o) {
       ops.push(DiscreteOperationDeserializer.deserialize(op));
     }
@@ -167,7 +165,7 @@ export class CompoundDeserializer {
 }
 
 export class ArrayInsertOperationSerializer {
-  static serialize(operation: ArrayInsertOperation): any {
+  public static serialize(operation: ArrayInsertOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.ARRAY_INSERT),
       d: operation.id,
@@ -179,13 +177,13 @@ export class ArrayInsertOperationSerializer {
 }
 
 export class ArrayInsertOperationDeserializer {
-  static deserialize(body: any): ArrayInsertOperation {
+  public static deserialize(body: any): ArrayInsertOperation {
     return new ArrayInsertOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
 export class ArrayMoveOperationSerializer {
-  static serialize(operation: ArrayMoveOperation): any {
+  public static serialize(operation: ArrayMoveOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.ARRAY_REORDER),
       d: operation.id,
@@ -197,13 +195,13 @@ export class ArrayMoveOperationSerializer {
 }
 
 export class ArrayMoveOperationDeserializer {
-  static deserialize(body: any): ArrayMoveOperation {
+  public static deserialize(body: any): ArrayMoveOperation {
     return new ArrayMoveOperation(body.d, body.n, body.f, body.o);
   }
 }
 
 export class ArrayRemoveOperationSerializer {
-  static serialize(operation: ArrayRemoveOperation): any {
+  public static serialize(operation: ArrayRemoveOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.ARRAY_REMOVE),
       d: operation.id,
@@ -214,13 +212,13 @@ export class ArrayRemoveOperationSerializer {
 }
 
 export class ArrayRemoveOperationDeserializer {
-  static deserialize(body: any): ArrayRemoveOperation {
+  public static deserialize(body: any): ArrayRemoveOperation {
     return new ArrayRemoveOperation(body.d, body.n, body.i);
   }
 }
 
 export class ArrayReplaceOperationSerializer {
-  static serialize(operation: ArrayReplaceOperation): any {
+  public static serialize(operation: ArrayReplaceOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.ARRAY_SET),
       d: operation.id,
@@ -232,13 +230,13 @@ export class ArrayReplaceOperationSerializer {
 }
 
 export class ArrayReplaceOperationDeserializer {
-  static deserialize(body: any): ArrayReplaceOperation {
+  public static deserialize(body: any): ArrayReplaceOperation {
     return new ArrayReplaceOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
 export class ArraySetOperationSerializer {
-  static serialize(operation: ArraySetOperation): any {
+  public static serialize(operation: ArraySetOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.ARRAY_VALUE),
       d: operation.id,
@@ -249,13 +247,13 @@ export class ArraySetOperationSerializer {
 }
 
 export class ArraySetOperationDeserializer {
-  static deserialize(body: any): ArraySetOperation {
+  public static deserialize(body: any): ArraySetOperation {
     return new ArraySetOperation(body.d, body.n, body.v.map((value: any) => DataValueDeserializer(value)));
   }
 }
 
 export class BooleanSetOperationSerializer {
-  static serialize(operation: BooleanSetOperation): any {
+  public static serialize(operation: BooleanSetOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.BOOLEAN_VALUE),
       d: operation.id,
@@ -266,13 +264,13 @@ export class BooleanSetOperationSerializer {
 }
 
 export class BooleanSetOperationDeserializer {
-  static deserialize(body: any): BooleanSetOperation {
+  public static deserialize(body: any): BooleanSetOperation {
     return new BooleanSetOperation(body.d, body.n, body.v);
   }
 }
 
 export class NumberAddOperationSerializer {
-  static serialize(operation: NumberAddOperation): any {
+  public static serialize(operation: NumberAddOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.NUMBER_ADD),
       d: operation.id,
@@ -283,13 +281,13 @@ export class NumberAddOperationSerializer {
 }
 
 export class NumberAddOperationDeserializer {
-  static deserialize(body: any): NumberAddOperation {
+  public static deserialize(body: any): NumberAddOperation {
     return new NumberAddOperation(body.d, body.n, body.v);
   }
 }
 
 export class NumberSetOperationSerializer {
-  static serialize(operation: NumberSetOperation): any {
+  public static serialize(operation: NumberSetOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.NUMBER_VALUE),
       d: operation.id,
@@ -300,13 +298,13 @@ export class NumberSetOperationSerializer {
 }
 
 export class NumberSetOperationDeserializer {
-  static deserialize(body: any): NumberSetOperation {
+  public static deserialize(body: any): NumberSetOperation {
     return new NumberSetOperation(body.d, body.n, body.v);
   }
 }
 
 export class ObjectAddPropertyOperationSerializer {
-  static serialize(operation: ObjectAddPropertyOperation): any {
+  public static serialize(operation: ObjectAddPropertyOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.OBJECT_ADD),
       d: operation.id,
@@ -318,13 +316,13 @@ export class ObjectAddPropertyOperationSerializer {
 }
 
 export class ObjectAddPropertyOperationDeserializer {
-  static deserialize(body: any): ObjectAddPropertyOperation {
+  public static deserialize(body: any): ObjectAddPropertyOperation {
     return new ObjectAddPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
 export class ObjectRemovePropertyOperationSerializer {
-  static serialize(operation: ObjectRemovePropertyOperation): any {
+  public static serialize(operation: ObjectRemovePropertyOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.OBJECT_REMOVE),
       d: operation.id,
@@ -335,13 +333,13 @@ export class ObjectRemovePropertyOperationSerializer {
 }
 
 export class ObjectRemovePropertyOperationDeserializer {
-  static deserialize(body: any): ObjectRemovePropertyOperation {
+  public static deserialize(body: any): ObjectRemovePropertyOperation {
     return new ObjectRemovePropertyOperation(body.d, body.n, body.p);
   }
 }
 
 export class ObjectSetPropertyOperationSerializer {
-  static serialize(operation: ObjectSetPropertyOperation): any {
+  public static serialize(operation: ObjectSetPropertyOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.OBJECT_SET),
       d: operation.id,
@@ -353,13 +351,13 @@ export class ObjectSetPropertyOperationSerializer {
 }
 
 export class ObjectSetPropertyOperationDeserializer {
-  static deserialize(body: any): ObjectSetPropertyOperation {
+  public static deserialize(body: any): ObjectSetPropertyOperation {
     return new ObjectSetPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
 export class ObjectSetOperationSerializer {
-  static serialize(operation: ObjectSetOperation): any {
+  public static serialize(operation: ObjectSetOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.OBJECT_VALUE),
       d: operation.id,
@@ -370,13 +368,13 @@ export class ObjectSetOperationSerializer {
 }
 
 export class ObjectSetOperationDeserializer {
-  static deserialize(body: any): ObjectSetOperation {
+  public static deserialize(body: any): ObjectSetOperation {
     return new ObjectSetOperation(body.d, body.n, mapObject(body.v, (value: any) => DataValueDeserializer(value)));
   }
 }
 
 export class StringInsertOperationSerializer {
-  static serialize(operation: StringInsertOperation): any {
+  public static serialize(operation: StringInsertOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.STRING_INSERT),
       d: operation.id,
@@ -388,13 +386,13 @@ export class StringInsertOperationSerializer {
 }
 
 export class StringInsertOperationDeserializer {
-  static deserialize(body: any): StringInsertOperation {
+  public static deserialize(body: any): StringInsertOperation {
     return new StringInsertOperation(body.d, body.n, body.i, body.v);
   }
 }
 
 export class StringRemoveOperationSerializer {
-  static serialize(operation: StringRemoveOperation): any {
+  public static serialize(operation: StringRemoveOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.STRING_REMOVE),
       d: operation.id,
@@ -406,13 +404,13 @@ export class StringRemoveOperationSerializer {
 }
 
 export class StringRemoveOperationDeserializer {
-  static deserialize(body: any): StringRemoveOperation {
+  public static deserialize(body: any): StringRemoveOperation {
     return new StringRemoveOperation(body.d, body.n, body.i, body.v);
   }
 }
 
 export class StringSetOperationSerializer {
-  static serialize(operation: StringSetOperation): any {
+  public static serialize(operation: StringSetOperation): any {
     return {
       t: OperationTypeCodes.code(OperationType.STRING_VALUE),
       d: operation.id,
@@ -423,7 +421,7 @@ export class StringSetOperationSerializer {
 }
 
 export class StringSetOperationDeserializer {
-  static deserialize(body: any): StringSetOperation {
+  public static deserialize(body: any): StringSetOperation {
     return new StringSetOperation(body.d, body.n, body.v);
   }
 }

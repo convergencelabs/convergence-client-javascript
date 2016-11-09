@@ -21,7 +21,7 @@ export interface JoinRoomResponseMessage extends IncomingProtocolResponseMessage
 }
 
 export var JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoomResponseMessage> = (body: any) => {
-  var result: JoinRoomResponseMessage = {
+  const result: JoinRoomResponseMessage = {
     members: body.p,
     messageCount: body.c,
     lastMessageTime: body.l
@@ -29,7 +29,6 @@ export var JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoom
 
   return result;
 };
-
 
 export interface UserJoinedRoomMessage extends IncomingProtocolNormalMessage {
   roomId: string;
@@ -39,7 +38,7 @@ export interface UserJoinedRoomMessage extends IncomingProtocolNormalMessage {
 }
 
 export var UserJoinedRoomMessageDeserializer: MessageBodyDeserializer<UserJoinedRoomMessage> = (body: any) => {
-  var result: UserJoinedRoomMessage = {
+  const result: UserJoinedRoomMessage = {
     roomId: body.r,
     username: body.u,
     sessionId: body.s,

@@ -10,7 +10,7 @@ export class AppliedObjectSetPropertyOperation extends AppliedDiscreteOperation 
     Object.freeze(this);
   }
 
-  inverse(): AppliedObjectSetPropertyOperation {
+  public inverse(): AppliedObjectSetPropertyOperation {
     return new AppliedObjectSetPropertyOperation(this.id, this.noOp, this.prop, this.oldValue, this.value);
   }
 }

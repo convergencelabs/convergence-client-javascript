@@ -7,7 +7,7 @@ export class ModelFqn {
     Object.freeze(this);
   }
 
-  hash(): string {
+  public hash(): string {
     return this.collectionId + "/" + this.modelId;
   }
 }

@@ -62,14 +62,14 @@ function convertReferences(refs: any[]): ReferenceData[] {
 function convertReferenceData(ref: any): ReferenceData {
   "use strict";
 
-  var type: string = ReferenceTypeCodes.value(ref.c);
-  var values: any = deserializeReferenceValues(ref.v, type);
-  var result: ReferenceData = {
+  const type: string = ReferenceTypeCodes.value(ref.c);
+  const values: any = deserializeReferenceValues(ref.v, type);
+  const result: ReferenceData = {
     sessionId: ref.s,
     id: ref.d,
     key: ref.k,
     referenceType: type,
-    values: values
+    values
   };
   return result;
 }

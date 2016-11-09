@@ -1,7 +1,6 @@
 import {IncomingProtocolResponseMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
-
 export interface RemoteClientOpenedModel extends IncomingProtocolResponseMessage {
   resourceId: string;
   username: string;

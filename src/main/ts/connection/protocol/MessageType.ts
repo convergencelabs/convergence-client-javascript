@@ -11,7 +11,6 @@ export enum MessageType {
   TOKEN_AUTH_REQUEST = 6,
   ANONYMOUS_AUTH_REQUEST = 7,
 
-
   AUTHENTICATE_RESPONSE = 10,
 
   // Models

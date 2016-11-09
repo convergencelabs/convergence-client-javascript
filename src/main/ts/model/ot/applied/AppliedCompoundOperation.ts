@@ -9,7 +9,7 @@ export class AppliedCompoundOperation extends AppliedOperation implements BatchC
     Object.freeze(this);
   }
 
-  inverse(): AppliedCompoundOperation {
+  public inverse(): AppliedCompoundOperation {
     return new AppliedCompoundOperation(this.ops.map((op) => {
       return <AppliedDiscreteOperation> op.inverse();
     }));

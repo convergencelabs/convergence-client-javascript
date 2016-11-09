@@ -3,7 +3,6 @@ import {OutgoingProtocolNormalMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
-
 export interface PresenceSetState extends OutgoingProtocolNormalMessage {
   state: {[key: string]: any};
   all: boolean;
@@ -29,14 +28,13 @@ export var PresenceRemoveStateSerializer: MessageBodySerializer = (request: Pres
 export interface PresenceClearState extends OutgoingProtocolNormalMessage {
 }
 
-
 export interface PresenceStateSet extends IncomingProtocolNormalMessage {
   username: string;
   state: Map<string, any>;
 }
 
 export var PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSet> = (body: any) => {
-  var result: PresenceStateSet = {
+  const result: PresenceStateSet = {
     username: body.u,
     state: body.s
   };
@@ -49,7 +47,7 @@ export interface PresenceStateRemoved extends IncomingProtocolNormalMessage {
 }
 
 export var PresenceStateRemovedDeserializer: MessageBodyDeserializer<PresenceStateRemoved> = (body: any) => {
-  var result: PresenceStateRemoved = {
+  const result: PresenceStateRemoved = {
     username: body.u,
     keys: body.k
   };
@@ -61,7 +59,7 @@ export interface PresenceStateCleared extends IncomingProtocolNormalMessage {
 }
 
 export var PresenceStateClearedDeserializer: MessageBodyDeserializer<PresenceStateCleared> = (body: any) => {
-  var result: PresenceStateCleared = {
+  const result: PresenceStateCleared = {
     username: body.u
   };
   return result;

@@ -21,7 +21,7 @@ export interface UserLeftRoomMessage extends IncomingProtocolNormalMessage {
 }
 
 export var UserLeftRoomMessageDeserializer: MessageBodyDeserializer<UserLeftRoomMessage> = (body: any) => {
-  var result: UserLeftRoomMessage = {
+  const result: UserLeftRoomMessage = {
     roomId: body.r,
     username: body.u,
     sessionId: body.s,

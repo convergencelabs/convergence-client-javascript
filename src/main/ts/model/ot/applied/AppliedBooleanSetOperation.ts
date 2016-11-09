@@ -9,7 +9,7 @@ export class AppliedBooleanSetOperation extends AppliedDiscreteOperation impleme
     Object.freeze(this);
   }
 
-  inverse(): AppliedBooleanSetOperation {
+  public inverse(): AppliedBooleanSetOperation {
     return new AppliedBooleanSetOperation(this.id, this.noOp, this.oldValue,  this.value);
   }
 }

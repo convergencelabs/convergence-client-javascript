@@ -7,7 +7,7 @@ export interface ActivitySessionLeft extends IncomingProtocolNormalMessage {
 }
 
 export var ActivitySessionLeftDeserializer: MessageBodyDeserializer<ActivitySessionLeft> = (body: any) => {
-  var result: ActivitySessionLeft = {
+  const result: ActivitySessionLeft = {
     activityId: body.i,
     sessionId: body.s
   };

@@ -66,63 +66,63 @@ export class HistoricalModel {
     this._opRequests = [];
   }
 
-  session(): Session {
+  public session(): Session {
     return this._session;
   }
 
-  collectionId(): string {
+  public collectionId(): string {
     return this._modelFqn.collectionId;
   }
 
-  modelId(): string {
+  public modelId(): string {
     return this._modelFqn.modelId;
   }
 
-  time(): Date {
+  public time(): Date {
     return this._currentTime;
   }
 
-  minTime(): Date {
+  public minTime(): Date {
     return this.createdTime();
   }
 
-  maxTime(): Date {
+  public maxTime(): Date {
     return this._modifiedTime;
   }
 
-  createdTime(): Date {
+  public createdTime(): Date {
     return this._createdTime;
   }
 
-  version(): number {
+  public version(): number {
     return this._version;
   }
 
-  minVersion(): number {
+  public minVersion(): number {
     return 0;
   }
 
-  maxVersion(): number {
+  public maxVersion(): number {
     return this._maxVersion;
   }
 
-  targetVersion(): number {
+  public targetVersion(): number {
     return this._targetVersion;
   }
 
-  isTransitioning(): boolean {
+  public isTransitioning(): boolean {
     return this._targetVersion === this._version;
   }
 
-  root(): HistoricalObject {
+  public root(): HistoricalObject {
     return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  valueAt(path: any): HistoricalElement<any> {
+  public valueAt(path: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._model.valueAt(path));
   }
 
-  playTo(version: number): Promise<void> {
+  public playTo(version: number): Promise<void> {
     if (version < 0) {
       throw new Error(`Version must be >= 0: ${version}`);
     } else if (version > this._maxVersion) {
@@ -157,7 +157,7 @@ export class HistoricalModel {
     };
 
     const opRequest: OperationRequest = {
-      forward: forward,
+      forward,
       completed: false,
       operations: null
     };
@@ -174,7 +174,30 @@ export class HistoricalModel {
     });
   }
 
-  _checkAndProcess(): void {
+  public forward(delta: number = 1): Promise<void> {
+    if (delta < 1) {
+      throw new Error("delta must be > 0");
+    } else if (this._targetVersion + delta > this._maxVersion) {
+      throw new Error(`Cannot move forward by ${delta}, because that would exceed the model's maxVersion.`);
+    }
+
+    const desiredVersion: number = this._targetVersion + delta;
+    return this.playTo(desiredVersion);
+
+  }
+
+  public backward(delta: number = 1): Promise<void> {
+    if (delta < 1) {
+      throw new Error("delta must be > 0");
+    } else if (this._targetVersion - delta < 0) {
+      throw new Error(`Cannot move backawrd by ${delta}, because that would move beyond version 0.`);
+    }
+
+    const desiredVersion: number = this._targetVersion - delta;
+    return this.playTo(desiredVersion);
+  }
+
+  private _checkAndProcess(): void {
     if (this._opRequests.length === 0) {
       throw new Error("There are no operation requests to process");
     }
@@ -185,7 +208,7 @@ export class HistoricalModel {
     }
   }
 
-  _playOperations(operations: ModelOperation[], forward: boolean): void {
+  private _playOperations(operations: ModelOperation[], forward: boolean): void {
     // Going backwards
     if (!forward) {
       operations.reverse().forEach((op: ModelOperation) => {
@@ -195,7 +218,7 @@ export class HistoricalModel {
             this._playDiscreteOp(op, discreteOp, true);
           });
         } else {
-          this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, true);
+          this._playDiscreteOp(op, <AppliedDiscreteOperation> op.operation, true);
         }
       });
     } else {
@@ -207,18 +230,18 @@ export class HistoricalModel {
             this._playDiscreteOp(op, discreteOp, false);
           });
         } else {
-          this._playDiscreteOp(op, <AppliedDiscreteOperation>op.operation, false);
+          this._playDiscreteOp(op, <AppliedDiscreteOperation> op.operation, false);
         }
       });
     }
   }
 
-  _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
+  private _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
     if (!discreteOp.noOp) {
       let dOp: AppliedDiscreteOperation = null;
 
       if (inverse) {
-        dOp = <AppliedDiscreteOperation>discreteOp.inverse();
+        dOp = <AppliedDiscreteOperation> discreteOp.inverse();
       } else {
         dOp = discreteOp;
       }
@@ -235,28 +258,5 @@ export class HistoricalModel {
 
     // fixme this is wrong.  Might be the op before.
     this._currentTime = new Date(op.timestamp);
-  }
-
-  forward(delta: number = 1): Promise<void> {
-    if (delta < 1) {
-      throw new Error("delta must be > 0");
-    } else if (this._targetVersion + delta > this._maxVersion) {
-      throw new Error(`Cannot move forward by ${delta}, because that would exceed the model's maxVersion.`);
-    }
-
-    const desiredVersion: number = this._targetVersion + delta;
-    return this.playTo(desiredVersion);
-
-  }
-
-  backward(delta: number = 1): Promise<void> {
-    if (delta < 1) {
-      throw new Error("delta must be > 0");
-    } else if (this._targetVersion - delta < 0) {
-      throw new Error(`Cannot move backawrd by ${delta}, because that would move beyond version 0.`);
-    }
-
-    const desiredVersion: number = this._targetVersion - delta;
-    return this.playTo(desiredVersion);
   }
 }

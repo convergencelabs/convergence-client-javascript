@@ -10,7 +10,7 @@ export class AppliedArrayReplaceOperation extends AppliedDiscreteOperation imple
     Object.freeze(this);
   }
 
-  inverse(): AppliedArrayReplaceOperation {
+  public inverse(): AppliedArrayReplaceOperation {
     return new AppliedArrayReplaceOperation(this.id, this.noOp, this.index, this.oldValue, this.value);
   }
 }

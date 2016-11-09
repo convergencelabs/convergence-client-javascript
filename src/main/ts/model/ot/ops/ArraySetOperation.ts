@@ -11,11 +11,10 @@ export class ArraySetOperation extends DiscreteOperation implements ArraySet {
     Object.freeze(this);
   }
 
-  copy(updates: any): ArraySetOperation {
+  public copy(updates: any): ArraySetOperation {
     return new ArraySetOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),
       Immutable.update(this.value, updates.value));
   }
 }
-

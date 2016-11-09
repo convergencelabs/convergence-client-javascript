@@ -7,7 +7,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeNull extends RealTimeElement<any> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: RealTimeElement.Events.DETACHED
   };
 
@@ -21,7 +21,7 @@ export class RealTimeNull extends RealTimeElement<any> {
     super(_delegate, _callbacks, _wrapperFactory, _model, []);
   }
 
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Null values do not process references");
   }
 }

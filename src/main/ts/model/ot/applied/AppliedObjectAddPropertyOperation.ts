@@ -11,7 +11,7 @@ export class AppliedObjectAddPropertyOperation extends AppliedDiscreteOperation 
     Object.freeze(this);
   }
 
-  inverse(): AppliedObjectRemovePropertyOperation {
+  public inverse(): AppliedObjectRemovePropertyOperation {
     return new AppliedObjectRemovePropertyOperation(this.id, this.noOp, this.prop, this.value);
   }
 }

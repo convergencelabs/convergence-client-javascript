@@ -22,7 +22,7 @@ import {Observable, Subject} from "rxjs/Rx";
 
 export class ConvergenceConnection extends EventEmitter {
 
-  static Events: any = {
+  public static Events: any = {
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
@@ -91,11 +91,11 @@ export class ConvergenceConnection extends EventEmitter {
     this._session = new SessionImpl(domain, this, null, null);
   }
 
-  session(): Session {
+  public session(): Session {
     return this._session;
   }
 
-  connect(): Promise<HandshakeResponse> {
+  public connect(): Promise<HandshakeResponse> {
     if (this._connectionState !== ConnectionState.DISCONNECTED) {
       throw new Error("Can only call connect on a disconnected connection.");
     }
@@ -109,9 +109,9 @@ export class ConvergenceConnection extends EventEmitter {
     return this._connectionDeferred.promise();
   }
 
-  disconnect(): Promise<void> {
+  public disconnect(): Promise<void> {
     // todo we might not need this.  refactor.
-    var deferred: Deferred<void> = new Deferred<void>();
+    const deferred: Deferred<void> = new Deferred<void>();
 
     if (this._connectionTimeoutTask != null) {
       clearTimeout(this._connectionTimeoutTask);
@@ -141,58 +141,58 @@ export class ConvergenceConnection extends EventEmitter {
     });
   }
 
-  isConnected(): boolean {
+  public isConnected(): boolean {
     return this._connectionState === ConnectionState.CONNECTED;
   }
 
-  send(message: OutgoingProtocolMessage): void {
+  public send(message: OutgoingProtocolMessage): void {
     this._protocolConnection.send(message);
   }
 
-  request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
+  public request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
     return this._protocolConnection.request(message);
   }
 
-  authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
-    var authRequest: PasswordAuthRequest = {
+  public authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
+    const authRequest: PasswordAuthRequest = {
       type: MessageType.PASSWORD_AUTH_REQUEST,
-      username: username,
-      password: password
+      username,
+      password
     };
     return this._authenticate(authRequest);
   }
 
-  authenticateWithToken(token: string): Promise<AuthResponse> {
-    var authRequest: TokenAuthRequest = {
+  public authenticateWithToken(token: string): Promise<AuthResponse> {
+    const authRequest: TokenAuthRequest = {
       type: MessageType.TOKEN_AUTH_REQUEST,
-      token: token
+      token
     };
     return this._authenticate(authRequest);
   }
 
-  authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
-    var authRequest: AnonymousAuthRequest = {
+  public authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
+    const authRequest: AnonymousAuthRequest = {
       type: MessageType.ANONYMOUS_AUTH_REQUEST,
-      displayName: displayName
+      displayName
     };
     return this._authenticate(authRequest);
   }
 
-  addMessageListener(type: EventKey, listener: (message: any) => void): void {
+  public addMessageListener(type: EventKey, listener: (message: any) => void): void {
     this._messageEmitter.on(type, listener);
   }
 
-  addMultipleMessageListener(types: EventKey[], listener: (message: any) => void): void {
+  public addMultipleMessageListener(types: EventKey[], listener: (message: any) => void): void {
     types.forEach((type: string) => {
       this._messageEmitter.on(type, listener);
     });
   }
 
-  removeMessageListener(type: EventKey, listener: (message: any) => void): void {
+  public removeMessageListener(type: EventKey, listener: (message: any) => void): void {
     this._messageEmitter.off(type, listener);
   }
 
-  messages(eventFilter?: MessageType[]): Observable<MessageEvent> {
+  public messages(eventFilter?: MessageType[]): Observable<MessageEvent> {
     if (typeof eventFilter === "undefined") {
       return this._messageSubject.asObservable();
     } else {
@@ -252,13 +252,13 @@ export class ConvergenceConnection extends EventEmitter {
       }
     }
 
-    var timeoutTask: Function = () => {
+    const timeoutTask: Function = () => {
       this._protocolConnection.abort("connection timeout exceeded");
     };
 
     this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
 
-    var socket: ConvergenceSocket = new ConvergenceSocket(this._url);
+    const socket: ConvergenceSocket = new ConvergenceSocket(this._url);
     this._protocolConnection = new ProtocolConnection(
       socket,
       this._protocolConfig);
@@ -332,7 +332,7 @@ export class ConvergenceConnection extends EventEmitter {
 
   private _scheduleReconnect(delay: number, reconnect: boolean): void {
     if (this._connectionAttempts < this._maxReconnectAttempts || this._maxReconnectAttempts < 0) {
-      var reconnectTask: Function = () => {
+      const reconnectTask: Function = () => {
         this._attemptConnection(reconnect);
       };
       this._connectionAttemptTask = setTimeout(reconnectTask, delay * 1000);
@@ -351,7 +351,6 @@ export interface MessageEvent {
 export interface AuthResponse {
   state: {[key: string]: void};
 }
-
 
 enum ConnectionState {
   DISCONNECTED, CONNECTING, CONNECTED, INTERRUPTED, DISCONNECTING

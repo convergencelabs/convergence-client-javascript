@@ -14,8 +14,8 @@ export class PropertyReference extends ModelReference<string> {
     super(referenceManager, ReferenceType.PROPERTY, key, source, username, sessionId, local);
   }
 
-  _handlePropertyRemoved(property: string): void {
-    var index: number = this._values.indexOf(property, 0);
+  public _handlePropertyRemoved(property: string): void {
+    const index: number = this._values.indexOf(property, 0);
     if (index > -1) {
       let newElements: string[] = this._values.slice(0);
       newElements.splice(index, 1);

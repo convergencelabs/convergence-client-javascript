@@ -10,7 +10,7 @@ export class CompoundOperation extends Operation implements BatchChange {
     Object.freeze(this);
   }
 
-  copy(updates: any): CompoundOperation {
+  public copy(updates: any): CompoundOperation {
     return new CompoundOperation(Immutable.update(this.ops, updates.ops));
   }
 }

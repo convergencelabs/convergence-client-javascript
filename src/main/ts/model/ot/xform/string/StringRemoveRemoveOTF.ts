@@ -6,13 +6,18 @@ import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 
 export var StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> =
   (s: StringRemoveOperation, c: StringRemoveOperation) => {
-    var cStart: number = c.index;
-    var cEnd: number = c.index + c.value.length;
+    const cStart: number = c.index;
+    const cEnd: number = c.index + c.value.length;
 
-    var sStart: number = s.index;
-    var sEnd: number = s.index + s.value.length;
+    const sStart: number = s.index;
+    const sEnd: number = s.index + s.value.length;
 
-    var rr: RangeRangeRelationship = RangeRelationshipUtil.getRangeRangeRelationship(sStart, sEnd, cStart, cEnd);
+    const rr: RangeRangeRelationship = RangeRelationshipUtil.getRangeRangeRelationship(sStart, sEnd, cStart, cEnd);
+
+    let offsetDelta: number;
+    let overlapStart: number;
+    let overlapEnd: number;
+
     switch (rr) {
       case RangeRangeRelationship.Precedes:
         // S-RR-1
@@ -27,7 +32,7 @@ export var StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOp
       case RangeRangeRelationship.Meets:
       case RangeRangeRelationship.Overlaps:
         // S-RR-3 and S-RR-5
-        var offsetDelta: number = c.index - s.index;
+        offsetDelta = c.index - s.index;
         return new OperationPair(
           s.copy({value: s.value.substring(0, offsetDelta)}),
           c.copy({index: s.index, value: c.value.substring(s.value.length - offsetDelta, c.value.length)}));
@@ -50,8 +55,8 @@ export var StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOp
           c.copy({noOp: true}));
       case RangeRangeRelationship.Contains:
         // S-RR-9
-        var overlapStart: number = c.index - s.index;
-        var overlapEnd: number = overlapStart + c.value.length;
+        overlapStart = c.index - s.index;
+        overlapEnd = overlapStart + c.value.length;
         return new OperationPair(
           s.copy({value: s.value.substring(0, overlapStart) + s.value.substring(overlapEnd, s.value.length)}),
           c.copy({noOp: true}));

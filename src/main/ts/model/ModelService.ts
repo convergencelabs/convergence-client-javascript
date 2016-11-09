@@ -51,11 +51,11 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       (message: MessageEvent) => this._handleMessage(message));
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  query(query: ModelQuery): Promise<ModelResult[]> {
+  public query(query: ModelQuery): Promise<ModelResult[]> {
     const message: ModelsQueryRequest = {
       type: MessageType.MODELS_QUERY_REQUEST,
       collection: query.collection,
@@ -69,7 +69,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
+  public open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(collectionId)) {
       return Promise.reject<RealTimeModel>(new Error("collectionId must be a non-null, non empty string."));
     }
@@ -82,37 +82,37 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       return Promise.reject<RealTimeModel>(new Error("initializer, supplied as an argument, must be a function."));
     }
 
-    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    var k: string = fqn.hash();
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    const k: string = fqn.hash();
 
-    var openModel: RealTimeModel = this._openModelsByFqn[k];
+    const openModel: RealTimeModel = this._openModelsByFqn[k];
     if (openModel !== undefined) {
       return Promise.resolve(openModel);
     }
 
-    var openRequest: OpenRequest = this._openRequestsByFqn[k];
+    const openRequest: OpenRequest = this._openRequestsByFqn[k];
     if (openRequest !== undefined) {
       return openRequest.deferred.promise();
     }
 
-    var request: OpenRealTimeModelRequest = {
+    const request: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
       initializerProvided: initializer !== undefined
     };
 
-    var deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
+    const deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
-      var transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
-      var referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
-      var clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
+      const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
+      const referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
+      const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
         this._connection.session().sessionId(),
         response.version,
         transformer,
         referenceTransformer);
 
-      var model: RealTimeModel = new RealTimeModel(
+      const model: RealTimeModel = new RealTimeModel(
         response.resourceId,
         response.valueIdPrefix,
         response.data,
@@ -137,21 +137,21 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
 
     this._openRequestsByFqn[k] = {
-      deferred: deferred,
-      initializer: initializer
+      deferred,
+      initializer
     };
 
     return deferred.promise();
   }
 
-  create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
-    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    var idGen: InitialIdGenerator = new InitialIdGenerator();
-    var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
+  public create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+    const idGen: InitialIdGenerator = new InitialIdGenerator();
+    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
     });
-    var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
-    var request: CreateRealTimeModelRequest = {
+    const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
+    const request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
       data: dataValue
@@ -162,10 +162,10 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  remove(collectionId: string, modelId: string): Promise<void> {
-    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+  public remove(collectionId: string, modelId: string): Promise<void> {
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
 
-    var request: DeleteRealTimeModelRequest = {
+    const request: DeleteRealTimeModelRequest = {
       type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn
     };
@@ -175,10 +175,10 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  history(collectionId: string, modelId: string): Promise<HistoricalModel> {
-    var fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+  public history(collectionId: string, modelId: string): Promise<HistoricalModel> {
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
 
-    var request: HistoricalDataRequest = {
+    const request: HistoricalDataRequest = {
       type: MessageType.HISTORICAL_DATA_REQUEST,
       modelFqn: fqn
     };
@@ -189,17 +189,17 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  _close(resourceId: string): Promise<void> {
-    var request: CloseRealTimeModelRequest = {
+  public _close(resourceId: string): Promise<void> {
+    const request: CloseRealTimeModelRequest = {
       type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
-      resourceId: resourceId
+      resourceId
     };
 
-    var model: RealTimeModel = this._openModelsByRid[resourceId];
+    const model: RealTimeModel = this._openModelsByRid[resourceId];
     delete this._openModelsByRid[resourceId];
 
-    var fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
-    var k: string = fqn.hash();
+    const fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
+    const k: string = fqn.hash();
 
     delete this._openModelsByFqn[k];
 
@@ -208,7 +208,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  _dispose(): void {
+  public _dispose(): void {
     Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
       this._openModelsByFqn[fqn].close();
     });
@@ -218,11 +218,11 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     switch (messageEvent.message.type) {
       case MessageType.MODEL_DATA_REQUEST:
         this._handleModelDataRequest(
-          <ModelDataRequest>messageEvent.message,
+          <ModelDataRequest> messageEvent.message,
           messageEvent.callback);
         break;
       default:
-        var model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+        const model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
         if (model !== undefined) {
           model._handleMessage(messageEvent);
         } else {
@@ -232,20 +232,20 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
-    var fqn: ModelFqn = request.modelFqn;
-    var openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
+    const fqn: ModelFqn = request.modelFqn;
+    const openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
     if (openReq === undefined) {
       replyCallback.expectedError("unknown_model", "the requested model is not being opened");
     } else if (openReq.initializer === undefined) {
       replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
     } else {
-      var data: any = openReq.initializer();
-      var idGen: InitialIdGenerator = new InitialIdGenerator();
-      var dataValueFactory: DataValueFactory = new DataValueFactory(() => {
+      const data: any = openReq.initializer();
+      const idGen: InitialIdGenerator = new InitialIdGenerator();
+      const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
         return idGen.id();
       });
-      var dataValue: ObjectValue = <ObjectValue>dataValueFactory.createDataValue(data);
-      var response: ModelDataResponse = {
+      const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
+      const response: ModelDataResponse = {
         data: dataValue,
         type: MessageType.MODEL_DATA_RESPONSE
       };
@@ -258,7 +258,7 @@ class InitialIdGenerator {
   private _prefix: string = "0";
   private _id: number = 0;
 
-  id(): string {
+  public id(): string {
     return this._prefix + ":" + this._id++;
   }
 }

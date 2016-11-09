@@ -34,19 +34,19 @@ export class ReferenceManager {
     this._onRemoteReference = onRemoteReference;
   }
 
-  get(sessionId: string, key: string): ModelReference<any> {
+  public get(sessionId: string, key: string): ModelReference<any> {
     return this._referenceMap.get(sessionId, key);
   }
 
-  getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+  public getAll(filter?: ReferenceFilter): ModelReference<any>[] {
     return this._referenceMap.getAll(filter);
   }
 
-  removeAll(): void {
+  public removeAll(): void {
     this.getAll().forEach(ref => ref._dispose());
   }
 
-  addLocalReference(reference: LocalModelReference<any, any>): void {
+  public addLocalReference(reference: LocalModelReference<any, any>): void {
     const key: string = reference.reference().key();
     if (this._localReferences[key] !== undefined) {
       throw new Error(`Local reference already set for key: ${key}`);
@@ -55,44 +55,51 @@ export class ReferenceManager {
     this._referenceMap.put(reference.reference());
   }
 
-  removeLocalReference(key: string): void {
+  public removeLocalReference(key: string): void {
     const current: LocalModelReference<any, any> = this._localReferences[key];
     if (current !== undefined) {
       current.dispose();
     }
   }
 
-  removeAllLocalReferences(): void {
+  public removeAllLocalReferences(): void {
     const keys: string[] = Object.getOwnPropertyNames(this._localReferences);
     keys.forEach((key: string) => {
       this.removeLocalReference(key);
     });
   }
 
-  getLocalReference(key: string): LocalModelReference<any, any> {
+  public getLocalReference(key: string): LocalModelReference<any, any> {
     return this._localReferences[key];
   }
 
-  localReferences(): {[key: string]: LocalModelReference<any, any>} {
+  public localReferences(): {[key: string]: LocalModelReference<any, any>} {
     return Immutable.copy(this._localReferences);
   }
 
-  handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     switch (event.type) {
       case MessageType.REFERENCE_PUBLISHED:
-        this._handleRemoteReferencePublished(<RemoteReferencePublished>event);
+        this._handleRemoteReferencePublished(<RemoteReferencePublished> event);
         break;
       case MessageType.REFERENCE_SET:
-        this._handleRemoteReferenceSet(<RemoteReferenceSet>event);
+        this._handleRemoteReferenceSet(<RemoteReferenceSet> event);
         break;
       case MessageType.REFERENCE_CLEARED:
-        this._handleRemoteReferenceCleared(<RemoteReferenceCleared>event);
+        this._handleRemoteReferenceCleared(<RemoteReferenceCleared> event);
         break;
       case MessageType.REFERENCE_UNPUBLISHED:
-        this._handleRemoteReferenceUnpublished(<RemoteReferenceUnpublished>event);
+        this._handleRemoteReferenceUnpublished(<RemoteReferenceUnpublished> event);
         break;
       default:
         throw new Error("Invalid reference event.");
+    }
+  }
+
+  public _handleReferenceDisposed(reference: ModelReference<any>): void {
+    this._referenceMap.remove(reference.sessionId(), reference.key());
+    if (reference.isLocal()) {
+      delete this._localReferences[reference.key()];
     }
   }
 
@@ -147,8 +154,8 @@ export class ReferenceManager {
     // Translate vids to RealTimeElements
     if (reference.type() === ReferenceType.ELEMENT) {
       const rtvs: RealTimeElement<any>[] = [];
-      for (var id of values) {
-        let value: RealTimeElement<any> = (<RealTimeModel>this._source)._getRegisteredValue(id);
+      for (let id of values) {
+        let value: RealTimeElement<any> = (<RealTimeModel> this._source)._getRegisteredValue(id);
         if (value !== undefined) {
           rtvs.push(value);
         }
@@ -156,13 +163,6 @@ export class ReferenceManager {
       reference._set(rtvs);
     } else {
       reference._set(values);
-    }
-  }
-
-  _handleReferenceDisposed(reference: ModelReference<any>): void {
-    this._referenceMap.remove(reference.sessionId(), reference.key());
-    if (reference.isLocal()) {
-      delete this._localReferences[reference.key()];
     }
   }
 }

@@ -11,7 +11,7 @@ import {ModelReferenceData} from "./xform/ReferenceTransformer";
 
 export class ClientConcurrencyControl extends EventEmitter {
 
-  static Events: any = {
+  public static Events: any = {
     COMMIT_STATE_CHANGED: "commitStateChanged"
   };
 
@@ -46,19 +46,19 @@ export class ClientConcurrencyControl extends EventEmitter {
     this._pendingCompoundOperation = [];
   }
 
-  clientId(): string {
+  public clientId(): string {
     return this._clientId;
   }
 
-  contextVersion(): number {
+  public contextVersion(): number {
     return this._contextVersion;
   }
 
-  hasNextIncomingOperation(): boolean {
+  public hasNextIncomingOperation(): boolean {
     return this._unappliedOperations.length !== 0;
   }
 
-  getNextIncomingOperation(): ProcessedOperationEvent {
+  public getNextIncomingOperation(): ProcessedOperationEvent {
     if (this._unappliedOperations.length === 0) {
       return null;
     } else {
@@ -68,11 +68,11 @@ export class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  hasNextRemoteReference(): boolean {
+  public hasNextRemoteReference(): boolean {
     return this._unappliedOperations.length !== 0;
   }
 
-  getNextRemoteReferenceSetEvent(): ProcessedOperationEvent {
+  public getNextRemoteReferenceSetEvent(): ProcessedOperationEvent {
     if (this._unappliedOperations.length === 0) {
       return null;
     } else {
@@ -82,7 +82,7 @@ export class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  startCompoundOperation(): void {
+  public startCompoundOperation(): void {
     if (this._compoundOpInProgress) {
       throw new Error("Compound operation already in progress.");
     }
@@ -91,7 +91,7 @@ export class ClientConcurrencyControl extends EventEmitter {
     this._compoundOpInProgress = true;
   }
 
-  completeCompoundOperation(): UnprocessedOperationEvent {
+  public completeCompoundOperation(): UnprocessedOperationEvent {
     if (!this._compoundOpInProgress) {
       throw new Error("Compound operation not in progress.");
     }
@@ -103,11 +103,11 @@ export class ClientConcurrencyControl extends EventEmitter {
 
     }
 
-    var compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
+    const compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
     this._pendingCompoundOperation = [];
     this._inflightOperations.push(compoundOp);
 
-    var event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
+    const event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       this._clientId,
       this._seqNo++,
       this._contextVersion,
@@ -117,18 +117,17 @@ export class ClientConcurrencyControl extends EventEmitter {
     return event;
   }
 
-  isCompoundOperationInProgress(): boolean {
+  public isCompoundOperationInProgress(): boolean {
     return this._compoundOpInProgress;
   }
 
-  processOutgoingOperation(operation: DiscreteOperation): UnprocessedOperationEvent {
+  public processOutgoingOperation(operation: DiscreteOperation): UnprocessedOperationEvent {
     if (this._compoundOpInProgress && !(operation instanceof DiscreteOperation)) {
       throw new Error("Can't process a compound operation that is in progress");
     }
 
     // transform against unapplied operations.
-    var outgoingOperation: DiscreteOperation =
-      this.transformOutgoing(this._unappliedOperations, operation);
+    const outgoingOperation: DiscreteOperation = this.transformOutgoing(this._unappliedOperations, operation);
 
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had no inflight ops or compound ops before. Now we have one.
@@ -153,24 +152,25 @@ export class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  processOutgoingSetReference(r: ModelReferenceData): ModelReferenceData {
-    for (var i: number = 0; i < this._unappliedOperations.length && r; i++) {
+  public processOutgoingSetReference(r: ModelReferenceData): ModelReferenceData {
+    for (let i: number = 0; i < this._unappliedOperations.length && r; i++) {
       r = this._referenceTransformer.transform(this._unappliedOperations[i].operation, r);
     }
     return r;
   }
 
-  dispose(): void {
+  public dispose(): void {
     // todo
   }
 
-  processAcknowledgementOperation(seqNo: number, version: number): void {
+  public processAcknowledgementOperation(seqNo: number, version: number): void {
     if (this._inflightOperations.length === 0) {
       throw new Error("Received an operation from this site, but with no operations in flight.");
     }
 
     if (this._contextVersion !== version) {
-      throw new Error("Acknowledgement did not meet expected context version of " + this._contextVersion + ": " + version);
+      throw new Error("Acknowledgement did not meet expected context version of " +
+        this._contextVersion + ": " + version);
     }
 
     this._contextVersion++;
@@ -184,12 +184,12 @@ export class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
+  public processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
     if (incomingOperation.contextVersion > this._contextVersion) {
       throw new Error("Invalid context version.");
     }
 
-    var remoteOperation: Operation = incomingOperation.operation;
+    let remoteOperation: Operation = incomingOperation.operation;
 
     // forward transform the operation against the in flight operations to
     // prepare it to be applied to the data model.
@@ -211,17 +211,17 @@ export class ClientConcurrencyControl extends EventEmitter {
       remoteOperation));
   }
 
-  processRemoteReferenceSet(r: ModelReferenceData): ModelReferenceData {
-    for (var i: number = 0; i < this._inflightOperations.length && r; i++) {
+  public processRemoteReferenceSet(r: ModelReferenceData): ModelReferenceData {
+    for (let i: number = 0; i < this._inflightOperations.length && r; i++) {
       r = this._referenceTransformer.transform(this._inflightOperations[i], r);
     }
     return r;
   }
 
   private transformIncoming(serverOp: Operation, clientOps: Operation[]): Operation {
-    var sPrime: Operation = serverOp;
-    for (var i: number = 0; i < clientOps.length; i++) {
-      var opPair: OperationPair = this._transformer.transform(sPrime, clientOps[i]);
+    let sPrime: Operation = serverOp;
+    for (let i: number = 0; i < clientOps.length; i++) {
+      let opPair: OperationPair = this._transformer.transform(sPrime, clientOps[i]);
       sPrime = opPair.serverOp;
       clientOps[i] = opPair.clientOp;
     }
@@ -229,9 +229,9 @@ export class ClientConcurrencyControl extends EventEmitter {
   }
 
   private transformOutgoing(serverOps: ProcessedOperationEvent[], clientOp: Operation): DiscreteOperation {
-    var cPrime: Operation = clientOp;
-    for (var i: number = 0; i < serverOps.length; i++) {
-      var opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
+    let cPrime: Operation = clientOp;
+    for (let i: number = 0; i < serverOps.length; i++) {
+      let opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
       serverOps[i] = new ProcessedOperationEvent(
         serverOps[i].clientId,
         serverOps[i].seqNo,
@@ -241,6 +241,6 @@ export class ClientConcurrencyControl extends EventEmitter {
       );
       cPrime = opPair.clientOp;
     }
-    return <DiscreteOperation>cPrime;
+    return <DiscreteOperation> cPrime;
   }
 }

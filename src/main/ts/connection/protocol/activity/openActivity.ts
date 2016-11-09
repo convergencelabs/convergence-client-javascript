@@ -17,12 +17,11 @@ export interface ActivityOpenResponse extends OutgoingProtocolRequestMessage {
 }
 
 export var ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
-  var result: ActivityOpenResponse = {
+  const result: ActivityOpenResponse = {
     state: body.s
   };
   return result;
 };
-
 
 /**
  * Stored by session id, then key.

@@ -1,6 +1,6 @@
-import {ConvergenceConnection} from "./connection/ConvergenceConnection";
+import { ConvergenceConnection } from "./connection/ConvergenceConnection";
 import ConvergenceDomain from "./ConvergenceDomain";
-import {Session} from "./Session";
+import { Session } from "./Session";
 
 export class SessionImpl implements Session {
 
@@ -21,47 +21,47 @@ export class SessionImpl implements Session {
   /**
    * @return The ConvergenceDomain for this session
    */
-  domain(): ConvergenceDomain {
+  public domain(): ConvergenceDomain {
     return this._domain;
   }
 
-  _setSessionId(sessionId: string): void {
+  public _setSessionId(sessionId: string): void {
     this._sessionId = sessionId;
   }
 
   /**
    * @return The sessionId of the connected client
    */
-  sessionId(): string {
+  public sessionId(): string {
     return this._sessionId;
   }
 
   /**
    * @return The username of the authenticated client or null if not authenticated
    */
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  _setUsername(username: string): void {
+  public _setUsername(username: string): void {
     this._username = username;
   }
 
   /**
    * @return True if the client is connected to the domain
    */
-  isConnected(): boolean {
+  public isConnected(): boolean {
     return this._connection.isConnected();
   }
 
-  setAuthenticated(authenticated: boolean): void {
+  public setAuthenticated(authenticated: boolean): void {
     this._authenticated = authenticated;
   }
 
   /**
    * @return True if the client is authenticated
    */
-  isAuthenticated(): boolean {
+  public isAuthenticated(): boolean {
     return this._authenticated;
   }
 }

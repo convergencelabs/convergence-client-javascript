@@ -10,7 +10,7 @@ export class AppliedStringInsertOperation extends AppliedDiscreteOperation imple
     Object.freeze(this);
   }
 
-  inverse(): AppliedStringRemoveOperation {
+  public inverse(): AppliedStringRemoveOperation {
     return new AppliedStringRemoveOperation(this.id, this.noOp, this.index, this.value.length, this.value);
   }
 }

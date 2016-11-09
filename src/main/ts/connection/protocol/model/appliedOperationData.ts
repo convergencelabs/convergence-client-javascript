@@ -23,7 +23,7 @@ import {ModelOperation} from "../../../model/ot/applied/ModelOperation";
 import {ModelFqn} from "../../../model/ModelFqn";
 import {AppliedDiscreteOperation} from "../../../model/ot/applied/AppliedDiscreteOperation";
 
-var OperationTypeCodes: CodeMap = new CodeMap();
+const OperationTypeCodes: CodeMap = new CodeMap();
 OperationTypeCodes.put(0, OperationType.COMPOUND);
 OperationTypeCodes.put(1, OperationType.ARRAY_INSERT);
 OperationTypeCodes.put(2, OperationType.ARRAY_REORDER);
@@ -41,16 +41,15 @@ OperationTypeCodes.put(13, OperationType.STRING_INSERT);
 OperationTypeCodes.put(14, OperationType.STRING_REMOVE);
 OperationTypeCodes.put(15, OperationType.STRING_VALUE);
 
-
 export class ModelOperationDeserializer {
-  static deserialize(body: any): ModelOperation {
+  public static deserialize(body: any): ModelOperation {
     return new ModelOperation(new ModelFqn(body.c, body.m), body.v, body.p, body.u, body.s,
       AppliedOperationDeserializer.deserialize(body.o));
   }
 }
 
 export class AppliedOperationDeserializer {
-  static deserialize(body: any): AppliedOperation {
+  public static deserialize(body: any): AppliedOperation {
     switch (OperationTypeCodes.value(body.t)) {
       case OperationType.COMPOUND:
         return AppliedCompoundDeserializer.deserialize(body);
@@ -90,11 +89,10 @@ export class AppliedOperationDeserializer {
   }
 }
 
-
 export class AppliedCompoundDeserializer {
-  static deserialize(body: any): AppliedCompoundOperation {
-    var ops: Array<AppliedDiscreteOperation> = [];
-    var op: AppliedDiscreteOperation;
+  public static deserialize(body: any): AppliedCompoundOperation {
+    const ops: Array<AppliedDiscreteOperation> = [];
+    let op: AppliedDiscreteOperation;
     for (op of body.o) {
       ops.push(<AppliedDiscreteOperation> AppliedOperationDeserializer.deserialize(op));
     }
@@ -102,97 +100,98 @@ export class AppliedCompoundDeserializer {
   }
 }
 
-
 export class AppliedArrayInsertOperationDeserializer {
-  static deserialize(body: any): AppliedArrayInsertOperation {
+  public static deserialize(body: any): AppliedArrayInsertOperation {
     return new AppliedArrayInsertOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
 export class AppliedArrayMoveOperationDeserializer {
-  static deserialize(body: any): AppliedArrayMoveOperation {
+  public static deserialize(body: any): AppliedArrayMoveOperation {
     return new AppliedArrayMoveOperation(body.d, body.n, body.f, body.o);
   }
 }
 
 export class AppliedArrayRemoveOperationDeserializer {
-  static deserialize(body: any): AppliedArrayRemoveOperation {
+  public static deserialize(body: any): AppliedArrayRemoveOperation {
     return new AppliedArrayRemoveOperation(body.d, body.n, body.i, body.o ? DataValueDeserializer(body.o) : null);
   }
 }
 
 export class AppliedArrayReplaceOperationDeserializer {
-  static deserialize(body: any): AppliedArrayReplaceOperation {
+  public static deserialize(body: any): AppliedArrayReplaceOperation {
     return new AppliedArrayReplaceOperation(body.d, body.n, body.i, DataValueDeserializer(body.v),
       body.o ? DataValueDeserializer(body.o) : null);
   }
 }
 
 export class AppliedArraySetOperationDeserializer {
-  static deserialize(body: any): AppliedArraySetOperation {
+  public static deserialize(body: any): AppliedArraySetOperation {
     return new AppliedArraySetOperation(body.d, body.n, body.v.map((value: any) => DataValueDeserializer(value)),
       body.o ? body.o.map((value: any) => DataValueDeserializer(value)) : null);
   }
 }
 
 export class AppliedBooleanSetOperationDeserializer {
-  static deserialize(body: any): AppliedBooleanSetOperation {
+  public static deserialize(body: any): AppliedBooleanSetOperation {
     return new AppliedBooleanSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }
 
 export class AppliedNumberAddOperationDeserializer {
-  static deserialize(body: any): AppliedNumberAddOperation {
+  public static deserialize(body: any): AppliedNumberAddOperation {
     return new AppliedNumberAddOperation(body.d, body.n, body.v);
   }
 }
 
 export class AppliedNumberSetOperationDeserializer {
-  static deserialize(body: any): AppliedNumberSetOperation {
+  public static deserialize(body: any): AppliedNumberSetOperation {
     return new AppliedNumberSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }
 
 export class AppliedObjectAddPropertyOperationDeserializer {
-  static deserialize(body: any): AppliedObjectAddPropertyOperation {
+  public static deserialize(body: any): AppliedObjectAddPropertyOperation {
     return new AppliedObjectAddPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
 export class AppliedObjectRemovePropertyOperationDeserializer {
-  static deserialize(body: any): AppliedObjectRemovePropertyOperation {
-    return new AppliedObjectRemovePropertyOperation(body.d, body.n, body.p, body.o ? DataValueDeserializer(body.o) : null);
+  public static deserialize(body: any): AppliedObjectRemovePropertyOperation {
+    return new AppliedObjectRemovePropertyOperation(body.d, body.n, body.p,
+      body.o ? DataValueDeserializer(body.o) : null);
   }
 }
 
 export class AppliedObjectSetPropertyOperationDeserializer {
-  static deserialize(body: any): AppliedObjectSetPropertyOperation {
+  public static deserialize(body: any): AppliedObjectSetPropertyOperation {
     return new AppliedObjectSetPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v),
       body.o ? DataValueDeserializer(body.o) : null);
   }
 }
 
 export class AppliedObjectSetOperationDeserializer {
-  static deserialize(body: any): AppliedObjectSetOperation {
-    return new AppliedObjectSetOperation(body.d, body.n, mapObject(body.v, (value: any) => DataValueDeserializer(value)),
+  public static deserialize(body: any): AppliedObjectSetOperation {
+    return new AppliedObjectSetOperation(body.d, body.n,
+      mapObject(body.v, (value: any) => DataValueDeserializer(value)),
       body.o ? mapObject(body.o, (value: any) => DataValueDeserializer(value)) : null);
   }
 }
 
 export class AppliedStringInsertOperationDeserializer {
-  static deserialize(body: any): AppliedStringInsertOperation {
+  public static deserialize(body: any): AppliedStringInsertOperation {
     return new AppliedStringInsertOperation(body.d, body.n, body.i, body.v);
   }
 }
 
 export class AppliedStringRemoveOperationDeserializer {
-  static deserialize(body: any): AppliedStringRemoveOperation {
+  public static deserialize(body: any): AppliedStringRemoveOperation {
     return new AppliedStringRemoveOperation(body.d, body.n, body.i, body.l, body.o);
   }
 }
 
 export class AppliedStringSetOperationDeserializer {
-  static deserialize(body: any): AppliedStringSetOperation {
+  public static deserialize(body: any): AppliedStringSetOperation {
     return new AppliedStringSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }

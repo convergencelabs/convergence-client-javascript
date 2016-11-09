@@ -13,25 +13,25 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<any> imple
     this._emitFrom(delegate.events());
   }
 
-  username(): string {
+  public username(): string {
     return this._manager.username();
   }
 
-  isAvailable(): boolean {
+  public isAvailable(): boolean {
     return this._manager.isAvailable();
   }
 
-  state(key: string): any
-  state(): Map<string, any>
-  state(key?: string): any {
+  public state(key: string): any
+  public state(): Map<string, any>
+  public state(key?: string): any {
     return this._manager.state(key);
   }
 
-  asObservable(): Observable<UserPresence> {
+  public asObservable(): Observable<UserPresence> {
     return this._manager.asObservable();
   }
 
-  unsubscribe(): void {
+  public unsubscribe(): void {
     if (this._manager !== null) {
       this._manager.unsubscribe(this);
     }

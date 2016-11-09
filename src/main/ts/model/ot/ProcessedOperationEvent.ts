@@ -10,4 +10,3 @@ export class ProcessedOperationEvent {
     Object.freeze(this);
   }
 }
-

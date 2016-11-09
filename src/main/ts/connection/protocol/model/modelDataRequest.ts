@@ -16,7 +16,6 @@ export var ModelDataRequestDeserializer: MessageBodyDeserializer<ModelDataReques
   };
 };
 
-
 export interface ModelDataResponse extends OutgoingProtocolResponseMessage {
   data: ObjectValue;
 }

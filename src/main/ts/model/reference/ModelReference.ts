@@ -13,15 +13,16 @@ Object.freeze(ReferenceType);
 
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  static Events: any = {
+  public static Events: any = {
     SET: "set",
     CLEARED: "cleared",
     DISPOSED: "disposed"
   };
 
+  protected _values: V[];
+
   private _referenceManager: ReferenceManager;
   private _disposed: boolean;
-  protected _values: V[];
   private _type: string;
   private _key: string;
   private _source: any;
@@ -48,37 +49,37 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     this._local = local;
   }
 
-  type(): string {
+  public type(): string {
     return this._type;
   }
 
-  key(): string {
+  public key(): string {
     return this._key;
   }
 
-  source(): any {
+  public source(): any {
     return this._source;
   }
 
-  isLocal(): boolean {
+  public isLocal(): boolean {
     return this._local;
   }
 
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  sessionId(): string {
+  public sessionId(): string {
     return this._sessionId;
   }
 
-  isDisposed(): boolean {
+  public isDisposed(): boolean {
     return this._disposed;
   }
 
-  _dispose(): void {
+  public _dispose(): void {
     this._disposed = true;
-    var event: ReferenceDisposedEvent = {
+    const event: ReferenceDisposedEvent = {
       name: ModelReference.Events.DISPOSED,
       src: this
     };
@@ -87,31 +88,31 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     this._referenceManager._handleReferenceDisposed(this);
   }
 
-  value(): V {
+  public value(): V {
     return this._values[0];
   }
 
-  values(): V[] {
+  public values(): V[] {
     return this._values;
   }
 
-  isSet(): boolean {
+  public isSet(): boolean {
     return this._values.length > 0;
   }
 
-  _set(values: V[], local: boolean = false): void {
+  public _set(values: V[], local: boolean = false): void {
     this._values = values;
-    var event: ReferenceChangedEvent = {
+    const event: ReferenceChangedEvent = {
       name: ModelReference.Events.SET,
       src: this,
-      local: local
+      local
     };
     this._emitEvent(event);
   }
 
-  _clear(): void {
+  public _clear(): void {
     this._values = [];
-    var event: ReferenceClearedEvent = {
+    const event: ReferenceClearedEvent = {
       name: ModelReference.Events.CLEARED,
       src: this
     };

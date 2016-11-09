@@ -21,7 +21,7 @@ export var ArrayRemoveMoveOTF: OperationTransformationFunction<ArrayRemoveOperat
   };
 
 function transformAgainstForwardMove(s: ArrayRemoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
     case RangeIndexRelationship.Before:
@@ -43,7 +43,7 @@ function transformAgainstForwardMove(s: ArrayRemoveOperation, c: ArrayMoveOperat
 }
 
 function transformAgainstBackwardMove(s: ArrayRemoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
     case RangeIndexRelationship.Before:
@@ -65,7 +65,7 @@ function transformAgainstBackwardMove(s: ArrayRemoveOperation, c: ArrayMoveOpera
 }
 
 function transformAgainstIdentityMove(s: ArrayRemoveOperation, c: ArrayMoveOperation): OperationPair {
-  'use strict';
+  "use strict";
 
   switch (ArrayMoveHelper.getRangeIndexRelationship(c, s.index)) {
     case RangeIndexRelationship.Before:

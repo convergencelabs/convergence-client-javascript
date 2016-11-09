@@ -10,8 +10,7 @@ export class AppliedArraySetOperation extends AppliedDiscreteOperation implement
     Object.freeze(this);
   }
 
-  inverse(): AppliedArraySetOperation {
+  public inverse(): AppliedArraySetOperation {
     return new AppliedArraySetOperation(this.id, this.noOp, this.oldValue, this.value);
   }
 }
-

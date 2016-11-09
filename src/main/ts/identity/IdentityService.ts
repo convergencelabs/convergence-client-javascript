@@ -16,30 +16,29 @@ export var UserField: any = {
   DISPLAY_NAME: "displayName"
 };
 
-var validLookUpFields: string[] = [
+const validLookUpFields: string[] = [
   UserField.USERNAME, UserField.EMAIL
 ];
 
-var validSearchFields: string[] = [
+const validSearchFields: string[] = [
   UserField.USERNAME,
   UserField.EMAIL,
   UserField.FIRST_NAME,
   UserField.LAST_NAME,
   UserField.DISPLAY_NAME];
 
-
 export class IdentityService {
 
   constructor(private _connection: ConvergenceConnection) {
   }
 
-  session(): Session {
+  public session(): Session {
     return this._connection.session();
   }
 
-  user(username: string): Promise<DomainUser> {
-    if (typeof username !== 'string') {
-      return Promise.reject<DomainUser>('Must specify a username.');
+  public user(username: string): Promise<DomainUser> {
+    if (typeof username !== "string") {
+      return Promise.reject<DomainUser>("Must specify a username.");
     }
 
     return this.users([username]).then((users: {[key: string]: DomainUser}) => {
@@ -52,7 +51,7 @@ export class IdentityService {
     });
   }
 
-  userByEmail(email: string): Promise<DomainUser> {
+  public userByEmail(email: string): Promise<DomainUser> {
     return this.usersByEmail([email]).then((users: {[hey: string]: DomainUser}) => {
       const keys: string[] = Object.keys(users);
       if (keys.length === 0 || keys.length === 1) {
@@ -63,7 +62,7 @@ export class IdentityService {
     });
   }
 
-  users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
+  public users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
     const unique: string[] = Array.from(new Set(usernames));
     return this._users(unique, UserField.USERNAME).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
@@ -74,7 +73,7 @@ export class IdentityService {
     });
   }
 
-  usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
+  public usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
     const unique: string[] = Array.from(new Set(emails));
     return this._users(unique, UserField.EMAIL).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
@@ -85,21 +84,21 @@ export class IdentityService {
     });
   }
 
-  search(query: UserQuery): Promise<DomainUser[]> {
+  public search(query: UserQuery): Promise<DomainUser[]> {
     if (query.fields === undefined || query.fields === null ||
-      (Array.isArray(query.fields) && (<string[]>query.fields).length === 0)) {
+      (Array.isArray(query.fields) && (<string[]> query.fields).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (query.term === undefined || query.term === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
     } else {
       let fields: string[] | string = query.fields;
       if (!Array.isArray(query.fields)) {
-        fields = [<string>query.fields];
+        fields = [<string> query.fields];
       }
 
       const orderBy: any = query.orderBy || {};
 
-      const sanitized: string[] = this._sanitizeSearchFields(<string[]>fields);
+      const sanitized: string[] = this._sanitizeSearchFields(<string[]> fields);
       const message: UserSearchRequest = {
         type: MessageType.USER_SEARCH_REQUEST,
         fields: sanitized,
@@ -122,17 +121,17 @@ export class IdentityService {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
     } else if (validLookUpFields.indexOf(field) < 0) {
       return Promise.reject<DomainUser[]>(new Error("invalid lookup field"));
-    } else if (values === undefined || values === null || (Array.isArray(values) && (<string[]>values).length === 0)) {
+    } else if (values === undefined || values === null || (Array.isArray(values) && (<string[]> values).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one value"));
     } else {
       if (!Array.isArray(values)) {
-        values = [<string>values];
+        values = [<string> values];
       }
 
-      var message: UserLookUpRequest = {
+      const message: UserLookUpRequest = {
         type: MessageType.USER_LOOKUP_REQUEST,
-        field: field,
-        values: <string[]>values
+        field,
+        values: <string[]> values
       };
 
       return this._connection.request(message).then((response: UserListResponse) => {
@@ -142,7 +141,7 @@ export class IdentityService {
   }
 
   private _sanitizeSearchFields(fields: string[]): string[] {
-    var result: string[] = [];
+    const result: string[] = [];
     fields.forEach((field: string) => {
       if (validSearchFields.indexOf(field) < 0) {
         throw new Error("Invalid user search field: " + field);

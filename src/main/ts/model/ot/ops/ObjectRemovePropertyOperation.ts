@@ -12,11 +12,10 @@ export class ObjectRemovePropertyOperation extends DiscreteOperation implements 
     Object.freeze(this);
   }
 
-  copy(updates: any): ObjectRemovePropertyOperation {
+  public copy(updates: any): ObjectRemovePropertyOperation {
     return new ObjectRemovePropertyOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),
       Immutable.update(this.prop, updates.prop));
   }
 }
-

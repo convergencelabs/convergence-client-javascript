@@ -11,7 +11,7 @@ export class ArrayReplaceOperation extends DiscreteOperation implements ArrayRep
     Object.freeze(this);
   }
 
-  copy(updates: any): ArrayReplaceOperation {
+  public copy(updates: any): ArrayReplaceOperation {
     return new ArrayReplaceOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

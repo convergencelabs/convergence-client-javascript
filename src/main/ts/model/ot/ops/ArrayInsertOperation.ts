@@ -11,7 +11,7 @@ export class ArrayInsertOperation extends DiscreteOperation implements ArrayInse
     Object.freeze(this);
   }
 
-  copy(updates: any): ArrayInsertOperation {
+  public copy(updates: any): ArrayInsertOperation {
     return new ArrayInsertOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

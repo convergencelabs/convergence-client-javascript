@@ -5,12 +5,13 @@ import {OperationType} from "../ops/OperationType";
 
 export class AppliedObjectSetOperation extends AppliedDiscreteOperation implements ObjectSet {
 
-  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue}, public oldValue: {[key: string]: DataValue}) {
+  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue},
+              public oldValue: {[key: string]: DataValue}) {
     super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }
 
-  inverse(): AppliedObjectSetOperation {
+  public inverse(): AppliedObjectSetOperation {
     return new AppliedObjectSetOperation(this.id, this.noOp, this.oldValue, this.value);
   }
 }

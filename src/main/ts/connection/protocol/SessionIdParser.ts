@@ -1,13 +1,13 @@
 export class SessionIdParser {
-  static serialize(sk: SessionKey): string {
+  public static serialize(sk: SessionKey): string {
     return `${sk.username}:${sk.sessionId}`;
   }
 
-  static parseUsername(sk: string): string {
+  public static parseUsername(sk: string): string {
     return SessionIdParser.deserialize(sk).username;
   }
 
-  static deserialize(sk: string): SessionKey {
+  public static deserialize(sk: string): SessionKey {
     const index: number = sk.lastIndexOf(":");
 
     return {

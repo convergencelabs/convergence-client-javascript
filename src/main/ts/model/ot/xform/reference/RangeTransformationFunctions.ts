@@ -12,18 +12,18 @@ import {RangeTransformer} from "./RangeTransformer";
 ///////////////////////////////////////////////////////////////////////////////
 
 export const StringInsertRangeTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringInsertOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringInsertOperation, r: ModelReferenceData) => {
     const values: IndexRange[] = RangeTransformer.handleInsert(r.values, o.index, o.value.length);
-    return Immutable.copy(r, {values: values});
+    return Immutable.copy(r, {values});
   };
 
 export const StringRemoveRangeTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringRemoveOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringRemoveOperation, r: ModelReferenceData) => {
     const values: IndexRange[] = RangeTransformer.handleRemove(r.values, o.index, o.value.length);
-    return Immutable.copy(r, {values: values});
+    return Immutable.copy(r, {values});
   };
 
 export const StringSetRangeTransformationFunction: ReferenceTransformationFunction =
-  function (o: StringSetOperation, r: ModelReferenceData): ModelReferenceData {
+  (o: StringSetOperation, r: ModelReferenceData) => {
     return null;
   };

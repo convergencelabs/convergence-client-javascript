@@ -18,7 +18,7 @@ import {debugFlags} from "../Debug";
 
 export class ProtocolConnection extends EventEmitter {
 
-  static Events: any = {
+  public static Events: any = {
     MESSAGE: "message",
     ERROR: "error",
     CLOSED: "close",
@@ -52,19 +52,19 @@ export class ProtocolConnection extends EventEmitter {
     this._requests = {};
   }
 
-  connect(): Promise<void> {
+  public connect(): Promise<void> {
     return this._socket.open();
   }
 
-  handshake(reconnect: boolean, reconnectToken?: string): Promise<HandshakeResponse> {
-    var request: HandshakeRequest = {
+  public handshake(reconnect: boolean, reconnectToken?: string): Promise<HandshakeResponse> {
+    const request: HandshakeRequest = {
       type: MessageType.HANDSHAKE_REQUEST,
-      reconnect: reconnect,
-      reconnectToken: reconnectToken
+      reconnect,
+      reconnectToken
     };
 
     return this.request(request).then((response: HandshakeResponse) => {
-      var heartbeatHandler: HeartbeatHandler = {
+      const heartbeatHandler: HeartbeatHandler = {
         sendPing(): void {
           this.onPing();
         },
@@ -87,40 +87,36 @@ export class ProtocolConnection extends EventEmitter {
     });
   }
 
-  send(message: OutgoingProtocolNormalMessage): void {
-    var envelope: MessageEnvelope = new MessageEnvelope(message);
+  public send(message: OutgoingProtocolNormalMessage): void {
+    const envelope: MessageEnvelope = new MessageEnvelope(message);
     this.sendMessage(envelope);
   }
 
-  request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
-    var self: ProtocolConnection = this;
-    var requestId: number = this._nextRequestId;
+  public request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
+    const self: ProtocolConnection = this;
+    const reqId: number = this._nextRequestId;
     this._nextRequestId++;
 
-    var replyDeferred: Deferred<IncomingProtocolResponseMessage> = new Deferred<IncomingProtocolResponseMessage>();
+    const replyDeferred: Deferred<IncomingProtocolResponseMessage> = new Deferred<IncomingProtocolResponseMessage>();
 
-    var timeout: number = this._protocolConfig.defaultRequestTimeout;
-    var timeoutTask: any = setTimeout(
-      function (): void {
-        var req: RequestRecord = self._requests[requestId];
+    const timeout: number = this._protocolConfig.defaultRequestTimeout;
+    const timeoutTask: any = setTimeout(
+      () => {
+        const req: RequestRecord = self._requests[reqId];
         if (req) {
           req.replyDeferred.reject(new Error("Response timeout"));
         }
       },
       timeout);
 
-    this._requests[requestId] = <RequestRecord> {
-      reqId: requestId,
-      replyDeferred: replyDeferred,
-      timeoutTask: timeoutTask
-    };
+    this._requests[reqId] = <RequestRecord> { reqId, replyDeferred, timeoutTask };
 
-    this.sendMessage(new MessageEnvelope(message, requestId));
+    this.sendMessage(new MessageEnvelope(message, reqId));
 
     return replyDeferred.promise();
   }
 
-  abort(reason: string): void {
+  public abort(reason: string): void {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -128,7 +124,7 @@ export class ProtocolConnection extends EventEmitter {
     this.onSocketDropped();
   }
 
-  close(): Promise<void> {
+  public close(): Promise<void> {
     this.removeAllListenersForAllEvents();
     if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
@@ -136,25 +132,25 @@ export class ProtocolConnection extends EventEmitter {
     return this._socket.close();
   }
 
-  sendMessage(envelope: MessageEnvelope): void {
+  public sendMessage(envelope: MessageEnvelope): void {
     if ((debugFlags.protocol.messages &&
       envelope.body.type !== MessageType.PING &&
       envelope.body.type !== MessageType.PONG) ||
       debugFlags.protocol.pings) {
       console.log("S: " + JSON.stringify(envelope));
     }
-    var message: any = MessageSerializer.serialize(envelope);
+    const message: any = MessageSerializer.serialize(envelope);
     this._socket.send(message);
   }
 
   private onSocketMessage(message: any): void {
-    var envelope: MessageEnvelope = MessageSerializer.deserialize(message);
+    const envelope: MessageEnvelope = MessageSerializer.deserialize(message);
 
     if (this._protocolConfig.heartbeatConfig.enabled && this._heartbeatHelper) {
       this._heartbeatHelper.messageReceived();
     }
 
-    var type: MessageType = envelope.body.type;
+    const type: MessageType = envelope.body.type;
 
     if ((debugFlags.protocol.messages &&
       type !== MessageType.PING &&
@@ -214,17 +210,17 @@ export class ProtocolConnection extends EventEmitter {
 
   private onReply(envelope: MessageEnvelope): void {
 
-    var requestId: number = envelope.responseId;
+    const requestId: number = envelope.responseId;
 
-    var record: RequestRecord = this._requests[requestId];
+    const record: RequestRecord = this._requests[requestId];
     delete this._requests[requestId];
 
     if (record) {
       clearTimeout(record.timeoutTask);
 
-      var type: MessageType = envelope.body.type;
+      const type: MessageType = envelope.body.type;
       if (type === MessageType.ERROR) {
-        var errorMessage: ErrorMessage = <ErrorMessage> envelope.body;
+        const errorMessage: ErrorMessage = <ErrorMessage> envelope.body;
         record.replyDeferred.reject(new Error(errorMessage.code + ": " + errorMessage.details));
       } else {
         record.replyDeferred.resolve(envelope.body);
@@ -243,7 +239,6 @@ interface RequestRecord {
   timeoutTask: any;
 }
 
-
 export interface ReplyCallback {
   reply(message: OutgoingProtocolResponseMessage): void;
   unknownError(): void;
@@ -260,27 +255,27 @@ class ReplyCallbackImpl implements ReplyCallback {
     this._protocolConnection = protocolConnection;
   }
 
-  reply(message: OutgoingProtocolResponseMessage): void {
-    var envelope: MessageEnvelope = new MessageEnvelope(message, undefined, this._reqId);
+  public reply(message: OutgoingProtocolResponseMessage): void {
+    const envelope: MessageEnvelope = new MessageEnvelope(message, undefined, this._reqId);
     this._protocolConnection.sendMessage(envelope);
   }
 
-  unknownError(): void {
+  public unknownError(): void {
     this.unexpectedError("An unknown error has occurred");
   }
 
-  unexpectedError(details: string): void {
+  public unexpectedError(details: string): void {
     this.expectedError("unknown", details);
   }
 
-  expectedError(code: string, details: string): void {
-    var errorMessage: ErrorMessage = {
+  public expectedError(code: string, details: string): void {
+    const errorMessage: ErrorMessage = {
       type: MessageType.ERROR,
-      code: code,
-      details: details
+      code,
+      details
     };
 
-    var envelope: MessageEnvelope = new MessageEnvelope(errorMessage, undefined, this._reqId);
+    const envelope: MessageEnvelope = new MessageEnvelope(errorMessage, undefined, this._reqId);
 
     this._protocolConnection.sendMessage(envelope);
   }

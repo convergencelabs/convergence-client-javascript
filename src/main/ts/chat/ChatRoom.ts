@@ -33,34 +33,32 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
     this._leftCB = leftCB;
     this._joined = true;
     this._connection = connection;
-
-
   }
 
-  id(): string {
+  public id(): string {
     return this._id;
   }
 
-  members(): ChatMember[] {
+  public members(): ChatMember[] {
     return this._members;
   }
 
-  messageCount(): number {
+  public messageCount(): number {
     return this._messageCount;
   }
 
-  lastMessageTime(): number {
+  public lastMessageTime(): number {
     return this._lastMessageTime;
   }
 
-  isJoined(): boolean {
+  public isJoined(): boolean {
     return this._joined;
   }
 
-  leave(): void {
+  public leave(): void {
     if (this.isJoined()) {
       this._joined = false;
-      this._connection.send(<LeaveRoomMessage>{
+      this._connection.send(<LeaveRoomMessage> {
         type: MessageType.LEAVE_ROOM,
         roomId: this._id
       });
@@ -68,15 +66,15 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
     }
   }
 
-  send(message: string): void {
+  public send(message: string): void {
     if (!this.isJoined()) {
       // TODO: Handle not joined error
     }
 
-    this._connection.send(<PublishChatMessage>{
+    this._connection.send(<PublishChatMessage> {
       type: MessageType.PUBLISH_CHAT_MESSAGE,
       roomId: this._id,
-      message: message
+      message
     });
   }
 }
@@ -92,11 +90,11 @@ export class ChatMember {
     Object.freeze(this);
   }
 
-  username(): string {
+  public username(): string {
     return this._sessionId;
   }
 
-  sessionId(): string {
+  public sessionId(): string {
     return this._username;
   }
 }

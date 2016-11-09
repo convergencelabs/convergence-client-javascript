@@ -11,7 +11,7 @@ export class ObjectSetPropertyOperation extends DiscreteOperation implements Obj
     Object.freeze(this);
   }
 
-  copy(updates: any): ObjectSetPropertyOperation {
+  public copy(updates: any): ObjectSetPropertyOperation {
     return new ObjectSetPropertyOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),

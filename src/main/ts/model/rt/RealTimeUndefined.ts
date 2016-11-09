@@ -7,7 +7,7 @@ import {RealTimeModel} from "./RealTimeModel";
 
 export class RealTimeUndefined extends RealTimeElement<void> {
 
-  static Events: any = {
+  public static Events: any = {
     DETACHED: RealTimeElement.Events.DETACHED
   };
 
@@ -21,11 +21,11 @@ export class RealTimeUndefined extends RealTimeElement<void> {
     super(_delegate, _callbacks, _wrapperFactory, _model, []);
   }
 
-  protected _setData(data: any): void {
-    throw new Error("Can not set the value on a Undefined type.");
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    throw new Error("Undefined values do not process references");
   }
 
-  _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
-    throw new Error("Undefined values do not process references");
+  protected _setData(data: any): void {
+    throw new Error("Can not set the value on a Undefined type.");
   }
 }

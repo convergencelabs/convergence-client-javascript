@@ -11,15 +11,15 @@ export class Deferred<R> {
     });
   }
 
-  resolve(value?: R | PromiseLike<R>): void {
+  public resolve(value?: R | PromiseLike<R>): void {
     this._resolve(value);
   }
 
-  reject(error: Error): void {
+  public reject(error: Error): void {
     this._reject(error);
   }
 
-  promise(): Promise<R> {
+  public promise(): Promise<R> {
     return this._promise;
   }
 }

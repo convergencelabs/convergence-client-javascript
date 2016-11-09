@@ -11,7 +11,7 @@ export class AppliedArrayRemoveOperation extends AppliedDiscreteOperation implem
     Object.freeze(this);
   }
 
-  inverse(): AppliedArrayInsertOperation {
+  public inverse(): AppliedArrayInsertOperation {
     return new AppliedArrayInsertOperation(this.id, this.noOp, this.index, this.oldValue);
   }
 }

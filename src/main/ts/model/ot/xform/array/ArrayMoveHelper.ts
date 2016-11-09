@@ -13,7 +13,7 @@ export class ArrayMoveHelper {
    *            The op to evaluate
    * @return true if fromIndex < toIndex, false otherwise.
    */
-  static isForwardMove(op: ArrayMoveOperation): boolean {
+  public static isForwardMove(op: ArrayMoveOperation): boolean {
     return op.fromIndex < op.toIndex;
   }
 
@@ -25,7 +25,7 @@ export class ArrayMoveHelper {
    *            The op to evaluate
    * @return true if fromIndex > toIndex, false otherwise.
    */
-  static isBackwardMoveMove(op: ArrayMoveOperation): boolean {
+  public static isBackwardMoveMove(op: ArrayMoveOperation): boolean {
     return op.fromIndex > op.toIndex;
   }
 
@@ -37,7 +37,7 @@ export class ArrayMoveHelper {
    *            The op to evaluate
    * @return true if fromIndex == toIndex, false otherwise.
    */
-  static isIdentityMove(op: ArrayMoveOperation): boolean {
+  public static isIdentityMove(op: ArrayMoveOperation): boolean {
     return op.fromIndex === op.toIndex;
   }
 
@@ -48,7 +48,7 @@ export class ArrayMoveHelper {
    *
    * @return The direction of the move.
    */
-  static getMoveDirection(op: ArrayMoveOperation): MoveDirection {
+  public static getMoveDirection(op: ArrayMoveOperation): MoveDirection {
     if (this.isForwardMove(op)) {
       return MoveDirection.Forward;
     } else if (this.isBackwardMoveMove(op)) {
@@ -67,7 +67,7 @@ export class ArrayMoveHelper {
    *            The index to evaluate
    * @return True if index < min(fromIndex, toIndex), false otherwise.
    */
-  static indexBeforeRange(op: ArrayMoveOperation, index: number): boolean {
+  public static indexBeforeRange(op: ArrayMoveOperation, index: number): boolean {
     return index < this.getRangeMin(op);
   }
 
@@ -80,7 +80,7 @@ export class ArrayMoveHelper {
    *            The index to evaluate
    * @return True if index > max(fromIndex, toIndex), false otherwise.
    */
-  static indexAfterRange(op: ArrayMoveOperation, index: number): boolean {
+  public static indexAfterRange(op: ArrayMoveOperation, index: number): boolean {
     return index > this.getRangeMax(op);
   }
 
@@ -95,11 +95,11 @@ export class ArrayMoveHelper {
    * @return True if index < max(fromIndex, toIndex) && index > min(fromIndex, toIndex), false
    *         otherwise.
    */
-  static indexWithinRange(op: ArrayMoveOperation, index: number): boolean {
+  public static indexWithinRange(op: ArrayMoveOperation, index: number): boolean {
     return index > this.getRangeMin(op) && index < this.getRangeMax(op);
   }
 
-  static getRangeIndexRelationship(op: ArrayMoveOperation, index: number): RangeIndexRelationship {
+  public static getRangeIndexRelationship(op: ArrayMoveOperation, index: number): RangeIndexRelationship {
     return RangeRelationshipUtil.getRangeIndexRelationship(this.getRangeMin(op), this.getRangeMax(op), index);
   }
 
@@ -113,7 +113,7 @@ export class ArrayMoveHelper {
    *
    * @return The interval that matched op1 <verb> op2
    */
-  static getRangeRelationship(op1: ArrayMoveOperation, op2: ArrayMoveOperation): RangeRangeRelationship {
+  public static getRangeRelationship(op1: ArrayMoveOperation, op2: ArrayMoveOperation): RangeRangeRelationship {
     return RangeRelationshipUtil.getRangeRangeRelationship(
       this.getRangeMin(op1), this.getRangeMax(op1), this.getRangeMin(op2), this.getRangeMax(op2));
   }
@@ -125,7 +125,7 @@ export class ArrayMoveHelper {
    *            The op to get the minimum index for
    * @return min(fromIndex, toIndex)
    */
-  static getRangeMin(op: ArrayMoveOperation): number {
+  public static getRangeMin(op: ArrayMoveOperation): number {
     return Math.min(op.fromIndex, op.toIndex);
   }
 
@@ -136,7 +136,7 @@ export class ArrayMoveHelper {
    *            The op to get the minimum index for
    * @return max(fromIndex, toIndex)
    */
-  static getRangeMax(op: ArrayMoveOperation): number {
+  public static getRangeMax(op: ArrayMoveOperation): number {
     return Math.max(op.fromIndex, op.toIndex);
   }
 }

@@ -4,7 +4,8 @@ import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOpera
 import {OperationPair} from "../OperationPair";
 import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
 
-export var ObjectSetPropertyRemovePropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation, ObjectRemovePropertyOperation> =
+export var ObjectSetPropertyRemovePropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation,
+  ObjectRemovePropertyOperation> =
   (s: ObjectSetPropertyOperation, c: ObjectRemovePropertyOperation) => {
     if (s.prop !== c.prop) {
       // O-TR-1
@@ -13,6 +14,6 @@ export var ObjectSetPropertyRemovePropertyOTF: OperationTransformationFunction<O
       // O-TR-2
       return new OperationPair(
         new ObjectAddPropertyOperation(s.id, s.noOp, s.prop, s.value),
-        c.copy({noOp: true}));
+        c.copy({ noOp: true }));
     }
   };

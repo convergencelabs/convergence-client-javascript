@@ -4,5 +4,5 @@ export abstract class AppliedOperation implements Change {
   constructor(public type: string) {
   }
 
-  abstract inverse(): AppliedOperation;
+  public abstract inverse(): AppliedOperation;
 }

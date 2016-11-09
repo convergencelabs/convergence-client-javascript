@@ -6,10 +6,11 @@ export interface PresenceAvailabilityChanged extends IncomingProtocolNormalMessa
   available: boolean;
 }
 
-export var PresenceAvailabilityChangedDeserializer: MessageBodyDeserializer<PresenceAvailabilityChanged> = (body: any) => {
-  var result: PresenceAvailabilityChanged = {
-    username: body.u,
-    available: body.a
+export var PresenceAvailabilityChangedDeserializer: MessageBodyDeserializer<PresenceAvailabilityChanged> =
+  (body: any) => {
+    const result: PresenceAvailabilityChanged = {
+      username: body.u,
+      available: body.a
+    };
+    return result;
   };
-  return result;
-};

@@ -7,7 +7,6 @@ import {NumberNode} from "./NumberNode";
 import {ObjectNode} from "./ObjectNode";
 import {StringNode} from "./StringNode";
 
-
 export interface ModelNodeEvent extends ConvergenceEvent {
   src: ModelNode<any>;
   local: boolean;
@@ -90,7 +89,6 @@ export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
               public username: string) {}
 }
 
-
 export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
   public name: string = "value";
 
@@ -120,7 +118,6 @@ export class NumberNodeDeltaEvent implements NodeValueChangedEvent {
               public sessionId: string,
               public username: string) {}
 }
-
 
 export class ObjectNodeSetEvent implements NodeValueChangedEvent {
   public name: string = "set";

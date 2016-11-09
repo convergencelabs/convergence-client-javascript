@@ -17,12 +17,11 @@ export interface ParticipantsResponse extends OutgoingProtocolRequestMessage {
 }
 
 export var ParticipantsResponseDeserializer: MessageBodyDeserializer<ParticipantsResponse> = (body: any) => {
-  var result: ParticipantsResponse = {
+  const result: ParticipantsResponse = {
     participants: body.s
   };
   return result;
 };
-
 
 /**
  * Stored by session id, then key.

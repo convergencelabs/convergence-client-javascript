@@ -4,12 +4,12 @@ import {DomainUser} from "../../../identity/DomainUser";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {DomainUserDeserializer} from "./DomainUser";
 
-var userFieldCodes: {[key: string]: number} = {
-  "username": 1,
-  "firstName": 2,
-  "lastName": 3,
-  "displayName": 4,
-  "email": 5
+const userFieldCodes: {[key: string]: number} = {
+  username: 1,
+  firstName: 2,
+  lastName: 3,
+  displayName: 4,
+  email: 5
 };
 
 export interface UserLookUpRequest extends OutgoingProtocolRequestMessage {
@@ -33,9 +33,8 @@ export interface UserSearchRequest extends OutgoingProtocolRequestMessage {
   ascending: boolean;
 }
 
-
 export var UserSearchRequestSerializer: MessageBodySerializer = (request: UserSearchRequest) => {
-  var sort: number;
+  let sort: number;
 
   if (request.ascending !== undefined) {
     sort = request.ascending ? 0 : 1;
@@ -53,17 +52,16 @@ export var UserSearchRequestSerializer: MessageBodySerializer = (request: UserSe
   };
 };
 
-
 export interface UserListResponse {
   users: DomainUser[];
 }
 
 export var UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
-  var users: DomainUser[] = (<any[]>body.u).map((u: any) => {
+  const users: DomainUser[] = (<any[]> body.u).map((u: any) => {
     return DomainUserDeserializer(u);
   });
 
   return {
-    users: users
+    users
   };
 };

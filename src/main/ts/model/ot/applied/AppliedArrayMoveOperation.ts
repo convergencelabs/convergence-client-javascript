@@ -9,7 +9,7 @@ export class AppliedArrayMoveOperation extends AppliedDiscreteOperation implemen
     Object.freeze(this);
   }
 
-  inverse(): AppliedArrayMoveOperation {
+  public inverse(): AppliedArrayMoveOperation {
     return new AppliedArrayMoveOperation(this.id, this.noOp, this.toIndex, this.fromIndex);
   }
 }

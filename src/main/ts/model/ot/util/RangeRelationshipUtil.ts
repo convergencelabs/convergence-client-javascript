@@ -1,5 +1,5 @@
 export class RangeRelationshipUtil {
-  static getRangeIndexRelationship(rStart: number, rEnd: number, index: number): RangeIndexRelationship {
+  public static getRangeIndexRelationship(rStart: number, rEnd: number, index: number): RangeIndexRelationship {
     if (index < rStart) {
       return RangeIndexRelationship.Before;
     } else if (index > rEnd) {
@@ -13,7 +13,8 @@ export class RangeRelationshipUtil {
     }
   }
 
-  static getRangeRangeRelationship(sStart: number, sEnd: number, cStart: number, cEnd: number): RangeRangeRelationship {
+  public static getRangeRangeRelationship(sStart: number, sEnd: number,
+                                          cStart: number, cEnd: number): RangeRangeRelationship {
     if (sStart === cStart) {
       if (sEnd === cEnd) {
         return RangeRangeRelationship.EqualTo;

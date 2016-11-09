@@ -1,8 +1,8 @@
 export class EqualsUtil {
-  static deepEquals(x: any, y: any): boolean {
-    var p: string;
+  public static deepEquals(x: any, y: any): boolean {
+    let p: string;
 
-    if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+    if (isNaN(x) && isNaN(y) && typeof x === "number" && typeof y === "number") {
       return true;
     }
 
@@ -10,7 +10,7 @@ export class EqualsUtil {
       return true;
     }
 
-    if ((typeof x === 'function' && typeof y === 'function') ||
+    if ((typeof x === "function" && typeof y === "function") ||
       (x instanceof Date && y instanceof Date) ||
       (x instanceof RegExp && y instanceof RegExp) ||
       (x instanceof String && y instanceof String) ||
@@ -52,8 +52,8 @@ export class EqualsUtil {
       }
 
       switch (typeof (x[p])) {
-        case 'object':
-        case 'function':
+        case "object":
+        case "function":
 
           if (!this.deepEquals(x[p], y[p])) {
             return false;

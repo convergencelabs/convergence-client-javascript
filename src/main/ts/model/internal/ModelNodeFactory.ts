@@ -28,19 +28,19 @@ export class ModelNodeFactory {
       return new UndefinedNode(undefined, path, model, sessionId, username);
     }
 
-    var type: string = data.type;
+    const type: string = data.type;
     if (type === "null") {
       return new NullNode(data.id, path, model, sessionId, username);
     } else if (type === "string") {
-      return new StringNode(<StringValue>data, path, model, sessionId, username);
+      return new StringNode(<StringValue> data, path, model, sessionId, username);
     } else if (type === "array") {
-      return new ArrayNode(<ArrayValue>data, path, model, sessionId, username, dataValueFactory);
+      return new ArrayNode(<ArrayValue> data, path, model, sessionId, username, dataValueFactory);
     } else if (type === "object") {
-      return new ObjectNode(<ObjectValue>data, path, model, sessionId, username, dataValueFactory);
+      return new ObjectNode(<ObjectValue> data, path, model, sessionId, username, dataValueFactory);
     } else if (type === "number") {
-      return new NumberNode(<NumberValue>data, path, model, sessionId, username);
+      return new NumberNode(<NumberValue> data, path, model, sessionId, username);
     } else if (type === "boolean") {
-      return new BooleanNode(<BooleanValue>data, path, model, sessionId, username);
+      return new BooleanNode(<BooleanValue> data, path, model, sessionId, username);
     } else {
       throw new Error("Invalid data type: " + type);
     }

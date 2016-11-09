@@ -17,17 +17,17 @@ export class ReferenceTransformer {
     this._tfr = tfr;
   }
 
-  transform(o: Operation, r: ModelReferenceData): ModelReferenceData {
+  public transform(o: Operation, r: ModelReferenceData): ModelReferenceData {
     if (o instanceof CompoundOperation) {
       return this.transformCompoundOperation(o, r);
     } else {
-      return this.transformDiscreteOperation(<DiscreteOperation>o, r);
+      return this.transformDiscreteOperation(<DiscreteOperation> o, r);
     }
   }
 
   private transformCompoundOperation(o: CompoundOperation, r: ModelReferenceData): ModelReferenceData {
-    var result: ModelReferenceData = r;
-    for (var i: number = 0; i < o.ops.length && result; i++) {
+    let result: ModelReferenceData = r;
+    for (let i: number = 0; i < o.ops.length && result; i++) {
       result = this.transform(o.ops[i], result);
     }
     return result;
@@ -44,7 +44,7 @@ export class ReferenceTransformer {
   }
 
   private transformWithIdenticalPathOperation(o: DiscreteOperation, r: ModelReferenceData): ModelReferenceData {
-    var tf: ReferenceTransformationFunction = this._tfr.getReferenceTransformationFunction(o, r);
+    const tf: ReferenceTransformationFunction = this._tfr.getReferenceTransformationFunction(o, r);
     if (tf) {
       return tf(o, r);
     } else {

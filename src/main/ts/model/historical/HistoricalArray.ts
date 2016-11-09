@@ -9,21 +9,21 @@ export class HistoricalArray extends HistoricalElement<any[]> implements Histori
     super(_delegate, _wrapperFactory);
   }
 
-  get(index: number): HistoricalElement<any> {
+  public get(index: number): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.get(index));
   }
 
-  length(): number {
+  public length(): number {
     return this._delegate.length();
   }
 
-  forEach(callback: (value: HistoricalElement<any>, index?: number) => void): void {
+  public forEach(callback: (value: HistoricalElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
-  elementAt(pathArgs: any): HistoricalElement<any> {
+  public elementAt(pathArgs: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
   }
 }

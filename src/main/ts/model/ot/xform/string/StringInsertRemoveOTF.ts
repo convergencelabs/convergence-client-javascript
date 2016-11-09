@@ -13,7 +13,7 @@ export var StringInsertRemoveOTF: OperationTransformationFunction<StringInsertOp
       return new OperationPair(s.copy({index: s.index - c.value.length}), c);
     } else {
       // S-IR-3 and S-IR-4
-      var offsetDelta: number = s.index - c.index;
+      const offsetDelta: number = s.index - c.index;
       return new OperationPair(
         s.copy({noOp: true}),
         c.copy({

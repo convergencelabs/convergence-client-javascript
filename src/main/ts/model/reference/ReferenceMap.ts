@@ -10,7 +10,7 @@ export class ReferenceMap {
     this._references = {};
   }
 
-  put(reference: ModelReference<any>): void {
+  public put(reference: ModelReference<any>): void {
     const sessionId: string = reference.sessionId();
     const key: string = reference.key();
 
@@ -27,7 +27,7 @@ export class ReferenceMap {
     sessionModels[key] = reference;
   }
 
-  get(sessionId: string, key: string): ModelReference<any> {
+  public get(sessionId: string, key: string): ModelReference<any> {
     const sessionModels: {[key: string]: ModelReference<any>} = this._references[sessionId];
     if (sessionModels !== undefined) {
       return sessionModels[key];
@@ -36,7 +36,7 @@ export class ReferenceMap {
     }
   }
 
-  getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+  public getAll(filter?: ReferenceFilter): ModelReference<any>[] {
     if (typeof filter === "undefined") {
       filter = {};
     }
@@ -64,11 +64,11 @@ export class ReferenceMap {
     return refs;
   }
 
-  removeAll(): void {
+  public removeAll(): void {
     this._references = {};
   }
 
-  remove(sessionId: string, key: string): ModelReference<any> {
+  public remove(sessionId: string, key: string): ModelReference<any> {
     const sessionModels: {[key: string]: ModelReference<any>} = this._references[sessionId];
     if (sessionModels !== undefined) {
       const current: ModelReference<any> = sessionModels[key];
@@ -79,12 +79,12 @@ export class ReferenceMap {
     }
   }
 
-  removeBySession(sessionId: string): void {
+  public removeBySession(sessionId: string): void {
     delete this._references[sessionId];
   }
 
-  removeByKey(key: string): void {
-    var sessionIds: string[] = Object.getOwnPropertyNames(this._references);
+  public removeByKey(key: string): void {
+    const sessionIds: string[] = Object.getOwnPropertyNames(this._references);
     sessionIds.forEach((sessionId: string) => {
       delete this._references[sessionId][key];
     });

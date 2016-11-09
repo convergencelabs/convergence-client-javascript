@@ -12,17 +12,17 @@ export class UserPresenceImpl implements UserPresence {
     this._state = state; // TODO copy
   }
 
-  username(): string {
+  public username(): string {
     return this._username;
   }
 
-  isAvailable(): boolean {
+  public isAvailable(): boolean {
     return this._available;
   }
 
-  state(key: string): any
-  state(): Map<string, any>
-  state(key?: string): any {
+  public state(key: string): any
+  public state(): Map<string, any>
+  public state(key?: string): any {
     // FIXME make result be cloned / immutable.
     if (typeof key === "undefined") {
       return this._state;
