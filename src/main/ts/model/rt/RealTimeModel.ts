@@ -81,7 +81,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _version: number;
   private _createdTime: Date;
-  private _modifiedTime: Date;
+  private _time: Date;
   private _modelFqn: ModelFqn;
   private _concurrencyControl: ClientConcurrencyControl;
   private _connection: ConvergenceConnection;
@@ -109,7 +109,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._resourceId = resourceId;
     this._version = version;
     this._createdTime = createdTime;
-    this._modifiedTime = modifiedTime;
+    this._time = modifiedTime;
     this._modelFqn = modelFqn;
     this._concurrencyControl = concurrencyControl;
     this._connection = connection;
@@ -304,16 +304,32 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._modelFqn.modelId;
   }
 
-  public version(): number {
-    return this._version;
+  public time(): Date {
+    return this._time;
+  }
+
+  public minTime(): Date {
+    return this._createdTime;
+  }
+
+  public maxTime(): Date {
+    return this.time();
   }
 
   public createdTime(): Date {
     return this._createdTime;
   }
 
-  public lastModifiedTime(): Date {
-    return this._modifiedTime;
+  public version(): number {
+    return this._version;
+  }
+
+  public minVersion(): number {
+    return 0;
+  }
+
+  public maxVersion(): number {
+    return this.version();
   }
 
   public root(): RealTimeObject {
@@ -555,7 +571,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     // todo in theory we could pass the operation in to verify it as well.
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, message.version);
     this._version = message.version + 1;
-    this._modifiedTime = new Date(message.timestamp);
+    this._time = new Date(message.timestamp);
   }
 
   private _handleRemoteOperation(message: RemoteOperation): void {
@@ -578,7 +594,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
     const username: string = SessionIdParser.parseUsername(message.sessionId);
 
     this._version = contextVersion + 1;
-    this._modifiedTime = new Date(timestamp);
+    this._time = new Date(timestamp);
 
     if (operation.type === OperationType.COMPOUND) {
       const compoundOp: CompoundOperation = <CompoundOperation> operation;

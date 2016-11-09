@@ -26,14 +26,31 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
   version(): number;
 
   /**
+   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   */
+  minVersion(): number;
+
+  /**
+   * The maximum version available for this model.  Synonymous for version() for the
+   * RealTimeModel
+   */
+  maxVersion(): number;
+
+  /**
    * The current, latest time of the model.
    */
   time(): Date;
 
   /**
-   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   * The minimum time of the model. Normally the created time unless the history has been truncated.
    */
-  minVersion(): number;
+  minTime(): Date;
+
+  /**
+   * The maximum time of the model, when it was last modified. Synonymous with time() for the
+   * RealTimeModel.
+   */
+  maxTime(): Date;
 
   /**
    * The time the model was created.

@@ -78,29 +78,36 @@ export class HistoricalModel {
     return this._modelFqn.modelId;
   }
 
+  time(): Date {
+    return this._currentTime;
+  }
+
+  minTime(): Date {
+    return this.createdTime();
+  }
+
+  maxTime(): Date {
+    return this._modifiedTime;
+  }
+
   createdTime(): Date {
     return this._createdTime;
   }
 
-  modifiedTime(): Date {
-    return this._modifiedTime;
-  }
-
-  currentTime(): Date {
-    return this._currentTime;
-  }
-
-  // todo should this be currentVersion?
   version(): number {
     return this._version;
   }
 
-  targetVersion(): number {
-    return this._targetVersion;
+  minVersion(): number {
+    return 0;
   }
 
   maxVersion(): number {
     return this._maxVersion;
+  }
+
+  targetVersion(): number {
+    return this._targetVersion;
   }
 
   isTransitioning(): boolean {
