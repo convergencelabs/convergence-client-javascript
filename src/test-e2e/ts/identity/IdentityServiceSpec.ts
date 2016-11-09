@@ -28,17 +28,18 @@ describe('IdentityService.user()', () => {
 
   it('must resolve with the correct user', (done: MochaDone) => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
+    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["test1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
-        {i: "u1", n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"}
+        {n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"}
       ]
     });
     mockServer.start();
 
     ConvergenceDomain.connectWithToken(mockServer.url(), "token").then(domain => {
-      return domain.identity().user("u1");
+      return domain.identity().user("test1");
     }).then((user: DomainUser) => {
+      expect(user).to.exist;
       expect(user.username()).to.equal("test1");
       expect(user.firstName()).to.equal("test");
       expect(user.lastName()).to.equal("user");

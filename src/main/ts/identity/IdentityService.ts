@@ -42,11 +42,10 @@ export class IdentityService {
       return Promise.reject<DomainUser>('Must specify a username.');
     }
 
-    return this.users([username]).then((users: DomainUser[]) => {
-      if (users.length === 0) {
-        return Promise.resolve(<DomainUser>undefined);
-      } else if (users.length === 1) {
-        return Promise.resolve(users[0]);
+    return this.users([username]).then((users: {[key: string]: DomainUser}) => {
+      const keys = Object.keys(users);
+      if (keys.length === 0 || keys.length === 1) {
+        return Promise.resolve(users[username]);
       } else {
         return Promise.reject<DomainUser>(new Error("Error getting user."));
       }
@@ -54,11 +53,10 @@ export class IdentityService {
   }
 
   userByEmail(email: string): Promise<DomainUser> {
-    return this.usersByEmail([email]).then((users: DomainUser[]) => {
-      if (users.length === 0) {
-        return Promise.resolve(<DomainUser>undefined);
-      } else if (users.length === 1) {
-        return Promise.resolve(users[0]);
+    return this.usersByEmail([email]).then((users: {[hey: string]: DomainUser}) => {
+      const keys = Object.keys(users);
+      if (keys.length === 0 || keys.length === 1) {
+        return Promise.resolve(users[email]);
       } else {
         return Promise.reject<DomainUser>(new Error("Error getting user."));
       }
@@ -66,7 +64,7 @@ export class IdentityService {
   }
 
   users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
-    const unique = [...new Set(usernames)];
+    const unique = Array.from(new Set(usernames));
     return this._users(unique, UserField.USERNAME).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
@@ -77,7 +75,7 @@ export class IdentityService {
   }
 
   usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
-    const unique = [...new Set(emails)];
+    const unique = Array.from(new Set(emails));
     return this._users(unique, UserField.EMAIL).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
