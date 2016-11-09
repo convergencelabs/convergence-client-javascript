@@ -14,7 +14,9 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
   static connect(url: string, username: string, password: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
 
-  static connectWithToken(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
+  static connectWithJwt(url: string, jwt: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
+
+  static connectAnonymously(url: string, displayName?: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
 
   session(): Session;
 

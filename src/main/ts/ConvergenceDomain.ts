@@ -51,7 +51,7 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     });
   }
 
-  static connectWithToken(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  static connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
     var domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithToken(token);
