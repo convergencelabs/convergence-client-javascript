@@ -43,7 +43,7 @@ export class IdentityService {
     }
 
     return this.users([username]).then((users: {[key: string]: DomainUser}) => {
-      const keys = Object.keys(users);
+      const keys: string[] = Object.keys(users);
       if (keys.length === 0 || keys.length === 1) {
         return Promise.resolve(users[username]);
       } else {
@@ -54,7 +54,7 @@ export class IdentityService {
 
   userByEmail(email: string): Promise<DomainUser> {
     return this.usersByEmail([email]).then((users: {[hey: string]: DomainUser}) => {
-      const keys = Object.keys(users);
+      const keys: string[] = Object.keys(users);
       if (keys.length === 0 || keys.length === 1) {
         return Promise.resolve(users[email]);
       } else {
@@ -64,7 +64,7 @@ export class IdentityService {
   }
 
   users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
-    const unique = Array.from(new Set(usernames));
+    const unique: string[] = Array.from(new Set(usernames));
     return this._users(unique, UserField.USERNAME).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
@@ -75,7 +75,7 @@ export class IdentityService {
   }
 
   usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
-    const unique = Array.from(new Set(emails));
+    const unique: string[] = Array.from(new Set(emails));
     return this._users(unique, UserField.EMAIL).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
