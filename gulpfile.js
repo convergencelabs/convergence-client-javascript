@@ -112,12 +112,14 @@ const baseRollupConfig = {
   external: [
     'rxjs/Rx',
     'rxjs/Observable',
-    'rxjs/Subject'
+    'rxjs/Subject',
+    'rxjs/BehaviorSubject'
   ],
   globals: {
     'rxjs/Rx': 'Rx',
     'rxjs/Observable': 'Rx',
-    'rxjs/Subject': 'Rx'
+    'rxjs/Subject': 'Rx',
+    'rxjs/BehaviorSubject': 'Rx'
   },
   plugins: [
     rollupTypescript({typescript: typescript})
