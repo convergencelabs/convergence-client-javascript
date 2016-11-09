@@ -33,5 +33,5 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   participant(sessionId: string): ActivityParticipant;
   participants(): ActivityParticipant[];
 
-  asObservable(): Observable<ActivityParticipant[]>;
+  participantsAsObservable(): Observable<ActivityParticipant[]>;
 }

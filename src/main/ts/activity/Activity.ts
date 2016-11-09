@@ -201,7 +201,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return Array.from(this._participants.getValue().values());
   }
 
-  participantsObservable(): Observable<ActivityParticipant[]> {
+  participantsAsObservable(): Observable<ActivityParticipant[]> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
 }
