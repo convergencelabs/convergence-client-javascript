@@ -33,7 +33,7 @@ export abstract class HistoricalElement<T> extends ConvergenceEventEmitter<Conve
     return this._delegate.isDetached();
   }
 
-  data(): T {
+  value(): T {
     return this._delegate.data();
   }
 }
