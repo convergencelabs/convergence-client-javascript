@@ -65,12 +65,26 @@ export class IdentityService {
     });
   }
 
-  users(usernames: string[]): Promise<DomainUser[]> {
-    return this._users(usernames, UserField.USERNAME);
+  users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
+    const unique = [...new Set(usernames)];
+    return this._users(unique, UserField.USERNAME).then(users => {
+      const mapped: {[key: string]: DomainUser} = {};
+      users.forEach(user => {
+        mapped[user.username()] = user;
+      });
+      return mapped;
+    });
   }
 
-  usersByEmail(emails: string[]): Promise<DomainUser[]> {
-    return this._users(emails, UserField.EMAIL);
+  usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
+    const unique = [...new Set(emails)];
+    return this._users(unique, UserField.EMAIL).then(users => {
+      const mapped: {[key: string]: DomainUser} = {};
+      users.forEach(user => {
+        mapped[user.email()] = user;
+      });
+      return mapped;
+    });
   }
 
   search(query: UserQuery): Promise<DomainUser[]> {
