@@ -17,7 +17,6 @@ node {
       stage 'NPM Install'
       sh '''
         npm install
-        npm run typings
       '''
 
       stage 'Compile'
