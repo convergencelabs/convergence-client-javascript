@@ -20,16 +20,20 @@
   "scripts": {
     "dist": "gulp",
     "test": "gulp test",
-    "clean": "gulp clean",
-    "typings": "typings install"
+    "clean": "gulp clean"
   },
   "publishConfig": {
     "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
   },
   "dependencies": {
-    "rxjs": "5.0.0-rc.1"
+    "rxjs": "5.0.0-rc.2"
   },
   "devDependencies": {
+    "@types/mocha": "2.2.32",
+    "@types/chai": "3.4.33",
+    "@types/sinon": "1.16.31",
+    "@types/sinon-chai": "2.7.27",
+    "@types/core-js": "0.9.34",
     "babel-eslint": "7.1.0",
     "chai": "3.5.0",
     "del": "2.2.2",

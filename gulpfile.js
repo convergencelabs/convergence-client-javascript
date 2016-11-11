@@ -189,5 +189,5 @@ gulp.task('copyPackage', function () {
  * Removes all build artifacts.
  */
 gulp.task('clean', function () {
-  return del(['dist', "build"]);
+  return del(['dist', "build", "coverage"]);
 });

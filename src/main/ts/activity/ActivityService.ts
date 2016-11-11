@@ -17,6 +17,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
 import {ActivityEvent} from "./events";
 import {StateRemovedEvent} from "./events";
+import {mapToObject} from "../util/ObjectUtils";
 
 export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -146,8 +147,8 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joinedMap.get(id).promise();
   }
 
-  public joined(): Map<string, Activity> {
-    return Object.assign({}, this._joinedMap);
+  public joined(): {[key: string]: Activity} {
+    return mapToObject(this._joinedMap);
   }
 
   public isJoined(id: string): boolean {
