@@ -18,7 +18,7 @@ import {ObjectSetProperty} from "../ot/ops/operationChanges";
 import {ObjectRemoveProperty} from "../ot/ops/operationChanges";
 import {ObjectSet} from "../ot/ops/operationChanges";
 
-export class ObjectNode extends ContainerNode<Map<string, any>> {
+export class ObjectNode extends ContainerNode<{[key: string]: any}> {
 
   public static Events: any = {
     SET: "set",
@@ -125,8 +125,8 @@ export class ObjectNode extends ContainerNode<Map<string, any>> {
   // private / protected methods.
   //
 
-  protected _getData(): Map<string, any> {
-    const returnObject: Map<string, any> = new Map<string, ModelNode<any>>();
+  protected _getData(): {[key: string]: any} {
+    const returnObject: {[key: string]: any} = {};
     this.forEach((model: ModelNode<any>, key: string) => {
       returnObject[key] = model.data();
     });

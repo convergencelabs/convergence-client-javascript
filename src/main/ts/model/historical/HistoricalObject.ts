@@ -3,8 +3,8 @@ import { ObjectNode } from "../internal/ObjectNode";
 import { HistoricalWrapperFactory } from "./HistoricalWrapperFactory";
 import { HistoricalContainerElement } from "./HistoricalContainerElement";
 
-export class HistoricalObject extends HistoricalElement<Map<string, any>>
-                              implements HistoricalContainerElement<Map<string, any>> {
+export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
+                              implements HistoricalContainerElement<{[key: string]: any}> {
 
   constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
     super(_delegate, _wrapperFactory);
