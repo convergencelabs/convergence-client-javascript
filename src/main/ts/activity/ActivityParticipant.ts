@@ -3,8 +3,10 @@ export class ActivityParticipant {
   private _username: string;
   private _sessionId: string;
   private _stateMap: Map<string, any>;
+  private _local;
 
-  constructor(username: string, session: string, stateMap: Map<string, any>) {
+  constructor(session: string, username: string, stateMap: Map<string, any>, local: boolean) {
+    this._local = local;
     this._username = username;
     this._sessionId = session;
     this._stateMap = stateMap;
@@ -25,5 +27,9 @@ export class ActivityParticipant {
     } else {
       return this._stateMap;
     }
+  }
+
+  public isLocal() {
+    return this._local;
   }
 }

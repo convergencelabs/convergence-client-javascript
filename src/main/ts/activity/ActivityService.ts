@@ -17,7 +17,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
 import {ActivityEvent} from "./events";
 import {StateRemovedEvent} from "./events";
-import {mapToObject} from "../util/ObjectUtils";
+import {mapToObject, objectToMap} from "../util/ObjectUtils";
 
 export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
@@ -47,9 +47,10 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           let joinedMsg: ActivitySessionJoined = <ActivitySessionJoined> message;
           let username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
           let participant: ActivityParticipant = new ActivityParticipant(
-            username,
             joinedMsg.sessionId,
-            joinedMsg.state);
+            username,
+            joinedMsg.state,
+            false);
           return [<SessionJoinedEvent> {
             src: this,
             name: Activity.Events.SESSION_JOINED,
@@ -132,14 +133,27 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
       }).then((response: ActivityJoinResponse) => {
         const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
 
-        for (let participant of response.participants) {
-          participants.set(participant.sessionId(), participant);
-        }
+        Object.keys(response.participants).forEach(sessionId => {
+          const username: string = SessionIdParser.parseUsername(sessionId);
+          const local: boolean = sessionId === this._connection.session().sessionId();
+          const state: {[key: string]: any} = response.participants[sessionId];
+          let stateMap: Map<string, any> = objectToMap(state);
+          const participant = new ActivityParticipant(sessionId, username, stateMap, local);
+          participants.set(sessionId, participant);
+        });
 
-        deferred.resolve(new Activity(id, participants, this._leftCB(id).bind(this), this.events().filter(event => {
-            return event.activityId === id;
-          }),
-          this._connection));
+        const filteredEvents: Observable<ActivityEvent> = this.events().filter(event => {
+          return event.activityId === id;
+        });
+
+        const activity: Activity = new Activity(
+          id,
+          participants,
+          this._leftCB(id).bind(this),
+          filteredEvents,
+          this._connection);
+
+        deferred.resolve(activity);
       });
     }
 
