@@ -71,7 +71,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           }];
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
           let stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
-          return Object.keys(stateSetMsg.state).map((key) => {
+          return Object.keys(stateSetMsg.state).map(key => {
             return <StateSetEvent> {
               name: Activity.Events.STATE_SET,
               activityId: stateSetMsg.activityId,
@@ -93,7 +93,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           }];
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
           let stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
-          return stateRemovedMsg.keys.map((key) => {
+          return stateRemovedMsg.keys.map(key => {
             return <StateRemovedEvent> {
               name: Activity.Events.STATE_REMOVED,
               activityId: stateRemovedMsg.activityId,

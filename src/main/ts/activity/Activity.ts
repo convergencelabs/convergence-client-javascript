@@ -123,11 +123,11 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public setState(key: string, value: any): void
   public setState(): void {
     if (this.isJoined()) {
-      let state: Map<string, any>;
+      let state: {[key: string]: any};
       if (arguments.length === 1) {
         state = arguments[0];
       } else if (arguments.length === 2) {
-        state = new Map<string, any>();
+        state = {};
         state[arguments[0]] = arguments[1];
       }
 

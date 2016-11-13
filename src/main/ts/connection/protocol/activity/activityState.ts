@@ -5,7 +5,7 @@ import { MessageBodyDeserializer } from "../MessageSerializer";
 
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {
   activityId: string;
-  state: Map<string, any>;
+  state: {[key: string]: any};
 }
 
 export var ActivitySetStateSerializer: MessageBodySerializer = (request: ActivitySetState) => {
@@ -40,7 +40,7 @@ export var ActivityClearStateSerializer: MessageBodySerializer = (request: Activ
 export interface ActivityRemoteStateSet extends IncomingProtocolNormalMessage {
   activityId: string;
   sessionId: string;
-  state: Map<string, any>;
+  state: {[key: string]: any};
 }
 
 export var ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<ActivityRemoteStateSet> = (body: any) => {
