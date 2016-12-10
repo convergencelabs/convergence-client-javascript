@@ -21,12 +21,12 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
   protected _path: () => Path;
 
   private _id: string;
-  private _modelType: ModelElementType;
+  private _modelType: string;
 
   /**
    * Constructs a new RealTimeElement.
    */
-  constructor(modelType: ModelElementType,
+  constructor(modelType: string,
               id: string,
               path: () => Path,
               model: Model,
@@ -45,7 +45,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     return this._id;
   }
 
-  public type(): ModelElementType {
+  public type(): string {
     return this._modelType;
   }
 

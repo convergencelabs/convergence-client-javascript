@@ -3,7 +3,7 @@ import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
-import {NullValue} from "../dataValue";
+import {NullValue, DataValueType} from "../dataValue";
 
 export class NullNode extends ModelNode<void> {
 
@@ -25,7 +25,7 @@ export class NullNode extends ModelNode<void> {
   public dataValue(): NullValue {
     return <NullValue> {
       id: this.id(),
-      type: "null",
+      type: DataValueType.NULL,
       value: this.data()
     };
   }

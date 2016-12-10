@@ -1,5 +1,5 @@
 import {ModelNode} from "./ModelNode";
-import {ArrayValue} from "../dataValue";
+import {ArrayValue, DataValueType} from "../dataValue";
 import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
@@ -65,7 +65,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     });
     return <ArrayValue> {
       id: this.id(),
-      type: "array",
+      type: DataValueType.ARRAY,
       children: values
     };
   }

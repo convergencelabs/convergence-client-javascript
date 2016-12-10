@@ -1,5 +1,5 @@
 import {ModelNode} from "./ModelNode";
-import {NumberValue} from "../dataValue";
+import {NumberValue, DataValueType} from "../dataValue";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -37,7 +37,7 @@ export class NumberNode extends ModelNode<number> {
   public dataValue(): NumberValue {
     return <NumberValue> {
       id: this.id(),
-      type: "number",
+      type: DataValueType.NUMBER,
       value: this.data()
     };
   }

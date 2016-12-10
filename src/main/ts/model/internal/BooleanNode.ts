@@ -1,5 +1,5 @@
 import {ModelNode} from "./ModelNode";
-import {BooleanValue} from "../dataValue";
+import {BooleanValue, DataValueType} from "../dataValue";
 import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -33,7 +33,7 @@ export class BooleanNode extends ModelNode<boolean> {
   public dataValue(): BooleanValue {
     return <BooleanValue> {
       id: this.id(),
-      type: "boolean",
+      type: DataValueType.BOOLEAN,
       value: this.data()
     };
   }

@@ -21,7 +21,7 @@ export abstract class HistoricalElement<T> extends ConvergenceEventEmitter<Conve
     return this._delegate.id();
   }
 
-  public type(): ModelElementType {
+  public type(): string {
     return this._delegate.type();
   }
 

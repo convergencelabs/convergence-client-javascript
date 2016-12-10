@@ -1,5 +1,5 @@
 import {ModelNode} from "./ModelNode";
-import {StringValue} from "../dataValue";
+import {StringValue, DataValueType} from "../dataValue";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
@@ -40,7 +40,7 @@ export class StringNode extends ModelNode<String> {
   public dataValue(): StringValue {
     return <StringValue> {
       id: this.id(),
-      type: "string",
+      type: DataValueType.STRING,
       value: this.data()
     };
   }

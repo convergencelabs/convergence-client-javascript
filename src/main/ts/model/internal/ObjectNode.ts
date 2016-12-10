@@ -1,7 +1,7 @@
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
-import {ObjectValue} from "../dataValue";
+import {ObjectValue, DataValueType} from "../dataValue";
 import {Validation} from "../../util/Validation";
 import {DataValue} from "../dataValue";
 import {Path} from "../ot/Path";
@@ -64,7 +64,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
 
     return <ObjectValue> {
       id: this.id(),
-      type: "object",
+      type: DataValueType.OBJECT,
       children: values
     };
   }

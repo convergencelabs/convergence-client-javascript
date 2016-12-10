@@ -1,6 +1,5 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelNode} from "../internal/ModelNode";
-import {ModelElementType} from "../ModelElementType";
 import {Path} from "../ot/Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -69,7 +68,7 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
     return this._delegate.id();
   }
 
-  public type(): ModelElementType {
+  public type(): string {
     return this._delegate.type();
   }
 
