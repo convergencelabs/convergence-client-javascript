@@ -1,4 +1,3 @@
-import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {Path} from "../ot/Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
