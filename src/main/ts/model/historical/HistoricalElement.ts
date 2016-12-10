@@ -1,4 +1,3 @@
-import {ModelElementType} from "../ModelElementType";
 import {Path} from "../ot/Path";
 import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
