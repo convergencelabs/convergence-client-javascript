@@ -26,7 +26,7 @@ node {
 
       stage 'Publish'
       sh '''
-        npm publish dist
+        npm publish dist-internal
       '''
     }
   }
