@@ -1,5 +1,5 @@
 import { ConvergenceConnection } from "./connection/ConvergenceConnection";
-import ConvergenceDomain from "./ConvergenceDomain";
+import { ConvergenceDomain } from "./ConvergenceDomain";
 import { Session } from "./Session";
 
 export class SessionImpl implements Session {

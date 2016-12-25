@@ -1,4 +1,3 @@
-import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
 import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
 import {OpenRealTimeModelRequest} from "../../main/ts/connection/protocol/model/openRealtimeModel";
@@ -6,13 +5,11 @@ import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord} from "../mock-server/records";
-import {ISendRequestRecord} from "../mock-server/records";
-import {IReceiveResponseRecord} from "../mock-server/records";
 import {ModelFqn} from "../../main/ts/model/ModelFqn";
 import {OpenRealTimeModelRequestSerializer} from "../../main/ts/connection/protocol/model/openRealtimeModel";
-import {DataValue} from "../../main/ts/model/dataValue";
 import {DataValueSerializer} from "../../main/ts/connection/protocol/model/dataValue";
 import {DataValueFactory} from "../../main/ts/model/DataValueFactory";
+import Convergence from "../../main/ts/Convergence";
 
 
 describe('Open Real Time Model E2E', () => {
@@ -52,7 +49,7 @@ describe('Open Real Time Model E2E', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.models().open("collection", "model");
     }).then((model: RealTimeModel) => {
       mockServer.doneManager().testSuccess();

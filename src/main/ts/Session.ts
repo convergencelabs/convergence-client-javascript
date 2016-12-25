@@ -1,4 +1,4 @@
-import ConvergenceDomain from "./ConvergenceDomain";
+import { ConvergenceDomain } from "./ConvergenceDomain";
 
 export interface Session {
   /**

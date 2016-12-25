@@ -32,7 +32,7 @@ import {ArraySetEvent} from "./events";
 import {ArraySetValueEvent} from "./events";
 import {BooleanSetValueEvent} from "./events";
 import {NumberSetValueEvent} from "./events";
-import {NumberAddEvent} from "./events";
+import {NumberDeltaEvent} from "./events";
 import {ObjectSetValueEvent} from "./events";
 import {ObjectRemoveEvent} from "./events";
 import {ObjectSetEvent} from "./events";
@@ -60,22 +60,22 @@ export class HistoricalEventConverter {
       return new ArrayReorderEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.fromIndex, event.toIndex,
         event.sessionId, event.username);
     } else if (event instanceof ArrayNodeSetEvent) {
-      return new ArraySetEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.index, event.value,
-        event.sessionId, event.username);
+      return new ArraySetEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.index,
+        wrapperFactory.wrap(event.value), event.sessionId, event.username);
     } else if (event instanceof ArrayNodeSetValueEvent) {
-      return new ArraySetValueEvent(<HistoricalArray> wrapperFactory.wrap(event.src), event.value,
+      return new ArraySetValueEvent(<HistoricalArray> wrapperFactory.wrap(event.src),
         event.sessionId, event.username);
     } else if (event instanceof BooleanNodeSetValueEvent) {
-      return new BooleanSetValueEvent(<HistoricalBoolean> wrapperFactory.wrap(event.src), event.value,
+      return new BooleanSetValueEvent(<HistoricalBoolean> wrapperFactory.wrap(event.src),
         event.sessionId, event.username);
     } else if (event instanceof NumberNodeSetValueEvent) {
-      return new NumberSetValueEvent(<HistoricalNumber> wrapperFactory.wrap(event.src), event.value,
+      return new NumberSetValueEvent(<HistoricalNumber> wrapperFactory.wrap(event.src),
         event.sessionId, event.username);
     } else if (event instanceof NumberNodeDeltaEvent) {
-      return new NumberAddEvent(<HistoricalNumber> wrapperFactory.wrap(event.src), event.value,
+      return new NumberDeltaEvent(<HistoricalNumber> wrapperFactory.wrap(event.src), event.value,
         event.sessionId, event.username);
     } else if (event instanceof ObjectNodeSetValueEvent) {
-      return new ObjectSetValueEvent(<HistoricalObject> wrapperFactory.wrap(event.src), event.value,
+      return new ObjectSetValueEvent(<HistoricalObject> wrapperFactory.wrap(event.src),
         event.sessionId, event.username);
     } else if (event instanceof ObjectNodeRemoveEvent) {
       return new ObjectRemoveEvent(<HistoricalObject> wrapperFactory.wrap(event.src), event.key,
@@ -90,7 +90,7 @@ export class HistoricalEventConverter {
       return new StringRemoveEvent(<HistoricalString> wrapperFactory.wrap(event.src), event.index, event.value,
         event.sessionId, event.username);
     } else if (event instanceof StringNodeSetValueEvent) {
-      return new StringSetValueEvent(<HistoricalString> wrapperFactory.wrap(event.src), event.value,
+      return new StringSetValueEvent(<HistoricalString> wrapperFactory.wrap(event.src),
         event.sessionId, event.username);
     } else {
       throw new Error("Unable to convert event: " + event.name);

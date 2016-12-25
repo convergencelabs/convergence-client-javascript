@@ -75,7 +75,7 @@ export class ArraySetEvent implements ValueChangedEvent {
   public name: string = "set";
   constructor(public src: RealTimeArray,
               public index: number,
-              public value: any,
+              public value: RealTimeElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -94,7 +94,6 @@ export class ArrayReorderEvent implements ValueChangedEvent {
 export class ArraySetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeArray,
-              public value: Array<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -103,7 +102,6 @@ export class ArraySetValueEvent implements ValueChangedEvent {
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeBoolean,
-              public value: boolean,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -112,7 +110,6 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
 export class NumberSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeNumber,
-              public value: number,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -149,7 +146,6 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 export class ObjectSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeObject,
-              public value: { [key: string]: any; },
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -186,7 +182,6 @@ export class StringRemoveEvent implements ValueChangedEvent {
 export class StringSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: RealTimeString,
-              public value: string,
               public sessionId: string,
               public username: string,
               public local: boolean) {}

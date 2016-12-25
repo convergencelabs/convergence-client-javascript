@@ -1,6 +1,6 @@
 import {DoneType} from "../../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../../mock-server/MockConvergenceServer";
-import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
+import {ConvergenceDomain} from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
@@ -8,6 +8,7 @@ import {DomainUser} from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 import {UserField} from "../../../main/ts/identity/IdentityService";
+import Convergence from "../../../main/ts/Convergence";
 
 var expect: ExpectStatic = chai.expect;
 
@@ -36,7 +37,7 @@ describe('IdentityService.user()', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().user("test1");
     }).then((user: DomainUser) => {
       expect(user).to.exist;
@@ -57,7 +58,7 @@ describe('IdentityService.user()', () => {
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().user("u1");
     }).then((user: DomainUser) => {
       expect(user).to.be.undefined;
@@ -78,7 +79,7 @@ describe('IdentityService.user()', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().user("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testFailure(
@@ -92,7 +93,7 @@ describe('IdentityService.user()', () => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().user(null);
     }).then((user: DomainUser) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
@@ -107,7 +108,7 @@ describe('IdentityService.user()', () => {
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().user("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
@@ -122,7 +123,7 @@ describe('IdentityService.user()', () => {
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().userByEmail("u1");
     }).then((user: DomainUser) => {
       mockServer.doneManager().testSuccess();
@@ -146,7 +147,7 @@ describe('IdentityService.search()', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({
         term: "keyword",
         fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
@@ -181,7 +182,7 @@ describe('IdentityService.search()', () => {
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({
         term: "keyword",
         fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
@@ -198,7 +199,7 @@ describe('IdentityService.search()', () => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({term: "keyword", fields: []});
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));
@@ -211,7 +212,7 @@ describe('IdentityService.search()', () => {
     var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({fields: "username", term: null});
     }).then((user: DomainUser[]) => {
       mockServer.doneManager().testFailure(new Error("The promise was incorrectly resolved"));

@@ -62,7 +62,7 @@ export class ArraySetEvent implements ValueChangedEvent {
 
   constructor(public src: HistoricalArray,
               public index: number,
-              public value: any,
+              public value: HistoricalElement<any>,
               public sessionId: string,
               public username: string) {
   }
@@ -83,7 +83,6 @@ export class ArraySetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
   constructor(public src: HistoricalArray,
-              public value: Array<any>,
               public sessionId: string,
               public username: string) {
   }
@@ -93,7 +92,6 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
   constructor(public src: HistoricalBoolean,
-              public value: boolean,
               public sessionId: string,
               public username: string) {
   }
@@ -103,14 +101,13 @@ export class NumberSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
   constructor(public src: HistoricalNumber,
-              public value: number,
               public sessionId: string,
               public username: string) {
   }
 }
 
-export class NumberAddEvent implements ValueChangedEvent {
-  public name: string = "add";
+export class NumberDeltaEvent implements ValueChangedEvent {
+  public name: string = "delta";
 
   constructor(public src: HistoricalNumber,
               public value: number,
@@ -141,16 +138,6 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
-  public name: string = "value";
-
-  constructor(public src: HistoricalObject,
-              public value: { [key: string]: any; },
-              public sessionId: string,
-              public username: string) {
-  }
-}
-
-export class NodeSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
   constructor(public src: HistoricalObject,
@@ -185,7 +172,6 @@ export class StringSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
 
   constructor(public src: HistoricalString,
-              public value: string,
               public sessionId: string,
               public username: string) {
   }

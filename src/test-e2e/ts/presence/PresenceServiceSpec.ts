@@ -1,12 +1,11 @@
 import {DoneType} from "../../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../../mock-server/MockConvergenceServer";
-import ConvergenceDomain from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-
+import Convergence from "../../../main/ts/Convergence";
 
 var expect: ExpectStatic = chai.expect;
 
@@ -38,7 +37,7 @@ describe('PresenceService.presence()', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.presence().presence("notFound");
     }).then(userPresence => {
       expect(userPresence.username()).to.equal("notFound");
@@ -64,7 +63,7 @@ describe('PresenceService.subscribe()', () => {
     });
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.presence().subscribe("u1").then(userPresence => {
         expect(userPresence.username()).to.equal("u1");
         expect(userPresence.isAvailable()).to.equal(false);

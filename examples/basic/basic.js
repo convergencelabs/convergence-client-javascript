@@ -11,10 +11,10 @@ var model;
 
 // Connect to the domain.
 var url = ConvergenceConfig.DOMAIN_URL;
-ConvergenceDomain.debugFlags.protocol.messages = true;
+Convergence.debugFlags.protocol.messages = true;
 
-ConvergenceDomain.connect(url, "test1", "password").then(function(domain) {
-  return domain.models().open("foo", "basic-example", function (collectionId, modelId) {
+Convergence.connectAnonymously(ConvergenceConfig.DOMAIN_URL).then(function(domain) {
+  return domain.models().open("test", "basic-example", function (collectionId, modelId) {
     return {
       "string": "test value",
       "number": 10,

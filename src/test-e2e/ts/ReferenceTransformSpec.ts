@@ -1,4 +1,3 @@
-import ConvergenceDomain from "../../main/ts/ConvergenceDomain";
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
 import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
@@ -8,6 +7,7 @@ import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
 import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
 import {RemoteReferenceCreatedEvent} from "../../main/ts/model/rt/events";
+import Convergence from "../../main/ts/Convergence";
 
 
 describe('Reference Transformation E2E', () => {
@@ -81,7 +81,7 @@ describe('Reference Transformation E2E', () => {
 
     mockServer.start();
 
-    ConvergenceDomain.connectWithJwt(mockServer.url(), "token").then(domain => {
+    Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.models().open("collection", "model");
     }).then((model: RealTimeModel) => {
       referenceSetAction.acknowledgeReceipt();

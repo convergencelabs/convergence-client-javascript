@@ -3,7 +3,6 @@ import {ConvergenceOptions} from "./ConvergenceOptions";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
-import {debugFlags as flags} from "./Debug";
 import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
@@ -14,9 +13,7 @@ import {UserPresence} from "./presence/UserPresence";
 import {objectToMap} from "./util/ObjectUtils";
 import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 
-export default class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
-
-  public static debugFlags: any = flags;
+export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static Events: any = {
     CONNECTED: "connected",
@@ -25,35 +22,6 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     DISCONNECTED: "disconnected",
     ERROR: "error"
   };
-
-  public static connect(url: string, username: string, password: string,
-                        options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
-    return domain._connect().then((response) => {
-      return domain._authenticateWithPassword(username, password);
-    }).then((v) => {
-      return domain;
-    });
-  }
-
-  public static connectAnonymously(url: string, displayName?: string,
-                                   options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
-    return domain._connect().then((response) => {
-      return domain._authenticateAnonymously(displayName);
-    }).then((v) => {
-      return domain;
-    });
-  }
-
-  public static connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
-    return domain._connect().then((response) => {
-      return domain._authenticateWithToken(token);
-    }).then((v) => {
-      return domain;
-    });
-  }
 
   private static DefaultOptions: ConvergenceOptions = {
     connectionTimeout: 5,
@@ -107,6 +75,22 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
       const evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error};
       this._emitEvent(evt);
     });
+  }
+
+  public _authenticateWithPassword(username: string, password: string): Promise<void> {
+    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
+  }
+
+  public _authenticateWithToken(token: string): Promise<void> {
+    return this._connection.authenticateWithToken(token).then(m => this._init(m));
+  }
+
+  public _authenticateAnonymously(displayName?: string): Promise<void> {
+    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
+  }
+
+  public _connect(): Promise<HandshakeResponse> {
+    return this._connection.connect();
   }
 
   public session(): Session {
@@ -166,22 +150,6 @@ export default class ConvergenceDomain extends ConvergenceEventEmitter<Convergen
     }
 
     return options;
-  }
-
-  private _connect(): Promise<HandshakeResponse> {
-    return this._connection.connect();
-  }
-
-  private _authenticateWithPassword(username: string, password: string): Promise<void> {
-    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
-  }
-
-  private _authenticateWithToken(token: string): Promise<void> {
-    return this._connection.authenticateWithToken(token).then(m => this._init(m));
-  }
-
-  private _authenticateAnonymously(displayName?: string): Promise<void> {
-    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
   }
 
   private _init(m: AuthResponse): void {

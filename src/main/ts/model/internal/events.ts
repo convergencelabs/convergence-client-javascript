@@ -63,7 +63,7 @@ export class ArrayNodeSetEvent implements NodeValueChangedEvent {
   constructor(public src: ArrayNode,
               public local: boolean,
               public index: number,
-              public value: any,
+              public value: ModelNode<any>,
               public sessionId: string,
               public username: string) {}
 }

@@ -8,7 +8,7 @@ import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
 import {IncomingProtocolResponseMessage} from "./protocol/protocol";
 import {EventEmitter} from "../util/EventEmitter";
 import {SessionImpl} from "../SessionImpl";
-import ConvergenceDomain from "../ConvergenceDomain";
+import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Session} from "../Session";
 import {PasswordAuthRequest, AnonymousAuthRequest} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";

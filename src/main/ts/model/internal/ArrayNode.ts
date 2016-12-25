@@ -219,7 +219,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._updateIdToPathElementMap(index);
     oldChild._detach(local);
 
-    const event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild.data(), sessionId, username);
+    const event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild, sessionId, username);
     this._emitValueEvent(event);
   }
 
