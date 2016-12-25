@@ -1,36 +1,29 @@
 import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
-import {ConvergenceOptions} from "./ConvergenceOptions";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
-import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
+
 
 export default class ConvergenceDomain extends ConvergenceEventEmitter {
 
-  static Events: any;
+  public static Events: any;
 
-  static connect(url: string, username: string, password: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
+  public session(): Session;
 
-  static connectWithJwt(url: string, jwt: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
+  public models(): ModelService;
 
-  static connectAnonymously(url: string, displayName?: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
+  public identity(): IdentityService;
 
-  session(): Session;
+  public activities(): ActivityService;
 
-  models(): ModelService;
+  public presence(): PresenceService;
 
-  identity(): IdentityService;
+  public chat(): ChatService;
 
-  activities(): ActivityService;
+  public dispose(): void;
 
-  presence(): PresenceService;
-
-  chat(): ChatService;
-
-  dispose(): void;
-
-  isDisposed(): boolean;
+  public isDisposed(): boolean;
 }

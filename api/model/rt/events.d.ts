@@ -8,157 +8,144 @@ import {RealTimeObject} from "./RealTimeObject";
 import {RealTimeString} from "./RealTimeString";
 import {ModelReference} from "../reference/ModelReference";
 import {RealTimeModel} from "./RealTimeModel";
+
 export interface ModelEvent extends ConvergenceEvent {
   src: RealTimeModel;
 }
+
 export interface ModelClosedEvent extends ModelEvent {
   local: boolean;
   reason?: string;
 }
+
 export interface VersionChangedEvent extends ModelEvent {
   version: number;
 }
+
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
   reference: ModelReference<any>;
 }
+
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
   src: RealTimeElement<any>;
 }
+
 export declare class ValueDetachedEvent implements ConvergenceEvent {
-  src: RealTimeElement<any>;
-  name: string;
-
-  constructor(src: RealTimeElement<any>);
+  public src: RealTimeElement<any>;
+  public name: string;
 }
+
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
-  sessionId: string;
-  username: string;
+   sessionId: string;
+   username: string;
 }
+
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
-  src: RealTimeElement<any>;
-  relativePath: Path;
-  childEvent: ValueChangedEvent;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeElement<any>, relativePath: Path, childEvent: ValueChangedEvent, sessionId: string, username: string);
+  public src: RealTimeElement<any>;
+  public relativePath: Path;
+  public childEvent: ValueChangedEvent;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ArrayInsertEvent implements ValueChangedEvent {
-  src: RealTimeArray;
-  index: number;
-  value: RealTimeElement<any>;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeArray, index: number, value: RealTimeElement<any>, sessionId: string, username: string);
+  public src: RealTimeArray;
+  public index: number;
+  public value: RealTimeElement<any>;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
-export declare class ArrayRemoveEvent implements ValueChangedEvent {
-  src: RealTimeArray;
-  index: number;
-  sessionId: string;
-  username: string;
-  name: string;
 
-  constructor(src: RealTimeArray, index: number, sessionId: string, username: string);
+export declare class ArrayRemoveEvent implements ValueChangedEvent {
+  public src: RealTimeArray;
+  public index: number;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
 export declare class ArraySetEvent implements ValueChangedEvent {
-  src: RealTimeArray;
-  index: number;
-  value: any;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeArray, index: number, value: any, sessionId: string, username: string);
+  public src: RealTimeArray;
+  public index: number;
+  public value: RealTimeElement<any>;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ArrayReorderEvent implements ValueChangedEvent {
-  src: RealTimeArray;
-  fromIndex: number;
-  toIndex: number;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeArray, fromIndex: number, toIndex: number, sessionId: string, username: string);
+  public src: RealTimeArray;
+  public fromIndex: number;
+  public toIndex: number;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ArraySetValueEvent implements ValueChangedEvent {
-  src: RealTimeArray;
-  value: Array<any>;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeArray, value: Array<any>, sessionId: string, username: string);
+  public src: RealTimeArray;
+  public value: Array<any>;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class BooleanSetValueEvent implements ValueChangedEvent {
-  src: RealTimeBoolean;
-  value: boolean;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeBoolean, value: boolean, sessionId: string, username: string);
+  public src: RealTimeBoolean;
+  public value: boolean;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class NumberSetValueEvent implements ValueChangedEvent {
-  src: RealTimeNumber;
-  value: number;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeNumber, value: number, sessionId: string, username: string);
+  public src: RealTimeNumber;
+  public value: number;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class NumberAddEvent implements ValueChangedEvent {
-  src: RealTimeNumber;
-  value: number;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeNumber, value: number, sessionId: string, username: string);
+  public src: RealTimeNumber;
+  public value: number;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ObjectSetEvent implements ValueChangedEvent {
-  src: RealTimeObject;
-  key: string;
-  value: RealTimeElement<any>;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeObject, key: string, value: RealTimeElement<any>, sessionId: string, username: string);
+  public src: RealTimeObject;
+  public key: string;
+  public value: RealTimeElement<any>;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ObjectRemoveEvent implements ValueChangedEvent {
-  src: RealTimeObject;
-  key: string;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeObject, key: string, sessionId: string, username: string);
+  public src: RealTimeObject;
+  public key: string;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class ObjectSetValueEvent implements ValueChangedEvent {
-  src: RealTimeObject;
-  value: {
-    [key: string]: any;
-  };
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeObject, value: {
-    [key: string]: any;
-  }, sessionId: string, username: string);
+  public src: RealTimeObject;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class NodeSetValueEvent implements ValueChangedEvent {
-  src: RealTimeObject;
-  sessionId: string;
-  username: string;
-  name: string;
-
-  constructor(src: RealTimeObject, sessionId: string, username: string);
+  public src: RealTimeObject;
+  public sessionId: string;
+  public username: string;
+  public name: string;
 }
+
 export declare class StringInsertEvent implements ValueChangedEvent {
   src: RealTimeString;
   index: number;

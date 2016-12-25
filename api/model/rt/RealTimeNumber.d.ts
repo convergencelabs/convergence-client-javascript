@@ -1,13 +1,13 @@
 import {RealTimeElement} from "./RealTimeElement";
 
 export declare class RealTimeNumber extends RealTimeElement<number> {
-  static Events: any;
+  public static Events: any;
 
-  add(num: number): void;
+  public add(num: number): void;
 
-  subtract(num: number): void;
+  public subtract(num: number): void;
 
-  increment(): void;
+  public increment(): void;
 
-  decrement(): void;
+  public decrement(): void;
 }

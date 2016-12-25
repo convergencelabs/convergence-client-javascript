@@ -1,16 +1,16 @@
-import {ModelElementType} from "../ModelElementType";
 import {Path} from "../Path";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
+
 export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitter {
 
-  id(): string;
+  public id(): string;
 
-  type(): ModelElementType;
+  public type(): String;
 
-  path(): Path;
+  public path(): Path;
 
-  isDetached(): boolean;
+  public isDetached(): boolean;
 
-  data(): T;
+  public data(): T;
 }

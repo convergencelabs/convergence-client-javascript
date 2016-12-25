@@ -4,15 +4,15 @@ import {Observable} from "rxjs/Rx";
 
 export declare class UserPresenceSubscription extends ConvergenceEventEmitter<any> implements UserPresence {
 
-  username(): string;
+  public username(): string;
 
-  isAvailable(): boolean;
+  public isAvailable(): boolean;
 
-  state(key: string): any;
+  public state(key: string): any;
 
-  state(): Map<string, any>;
+  public state(): Map<string, any>;
 
-  asObservable(): Observable<UserPresence>;
+  public asObservable(): Observable<UserPresence>;
 
-  unsubscribe();
+  public unsubscribe();
 }

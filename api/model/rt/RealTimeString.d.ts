@@ -6,20 +6,19 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 
 export declare class RealTimeString extends RealTimeElement<string> {
 
-  static Events: any;
+  public static Events: any;
 
-  insert(index: number, value: string): void;
+  public insert(index: number, value: string): void;
 
-  remove(index: number, length: number): void;
+  public remove(index: number, length: number): void;
 
-  length(): number;
+  public length(): number;
 
-  indexReference(key: string): LocalIndexReference;
+  public indexReference(key: string): LocalIndexReference;
 
-  rangeReference(key: string): LocalRangeReference;
+  public rangeReference(key: string): LocalRangeReference;
 
-  reference(sessionId: string, key: string): ModelReference<any>;
+  public reference(sessionId: string, key: string): ModelReference<any>;
 
-  references(filter?: ReferenceFilter): ModelReference<any>[];
-
+  public references(filter?: ReferenceFilter): ModelReference<any>[];
 }

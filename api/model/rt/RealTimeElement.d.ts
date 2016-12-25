@@ -7,24 +7,24 @@ import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
 export declare abstract class RealTimeElement<T> extends ConvergenceEventEmitter<any> {
 
-  static Events: any;
+  public  static Events: any;
 
-  id(): string;
+  public id(): string;
 
-  type(): ModelElementType;
+  public type(): ModelElementType;
 
-  path(): Path;
+  public path(): Path;
 
-  isAttached(): boolean;
+  public isAttached(): boolean;
 
-  isDetached(): boolean;
+  public isDetached(): boolean;
 
-  parent(): RealTimeContainerElement<any>
+  public parent(): RealTimeContainerElement<any>
 
-  value(): T;
-  value(value: T): void;
+  public value(): T;
+  public value(value: T): void;
 
-  reference(sessionId: string, key: string): ModelReference<any>;
+  public reference(sessionId: string, key: string): ModelReference<any>;
 
-  references(filter?: ReferenceFilter): ModelReference<any>[];
+  public references(filter?: ReferenceFilter): ModelReference<any>[];
 }

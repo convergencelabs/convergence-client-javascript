@@ -1,54 +1,41 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+
 export declare var ReferenceType: any;
+
 export declare abstract class ModelReference<V> extends ConvergenceEventEmitter {
-  static Events: any;
-  private _disposed;
-  protected _values: V[];
-  private _type;
-  private _key;
-  private _source;
-  private _username;
-  private _sessionId;
-  private _local;
+  public static Events: any;
 
-  constructor(type: string, key: string, source: any, username: string, sessionId: string, local: boolean);
+  public type(): string;
 
-  type(): string;
+  public key(): string;
 
-  key(): string;
+  public source(): any;
 
-  source(): any;
+  public isLocal(): boolean;
 
-  isLocal(): boolean;
+  public username(): string;
 
-  username(): string;
+  public sessionId(): string;
 
-  sessionId(): string;
+  public isDisposed(): boolean;
 
-  isDisposed(): boolean;
+  public value(): V;
 
-  _dispose(): void;
+  public values(): V[];
 
-  value(): V;
-
-  values(): V[];
-
-  isSet(): boolean;
-
-  _set(values: V[], local?: boolean): void;
-
-  _clear(): void;
-
-  protected _setIfChanged(values: V[]): void;
+  public isSet(): boolean;
 }
+
 export interface ReferenceChangedEvent extends ConvergenceEvent {
   src: ModelReference<any>;
   local: boolean;
 }
+
 export interface ReferenceClearedEvent extends ConvergenceEvent {
   src: ModelReference<any>;
 }
+
 export interface ReferenceDisposedEvent extends ConvergenceEvent {
   src: ModelReference<any>;
 }

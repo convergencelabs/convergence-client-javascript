@@ -10,74 +10,74 @@ import {ModelCollaborator} from "./ModelCollaborator";
 
 export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
 
-  static Events: any;
+  public static Events: any;
 
-  session(): Session;
+  public session(): Session;
 
-  collaborators(): ModelCollaborator[];
+  public collaborators(): ModelCollaborator[];
 
-  collectionId(): string;
+  public collectionId(): string;
 
-  modelId(): string;
+  public modelId(): string;
 
   /**
    * The current, latest version of the model.
    */
-  version(): number;
+  public version(): number;
 
   /**
    * The minimum version of the model. Normally 0 unless the history has been truncated.
    */
-  minVersion(): number;
+  public minVersion(): number;
 
   /**
    * The maximum version available for this model.  Synonymous for version() for the
    * RealTimeModel
    */
-  maxVersion(): number;
+  public maxVersion(): number;
 
   /**
    * The current, latest time of the model.
    */
-  time(): Date;
+  public time(): Date;
 
   /**
    * The minimum time of the model. Normally the created time unless the history has been truncated.
    */
-  minTime(): Date;
+  public minTime(): Date;
 
   /**
    * The maximum time of the model, when it was last modified. Synonymous with time() for the
    * RealTimeModel.
    */
-  maxTime(): Date;
+  public maxTime(): Date;
 
   /**
    * The time the model was created.
    */
-  createdTime(): Date;
+  public createdTime(): Date;
 
-  root(): RealTimeObject;
+  public root(): RealTimeObject;
 
-  element(id: string): RealTimeElement<any>
+  public element(id: string): RealTimeElement<any>
 
-  elementAt(path: any): RealTimeElement<any>;
+  public elementAt(path: any): RealTimeElement<any>;
 
-  isOpen(): boolean;
+  public isOpen(): boolean;
 
-  close(): Promise<void>;
+  public close(): Promise<void>;
 
-  startBatch(): void;
+  public startBatch(): void;
 
-  endBatch(): void;
+  public endBatch(): void;
 
-  isBatchStarted(): boolean;
+  public isBatchStarted(): boolean;
 
-  elementReference(key: string): LocalElementReference;
+  public elementReference(key: string): LocalElementReference;
 
-  reference(sessionId: string, key: string): ModelReference<any>;
+  public reference(sessionId: string, key: string): ModelReference<any>;
 
-  references(filter?: ReferenceFilter): ModelReference<any>[];
+  public references(filter?: ReferenceFilter): ModelReference<any>[];
 }
 
 export interface OpenedEvent extends ModelEvent {

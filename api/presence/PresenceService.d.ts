@@ -5,27 +5,26 @@ import {UserPresenceSubscription} from "./UserPresenceSubscription";
 
 export declare class PresenceService extends ConvergenceEventEmitter {
 
-  session(): Session;
+  public session(): Session;
 
-  isAvailable(): boolean;
+  public isAvailable(): boolean;
 
-  setState(state: {[key: string]: any}): void;
-  setState(key: string, value: any): void;
+  public setState(state: {[key: string]: any}): void;
+  public setState(key: string, value: any): void;
 
-  //replace(state: Map<string, any>);
+  // public replace(state: Map<string, any>);
 
-  removeState(key: string): void;
-  removeState(keys: string[]): void;
+  public removeState(key: string): void;
+  public removeState(keys: string[]): void;
 
-  clearState(): void;
+  public clearState(): void;
 
-  state(key: string): any;
-  state(): {[key: string]: any};
+  public state(key: string): any;
+  public state(): {[key: string]: any};
 
+  public presence(username: string): Promise<UserPresence>;
+  public presence(usernames: string[]): Promise<UserPresence[]>;
 
-  presence(username: string): Promise<UserPresence>;
-  presence(usernames: string[]): Promise<UserPresence[]>;
-
-  subscribe(username: string): Promise<UserPresenceSubscription>;
-  subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>;
+  public subscribe(username: string): Promise<UserPresenceSubscription>;
+  public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>;
 }

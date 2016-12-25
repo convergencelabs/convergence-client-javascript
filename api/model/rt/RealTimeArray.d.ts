@@ -1,47 +1,39 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
-import {RealTimeValue} from "../../../src/main/ts/model/rt/RealTimeValue";
-
 
 export declare class RealTimeArray extends RealTimeElement<any[]> implements RealTimeContainerElement<any[]> {
 
-  static Events: any;
+  public static Events: any;
 
-  get(index: number): RealTimeElement<any>;
+  public get(index: number): RealTimeElement<any>;
 
+  public set(index: number, value: any): RealTimeElement<any>;
 
-  set(index: number, value: any): RealTimeElement<any>;
+  public insert(index: number, value: any): RealTimeElement<any>;
 
-  insert(index: number, value: any): RealTimeElement<any>;
+  public remove(index: number): Object | number | string | boolean;
 
-  remove(index: number): Object | number | string | boolean;
+  public reorder(fromIndex: number, toIndex: number): void;
 
-  reorder(fromIndex: number, toIndex: number): void;
+  public push(value: any): RealTimeElement<any>;
 
+  public pop(): any;
 
-  push(value: any): RealTimeElement<any>;
+  public unshift(value: any): RealTimeElement<any>;
 
-  pop(): any;
+  public shift(): any;
 
-  unshift(value: any): RealTimeElement<any>;
+  public length(): number;
 
-  shift(): any;
+  public some(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
 
+  public every(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
 
-  length(): number;
+  public find(callback: (element: RealTimeElement<any>, index: number) => boolean): RealTimeElement<any>
 
+  public findIndex(callback: (element: RealTimeElement<any>, index: number) => boolean): number;
 
-  some(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
+  public forEach(callback: (value: RealTimeElement<any>, index: number) => void): void;
 
-  every(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
-
-  find(callback: (element: RealTimeElement<any>, index: number) => boolean): RealTimeValue<any>
-
-  findIndex(callback: (element: RealTimeElement<any>, index: number) => boolean): number;
-
-
-  forEach(callback: (value: RealTimeElement<any>, index: number) => void): void;
-
-
-  elementAt(pathArgs: any): RealTimeElement<any>;
+  public elementAt(pathArgs: any): RealTimeElement<any>;
 }

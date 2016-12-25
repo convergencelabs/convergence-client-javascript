@@ -1,7 +1,9 @@
 import {ModelReference} from "./ModelReference";
 import {RealTimeElement} from "../rt/RealTimeElement";
-import {DelegatingEventEmitter} from "../../util/DelegatingEventEmitter";
+import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {RealTimeModel} from "../rt/RealTimeModel";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+
 export interface ModelReferenceCallbacks {
   onPublish: (reference: LocalModelReference<any, any>) => void;
   onUnpublish: (reference: LocalModelReference<any, any>) => void;
@@ -9,47 +11,43 @@ export interface ModelReferenceCallbacks {
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
 export declare type ReferenceDisposedCallback = (reference: LocalModelReference<any, any>) => void;
-export declare abstract class LocalModelReference<V, R extends ModelReference<V>> extends DelegatingEventEmitter {
-  private _published;
-  private _callbacks;
-  protected _reference: R;
-  private _disposeCallback;
 
-  constructor(reference: R, callbacks: ModelReferenceCallbacks, disposeCallback: ReferenceDisposedCallback);
+export declare abstract class LocalModelReference<V, R extends ModelReference<V>>
+  extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  type(): string;
+  public type(): string;
 
-  key(): string;
+  public key(): string;
 
-  source(): RealTimeElement<any> | RealTimeModel;
+  public source(): RealTimeElement<any> | RealTimeModel;
 
-  isLocal(): boolean;
+  public isLocal(): boolean;
 
-  username(): string;
+  public username(): string;
 
-  sessionId(): string;
+  public sessionId(): string;
 
-  isDisposed(): boolean;
+  public isDisposed(): boolean;
 
-  value(): V;
-  value(value: V): void;
+  public value(): V;
+  public value(value: V): void;
 
-  values(): V[];
-  values(values: V[]): void;
+  public values(): V[];
+  public values(values: V[]): void;
 
-  reference(): R;
+  public reference(): R;
 
-  share(): void;
+  public share(): void;
 
-  unshare(): void;
+  public unshare(): void;
 
-  isShared(): boolean;
+  public isShared(): boolean;
 
-  clear(): void;
+  public clear(): void;
 
-  dispose(): void;
+  public dispose(): void;
 
-  isSet(): boolean;
+  public isSet(): boolean;
 
   protected _fireSet(): void;
 
