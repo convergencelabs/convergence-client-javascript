@@ -2,6 +2,7 @@
 .vscode
 build
 dist
+dist-internal
 coverage
 downloads
 node_modules
