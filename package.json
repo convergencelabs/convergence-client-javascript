@@ -1,15 +1,19 @@
 {
-  "name": "convergence-client",
-  "version": "1.0.0-SNAPSHOT",
-  "description": "Convergence Javascript Client",
-  "tags": [
+  "name": "@convergence/convergence",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Convergence JavaScript client library.",
+  "keywords": [
     "Convergence",
     "Client",
     "Collaboration",
     "Real Time"
   ],
-  "author": "Convergence Labs",
-  "homepage": "http://www.convergencelabs.com",
+  "author": {
+    "name": "Convergence Labs, Inc.",
+    "email": "info@convergencelabs.com",
+    "url": "http://convergencelabs.com"
+  },
+  "homepage": "http://convergencelabs.com",
   "repository": {
     "type": "git",
     "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
@@ -22,18 +26,19 @@
     "test": "gulp test",
     "clean": "gulp clean"
   },
+  "typings": "typings/Convergence.d.ts",
   "publishConfig": {
     "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
   },
   "dependencies": {
-    "rxjs": "5.0.0-rc.2"
+    "rxjs": "5.0.1"
   },
   "devDependencies": {
-    "@types/mocha": "2.2.32",
     "@types/chai": "3.4.33",
+    "@types/core-js": "0.9.34",
+    "@types/mocha": "2.2.32",
     "@types/sinon": "1.16.31",
     "@types/sinon-chai": "2.7.27",
-    "@types/core-js": "0.9.34",
     "babel-eslint": "7.1.0",
     "chai": "3.5.0",
     "del": "2.2.2",
@@ -41,6 +46,7 @@
     "gulp": "3.9.1",
     "gulp-bump": "2.4.0",
     "gulp-concat": "2.6.0",
+    "gulp-header": "^1.8.8",
     "gulp-istanbul": "0.10.4",
     "gulp-mocha": "2.2.0",
     "gulp-rename": "1.2.2",
@@ -52,6 +58,7 @@
     "merge2": "1.0.2",
     "mkdirp": "0.5.1",
     "mocha": "2.3.4",
+    "mocha-typescript": "^1.0.15",
     "mock-socket": "2.0.0",
     "rollup": "0.36.3",
     "rollup-plugin-typescript": "0.8.1",

@@ -1,0 +1,44 @@
+{
+  "name": "@convergence/convergence",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Convergence JavaScript client library.",
+  "keywords": [
+    "Convergence",
+    "client",
+    "collaboration",
+    "real time",
+    "database"
+  ],
+  "author": {
+    "name": "Convergence Labs, Inc.",
+    "email": "info@convergencelabs.com",
+    "url": "http://convergencelabs.com"
+  },
+  "maintainers": [{
+      "name": "Convergence Labs, Inc.",
+      "email": "info@convergencelabs.com",
+      "url": "http://convergencelabs.com"
+  }],
+  "contributors": [],
+  "homepage": "http://convergencelabs.com",
+  "bugs": {
+    "email": "support@convergencelabs.com"
+  },
+  "main": "cjs/convergence.js",
+  "typings": "typings/Convergence.d.ts",
+  "dependencies": {
+    "rxjs": "5.0.1"
+  },
+  "license": "SEE LICENSE IN http://www.convergencelabs.com/terms/services/",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "none",
+    "url": "http://convergencelabs.com/"
+  },
+  "engines" : {
+    "node" : ">=5.0.0"
+  }
+}
