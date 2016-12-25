@@ -1,5 +1,5 @@
 /**!
-© 2016 Convergence Labs, Inc.; All Rights Reservedvim
+© 2016 Convergence Labs, Inc.; All Rights Reserved.
 @version <%= package.version %>
 @license http://convergencelabs.com/terms/services/
 */

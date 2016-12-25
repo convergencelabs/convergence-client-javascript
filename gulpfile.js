@@ -138,7 +138,7 @@ gulp.task("dist-typings", function () {
 gulp.task("dist-cjs", ["lint", "test"], function () {
   const config = Object.assign({}, baseRollupConfig);
   config.format = "cjs";
-  config.exports = "named";
+  config.exports = "default";
 
   return rollupStream(config)
     .pipe(source(`${distInternal}/cjs/convergence.js`))
