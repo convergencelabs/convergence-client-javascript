@@ -25,7 +25,7 @@
     "email": "support@convergencelabs.com"
   },
   "main": "cjs/convergence.js",
-  "typings": "typings/Convergence.d.ts",
+  "typings": "typings/index.d.ts",
   "dependencies": {
     "rxjs": "5.0.1"
   },

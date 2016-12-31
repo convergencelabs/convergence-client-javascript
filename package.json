@@ -27,7 +27,7 @@
     "clean": "gulp clean",
     "lint": "gulp lint"
   },
-  "typings": "typings/Convergence.d.ts",
+  "typings": "typings/index.d.ts",
   "publishConfig": {
     "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
   },
