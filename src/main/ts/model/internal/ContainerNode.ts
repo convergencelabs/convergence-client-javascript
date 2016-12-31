@@ -1,6 +1,6 @@
-import {PathElement} from "../ot/Path";
+import {PathElement} from "../Path";
 import {Model} from "./Model";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ModelNode} from "./ModelNode";
 import {NodeChangedEvent} from "./events";
 

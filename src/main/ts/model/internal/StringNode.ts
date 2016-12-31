@@ -7,7 +7,7 @@ import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {StringNodeInsertEvent} from "./events";
 import {StringNodeRemoveEvent} from "./events";
 import {StringNodeSetValueEvent} from "./events";

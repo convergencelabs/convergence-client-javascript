@@ -1,4 +1,4 @@
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";

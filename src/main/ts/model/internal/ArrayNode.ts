@@ -4,7 +4,7 @@ import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {DataValue} from "../dataValue";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {ModelNodeFactory} from "./ModelNodeFactory";

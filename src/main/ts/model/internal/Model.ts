@@ -1,5 +1,5 @@
 import { ModelOperationEvent } from "../ModelOperationEvent";
-import { Path } from "../ot/Path";
+import { Path } from "../Path";
 import { ModelNode } from "./ModelNode";
 import { DataValueFactory } from "../DataValueFactory";
 import { ObjectNode } from "./ObjectNode";

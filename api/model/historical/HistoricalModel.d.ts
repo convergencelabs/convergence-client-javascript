@@ -1,8 +1,9 @@
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
+import {ObservableModel} from "../observable/ObservableModel";
 
-export declare class HistoricalModel {
+export declare class HistoricalModel implements ObservableModel {
 
   public session(): Session;
 

@@ -1,7 +1,10 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
+import {ObservableObject} from "../observable/ObservableObject";
 
-export declare class HistoricalObject extends HistoricalElement<Map<string, any>> implements HistoricalContainerElement<Map<string, any>> {
+export declare class HistoricalObject extends HistoricalElement<Map<string, any>>
+  implements HistoricalContainerElement<Map<string, any>>, ObservableObject {
+
   public get(key: string): HistoricalElement<any>;
 
   public keys(): string[];

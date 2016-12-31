@@ -3,9 +3,10 @@ import {Session} from "../Session";
 import {RealTimeModel} from "./rt/RealTimeModel";
 import {ModelQuery} from "./query/ModelQuery";
 import {HistoricalModel} from "./historical/HistoricalModel";
-import {ModelResult} from "../../src/main/ts/model/query/ModelResult";
+import {ModelResult} from "./query/ModelResult";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
-export declare class ModelService extends ConvergenceEventEmitter {
+export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public session(): Session;
 
   public query(query: ModelQuery): Promise<ModelResult>;

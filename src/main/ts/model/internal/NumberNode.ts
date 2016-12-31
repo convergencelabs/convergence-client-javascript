@@ -4,7 +4,7 @@ import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {NumberNodeDeltaEvent} from "./events";
 import {NumberNodeSetValueEvent} from "./events";
 import {NumberAdd} from "../ot/ops/operationChanges";

@@ -4,7 +4,7 @@ import {ModelNode} from "./ModelNode";
 import {ObjectValue, DataValueType} from "../dataValue";
 import {Validation} from "../../util/Validation";
 import {DataValue} from "../dataValue";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {ModelNodeFactory} from "./ModelNodeFactory";

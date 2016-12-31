@@ -4,7 +4,7 @@ import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {BooleanNodeSetValueEvent} from "./events";
 import {BooleanSet} from "../ot/ops/operationChanges";
 

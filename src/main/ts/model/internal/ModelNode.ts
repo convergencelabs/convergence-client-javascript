@@ -1,5 +1,5 @@
 import {Model} from "./Model";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {NodeValueChangedEvent} from "./events";
 import {NodeChangedEvent} from "./events";

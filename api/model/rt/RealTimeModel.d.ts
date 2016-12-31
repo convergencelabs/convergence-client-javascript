@@ -4,11 +4,13 @@ import {RealTimeElement} from "./RealTimeElement";
 import {Session} from "../../Session";
 import {LocalElementReference} from "../reference/LocalElementReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
-import {ModelEvent} from "./events";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelCollaborator} from "./ModelCollaborator";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ObservableModel} from "../observable/ObservableModel";
+import {ModelEvent} from "../modelEvents";
 
-export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
+export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
 
   public static Events: any;
 
@@ -80,10 +82,10 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<any> {
   public references(filter?: ReferenceFilter): ModelReference<any>[];
 }
 
-export interface OpenedEvent extends ModelEvent {
+export interface CollaboratorOpenedEvent extends ModelEvent {
   collaborator: ModelCollaborator;
 }
 
-export interface ClosedEvent extends ModelEvent {
+export interface CollaboratorClosedEvent extends ModelEvent {
   collaborator: ModelCollaborator;
 }

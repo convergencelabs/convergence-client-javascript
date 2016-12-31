@@ -2,7 +2,7 @@ import {ModelNode} from "./ModelNode";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {DataValue} from "../dataValue";
 
 export class UndefinedNode extends ModelNode<void> {

@@ -13,7 +13,7 @@ import {NumberNode} from "./NumberNode";
 import {NumberValue} from "../dataValue";
 import {BooleanValue} from "../dataValue";
 import {BooleanNode} from "./BooleanNode";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {DataValueFactory} from "../DataValueFactory";
 
 export class ModelNodeFactory {

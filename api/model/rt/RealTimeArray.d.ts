@@ -1,7 +1,9 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
+import {ObservableArray} from "../observable/ObservableArray";
 
-export declare class RealTimeArray extends RealTimeElement<any[]> implements RealTimeContainerElement<any[]> {
+export declare class RealTimeArray extends RealTimeElement<any[]>
+  implements RealTimeContainerElement<any[]>, ObservableArray {
 
   public static Events: any;
 

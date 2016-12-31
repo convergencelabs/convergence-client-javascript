@@ -3,8 +3,9 @@ import {ModelReference} from "../reference/ModelReference";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
 import {LocalRangeReference} from "../reference/LocalRangeReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {ObservableString} from "../observable/ObservableString";
 
-export declare class RealTimeString extends RealTimeElement<string> {
+export declare class RealTimeString extends RealTimeElement<string> implements ObservableString {
 
   public static Events: any;
 

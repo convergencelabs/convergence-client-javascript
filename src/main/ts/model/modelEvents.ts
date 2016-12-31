@@ -1,5 +1,5 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
-import {Path} from "./ot/Path";
+import {Path} from "./Path";
 import {ModelReference} from "./reference/ModelReference";
 import {ObservableModel} from "./observable/ObservableModel";
 import {ObservableElement} from "./observable/ObservableElement";
@@ -144,14 +144,6 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
-  public name: string = "value";
-  constructor(public src: ObservableObject,
-              public sessionId: string,
-              public username: string,
-              public local: boolean) {}
-}
-
-export class NodeSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
   constructor(public src: ObservableObject,
               public sessionId: string,

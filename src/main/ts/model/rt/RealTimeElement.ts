@@ -1,6 +1,6 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelNode} from "../internal/ModelNode";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "../reference/ModelReference";

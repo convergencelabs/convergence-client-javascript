@@ -1,6 +1,6 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelNode} from "./ModelNode";
-import {Path} from "../ot/Path";
+import {Path} from "../Path";
 import {ArrayNode} from "./ArrayNode";
 import {BooleanNode} from "./BooleanNode";
 import {NumberNode} from "./NumberNode";
