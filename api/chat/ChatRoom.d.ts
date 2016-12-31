@@ -1,5 +1,6 @@
 import {ChatEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ChatMember} from "./ChatMember";
 
 export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
   id(): string;
@@ -15,9 +16,4 @@ export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
   messageCount(): number;
 
   lastMessageTime(): number;
-}
-
-export declare class ChatMember {
-  sessionId();
-  username();
 }

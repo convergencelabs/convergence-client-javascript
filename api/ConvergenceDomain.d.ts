@@ -1,4 +1,5 @@
 import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {ActivityService} from "./activity/ActivityService";
@@ -7,7 +8,7 @@ import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
 
 
-export default class ConvergenceDomain extends ConvergenceEventEmitter {
+export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static Events: any;
 
