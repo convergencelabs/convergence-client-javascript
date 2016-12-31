@@ -20,8 +20,8 @@ export default class SendResponseAction extends AbstractSendAction {
     this._record = new SendResponseRecord(this);
   }
 
-  execute(): void {
-    var message: any = this._messageGenerator();
+  public execute(): void {
+    const message: any = this._messageGenerator();
     this._envelope = {
       p: this._requestRecord.requestId(),
       b: message
@@ -32,19 +32,20 @@ export default class SendResponseAction extends AbstractSendAction {
     super.execute();
   }
 
-  sendResponseRecord(): ISendResponseRecord {
+  public sendResponseRecord(): ISendResponseRecord {
     return this._record;
   }
 
-  requestRecord(): IReceiveRequestRecord {
+  public requestRecord(): IReceiveRequestRecord {
     return this._requestRecord;
   }
 
-  responseId(): number {
+  public responseId(): number {
     return this._requestRecord.requestId();
   }
 
   protected _generateTimeoutMessage(): string {
-    return "Timeout exceeded waiting for a sent response to be acknowledged: " + JSON.stringify(this.sendResponseRecord().message());
+    return "Timeout exceeded waiting for a sent response to be acknowledged: " +
+      JSON.stringify(this.sendResponseRecord().message());
   }
 }

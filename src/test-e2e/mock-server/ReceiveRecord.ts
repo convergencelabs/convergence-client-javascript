@@ -10,11 +10,11 @@ export default class ReceiveRecord extends ActionRecord implements IReceiveRecor
     this._received = false;
   }
 
-  isReceived(): boolean {
+  public isReceived(): boolean {
     return this._received;
   }
 
-  setReceived(): void {
+  public setReceived(): void {
     this._received = true;
   }
 }

@@ -11,20 +11,20 @@ export default class SendRecord extends ActionRecord implements ISendRecord {
     this._sent = false;
   }
 
-  acknowledgeReceipt(): void {
+  public acknowledgeReceipt(): void {
     this._acked = true;
     this._serverAction.complete();
   }
 
-  isAcknowledged(): boolean {
+  public isAcknowledged(): boolean {
     return this._acked;
   }
 
-  isSent(): boolean {
+  public isSent(): boolean {
     return this._sent;
   }
 
-  setSent(): void {
+  public setSent(): void {
     this._sent = true;
   }
 }

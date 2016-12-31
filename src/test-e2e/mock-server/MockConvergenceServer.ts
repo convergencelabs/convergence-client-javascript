@@ -22,7 +22,7 @@ import {AbstractDoneManager} from "./doneManager";
 /* tslint:disable */
 // This block of code is necessary to enable the mock socket framework in
 // node.
-var mockSocket = require('mock-socket');
+const mockSocket = require('mock-socket');
 if (typeof global['WebSocket'] === "undefined") {
   global['WebSocket'] = mockSocket.WebSocket;
 }
@@ -86,7 +86,7 @@ export class MockConvergenceServer {
     };
 
     this._completeCallback = (action: MockServerAction) => {
-      var index: number = this._timeoutQueue.indexOf(action);
+      const index: number = this._timeoutQueue.indexOf(action);
       if (index >= 0) {
         this._timeoutQueue.splice(index, 1);
       }
@@ -106,7 +106,7 @@ export class MockConvergenceServer {
    * Returns the URL that the mock server is configured to "listen" on.
    * @returns {string}
    */
-  url(): string {
+  public url(): string {
     return this._url;
   }
 
@@ -115,12 +115,12 @@ export class MockConvergenceServer {
    * success or failure.
    * @returns {IDoneManager}
    */
-  doneManager(): IDoneManager {
+  public doneManager(): IDoneManager {
     return this._doneManager;
   }
 
-  expect(body: any, timeout?: number): IReceiveRecord {
-    var action: ReceiveAction = new ReceiveAction(
+  public expect(body: any, timeout?: number): IReceiveRecord {
+    const action: ReceiveAction = new ReceiveAction(
       this._actionId++,
       this._timeoutCallback,
       this._completeCallback,
@@ -132,8 +132,8 @@ export class MockConvergenceServer {
     return action.record();
   }
 
-  expectRequest(body: any, timeout?: number): IReceiveRequestRecord {
-    var action: ReceiveRequestAction = new ReceiveRequestAction(
+  public expectRequest(body: any, timeout?: number): IReceiveRequestRecord {
+    const action: ReceiveRequestAction = new ReceiveRequestAction(
       this._actionId++,
       this._timeoutCallback,
       this._completeCallback,
@@ -145,8 +145,8 @@ export class MockConvergenceServer {
     return action.requestRecord();
   }
 
-  expectResponseTo(requestRecord: ISendRequestRecord, body: any, timeout?: number): IReceiveResponseRecord {
-    var action: ReceiveResponseAction = new ReceiveResponseAction(
+  public expectResponseTo(requestRecord: ISendRequestRecord, body: any, timeout?: number): IReceiveResponseRecord {
+    const action: ReceiveResponseAction = new ReceiveResponseAction(
       this._actionId++,
       requestRecord,
       this._timeoutCallback,
@@ -159,8 +159,8 @@ export class MockConvergenceServer {
     return action.responseRecord();
   }
 
-  send(message: any, timeout?: number): ISendRecord {
-    var action: SendAction = new SendAction(
+  public send(message: any, timeout?: number): ISendRecord {
+    const action: SendAction = new SendAction(
       this._actionId++,
       this._timeoutCallback,
       this._completeCallback,
@@ -173,8 +173,8 @@ export class MockConvergenceServer {
     return action.sendRecord();
   }
 
-  sendRequest(message: any, timeout?: number): ISendRequestRecord {
-    var action: SendRequestAction = new SendRequestAction(
+  public sendRequest(message: any, timeout?: number): ISendRequestRecord {
+    const action: SendRequestAction = new SendRequestAction(
       this._actionId++,
       this._reqId++,
       this._timeoutCallback,
@@ -188,8 +188,8 @@ export class MockConvergenceServer {
     return action.sendRequestRecord();
   }
 
-  sendReplyTo(requestRecord: IReceiveRequestRecord, message: any, timeout?: number): ISendResponseRecord {
-    var action: SendResponseAction = new SendResponseAction(
+  public sendReplyTo(requestRecord: IReceiveRequestRecord, message: any, timeout?: number): ISendResponseRecord {
+    const action: SendResponseAction = new SendResponseAction(
       this._actionId++,
       requestRecord,
       this._timeoutCallback,
@@ -203,7 +203,7 @@ export class MockConvergenceServer {
     return action.sendResponseRecord();
   }
 
-  start(): void {
+  public start(): void {
     if (this._mockSocketServer !== undefined) {
       throw new Error("MockConvergenceServer already started");
     }
@@ -227,8 +227,8 @@ export class MockConvergenceServer {
     });
   }
 
-  stop(): void {
-    if(this._mockSocketServer !== undefined) {
+  public stop(): void {
+    if (this._mockSocketServer !== undefined) {
       this._mockSocketServer.close();
       this._mockSocketServer = undefined;
 
@@ -244,7 +244,7 @@ export class MockConvergenceServer {
     }
   }
 
-  handshake(response?: any, timeout?: number): void {
+  public handshake(response?: any, timeout?: number): void {
     if (response === undefined) {
       response = {
         s: true,
@@ -255,7 +255,7 @@ export class MockConvergenceServer {
       };
     }
 
-    var requestRecord: IReceiveRequestRecord = this.expectRequest(
+    const requestRecord: IReceiveRequestRecord = this.expectRequest(
       {
         t: MessageType.HANDSHAKE_REQUEST,
         r: false
@@ -264,7 +264,7 @@ export class MockConvergenceServer {
     this.sendReplyTo(requestRecord, response);
   }
 
-  tokenAuth(token: string, response?: any, timeout?: number): void {
+  public tokenAuth(token: string, response?: any, timeout?: number): void {
     if (response === undefined) {
       response = {
         s: true,
@@ -273,7 +273,7 @@ export class MockConvergenceServer {
         p: []
       };
     }
-    var requestRecord: IReceiveRequestRecord = this.expectRequest(
+    const requestRecord: IReceiveRequestRecord = this.expectRequest(
       {
         t: MessageType.TOKEN_AUTH_REQUEST,
         k: token
@@ -291,7 +291,7 @@ export class MockConvergenceServer {
   }
 
   private _resolveMessageGenerator(message: any): () => any {
-    var messageGenerator: () => any;
+    let messageGenerator: () => any;
     if (typeof message !== "function") {
       messageGenerator = () => {
         return message;
@@ -303,7 +303,7 @@ export class MockConvergenceServer {
   }
 
   private _handleMessage(json: string): void {
-    var envelope: any = JSON.parse(json);
+    const envelope: any = JSON.parse(json);
     if (envelope.b.t === MessageType.PING) {
       this._mockSocketServer.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
     } else {
@@ -313,10 +313,10 @@ export class MockConvergenceServer {
         this._doneManager.testFailure(new Error("Received a message, but was not expecting one"));
       }
 
-      var action: AbstractReceiveAction = this._currentReceiveAction;
+      const action: AbstractReceiveAction = this._currentReceiveAction;
       this._currentReceiveAction = undefined;
 
-      var success: boolean = action.processMessage(envelope, this._doneManager);
+      const success: boolean = action.processMessage(envelope, this._doneManager);
       if (success) {
         this._flushSendsAndWait();
       }
@@ -325,7 +325,7 @@ export class MockConvergenceServer {
 
   private _flushSendsAndWait(): void {
     while (this._actionQueue.length > 0 && this._actionQueue[0] instanceof AbstractSendAction) {
-      var sendAction: AbstractSendAction = <AbstractSendAction>this._actionQueue.shift();
+      const sendAction: AbstractSendAction = <AbstractSendAction> this._actionQueue.shift();
       sendAction.execute();
     }
 
@@ -344,7 +344,7 @@ export class MockConvergenceServer {
   }
 
   private _send(envelope: any): void {
-    var json: string = JSON.stringify(envelope);
+    const json: string = JSON.stringify(envelope);
     console.log("Server Sending: " + json);
     this._mockSocketServer.send(json);
   }

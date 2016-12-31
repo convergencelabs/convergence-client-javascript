@@ -24,7 +24,8 @@
   "scripts": {
     "dist": "gulp",
     "test": "gulp test",
-    "clean": "gulp clean"
+    "clean": "gulp clean",
+    "lint": "gulp lint"
   },
   "typings": "typings/Convergence.d.ts",
   "publishConfig": {

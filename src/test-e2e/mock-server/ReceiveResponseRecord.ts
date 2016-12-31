@@ -12,19 +12,19 @@ export class ReceiveResponseRecord extends ActionRecord implements IReceiveRespo
     this._received = false;
   }
 
-  responseId(): number {
-    return (<ReceiveResponseAction>this._serverAction).responseId();
+  public responseId(): number {
+    return (<ReceiveResponseAction> this._serverAction).responseId();
   }
 
-  requestRecord(): ISendRequestRecord {
-    return (<ReceiveResponseAction>this._serverAction).sendRequestRecord();
+  public requestRecord(): ISendRequestRecord {
+    return (<ReceiveResponseAction> this._serverAction).sendRequestRecord();
   }
 
-  isReceived(): boolean {
+  public isReceived(): boolean {
     return this._received;
   }
 
-  setReceived(): void {
+  public setReceived(): void {
     this._received = true;
   }
 }

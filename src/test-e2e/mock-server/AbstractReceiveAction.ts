@@ -15,11 +15,12 @@ abstract class AbstractReceiveAction extends MockServerAction {
     super(actionId, timeoutCallback, completeCallback, messageGenerator, timeout);
   }
 
-  abstract processMessage(envelope: any, doneManager: IDoneManager): boolean;
+  public abstract processMessage(envelope: any, doneManager: IDoneManager): boolean;
 
   protected _validateType(expected: any, actual: any, doneManager: IDoneManager): boolean {
     if (expected.t !== actual.t) {
-      doneManager.testFailure(new Error(`Expected type '${MessageType[expected.t]}, but received '${MessageType[actual.t]}'.`));
+      doneManager.testFailure(
+        new Error(`Expected type '${MessageType[expected.t]}, but received '${MessageType[actual.t]}'.`));
       return false;
     }
     return true;
@@ -33,9 +34,6 @@ abstract class AbstractReceiveAction extends MockServerAction {
     }
     return true;
   }
-
-
-
 }
 
 export default AbstractReceiveAction;

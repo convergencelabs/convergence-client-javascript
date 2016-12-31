@@ -16,17 +16,19 @@ export default class ReceiveAction extends AbstractReceiveAction {
     this._record = new ReceiveRecord(this);
   }
 
-  record(): ReceiveRecord {
+  public record(): ReceiveRecord {
     return this._record;
   }
 
-  processMessage(envelope: any, doneManager: IDoneManager): boolean {
-    var body: any = this._messageGenerator();
+  public processMessage(envelope: any, doneManager: IDoneManager): boolean {
+    const body: any = this._messageGenerator();
     if (envelope.q !== undefined) {
       doneManager.testFailure(new Error("A normal message must not have a requestId set."));
     } else if (envelope.p !== undefined) {
       doneManager.testFailure(new Error("A response message must not have a responseId set."));
-    } else if (this._validateType(body, envelope.b, doneManager) &&  this._validateBody(body, envelope.b, doneManager)) {
+    } else if (this._validateType(body, envelope.b, doneManager) &&
+      this._validateBody(body, envelope.b, doneManager)) {
+
       this._record.setMessage(envelope.b);
       this._record.setReceived();
       this.complete();

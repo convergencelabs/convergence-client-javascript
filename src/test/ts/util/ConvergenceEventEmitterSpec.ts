@@ -3,14 +3,14 @@ import {ConvergenceEvent} from "../../../main/ts/util/ConvergenceEvent";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-var expect: ExpectStatic = chai.expect;
+const expect: ExpectStatic = chai.expect;
 
-describe('EventEmitter', () => {
+describe("EventEmitter", () => {
 
-  it('A listener registered for an event should get called when that event is emitted', () => {
-    var value: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("A listener registered for an event should get called when that event is emitted", () => {
+    let value: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       value = e.value;
     };
     emitter.on("event", listener);
@@ -20,9 +20,9 @@ describe('EventEmitter', () => {
     expect(value).to.equal(1);
   });
 
-  it('A listener is not notified after it is removed', () => {
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("A listener is not notified after it is removed", () => {
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       throw new Error();
     };
     emitter.on("event", listener);
@@ -31,9 +31,9 @@ describe('EventEmitter', () => {
     emitter.next({src: this, name: "test", value: 1});
   });
 
-  it('All listeners for an event are not notified after all listeners are removed for that event', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
+  it("All listeners for an event are not notified after all listeners are removed for that event", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
       throw new Error();
@@ -54,8 +54,8 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('No listeners are notified after all listeners are removed', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("No listeners are notified after all listeners are removed", () => {
+    const emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
       throw new Error();
@@ -70,10 +70,10 @@ describe('EventEmitter', () => {
     emitter.next({src: this, name: "event2", value: 1});
   });
 
-  it('A once listener is only notified once.', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("A once listener is only notified once.", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.once("event", listener);
@@ -84,10 +84,10 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('A listener is only notified for events it is register to.', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("A listener is only notified for events it is register to.", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.once("event", listener);
@@ -97,10 +97,10 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('Event registration is case insensitive', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("Event registration is case insensitive", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.on("EVENT", listener);
@@ -114,10 +114,10 @@ describe('EventEmitter', () => {
     expect(count).to.equal(2);
   });
 
-  it('Listeners can not be added multiple times', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: EventListener<TestEvent> = (e: TestEvent) => {
+  it("Listeners can not be added multiple times", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: EventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.on("event", listener);

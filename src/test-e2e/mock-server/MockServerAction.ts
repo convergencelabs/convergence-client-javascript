@@ -2,8 +2,8 @@ import {TimeoutCallback} from "./MockConvergenceServer";
 import {CompleteCallback} from "./MockConvergenceServer";
 
 abstract class MockServerAction {
-  private _timer: any;
   protected _envelope: any;
+  private _timer: any;
 
   constructor(protected _actionId: number,
               protected _timeoutCallback: TimeoutCallback,
@@ -12,26 +12,26 @@ abstract class MockServerAction {
               private _timeout?: number) {
   }
 
-  timeout(): number {
+  public timeout(): number {
     return this._timeout;
   }
 
-  actionId(): number {
+  public actionId(): number {
     return this._actionId;
   }
 
-  complete(): void {
+  public complete(): void {
     if (this._timer !== undefined) {
       clearTimeout(this._timer);
     }
     this._completeCallback(this);
   }
 
-  envelope(): any {
+  public envelope(): any {
     return this._envelope;
   }
 
-  execute(): void {
+  public execute(): void {
     if (this._timeout) {
       this._timer = setTimeout(
         () => {

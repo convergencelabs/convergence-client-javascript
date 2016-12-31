@@ -17,8 +17,8 @@ export default class SendAction extends AbstractSendAction {
     this._record = new SendRecord(this);
   }
 
-  execute(): void {
-    var message: any = this._messageGenerator();
+  public execute(): void {
+    const message: any = this._messageGenerator();
     this._envelope = {
       b: message
     };
@@ -28,11 +28,12 @@ export default class SendAction extends AbstractSendAction {
     super.execute();
   }
 
-  sendRecord(): ISendRecord {
+  public sendRecord(): ISendRecord {
     return this._record;
   }
 
   protected _generateTimeoutMessage(): string {
-    return "Timeout exceeded waiting for a sent message to be acknowledged: " + JSON.stringify(this.sendRecord().message());
+    return "Timeout exceeded waiting for a sent message to be acknowledged: " +
+      JSON.stringify(this.sendRecord().message());
   }
 }

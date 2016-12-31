@@ -2,15 +2,14 @@ import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 import {Deferred} from "../../../main/ts/util/Deferred";
 
+const expect: ExpectStatic = chai.expect;
 
-var expect: ExpectStatic = chai.expect;
+describe("DeferredSpec", () => {
 
-describe('DeferredSpec', () => {
+  it("calling resolve on the deferred must resolve the promise with the correct valeue", (done: Function) => {
+    const resolveVal: string = "resolve";
 
-  it('calling resolve on the deferred must resolve the promise with the correct valeue', (done: Function) => {
-    var resolveVal: string = "resolve";
-
-    var def: Deferred<string> = new Deferred<string>();
+    const def: Deferred<string> = new Deferred<string>();
     def.promise().then((val: string) => {
       expect(val).to.equal(resolveVal);
       done();
@@ -21,11 +20,11 @@ describe('DeferredSpec', () => {
     def.resolve(resolveVal);
   });
 
-  it('calling reject on the deferred must reject the promise with the correct error', (done: Function) => {
-    var rejectError: Error = new Error("Test Error");
+  it("calling reject on the deferred must reject the promise with the correct error", (done: Function) => {
+    const rejectError: Error = new Error("Test Error");
 
-    var def: Deferred<string> = new Deferred<string>();
-    def.promise().then((val: string) => {
+    const def: Deferred<string> = new Deferred<string>();
+    def.promise().then(() => {
       done(new Error("The promise was resolved, when it was supposed to be rejected."));
     }).catch((error: Error) => {
       expect(error).to.equal(rejectError);

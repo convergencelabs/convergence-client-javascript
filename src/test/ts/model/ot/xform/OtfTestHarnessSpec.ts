@@ -22,22 +22,22 @@ import ExpectStatic = Chai.ExpectStatic;
 import * as chai from "chai";
 import * as fs from "fs";
 
-var expect: ExpectStatic = chai.expect;
-var fail: Function = chai.assert.fail;
+const expect: ExpectStatic = chai.expect;
+const fail: Function = chai.assert.fail;
 
-var baseDir: string = "src/test/otspec";
+const baseDir: string = "src/test/otspec";
 
-var xformer: TransformationFunctionRegistry = new TransformationFunctionRegistry();
+const xformer: TransformationFunctionRegistry = new TransformationFunctionRegistry();
 
 fs.readdirSync(baseDir).forEach((file: string) => {
-  var contents: string = fs.readFileSync(baseDir + "/" + file, 'utf8');
-  var spec: any = JSON.parse(contents);
+  const contents: string = fs.readFileSync(baseDir + "/" + file, "utf8");
+  const spec: any = JSON.parse(contents);
 
-  describe('A server ' + spec.serverOpType + " transforming against a client " + spec.clientOpType, () => {
-    spec.cases.forEach(function (testCase: any): void {
+  describe("A server " + spec.serverOpType + " transforming against a client " + spec.clientOpType, () => {
+    spec.cases.forEach((testCase: any) => {
       it(testCase.id, () => {
-        var serverInputOp: DiscreteOperation = json2Operation(testCase.input.serverOp);
-        var clientInputOp: DiscreteOperation = json2Operation(testCase.input.clientOp);
+        const serverInputOp: DiscreteOperation = json2Operation(testCase.input.serverOp);
+        const clientInputOp: DiscreteOperation = json2Operation(testCase.input.clientOp);
 
         if (testCase.error) {
           try {
@@ -47,12 +47,12 @@ fs.readdirSync(baseDir).forEach((file: string) => {
             // expected
           }
         } else {
-          var otf: OperationTransformationFunction<DiscreteOperation, DiscreteOperation> =
+          const otf: OperationTransformationFunction<DiscreteOperation, DiscreteOperation> =
             xformer.getOperationTransformationFunction(serverInputOp, clientInputOp);
-          var xformed: OperationPair = otf(serverInputOp, clientInputOp);
+          const xformed: OperationPair = otf(serverInputOp, clientInputOp);
 
-          var serverOutputOp: DiscreteOperation = json2Operation(testCase.output.serverOp);
-          var clientOutputOp: DiscreteOperation = json2Operation(testCase.output.clientOp);
+          const serverOutputOp: DiscreteOperation = json2Operation(testCase.output.serverOp);
+          const clientOutputOp: DiscreteOperation = json2Operation(testCase.output.clientOp);
 
           expect(serverOutputOp).to.deep.equal(xformed.serverOp);
           expect(clientOutputOp).to.deep.equal(xformed.clientOp);
@@ -62,7 +62,7 @@ fs.readdirSync(baseDir).forEach((file: string) => {
   });
 });
 
-var commonId: string = "vid";
+const commonId: string = "vid";
 
 function json2Operation(opData: any): DiscreteOperation {
   "use strict";

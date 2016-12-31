@@ -27,7 +27,7 @@ describe("RealTimeString", () => {
   const username: string = "myUser";
   const version: number = 1;
   const timestamp: number = 100;
-  
+
   const gen: TestIdGenerator = new TestIdGenerator();
   const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
     return gen.id();
@@ -36,14 +36,14 @@ describe("RealTimeString", () => {
   const initialValue: StringValue =
     <StringValue> dataValueFactory.createDataValue("MyString");
 
-  const model: Model = <Model><any>sinon.createStubInstance(Model);
-  const rtModel: RealTimeModel = <RealTimeModel><any>sinon.createStubInstance(RealTimeModel);
+  const model: Model = <Model> <any> sinon.createStubInstance(Model);
+  const rtModel: RealTimeModel = <RealTimeModel> <any> sinon.createStubInstance(RealTimeModel);
   rtModel.emitLocalEvents = () => {
     return false;
   };
 
   let callbacks: ModelEventCallbacks;
-  beforeEach(function (): void {
+  beforeEach(() => {
     callbacks = {
       sendOperationCallback: sinon.spy(),
       referenceEventCallbacks: {
@@ -62,14 +62,14 @@ describe("RealTimeString", () => {
 
   it("Value is correct after creation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     expect(myString.value()).to.equal("MyString");
   });
 
   it("Value is correct after set", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.value("AnotherString");
     expect(myString.value()).to.equal("AnotherString");
@@ -77,7 +77,7 @@ describe("RealTimeString", () => {
 
   it("Value is correct after insert", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.insert(2, "Edited");
     expect(myString.value()).to.equal("MyEditedString");
@@ -85,7 +85,7 @@ describe("RealTimeString", () => {
 
   it("Value is correct after remove", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.remove(0, 2);
     expect(myString.value()).to.equal("String");
@@ -93,7 +93,7 @@ describe("RealTimeString", () => {
 
   it("Correct operation is sent after set", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.value("AnotherString");
 
@@ -103,7 +103,7 @@ describe("RealTimeString", () => {
 
   it("Correct operation is sent after insert", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.insert(2, "Edited");
 
@@ -113,7 +113,7 @@ describe("RealTimeString", () => {
 
   it("Correct operation is sent after remove", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.remove(0, 2);
 
@@ -123,7 +123,7 @@ describe("RealTimeString", () => {
 
   it("Value is correct after StringSetOperation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
 
     const incomingOp: StringSetOperation = new StringSetOperation(initialValue.id, false, "AnotherString");
@@ -136,7 +136,7 @@ describe("RealTimeString", () => {
 
   it("Value is correct after StringInsertOperation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
 
     const incomingOp: StringInsertOperation = new StringInsertOperation(initialValue.id, false, 2, "Edited");
@@ -149,7 +149,7 @@ describe("RealTimeString", () => {
 
   it("Value is correct after StringRemoveOperation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
 
     const incomingOp: StringRemoveOperation = new StringRemoveOperation(initialValue.id, false, 0, "My");
@@ -163,7 +163,7 @@ describe("RealTimeString", () => {
   it("Correct event is fired after StringSetOperation", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.on(RealTimeString.Events.VALUE, lastEventCallback);
 
@@ -196,7 +196,7 @@ describe("RealTimeString", () => {
   it("Correct event is fired after StringRemoveOperation", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: StringNode = new StringNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, sessionId, username);
     const myString: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate);
     myString.on("Remove", lastEventCallback);
 

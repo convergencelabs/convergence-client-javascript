@@ -8,11 +8,11 @@ export default class SendResponseRecord extends SendRecord implements ISendRespo
     super(serverAction);
   }
 
-  responseId(): number {
-    return (<SendResponseAction>this._serverAction).responseId();
+  public responseId(): number {
+    return (<SendResponseAction> this._serverAction).responseId();
   }
 
-  requestRecord(): IReceiveRequestRecord {
-    return (<SendResponseAction>this._serverAction).requestRecord();
+  public requestRecord(): IReceiveRequestRecord {
+    return (<SendResponseAction> this._serverAction).requestRecord();
   }
 }

@@ -2,8 +2,6 @@ import AbstractReceiveAction from "./AbstractReceiveAction";
 import {TimeoutCallback} from "./MockConvergenceServer";
 import {CompleteCallback} from "./MockConvergenceServer";
 import {IDoneManager} from "./doneManager";
-import {MessageType} from "../../main/ts/connection/protocol/MessageType";
-import {EqualsUtil} from "../../main/ts/util/EqualsUtil";
 import ReceiveRequestRecord from "./ReceiveRequestRecord";
 
 export default class ReceiveRequestAction extends AbstractReceiveAction {
@@ -19,16 +17,16 @@ export default class ReceiveRequestAction extends AbstractReceiveAction {
     this._record = new ReceiveRequestRecord(this);
   }
 
-  requestRecord(): ReceiveRequestRecord {
+  public requestRecord(): ReceiveRequestRecord {
     return this._record;
   }
 
-  requestId(): number {
+  public requestId(): number {
     return this._reqId;
   }
 
-  processMessage(envelope: any, doneManager: IDoneManager): boolean {
-    var body: any = this._messageGenerator();
+  public processMessage(envelope: any, doneManager: IDoneManager): boolean {
+    const body: any = this._messageGenerator();
 
     if (envelope.q === undefined) {
       doneManager.testFailure(new Error("A request message must have a requestId set."));

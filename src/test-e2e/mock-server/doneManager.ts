@@ -36,7 +36,7 @@ export abstract class AbstractDoneManager implements IDoneManager {
     this._resolved = false;
   }
 
-  testSuccess(): void {
+  public testSuccess(): void {
     this._testDone = true;
     if (!this._resolved && this._serverDone) {
       this._resolved = true;
@@ -45,7 +45,7 @@ export abstract class AbstractDoneManager implements IDoneManager {
     }
   }
 
-  testFailure(error?: Error): void {
+  public testFailure(error?: Error): void {
     if (!this._resolved) {
       this._resolved = true;
       this._mockServer.stop();
@@ -53,7 +53,7 @@ export abstract class AbstractDoneManager implements IDoneManager {
     }
   }
 
-  serverDone(): void {
+  public serverDone(): void {
     this._serverDone = true;
     if (!this._resolved && this._testDone) {
       this._resolved = true;
@@ -73,7 +73,8 @@ export abstract class AbstractDoneManager implements IDoneManager {
  */
 export class CallbackDoneManager extends AbstractDoneManager {
 
-  constructor(_mockServer: MockConvergenceServer, private _successCallback: () => void, private _errorCallback: (error: Error) => void) {
+  constructor(_mockServer: MockConvergenceServer,
+              private _successCallback: () => void, private _errorCallback: (error: Error) => void) {
     super(_mockServer);
   }
 

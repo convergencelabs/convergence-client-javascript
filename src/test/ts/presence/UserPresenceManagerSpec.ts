@@ -6,14 +6,13 @@ import {UserPresenceImpl} from "../../../main/ts/presence/UserPresenceImpl";
 import {UserPresenceManager} from "../../../main/ts/presence/UserPresenceManager";
 import {MessageEvent} from "../../../main/ts/connection/ConvergenceConnection";
 
-var expect: ExpectStatic = chai.expect;
+const expect: ExpectStatic = chai.expect;
 
+const noOp: () => void = () => { return; };
 
-const noOp: () => void = () => {};
+describe("UserPresenceManager", () => {
 
-describe('UserPresenceManager', () => {
-
-  it('initial presence set correctly', () => {
+  it("initial presence set correctly", () => {
     const state = new Map<string, any>();
     state.set("key", 9);
 
@@ -28,7 +27,7 @@ describe('UserPresenceManager', () => {
     expect(mgr.state("key")).to.equal(9);
   });
 
-  it('availability is set properly', () => {
+  it("availability is set properly", () => {
     const state = new Map<string, any>();
     state.set("key", 9);
 
@@ -41,7 +40,7 @@ describe('UserPresenceManager', () => {
     expect(mgr.isAvailable()).to.equal(true);
   });
 
-  it('new state is merged properly', () => {
+  it("new state is merged properly", () => {
     const state = new Map<string, any>();
     state.set("key1", "value1");
     state.set("key2", "value2");
@@ -61,7 +60,7 @@ describe('UserPresenceManager', () => {
     expect(mgr.state("key3")).to.equal("3");
   });
 
-  it('new state is removed properly', () => {
+  it("new state is removed properly", () => {
     const state = new Map<string, any>();
     state.set("key1", "value1");
     state.set("key2", "value2");
@@ -77,7 +76,7 @@ describe('UserPresenceManager', () => {
     expect(mgr.state("key3")).to.equal("value3");
   });
 
-  it('new state is cleared properly', () => {
+  it("new state is cleared properly", () => {
     const state = new Map<string, any>();
     state.set("key1", "value1");
     state.set("key2", "value2");
@@ -92,7 +91,7 @@ describe('UserPresenceManager', () => {
     expect(mgr.state().size).to.equal(0);
   });
 
-  it('set fires the proper event', () => {
+  it("set fires the proper event", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
@@ -121,7 +120,7 @@ describe('UserPresenceManager', () => {
     expect(firedObserver).to.equal(1);
   });
 
-  it('clear fires the proper event', () => {
+  it("clear fires the proper event", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
@@ -146,7 +145,7 @@ describe('UserPresenceManager', () => {
     expect(firedObserver).to.equal(1);
   });
 
-  it('remove fires the proper event', () => {
+  it("remove fires the proper event", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
@@ -172,7 +171,7 @@ describe('UserPresenceManager', () => {
     expect(firedObserver).to.equal(1);
   });
 
-  it('subscription has correct state', () => {
+  it("subscription has correct state", () => {
     const state = new Map<string, any>();
     state.set("key", 9);
 
@@ -189,7 +188,7 @@ describe('UserPresenceManager', () => {
     expect(s.state("key")).to.equal(9);
   });
 
-  it('unsubscribe correctly called', () => {
+  it("unsubscribe correctly called", () => {
     const state = new Map<string, any>();
 
     let called: number = 0;

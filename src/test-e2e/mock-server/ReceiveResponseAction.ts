@@ -20,26 +20,27 @@ export default class ReceiveResponseAction extends AbstractReceiveAction {
     this._record = new ReceiveResponseRecord(this);
   }
 
-  responseRecord(): IReceiveResponseRecord {
+  public responseRecord(): IReceiveResponseRecord {
     return this._record;
   }
 
-  sendRequestRecord(): ISendRequestRecord {
+  public sendRequestRecord(): ISendRequestRecord {
     return this._requestRecord;
   }
 
-  responseId(): number {
+  public responseId(): number {
     return this._responseId;
   }
 
-  processMessage(envelope: any, doneManager: IDoneManager): boolean {
-    var body: any = this._messageGenerator();
+  public processMessage(envelope: any, doneManager: IDoneManager): boolean {
+    const body: any = this._messageGenerator();
 
     if (envelope.p === undefined) {
       doneManager.testFailure(new Error("A response message must have a responseId set."));
     } else if (envelope.q !== undefined) {
       doneManager.testFailure(new Error("A response message must not have a requestId set."));
-    } else if (this._validateType(body, envelope.b, doneManager) &&  this._validateBody(body, envelope.b, doneManager)) {
+    } else if (this._validateType(body, envelope.b, doneManager) &&
+      this._validateBody(body, envelope.b, doneManager)) {
       this._responseId = envelope.p;
       this._record.setMessage(envelope.b);
       this._record.setReceived();

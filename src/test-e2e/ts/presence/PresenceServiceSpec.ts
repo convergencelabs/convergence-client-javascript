@@ -7,12 +7,12 @@ import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 import Convergence from "../../../main/ts/Convergence";
 
-var expect: ExpectStatic = chai.expect;
+const expect: ExpectStatic = chai.expect;
 
-var url: string = "ws://localhost:8085/domain/namespace1/domain1";
-var expectedSuccessOptions: Function = function (done: MochaDone): IMockServerOptions {
-  return {
-    url: url,
+const url: string = "ws://localhost:8085/domain/namespace1/domain1";
+const expectedSuccessOptions: Function = (done: MochaDone) => {
+  return <IMockServerOptions> {
+    url,
     doneType: DoneType.MOCHA,
     mochaDone: done,
     autoHandshake: true,
@@ -22,11 +22,11 @@ var expectedSuccessOptions: Function = function (done: MochaDone): IMockServerOp
   };
 };
 
-describe('PresenceService.presence()', () => {
+describe("PresenceService.presence()", () => {
 
-  it('must return presence info', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_REQUEST, u: ["notFound"]});
+  it("must return presence info", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_REQUEST, u: ["notFound"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.PRESENCE_RESPONSE, p: [{
         username: "notFound",
@@ -50,10 +50,10 @@ describe('PresenceService.presence()', () => {
   });
 });
 
-describe('PresenceService.subscribe()', () => {
-  it('must return resolve with the correct user', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_SUBSCRIBE_REQUEST, u: ["u1"]});
+describe("PresenceService.subscribe()", () => {
+  it("must return resolve with the correct user", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.PRESENCE_SUBSCRIBE_REQUEST, u: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.PRESENCE_SUBSCRIBE_RESPONSE, p: [{
         username: "u1",

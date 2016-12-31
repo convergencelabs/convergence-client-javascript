@@ -2,14 +2,14 @@ import * as chai from "chai";
 import {EventEmitter} from "../../../main/ts/util/EventEmitter";
 import ExpectStatic = Chai.ExpectStatic;
 
-var expect: ExpectStatic = chai.expect;
+const expect: ExpectStatic = chai.expect;
 
-describe('EventEmitter', () => {
+describe("EventEmitter", () => {
 
-  it('A listener registered for an event should get called when that event is emitted', () => {
-    var value: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = (v: number) => {
+  it("A listener registered for an event should get called when that event is emitted", () => {
+    let value: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = (v: number) => {
       value = v;
     };
     emitter.on("event", listener);
@@ -19,9 +19,9 @@ describe('EventEmitter', () => {
     expect(value).to.equal(1);
   });
 
-  it('A listener is not notified after it is removed', () => {
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = (v: number) => {
+  it("A listener is not notified after it is removed", () => {
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = (v: number) => {
       throw new Error();
     };
     emitter.on("event", listener);
@@ -30,9 +30,9 @@ describe('EventEmitter', () => {
     emitter.emit("event", 1);
   });
 
-  it('All listeners for an event are not notified after all listeners are removed for that event', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
+  it("All listeners for an event are not notified after all listeners are removed for that event", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
       throw new Error();
@@ -53,8 +53,8 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('No listeners are notified after all listeners are removed', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("No listeners are notified after all listeners are removed", () => {
+    const emitter: TestEmitter = new TestEmitter();
 
     emitter.on("event1", () => {
       throw new Error();
@@ -69,10 +69,10 @@ describe('EventEmitter', () => {
     emitter.emit("event2");
   });
 
-  it('A once listener is only notified once.', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = (v: number) => {
+  it("A once listener is only notified once.", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = (v: number) => {
       count++;
     };
     emitter.once("event", listener);
@@ -82,10 +82,10 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('A listener is only notified for events it is register to.', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = (v: number) => {
+  it("A listener is only notified for events it is register to.", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = (v: number) => {
       count++;
     };
     emitter.once("event", listener);
@@ -95,10 +95,10 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('Event registration is case insensitive', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = (v: number) => {
+  it("Event registration is case insensitive", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = (v: number) => {
       count++;
     };
     emitter.on("EVENT", listener);
@@ -112,8 +112,8 @@ describe('EventEmitter', () => {
     expect(count).to.equal(2);
   });
 
-  it('The correct listener count is returned for events with at least one listener', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("The correct listener count is returned for events with at least one listener", () => {
+    const emitter: TestEmitter = new TestEmitter();
     emitter.on("event1", () => {/* noop */
     });
     emitter.on("event1", () => {/* noop */
@@ -125,13 +125,13 @@ describe('EventEmitter', () => {
     expect(emitter.listenerCount("event2")).to.equal(1);
   });
 
-  it('The correct listener count is returned for events with at no listeners', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("The correct listener count is returned for events with at no listeners", () => {
+    const emitter: TestEmitter = new TestEmitter();
     expect(emitter.listenerCount("event1")).to.equal(0);
   });
 
-  it('The correct listeners are returned for events with at least one listener', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("The correct listeners are returned for events with at least one listener", () => {
+    const emitter: TestEmitter = new TestEmitter();
     emitter.on("event1", () => {/* noop */
     });
     emitter.on("event1", () => {/* noop */
@@ -143,15 +143,15 @@ describe('EventEmitter', () => {
     expect(emitter.listeners("event2").length).to.equal(1);
   });
 
-  it('An empty array is returned for an event with no listeners', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("An empty array is returned for an event with no listeners", () => {
+    const emitter: TestEmitter = new TestEmitter();
     expect(emitter.listeners("event1")).to.deep.equal([]);
   });
 
-  it('Listeners can not be added multiple times', () => {
-    var count: number = 0;
-    var emitter: TestEmitter = new TestEmitter();
-    var listener: Function = () => {
+  it("Listeners can not be added multiple times", () => {
+    let count: number = 0;
+    const emitter: TestEmitter = new TestEmitter();
+    const listener: Function = () => {
       count++;
     };
     emitter.on("event", listener);
@@ -162,8 +162,8 @@ describe('EventEmitter', () => {
     expect(count).to.equal(1);
   });
 
-  it('Max listeners can not be exceeded', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("Max listeners can not be exceeded", () => {
+    const emitter: TestEmitter = new TestEmitter();
     emitter.setMaxListeners(1);
     emitter.on("event", () => {
       // noop
@@ -174,8 +174,8 @@ describe('EventEmitter', () => {
     })).to.throw(Error);
   });
 
-  it('Max listeners must be set to the default when constructed', () => {
-    var emitter: TestEmitter = new TestEmitter();
+  it("Max listeners must be set to the default when constructed", () => {
+    const emitter: TestEmitter = new TestEmitter();
     expect(emitter.getMaxListeners()).to.equal(TestEmitter.defaultMaxListeners);
   });
 });

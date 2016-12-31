@@ -11,15 +11,15 @@ export default class ReceiveRequestRecord extends ActionRecord implements IRecei
     this._received = false;
   }
 
-  requestId(): number {
-    return (<ReceiveRequestAction>this._serverAction).requestId();
+  public requestId(): number {
+    return (<ReceiveRequestAction> this._serverAction).requestId();
   }
 
-  isReceived(): boolean {
+  public isReceived(): boolean {
     return this._received;
   }
 
-  setReceived(): void {
+  public setReceived(): void {
     this._received = true;
   }
 }

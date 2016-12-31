@@ -7,7 +7,7 @@ export default class SendRequestRecord extends SendRecord implements ISendReques
     super(serverAction);
   }
 
-  requestId(): number {
-    return (<SendRequestAction>this._serverAction).requestId();
+  public requestId(): number {
+    return (<SendRequestAction> this._serverAction).requestId();
   }
 }

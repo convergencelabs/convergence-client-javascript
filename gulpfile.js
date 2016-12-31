@@ -82,7 +82,7 @@ gulp.task("coverage", ["build"], function () {
  * tslint.config file.
  */
 gulp.task("lint", function () {
-  return gulp.src("src/main/ts/**/*.ts")
+  return gulp.src("src/**/*.ts")
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 });

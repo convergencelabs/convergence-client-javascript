@@ -59,14 +59,14 @@ describe("RealTimeBoolean", () => {
 
   it("Value is correct after creation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     expect(myBoolean.value()).to.equal(true);
   });
 
   it("Value is correct after set", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => { return []; }, model, sessionId, username);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.value(false);
     expect(myBoolean.value()).to.equal(false);
@@ -74,7 +74,7 @@ describe("RealTimeBoolean", () => {
 
   it("Correct operation is sent after set", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => { return []; }, model, sessionId, username);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.value(false);
 
@@ -84,7 +84,7 @@ describe("RealTimeBoolean", () => {
 
   it("Value is correct after BooleanSetOperation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
 
     const incomingOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
@@ -98,7 +98,7 @@ describe("RealTimeBoolean", () => {
   it("Correct Event is fired after BooleanSetOperation", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => {return [];}, model, sessionId, username);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.on(RealTimeBoolean.Events.VALUE, lastEventCallback);
 

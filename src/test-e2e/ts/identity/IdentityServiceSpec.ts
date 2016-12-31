@@ -1,6 +1,5 @@
 import {DoneType} from "../../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../../mock-server/MockConvergenceServer";
-import {ConvergenceDomain} from "../../../main/ts/ConvergenceDomain";
 import {MockConvergenceServer} from "../../mock-server/MockConvergenceServer";
 import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
@@ -10,12 +9,12 @@ import ExpectStatic = Chai.ExpectStatic;
 import {UserField} from "../../../main/ts/identity/IdentityService";
 import Convergence from "../../../main/ts/Convergence";
 
-var expect: ExpectStatic = chai.expect;
+const expect: ExpectStatic = chai.expect;
 
-var url: string = "ws://localhost:8085/domain/namespace1/domain1";
-var expectedSuccessOptions: Function = function(done: MochaDone): IMockServerOptions {
-  return {
-    url: url,
+const url: string = "ws://localhost:8085/domain/namespace1/domain1";
+const expectedSuccessOptions: Function = (done: MochaDone) => {
+  return <IMockServerOptions> {
+    url,
     doneType: DoneType.MOCHA,
     mochaDone: done,
     autoHandshake: true,
@@ -25,11 +24,12 @@ var expectedSuccessOptions: Function = function(done: MochaDone): IMockServerOpt
   };
 };
 
-describe('IdentityService.user()', () => {
+describe("IdentityService.user()", () => {
 
-  it('must resolve with the correct user', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["test1"]});
+  it("must resolve with the correct user", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord =
+      mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["test1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
         {n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"}
@@ -52,9 +52,9 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must resolve with undefined if no user is found', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
+  it("must resolve with undefined if no user is found", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
@@ -68,9 +68,9 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must reject if more than one user is returned', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
+  it("must reject if more than one user is returned", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {
       t: MessageType.USER_LIST_RESPONSE, u: [
         {i: "u1", n: "test1", f: "test", l: "user", d: "test user", e: "test@example.com"},
@@ -89,8 +89,8 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must reject the promise if no userId is specified', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+  it("must reject the promise if no userId is specified", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
@@ -102,9 +102,9 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must send field code 1 if USERNAME is specified', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
+  it("must send field code 1 if USERNAME is specified", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 1, v: ["u1"]});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
@@ -117,9 +117,9 @@ describe('IdentityService.user()', () => {
     });
   });
 
-  it('must send field code 5 if EMAIL is specified', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 5, v: ["u1"]});
+  it("must send field code 5 if EMAIL is specified", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest({t: MessageType.USER_LOOKUP_REQUEST, f: 5, v: ["u1"]});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
 
@@ -133,10 +133,10 @@ describe('IdentityService.user()', () => {
   });
 });
 
-describe('IdentityService.search()', () => {
-  it('must resolve with the proper users that were returned', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest(
+describe("IdentityService.search()", () => {
+  it("must resolve with the proper users that were returned", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest(
       {t: MessageType.USER_SEARCH_REQUEST, f: [2, 3], v: "keyword"});
 
     mockServer.sendReplyTo(req, {
@@ -155,14 +155,14 @@ describe('IdentityService.search()', () => {
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(2);
 
-      var user1: DomainUser = users[0];
+      const user1: DomainUser = users[0];
       expect(user1.username()).to.equal("test1");
       expect(user1.firstName()).to.equal("test");
       expect(user1.lastName()).to.equal("user");
       expect(user1.displayName()).to.equal("test user");
       expect(user1.email()).to.equal("test@example.com");
 
-      var user2: DomainUser = users[1];
+      const user2: DomainUser = users[1];
       expect(user2.username()).to.equal("test2");
       expect(user2.firstName()).to.equal("test2");
       expect(user2.lastName()).to.equal("user2");
@@ -175,9 +175,9 @@ describe('IdentityService.search()', () => {
     });
   });
 
-  it('must resolve with an empty array if no users are returned', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
-    var req: IReceiveRequestRecord = mockServer.expectRequest(
+  it("must resolve with an empty array if no users are returned", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const req: IReceiveRequestRecord = mockServer.expectRequest(
       {t: MessageType.USER_SEARCH_REQUEST, f: [2, 3], v: "keyword"});
     mockServer.sendReplyTo(req, {t: MessageType.USER_LIST_RESPONSE, u: []});
     mockServer.start();
@@ -195,8 +195,8 @@ describe('IdentityService.search()', () => {
     });
   });
 
-  it('must reject the promise if no fields are specified', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+  it("must reject the promise if no fields are specified", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
@@ -208,8 +208,8 @@ describe('IdentityService.search()', () => {
     });
   });
 
-  it('must reject the promise if no value is specified', (done: MochaDone) => {
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+  it("must reject the promise if no value is specified", (done: MochaDone) => {
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
     mockServer.start();
 
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {

@@ -8,15 +8,15 @@ abstract class ActionRecord implements IActionRecord {
   constructor(protected _serverAction: MockServerAction) {
   }
 
-  actionId(): number {
+  public actionId(): number {
     return this._serverAction.actionId();
   }
 
-  setMessage(message: any): void {
+  public setMessage(message: any): void {
     this._message = message;
   }
 
-  message(): any {
+  public message(): any {
     return this._message;
   }
 }

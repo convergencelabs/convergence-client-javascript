@@ -11,30 +11,29 @@ import {DataValueSerializer} from "../../main/ts/connection/protocol/model/dataV
 import {DataValueFactory} from "../../main/ts/model/DataValueFactory";
 import Convergence from "../../main/ts/Convergence";
 
+describe("Open Real Time Model E2E", () => {
 
-describe('Open Real Time Model E2E', () => {
-
-  it('Successful open of existing model', (done: MochaDone) => {
-    var id: number = 0;
-    var idGen = () => {
+  it("Successful open of existing model", (done: MochaDone) => {
+    let id: number = 0;
+    const idGen = () => {
       return "" + id++;
     };
 
-    var dataValueFactory: DataValueFactory = new DataValueFactory(idGen);
+    const dataValueFactory: DataValueFactory = new DataValueFactory(idGen);
 
-    var mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
+    const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
 
-    var fqn: ModelFqn = new ModelFqn("collection", "model");
+    const fqn: ModelFqn = new ModelFqn("collection", "model");
 
-    var openRequest: OpenRealTimeModelRequest = {
+    const openRequest: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
       modelFqn: fqn,
       initializerProvided: false
     };
 
-    var expectOpen = OpenRealTimeModelRequestSerializer(openRequest);
+    const expectOpen = OpenRealTimeModelRequestSerializer(openRequest);
     expectOpen.t = MessageType.OPEN_REAL_TIME_MODEL_REQUEST;
-    var openReq: IReceiveRequestRecord = mockServer.expectRequest(expectOpen, 300);
+    const openReq: IReceiveRequestRecord = mockServer.expectRequest(expectOpen, 300);
     mockServer.sendReplyTo(openReq, {
       r: "1",
       v: 0,
@@ -61,11 +60,11 @@ describe('Open Real Time Model E2E', () => {
   //
   // Text Fixture Code
   //
-  var url: string = "ws://localhost:8085/domain/namespace1/domain1";
+  const url: string = "ws://localhost:8085/domain/namespace1/domain1";
 
   function expectedSuccessOptions(done: MochaDone): IMockServerOptions {
     return {
-      url: url,
+      url,
       doneType: DoneType.MOCHA,
       mochaDone: done,
 

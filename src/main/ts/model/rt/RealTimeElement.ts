@@ -15,7 +15,9 @@ import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {ObservableElement} from "../observable/ObservableElement";
 
-export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+export abstract class RealTimeElement<T>
+  extends ConvergenceEventEmitter<ConvergenceEvent>
+  implements ObservableElement<T> {
 
   public static Events: any = {
     DETACHED: "detached",
