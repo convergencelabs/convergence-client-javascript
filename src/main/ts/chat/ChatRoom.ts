@@ -5,6 +5,7 @@ import {MessageType} from "../connection/protocol/MessageType";
 import {LeaveRoomMessage} from "../connection/protocol/chat/leaveRoom";
 import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ChatMember} from "./ChatMember";
 
 export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
 
@@ -76,25 +77,5 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
       roomId: this._id,
       message
     });
-  }
-}
-
-export class ChatMember {
-
-  private _username: string;
-  private _sessionId: string;
-
-  constructor(username: string, sessionId: string) {
-    this._username = username;
-    this._sessionId = sessionId;
-    Object.freeze(this);
-  }
-
-  public username(): string {
-    return this._sessionId;
-  }
-
-  public sessionId(): string {
-    return this._username;
   }
 }

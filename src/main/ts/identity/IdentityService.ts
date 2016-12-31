@@ -8,7 +8,7 @@ import {UserListResponse} from "../connection/protocol/user/userLookUps";
 import {UserQuery} from "./UserQuery";
 
 // fixme should the props be camelcase
-export var UserField: any = {
+export const UserField: any = {
   USERNAME: "username",
   EMAIL: "email",
   FIRST_NAME: "firstName",

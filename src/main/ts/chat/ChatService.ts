@@ -11,7 +11,7 @@ import {Deferred} from "../util/Deferred";
 import {JoinRoomRequestMessage} from "../connection/protocol/chat/joinRoom";
 import {JoinRoomResponseMessage} from "../connection/protocol/chat/joinRoom";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {ChatMember} from "./ChatRoom";
+import {ChatMember} from "./ChatMember";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatEvent} from "./events";
 
