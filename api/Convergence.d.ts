@@ -1,7 +1,7 @@
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {ConvergenceDomain} from "./ConvergenceDomain";
 
-export default class Convergence {
+export class Convergence {
 
   public static connect(url: string,
                         username: string,

@@ -5,7 +5,7 @@ import {MessageType} from "../../../main/ts/connection/protocol/MessageType";
 import {IReceiveRequestRecord} from "../../mock-server/records";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import Convergence from "../../../main/ts/Convergence";
+import {Convergence} from "../../../main/ts/Convergence";
 
 const expect: ExpectStatic = chai.expect;
 

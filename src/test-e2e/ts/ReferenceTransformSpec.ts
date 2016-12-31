@@ -7,7 +7,7 @@ import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
 import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
 import {RemoteReferenceCreatedEvent} from "../../main/ts/model/modelEvents";
-import Convergence from "../../main/ts/Convergence";
+import {Convergence} from "../../main/ts/Convergence";
 
 describe("Reference Transformation E2E", () => {
 

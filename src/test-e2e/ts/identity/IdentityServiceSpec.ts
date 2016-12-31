@@ -7,7 +7,7 @@ import {DomainUser} from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
 import {UserField} from "../../../main/ts/identity/IdentityService";
-import Convergence from "../../../main/ts/Convergence";
+import {Convergence} from "../../../main/ts/Convergence";
 
 const expect: ExpectStatic = chai.expect;
 

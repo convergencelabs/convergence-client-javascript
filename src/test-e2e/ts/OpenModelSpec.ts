@@ -9,7 +9,7 @@ import {ModelFqn} from "../../main/ts/model/ModelFqn";
 import {OpenRealTimeModelRequestSerializer} from "../../main/ts/connection/protocol/model/openRealtimeModel";
 import {DataValueSerializer} from "../../main/ts/connection/protocol/model/dataValue";
 import {DataValueFactory} from "../../main/ts/model/DataValueFactory";
-import Convergence from "../../main/ts/Convergence";
+import {Convergence} from "../../main/ts/Convergence";
 
 describe("Open Real Time Model E2E", () => {
 
