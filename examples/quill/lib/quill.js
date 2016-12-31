@@ -356,7 +356,7 @@
         MAX_ARRAY_INDEX = MAX_ARRAY_LENGTH - 1,
         HALF_MAX_ARRAY_LENGTH = MAX_ARRAY_LENGTH >>> 1;
 
-      /** Used as the size, in bytes, of each `Float64Array` element. */
+      /** Used as the size, in bytes, of each `Float64Array` observable. */
       var FLOAT64_BYTES_PER_ELEMENT = Float64Array ? Float64Array.BYTES_PER_ELEMENT : 0;
 
       /**
@@ -672,7 +672,7 @@
        * @param {Array} array The array to iterate over.
        * @param {Function} iteratee The function invoked per iteration.
        * @param {*} [accumulator] The initial value.
-       * @param {boolean} [initFromArray] Specify using the first element of `array`
+       * @param {boolean} [initFromArray] Specify using the first observable of `array`
        *  as the initial value.
        * @returns {*} Returns the accumulated value.
        */
@@ -696,7 +696,7 @@
        * @private
        * @param {Array} array The array to iterate over.
        * @param {Function} predicate The function invoked per iteration.
-       * @returns {boolean} Returns `true` if any element passes the predicate check,
+       * @returns {boolean} Returns `true` if any observable passes the predicate check,
        *  else `false`.
        */
       function arraySome(array, predicate) {
@@ -1007,9 +1007,9 @@
        * @param {Array|Object|string} collection The collection to search.
        * @param {Function} predicate The function invoked per iteration.
        * @param {Function} eachFunc The function to iterate over `collection`.
-       * @param {boolean} [retKey] Specify returning the key of the found element
-       *  instead of the element itself.
-       * @returns {*} Returns the found element or its key, else `undefined`.
+       * @param {boolean} [retKey] Specify returning the key of the found observable
+       *  instead of the observable itself.
+       * @returns {*} Returns the found observable or its key, else `undefined`.
        */
       function baseFind(collection, predicate, eachFunc, retKey) {
         var result;
@@ -1389,7 +1389,7 @@
        * @param {Array|Object|string} collection The collection to iterate over.
        * @param {Function} iteratee The function invoked per iteration.
        * @param {*} accumulator The initial value.
-       * @param {boolean} initFromCollection Specify using the first or last element
+       * @param {boolean} initFromCollection Specify using the first or last observable
        *  of `collection` as the initial value.
        * @param {Function} eachFunc The function to iterate over `collection`.
        * @returns {*} Returns the accumulated value.
@@ -1501,7 +1501,7 @@
 
       /**
        * This function is like `binaryIndex` except that it invokes `iteratee` for
-       * `value` and each element of `array` to compute their sort ranking. The
+       * `value` and each observable of `array` to compute their sort ranking. The
        * iteratee is invoked with one argument; (value).
        *
        * @private
@@ -1677,7 +1677,7 @@
 
       /**
        * Creates a function that aggregates a collection, creating an accumulator
-       * object composed from the results of running each element in the collection
+       * object composed from the results of running each observable in the collection
        * through an iteratee.
        *
        * **Note:** This function is used to create `_.countBy`, `_.groupBy`, `_.indexBy`,
@@ -2687,9 +2687,9 @@
       }
 
       /**
-       * Reorder `array` according to the specified indexes where the element at
-       * the first index is assigned as the first element, the element at
-       * the second index is assigned as the second element, and so on.
+       * Reorder `array` according to the specified indexes where the observable at
+       * the first index is assigned as the first observable, the observable at
+       * the second index is assigned as the second observable, and so on.
        *
        * @private
        * @param {Array} array The array to reorder.
@@ -2953,13 +2953,13 @@
       });
 
       /**
-       * Gets the last element of `array`.
+       * Gets the last observable of `array`.
        *
        * @static
        * @memberOf _
        * @category Array
        * @param {Array} array The array to query.
-       * @returns {*} Returns the last element of `array`.
+       * @returns {*} Returns the last observable of `array`.
        * @example
        *
        * _.last([1, 2, 3]);
@@ -2978,7 +2978,7 @@
        * (value, index|key, collection).
        *
        * If a property name is provided for `predicate` the created `_.property`
-       * style callback returns the property value of the given element.
+       * style callback returns the property value of the given observable.
        *
        * If a value is also provided for `thisArg` the created `_.matchesProperty`
        * style callback returns `true` for elements that have a matching property
@@ -3032,12 +3032,12 @@
       }
 
       /**
-       * Iterates over elements of `collection`, returning the first element
+       * Iterates over elements of `collection`, returning the first observable
        * `predicate` returns truthy for. The predicate is bound to `thisArg` and
        * invoked with three arguments: (value, index|key, collection).
        *
        * If a property name is provided for `predicate` the created `_.property`
-       * style callback returns the property value of the given element.
+       * style callback returns the property value of the given observable.
        *
        * If a value is also provided for `thisArg` the created `_.matchesProperty`
        * style callback returns `true` for elements that have a matching property
@@ -3055,7 +3055,7 @@
        * @param {Function|Object|string} [predicate=_.identity] The function invoked
        *  per iteration.
        * @param {*} [thisArg] The `this` binding of `predicate`.
-       * @returns {*} Returns the matched element, else `undefined`.
+       * @returns {*} Returns the matched observable, else `undefined`.
        * @example
        *
        * var users = [
@@ -3084,7 +3084,7 @@
       var find = createFind(baseEach);
 
       /**
-       * Iterates over elements of `collection` invoking `iteratee` for each element.
+       * Iterates over elements of `collection` invoking `iteratee` for each observable.
        * The `iteratee` is bound to `thisArg` and invoked with three arguments:
        * (value, index|key, collection). Iteratee functions may exit iteration early
        * by explicitly returning `false`.
@@ -3116,10 +3116,10 @@
       var forEach = createForEach(arrayEach, baseEach);
 
       /**
-       * Invokes the method at `path` of each element in `collection`, returning
+       * Invokes the method at `path` of each observable in `collection`, returning
        * an array of the results of each invoked method. Any additional arguments
        * are provided to each invoked method. If `methodName` is a function it is
-       * invoked for, and `this` bound to, each element in `collection`.
+       * invoked for, and `this` bound to, each observable in `collection`.
        *
        * @static
        * @memberOf _
@@ -3151,12 +3151,12 @@
       });
 
       /**
-       * Creates an array of values by running each element in `collection` through
+       * Creates an array of values by running each observable in `collection` through
        * `iteratee`. The `iteratee` is bound to `thisArg` and invoked with three
        * arguments: (value, index|key, collection).
        *
        * If a property name is provided for `iteratee` the created `_.property`
-       * style callback returns the property value of the given element.
+       * style callback returns the property value of the given observable.
        *
        * If a value is also provided for `thisArg` the created `_.matchesProperty`
        * style callback returns `true` for elements that have a matching property
@@ -3219,7 +3219,7 @@
        * to `thisArg` and invoked with three arguments: (value, index|key, collection).
        *
        * If a property name is provided for `predicate` the created `_.property`
-       * style callback returns the property value of the given element.
+       * style callback returns the property value of the given observable.
        *
        * If a value is also provided for `thisArg` the created `_.matchesProperty`
        * style callback returns `true` for elements that have a matching property
@@ -3277,9 +3277,9 @@
 
       /**
        * Reduces `collection` to a value which is the accumulated result of running
-       * each element in `collection` through `iteratee`, where each successive
+       * each observable in `collection` through `iteratee`, where each successive
        * invocation is supplied the return value of the previous. If `accumulator`
-       * is not provided the first element of `collection` is used as the initial
+       * is not provided the first observable of `collection` is used as the initial
        * value. The `iteratee` is bound to `thisArg` and invoked with four arguments:
        * (accumulator, value, index|key, collection).
        *
@@ -3593,13 +3593,13 @@
         };
 
       /**
-       * Checks if `value` is a DOM element.
+       * Checks if `value` is a DOM observable.
        *
        * @static
        * @memberOf _
        * @category Lang
        * @param {*} value The value to check.
-       * @returns {boolean} Returns `true` if `value` is a DOM element, else `false`.
+       * @returns {boolean} Returns `true` if `value` is a DOM observable, else `false`.
        * @example
        *
        * _.isElement(document.body);
@@ -4130,7 +4130,7 @@
       /**
        * Creates a function that invokes `func` with the `this` binding of `thisArg`
        * and arguments of the created function. If `func` is a property name the
-       * created callback returns the property value for a given element. If `func`
+       * created callback returns the property value for a given observable. If `func`
        * is an object the created callback returns `true` for elements that contain
        * the equivalent object properties, otherwise it returns `false`.
        *
@@ -4515,7 +4515,7 @@
         } else if(currentType === '**') {
           endReached = (i+1 === typeLength || (i+2 === typeLength && nextType === '*'));
           if(endReached && tree._listeners) {
-            // The next element has a _listeners, add it to the handlers.
+            // The next observable has a _listeners, add it to the handlers.
             listeners = listeners.concat(searchListenerTree(handlers, type, tree, typeLength));
           }
 
@@ -4561,7 +4561,7 @@
           for(branch in xxTree) {
             if(branch !== '_listeners' && xxTree.hasOwnProperty(branch)) {
               if(branch === nextType) {
-                // We know the next element will match, so jump twice.
+                // We know the next observable will match, so jump twice.
                 searchListenerTree(handlers, type, xxTree[branch], i+2);
               } else if(branch === currentType) {
                 // Current node matches, move into the tree.
@@ -4804,7 +4804,7 @@
         this._events[type] = listener;
       }
       else if(typeof this._events[type] === 'function') {
-        // Adding the second element, need to change to array.
+        // Adding the second observable, need to change to array.
         this._events[type] = [this._events[type], listener];
       }
       else if (isArray(this._events[type])) {
@@ -5795,7 +5795,7 @@
    * This speedup can produce non-minimal diffs.
    * @param {string} text1 First string.
    * @param {string} text2 Second string.
-   * @return {Array.<string>} Five element Array, containing the prefix of
+   * @return {Array.<string>} Five observable Array, containing the prefix of
    *     text1, the suffix of text1, the prefix of text2, the suffix of
    *     text2 and the common middle.  Or null if there was no match.
    */
@@ -5813,7 +5813,7 @@
      * @param {string} longtext Longer string.
      * @param {string} shorttext Shorter string.
      * @param {number} i Start index of quarter length substring within longtext.
-     * @return {Array.<string>} Five element Array, containing the prefix of
+     * @return {Array.<string>} Five observable Array, containing the prefix of
      *     longtext, the suffix of longtext, the prefix of shorttext, the suffix
      *     of shorttext and the common middle.  Or null if there was no match.
      * @private
@@ -5975,7 +5975,7 @@
     // e.g: A<ins>BA</ins>C -> <ins>AB</ins>AC
     var changes = false;
     pointer = 1;
-    // Intentionally ignore the first and last element (don't need checking).
+    // Intentionally ignore the first and last observable (don't need checking).
     while (pointer < diffs.length - 1) {
       if (diffs[pointer - 1][0] == DIFF_EQUAL &&
         diffs[pointer + 1][0] == DIFF_EQUAL) {

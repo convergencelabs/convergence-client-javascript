@@ -2,7 +2,7 @@ import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
-import {ObservableArray} from "../element/ObservableArray";
+import {ObservableArray} from "../observable/ObservableArray";
 
 export class HistoricalArray
   extends HistoricalElement<any[]>

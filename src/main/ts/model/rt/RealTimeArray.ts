@@ -16,7 +16,7 @@ import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableArray} from "../element/ObservableArray";
+import {ObservableArray} from "../observable/ObservableArray";
 
 export class RealTimeArray extends RealTimeElement<any[]> implements ObservableArray, RealTimeContainerElement<any[]> {
 

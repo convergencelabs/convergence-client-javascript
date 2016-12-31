@@ -4,7 +4,7 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableUndefined} from "../element/ObservableUndefined";
+import {ObservableUndefined} from "../observable/ObservableUndefined";
 
 export class RealTimeUndefined extends RealTimeElement<void> implements ObservableUndefined {
 

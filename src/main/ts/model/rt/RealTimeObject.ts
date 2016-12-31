@@ -19,7 +19,7 @@ import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableObject} from "../element/ObservableObject";
+import {ObservableObject} from "../observable/ObservableObject";
 
 export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
 implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {

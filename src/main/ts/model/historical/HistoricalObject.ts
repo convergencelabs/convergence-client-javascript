@@ -2,7 +2,7 @@ import { HistoricalElement } from "./HistoricalElement";
 import { ObjectNode } from "../internal/ObjectNode";
 import { HistoricalWrapperFactory } from "./HistoricalWrapperFactory";
 import { HistoricalContainerElement } from "./HistoricalContainerElement";
-import {ObservableObject} from "../element/ObservableObject";
+import {ObservableObject} from "../observable/ObservableObject";
 
 export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
                               implements HistoricalContainerElement<{[key: string]: any}>, ObservableObject {

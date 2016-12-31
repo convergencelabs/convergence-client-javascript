@@ -14,7 +14,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
-import {ObservableModel} from "../element/ObservableModel";
+import {ObservableModel} from "../observable/ObservableModel";
 
 interface OperationRequest {
   forward: boolean;

@@ -4,7 +4,7 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableNull} from "../element/ObservableNull";
+import {ObservableNull} from "../observable/ObservableNull";
 
 export class RealTimeNull extends RealTimeElement<void> implements ObservableNull {
 

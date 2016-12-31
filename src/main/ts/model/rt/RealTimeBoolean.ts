@@ -7,7 +7,7 @@ import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableBoolean} from "../element/ObservableBoolean";
+import {ObservableBoolean} from "../observable/ObservableBoolean";
 
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 

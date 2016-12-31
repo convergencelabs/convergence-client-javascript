@@ -9,7 +9,7 @@ import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableNumber} from "../element/ObservableNumber";
+import {ObservableNumber} from "../observable/ObservableNumber";
 
 export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 

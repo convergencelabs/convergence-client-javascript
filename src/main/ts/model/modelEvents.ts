@@ -1,13 +1,13 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {Path} from "./ot/Path";
 import {ModelReference} from "./reference/ModelReference";
-import {ObservableModel} from "./element/ObservableModel";
-import {ObservableElement} from "./element/ObservableElement";
-import {ObservableArray} from "./element/ObservableArray";
-import {ObservableBoolean} from "./element/ObservableBoolean";
-import {ObservableNumber} from "./element/ObservableNumber";
-import {ObservableObject} from "./element/ObservableObject";
-import {ObservableString} from "./element/ObservableString";
+import {ObservableModel} from "./observable/ObservableModel";
+import {ObservableElement} from "./observable/ObservableElement";
+import {ObservableArray} from "./observable/ObservableArray";
+import {ObservableBoolean} from "./observable/ObservableBoolean";
+import {ObservableNumber} from "./observable/ObservableNumber";
+import {ObservableObject} from "./observable/ObservableObject";
+import {ObservableString} from "./observable/ObservableString";
 
 export interface ModelEvent extends ConvergenceEvent {
   src: ObservableModel;

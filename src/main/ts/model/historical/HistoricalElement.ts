@@ -3,7 +3,7 @@ import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {ObservableElement} from "../element/ObservableElement";
+import {ObservableElement} from "../observable/ObservableElement";
 import {ModelEventConverter} from "../ModelEventConverter";
 
 export abstract class HistoricalElement<T>

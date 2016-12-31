@@ -51,7 +51,7 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {ObservableModel} from "../element/ObservableModel";
+import {ObservableModel} from "../observable/ObservableModel";
 
 export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
 
@@ -377,7 +377,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ReferenceType.ELEMENT) {
-        throw new Error("A reference with this key already exists, but is not an element reference");
+        throw new Error("A reference with this key already exists, but is not an observable reference");
       } else {
         return <LocalElementReference> existing;
       }

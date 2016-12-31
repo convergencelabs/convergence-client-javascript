@@ -13,7 +13,7 @@ import {ModelEventConverter} from "../ModelEventConverter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
-import {ObservableElement} from "../element/ObservableElement";
+import {ObservableElement} from "../observable/ObservableElement";
 
 export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
 

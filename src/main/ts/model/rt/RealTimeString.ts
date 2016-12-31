@@ -17,7 +17,7 @@ import {StringNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableString} from "../element/ObservableString";
+import {ObservableString} from "../observable/ObservableString";
 
 export class RealTimeString extends RealTimeElement<string> implements ObservableString {
 

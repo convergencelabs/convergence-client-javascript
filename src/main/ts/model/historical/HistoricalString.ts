@@ -1,7 +1,7 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {StringNode} from "../internal/StringNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
-import {ObservableString} from "../element/ObservableString";
+import {ObservableString} from "../observable/ObservableString";
 
 export class HistoricalString extends HistoricalElement<string> implements ObservableString{
 

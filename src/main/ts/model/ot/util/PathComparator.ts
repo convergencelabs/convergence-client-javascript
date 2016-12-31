@@ -19,8 +19,8 @@ export default class PathComparator {
   /**
    * Determines if the first path passed in is the direct child of the second
    * path passed in.  A path is a direct child of another if the child path
-   * is exactly one element longer than the parent AND if for each element in
-   * the parent path there is an equal element in the child path at the same
+   * is exactly one observable longer than the parent AND if for each observable in
+   * the parent path there is an equal observable in the child path at the same
    * position.
    *
    * @param p1 The potential child path.
@@ -42,8 +42,8 @@ export default class PathComparator {
   /**
    * Determines if the first path passed in is the direct parent of the second
    * path passed in.  A path is a direct parent of another if the parent path
-   * is exactly one element shorter than the parent AND if for each element in
-   * the parent path there is an equal element in the child path at the same
+   * is exactly one observable shorter than the parent AND if for each observable in
+   * the parent path there is an equal observable in the child path at the same
    * position.
    *
    * @param p1 The potential parent path.
@@ -58,8 +58,8 @@ export default class PathComparator {
   /**
    * Determines if the first path passed in is a descendant of the second
    * path passed in.  A path is a descendant of another if the path is
-   * longer than the other path AND if for each element in the other path
-   * the descendant path has an equal element at the same position.
+   * longer than the other path AND if for each observable in the other path
+   * the descendant path has an equal observable at the same position.
    *
    * @param p1 The potential descendant path.
    * @param p2 The potential ancestor path.
@@ -80,8 +80,8 @@ export default class PathComparator {
   /**
    * Determines if the first path passed in is an ancestor of the second
    * path passed in.  A path is a ancestor of another if the path is
-   * shorter than the other path AND if for each element in ancestor path the
-   * descendant path has an equal element at the same position.
+   * shorter than the other path AND if for each observable in ancestor path the
+   * descendant path has an equal observable at the same position.
    *
    * @param p1 The potential ancestor path.
    * @param p2 The potential descendant path.
