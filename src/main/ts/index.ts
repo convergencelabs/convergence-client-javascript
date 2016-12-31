@@ -1,8 +1,9 @@
-import Convergence from "./Convergence";
+import {Convergence} from "./Convergence";
 export default Convergence;
 
 export {Session} from "./Session";
 export {ConvergenceDomain} from "./ConvergenceDomain";
+export {Convergence} from "./Convergence";
 export {ConvergenceOptions} from "./ConvergenceOptions";
 
 export * from "./activity/index";

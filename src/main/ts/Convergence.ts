@@ -2,7 +2,7 @@ import {ConvergenceDomain} from "./ConvergenceDomain";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {debugFlags as flags} from "./Debug";
 
-export default class Convergence {
+export class Convergence {
 
   public static debugFlags: any = flags;
 
