@@ -1,16 +1,16 @@
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {Path} from "../ot/Path";
-import {RealTimeElement} from "./RealTimeElement";
-import {RealTimeArray} from "./RealTimeArray";
-import {RealTimeBoolean} from "./RealTimeBoolean";
-import {RealTimeNumber} from "./RealTimeNumber";
-import {RealTimeObject} from "./RealTimeObject";
-import {RealTimeString} from "./RealTimeString";
-import {ModelReference} from "../reference/ModelReference";
-import {RealTimeModel} from "./RealTimeModel";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {Path} from "./ot/Path";
+import {ModelReference} from "./reference/ModelReference";
+import {ObservableModel} from "./element/ObservableModel";
+import {ObservableElement} from "./element/ObservableElement";
+import {ObservableArray} from "./element/ObservableArray";
+import {ObservableBoolean} from "./element/ObservableBoolean";
+import {ObservableNumber} from "./element/ObservableNumber";
+import {ObservableObject} from "./element/ObservableObject";
+import {ObservableString} from "./element/ObservableString";
 
 export interface ModelEvent extends ConvergenceEvent {
-  src: RealTimeModel;
+  src: ObservableModel;
 }
 
 export interface ModelClosedEvent extends ModelEvent {
@@ -27,13 +27,13 @@ export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: RealTimeElement<any>;
+  src: ObservableElement<any>;
   local: boolean;
 }
 
 export class ElementDetachedEvent implements ConvergenceEvent {
   public name: string = "detached";
-  constructor(public src: RealTimeElement<any>) {}
+  constructor(public src: ObservableElement<any>) {}
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
@@ -44,7 +44,7 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
 export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
   public name: string = "model_changed";
-  constructor(public src: RealTimeElement<any>,
+  constructor(public src: ObservableElement<any>,
               public relativePath: Path,
               public childEvent: ValueChangedEvent,
               public sessionId: string,
@@ -54,9 +54,9 @@ export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
 export class ArrayInsertEvent implements ValueChangedEvent {
   public name: string = "insert";
-  constructor(public src: RealTimeArray,
+  constructor(public src: ObservableArray,
               public index: number,
-              public value: RealTimeElement<any>,
+              public value: ObservableElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -64,7 +64,7 @@ export class ArrayInsertEvent implements ValueChangedEvent {
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeArray,
+  constructor(public src: ObservableArray,
               public index: number,
               public sessionId: string,
               public username: string,
@@ -73,9 +73,9 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
 
 export class ArraySetEvent implements ValueChangedEvent {
   public name: string = "set";
-  constructor(public src: RealTimeArray,
+  constructor(public src: ObservableArray,
               public index: number,
-              public value: RealTimeElement<any>,
+              public value: ObservableElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -83,7 +83,7 @@ export class ArraySetEvent implements ValueChangedEvent {
 
 export class ArrayReorderEvent implements ValueChangedEvent {
   public name: string = "reorder";
-  constructor(public src: RealTimeArray,
+  constructor(public src: ObservableArray,
               public fromIndex: number,
               public toIndex: number,
               public sessionId: string,
@@ -93,7 +93,7 @@ export class ArrayReorderEvent implements ValueChangedEvent {
 
 export class ArraySetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeArray,
+  constructor(public src: ObservableArray,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -101,7 +101,7 @@ export class ArraySetValueEvent implements ValueChangedEvent {
 
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeBoolean,
+  constructor(public src: ObservableBoolean,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -109,7 +109,7 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
 
 export class NumberSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeNumber,
+  constructor(public src: ObservableNumber,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -117,7 +117,7 @@ export class NumberSetValueEvent implements ValueChangedEvent {
 
 export class NumberDeltaEvent implements ValueChangedEvent {
   public name: string = "delta";
-  constructor(public src: RealTimeNumber,
+  constructor(public src: ObservableNumber,
               public value: number,
               public sessionId: string,
               public username: string,
@@ -126,9 +126,9 @@ export class NumberDeltaEvent implements ValueChangedEvent {
 
 export class ObjectSetEvent implements ValueChangedEvent {
   public name: string = "set";
-  constructor(public src: RealTimeObject,
+  constructor(public src: ObservableObject,
               public key: string,
-              public value: RealTimeElement<any>,
+              public value: ObservableElement<any>,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -136,7 +136,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeObject,
+  constructor(public src: ObservableObject,
               public key: string,
               public sessionId: string,
               public username: string,
@@ -145,7 +145,7 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeObject,
+  constructor(public src: ObservableObject,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -153,7 +153,7 @@ export class ObjectSetValueEvent implements ValueChangedEvent {
 
 export class NodeSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeObject,
+  constructor(public src: ObservableObject,
               public sessionId: string,
               public username: string,
               public local: boolean) {}
@@ -161,7 +161,7 @@ export class NodeSetValueEvent implements ValueChangedEvent {
 
 export class StringInsertEvent implements ValueChangedEvent {
   public name: string = "insert";
-  constructor(public src: RealTimeString,
+  constructor(public src: ObservableString,
               public index: number,
               public value: string,
               public sessionId: string,
@@ -171,7 +171,7 @@ export class StringInsertEvent implements ValueChangedEvent {
 
 export class StringRemoveEvent implements ValueChangedEvent {
   public name: string = "remove";
-  constructor(public src: RealTimeString,
+  constructor(public src: ObservableString,
               public index: number,
               public value: string,
               public sessionId: string,
@@ -181,7 +181,7 @@ export class StringRemoveEvent implements ValueChangedEvent {
 
 export class StringSetValueEvent implements ValueChangedEvent {
   public name: string = "value";
-  constructor(public src: RealTimeString,
+  constructor(public src: ObservableString,
               public sessionId: string,
               public username: string,
               public local: boolean) {}

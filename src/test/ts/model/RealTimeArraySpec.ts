@@ -14,11 +14,11 @@ import {ArrayValue} from "../../../main/ts/model/dataValue";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {ArrayNode} from "../../../main/ts/model/internal/ArrayNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ArraySetValueEvent} from "../../../main/ts/model/rt/events";
-import {ArrayInsertEvent} from "../../../main/ts/model/rt/events";
-import {ArrayRemoveEvent} from "../../../main/ts/model/rt/events";
-import {ArraySetEvent} from "../../../main/ts/model/rt/events";
-import {ArrayReorderEvent} from "../../../main/ts/model/rt/events";
+import {ArraySetValueEvent} from "../../../main/ts/model/modelEvents";
+import {ArrayInsertEvent} from "../../../main/ts/model/modelEvents";
+import {ArrayRemoveEvent} from "../../../main/ts/model/modelEvents";
+import {ArraySetEvent} from "../../../main/ts/model/modelEvents";
+import {ArrayReorderEvent} from "../../../main/ts/model/modelEvents";
 import {RealTimeString} from "../../../main/ts/model/rt/RealTimeString";
 import {StringNode} from "../../../main/ts/model/internal/StringNode";
 

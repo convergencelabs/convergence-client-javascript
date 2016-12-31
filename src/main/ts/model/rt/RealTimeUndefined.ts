@@ -4,8 +4,9 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RealTimeModel} from "./RealTimeModel";
+import {ObservableUndefined} from "../element/ObservableUndefined";
 
-export class RealTimeUndefined extends RealTimeElement<void> {
+export class RealTimeUndefined extends RealTimeElement<void> implements ObservableUndefined {
 
   public static Events: any = {
     DETACHED: RealTimeElement.Events.DETACHED

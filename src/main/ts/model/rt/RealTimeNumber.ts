@@ -9,8 +9,9 @@ import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
+import {ObservableNumber} from "../element/ObservableNumber";
 
-export class RealTimeNumber extends RealTimeElement<number>  {
+export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 
   public static Events: any = {
     DELTA: "delta",

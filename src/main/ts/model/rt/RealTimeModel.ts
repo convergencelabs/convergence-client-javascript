@@ -43,16 +43,17 @@ import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {MessageEvent} from "../../connection/ConvergenceConnection";
-import {RemoteReferenceCreatedEvent} from "./events";
-import {ModelEvent} from "./events";
-import {ModelClosedEvent} from "./events";
-import {VersionChangedEvent} from "./events";
+import {RemoteReferenceCreatedEvent} from "../modelEvents";
+import {ModelEvent} from "../modelEvents";
+import {ModelClosedEvent} from "../modelEvents";
+import {VersionChangedEvent} from "../modelEvents";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {ObservableModel} from "../element/ObservableModel";
 
-export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
 
   public static Events: any = {
     CLOSED: "closed",

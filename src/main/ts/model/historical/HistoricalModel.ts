@@ -14,6 +14,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
+import {ObservableModel} from "../element/ObservableModel";
 
 interface OperationRequest {
   forward: boolean;
@@ -21,7 +22,7 @@ interface OperationRequest {
   operations: ModelOperation[];
 }
 
-export class HistoricalModel {
+export class HistoricalModel implements ObservableModel {
   private _session: Session;
   private _connection: ConvergenceConnection;
 
@@ -118,7 +119,7 @@ export class HistoricalModel {
     return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  public valueAt(path: any): HistoricalElement<any> {
+  public elementAt(path: any): HistoricalElement<any> {
     return this._wrapperFactory.wrap(this._model.valueAt(path));
   }
 

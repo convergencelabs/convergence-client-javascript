@@ -12,7 +12,7 @@ import {StringNodeInsertEvent} from "./events";
 import {StringNodeRemoveEvent} from "./events";
 import {StringNodeSetValueEvent} from "./events";
 
-export class StringNode extends ModelNode<String> {
+export class StringNode extends ModelNode<string> {
 
   public static Events: any = {
     INSERT: "insert",

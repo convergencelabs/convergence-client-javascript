@@ -7,8 +7,9 @@ import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
+import {ObservableBoolean} from "../element/ObservableBoolean";
 
-export class RealTimeBoolean extends RealTimeElement<boolean> {
+export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
   public static Events: any = {
     VALUE: "value",

@@ -2,8 +2,11 @@ import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
+import {ObservableArray} from "../element/ObservableArray";
 
-export class HistoricalArray extends HistoricalElement<any[]> implements HistoricalContainerElement<any[]> {
+export class HistoricalArray
+  extends HistoricalElement<any[]>
+  implements ObservableArray, HistoricalContainerElement<any[]> {
 
   constructor(protected _delegate: ArrayNode, _wrapperFactory: HistoricalWrapperFactory) {
     super(_delegate, _wrapperFactory);

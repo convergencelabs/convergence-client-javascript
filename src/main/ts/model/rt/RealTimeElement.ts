@@ -7,14 +7,15 @@ import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ModelEventCallbacks} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RemoteReferenceCreatedEvent} from "./events";
+import {RemoteReferenceCreatedEvent} from "../modelEvents";
 import {RealTimeModel} from "./RealTimeModel";
-import {EventConverter} from "./EventConverter";
+import {ModelEventConverter} from "../ModelEventConverter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
+import {ObservableElement} from "../element/ObservableElement";
 
-export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
 
   public static Events: any = {
     DETACHED: "detached",
@@ -55,7 +56,7 @@ export abstract class RealTimeElement<T> extends ConvergenceEventEmitter<Converg
         !event.local ||
         event instanceof NodeDetachedEvent;
     }).subscribe(event => {
-      let convertedEvent: ConvergenceEvent = EventConverter.convertEvent(event, this._wrapperFactory);
+      let convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
   }

@@ -1,9 +1,10 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {BooleanNode} from "../internal/BooleanNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
+import {ObservableBoolean} from "../element/ObservableBoolean";
 
-export class HistoricalBoolean extends HistoricalElement<any> {
-  constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
-  }
+export class HistoricalBoolean extends HistoricalElement<boolean> implements ObservableBoolean {
+    constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory) {
+        super(_delegate, _wrapperFactory);
+    }
 }

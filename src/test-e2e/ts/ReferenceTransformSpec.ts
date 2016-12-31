@@ -6,7 +6,7 @@ import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
 import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
 import {debugFlags} from "../../main/ts/Debug";
-import {RemoteReferenceCreatedEvent} from "../../main/ts/model/rt/events";
+import {RemoteReferenceCreatedEvent} from "../../main/ts/model/modelEvents";
 import Convergence from "../../main/ts/Convergence";
 
 

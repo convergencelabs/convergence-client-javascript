@@ -2,9 +2,10 @@ import { HistoricalElement } from "./HistoricalElement";
 import { ObjectNode } from "../internal/ObjectNode";
 import { HistoricalWrapperFactory } from "./HistoricalWrapperFactory";
 import { HistoricalContainerElement } from "./HistoricalContainerElement";
+import {ObservableObject} from "../element/ObservableObject";
 
 export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
-                              implements HistoricalContainerElement<{[key: string]: any}> {
+                              implements HistoricalContainerElement<{[key: string]: any}>, ObservableObject {
 
   constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
     super(_delegate, _wrapperFactory);
