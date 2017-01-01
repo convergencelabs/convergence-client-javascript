@@ -1,10 +1,17 @@
 import {Observable, Subscription, Subject} from "rxjs/Rx";
 import {ConvergenceEvent} from "./ConvergenceEvent";
-export type EventKey = string | number;
 
 export type EventListener<T> = (e: T) => void;
 
 export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
+
+  private static _resolveEventKey(event: string): string {
+    if (typeof event === "string") {
+      return event.toLowerCase();
+    } else {
+      throw new Error("Event names must be strings");
+    }
+  }
 
   private _eventSubscriptions: {[key: string]: Subscription[]};
   private _listeners: {[key: string]: EventListener<T>[]};
@@ -19,12 +26,12 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     this._listeners = {};
   }
 
-  public addListener(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+  public addListener(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     if (typeof listener !== "function") {
       throw new TypeError("Listeners must be functions");
     }
 
-    event = this._resolveEventKey(event);
+    event = ConvergenceEventEmitter._resolveEventKey(event);
     let listeners: EventListener<T>[] = this._listeners[event];
     let subscriptions: Subscription[] = this._eventSubscriptions[event];
     if (listeners === undefined) {
@@ -48,11 +55,11 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  public on(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+  public on(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     return this.addListener(event, listener);
   }
 
-  public once(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+  public once(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     const wrapper: EventListener<T> = (e: T) => {
       this.removeListener(event, wrapper);
       listener(e);
@@ -67,8 +74,8 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  public removeAllListeners(event: EventKey): ConvergenceEventEmitter<T> {
-    event = this._resolveEventKey(event);
+  public removeAllListeners(event: string): ConvergenceEventEmitter<T> {
+    event = ConvergenceEventEmitter._resolveEventKey(event);
     const subscriptions: Subscription[] = this._eventSubscriptions[event];
     subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
@@ -79,8 +86,8 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  public removeListener(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
-    event = this._resolveEventKey(event);
+  public removeListener(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+    event = ConvergenceEventEmitter._resolveEventKey(event);
     const listeners: EventListener<T>[] = this._listeners[event];
     const subscriptions: Subscription[] = this._eventSubscriptions[event];
     const index: number = listeners.indexOf(listener);
@@ -93,7 +100,7 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  public  off(event: EventKey, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+  public  off(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     return this.removeListener(event, listener);
   }
 
@@ -112,15 +119,5 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
   protected _emitEvent(value: T): void {
     this._defaultSubject.next(value);
-  }
-
-  private _resolveEventKey(event: EventKey): EventKey {
-    if (typeof event === "string") {
-      return event.toLowerCase();
-    } else if (typeof event === "number" && (<number> event) >= 0) {
-      return event.toString().toLowerCase();
-    } else {
-      throw new Error("Event names must be strings or numbers >= 0");
-    }
   }
 }
