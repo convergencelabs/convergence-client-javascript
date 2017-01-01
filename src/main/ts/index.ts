@@ -1,7 +1,6 @@
 export * from "./Convergence";
 export * from "./Session";
 export * from "./ConvergenceDomain";
-export * from "./Convergence";
 export * from "./ConvergenceOptions";
 
 export * from "./activity/index";
