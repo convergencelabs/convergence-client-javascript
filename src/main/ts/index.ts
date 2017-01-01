@@ -1,10 +1,8 @@
-import {Convergence} from "./Convergence";
-export default Convergence;
-
-export {Session} from "./Session";
-export {ConvergenceDomain} from "./ConvergenceDomain";
-export {Convergence} from "./Convergence";
-export {ConvergenceOptions} from "./ConvergenceOptions";
+export * from "./Convergence";
+export * from "./Session";
+export * from "./ConvergenceDomain";
+export * from "./Convergence";
+export * from "./ConvergenceOptions";
 
 export * from "./activity/index";
 export * from "./chat/index";

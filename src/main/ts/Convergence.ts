@@ -11,7 +11,7 @@ export class Convergence {
     let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithPassword(username, password);
-    }).then((v) => {
+    }).then(() => {
       return domain;
     });
   }
@@ -21,7 +21,7 @@ export class Convergence {
     let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateAnonymously(displayName);
-    }).then((v) => {
+    }).then(() => {
       return domain;
     });
   }
@@ -30,8 +30,22 @@ export class Convergence {
     let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithToken(token);
-    }).then((v) => {
+    }).then(() => {
       return domain;
     });
   }
+}
+
+export function connect(url: string, username: string, password: string,
+                        options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  return Convergence.connect(url, username, password, options);
+}
+
+export function connectAnonymously(url: string, displayName?: string,
+                                   options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  return Convergence.connectAnonymously(url, displayName, options);
+}
+
+export function connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  return Convergence.connectWithJwt(url, token, options);
 }

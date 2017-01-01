@@ -41,7 +41,7 @@ gulp.task("build", [], function () {
   // can"t put this in the tsconfig because the other steps bomb out.
   tsProject.options.declaration = true;
 
-  var tsResult = gulp.src(["src/**/*.ts"])
+  const tsResult = gulp.src(["src/**/*.ts"])
     .pipe(tsProject());
 
   return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done.
@@ -87,34 +87,10 @@ gulp.task("lint", function () {
     .pipe(tsLint.report());
 });
 
-// fixme I think the external and gloabs might not be needed anymore.
-const baseRollupConfig = {
-  entry: "src/main/ts/Convergence.ts",
-  rollup: rollup,
-  format: "umd",
-  moduleName: "Convergence",
-  sourceMap: true,
-  external: [
-    "rxjs/Rx",
-    "rxjs/Observable",
-    "rxjs/Subject",
-    "rxjs/BehaviorSubject"
-  ],
-  globals: {
-    "rxjs/Rx": "Rx",
-    "rxjs/Observable": "Rx",
-    "rxjs/Subject": "Rx",
-    "rxjs/BehaviorSubject": "Rx"
-  },
-  plugins: [
-    rollupTypescript({typescript: typescript})
-  ]
-};
-
 gulp.task("dist-umd", ["lint", "test"], function () {
-  const config = Object.assign({}, baseRollupConfig);
+  const config = generateRollUpConfig();
   config.format = "umd";
-  config.exports = "default";
+  config.exports = "named";
 
   return rollupStream(config)
     .pipe(source(`${distInternal}/umd/convergence.js`))
@@ -136,9 +112,9 @@ gulp.task("dist-typings", function () {
 });
 
 gulp.task("dist-cjs", ["lint", "test"], function () {
-  const config = Object.assign({}, baseRollupConfig);
+  const config = generateRollUpConfig();
   config.format = "cjs";
-  config.exports = "default";
+
 
   return rollupStream(config)
     .pipe(source(`${distInternal}/cjs/convergence.js`))
@@ -221,3 +197,28 @@ gulp.task("dist", ["dist-internal", "dist-npmjs"], function (cb) {
 gulp.task("clean", function () {
   return del(["dist-internal", "dist", "build", "coverage"]);
 });
+
+function generateRollUpConfig() {
+  return {
+    entry: "src/main/ts/index.ts",
+    rollup: rollup,
+    exports: "named",
+    moduleName: "Convergence",
+    sourceMap: true,
+    external: [
+      "rxjs/Rx",
+      "rxjs/Observable",
+      "rxjs/Subject",
+      "rxjs/BehaviorSubject"
+    ],
+    globals: {
+      "rxjs/Rx": "Rx",
+      "rxjs/Observable": "Rx",
+      "rxjs/Subject": "Rx",
+      "rxjs/BehaviorSubject": "Rx"
+    },
+    plugins: [
+      rollupTypescript({typescript: typescript})
+    ]
+  };
+}
