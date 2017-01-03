@@ -36,6 +36,8 @@ export class Convergence {
   }
 }
 
+export * from "./Debug";
+
 export function connect(url: string, username: string, password: string,
                         options?: ConvergenceOptions): Promise<ConvergenceDomain> {
   return Convergence.connect(url, username, password, options);
