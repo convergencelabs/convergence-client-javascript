@@ -3,7 +3,7 @@ export class Immutable {
   public static make(source: any): void {
     if (typeof source === "object") {
       Object.freeze(source);
-      Object.keys(source).forEach((val: any, idx: number, array: Array<any>) => {
+      Object.keys(source).forEach((val: any, idx: number, array: any[]) => {
         Immutable.make(val);
       });
     }
@@ -11,7 +11,7 @@ export class Immutable {
 
   public static copy(source: any, updates?: any): any {
     const result: any = {};
-    Object.keys(source).forEach((prop: any, idx: number, array: Array<any>) => {
+    Object.keys(source).forEach((prop: any, idx: number, array: any[]) => {
       if (updates[prop] !== undefined) {
         result[prop] = updates[prop];
       } else {

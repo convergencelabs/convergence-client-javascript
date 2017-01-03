@@ -10,7 +10,7 @@ export interface OperationSubmission extends OutgoingProtocolNormalMessage {
   operation: Operation;
 }
 
-export var OperationSubmissionSerializer: MessageBodySerializer =  (submission: OperationSubmission) => {
+export const OperationSubmissionSerializer: MessageBodySerializer =  (submission: OperationSubmission) => {
   return {
     r: submission.resourceId,
     s: submission.seqNo,

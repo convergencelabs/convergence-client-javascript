@@ -139,7 +139,7 @@ export class DiscreteOperationDeserializer {
 
 export class CompoundOperationSerializer {
   public static serialize(operation: CompoundOperation): any {
-    const ops: Array<any> = [];
+    const ops: any[] = [];
     let op: DiscreteOperation;
 
     for (op of operation.ops) {
@@ -155,7 +155,7 @@ export class CompoundOperationSerializer {
 
 export class CompoundDeserializer {
   public static deserialize(body: any): CompoundOperation {
-    const ops: Array<DiscreteOperation> = [];
+    const ops: DiscreteOperation[] = [];
     let op: any;
     for (op of body.o) {
       ops.push(DiscreteOperationDeserializer.deserialize(op));

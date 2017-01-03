@@ -10,7 +10,7 @@ export interface ModelDataRequest extends IncomingProtocolRequestMessage {
   modelFqn: ModelFqn;
 }
 
-export var ModelDataRequestDeserializer: MessageBodyDeserializer<ModelDataRequest> =  (body: any) => {
+export const ModelDataRequestDeserializer: MessageBodyDeserializer<ModelDataRequest> =  (body: any) => {
   return {
     modelFqn: new ModelFqn(body.c, body.m)
   };
@@ -20,7 +20,7 @@ export interface ModelDataResponse extends OutgoingProtocolResponseMessage {
   data: ObjectValue;
 }
 
-export var ModelDataResponseSerializer: MessageBodySerializer = (response: ModelDataResponse) => {
+export const ModelDataResponseSerializer: MessageBodySerializer = (response: ModelDataResponse) => {
   return {
     d: DataValueSerializer(response.data)
   };

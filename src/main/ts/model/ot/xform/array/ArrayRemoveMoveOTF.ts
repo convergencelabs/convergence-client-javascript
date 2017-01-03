@@ -6,7 +6,7 @@ import {ArrayMoveHelper} from "./ArrayMoveHelper";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
 import {MoveDirection} from "./ArrayMoveHelper";
 
-export var ArrayRemoveMoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayMoveOperation> =
+export const ArrayRemoveMoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayMoveOperation> =
   (s: ArrayRemoveOperation, c: ArrayMoveOperation) => {
     switch (ArrayMoveHelper.getMoveDirection(c)) {
       case MoveDirection.Forward:

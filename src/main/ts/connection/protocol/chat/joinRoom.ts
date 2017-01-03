@@ -8,7 +8,7 @@ export interface JoinRoomRequestMessage extends OutgoingProtocolRequestMessage {
   roomId: string;
 }
 
-export var JoinRoomRequestMessageSerializer: MessageBodySerializer = (request: JoinRoomRequestMessage) => {
+export const JoinRoomRequestMessageSerializer: MessageBodySerializer = (request: JoinRoomRequestMessage) => {
   return {
     r: request.roomId
   };
@@ -20,7 +20,7 @@ export interface JoinRoomResponseMessage extends IncomingProtocolResponseMessage
   lastMessageTime: number;
 }
 
-export var JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoomResponseMessage> = (body: any) => {
+export const JoinRoomResponseMessageDeserializer: MessageBodyDeserializer<JoinRoomResponseMessage> = (body: any) => {
   const result: JoinRoomResponseMessage = {
     members: body.p,
     messageCount: body.c,
@@ -37,7 +37,7 @@ export interface UserJoinedRoomMessage extends IncomingProtocolNormalMessage {
   timestamp: number;
 }
 
-export var UserJoinedRoomMessageDeserializer: MessageBodyDeserializer<UserJoinedRoomMessage> = (body: any) => {
+export const UserJoinedRoomMessageDeserializer: MessageBodyDeserializer<UserJoinedRoomMessage> = (body: any) => {
   const result: UserJoinedRoomMessage = {
     roomId: body.r,
     username: body.u,

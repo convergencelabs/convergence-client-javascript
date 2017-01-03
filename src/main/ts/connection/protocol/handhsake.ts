@@ -8,7 +8,7 @@ export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   reconnectToken: string;
 }
 
-export var HandshakeRequestSerializer: MessageBodySerializer = (request: HandshakeRequest) => {
+export const HandshakeRequestSerializer: MessageBodySerializer = (request: HandshakeRequest) => {
   return {
     r: request.reconnect,
     k: request.reconnectToken
@@ -23,7 +23,7 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   retryOk?: boolean;
 }
 
-export var HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
+export const HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
   return {
     success: body.s,
     reconnectToken: body.k,

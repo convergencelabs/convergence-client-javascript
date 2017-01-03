@@ -8,7 +8,7 @@ export interface PublishChatMessage extends OutgoingProtocolNormalMessage {
   message: string;
 }
 
-export var PublishChatMessageSerializer: MessageBodySerializer = (request: PublishChatMessage) => {
+export const PublishChatMessageSerializer: MessageBodySerializer = (request: PublishChatMessage) => {
   return {
     r: request.roomId,
     m: request.message
@@ -23,7 +23,7 @@ export interface UserChatMessage extends IncomingProtocolNormalMessage {
   timestamp: number;
 }
 
-export var UserChatMessageDeserializer: MessageBodyDeserializer<UserChatMessage> = (body: any) => {
+export const UserChatMessageDeserializer: MessageBodyDeserializer<UserChatMessage> = (body: any) => {
   const result: UserChatMessage = {
     roomId: body.r,
     message: body.m,

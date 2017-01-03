@@ -5,7 +5,7 @@ export interface UnsubscribePresence extends OutgoingProtocolRequestMessage {
   username: string;
 }
 
-export var UnsubscribePresenceSerializer: MessageBodySerializer = (request: UnsubscribePresence) => {
+export const UnsubscribePresenceSerializer: MessageBodySerializer = (request: UnsubscribePresence) => {
   return {
     u: request.username
   };

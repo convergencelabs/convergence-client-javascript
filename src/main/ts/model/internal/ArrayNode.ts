@@ -32,7 +32,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     NODE_CHANGED: ContainerNode.Events.NODE_CHANGED
   };
 
-  private _children: ModelNode<any>[];
+  private _children: Array<ModelNode<any>>;
 
   /**
    * Constructs a new RealTimeArray.
@@ -141,8 +141,8 @@ export class ArrayNode extends ContainerNode<any[]> {
   // protected and private methods.
   //
 
-  protected _getData(): Array<any> {
-    const returnVal: Array<any> = [];
+  protected _getData(): any[] {
+    const returnVal: any[] = [];
     this.forEach((child: ModelNode<any>) => {
       returnVal.push(child.data());
     });

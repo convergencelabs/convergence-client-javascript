@@ -8,7 +8,7 @@ export interface SubscribePresenceRequest extends OutgoingProtocolRequestMessage
   usernames: string[];
 }
 
-export var SubscribePresenceRequestSerializer: MessageBodySerializer = (request: SubscribePresenceRequest) => {
+export const SubscribePresenceRequestSerializer: MessageBodySerializer = (request: SubscribePresenceRequest) => {
   return {
     u: request.usernames
   };
@@ -18,10 +18,11 @@ export interface SubscribePresenceResponse extends IncomingProtocolResponseMessa
   userPresences: UserPresenceData[];
 }
 
-export var SubscribePresenceResponseDeserializer: MessageBodyDeserializer<SubscribePresenceResponse> = (body: any) => {
-  const result: SubscribePresenceResponse = {
-    userPresences: body.p
-  };
+export const SubscribePresenceResponseDeserializer: MessageBodyDeserializer<SubscribePresenceResponse> =
+  (body: any) => {
+    const result: SubscribePresenceResponse = {
+      userPresences: body.p
+    };
 
-  return result;
-};
+    return result;
+  };

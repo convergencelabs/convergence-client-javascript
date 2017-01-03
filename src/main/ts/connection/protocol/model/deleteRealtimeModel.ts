@@ -6,7 +6,7 @@ export interface DeleteRealTimeModelRequest extends OutgoingProtocolRequestMessa
   modelFqn: ModelFqn;
 }
 
-export var DeleteRealTimeModelRequestSerializer: MessageBodySerializer = (request: DeleteRealTimeModelRequest) => {
+export const DeleteRealTimeModelRequestSerializer: MessageBodySerializer = (request: DeleteRealTimeModelRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId

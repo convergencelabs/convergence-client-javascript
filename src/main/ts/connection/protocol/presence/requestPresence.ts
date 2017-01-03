@@ -7,7 +7,7 @@ export interface RequestPresence extends OutgoingProtocolRequestMessage {
   usernames: string[];
 }
 
-export var RequestPresenceSerializer: MessageBodySerializer = (request: RequestPresence) => {
+export const RequestPresenceSerializer: MessageBodySerializer = (request: RequestPresence) => {
   return {
     u: request.usernames
   };
@@ -17,7 +17,7 @@ export interface RequestPresenceResponse extends IncomingProtocolNormalMessage {
   userPresences: UserPresenceData[];
 }
 
-export var RequestPresenceResponseDeserializer: MessageBodyDeserializer<RequestPresenceResponse> = (body: any) => {
+export const RequestPresenceResponseDeserializer: MessageBodyDeserializer<RequestPresenceResponse> = (body: any) => {
   const result: RequestPresenceResponse = {
     userPresences: body.p
   };

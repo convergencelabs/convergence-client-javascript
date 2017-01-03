@@ -84,7 +84,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
 
   private _open: boolean;
   private _committed: boolean;
-  private _referencesBySession: {[key: string]: ModelReference<any>[]};
+  private _referencesBySession: {[key: string]: Array<ModelReference<any>>};
   private _sessions: string[];
   private _wrapperFactory: RealTimeWrapperFactory;
 
@@ -413,7 +413,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     return this._referenceManager.get(sessionId, key);
   }
 
-  public references(filter?: ReferenceFilter): ModelReference<any>[] {
+  public references(filter?: ReferenceFilter): Array<ModelReference<any>> {
     return this._referenceManager.getAll(filter);
   }
 
@@ -472,7 +472,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   private _handleClientClosed(message: RemoteClientClosedModel): void {
     this._sessions = this._sessions.filter(s => s !== message.sessionId);
 
-    const refs: ModelReference<any>[] = this._referencesBySession[message.sessionId];
+    const refs: Array<ModelReference<any>> = this._referencesBySession[message.sessionId];
     delete this._referencesBySession[message.sessionId];
 
     refs.forEach((ref: ModelReference<any>) => {

@@ -6,7 +6,7 @@ export interface ActivitySessionLeft extends IncomingProtocolNormalMessage {
   sessionId: string;
 }
 
-export var ActivitySessionLeftDeserializer: MessageBodyDeserializer<ActivitySessionLeft> = (body: any) => {
+export const ActivitySessionLeftDeserializer: MessageBodyDeserializer<ActivitySessionLeft> = (body: any) => {
   const result: ActivitySessionLeft = {
     activityId: body.i,
     sessionId: body.s

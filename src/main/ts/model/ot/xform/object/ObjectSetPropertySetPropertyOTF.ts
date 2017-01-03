@@ -2,7 +2,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {ObjectSetPropertyOperation} from "../../ops/ObjectSetPropertyOperation";
 import {OperationPair} from "../OperationPair";
 
-export var ObjectSetPropertySetPropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation,
+export const ObjectSetPropertySetPropertyOTF: OperationTransformationFunction<ObjectSetPropertyOperation,
   ObjectSetPropertyOperation> =
   (s: ObjectSetPropertyOperation, c: ObjectSetPropertyOperation) => {
     if (s.prop !== c.prop) {

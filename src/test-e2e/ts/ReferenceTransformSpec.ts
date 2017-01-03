@@ -28,13 +28,13 @@ describe("Reference Transformation E2E", () => {
       m: new Date().getTime(),
       d: {
         d: {
-          i: "0:0",
+          "i": "0:0",
           "?": 0,
-          c: {
+          "c": {
             text: {
-              i: "0:1",
+              "i": "0:1",
               "?": 2,
-              v: "Some example text to test with."
+              "v": "Some example text to test with."
             }
           }
         },

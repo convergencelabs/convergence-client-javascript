@@ -8,7 +8,7 @@ export interface OperationAck extends IncomingProtocolNormalMessage {
   timestamp: number;
 }
 
-export var OperationAckDeserializer: MessageBodyDeserializer<OperationAck> = (body: any) => {
+export const OperationAckDeserializer: MessageBodyDeserializer<OperationAck> = (body: any) => {
   return {
     resourceId: body.r,
     seqNo: body.s,

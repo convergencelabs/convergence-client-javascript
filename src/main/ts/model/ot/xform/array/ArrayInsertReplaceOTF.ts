@@ -3,7 +3,7 @@ import {OperationPair} from "../OperationPair";
 import {ArrayInsertOperation} from "../../ops/ArrayInsertOperation";
 import {ArrayReplaceOperation} from "../../ops/ArrayReplaceOperation";
 
-export var ArrayInsertReplaceOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayReplaceOperation> =
+export const ArrayInsertReplaceOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayReplaceOperation> =
   (s: ArrayInsertOperation, c: ArrayReplaceOperation) => {
     if (s.index <= c.index) {
       // A-IP-1 and A-IP-2

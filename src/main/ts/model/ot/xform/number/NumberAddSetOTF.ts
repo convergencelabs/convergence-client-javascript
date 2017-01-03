@@ -3,7 +3,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {NumberAddOperation} from "../../ops/NumberAddOperation";
 import {NumberSetOperation} from "../../ops/NumberSetOperation";
 
-export var NumberAddSetOTF: OperationTransformationFunction<NumberAddOperation, NumberSetOperation> =
+export const NumberAddSetOTF: OperationTransformationFunction<NumberAddOperation, NumberSetOperation> =
   (s: NumberAddOperation, c: NumberSetOperation) => {
     // N-AS-1
     return new OperationPair(s.copy({noOp: true}), c);

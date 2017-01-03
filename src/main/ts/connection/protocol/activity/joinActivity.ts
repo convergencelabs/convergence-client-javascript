@@ -8,7 +8,7 @@ export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
   state: Map<string, any>;
 }
 
-export var ActivityJoinRequestSerializer: MessageBodySerializer = (request: ActivityJoinRequest) => {
+export const ActivityJoinRequestSerializer: MessageBodySerializer = (request: ActivityJoinRequest) => {
   return {
     i: request.activityId,
     s: request.state
@@ -19,7 +19,7 @@ export interface ActivityJoinResponse extends IncomingProtocolResponseMessage {
   participants: {[key: string]: any};
 }
 
-export var ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
+export const ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
   const participants: {[key: string]: any} = body.s;
   const result: ActivityJoinResponse = {participants};
   return result;

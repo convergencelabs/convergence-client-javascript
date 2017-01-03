@@ -98,7 +98,7 @@ export abstract class RealTimeElement<T>
     return this._referenceManager.get(sessionId, key);
   }
 
-  public references(filter?: ReferenceFilter): ModelReference<any>[] {
+  public references(filter?: ReferenceFilter): Array<ModelReference<any>> {
     return this._referenceManager.getAll(filter);
   }
 

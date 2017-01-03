@@ -16,7 +16,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
     super(referenceManager, ReferenceType.ELEMENT, key, source, username, sessionId, local);
   }
 
-  public _set(values: RealTimeElement<any>[], local: boolean = false): void {
+  public _set(values: Array<RealTimeElement<any>>, local: boolean = false): void {
     for (let oldElement of this.values()) {
       oldElement.removeListener(RealTimeElement.Events.DETACHED, this._detachedListener);
     }
@@ -38,7 +38,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
   public _handleElementRemoved(element: RealTimeElement<any>): void {
     const index: number = this._values.indexOf(element, 0);
     if (index > -1) {
-      let newElements: RealTimeElement<any>[] = this._values.slice(0);
+      let newElements: Array<RealTimeElement<any>> = this._values.slice(0);
       newElements.splice(index, 1);
       this._set(newElements);
     }
@@ -46,5 +46,5 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
 
   private _detachedListener: (event: ElementDetachedEvent) => void = (event: ElementDetachedEvent) => {
     this._handleElementRemoved(<RealTimeElement<any>> event.src);
-  };
+  }
 }

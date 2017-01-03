@@ -17,7 +17,7 @@ export interface UserLookUpRequest extends OutgoingProtocolRequestMessage {
   values: string[];
 }
 
-export var UserLookUpRequestSerializer: MessageBodySerializer = (request: UserLookUpRequest) => {
+export const UserLookUpRequestSerializer: MessageBodySerializer = (request: UserLookUpRequest) => {
   return {
     f: userFieldCodes[request.field],
     v: request.values
@@ -33,7 +33,7 @@ export interface UserSearchRequest extends OutgoingProtocolRequestMessage {
   ascending: boolean;
 }
 
-export var UserSearchRequestSerializer: MessageBodySerializer = (request: UserSearchRequest) => {
+export const UserSearchRequestSerializer: MessageBodySerializer = (request: UserSearchRequest) => {
   let sort: number;
 
   if (request.ascending !== undefined) {
@@ -56,7 +56,7 @@ export interface UserListResponse {
   users: DomainUser[];
 }
 
-export var UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
+export const UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
   const users: DomainUser[] = (<any[]> body.u).map((u: any) => {
     return DomainUserDeserializer(u);
   });

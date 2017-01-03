@@ -2,7 +2,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {OperationPair} from "../OperationPair";
 import {ArrayInsertOperation} from "../../ops/ArrayInsertOperation";
 
-export var ArrayInsertInsertOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayInsertOperation> =
+export const ArrayInsertInsertOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayInsertOperation> =
   (s: ArrayInsertOperation, c: ArrayInsertOperation) => {
     if (s.index <= c.index) {
       // A-II-1 and A-II-2

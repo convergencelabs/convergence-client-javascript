@@ -171,7 +171,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
   private _leftCB: (id: string) => () => void = (id: string) => {
     return () => this._joinedMap.delete(id);
-  };
+  }
 }
 
 export interface ActivityJoinOptions {

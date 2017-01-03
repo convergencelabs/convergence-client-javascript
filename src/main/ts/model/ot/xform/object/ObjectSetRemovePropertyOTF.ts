@@ -3,7 +3,7 @@ import {ObjectSetOperation} from "../../ops/ObjectSetOperation";
 import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
 import {OperationPair} from "../OperationPair";
 
-export var ObjectSetRemovePropertyOTF: OperationTransformationFunction<ObjectSetOperation,
+export const ObjectSetRemovePropertyOTF: OperationTransformationFunction<ObjectSetOperation,
   ObjectRemovePropertyOperation> =
   (s: ObjectSetOperation, c: ObjectRemovePropertyOperation) => {
     // O-SR-1

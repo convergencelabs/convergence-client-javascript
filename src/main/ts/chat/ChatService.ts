@@ -111,5 +111,5 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   private _leftCB: (id: string) => () => void = (id: string) => {
     return () => this._joinedMap.delete(id);
-  };
+  }
 }

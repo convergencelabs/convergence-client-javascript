@@ -7,6 +7,8 @@
     "trailing-comma": false,
     "no-string-literal": false,
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
-    "no-console": false
+    "no-console": false,
+    "arrow-parens": false,
+    "max-classes-per-file": false
   }
 }

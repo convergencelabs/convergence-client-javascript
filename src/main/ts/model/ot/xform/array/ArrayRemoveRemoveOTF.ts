@@ -2,7 +2,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {OperationPair} from "../OperationPair";
 import {ArrayRemoveOperation} from "../../ops/ArrayRemoveOperation";
 
-export var ArrayRemoveRemoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayRemoveOperation> =
+export const ArrayRemoveRemoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayRemoveOperation> =
   (s: ArrayRemoveOperation, c: ArrayRemoveOperation) => {
     if (s.index === c.index) {
       // A-RR-2

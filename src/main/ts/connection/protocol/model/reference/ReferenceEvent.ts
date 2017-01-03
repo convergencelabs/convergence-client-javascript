@@ -11,7 +11,7 @@ import {SessionIdParser} from "../../SessionIdParser";
 // Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-export var ReferenceTypeCodes: CodeMap = new CodeMap();
+export const ReferenceTypeCodes: CodeMap = new CodeMap();
 ReferenceTypeCodes.put(0, ReferenceType.INDEX);
 ReferenceTypeCodes.put(1, ReferenceType.RANGE);
 ReferenceTypeCodes.put(2, ReferenceType.PROPERTY);
@@ -46,7 +46,7 @@ export interface RemoteReferenceSet extends RemoteReferenceEvent {
 export interface RemoteReferenceCleared extends RemoteReferenceEvent {
 }
 
-export var RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
+export const RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
   const type: string = ReferenceTypeCodes.value(body.c);
   const values: any = deserializeReferenceValues(body.v, type);
 
@@ -89,7 +89,7 @@ export function deserializeReferenceValues(values: any, type: string): any {
   }
 }
 
-export var RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
+export const RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
   const type: string = ReferenceTypeCodes.value(body.c);
   const values: any = deserializeReferenceValues(body.v, type);
   const result: RemoteReferenceSet = {
@@ -115,9 +115,9 @@ const ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent
   return result;
 };
 
-export var RemoteReferenceClearedDeserializer: MessageBodyDeserializer<RemoteReferenceCleared> =
+export const RemoteReferenceClearedDeserializer: MessageBodyDeserializer<RemoteReferenceCleared> =
   ReferenceMessageDeserializer;
-export var RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<RemoteReferenceUnpublished> =
+export const RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<RemoteReferenceUnpublished> =
   ReferenceMessageDeserializer;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ export interface SetReferenceEvent extends OutgoingReferenceEvent {
 export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 }
 
-export var PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
+export const PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
     r: message.resourceId,
     d: message.id,
@@ -159,7 +159,7 @@ export var PublishReferenceSerializer: MessageBodySerializer = (message: Publish
   };
 };
 
-export var UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
+export const UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
   return {
     r: message.resourceId,
     d: message.id,
@@ -189,7 +189,7 @@ function serializeReferenceValue(values: any, type: string): any {
   }
 }
 
-export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
+export const SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
     d: message.id,
@@ -200,7 +200,7 @@ export var SetReferenceSerializer: MessageBodySerializer = (message: SetReferenc
   };
 };
 
-export var ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
+export const ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
   return {
     r: message.resourceId,
     d: message.id,

@@ -36,12 +36,12 @@ export class ReferenceMap {
     }
   }
 
-  public getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+  public getAll(filter?: ReferenceFilter): Array<ModelReference<any>> {
     if (typeof filter === "undefined") {
       filter = {};
     }
 
-    const refs: ModelReference<any>[] = [];
+    const refs: Array<ModelReference<any>> = [];
 
     let sessionIds: string[];
     if (filter.sessionId !== undefined && filter.sessionId !== null) {

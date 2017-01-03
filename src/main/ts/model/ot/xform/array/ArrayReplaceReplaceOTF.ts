@@ -3,7 +3,7 @@ import {OperationPair} from "../OperationPair";
 import {ArrayReplaceOperation} from "../../ops/ArrayReplaceOperation";
 import {EqualsUtil} from "../../../../util/EqualsUtil";
 
-export var ArrayReplaceReplaceOTF: OperationTransformationFunction<ArrayReplaceOperation, ArrayReplaceOperation> =
+export const ArrayReplaceReplaceOTF: OperationTransformationFunction<ArrayReplaceOperation, ArrayReplaceOperation> =
   (s: ArrayReplaceOperation, c: ArrayReplaceOperation) => {
     if (s.index !== c.index) {
       // A-PP-1

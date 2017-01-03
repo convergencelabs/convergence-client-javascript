@@ -6,7 +6,7 @@ import {ArrayMoveHelper} from "./ArrayMoveHelper";
 import {MoveDirection} from "./ArrayMoveHelper";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
 
-export var ArrayMoveInsertOTF: OperationTransformationFunction<ArrayMoveOperation, ArrayInsertOperation> =
+export const ArrayMoveInsertOTF: OperationTransformationFunction<ArrayMoveOperation, ArrayInsertOperation> =
   (s: ArrayMoveOperation, c: ArrayInsertOperation) => {
     switch (ArrayMoveHelper.getMoveDirection(s)) {
       case MoveDirection.Forward:

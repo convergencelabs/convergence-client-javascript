@@ -144,11 +144,11 @@ export class MessageSerializer {
 
   private static _defaultBodyDeserializer: MessageBodyDeserializer<any> = (message: any) => {
     return {};
-  };
+  }
 
   private static _defaultBodySerializer: MessageBodySerializer = (message: any) => {
     return {};
-  };
+  }
 }
 
 // Serializers

@@ -12,7 +12,7 @@ export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
   orderBy?: OrderBy;
 }
 
-export var ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
+export const ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
   const query: any = {
     c: request.collection,
     l: request.limit,
@@ -29,7 +29,7 @@ export var ModelsQueryRequestSerializer: MessageBodySerializer = (request: Model
   return query;
 };
 
-export var ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body: any) => {
+export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body: any) => {
   return {
     collectionId: body.l,
     modelId: body.m,
@@ -43,7 +43,7 @@ export interface ModelsQueryResponse extends IncomingProtocolResponseMessage {
   result: ModelResult[];
 }
 
-export var ModelsQueryResponseDeserializer: MessageBodyDeserializer<ModelsQueryResponse> = (body: any) => {
+export const ModelsQueryResponseDeserializer: MessageBodyDeserializer<ModelsQueryResponse> = (body: any) => {
   let modelResults: ModelResult[] = [];
   for (let r of body.r) {
     modelResults.push(ModelResultDeserializer(r));

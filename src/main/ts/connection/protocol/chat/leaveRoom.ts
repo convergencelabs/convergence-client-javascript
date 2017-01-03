@@ -7,7 +7,7 @@ export interface LeaveRoomMessage extends OutgoingProtocolNormalMessage {
   roomId: string;
 }
 
-export var LeaveRoomMessageSerializer: MessageBodySerializer = (request: LeaveRoomMessage) => {
+export const LeaveRoomMessageSerializer: MessageBodySerializer = (request: LeaveRoomMessage) => {
   return {
     r: request.roomId
   };
@@ -20,7 +20,7 @@ export interface UserLeftRoomMessage extends IncomingProtocolNormalMessage {
   timestamp: number;
 }
 
-export var UserLeftRoomMessageDeserializer: MessageBodyDeserializer<UserLeftRoomMessage> = (body: any) => {
+export const UserLeftRoomMessageDeserializer: MessageBodyDeserializer<UserLeftRoomMessage> = (body: any) => {
   const result: UserLeftRoomMessage = {
     roomId: body.r,
     username: body.u,

@@ -12,7 +12,7 @@ export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage
   initializerProvided: boolean;
 }
 
-export var OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request: OpenRealTimeModelRequest) => {
+export const OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request: OpenRealTimeModelRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,
@@ -31,18 +31,19 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   references: ReferenceData[];
 }
 
-export var OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> = (body: any) => {
-  return {
-    resourceId: body.r,
-    valueIdPrefix: body.p,
-    version: body.v,
-    createdTime: body.c,
-    modifiedTime: body.m,
-    data: DataValueDeserializer(body.d.d),
-    connectedClients: body.d.s,
-    references: convertReferences(body.d.r)
+export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> =
+  (body: any) => {
+    return {
+      resourceId: body.r,
+      valueIdPrefix: body.p,
+      version: body.v,
+      createdTime: body.c,
+      modifiedTime: body.m,
+      data: DataValueDeserializer(body.d.d),
+      connectedClients: body.d.s,
+      references: convertReferences(body.d.r)
+    };
   };
-};
 
 export interface ReferenceData {
   sessionId: string;

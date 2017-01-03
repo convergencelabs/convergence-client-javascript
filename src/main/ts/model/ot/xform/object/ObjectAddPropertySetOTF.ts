@@ -3,7 +3,7 @@ import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
 import {ObjectSetOperation} from "../../ops/ObjectSetOperation";
 import {OperationPair} from "../OperationPair";
 
-export var ObjectAddPropertySetOTF: OperationTransformationFunction<ObjectAddPropertyOperation, ObjectSetOperation> =
+export const ObjectAddPropertySetOTF: OperationTransformationFunction<ObjectAddPropertyOperation, ObjectSetOperation> =
   (s: ObjectAddPropertyOperation, c: ObjectSetOperation) => {
     // O-AS-1
     return new OperationPair(s.copy({noOp: true}), c);

@@ -2,7 +2,7 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {StringSetOperation} from "../../ops/StringSetOperation";
 
-export var StringSetSetOTF: OperationTransformationFunction<StringSetOperation, StringSetOperation> =
+export const StringSetSetOTF: OperationTransformationFunction<StringSetOperation, StringSetOperation> =
   (s: StringSetOperation, c: StringSetOperation) => {
     if (s.value === c.value) {
       // S-SS-1

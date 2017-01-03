@@ -19,4 +19,4 @@ const types: {[key: string]: string}  = {
 
 Object.freeze(types);
 
-export var OperationType: any = types;
+export const OperationType: any = types;

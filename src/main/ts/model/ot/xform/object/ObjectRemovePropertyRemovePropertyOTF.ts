@@ -2,7 +2,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
 import {OperationPair} from "../OperationPair";
 
-export var ObjectRemovePropertyRemovePropertyOTF: OperationTransformationFunction<ObjectRemovePropertyOperation,
+export const ObjectRemovePropertyRemovePropertyOTF: OperationTransformationFunction<ObjectRemovePropertyOperation,
   ObjectRemovePropertyOperation> =
   (s: ObjectRemovePropertyOperation, c: ObjectRemovePropertyOperation) => {
     if (s.prop !== c.prop) {

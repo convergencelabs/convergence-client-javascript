@@ -9,7 +9,7 @@ export interface CreateRealTimeModelRequest extends OutgoingProtocolRequestMessa
   data: ObjectValue;
 }
 
-export var CreateRealTimeModelRequestSerializer: MessageBodySerializer = (request: CreateRealTimeModelRequest) => {
+export const CreateRealTimeModelRequestSerializer: MessageBodySerializer = (request: CreateRealTimeModelRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,

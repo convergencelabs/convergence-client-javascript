@@ -91,7 +91,7 @@ export class AppliedOperationDeserializer {
 
 export class AppliedCompoundDeserializer {
   public static deserialize(body: any): AppliedCompoundOperation {
-    const ops: Array<AppliedDiscreteOperation> = [];
+    const ops: AppliedDiscreteOperation[] = [];
     let op: AppliedDiscreteOperation;
     for (op of body.o) {
       ops.push(<AppliedDiscreteOperation> AppliedOperationDeserializer.deserialize(op));

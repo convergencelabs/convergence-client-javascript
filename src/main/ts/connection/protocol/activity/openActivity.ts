@@ -6,7 +6,7 @@ export interface ActivityOpenRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
 }
 
-export var ActivityOpenRequestSerializer: MessageBodySerializer = (request: ActivityOpenRequest) => {
+export const ActivityOpenRequestSerializer: MessageBodySerializer = (request: ActivityOpenRequest) => {
   return {
     i: request.activityId
   };
@@ -16,7 +16,7 @@ export interface ActivityOpenResponse extends OutgoingProtocolRequestMessage {
   state: ActivityState;
 }
 
-export var ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
+export const ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
   const result: ActivityOpenResponse = {
     state: body.s
   };

@@ -4,7 +4,7 @@ import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
 import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 
-export var StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> =
+export const StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> =
   (s: StringRemoveOperation, c: StringRemoveOperation) => {
     const cStart: number = c.index;
     const cEnd: number = c.index + c.value.length;

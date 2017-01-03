@@ -11,7 +11,7 @@ export interface PasswordAuthRequest extends AuthRequest {
   password: string;
 }
 
-export var PasswordAuthRequestSerializer: MessageBodySerializer = (request: PasswordAuthRequest) => {
+export const PasswordAuthRequestSerializer: MessageBodySerializer = (request: PasswordAuthRequest) => {
   return {
     u: request.username,
     p: request.password
@@ -22,7 +22,7 @@ export interface TokenAuthRequest extends AuthRequest {
   token: string;
 }
 
-export var TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAuthRequest) => {
+export const TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAuthRequest) => {
   return {
     k: request.token
   };
@@ -32,7 +32,7 @@ export interface AnonymousAuthRequest extends AuthRequest {
   displayName?: string;
 }
 
-export var AnonymousAuthRequestSerializer: MessageBodySerializer = (request: AnonymousAuthRequest) => {
+export const AnonymousAuthRequestSerializer: MessageBodySerializer = (request: AnonymousAuthRequest) => {
   return {
     d: request.displayName
   };
@@ -45,7 +45,7 @@ export interface AuthenticationResponse extends IncomingProtocolResponseMessage 
   state: {[key: string]: any};
 }
 
-export var AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
+export const AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
   return {
     success: body.s,
     username: body.n,

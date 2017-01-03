@@ -3,7 +3,7 @@ import {EqualsUtil} from "../../util/EqualsUtil";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ReferenceManager} from "./ReferenceManager";
 
-export var ReferenceType: any = {
+export const ReferenceType: any = {
   INDEX: "index",
   RANGE: "range",
   PROPERTY: "property",

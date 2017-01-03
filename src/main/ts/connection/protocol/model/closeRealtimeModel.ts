@@ -5,7 +5,7 @@ export interface CloseRealTimeModelRequest extends OutgoingProtocolRequestMessag
   resourceId: string;
 }
 
-export var CloseRealTimeModelRequestSerializer: MessageBodySerializer = (request: CloseRealTimeModelRequest) => {
+export const CloseRealTimeModelRequestSerializer: MessageBodySerializer = (request: CloseRealTimeModelRequest) => {
   return {
     r: request.resourceId
   };

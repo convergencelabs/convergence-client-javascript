@@ -11,7 +11,7 @@ export interface RemoteOperation extends IncomingProtocolNormalMessage {
   operation: Operation;
 }
 
-export var RemoteOperationDeserializer: MessageBodyDeserializer<RemoteOperation> =  (body: any) => {
+export const RemoteOperationDeserializer: MessageBodyDeserializer<RemoteOperation> =  (body: any) => {
   return {
     resourceId: body.r,
     sessionId: body.s,

@@ -3,7 +3,7 @@ import {OperationPair} from "../OperationPair";
 import {ArraySetOperation} from "../../ops/ArraySetOperation";
 import {EqualsUtil} from "../../../../util/EqualsUtil";
 
-export var ArraySetSetOTF: OperationTransformationFunction<ArraySetOperation, ArraySetOperation> =
+export const ArraySetSetOTF: OperationTransformationFunction<ArraySetOperation, ArraySetOperation> =
   (s: ArraySetOperation, c: ArraySetOperation) => {
     if (!EqualsUtil.deepEquals(s.value, c.value)) {
       // A-SS-1

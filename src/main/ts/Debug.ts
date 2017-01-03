@@ -1,4 +1,4 @@
-export var debugFlags: any = {
+export const debugFlags: any = {
   socket: {
     messages: false,
     connection: false

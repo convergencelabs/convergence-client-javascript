@@ -9,7 +9,7 @@ export interface HistoricalDataRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
 }
 
-export var HistoricalDataRequestSerializer: MessageBodySerializer = (request: HistoricalDataRequest) => {
+export const HistoricalDataRequestSerializer: MessageBodySerializer = (request: HistoricalDataRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,
@@ -23,7 +23,7 @@ export interface HistoricalDataResponse extends IncomingProtocolResponseMessage 
   data: any;
 }
 
-export var HistoricalDataResponseDeserializer: MessageBodyDeserializer<HistoricalDataResponse> = (body: any) => {
+export const HistoricalDataResponseDeserializer: MessageBodyDeserializer<HistoricalDataResponse> = (body: any) => {
   return {
     version: body.v,
     createdTime: body.c,

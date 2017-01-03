@@ -8,7 +8,7 @@ export interface PresenceSetState extends OutgoingProtocolNormalMessage {
   all: boolean;
 }
 
-export var PresenceSetStateSerializer: MessageBodySerializer = (request: PresenceSetState) => {
+export const PresenceSetStateSerializer: MessageBodySerializer = (request: PresenceSetState) => {
   return {
     s: request.state,
     a: request.all
@@ -19,7 +19,7 @@ export interface PresenceRemoveState extends OutgoingProtocolNormalMessage {
   keys: string[];
 }
 
-export var PresenceRemoveStateSerializer: MessageBodySerializer = (request: PresenceRemoveState) => {
+export const PresenceRemoveStateSerializer: MessageBodySerializer = (request: PresenceRemoveState) => {
   return {
     k: request.keys
   };
@@ -33,7 +33,7 @@ export interface PresenceStateSet extends IncomingProtocolNormalMessage {
   state: Map<string, any>;
 }
 
-export var PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSet> = (body: any) => {
+export const PresenceStateSetDeserializer: MessageBodyDeserializer<PresenceStateSet> = (body: any) => {
   const result: PresenceStateSet = {
     username: body.u,
     state: body.s
@@ -46,7 +46,7 @@ export interface PresenceStateRemoved extends IncomingProtocolNormalMessage {
   keys: string[];
 }
 
-export var PresenceStateRemovedDeserializer: MessageBodyDeserializer<PresenceStateRemoved> = (body: any) => {
+export const PresenceStateRemovedDeserializer: MessageBodyDeserializer<PresenceStateRemoved> = (body: any) => {
   const result: PresenceStateRemoved = {
     username: body.u,
     keys: body.k
@@ -58,7 +58,7 @@ export interface PresenceStateCleared extends IncomingProtocolNormalMessage {
   username: string;
 }
 
-export var PresenceStateClearedDeserializer: MessageBodyDeserializer<PresenceStateCleared> = (body: any) => {
+export const PresenceStateClearedDeserializer: MessageBodyDeserializer<PresenceStateCleared> = (body: any) => {
   const result: PresenceStateCleared = {
     username: body.u
   };

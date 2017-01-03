@@ -7,7 +7,7 @@ export interface RemoteClientOpenedModel extends IncomingProtocolResponseMessage
   sessionId: string;
 }
 
-export var RemoteClientOpenedModelDeserializer: MessageBodyDeserializer<RemoteClientOpenedModel> = (body: any) => {
+export const RemoteClientOpenedModelDeserializer: MessageBodyDeserializer<RemoteClientOpenedModel> = (body: any) => {
   return {
     resourceId: body.r,
     username: body.u,
@@ -21,7 +21,7 @@ export interface RemoteClientClosedModel extends IncomingProtocolResponseMessage
   sessionId: string;
 }
 
-export var RemoteClientClosedModelDeserializer: MessageBodyDeserializer<RemoteClientClosedModel> = (body: any) => {
+export const RemoteClientClosedModelDeserializer: MessageBodyDeserializer<RemoteClientClosedModel> = (body: any) => {
   return {
     resourceId: body.r,
     username: body.u,

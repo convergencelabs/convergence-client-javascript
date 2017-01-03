@@ -2,7 +2,7 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {NumberSetOperation} from "../../ops/NumberSetOperation";
 
-export var NumberSetSetOTF: OperationTransformationFunction<NumberSetOperation, NumberSetOperation> =
+export const NumberSetSetOTF: OperationTransformationFunction<NumberSetOperation, NumberSetOperation> =
   (s: NumberSetOperation, c: NumberSetOperation) => {
     if (s.value === c.value) {
       // N-SS-1

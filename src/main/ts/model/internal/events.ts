@@ -84,7 +84,7 @@ export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
 
   constructor(public src: ArrayNode,
               public local: boolean,
-              public value: Array<any>,
+              public value: any[],
               public sessionId: string,
               public username: string) {}
 }

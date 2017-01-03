@@ -3,7 +3,7 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {StringInsertOperation} from "../../ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 
-export var StringInsertRemoveOTF: OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> =
+export const StringInsertRemoveOTF: OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> =
   (s: StringInsertOperation, c: StringRemoveOperation) => {
     if (s.index <= c.index) {
       // S-IR-1 and S-IR-2

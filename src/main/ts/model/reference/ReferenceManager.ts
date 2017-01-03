@@ -38,7 +38,7 @@ export class ReferenceManager {
     return this._referenceMap.get(sessionId, key);
   }
 
-  public getAll(filter?: ReferenceFilter): ModelReference<any>[] {
+  public getAll(filter?: ReferenceFilter): Array<ModelReference<any>> {
     return this._referenceMap.getAll(filter);
   }
 
@@ -153,7 +153,7 @@ export class ReferenceManager {
   private _setReferenceValues(reference: ModelReference<any> , values: any): void {
     // Translate vids to RealTimeElements
     if (reference.type() === ReferenceType.ELEMENT) {
-      const rtvs: RealTimeElement<any>[] = [];
+      const rtvs: Array<RealTimeElement<any>> = [];
       for (let id of values) {
         let value: RealTimeElement<any> = (<RealTimeModel> this._source)._getRegisteredValue(id);
         if (value !== undefined) {

@@ -4,7 +4,7 @@ import {ArrayReplaceOperation} from "../../ops/ArrayReplaceOperation";
 import {ArrayRemoveOperation} from "../../ops/ArrayRemoveOperation";
 import {ArrayInsertOperation} from "../../ops/ArrayInsertOperation";
 
-export var ArrayReplaceRemoveOTF: OperationTransformationFunction<ArrayReplaceOperation, ArrayRemoveOperation> =
+export const ArrayReplaceRemoveOTF: OperationTransformationFunction<ArrayReplaceOperation, ArrayRemoveOperation> =
   (s: ArrayReplaceOperation, c: ArrayRemoveOperation) => {
     if (s.index < c.index) {
       // A-PR-1

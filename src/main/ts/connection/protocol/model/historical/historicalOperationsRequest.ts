@@ -12,7 +12,7 @@ export interface HistoricalOperationsRequest extends OutgoingProtocolRequestMess
   last: number;
 }
 
-export var HistoricalOperationsRequestSerializer: MessageBodySerializer = (request: HistoricalOperationsRequest) => {
+export const HistoricalOperationsRequestSerializer: MessageBodySerializer = (request: HistoricalOperationsRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,
@@ -25,7 +25,7 @@ export interface HistoricalOperationsResponse extends IncomingProtocolResponseMe
   operations: ModelOperation[];
 }
 
-export var HistoricalOperationsResponseDeserializer: MessageBodyDeserializer<HistoricalOperationsResponse> =
+export const HistoricalOperationsResponseDeserializer: MessageBodyDeserializer<HistoricalOperationsResponse> =
   (body: any) => {
     return {
       operations: (<any[]> body.o).map((op) => {

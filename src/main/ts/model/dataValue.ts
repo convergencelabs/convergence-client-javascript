@@ -9,7 +9,7 @@ const types: {[key: string]: string}  = {
 
 Object.freeze(types);
 
-export var DataValueType: any = types;
+export const DataValueType: any = types;
 
 export interface DataValue {
   id: string;

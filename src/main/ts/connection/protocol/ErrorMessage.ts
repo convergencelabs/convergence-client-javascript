@@ -9,14 +9,14 @@ export interface ErrorMessage extends ProtocolMessage, OutgoingProtocolMessage, 
   details: string;
 }
 
-export var ErrorMessageSerializer: MessageBodySerializer = (message: ErrorMessage) => {
+export const ErrorMessageSerializer: MessageBodySerializer = (message: ErrorMessage) => {
   return {
     c: message.code,
     d: message.details
   };
 };
 
-export var ErrorMessageDeserializer: MessageBodyDeserializer<ErrorMessage> = (body: any) => {
+export const ErrorMessageDeserializer: MessageBodyDeserializer<ErrorMessage> = (body: any) => {
   return {
     code: body.c,
     details: body.d

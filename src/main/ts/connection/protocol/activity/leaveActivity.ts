@@ -6,7 +6,7 @@ export interface ActivityLeaveRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
 }
 
-export var ActivityLeaveRequestSerializer: MessageBodySerializer = (request: ActivityLeaveRequest) => {
+export const ActivityLeaveRequestSerializer: MessageBodySerializer = (request: ActivityLeaveRequest) => {
   return {
     i: request.activityId
   };

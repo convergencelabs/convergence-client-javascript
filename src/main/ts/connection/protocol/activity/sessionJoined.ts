@@ -7,7 +7,7 @@ export interface ActivitySessionJoined extends IncomingProtocolNormalMessage {
   state: Map<string, any>;
 }
 
-export var ActivitySessionJoinedDeserializer: MessageBodyDeserializer<ActivitySessionJoined> = (body: any) => {
+export const ActivitySessionJoinedDeserializer: MessageBodyDeserializer<ActivitySessionJoined> = (body: any) => {
   const state: Map<string, any> = new Map<string, any>();
   for (let k of Object.keys(body.v)) {
     state.set(k, body.v[k]);
