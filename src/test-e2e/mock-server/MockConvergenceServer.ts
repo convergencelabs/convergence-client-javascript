@@ -22,7 +22,8 @@ import {AbstractDoneManager} from "./doneManager";
 /* tslint:disable */
 // This block of code is necessary to enable the mock socket framework in
 // node.
-const mockSocket = require('mock-socket');
+declare var global;
+import * as mockSocket from "mock-socket";
 if (typeof global['WebSocket'] === "undefined") {
   global['WebSocket'] = mockSocket.WebSocket;
 }

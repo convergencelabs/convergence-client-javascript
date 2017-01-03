@@ -6,14 +6,14 @@ import {ObjectValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValue} from "../../../main/ts/model/dataValue";
-
-import * as chai from "chai";
-import * as sinon from "sinon";
-import SinonSpy = Sinon.SinonSpy;
 import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {ObjectNode} from "../../../main/ts/model/internal/ObjectNode";
+
+import * as chai from "chai";
+import {SinonSpy} from "sinon";
+import * as sinon from "sinon";
 
 const expect: any = chai.expect;
 
