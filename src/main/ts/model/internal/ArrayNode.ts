@@ -117,6 +117,22 @@ export class ArrayNode extends ContainerNode<any[]> {
     return this._children.length;
   }
 
+  public some(callback: (element: ModelNode<any>, index?: number) => boolean): boolean {
+    return this._children.some(callback);
+  }
+
+  public every(callback: (element: ModelNode<any>, index?: number) => boolean): boolean {
+    return this._children.every(callback);
+  }
+
+  public find(callback: (element: ModelNode<any>, index?: number) => boolean): ModelNode<any> {
+    return this._children.find(callback);
+  }
+
+  public findIndex(callback: (element: ModelNode<any>, index?: number) => boolean): number {
+    return this._children.findIndex(callback);
+  }
+
   public forEach(callback: (value: ModelNode<any>, index?: number) => void): void {
     this._children.forEach(callback);
   }

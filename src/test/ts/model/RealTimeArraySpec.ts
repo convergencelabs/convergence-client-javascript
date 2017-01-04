@@ -24,6 +24,7 @@ import {StringNode} from "../../../main/ts/model/internal/StringNode";
 
 import * as chai from "chai";
 import * as sinon from "sinon";
+import {RealTimeElement} from "../../../main/ts/model/rt/RealTimeElement";
 
 const expect: any = chai.expect;
 
@@ -348,5 +349,104 @@ describe("RealTimeArray", () => {
 
     const expectedEvent: ArrayReorderEvent = new ArrayReorderEvent(myArray, 1, 2, sessionId, username, false);
     expect(lastEvent).to.deep.equal(expectedEvent);
+  });
+
+  it("ForEach is called on all elements", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    myArray.forEach((element: RealTimeElement<any>) => {
+      element.value("R");
+    });
+    expect(myArray.value()).to.deep.equal(["R", "R", "R"]);
+  });
+
+  it("Some returns true if callback returns true for any element", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const some = myArray.some((element: RealTimeElement<any>) => {
+      return element.value() === "A";
+    });
+    expect(some).to.deep.equal(true);
+  });
+
+  it("Some returns false if callback returns false for all elements", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const some = myArray.some((element: RealTimeElement<any>) => {
+      return element.value() === "R";
+    });
+    expect(some).to.deep.equal(false);
+  });
+
+  it("Every returns true if callback returns true for all elements", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const every = myArray.every((element: RealTimeElement<any>) => {
+      return element instanceof RealTimeString;
+    });
+    expect(every).to.deep.equal(true);
+  });
+
+  it("Every returns false if callback returns false for any element", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const every = myArray.every((element: RealTimeElement<any>) => {
+      return element.value() === "A";
+    });
+    expect(every).to.deep.equal(false);
+  });
+
+  it("Find returns the correct element", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const found = myArray.find((element: RealTimeElement<any>) => {
+      return element.value() === "B";
+    });
+    expect(found.value()).to.deep.equal("B");
+  });
+
+  it("Find returns undefined if nothing is found", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const found = myArray.find((element: RealTimeElement<any>) => {
+      return element.value() === "R";
+    });
+    expect(found).to.deep.equal(undefined);
+  });
+
+  it("FindIndex returns the correct index", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const foundIndex = myArray.findIndex((element: RealTimeElement<any>) => {
+      return element.value() === "B";
+    });
+    expect(foundIndex).to.deep.equal(1);
+  });
+
+  it("FindIndex returns undefined if nothing is found", () => {
+    const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ArrayNode =
+      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+    const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
+    const foundIndex = myArray.find((element: RealTimeElement<any>) => {
+      return element.value() === "R";
+    });
+    expect(foundIndex).to.deep.equal(undefined);
   });
 });

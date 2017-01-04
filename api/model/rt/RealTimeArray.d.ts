@@ -27,15 +27,15 @@ export declare class RealTimeArray extends RealTimeElement<any[]>
 
   public length(): number;
 
-  public some(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
+  public some(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean;
 
-  public every(callback: (element: RealTimeElement<any>, index: number) => boolean): boolean;
+  public every(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean;
 
-  public find(callback: (element: RealTimeElement<any>, index: number) => boolean): RealTimeElement<any>
+  public find(callback: (element: RealTimeElement<any>, index?: number) => boolean): RealTimeElement<any>
 
-  public findIndex(callback: (element: RealTimeElement<any>, index: number) => boolean): number;
+  public findIndex(callback: (element: RealTimeElement<any>, index?: number) => boolean): number;
 
-  public forEach(callback: (value: RealTimeElement<any>, index: number) => void): void;
+  public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void;
 
   public elementAt(pathArgs: any): RealTimeElement<any>;
 }

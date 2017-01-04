@@ -98,6 +98,36 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
     return this._delegate.length();
   }
 
+  public some(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean {
+    return this._delegate.some((modelNode, index) => {
+      return callback(this._wrapperFactory.wrap(modelNode), index);
+    });
+  }
+
+  public every(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean {
+    return this._delegate.every((modelNode, index) => {
+      return callback(this._wrapperFactory.wrap(modelNode), index);
+    });
+  }
+
+  public find(callback: (element: RealTimeElement<any>, index?: number) => boolean): RealTimeElement<any> {
+    const node = this._delegate.find((modelNode, index) => {
+      return callback(this._wrapperFactory.wrap(modelNode), index);
+    });
+
+    if (node === undefined) {
+      return undefined;
+    } else {
+      return this._wrapperFactory.wrap(node);
+    }
+  }
+
+  public findIndex(callback: (element: RealTimeElement<any>, index?: number) => boolean): number {
+    return this._delegate.findIndex((modelNode, index) => {
+      return callback(this._wrapperFactory.wrap(modelNode), index);
+    });
+  }
+
   public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
