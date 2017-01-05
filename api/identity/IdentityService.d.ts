@@ -1,16 +1,25 @@
 import {Session} from "../Session";
-import DomainUser from "./DomainUser";
+import {DomainUser} from "./DomainUser";
 import {UserQuery} from "./UserQuery";
 
-export declare var UserField: any;
+export interface UserField {
+  USERNAME: string;
+  EMAIL: string;
+  FIRST_NAME: string;
+  LAST_NAME: string;
+  DISPLAY_NAME: string;
+}
+
+export declare const UserFields: UserField;
+
 export declare class IdentityService {
-  session(): Session;
+  public session(): Session;
 
-  user(username: string): Promise<DomainUser>;
-  userByEmail(email: string): Promise<DomainUser>;
+  public user(username: string): Promise<DomainUser>;
+  public userByEmail(email: string): Promise<DomainUser>;
 
-  users(values: string[]): Promise<DomainUser[]>;
-  usersByEmail(values: string[]): Promise<DomainUser[]>;
+  public users(values: string[]): Promise<DomainUser[]>;
+  public usersByEmail(values: string[]): Promise<DomainUser[]>;
 
-  search(query: UserQuery): Promise<DomainUser[]>;
+  public search(query: UserQuery): Promise<DomainUser[]>;
 }

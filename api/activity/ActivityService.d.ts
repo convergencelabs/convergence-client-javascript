@@ -1,15 +1,16 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {Session} from "../Session";
 import {Activity} from "./Activity";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
-export declare class ActivityService extends ConvergenceEventEmitter {
-  session(): Session;
+export declare class ActivityService extends ConvergenceEventEmitter<ConvergenceEvent> {
+  public session(): Session;
 
-  join(id: string, options?: ActivityJoinOptions): Promise<Activity>;
+  public join(id: string, options?: ActivityJoinOptions): Promise<Activity>;
 
-  joined(): Map<string, Activity>;
+  public joined(): Map<string, Activity>;
 
-  isJoined(id: string): boolean;
+  public isJoined(id: string): boolean;
 }
 
 export interface ActivityJoinOptions {

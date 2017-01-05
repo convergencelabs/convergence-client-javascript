@@ -2,6 +2,12 @@ import {Session} from "../../Session";
 import {ObservableObject} from "./ObservableObject";
 import {ObservableElement} from "./ObservableElement";
 
+export interface ObservableModelEvents {
+  CLOSED: string;
+  DELETED: string;
+  VERSION_CHANGED: string;
+}
+
 export interface ObservableModel {
 
   session(): Session;

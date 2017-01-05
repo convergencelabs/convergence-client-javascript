@@ -3,12 +3,20 @@ import {Observable} from "rxjs/Rx";
 import {ChatRoom} from "./ChatRoom";
 import {ChatEvent} from "./events";
 
+export interface ChatServiceEvents {
+  MESSAGE: string;
+  USER_JOINED: string;
+  USER_LEFT: string;
+  JOINED: string;
+  LEFT: string;
+}
+
 export declare class ChatService {
-  static Events: any;
+  public static readonly Events: ChatServiceEvents;
 
-  session(): Session;
+  public session(): Session;
 
-  joinRoom(id: string): Promise<ChatRoom>;
+  public joinRoom(id: string): Promise<ChatRoom>;
 
-  events(): Observable<ChatEvent>;
+  public events(): Observable<ChatEvent>;
 }

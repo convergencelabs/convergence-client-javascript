@@ -11,6 +11,7 @@ export interface ChatRoomEvents {
 }
 
 export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
+
   public static readonly Events: ChatRoomEvents;
 
   public id(): string;

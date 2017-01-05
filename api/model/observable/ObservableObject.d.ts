@@ -1,5 +1,10 @@
-import {ObservableElement} from "./ObservableElement";
+import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
+
+export interface ObservableObjectEvents extends ObservableElementEvents {
+  SET: string;
+  REMOVE: string;
+}
 
 export interface ObservableObject extends ObservableContainerElement<{[key: string]: any}> {
 

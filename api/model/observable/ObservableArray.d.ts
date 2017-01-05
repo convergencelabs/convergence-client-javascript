@@ -1,5 +1,12 @@
-import {ObservableElement} from "./ObservableElement";
+import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
+
+export interface ObservableArrayEvents extends ObservableElementEvents {
+  INSERT: string;
+  REMOVE: string;
+  SET: string;
+  REORDER: string;
+}
 
 export interface ObservableArray extends ObservableContainerElement<any[]> {
   get(index: number): ObservableElement<any>;

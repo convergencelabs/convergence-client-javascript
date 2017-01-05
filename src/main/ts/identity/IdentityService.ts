@@ -7,7 +7,7 @@ import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
 import {UserQuery} from "./UserQuery";
 
-export interface UserFields {
+export interface UserField {
   USERNAME: string;
   EMAIL: string;
   FIRST_NAME: string;
@@ -15,24 +15,25 @@ export interface UserFields {
   DISPLAY_NAME: string;
 }
 
-export const UserField: UserFields = {
+export const UserFields: UserField = {
   USERNAME: "username",
   EMAIL: "email",
   FIRST_NAME: "firstName",
   LAST_NAME: "lastName",
   DISPLAY_NAME: "displayName"
 };
+Object.freeze(UserFields);
 
 const validLookUpFields: string[] = [
-  UserField.USERNAME, UserField.EMAIL
+  UserFields.USERNAME, UserFields.EMAIL
 ];
 
 const validSearchFields: string[] = [
-  UserField.USERNAME,
-  UserField.EMAIL,
-  UserField.FIRST_NAME,
-  UserField.LAST_NAME,
-  UserField.DISPLAY_NAME];
+  UserFields.USERNAME,
+  UserFields.EMAIL,
+  UserFields.FIRST_NAME,
+  UserFields.LAST_NAME,
+  UserFields.DISPLAY_NAME];
 
 export class IdentityService {
 
@@ -71,7 +72,7 @@ export class IdentityService {
 
   public users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
     const unique: string[] = Array.from(new Set(usernames));
-    return this._users(unique, UserField.USERNAME).then(users => {
+    return this._users(unique, UserFields.USERNAME).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
         mapped[user.username()] = user;
@@ -82,7 +83,7 @@ export class IdentityService {
 
   public usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
     const unique: string[] = Array.from(new Set(emails));
-    return this._users(unique, UserField.EMAIL).then(users => {
+    return this._users(unique, UserFields.EMAIL).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
         mapped[user.email()] = user;
@@ -122,7 +123,7 @@ export class IdentityService {
     }
   }
 
-  private _users(values: string | string[], field: string = UserField.USERNAME): Promise<DomainUser[]> {
+  private _users(values: string | string[], field: string = UserFields.USERNAME): Promise<DomainUser[]> {
     // TODO It is only valid to look up by email / username.
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));

@@ -6,7 +6,7 @@ import {IReceiveRequestRecord} from "../../mock-server/records";
 import {DomainUser} from "../../../main/ts/identity/DomainUser";
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import {UserField} from "../../../main/ts/identity/IdentityService";
+import {UserFields} from "../../../main/ts/identity/IdentityService";
 import {Convergence} from "../../../main/ts/Convergence";
 
 const expect: ExpectStatic = chai.expect;
@@ -150,7 +150,7 @@ describe("IdentityService.search()", () => {
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({
         term: "keyword",
-        fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
+        fields: [UserFields.FIRST_NAME, UserFields.LAST_NAME]
       });
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(2);
@@ -185,7 +185,7 @@ describe("IdentityService.search()", () => {
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.identity().search({
         term: "keyword",
-        fields: [UserField.FIRST_NAME, UserField.LAST_NAME]
+        fields: [UserFields.FIRST_NAME, UserFields.LAST_NAME]
       });
     }).then((users: DomainUser[]) => {
       expect(users.length).to.equal(0);
