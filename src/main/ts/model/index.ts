@@ -3,7 +3,6 @@ export * from "./ModelElementType";
 export * from "./modelEvents";
 export * from "./Path";
 
-export * from "./observable/index";
 export * from "./historical/index";
 export * from "./rt/index";
 export * from "./query/index";

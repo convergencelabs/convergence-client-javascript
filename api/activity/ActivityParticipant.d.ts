@@ -1,7 +1,7 @@
 export declare class ActivityParticipant {
-  username(): string;
+  public username(): string;
 
-  sessionId(): string;
+  public sessionId(): string;
 
-  state(): Map<string, any>;
+  public state(): Map<string, any>;
 }

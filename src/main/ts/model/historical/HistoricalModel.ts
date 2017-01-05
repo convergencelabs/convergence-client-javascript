@@ -14,7 +14,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
-import {ObservableModel} from "../observable/ObservableModel";
+import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
 
 interface OperationRequest {
   forward: boolean;
@@ -22,7 +22,23 @@ interface OperationRequest {
   operations: ModelOperation[];
 }
 
+export interface HistoricalModelEvents extends ObservableModelEvents {
+  TARGET_CHANGED: string;
+  TRANSITION_START: string;
+  TRANSITION_END: string;
+}
+
+const HistoricalModelEventConstants = Object.assign({
+  TARGET_CHANGED: "target_changed",
+  TRANSITION_START: "transition_start",
+  TRANSITION_END: "transition_end"
+}, ObservableModelEventConstants);
+Object.freeze(HistoricalModelEventConstants);
+
 export class HistoricalModel implements ObservableModel {
+
+  public static readonly Events: HistoricalModelEvents = HistoricalModelEventConstants;
+
   private _session: Session;
   private _connection: ConvergenceConnection;
 

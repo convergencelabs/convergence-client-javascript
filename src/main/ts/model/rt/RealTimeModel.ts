@@ -51,34 +51,27 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {ObservableModel} from "../observable/ObservableModel";
+import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
 
-export interface RealTimeModelEvents {
-  CLOSED: string;
-  DELETED: string;
+export interface RealTimeModelEvents extends ObservableModelEvents {
   MODIFIED: string;
   COMMITTED: string;
-  VERSION_CHANGED: string;
   COLLABORATOR_OPENED: string;
   COLLABORATOR_CLOSED: string;
   REFERENCE: string;
 }
 
-const Events: RealTimeModelEvents = {
-  CLOSED: "closed",
-  DELETED: "deleted",
+const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
   MODIFIED: "modified",
   COMMITTED: "committed",
-  VERSION_CHANGED: "version_changed",
   COLLABORATOR_OPENED: "collaborator_opened",
   COLLABORATOR_CLOSED: "collaborator_closed",
-  REFERENCE: "reference"
-};
-Object.freeze(Events);
+  REFERENCE: "reference"},
+  ObservableModelEventConstants);
 
 export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
 
-  public static readonly Events: RealTimeModelEvents = Events;
+  public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
 
   private _resourceId: string;
 
@@ -683,7 +676,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     }
   }
 }
-
 Object.freeze(RealTimeModel.Events);
 
 export interface ModelEventCallbacks {

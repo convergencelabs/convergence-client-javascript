@@ -23,7 +23,7 @@ export class DomainUser {
     this._displayName = displayName;
     this._email = email;
     this._anonymous = userType === "anonymous";
-    this._admin = userType === "anonymous";
+    this._admin = userType === "admin";
 
     Object.freeze(this);
   }

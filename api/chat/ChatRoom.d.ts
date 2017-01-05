@@ -2,18 +2,28 @@ import {ChatEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatMember} from "./ChatMember";
 
+export interface ChatRoomEvents {
+  MESSAGE: string;
+  USER_JOINED: string;
+  USER_LEFT: string;
+  JOINED: string;
+  LEFT: string;
+}
+
 export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
-  id(): string;
+  public static readonly Events: ChatRoomEvents;
 
-  isJoined(): boolean;
+  public id(): string;
 
-  leave(): void;
+  public isJoined(): boolean;
 
-  send(message: string): void;
+  public leave(): void;
 
-  members(): ChatMember[];
+  public send(message: string): void;
 
-  messageCount(): number;
+  public members(): ChatMember[];
 
-  lastMessageTime(): number;
+  public messageCount(): number;
+
+  public lastMessageTime(): number;
 }

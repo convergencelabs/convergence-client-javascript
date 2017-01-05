@@ -2,10 +2,19 @@ import { HistoricalElement } from "./HistoricalElement";
 import { ObjectNode } from "../internal/ObjectNode";
 import { HistoricalWrapperFactory } from "./HistoricalWrapperFactory";
 import { HistoricalContainerElement } from "./HistoricalContainerElement";
-import {ObservableObject} from "../observable/ObservableObject";
+import {
+  ObservableObject,
+  ObservableObjectEvents,
+  ObservableObjectEventConstants
+} from "../observable/ObservableObject";
+
+export interface HistoricalObjectEvents extends ObservableObjectEvents {
+}
 
 export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
                               implements HistoricalContainerElement<{[key: string]: any}>, ObservableObject {
+
+  public static readonly Events: HistoricalObjectEvents = ObservableObjectEventConstants;
 
   constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
     super(_delegate, _wrapperFactory);

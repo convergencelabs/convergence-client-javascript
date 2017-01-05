@@ -1,4 +1,5 @@
 export declare class ChatMember {
-    sessionId();
-    username();
+  public sessionId(): string;
+
+  public username(): string;
 }

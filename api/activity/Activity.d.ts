@@ -4,34 +4,43 @@ import {Observable} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 
+export declare interface ActivityEvents {
+  SESSION_JOINED: string;
+  SESSION_LEFT: string;
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+}
+
 export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
-  static Events: any;
 
-  session(): Session;
+  public static readonly Events: ActivityEvents;
 
-  id(): string;
+  public session(): Session;
 
-  leave(): void;
-  isJoined(): boolean;
+  public id(): string;
+
+  public leave(): void;
+  public isJoined(): boolean;
 
 
-  setState(state: {[key: string]: any}): void;
-  setState(key: string, value: any): void;
+  public setState(state: {[key: string]: any}): void;
+  public setState(key: string, value: any): void;
 
-  removeState(key: string): void;
-  removeState(keys: string[]): void;
+  public removeState(key: string): void;
+  public removeState(keys: string[]): void;
 
-  clearState(): void;
+  public clearState(): void;
 
   // TODO
-  //replaceState(state: Map<string, any>);
+  // replaceState(state: Map<string, any>);
 
-  state(key: string): any;
-  state(): {[key: string]: any};
+  public state(key: string): any;
+  public state(): {[key: string]: any};
 
 
-  participant(sessionId: string): ActivityParticipant;
-  participants(): ActivityParticipant[];
+  public participant(sessionId: string): ActivityParticipant;
+  public participants(): ActivityParticipant[];
 
-  participantsAsObservable(): Observable<ActivityParticipant[]>;
+  public participantsAsObservable(): Observable<ActivityParticipant[]>;
 }

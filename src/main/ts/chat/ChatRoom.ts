@@ -7,7 +7,23 @@ import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatMember} from "./ChatMember";
 
+export interface ChatRoomEvents {
+  MESSAGE: string;
+  USER_JOINED: string;
+  USER_LEFT: string;
+  JOINED: string;
+  LEFT: string;
+}
+
 export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
+
+  public static readonly Events: ChatRoomEvents = {
+    MESSAGE: "message",
+    USER_JOINED: "user_joined",
+    USER_LEFT: "user_left",
+    JOINED: "joined",
+    LEFT: "left",
+  };
 
   private _id: string;
   private _members: ChatMember[];
@@ -79,3 +95,4 @@ export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
     });
   }
 }
+Object.freeze(ChatRoom.Events);

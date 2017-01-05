@@ -41,12 +41,12 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     });
 
     let eventStream: Observable<any> = messageObs.pluck("message").concatMap(message => {
-      let msg: any = message;
+      const msg: any = message;
       switch (msg.type) {
         case MessageType.ACTIVITY_SESSION_JOINED:
-          let joinedMsg: ActivitySessionJoined = <ActivitySessionJoined> message;
-          let username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
-          let participant: ActivityParticipant = new ActivityParticipant(
+          const joinedMsg: ActivitySessionJoined = <ActivitySessionJoined> message;
+          const username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
+          const participant: ActivityParticipant = new ActivityParticipant(
             joinedMsg.sessionId,
             username,
             joinedMsg.state,
@@ -61,7 +61,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             local: false
           }];
         case MessageType.ACTIVITY_SESSION_LEFT:
-          let leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
+          const leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
           return [<SessionLeftEvent> {
             name: Activity.Events.SESSION_LEFT,
             activityId: leftMsg.activityId,
@@ -70,7 +70,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             local: false
           }];
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
-          let stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
+          const stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
           return Object.keys(stateSetMsg.state).map(key => {
             return <StateSetEvent> {
               name: Activity.Events.STATE_SET,
@@ -83,7 +83,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             };
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
-          let stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
+          const stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
           return [<StateClearedEvent> {
             name: Activity.Events.STATE_CLEARED,
             activityId: stateClearedMsg.activityId,
@@ -92,7 +92,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             local: false
           }];
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
-          let stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
+          const stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
           return stateRemovedMsg.keys.map(key => {
             return <StateRemovedEvent> {
               name: Activity.Events.STATE_REMOVED,

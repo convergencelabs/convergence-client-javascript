@@ -19,18 +19,15 @@ import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
 import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableObject} from "../observable/ObservableObject";
+import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants} from "../observable/ObservableObject";
+
+export interface RealTimeObjectEvents extends ObservableObjectEvents {
+}
 
 export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
-implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {
+  implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {
 
-  public static Events: any = {
-    SET: "set",
-    REMOVE: "remove",
-    VALUE: "value",
-    DETACHED: RealTimeElement.Events.DETACHED,
-    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
-  };
+  public static readonly Events: RealTimeObjectEvents = ObservableObjectEventConstants;
 
   /**
    * Constructs a new RealTimeObject.

@@ -9,16 +9,14 @@ import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableNumber} from "../observable/ObservableNumber";
+import {ObservableNumber, ObservableNumberEvents, ObservableNumberEventConstants} from "../observable/ObservableNumber";
+
+export interface RealTimeNumberEvents extends ObservableNumberEvents {
+}
 
 export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 
-  public static Events: any = {
-    DELTA: "delta",
-    VALUE: "value",
-    DETACHED: RealTimeElement.Events.DETACHED,
-    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
-  };
+  public static readonly Events: RealTimeNumberEvents = ObservableNumberEventConstants;
 
   /**
    * Constructs a new RealTimeNumber.

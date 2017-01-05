@@ -12,8 +12,6 @@ import {Convergence} from "../../main/ts/Convergence";
 describe("Reference Transformation E2E", () => {
 
   it("Successful open of existing model", (done: MochaDone) => {
-    debugFlags.socket.messages = true;
-
     const resourceId = "1";
     const remoteSessionId = "u1:02";
 
@@ -89,7 +87,7 @@ describe("Reference Transformation E2E", () => {
       rts.on(RealTimeString.Events.REFERENCE, (e: RemoteReferenceCreatedEvent) => {
         console.log(e.reference.username());
         refPublishAction.acknowledgeReceipt();
-        e.reference.on("set", (evt) => {
+        e.reference.on("set", () => {
           referenceSetAction.acknowledgeReceipt();
           console.log(e.src.value());
           mockServer.doneManager().testSuccess();

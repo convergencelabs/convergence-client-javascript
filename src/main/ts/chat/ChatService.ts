@@ -15,9 +15,17 @@ import {ChatMember} from "./ChatMember";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatEvent} from "./events";
 
+export interface ChatServiceEvents {
+  MESSAGE: string;
+  USER_JOINED: string;
+  USER_LEFT: string;
+  JOINED: string;
+  LEFT: string;
+}
+
 export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
-  public static Events: any = {
+  public static readonly Events: ChatServiceEvents = {
     MESSAGE: "message",
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
@@ -41,10 +49,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     });
 
     let eventStream: Observable<ChatEvent> = messageObs.pluck("message").map(message => {
-      let msg: any = message;
+      const msg: any = message;
       switch (msg.type) {
         case MessageType.USER_JOINED_ROOM:
-          let joinedMsg: UserJoinedRoomMessage = <UserJoinedRoomMessage> message;
+          const joinedMsg: UserJoinedRoomMessage = <UserJoinedRoomMessage> message;
           return <UserJoinedEvent> {
             name: ChatService.Events.USER_JOINED,
             roomId: joinedMsg.roomId,
@@ -53,7 +61,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
             timestamp: joinedMsg.timestamp
           };
         case MessageType.USER_LEFT_ROOM:
-          let leftMsg: UserLeftRoomMessage = <UserLeftRoomMessage> message;
+          const leftMsg: UserLeftRoomMessage = <UserLeftRoomMessage> message;
           return <UserLeftEvent> {
             name: ChatService.Events.USER_LEFT,
             roomId: leftMsg.roomId,
@@ -62,7 +70,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
             timestamp: leftMsg.timestamp
           };
         case MessageType.CHAT_MESSAGE_PUBLISHED:
-          let chatMsg: UserChatMessage = <UserChatMessage> message;
+          const chatMsg: UserChatMessage = <UserChatMessage> message;
           return <ChatMessageEvent> {
             name: ChatService.Events.MESSAGE,
             roomId: chatMsg.roomId,
@@ -113,3 +121,4 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     return () => this._joinedMap.delete(id);
   }
 }
+Object.freeze(ChatService.Events);

@@ -10,9 +10,20 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableModel} from "../observable/ObservableModel";
 import {ModelEvent} from "../modelEvents";
 
+export interface RealTimeModelEvents {
+  CLOSED: string;
+  DELETED: string;
+  MODIFIED: string;
+  COMMITTED: string;
+  VERSION_CHANGED: string;
+  COLLABORATOR_OPENED: string;
+  COLLABORATOR_CLOSED: string;
+  REFERENCE: string;
+}
+
 export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
 
-  public static Events: any;
+  public static readonly Events: RealTimeModelEvents;
 
   public session(): Session;
 
@@ -79,7 +90,7 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
 
   public reference(sessionId: string, key: string): ModelReference<any>;
 
-  public references(filter?: ReferenceFilter): ModelReference<any>[];
+  public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
 }
 
 export interface CollaboratorOpenedEvent extends ModelEvent {

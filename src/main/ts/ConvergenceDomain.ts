@@ -13,9 +13,17 @@ import {UserPresence} from "./presence/UserPresence";
 import {objectToMap} from "./util/ObjectUtils";
 import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 
+export interface ConvergenceDomainEvents {
+  CONNECTED: string;
+  INTERRUPTED: string;
+  RECONNECTED: string;
+  DISCONNECTED: string;
+  ERROR: string;
+}
+
 export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  public static Events: any = {
+  public static readonly Events: ConvergenceDomainEvents = {
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
@@ -163,6 +171,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent>
     this._chatService = new ChatService(this._connection);
   }
 }
+Object.freeze(ConvergenceDomain.Events);
 
 interface ConvergenceErrorEvent extends ConvergenceEvent {
   error: string;

@@ -17,18 +17,14 @@ import {StringNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableString} from "../observable/ObservableString";
+import {ObservableString, ObservableStringEvents, ObservableStringEventConstants} from "../observable/ObservableString";
+
+export interface RealTimeStringEvents extends ObservableStringEvents {
+}
 
 export class RealTimeString extends RealTimeElement<string> implements ObservableString {
 
-  public static Events: any = {
-    INSERT: "insert",
-    REMOVE: "remove",
-    VALUE: "value",
-    DETACHED: RealTimeElement.Events.DETACHED,
-    REFERENCE: RealTimeElement.Events.REFERENCE,
-    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
-  };
+  public static readonly Events: RealTimeStringEvents = ObservableStringEventConstants;
 
   /**
    * Constructs a new RealTimeString.
@@ -133,3 +129,4 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     }
   }
 }
+Object.freeze(RealTimeString.Events);

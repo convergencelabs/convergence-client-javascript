@@ -243,11 +243,11 @@ export class ConvergenceConnection extends EventEmitter {
     this._connectionAttempts++;
 
     if (reconnect) {
-      if (debugFlags.serverConnection) {
+      if (debugFlags.CONNECTION) {
         console.log("Attempting reconnection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
       }
     } else {
-      if (debugFlags.serverConnection) {
+      if (debugFlags.CONNECTION) {
         console.log("Attempting connection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
       }
     }
@@ -278,7 +278,7 @@ export class ConvergenceConnection extends EventEmitter {
     });
 
     this._protocolConnection.connect().then(() => {
-      if (debugFlags.connection) {
+      if (debugFlags.CONNECTION) {
         console.log("Connection succeeded, handshaking.");
       }
 

@@ -16,19 +16,14 @@ import {ArrayNodeReorderEvent} from "../internal/events";
 import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableArray} from "../observable/ObservableArray";
+import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
+
+export interface RealTimeArrayEvents extends ObservableArrayEvents {
+}
 
 export class RealTimeArray extends RealTimeElement<any[]> implements ObservableArray, RealTimeContainerElement<any[]> {
 
-  public static Events: any = {
-    INSERT: "insert",
-    REMOVE: "remove",
-    SET: "set",
-    REORDER: "reorder",
-    VALUE: "value",
-    DETACHED: RealTimeElement.Events.DETACHED,
-    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
-  };
+  public static readonly Events: RealTimeArrayEvents = ObservableArrayEventConstants;
 
   /**
    * Constructs a new RealTimeArray.

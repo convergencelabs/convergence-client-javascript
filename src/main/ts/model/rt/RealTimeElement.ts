@@ -13,17 +13,18 @@ import {ModelEventConverter} from "../ModelEventConverter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
-import {ObservableElement} from "../observable/ObservableElement";
+import {
+  ObservableElement,
+  ObservableElementEvents,
+  ObservableElementEventConstants} from "../observable/ObservableElement";
+
+export interface RealTimeElementEvents extends ObservableElementEvents {}
 
 export abstract class RealTimeElement<T>
   extends ConvergenceEventEmitter<ConvergenceEvent>
   implements ObservableElement<T> {
 
-  public static Events: any = {
-    DETACHED: "detached",
-    REFERENCE: "reference",
-    MODEL_CHANGED: "model_changed"
-  };
+  public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
 
   protected _delegate: ModelNode<T>;
   protected _callbacks: ModelEventCallbacks;
@@ -126,3 +127,4 @@ export abstract class RealTimeElement<T>
     }
   }
 }
+Object.freeze(RealTimeElement.Events);

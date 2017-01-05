@@ -4,13 +4,14 @@ import {ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableNull} from "../observable/ObservableNull";
+import {ObservableNull, ObservableNullEvents, ObservableNullEventConstants} from "../observable/ObservableNull";
+
+export interface RealTimeNullEvents extends ObservableNullEvents {
+}
 
 export class RealTimeNull extends RealTimeElement<void> implements ObservableNull {
 
-  public static Events: any = {
-    DETACHED: RealTimeElement.Events.DETACHED
-  };
+  public static readonly Events: RealTimeNullEvents = ObservableNullEventConstants;
 
   /**
    * Constructs a new RealTimeNull.

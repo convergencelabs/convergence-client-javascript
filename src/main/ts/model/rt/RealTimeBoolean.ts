@@ -7,15 +7,16 @@ import {BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
-import {ObservableBoolean} from "../observable/ObservableBoolean";
+import {
+  ObservableBoolean,
+  ObservableBooleanEvents,
+  ObservableBooleanEventConstants} from "../observable/ObservableBoolean";
+
+export interface RealTimeBooleanEvents extends ObservableBooleanEvents {}
 
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
-  public static Events: any = {
-    VALUE: "value",
-    DETACHED: RealTimeElement.Events.DETACHED,
-    MODEL_CHANGED: RealTimeElement.Events.MODEL_CHANGED
-  };
+  public static readonly Events: RealTimeBooleanEvents = ObservableBooleanEventConstants;
 
   /**
    * Constructs a new RealTimeBoolean.

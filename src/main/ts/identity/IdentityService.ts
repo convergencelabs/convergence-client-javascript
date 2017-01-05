@@ -7,8 +7,15 @@ import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
 import {UserListResponse} from "../connection/protocol/user/userLookUps";
 import {UserQuery} from "./UserQuery";
 
-// fixme should the props be camelcase
-export const UserField: any = {
+export interface UserFields {
+  USERNAME: string;
+  EMAIL: string;
+  FIRST_NAME: string;
+  LAST_NAME: string;
+  DISPLAY_NAME: string;
+}
+
+export const UserField: UserFields = {
   USERNAME: "username",
   EMAIL: "email",
   FIRST_NAME: "firstName",

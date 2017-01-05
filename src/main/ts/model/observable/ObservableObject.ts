@@ -1,5 +1,17 @@
-import {ObservableElement} from "./ObservableElement";
+import {ObservableElement, ObservableElementEvents, ObservableElementEventConstants} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
+
+export interface ObservableObjectEvents extends ObservableElementEvents {
+  SET: string;
+  REMOVE: string;
+}
+
+export const ObservableObjectEventConstants: ObservableObjectEvents = Object.assign({
+    SET: "set",
+    REMOVE: "remove"
+  },
+  ObservableElementEventConstants);
+Object.freeze(ObservableObjectEventConstants);
 
 export interface ObservableObject extends ObservableContainerElement<{[key: string]: any}> {
 

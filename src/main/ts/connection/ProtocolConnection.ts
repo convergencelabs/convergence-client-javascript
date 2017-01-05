@@ -133,10 +133,10 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   public sendMessage(envelope: MessageEnvelope): void {
-    if ((debugFlags.protocol.messages &&
+    if ((debugFlags.PROTOCOL_MESSAGES &&
       envelope.body.type !== MessageType.PING &&
       envelope.body.type !== MessageType.PONG) ||
-      debugFlags.protocol.pings) {
+      debugFlags.PROTOCOL_PINGS) {
       console.log("S: " + JSON.stringify(envelope));
     }
     const message: any = MessageSerializer.serialize(envelope);
@@ -152,10 +152,10 @@ export class ProtocolConnection extends EventEmitter {
 
     const type: MessageType = envelope.body.type;
 
-    if ((debugFlags.protocol.messages &&
+    if ((debugFlags.PROTOCOL_MESSAGES &&
       type !== MessageType.PING &&
       type !== MessageType.PONG) ||
-      debugFlags.protocol.pings) {
+      debugFlags.PROTOCOL_PINGS) {
       console.log("R: " + JSON.stringify(envelope));
     }
 

@@ -3,12 +3,20 @@ import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {ObservableElement} from "../observable/ObservableElement";
 import {ModelEventConverter} from "../ModelEventConverter";
+import {
+  ObservableElement,
+  ObservableElementEvents,
+  ObservableElementEventConstants
+} from "../observable/ObservableElement";
+
+export interface HistoricalElementEvents extends ObservableElementEvents {
+}
 
 export abstract class HistoricalElement<T>
-  extends ConvergenceEventEmitter<ConvergenceEvent>
-  implements ObservableElement<T> {
+extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+
+  public static readonly Events: HistoricalElementEvents = ObservableElementEventConstants;
 
   constructor(protected _delegate: ModelNode<T>, protected _wrapperFactory: HistoricalWrapperFactory) {
     super();
@@ -28,7 +36,7 @@ export abstract class HistoricalElement<T>
   }
 
   public path(): Path {
-    return  this._delegate.path();
+    return this._delegate.path();
   }
 
   public isDetached(): boolean {

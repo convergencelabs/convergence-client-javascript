@@ -12,9 +12,17 @@ import { ActivityRemoveState } from "../connection/protocol/activity/activitySta
 import { StateRemovedEvent } from "./events";
 import { mapToObject } from "../util/ObjectUtils";
 
+export interface ActivityEvents {
+  SESSION_JOINED: string;
+  SESSION_LEFT: string;
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+}
+
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
-  public static Events: any = {
+  public static readonly Events: ActivityEvents = {
     SESSION_JOINED: "session_joined",
     SESSION_LEFT: "session_left",
     STATE_SET: "state_set",
@@ -210,3 +218,4 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
 }
+Object.freeze(Activity.Events);

@@ -1,10 +1,7 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {ConvergenceOptions} from "./ConvergenceOptions";
-import {debugFlags as flags} from "./Debug";
 
 export class Convergence {
-
-  public static debugFlags: any = flags;
 
   public static connect(url: string, username: string, password: string,
                         options?: ConvergenceOptions): Promise<ConvergenceDomain> {
@@ -35,8 +32,6 @@ export class Convergence {
     });
   }
 }
-
-export * from "./Debug";
 
 export function connect(url: string, username: string, password: string,
                         options?: ConvergenceOptions): Promise<ConvergenceDomain> {

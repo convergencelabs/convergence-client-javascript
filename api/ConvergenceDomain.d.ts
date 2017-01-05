@@ -7,6 +7,13 @@ import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
 
+export declare interface ConvergenceDomainEvents {
+  CONNECTED: string;
+  INTERRUPTED: string;
+  RECONNECTED: string;
+  DISCONNECTED: string;
+  ERROR: string;
+}
 
 export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
 
