@@ -1,9 +1,10 @@
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
 
-export class UserPresenceSubscription extends ConvergenceEventEmitter<any> implements UserPresence {
+export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
 
   private _manager: UserPresenceManager;
 
