@@ -1,6 +1,6 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs/Observable";
-import {ChatEvent} from "./events";
+import {ChatEvent, ChatMessageEvent, UserJoinedEvent, UserLeftEvent} from "./events";
 import {MessageType} from "../connection/protocol/MessageType";
 import {LeaveRoomMessage} from "../connection/protocol/chat/leaveRoom";
 import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
@@ -11,18 +11,14 @@ export interface ChatRoomEvents {
   MESSAGE: string;
   USER_JOINED: string;
   USER_LEFT: string;
-  JOINED: string;
-  LEFT: string;
 }
 
 export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
 
   public static readonly Events: ChatRoomEvents = {
-    MESSAGE: "message",
-    USER_JOINED: "user_joined",
-    USER_LEFT: "user_left",
-    JOINED: "joined",
-    LEFT: "left",
+    MESSAGE: ChatMessageEvent.NAME,
+    USER_JOINED: UserJoinedEvent.NAME,
+    USER_LEFT: UserLeftEvent.NAME
   };
 
   private _id: string;

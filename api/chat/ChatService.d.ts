@@ -7,8 +7,6 @@ export interface ChatServiceEvents {
   MESSAGE: string;
   USER_JOINED: string;
   USER_LEFT: string;
-  JOINED: string;
-  LEFT: string;
 }
 
 export declare class ChatService {

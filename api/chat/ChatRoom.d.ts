@@ -6,8 +6,6 @@ export interface ChatRoomEvents {
   MESSAGE: string;
   USER_JOINED: string;
   USER_LEFT: string;
-  JOINED: string;
-  LEFT: string;
 }
 
 export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {

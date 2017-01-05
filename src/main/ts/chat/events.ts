@@ -7,18 +7,39 @@ export interface ChatEvent extends ConvergenceEvent {
   timestamp: number;
 }
 
-export interface ChatMessageEvent extends ChatEvent {
-  message: string;
+export class ChatMessageEvent implements ChatEvent {
+  public static readonly NAME = "message";
+  public name: string = ChatMessageEvent.NAME;
+
+  constructor(public roomId: string,
+              public username: string,
+              public sessionId: string,
+              public timestamp: number,
+              public message: string) {
+    Object.freeze(this);
+  }
 }
 
-export interface UserJoinedEvent extends ChatEvent {
+export class UserJoinedEvent implements ChatEvent {
+  public static readonly NAME = "user_joined";
+  public name: string = UserJoinedEvent.NAME;
+
+  constructor(public roomId: string,
+              public username: string,
+              public sessionId: string,
+              public timestamp: number) {
+    Object.freeze(this);
+  }
 }
 
-export interface UserLeftEvent extends ChatEvent {
-}
+export class UserLeftEvent implements ChatEvent {
+  public static readonly NAME = "user_left";
+  public name: string = UserLeftEvent.NAME;
 
-export interface JoinedEvent extends ChatEvent {
-}
-
-export interface LeftEvent extends ChatEvent {
+  constructor(public roomId: string,
+              public username: string,
+              public sessionId: string,
+              public timestamp: number) {
+    Object.freeze(this);
+  }
 }

@@ -7,18 +7,27 @@ export interface ChatEvent extends ConvergenceEvent {
   timestamp: number;
 }
 
-export interface ChatMessageEvent extends ChatEvent {
+export declare class ChatMessageEvent implements ChatEvent {
+  name: string;
+  roomId: string;
+  username: string;
+  sessionId: string;
+  timestamp: number;
   message: string;
 }
 
-export interface UserJoinedEvent extends ChatEvent {
+export declare class  UserJoinedEvent implements ChatEvent {
+  name: string;
+  roomId: string;
+  username: string;
+  sessionId: string;
+  timestamp: number;
 }
 
-export interface UserLeftEvent extends ChatEvent {
-}
-
-export interface JoinedEvent extends ChatEvent {
-}
-
-export interface LeftEvent extends ChatEvent {
+export declare class  UserLeftEvent implements ChatEvent {
+  name: string;
+  roomId: string;
+  username: string;
+  sessionId: string;
+  timestamp: number;
 }

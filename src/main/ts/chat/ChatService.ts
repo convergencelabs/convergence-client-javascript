@@ -19,18 +19,14 @@ export interface ChatServiceEvents {
   MESSAGE: string;
   USER_JOINED: string;
   USER_LEFT: string;
-  JOINED: string;
-  LEFT: string;
 }
 
 export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public static readonly Events: ChatServiceEvents = {
-    MESSAGE: "message",
-    USER_JOINED: "user_joined",
-    USER_LEFT: "user_left",
-    JOINED: "joined",
-    LEFT: "left",
+    MESSAGE: ChatMessageEvent.NAME,
+    USER_JOINED: UserJoinedEvent.NAME,
+    USER_LEFT: UserLeftEvent.NAME
   };
 
   private _connection: ConvergenceConnection;
@@ -53,32 +49,29 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       switch (msg.type) {
         case MessageType.USER_JOINED_ROOM:
           const joinedMsg: UserJoinedRoomMessage = <UserJoinedRoomMessage> message;
-          return <UserJoinedEvent> {
-            name: ChatService.Events.USER_JOINED,
-            roomId: joinedMsg.roomId,
-            username: joinedMsg.username,
-            sessionId: joinedMsg.sessionId,
-            timestamp: joinedMsg.timestamp
-          };
+          return new UserJoinedEvent(
+            joinedMsg.roomId,
+            joinedMsg.username,
+            joinedMsg.sessionId,
+            joinedMsg.timestamp
+        );
         case MessageType.USER_LEFT_ROOM:
           const leftMsg: UserLeftRoomMessage = <UserLeftRoomMessage> message;
-          return <UserLeftEvent> {
-            name: ChatService.Events.USER_LEFT,
-            roomId: leftMsg.roomId,
-            username: leftMsg.username,
-            sessionId: leftMsg.sessionId,
-            timestamp: leftMsg.timestamp
-          };
+          return new UserLeftEvent(
+            leftMsg.roomId,
+            leftMsg.username,
+            leftMsg.sessionId,
+            leftMsg.timestamp
+        );
         case MessageType.CHAT_MESSAGE_PUBLISHED:
           const chatMsg: UserChatMessage = <UserChatMessage> message;
-          return <ChatMessageEvent> {
-            name: ChatService.Events.MESSAGE,
-            roomId: chatMsg.roomId,
-            username: chatMsg.username,
-            sessionId: chatMsg.sessionId,
-            timestamp: chatMsg.timestamp,
-            message: chatMsg.message
-          };
+          return new ChatMessageEvent(
+            chatMsg.roomId,
+            chatMsg.username,
+            chatMsg.sessionId,
+            chatMsg.timestamp,
+            chatMsg.message
+        );
         default:
         // This should be impossible
       }
