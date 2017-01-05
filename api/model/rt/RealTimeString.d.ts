@@ -24,5 +24,5 @@ export declare class RealTimeString extends RealTimeElement<string> implements O
 
   public reference(sessionId: string, key: string): ModelReference<any>;
 
-  public references(filter?: ReferenceFilter): ModelReference<any>[];
+  public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
 }

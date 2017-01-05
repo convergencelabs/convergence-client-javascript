@@ -1,2 +1,2 @@
 export declare type PathElement = string | number;
-export declare type Path = Array<PathElement>;
+export declare type Path = PathElement[];

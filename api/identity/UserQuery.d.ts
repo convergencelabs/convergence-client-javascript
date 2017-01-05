@@ -4,6 +4,6 @@ export declare interface UserQuery {
   term: string;
   fields: string | string[];
   offset?: number;
-  limit?: number
+  limit?: number;
   orderBy?: OrderBy;
 }

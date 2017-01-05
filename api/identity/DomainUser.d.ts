@@ -1,7 +1,7 @@
-export class DomainUser {
-  username: string;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  email: string;
+export declare class DomainUser {
+  public username: string;
+  public firstName: string;
+  public lastName: string;
+  public displayName: string;
+  public email: string;
 }

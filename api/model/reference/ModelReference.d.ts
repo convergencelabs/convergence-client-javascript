@@ -3,7 +3,7 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
 export declare var ReferenceType: any;
 
-export declare abstract class ModelReference<V> extends ConvergenceEventEmitter {
+export declare abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
   public static Events: any;
 
   public type(): string;

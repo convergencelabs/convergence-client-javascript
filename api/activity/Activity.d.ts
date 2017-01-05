@@ -23,7 +23,6 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public leave(): void;
   public isJoined(): boolean;
 
-
   public setState(state: {[key: string]: any}): void;
   public setState(key: string, value: any): void;
 
@@ -37,7 +36,6 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   public state(key: string): any;
   public state(): {[key: string]: any};
-
 
   public participant(sessionId: string): ActivityParticipant;
   public participants(): ActivityParticipant[];

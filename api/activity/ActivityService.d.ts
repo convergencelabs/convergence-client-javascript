@@ -16,4 +16,3 @@ export declare class ActivityService extends ConvergenceEventEmitter<Convergence
 export interface ActivityJoinOptions {
   state?: Map<string, any>;
 }
-

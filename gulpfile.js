@@ -94,7 +94,7 @@ gulp.task("dist-umd-bundle-min", ["dist-umd"], function () {
 });
 
 gulp.task("lint", function () {
-  return gulp.src("src/**/*.ts")
+  return gulp.src(["src/**/*.ts", "api/**/*.ts"])
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 });

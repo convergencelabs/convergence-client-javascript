@@ -31,5 +31,5 @@ export declare class RealTimeObject extends RealTimeElement<Map<string, any>>
 
   public reference(sessionId: string, key: string): ModelReference<any>;
 
-  public references(filter: ReferenceFilter): ModelReference<any>[];
+  public references(filter: ReferenceFilter): Array<ModelReference<any>>;
 }
