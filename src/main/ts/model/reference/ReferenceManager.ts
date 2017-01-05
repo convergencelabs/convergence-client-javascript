@@ -7,7 +7,6 @@ import {RemoteReferenceSet} from "../../connection/protocol/model/reference/Refe
 import {RemoteReferenceCleared} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RemoteReferenceUnpublished} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "./ModelReference";
-import {ReferenceType} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {Immutable} from "../../util/Immutable";
@@ -111,16 +110,16 @@ export class ReferenceManager {
     const username: string = event.username;
     let reference: ModelReference<any>;
     switch (event.referenceType) {
-      case ReferenceType.INDEX:
+      case ModelReference.Types.INDEX:
         reference = new IndexReference(this, event.key, this._source, username, event.sessionId, false);
         break;
-      case ReferenceType.RANGE:
+      case ModelReference.Types.RANGE:
         reference = new RangeReference(this, event.key, this._source, username, event.sessionId, false);
         break;
-      case ReferenceType.ELEMENT:
+      case ModelReference.Types.ELEMENT:
         reference = new ElementReference(this, event.key, this._source, username, event.sessionId, false);
         break;
-      case ReferenceType.PROPERTY:
+      case ModelReference.Types.PROPERTY:
         reference = new PropertyReference(this, event.key, this._source, username, event.sessionId, false);
         break;
       default:
@@ -152,7 +151,7 @@ export class ReferenceManager {
 
   private _setReferenceValues(reference: ModelReference<any> , values: any): void {
     // Translate vids to RealTimeElements
-    if (reference.type() === ReferenceType.ELEMENT) {
+    if (reference.type() === ModelReference.Types.ELEMENT) {
       const rtvs: Array<RealTimeElement<any>> = [];
       for (let id of values) {
         let value: RealTimeElement<any> = (<RealTimeModel> this._source)._getRegisteredValue(id);

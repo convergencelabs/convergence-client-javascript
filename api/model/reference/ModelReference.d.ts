@@ -1,16 +1,23 @@
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
-export declare var ReferenceType: any;
-
 export interface ModelReferenceEvents {
   SET: string;
   CLEARED: string;
   DISPOSED: string;
 }
 
+export interface ModelReferenceTypes {
+  INDEX: string;
+  RANGE: string;
+  PROPERTY: string;
+  ELEMENT: string;
+}
+
 export declare abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
   public static readonly Events: ModelReferenceEvents;
+
+  public static readonly Types: ModelReferenceEvents;
 
   public type(): string;
 

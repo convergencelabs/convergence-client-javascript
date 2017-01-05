@@ -1,6 +1,5 @@
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
-import {ReferenceType} from "./ModelReference";
 import {ReferenceManager} from "./ReferenceManager";
 
 export class PropertyReference extends ModelReference<string> {
@@ -11,7 +10,7 @@ export class PropertyReference extends ModelReference<string> {
               username: string,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ReferenceType.PROPERTY, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.PROPERTY, key, source, username, sessionId, local);
   }
 
   public _handlePropertyRemoved(property: string): void {

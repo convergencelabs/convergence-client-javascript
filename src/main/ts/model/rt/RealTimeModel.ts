@@ -10,7 +10,6 @@ import {ModelFqn} from "../ModelFqn";
 import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
-import {ReferenceType} from "../reference/ModelReference";
 import {ModelReferenceCallbacks} from "../reference/LocalModelReference";
 import {LocalModelReference} from "../reference/LocalModelReference";
 import {PublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -62,11 +61,12 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
 }
 
 const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
-  MODIFIED: "modified",
-  COMMITTED: "committed",
-  COLLABORATOR_OPENED: "collaborator_opened",
-  COLLABORATOR_CLOSED: "collaborator_closed",
-  REFERENCE: "reference"},
+    MODIFIED: "modified",
+    COMMITTED: "committed",
+    COLLABORATOR_OPENED: "collaborator_opened",
+    COLLABORATOR_CLOSED: "collaborator_closed",
+    REFERENCE: "reference"
+  },
   ObservableModelEventConstants);
 
 export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
@@ -137,7 +137,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
     const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
-    this._referenceManager = new ReferenceManager(this, [ReferenceType.ELEMENT], onRemoteReference);
+    this._referenceManager = new ReferenceManager(this, [ModelReference.Types.ELEMENT], onRemoteReference);
 
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this._committed = committed;
@@ -146,77 +146,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
       this._emitEvent(evt);
     });
 
-    // fixme these should have versions unless we move to GUIDs.
-    // also move this out of this constructor.
     const referenceCallbacks: ModelReferenceCallbacks = {
-      onShare: (reference: LocalModelReference<any, any>): void => {
-        const source: any = reference.reference().source();
-        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
-
-        const event: PublishReferenceEvent = {
-          type: MessageType.PUBLISH_REFERENCE,
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          id: vid,
-          referenceType: reference.reference().type(),
-          values: reference.values(),
-          version: this._concurrencyControl.contextVersion()
-        };
-        this._connection.send(event);
-
-      },
-      onUnshare: (reference: LocalModelReference<any, any>): void => {
-        const source: any = reference.reference().source();
-        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
-
-        const event: UnpublishReferenceEvent = {
-          type: MessageType.UNPUBLISH_REFERENCE,
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          id: vid
-        };
-        this._connection.send(event);
-      },
-      onSet: (reference: LocalModelReference<any, any>): void => {
-        const source: any = reference.reference().source();
-        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
-
-        let refData: ModelReferenceData = {
-          type: reference.reference().type(),
-          id: vid,
-          values: reference.reference().values()
-        };
-
-        // Only transform those that target a RealTimeElement
-        if (vid !== undefined) {
-          refData = this._concurrencyControl.processOutgoingSetReference(refData);
-        }
-
-        if (refData) {
-          const event: SetReferenceEvent = {
-            type: MessageType.SET_REFERENCE,
-            resourceId: this._resourceId,
-            key: reference.reference().key(),
-            id: refData.id,
-            referenceType: reference.reference().type(),
-            values: this._getMessageValues(refData),
-            version: this._concurrencyControl.contextVersion()
-          };
-          this._connection.send(event);
-        }
-      },
-      onClear: (reference: LocalModelReference<any, any>): void => {
-        const source: any = reference.reference().source();
-        const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
-
-        const event: ClearReferenceEvent = {
-          type: MessageType.CLEAR_REFERENCE,
-          resourceId: this._resourceId,
-          key: reference.reference().key(),
-          id: vid
-        };
-        this._connection.send(event);
-      }
+      onShare: this._onShareReference,
+      onUnshare: this._onUnshareReference,
+      onSet: this._onSetReference,
+      onClear: this._onClearReference
     };
 
     this._callbacks = {
@@ -234,49 +168,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._open = true;
     this._committed = true;
 
-    references.forEach((ref: ReferenceData) => {
-      const published: RemoteReferencePublished = {
-        type: MessageType.REFERENCE_PUBLISHED,
-        sessionId: ref.sessionId,
-        username: SessionIdParser.deserialize(ref.sessionId).username,
-        resourceId: this._resourceId,
-        key: ref.key,
-        id: ref.id,
-        referenceType: ref.referenceType,
-        values: ref.values
-      };
-
-      // fixme refactor
-      if (published.id !== undefined) {
-        // fixme this var is pretty bad, it is used below.
-        const m: RealTimeElement<any> = this._wrapperFactory.wrap(this._model._getRegisteredValue(published.id));
-        m._handleRemoteReferenceEvent(published);
-        const r: ModelReference<any> = m.reference(ref.sessionId, ref.key);
-        this._referencesBySession[ref.sessionId].push(r);
-      } else {
-        this._modelReferenceEvent(published);
-      }
-
-      if (ref.values) {
-        const set: RemoteReferenceSet = {
-          type: MessageType.REFERENCE_SET,
-          sessionId: ref.sessionId,
-          username: SessionIdParser.deserialize(ref.sessionId).username,
-          resourceId: this._resourceId,
-          key: ref.key,
-          id: ref.id,
-          referenceType: ref.referenceType,
-          values: ref.values
-        };
-
-        if (set.id !== undefined) {
-          // fixme: what was this suppose to do
-          // m._handleRemoteReferenceEvent(set);
-        } else {
-          this._modelReferenceEvent(set);
-        }
-      }
-    });
+    this._initializeReferences(references);
   }
 
   // fixme inconsistent with isOpen()
@@ -383,7 +275,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   public elementReference(key: string): LocalElementReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
-      if (existing.reference().type() !== ReferenceType.ELEMENT) {
+      if (existing.reference().type() !== ModelReference.Types.ELEMENT) {
         throw new Error("A reference with this key already exists, but is not an observable reference");
       } else {
         return <LocalElementReference> existing;
@@ -661,11 +553,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
 
   private _getMessageValues(ref: ModelReferenceData): string[] {
     switch (ref.type) {
-      case ReferenceType.INDEX:
-      case ReferenceType.PROPERTY:
-      case ReferenceType.RANGE:
+      case ModelReference.Types.INDEX:
+      case ModelReference.Types.PROPERTY:
+      case ModelReference.Types.RANGE:
         return ref.values;
-      case ReferenceType.ELEMENT:
+      case ModelReference.Types.ELEMENT:
         const elementIds: string[] = [];
         for (let element of ref.values) {
           elementIds.push((<RealTimeElement<any>> element).id());
@@ -674,6 +566,124 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
       default:
         throw new Error("Invalid reference type");
     }
+  }
+
+  private _initializeReferences(references: ReferenceData[]): void {
+    references.forEach((ref: ReferenceData) => {
+      let model: RealTimeElement<any>;
+      if (ref.id !== undefined) {
+        model = this._wrapperFactory.wrap(this._model._getRegisteredValue(ref.id));
+      }
+
+      const published: RemoteReferencePublished = {
+        type: MessageType.REFERENCE_PUBLISHED,
+        sessionId: ref.sessionId,
+        username: SessionIdParser.deserialize(ref.sessionId).username,
+        resourceId: this._resourceId,
+        key: ref.key,
+        id: ref.id,
+        referenceType: ref.referenceType,
+        values: ref.values
+      };
+
+      if (model !== undefined) {
+        model._handleRemoteReferenceEvent(published);
+        const r: ModelReference<any> = model.reference(ref.sessionId, ref.key);
+        this._referencesBySession[ref.sessionId].push(r);
+      } else {
+        this._modelReferenceEvent(published);
+      }
+
+      if (ref.values) {
+        const set: RemoteReferenceSet = {
+          type: MessageType.REFERENCE_SET,
+          sessionId: ref.sessionId,
+          username: SessionIdParser.deserialize(ref.sessionId).username,
+          resourceId: this._resourceId,
+          key: ref.key,
+          id: ref.id,
+          referenceType: ref.referenceType,
+          values: ref.values
+        };
+
+        if (model !== undefined) {
+          model._handleRemoteReferenceEvent(set);
+        } else {
+          this._modelReferenceEvent(set);
+        }
+      }
+    });
+  }
+
+  private _onShareReference(reference: LocalModelReference<any, any>): void {
+    const source: any = reference.reference().source();
+    const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
+
+    const event: PublishReferenceEvent = {
+      type: MessageType.PUBLISH_REFERENCE,
+      resourceId: this._resourceId,
+      key: reference.reference().key(),
+      id: vid,
+      referenceType: reference.reference().type(),
+      values: reference.values(),
+      version: this._concurrencyControl.contextVersion()
+    };
+    this._connection.send(event);
+  }
+
+  private _onUnshareReference(reference: LocalModelReference<any, any>): void {
+    const source: any = reference.reference().source();
+    const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
+
+    const event: UnpublishReferenceEvent = {
+      type: MessageType.UNPUBLISH_REFERENCE,
+      resourceId: this._resourceId,
+      key: reference.reference().key(),
+      id: vid
+    };
+    this._connection.send(event);
+  }
+
+  private _onSetReference(reference: LocalModelReference<any, any>): void {
+    const source: any = reference.reference().source();
+    const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
+
+    let refData: ModelReferenceData = {
+      type: reference.reference().type(),
+      id: vid,
+      values: reference.reference().values()
+    };
+
+    // Only transform those that target a RealTimeElement
+    if (vid !== undefined) {
+      refData = this._concurrencyControl.processOutgoingSetReference(refData);
+    }
+
+    if (refData) {
+      const event: SetReferenceEvent = {
+        type: MessageType.SET_REFERENCE,
+        resourceId: this._resourceId,
+        key: reference.reference().key(),
+        id: refData.id,
+        referenceType: reference.reference().type(),
+        values: this._getMessageValues(refData),
+        version: this._concurrencyControl.contextVersion()
+      };
+      this._connection.send(event);
+    }
+  }
+
+  private _onClearReference(reference: LocalModelReference<any, any>): void {
+    const source: any = reference.reference().source();
+    const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
+
+    const event: ClearReferenceEvent = {
+      type: MessageType.CLEAR_REFERENCE,
+      resourceId: this._resourceId,
+      key: reference.reference().key(),
+      id: vid
+    };
+    this._connection.send(event);
   }
 }
 Object.freeze(RealTimeModel.Events);

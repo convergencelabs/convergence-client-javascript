@@ -3,20 +3,12 @@ import {EqualsUtil} from "../../util/EqualsUtil";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ReferenceManager} from "./ReferenceManager";
 
-export interface ReferenceTypes {
+export interface ModelReferenceTypes {
   INDEX: string;
   RANGE: string;
   PROPERTY: string;
   ELEMENT: string;
 }
-
-export const ReferenceType: ReferenceTypes = {
-  INDEX: "index",
-  RANGE: "range",
-  PROPERTY: "property",
-  ELEMENT: "element"
-};
-Object.freeze(ReferenceType);
 
 export interface ModelReferenceEvents {
   SET: string;
@@ -30,6 +22,13 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     SET: "set",
     CLEARED: "cleared",
     DISPOSED: "disposed"
+  };
+
+  public static readonly Types: ModelReferenceTypes = {
+    INDEX: "index",
+    RANGE: "range",
+    PROPERTY: "property",
+    ELEMENT: "element"
   };
 
   protected _values: V[];
@@ -139,6 +138,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
   }
 }
 Object.freeze(ModelReference.Events);
+Object.freeze(ModelReference.Types);
 
 export interface ReferenceChangedEvent extends ConvergenceEvent {
   src: ModelReference<any>;

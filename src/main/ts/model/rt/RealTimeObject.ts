@@ -3,7 +3,6 @@ import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {ReferenceType} from "../reference/ModelReference";
 import {LocalModelReference} from "../reference/LocalModelReference";
 import {ObjectNodeSetValueEvent} from "../internal/events";
 import {ModelReference} from "../reference/ModelReference";
@@ -36,7 +35,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
               protected _callbacks: ModelEventCallbacks,
               protected _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, [ReferenceType.PROPERTY]);
+    super(_delegate, _callbacks, _wrapperFactory, _model, [ModelReference.Types.PROPERTY]);
 
     this._delegate.events().subscribe(event => this._handleReferenceEvents(event));
   }
@@ -84,7 +83,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   public propertyReference(key: string): LocalPropertyReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
-      if (existing.reference().type() !== ReferenceType.PROPERTY) {
+      if (existing.reference().type() !== ModelReference.Types.PROPERTY) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
         return <LocalPropertyReference> existing;

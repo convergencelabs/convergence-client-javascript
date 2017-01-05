@@ -1,6 +1,5 @@
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
-import {ReferenceType} from "./ModelReference";
 import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
 import {ReferenceManager} from "./ReferenceManager";
 
@@ -17,7 +16,7 @@ export class RangeReference extends ModelReference<IndexRange> {
               username: string,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ReferenceType.RANGE, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.RANGE, key, source, username, sessionId, local);
   }
 
   public _handleInsert(index: number, length: number): void {

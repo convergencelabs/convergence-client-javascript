@@ -1,7 +1,6 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {StringNode} from "../internal/StringNode";
 import {ModelEventCallbacks} from "./RealTimeModel";
-import {ReferenceType} from "../reference/ModelReference";
 import {LocalModelReference} from "../reference/LocalModelReference";
 import {ModelReference} from "../reference/ModelReference";
 import {IndexReference} from "../reference/IndexReference";
@@ -33,7 +32,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
               protected _callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, [ReferenceType.INDEX, ReferenceType.RANGE]);
+    super(_delegate, _callbacks, _wrapperFactory, _model, [ModelReference.Types.INDEX, ModelReference.Types.RANGE]);
 
     this._delegate.events().subscribe(e => this._handleReferenceModelEvents(e) );
   }
@@ -58,7 +57,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
   public indexReference(key: string): LocalIndexReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
-      if (existing.reference().type() !== ReferenceType.INDEX) {
+      if (existing.reference().type() !== ModelReference.Types.INDEX) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
         return <LocalIndexReference> existing;
@@ -78,7 +77,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
   public rangeReference(key: string): LocalRangeReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
-      if (existing.reference().type() !== ReferenceType.RANGE) {
+      if (existing.reference().type() !== ModelReference.Types.RANGE) {
         throw new Error("A reference with this key already exists, but is not a range reference");
       } else {
         return <LocalRangeReference> existing;

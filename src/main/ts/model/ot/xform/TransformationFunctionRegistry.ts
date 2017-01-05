@@ -57,7 +57,7 @@ import {ObjectSetRemovePropertyOTF} from "./object/ObjectSetRemovePropertyOTF";
 import {ObjectSetSetOTF} from "./object/ObjectSetSetOTF";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 import {ModelReferenceData} from "./ReferenceTransformer";
-import {ReferenceType} from "../../reference/ModelReference";
+import {ModelReference} from "../../reference/ModelReference";
 import {StringInsertIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
 import {OperationType} from "../ops/OperationType";
 import {StringRemoveIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
@@ -152,13 +152,13 @@ export class TransformationFunctionRegistry {
     //
     // Reference Transformation Functions
     //
-    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_INSERT, StringInsertIndexTransformationFunction);
-    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_REMOVE, StringRemoveIndexTransformationFunction);
-    this.registerRtf(ReferenceType.INDEX, OperationType.STRING_VALUE, StringSetIndexTransformationFunction);
+    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_INSERT, StringInsertIndexTransformationFunction);
+    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_REMOVE, StringRemoveIndexTransformationFunction);
+    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_VALUE, StringSetIndexTransformationFunction);
 
-    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_INSERT, StringInsertRangeTransformationFunction);
-    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_REMOVE, StringRemoveRangeTransformationFunction);
-    this.registerRtf(ReferenceType.RANGE, OperationType.STRING_VALUE, StringSetRangeTransformationFunction);
+    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_INSERT, StringInsertRangeTransformationFunction);
+    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_REMOVE, StringRemoveRangeTransformationFunction);
+    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_VALUE, StringSetRangeTransformationFunction);
   }
 
   public registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>

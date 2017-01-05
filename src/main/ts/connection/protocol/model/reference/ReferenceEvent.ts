@@ -3,7 +3,7 @@ import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {CodeMap} from "../../../../util/CodeMap";
 import {OutgoingProtocolNormalMessage} from "../../protocol";
 import {IncomingProtocolNormalMessage} from "../../protocol";
-import {ReferenceType} from "../../../../model/reference/ModelReference";
+import {ModelReference} from "../../../../model/reference/ModelReference";
 import {IndexRange} from "../../../../model/reference/RangeReference";
 import {SessionIdParser} from "../../SessionIdParser";
 
@@ -12,10 +12,10 @@ import {SessionIdParser} from "../../SessionIdParser";
 ///////////////////////////////////////////////////////////////////////////////
 
 export const ReferenceTypeCodes: CodeMap = new CodeMap();
-ReferenceTypeCodes.put(0, ReferenceType.INDEX);
-ReferenceTypeCodes.put(1, ReferenceType.RANGE);
-ReferenceTypeCodes.put(2, ReferenceType.PROPERTY);
-ReferenceTypeCodes.put(3, ReferenceType.ELEMENT);
+ReferenceTypeCodes.put(0, ModelReference.Types.INDEX);
+ReferenceTypeCodes.put(1, ModelReference.Types.RANGE);
+ReferenceTypeCodes.put(2, ModelReference.Types.PROPERTY);
+ReferenceTypeCodes.put(3, ModelReference.Types.ELEMENT);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Incoming References
@@ -69,11 +69,11 @@ export function deserializeReferenceValues(values: any, type: string): any {
   }
 
   switch (type) {
-    case ReferenceType.INDEX:
-    case ReferenceType.PROPERTY:
-    case ReferenceType.ELEMENT:
+    case ModelReference.Types.INDEX:
+    case ModelReference.Types.PROPERTY:
+    case ModelReference.Types.ELEMENT:
       return values;
-    case ReferenceType.RANGE:
+    case ModelReference.Types.RANGE:
       let ranges: IndexRange[] = [];
 
       for (let range of values) {
@@ -174,11 +174,11 @@ function serializeReferenceValue(values: any, type: string): any {
   }
 
   switch (type) {
-    case ReferenceType.INDEX:
-    case ReferenceType.PROPERTY:
-    case ReferenceType.ELEMENT:
+    case ModelReference.Types.INDEX:
+    case ModelReference.Types.PROPERTY:
+    case ModelReference.Types.ELEMENT:
       return values;
-    case ReferenceType.RANGE:
+    case ModelReference.Types.RANGE:
       const ranges: number[][] = [];
       for (let range of values) {
         ranges.push([range.start, range.end]);

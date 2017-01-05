@@ -1,6 +1,5 @@
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
-import {ReferenceType} from "./ModelReference";
 import {RealTimeModel} from "../rt/RealTimeModel";
 import {ElementDetachedEvent} from "../modelEvents";
 import {ReferenceManager} from "./ReferenceManager";
@@ -13,7 +12,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
               username: string,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ReferenceType.ELEMENT, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.ELEMENT, key, source, username, sessionId, local);
   }
 
   public _set(values: Array<RealTimeElement<any>>, local: boolean = false): void {

@@ -1,6 +1,5 @@
 import {ModelReference, ModelReferenceEvents} from "./ModelReference";
 import {RealTimeElement} from "../rt/RealTimeElement";
-import {ReferenceType} from "./ModelReference";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {RealTimeModel} from "../rt/RealTimeModel";
@@ -120,7 +119,7 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _ensureAttached(): void {
-    if (this.type() !== ReferenceType.ELEMENT) {
+    if (this.type() !== ModelReference.Types.ELEMENT) {
       if (this.reference().source().isDetached()) {
         throw new Error("The source model is detached");
       }

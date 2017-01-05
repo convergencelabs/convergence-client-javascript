@@ -44,8 +44,8 @@ describe("RealTimeBoolean", () => {
     callbacks = {
       sendOperationCallback: sinon.spy(),
       referenceEventCallbacks: {
-        onPublish: sinon.spy(),
-        onUnpublish: sinon.spy(),
+        onShare: sinon.spy(),
+        onUnshare: sinon.spy(),
         onSet: sinon.spy(),
         onClear: sinon.spy()
       }
