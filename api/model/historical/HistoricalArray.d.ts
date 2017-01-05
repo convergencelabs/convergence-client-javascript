@@ -1,9 +1,14 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
-import {ObservableArray} from "../observable/ObservableArray";
+import {ObservableArray, ObservableArrayEvents} from "../observable/ObservableArray";
+
+export interface HistoricalArrayEvents extends ObservableArrayEvents {
+}
 
 export declare class HistoricalArray extends HistoricalElement<any[]>
   implements HistoricalContainerElement<any[]>, ObservableArray {
+
+  public static readonly Events: HistoricalArrayEvents;
 
   public get(index: number): HistoricalElement<any>;
 

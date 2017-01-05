@@ -1,10 +1,15 @@
 import {Path} from "../Path";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {ObservableElement} from "../observable/ObservableElement";
+import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
+
+export interface HistoricalElementEvents extends ObservableElementEvents {
+}
 
 export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitter<ConvergenceEvent>
   implements ObservableElement<T> {
+
+  public static readonly Events: HistoricalElementEvents;
 
   public id(): string;
 

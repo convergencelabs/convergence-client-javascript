@@ -1,9 +1,14 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
-import {ObservableObject} from "../observable/ObservableObject";
+import {ObservableObject, ObservableObjectEvents} from "../observable/ObservableObject";
+
+export interface HistoricalObjectEvents extends ObservableObjectEvents {
+}
 
 export declare class HistoricalObject extends HistoricalElement<Map<string, any>>
   implements HistoricalContainerElement<Map<string, any>>, ObservableObject {
+
+  public static readonly Events: HistoricalObjectEvents;
 
   public get(key: string): HistoricalElement<any>;
 

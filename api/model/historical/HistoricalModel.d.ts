@@ -1,9 +1,17 @@
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
-import {ObservableModel} from "../observable/ObservableModel";
+import {ObservableModel, ObservableModelEvents} from "../observable/ObservableModel";
+
+export interface HistoricalModelEvents extends ObservableModelEvents {
+  TARGET_CHANGED: string;
+  TRANSITION_START: string;
+  TRANSITION_END: string;
+}
 
 export declare class HistoricalModel implements ObservableModel {
+
+  public static readonly Events: HistoricalModelEvents;
 
   public session(): Session;
 
