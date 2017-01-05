@@ -4,7 +4,21 @@ import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
 
+export interface UserPresenceSubscriptionEvents {
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+  AVAILABILITY_CHANGED: string;
+}
+
 export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
+
+  public static readonly Events: UserPresenceSubscriptionEvents = {
+    STATE_SET: "state_set",
+    STATE_REMOVED: "state_removed",
+    STATE_CLEARED: "state_cleared",
+    AVAILABILITY_CHANGED: "availability_changed",
+  };
 
   private _manager: UserPresenceManager;
 

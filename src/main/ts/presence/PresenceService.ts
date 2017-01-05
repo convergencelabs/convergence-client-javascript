@@ -16,7 +16,21 @@ import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {objectToMap, mapToObject} from "../util/ObjectUtils";
 
+export interface PresenceServiceEvents {
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+  AVAILABILITY_CHANGED: string;
+}
+
 export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
+
+  public static readonly Events: PresenceServiceEvents = {
+    STATE_SET: "state_set",
+    STATE_REMOVED: "state_removed",
+    STATE_CLEARED: "state_cleared",
+    AVAILABILITY_CHANGED: "availability_changed",
+  };
 
   private _connection: ConvergenceConnection;
 
@@ -135,8 +149,8 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public subscribe(username: string): Promise<UserPresenceSubscription>
   public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>
-  public subscribe(
-    usernames: string | string[]): Promise<UserPresenceSubscription> | Promise<UserPresenceSubscription[]> {
+  public subscribe(usernames: string | string[]):
+    Promise<UserPresenceSubscription> | Promise<UserPresenceSubscription[]> {
     let requested: string[];
     if (typeof usernames === "string") {
       requested = [<string> usernames];

@@ -1,9 +1,19 @@
 import {Session} from "../Session";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 
-export declare class PresenceService extends ConvergenceEventEmitter {
+export interface PresenceServiceEvents {
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+  AVAILABILITY_CHANGED: string;
+}
+
+export declare class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
+
+  public static readonly Events: PresenceServiceEvents;
 
   public session(): Session;
 

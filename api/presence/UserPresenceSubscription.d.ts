@@ -3,6 +3,13 @@ import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/Rx";
 
+export interface UserPresenceSubscriptionEvents {
+  STATE_SET: string;
+  STATE_REMOVED: string;
+  STATE_CLEARED: string;
+  AVAILABILITY_CHANGED: string;
+}
+
 export declare class UserPresenceSubscription
   extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
 
