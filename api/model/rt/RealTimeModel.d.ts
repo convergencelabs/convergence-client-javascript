@@ -7,15 +7,12 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {ObservableModel} from "../observable/ObservableModel";
+import {ObservableModel, ObservableModelEvents} from "../observable/ObservableModel";
 import {ModelEvent} from "../modelEvents";
 
-export interface RealTimeModelEvents {
-  CLOSED: string;
-  DELETED: string;
+export interface RealTimeModelEvents extends ObservableModelEvents {
   MODIFIED: string;
   COMMITTED: string;
-  VERSION_CHANGED: string;
   COLLABORATOR_OPENED: string;
   COLLABORATOR_CLOSED: string;
   REFERENCE: string;

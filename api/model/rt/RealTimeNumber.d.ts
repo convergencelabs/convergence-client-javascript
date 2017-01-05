@@ -1,8 +1,11 @@
 import {RealTimeElement} from "./RealTimeElement";
-import {ObservableNull} from "../observable/ObservableNull";
+import {ObservableNumber, ObservableNumberEvents} from "../observable/ObservableNumber";
 
-export declare class RealTimeNumber extends RealTimeElement<number> implements ObservableNull {
-  public static Events: any;
+export interface RealTimeNumberEvents extends ObservableNumberEvents {
+}
+
+export declare class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
+  public static readonly Events: RealTimeNumberEvents;
 
   public add(num: number): void;
 

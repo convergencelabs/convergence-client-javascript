@@ -1,6 +1,9 @@
 import {RealTimeElement} from "./RealTimeElement";
-import {ObservableNull} from "../observable/ObservableNull";
+import {ObservableNull, ObservableNullEvents} from "../observable/ObservableNull";
+
+export interface RealTimeNullEvents extends ObservableNullEvents {
+}
 
 export declare class RealTimeNull extends RealTimeElement<void> implements ObservableNull {
-  public static Events: any;
+  public static readonly Events: RealTimeNullEvents;
 }

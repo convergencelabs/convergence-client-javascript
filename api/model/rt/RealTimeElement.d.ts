@@ -3,11 +3,16 @@ import {Path} from "../Path";
 import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
-import {ObservableElement} from "../observable/ObservableElement";
+import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
+import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 
-export declare abstract class RealTimeElement<T> extends ConvergenceEventEmitter<any> implements ObservableElement<T> {
+export interface RealTimeElementEvents extends ObservableElementEvents {
+}
 
-  public  static Events: any;
+export declare abstract class RealTimeElement<T>
+  extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+
+  public static readonly Events: RealTimeElementEvents;
 
   public id(): string;
 
@@ -26,5 +31,5 @@ export declare abstract class RealTimeElement<T> extends ConvergenceEventEmitter
 
   public reference(sessionId: string, key: string): ModelReference<any>;
 
-  public references(filter?: ReferenceFilter): ModelReference<any>[];
+  public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
 }

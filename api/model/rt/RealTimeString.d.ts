@@ -3,11 +3,14 @@ import {ModelReference} from "../reference/ModelReference";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
 import {LocalRangeReference} from "../reference/LocalRangeReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
-import {ObservableString} from "../observable/ObservableString";
+import {ObservableString, ObservableStringEvents} from "../observable/ObservableString";
+
+export interface RealTimeStringEvents extends ObservableStringEvents {
+}
 
 export declare class RealTimeString extends RealTimeElement<string> implements ObservableString {
 
-  public static Events: any;
+  public static readonly Events: RealTimeStringEvents;
 
   public insert(index: number, value: string): void;
 

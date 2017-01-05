@@ -3,12 +3,15 @@ import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ModelReference} from "../reference/ModelReference";
 import {LocalPropertyReference} from "../reference/LocalPropertyReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
-import {ObservableObject} from "../observable/ObservableObject";
+import {ObservableObject, ObservableObjectEvents} from "../observable/ObservableObject";
+
+export interface RealTimeObjectEvents extends ObservableObjectEvents {
+}
 
 export declare class RealTimeObject extends RealTimeElement<Map<string, any>>
   implements RealTimeContainerElement<Map<string, any>>, ObservableObject {
 
-  public static Events: any;
+  public static readonly Events: RealTimeObjectEvents;
 
   public get(key: string): RealTimeElement<any>;
 

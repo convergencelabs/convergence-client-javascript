@@ -1,23 +1,14 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
-import {ObservableArray} from "../observable/ObservableArray";
-import {RealTimeElementEvents} from "../../../src/main/ts/model/rt/RealTimeElement";
+import {ObservableArray, ObservableArrayEvents} from "../observable/ObservableArray";
 
-export interface RealTimeArrayEvents extends RealTimeElementEvents{
-  CLOSED: string;
-  DELETED: string;
-  MODIFIED: string;
-  COMMITTED: string;
-  VERSION_CHANGED: string;
-  COLLABORATOR_OPENED: string;
-  COLLABORATOR_CLOSED: string;
-  REFERENCE: string;
+export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
 
 export declare class RealTimeArray extends RealTimeElement<any[]>
   implements RealTimeContainerElement<any[]>, ObservableArray {
 
-  public static Events: any;
+  public static readonly Events: RealTimeArrayEvents;
 
   public get(index: number): RealTimeElement<any>;
 
