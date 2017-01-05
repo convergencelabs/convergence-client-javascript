@@ -3,8 +3,14 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
 export declare var ReferenceType: any;
 
+export interface ModelReferenceEvents {
+  SET: string;
+  CLEARED: string;
+  DISPOSED: string;
+}
+
 export declare abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
-  public static Events: any;
+  public static readonly Events: ModelReferenceEvents;
 
   public type(): string;
 

@@ -149,7 +149,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     // fixme these should have versions unless we move to GUIDs.
     // also move this out of this constructor.
     const referenceCallbacks: ModelReferenceCallbacks = {
-      onPublish: (reference: LocalModelReference<any, any>): void => {
+      onShare: (reference: LocalModelReference<any, any>): void => {
         const source: any = reference.reference().source();
         const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
@@ -165,7 +165,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
         this._connection.send(event);
 
       },
-      onUnpublish: (reference: LocalModelReference<any, any>): void => {
+      onUnshare: (reference: LocalModelReference<any, any>): void => {
         const source: any = reference.reference().source();
         const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
@@ -270,7 +270,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
         };
 
         if (set.id !== undefined) {
-          // TODO: what was this suppose to do
+          // fixme: what was this suppose to do
           // m._handleRemoteReferenceEvent(set);
         } else {
           this._modelReferenceEvent(set);

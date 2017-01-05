@@ -7,3 +7,4 @@ export * from "./observable/index";
 export * from "./historical/index";
 export * from "./rt/index";
 export * from "./query/index";
+export * from "./reference/index";

@@ -1,4 +1,4 @@
-import {ModelReference} from "./ModelReference";
+import {ModelReference, ModelReferenceEvents} from "./ModelReference";
 import {RealTimeElement} from "../rt/RealTimeElement";
 import {ReferenceType} from "./ModelReference";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
@@ -6,14 +6,16 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {RealTimeModel} from "../rt/RealTimeModel";
 
 export interface ModelReferenceCallbacks {
-  onPublish: (reference: LocalModelReference<any, any>) => void;
-  onUnpublish: (reference: LocalModelReference<any, any>) => void;
+  onShare: (reference: LocalModelReference<any, any>) => void;
+  onUnshare: (reference: LocalModelReference<any, any>) => void;
   onSet: (reference: LocalModelReference<any, any>) => void;
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
 
 export abstract class LocalModelReference<V, R extends ModelReference<V>>
 extends ConvergenceEventEmitter<ConvergenceEvent> {
+
+  public static readonly Events: ModelReferenceEvents = ModelReference.Events;
 
   protected _reference: R;
   private _published: boolean;
@@ -71,13 +73,13 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
   public share(): void {
     this._ensureAttached();
     this._published = true;
-    this._callbacks.onPublish(this);
+    this._callbacks.onShare(this);
   }
 
   public unshare(): void {
     this._ensureAttached();
     this._published = false;
-    this._callbacks.onUnpublish(this);
+    this._callbacks.onUnshare(this);
   }
 
   public isShared(): boolean {
