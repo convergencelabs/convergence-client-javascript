@@ -32,8 +32,8 @@ export interface ConvergenceModelValueEvent extends ConvergenceEvent {
 }
 
 export declare class ElementDetachedEvent implements ConvergenceEvent {
-  public name: string;
-  public src: ObservableElement<any>;
+  public readonly name: string;
+  public readonly src: ObservableElement<any>;
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
@@ -42,139 +42,139 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
 }
 
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
-  public name: string;
-  public src: ObservableElement<any>;
-  public relativePath: Path;
-  public childEvent: ValueChangedEvent;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableElement<any>;
+  public readonly relativePath: Path;
+  public readonly childEvent: ValueChangedEvent;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ArrayInsertEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableArray;
-  public index: number;
-  public value: ObservableElement<any>;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableArray;
+  public readonly index: number;
+  public readonly value: ObservableElement<any>;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 
 }
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableArray;
-  public index: number;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableArray;
+  public readonly index: number;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ArraySetEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableArray;
-  public index: number;
-  public value: ObservableElement<any>;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableArray;
+  public readonly index: number;
+  public readonly value: ObservableElement<any>;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ArrayReorderEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableArray;
-  public fromIndex: number;
-  public toIndex: number;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableArray;
+  public readonly fromIndex: number;
+  public readonly toIndex: number;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ArraySetValueEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableArray;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableArray;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class BooleanSetValueEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableBoolean;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableBoolean;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class NumberSetValueEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableNumber;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableNumber;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class NumberDeltaEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableNumber;
-  public value: number;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableNumber;
+  public readonly value: number;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ObjectSetEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableObject;
-  public key: string;
-  public value: ObservableElement<any>;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableObject;
+  public readonly key: string;
+  public readonly value: ObservableElement<any>;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableObject;
-  public key: string;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableObject;
+  public readonly key: string;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableObject;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableObject;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class StringInsertEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableString;
-  public index: number;
-  public value: string;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableString;
+  public readonly index: number;
+  public readonly value: string;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class StringRemoveEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableString;
-  public index: number;
-  public value: string;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableString;
+  public readonly index: number;
+  public readonly value: string;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }
 
 export class StringSetValueEvent implements ValueChangedEvent {
-  public name: string;
-  public src: ObservableString;
-  public sessionId: string;
-  public username: string;
-  public local: boolean;
+  public readonly name: string;
+  public readonly src: ObservableString;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
 }

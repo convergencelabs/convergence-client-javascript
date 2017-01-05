@@ -9,37 +9,37 @@ export interface ActivityEvent extends ConvergenceEvent {
 }
 
 export declare class SessionJoinedEvent implements ActivityEvent {
-  name: string;
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-  participant: ActivityParticipant;
+  public readonly name: string;
+  public readonly activityId: string;
+  public readonly username: string;
+  public readonly sessionId: string;
+  public readonly local: boolean;
+  public readonly participant: ActivityParticipant;
 }
 
 export declare class SessionLeftEvent implements ActivityEvent {
-  name: string;
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
+  public readonly name: string;
+  public readonly activityId: string;
+  public readonly username: string;
+  public readonly sessionId: string;
+  public readonly local: boolean;
 }
 
 export declare class StateSetEvent implements ActivityEvent {
-  name: string;
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-  key: string;
-  value: any;
+  public readonly name: string;
+  public readonly activityId: string;
+  public readonly username: string;
+  public readonly sessionId: string;
+  public readonly local: boolean;
+  public readonly key: string;
+  public readonly value: any;
 }
 
 export declare class StateClearedEvent implements ActivityEvent {
-  name: string;
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
-  key: string;
+  public readonly name: string;
+  public readonly activityId: string;
+  public readonly username: string;
+  public readonly sessionId: string;
+  public readonly local: boolean;
+  public readonly key: string;
 }
