@@ -10,7 +10,6 @@ var objectTable = document.getElementById("objectVal");
 var model;
 
 // Connect to the domain.
-Convergence.debugFlags.protocol.messages = true;
 Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
   return domain.models().open("test", "basic-example", function (collectionId, modelId) {
     return {
