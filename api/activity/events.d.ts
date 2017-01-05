@@ -8,18 +8,38 @@ export interface ActivityEvent extends ConvergenceEvent {
   local: boolean;
 }
 
-export interface SessionJoinedEvent extends ActivityEvent {
+export declare class SessionJoinedEvent implements ActivityEvent {
+  name: string;
+  activityId: string;
+  username: string;
+  sessionId: string;
+  local: boolean;
   participant: ActivityParticipant;
 }
 
-export interface SessionLeftEvent extends ActivityEvent {
+export declare class SessionLeftEvent implements ActivityEvent {
+  name: string;
+  activityId: string;
+  username: string;
+  sessionId: string;
+  local: boolean;
 }
 
-export interface StateSetEvent extends ActivityEvent {
+export declare class StateSetEvent implements ActivityEvent {
+  name: string;
+  activityId: string;
+  username: string;
+  sessionId: string;
+  local: boolean;
   key: string;
   value: any;
 }
 
-export interface StateClearedEvent extends ActivityEvent {
+export declare class StateClearedEvent implements ActivityEvent {
+  name: string;
+  activityId: string;
+  username: string;
+  sessionId: string;
+  local: boolean;
   key: string;
 }

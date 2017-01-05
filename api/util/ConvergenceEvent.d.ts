@@ -1,4 +1,4 @@
 export interface ConvergenceEvent {
-  src: any;
+  src?: any;
   name: string;
 }

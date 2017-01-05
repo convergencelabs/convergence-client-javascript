@@ -51,57 +51,50 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             username,
             joinedMsg.state,
             false);
-          return [<SessionJoinedEvent> {
-            src: this,
-            name: Activity.Events.SESSION_JOINED,
-            activityId: joinedMsg.activityId,
+          return [new SessionJoinedEvent(
+            joinedMsg.activityId,
             username,
-            sessionId: joinedMsg.sessionId,
-            participant,
-            local: false
-          }];
+            joinedMsg.sessionId,
+            false,
+            participant)];
         case MessageType.ACTIVITY_SESSION_LEFT:
           const leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
-          return [<SessionLeftEvent> {
-            name: Activity.Events.SESSION_LEFT,
-            activityId: leftMsg.activityId,
-            username: SessionIdParser.parseUsername(leftMsg.sessionId),
-            sessionId: leftMsg.sessionId,
-            local: false
-          }];
+          return [new SessionLeftEvent(
+            leftMsg.activityId,
+            SessionIdParser.parseUsername(leftMsg.sessionId),
+            leftMsg.sessionId,
+            false
+        )];
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
           const stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
           return Object.keys(stateSetMsg.state).map(key => {
-            return <StateSetEvent> {
-              name: Activity.Events.STATE_SET,
-              activityId: stateSetMsg.activityId,
-              username: SessionIdParser.parseUsername(stateSetMsg.sessionId),
-              sessionId: stateSetMsg.sessionId,
+            return new StateSetEvent(
+              stateSetMsg.activityId,
+              SessionIdParser.parseUsername(stateSetMsg.sessionId),
+              stateSetMsg.sessionId,
+              false,
               key,
-              value: stateSetMsg.state[key],
-              local: false
-            };
+              stateSetMsg.state[key],
+            );
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           const stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
-          return [<StateClearedEvent> {
-            name: Activity.Events.STATE_CLEARED,
-            activityId: stateClearedMsg.activityId,
-            username: SessionIdParser.parseUsername(stateClearedMsg.sessionId),
-            sessionId: stateClearedMsg.sessionId,
-            local: false
-          }];
+          return [new StateClearedEvent(
+            stateClearedMsg.activityId,
+            SessionIdParser.parseUsername(stateClearedMsg.sessionId),
+            stateClearedMsg.sessionId,
+            false
+        )];
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
           const stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
           return stateRemovedMsg.keys.map(key => {
-            return <StateRemovedEvent> {
-              name: Activity.Events.STATE_REMOVED,
-              activityId: stateRemovedMsg.activityId,
-              username: SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
-              sessionId: stateRemovedMsg.sessionId,
-              key,
-              local: false
-            };
+            return new StateRemovedEvent(
+              stateRemovedMsg.activityId,
+              SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
+              stateRemovedMsg.sessionId,
+              false,
+              key
+            );
           });
         default:
           // This should be impossible
@@ -136,7 +129,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         Object.keys(response.participants).forEach(sessionId => {
           const username: string = SessionIdParser.parseUsername(sessionId);
           const local: boolean = sessionId === this._connection.session().sessionId();
-          const state: {[key: string]: any} = response.participants[sessionId];
+          const state: { [key: string]: any } = response.participants[sessionId];
           let stateMap: Map<string, any> = objectToMap(state);
           const participant = new ActivityParticipant(sessionId, username, stateMap, local);
           participants.set(sessionId, participant);
@@ -161,7 +154,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joinedMap.get(id).promise();
   }
 
-  public joined(): {[key: string]: Activity} {
+  public joined(): { [key: string]: Activity } {
     return mapToObject(this._joinedMap);
   }
 

@@ -23,11 +23,11 @@ export interface ActivityEvents {
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   public static readonly Events: ActivityEvents = {
-    SESSION_JOINED: "session_joined",
-    SESSION_LEFT: "session_left",
-    STATE_SET: "state_set",
-    STATE_REMOVED: "state_removed",
-    STATE_CLEARED: "state_cleared"
+    SESSION_JOINED: SessionJoinedEvent.NAME,
+    SESSION_LEFT: SessionLeftEvent.NAME,
+    STATE_SET: StateSetEvent.NAME,
+    STATE_REMOVED: StateRemovedEvent.NAME,
+    STATE_CLEARED: StateClearedEvent.NAME
   };
 
   private _id: string;
@@ -147,15 +147,14 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       this._connection.send(message);
 
       Object.keys(state).forEach((key) => {
-        this._emitEvent(<StateSetEvent> {
-          name: Activity.Events.STATE_SET,
-          activityId: this.id(),
-          username: this._connection.session().username(),
-          sessionId: this._connection.session().sessionId(),
+        this._emitEvent(new StateSetEvent (
+          this.id(),
+          this._connection.session().username(),
+          this._connection.session().sessionId(),
+          true,
           key,
-          value: state[key],
-          local: true
-        });
+          state[key]
+        ));
       });
     }
   }
@@ -176,14 +175,13 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       this._connection.send(message);
 
       (<string[]> keys).forEach((key) => {
-        this._emitEvent(<StateRemovedEvent> {
-          name: Activity.Events.STATE_REMOVED,
-          activityId: this.id(),
-          username: this._connection.session().username(),
-          sessionId: this._connection.session().sessionId(),
-          key,
-          local: true
-        });
+        this._emitEvent(new StateRemovedEvent(
+          this.id(),
+          this._connection.session().username(),
+          this._connection.session().sessionId(),
+          true,
+          key
+        ));
       });
     }
   }
@@ -196,13 +194,12 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       };
       this._connection.send(message);
 
-      this._emitEvent(<StateClearedEvent> {
-        name: Activity.Events.STATE_CLEARED,
-        activityId: this.id(),
-        username: this._connection.session().username(),
-        sessionId: this._connection.session().sessionId(),
-        local: true
-      });
+      this._emitEvent(new StateClearedEvent(
+        this.id(),
+        this._connection.session().username(),
+        this._connection.session().sessionId(),
+        true
+    ));
     }
   }
 
