@@ -12,6 +12,10 @@ import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 import {UserPresence} from "./presence/UserPresence";
 import {objectToMap} from "./util/ObjectUtils";
 import {UserPresenceImpl} from "./presence/UserPresenceImpl";
+import {
+  ConnectionErrorEvent, ConnectedEvent, ConvergenceDomainEvent, InterruptedEvent,
+  ReconnectedEvent, DisconnectedEvent
+} from "./events";
 
 export interface ConvergenceDomainEvents {
   readonly CONNECTED: string;
@@ -24,11 +28,11 @@ export interface ConvergenceDomainEvents {
 export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
 
   public static readonly Events: ConvergenceDomainEvents = {
-    CONNECTED: "connected",
-    INTERRUPTED: "interrupted",
-    RECONNECTED: "reconnected",
-    DISCONNECTED: "disconnected",
-    ERROR: "error"
+    CONNECTED: ConnectedEvent.NAME,
+    INTERRUPTED: InterruptedEvent.NAME,
+    RECONNECTED: ReconnectedEvent.NAME,
+    DISCONNECTED: DisconnectedEvent.NAME,
+    ERROR: ConnectionErrorEvent.NAME
   };
 
   private static DefaultOptions: ConvergenceOptions = {
@@ -67,22 +71,13 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
       this
     );
 
-    this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
-      this._emitEvent({domain: this, name: ConvergenceDomain.Events.CONNECTED}));
-
-    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
-      this._emitEvent({domain: this, name: ConvergenceDomain.Events.INTERRUPTED}));
-
-    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
-      this._emitEvent({domain: this, name: ConvergenceDomain.Events.DISCONNECTED}));
-
-    this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
-      this._emitEvent({domain: this, name: ConvergenceDomain.Events.RECONNECTED}));
-
-    this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
-      const evt: ConvergenceErrorEvent = {domain: this, name: ConvergenceDomain.Events.ERROR, error};
-      this._emitEvent(evt);
-    });
+    this._connection.on(ConvergenceConnection.Events.CONNECTED, () => this._emitEvent(new ConnectedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () => this._emitEvent(new InterruptedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => this._emitEvent(new DisconnectedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.RECONNECTED, () => this._emitEvent(new ReconnectedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) =>
+      this._emitEvent(new ConnectionErrorEvent(this, error))
+    );
   }
 
   public _authenticateWithPassword(username: string, password: string): Promise<void> {
@@ -172,11 +167,3 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   }
 }
 Object.freeze(ConvergenceDomain.Events);
-
-export interface ConvergenceDomainEvent extends ConvergenceEvent {
-  domain: ConvergenceDomain;
-}
-
-export interface ConvergenceErrorEvent extends ConvergenceDomainEvent {
-  error: string;
-}
