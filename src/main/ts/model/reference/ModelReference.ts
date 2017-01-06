@@ -2,6 +2,7 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {EqualsUtil} from "../../util/EqualsUtil";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ReferenceManager} from "./ReferenceManager";
+import {ReferenceChangedEvent, ReferenceClearedEvent, ReferenceDisposedEvent} from "./events";
 
 export interface ModelReferenceTypes {
   readonly INDEX: string;
@@ -19,9 +20,9 @@ export interface ModelReferenceEvents {
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static readonly Events: ModelReferenceEvents = {
-    SET: "set",
-    CLEARED: "cleared",
-    DISPOSED: "disposed"
+    SET: ReferenceChangedEvent.NAME,
+    CLEARED: ReferenceClearedEvent.NAME,
+    DISPOSED: ReferenceDisposedEvent.NAME
   };
 
   public static readonly Types: ModelReferenceTypes = {
@@ -91,10 +92,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
 
   public _dispose(): void {
     this._disposed = true;
-    const event: ReferenceDisposedEvent = {
-      name: ModelReference.Events.DISPOSED,
-      src: this
-    };
+    const event: ReferenceDisposedEvent = new ReferenceDisposedEvent(this);
     this._emitEvent(event);
     this.removeAllListenersForAllEvents();
     this._referenceManager._handleReferenceDisposed(this);
@@ -114,20 +112,13 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
 
   public _set(values: V[], local: boolean = false): void {
     this._values = values;
-    const event: ReferenceChangedEvent = {
-      name: ModelReference.Events.SET,
-      src: this,
-      local
-    };
+    const event: ReferenceChangedEvent = new ReferenceChangedEvent(this, local);
     this._emitEvent(event);
   }
 
   public _clear(): void {
     this._values = [];
-    const event: ReferenceClearedEvent = {
-      name: ModelReference.Events.CLEARED,
-      src: this
-    };
+    const event: ReferenceClearedEvent = new ReferenceClearedEvent(this);
     this._emitEvent(event);
   }
 
@@ -139,16 +130,3 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
 }
 Object.freeze(ModelReference.Events);
 Object.freeze(ModelReference.Types);
-
-export interface ReferenceChangedEvent extends ConvergenceEvent {
-  src: ModelReference<any>;
-  local: boolean;
-}
-
-export interface ReferenceClearedEvent extends ConvergenceEvent {
-  src: ModelReference<any>;
-}
-
-export interface ReferenceDisposedEvent extends ConvergenceEvent {
-  src: ModelReference<any>;
-}
