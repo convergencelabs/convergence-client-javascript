@@ -3,7 +3,6 @@ import {ConvergenceOptions} from "./ConvergenceOptions";
 import {Session} from "./Session";
 import {ModelService} from "./model/ModelService";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
-import {ConvergenceEvent} from "./util/ConvergenceEvent";
 import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";

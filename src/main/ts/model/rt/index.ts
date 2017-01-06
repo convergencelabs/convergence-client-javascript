@@ -9,3 +9,4 @@ export * from "./RealTimeObject";
 export * from "./RealTimeString";
 export * from "./RealTimeUndefined";
 export * from "./ModelCollaborator";
+export * from "./events";

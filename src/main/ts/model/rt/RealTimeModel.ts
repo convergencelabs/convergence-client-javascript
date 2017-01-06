@@ -51,6 +51,7 @@ import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
+import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -63,8 +64,8 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
 const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
     MODIFIED: "modified",
     COMMITTED: "committed",
-    COLLABORATOR_OPENED: "collaborator_opened",
-    COLLABORATOR_CLOSED: "collaborator_closed",
+    COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
+    COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
     REFERENCE: "reference"
   },
   ObservableModelEventConstants);
@@ -345,11 +346,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._sessions.push(message.sessionId);
 
     this._referencesBySession[message.sessionId] = [];
-    const event: CollaboratorOpenedEvent = {
-      name: RealTimeModel.Events.COLLABORATOR_OPENED,
-      src: this,
-      collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
-    };
+    const event: CollaboratorOpenedEvent = new CollaboratorOpenedEvent(
+      this, new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId));
     this._emitEvent(event);
     this._collaboratorsSubject.next(this.collaborators());
   }
@@ -364,11 +362,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
       ref._dispose();
     });
 
-    const event: CollaboratorClosedEvent = {
-      name: RealTimeModel.Events.COLLABORATOR_CLOSED,
-      src: this,
-      collaborator: new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
-    };
+    const event: CollaboratorClosedEvent = new CollaboratorClosedEvent(
+      this, new ModelCollaborator(SessionIdParser.parseUsername(message.sessionId), message.sessionId)
+    );
     this._emitEvent(event);
 
     // todo we could make this more performant by not calc'ing every time.
@@ -691,12 +687,4 @@ Object.freeze(RealTimeModel.Events);
 export interface ModelEventCallbacks {
   sendOperationCallback: (operation: DiscreteOperation) => void;
   referenceEventCallbacks: ModelReferenceCallbacks;
-}
-
-export interface CollaboratorOpenedEvent extends ModelEvent {
-  collaborator: ModelCollaborator;
-}
-
-export interface CollaboratorClosedEvent extends ModelEvent {
-  collaborator: ModelCollaborator;
 }
