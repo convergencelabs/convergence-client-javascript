@@ -8,16 +8,16 @@ import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
 
 export declare interface ConvergenceDomainEvents {
-  CONNECTED: string;
-  INTERRUPTED: string;
-  RECONNECTED: string;
-  DISCONNECTED: string;
-  ERROR: string;
+  readonly CONNECTED: string;
+  readonly INTERRUPTED: string;
+  readonly RECONNECTED: string;
+  readonly DISCONNECTED: string;
+  readonly ERROR: string;
 }
 
 export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
 
-  public static Events: any;
+  public static readonly Events: ConvergenceDomainEvents;
 
   public session(): Session;
 

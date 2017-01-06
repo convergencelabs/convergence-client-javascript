@@ -14,11 +14,11 @@ import {objectToMap} from "./util/ObjectUtils";
 import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 
 export interface ConvergenceDomainEvents {
-  CONNECTED: string;
-  INTERRUPTED: string;
-  RECONNECTED: string;
-  DISCONNECTED: string;
-  ERROR: string;
+  readonly CONNECTED: string;
+  readonly INTERRUPTED: string;
+  readonly RECONNECTED: string;
+  readonly DISCONNECTED: string;
+  readonly ERROR: string;
 }
 
 export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
