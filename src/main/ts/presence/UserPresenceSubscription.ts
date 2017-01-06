@@ -3,6 +3,10 @@ import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
+import {
+  PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
+  PresenceAvailabilityChangedEvent
+} from "./events";
 
 export interface UserPresenceSubscriptionEvents {
   STATE_SET: string;
@@ -14,10 +18,10 @@ export interface UserPresenceSubscriptionEvents {
 export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
 
   public static readonly Events: UserPresenceSubscriptionEvents = {
-    STATE_SET: "state_set",
-    STATE_REMOVED: "state_removed",
-    STATE_CLEARED: "state_cleared",
-    AVAILABILITY_CHANGED: "availability_changed",
+    STATE_SET: PresenceStateSetEvent.NAME,
+    STATE_REMOVED: PresenceStateRemovedEvent.NAME,
+    STATE_CLEARED: PresenceStateClearedEvent.NAME,
+    AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME,
   };
 
   private _manager: UserPresenceManager;

@@ -5,52 +5,40 @@ export interface  PresenceSubscriptionEvent extends ConvergenceEvent {
 }
 
 export class PresenceStateSetEvent implements PresenceSubscriptionEvent {
-  static get NAME(): string {
-    return "state_set";
-  };
-
+  public static readonly NAME = "state_set";
   public name: string = PresenceStateSetEvent.NAME;
 
-  constructor(public username: string,
+  constructor(public readonly username: string,
               public state: Map<string, any>) {
     Object.freeze(this);
   }
 }
 
 export class PresenceStateRemovedEvent implements PresenceSubscriptionEvent {
-  static get NAME(): string {
-    return "state_removed";
-  };
-
+  public static readonly NAME = "state_removed";
   public name: string = PresenceStateRemovedEvent.NAME;
 
-  constructor(public username: string,
-              public keys: string[]) {
+  constructor(public readonly username: string,
+              public readonly keys: string[]) {
     Object.freeze(this);
   }
 }
 
 export class PresenceStateClearedEvent implements PresenceSubscriptionEvent {
-  static get NAME(): string {
-    return "state_cleared";
-  };
-
+  public static readonly NAME = "state_cleared";
   public name: string = PresenceStateClearedEvent.NAME;
 
-  constructor(public username: string) {
+  constructor(public readonly username: string) {
     Object.freeze(this);
   }
 }
 
 export class PresenceAvailabilityChangedEvent implements PresenceSubscriptionEvent {
-  static get NAME(): string {
-    return "availability_changed";
-  };
-
+  public static readonly NAME = "availability_changed";
   public name: string = PresenceAvailabilityChangedEvent.NAME;
 
-  constructor(public username: string,
-              public available: boolean) {
+  constructor(public readonly username: string,
+              public readonly available: boolean) {
     Object.freeze(this);
   }
 }

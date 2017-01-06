@@ -15,6 +15,10 @@ import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {objectToMap, mapToObject} from "../util/ObjectUtils";
+import {
+  PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
+  PresenceAvailabilityChangedEvent
+} from "./events";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -26,10 +30,10 @@ export interface PresenceServiceEvents {
 export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static readonly Events: PresenceServiceEvents = {
-    STATE_SET: "state_set",
-    STATE_REMOVED: "state_removed",
-    STATE_CLEARED: "state_cleared",
-    AVAILABILITY_CHANGED: "availability_changed",
+    STATE_SET: PresenceStateSetEvent.NAME,
+    STATE_REMOVED: PresenceStateRemovedEvent.NAME,
+    STATE_CLEARED: PresenceStateClearedEvent.NAME,
+    AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME,
   };
 
   private _connection: ConvergenceConnection;
