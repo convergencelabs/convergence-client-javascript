@@ -8,9 +8,9 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatMember} from "./ChatMember";
 
 export interface ChatRoomEvents {
-  MESSAGE: string;
-  USER_JOINED: string;
-  USER_LEFT: string;
+  readonly MESSAGE: string;
+  readonly USER_JOINED: string;
+  readonly USER_LEFT: string;
 }
 
 export class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {

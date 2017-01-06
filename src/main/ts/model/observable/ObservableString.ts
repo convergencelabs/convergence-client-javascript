@@ -1,8 +1,8 @@
 import {ObservableElement, ObservableElementEvents, ObservableElementEventConstants} from "./ObservableElement";
 
 export interface ObservableStringEvents extends ObservableElementEvents {
-  INSERT: string;
-  REMOVE: string;
+  readonly INSERT: string;
+  readonly REMOVE: string;
 }
 
 export const ObservableStringEventConstants: ObservableStringEvents = Object.assign({

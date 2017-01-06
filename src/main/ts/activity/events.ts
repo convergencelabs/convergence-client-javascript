@@ -3,11 +3,11 @@ import {ActivityParticipant} from "./ActivityParticipant";
 import {Activity} from "./Activity";
 
 export interface ActivityEvent extends ConvergenceEvent {
-  src: Activity;
-  activityId: string;
-  username: string;
-  sessionId: string;
-  local: boolean;
+  readonly src: Activity;
+  readonly activityId: string;
+  readonly username: string;
+  readonly sessionId: string;
+  readonly local: boolean;
 }
 
 export class SessionJoinedEvent implements ActivityEvent {

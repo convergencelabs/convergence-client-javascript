@@ -1,7 +1,7 @@
 import {ObservableElement, ObservableElementEvents, ObservableElementEventConstants} from "./ObservableElement";
 
 export interface ObservableNumberEvents extends ObservableElementEvents {
-  DELTA: string;
+  readonly DELTA: string;
 }
 
 export const ObservableNumberEventConstants: ObservableNumberEvents = Object.assign({

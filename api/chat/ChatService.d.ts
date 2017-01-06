@@ -4,9 +4,9 @@ import {ChatRoom} from "./ChatRoom";
 import {ChatEvent} from "./events";
 
 export interface ChatServiceEvents {
-  MESSAGE: string;
-  USER_JOINED: string;
-  USER_LEFT: string;
+  readonly MESSAGE: string;
+  readonly USER_JOINED: string;
+  readonly USER_LEFT: string;
 }
 
 export declare class ChatService {

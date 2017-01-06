@@ -4,16 +4,16 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ReferenceManager} from "./ReferenceManager";
 
 export interface ModelReferenceTypes {
-  INDEX: string;
-  RANGE: string;
-  PROPERTY: string;
-  ELEMENT: string;
+  readonly INDEX: string;
+  readonly RANGE: string;
+  readonly PROPERTY: string;
+  readonly ELEMENT: string;
 }
 
 export interface ModelReferenceEvents {
-  SET: string;
-  CLEARED: string;
-  DISPOSED: string;
+  readonly SET: string;
+  readonly CLEARED: string;
+  readonly DISPOSED: string;
 }
 
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {

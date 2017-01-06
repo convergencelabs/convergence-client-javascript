@@ -2,8 +2,8 @@ import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
 
 export interface ObservableObjectEvents extends ObservableElementEvents {
-  SET: string;
-  REMOVE: string;
+  readonly SET: string;
+  readonly REMOVE: string;
 }
 
 export interface ObservableObject extends ObservableContainerElement<{[key: string]: any}> {

@@ -2,10 +2,10 @@ import {ObservableElement, ObservableElementEvents, ObservableElementEventConsta
 import {ObservableContainerElement} from "./ObservableContainerElement";
 
 export interface ObservableArrayEvents extends ObservableElementEvents {
-  INSERT: string;
-  REMOVE: string;
-  SET: string;
-  REORDER: string;
+  readonly INSERT: string;
+  readonly REMOVE: string;
+  readonly SET: string;
+  readonly REORDER: string;
 }
 
 export const ObservableArrayEventConstants: ObservableArrayEvents = Object.assign({

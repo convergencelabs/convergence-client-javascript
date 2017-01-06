@@ -53,11 +53,11 @@ import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
-  MODIFIED: string;
-  COMMITTED: string;
-  COLLABORATOR_OPENED: string;
-  COLLABORATOR_CLOSED: string;
-  REFERENCE: string;
+  readonly MODIFIED: string;
+  readonly COMMITTED: string;
+  readonly COLLABORATOR_OPENED: string;
+  readonly COLLABORATOR_CLOSED: string;
+  readonly REFERENCE: string;
 }
 
 const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({

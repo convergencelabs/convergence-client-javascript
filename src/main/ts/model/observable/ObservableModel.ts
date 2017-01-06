@@ -3,9 +3,9 @@ import {ObservableObject} from "./ObservableObject";
 import {ObservableElement} from "./ObservableElement";
 
 export interface ObservableModelEvents {
-  CLOSED: string;
-  DELETED: string;
-  VERSION_CHANGED: string;
+  readonly CLOSED: string;
+  readonly DELETED: string;
+  readonly VERSION_CHANGED: string;
 }
 
 export const ObservableModelEventConstants: ObservableModelEvents = {

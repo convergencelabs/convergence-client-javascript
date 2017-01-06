@@ -3,10 +3,10 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 
 export interface ObservableElementEvents {
-  VALUE: string;
-  DETACHED: string;
-  MODEL_CHANGED: string;
-  REFERENCE: string;
+  readonly VALUE: string;
+  readonly DETACHED: string;
+  readonly MODEL_CHANGED: string;
+  readonly REFERENCE: string;
 }
 
 export const ObservableElementEventConstants: ObservableElementEvents = {

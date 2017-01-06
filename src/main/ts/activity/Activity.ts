@@ -13,11 +13,11 @@ import { StateRemovedEvent } from "./events";
 import { mapToObject } from "../util/ObjectUtils";
 
 export interface ActivityEvents {
-  SESSION_JOINED: string;
-  SESSION_LEFT: string;
-  STATE_SET: string;
-  STATE_REMOVED: string;
-  STATE_CLEARED: string;
+  readonly SESSION_JOINED: string;
+  readonly SESSION_LEFT: string;
+  readonly STATE_SET: string;
+  readonly STATE_REMOVED: string;
+  readonly STATE_CLEARED: string;
 }
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {

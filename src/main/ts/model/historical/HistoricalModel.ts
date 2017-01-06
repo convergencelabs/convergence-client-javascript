@@ -23,13 +23,13 @@ interface OperationRequest {
 }
 
 export interface HistoricalModelEvents extends ObservableModelEvents {
-  TARGET_CHANGED: string;
-  TRANSITION_START: string;
-  TRANSITION_END: string;
+  readonly TARGET_VERSION_CHANGED: string;
+  readonly TRANSITION_START: string;
+  readonly TRANSITION_END: string;
 }
 
 const HistoricalModelEventConstants = Object.assign({
-  TARGET_CHANGED: "target_changed",
+  TARGET_VERSION_CHANGED: "target_changed",
   TRANSITION_START: "transition_start",
   TRANSITION_END: "transition_end"
 }, ObservableModelEventConstants);
