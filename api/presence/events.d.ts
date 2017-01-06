@@ -5,28 +5,28 @@ export interface PresenceSubscriptionEvent extends ConvergenceEvent {
 }
 
 export declare class PresenceStateSetEvent implements PresenceSubscriptionEvent {
-  public src: any;
-  public name: string;
-  public username: string;
-  public state: Map<string, any>;
+  public readonly src: any;
+  public readonly name: string;
+  public readonly username: string;
+  public readonly state: Map<string, any>;
 }
 
 export class PresenceStateRemovedEvent implements PresenceSubscriptionEvent {
-  public src: any;
-  public name: string;
-  public username: string;
-  public keys: string[];
+  public readonly src: any;
+  public readonly name: string;
+  public readonly username: string;
+  public readonly keys: string[];
 }
 
 export class PresenceStateClearedEvent implements PresenceSubscriptionEvent {
-  public src: any;
-  public name: string;
-  public username: string;
+  public readonly src: any;
+  public readonly name: string;
+  public readonly username: string;
 }
 
 export class PresenceAvailabilityChangedEvent implements PresenceSubscriptionEvent {
-  public src: any;
-  public name: string;
-  public username: string;
-  public available: boolean;
+  public readonly src: any;
+  public readonly name: string;
+  public readonly username: string;
+  public readonly available: boolean;
 }
