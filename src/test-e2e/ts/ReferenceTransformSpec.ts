@@ -89,7 +89,6 @@ describe("Reference Transformation E2E", () => {
         refPublishAction.acknowledgeReceipt();
         e.reference.on("set", () => {
           referenceSetAction.acknowledgeReceipt();
-          console.log(e.src.value());
           mockServer.doneManager().testSuccess();
         });
       });

@@ -115,7 +115,7 @@ export abstract class RealTimeElement<T>
   private _fireReferenceCreated(reference: ModelReference<any>): void {
     const createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeElement.Events.REFERENCE,
-      src: this,
+      element: this,
       reference
     };
     this._emitEvent(createdEvent);

@@ -142,5 +142,6 @@ class TestEmitter extends ConvergenceEventEmitter<TestEvent> {
 }
 
 interface TestEvent extends ConvergenceEvent {
+  src: any;
   value: number;
 }

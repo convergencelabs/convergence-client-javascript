@@ -15,7 +15,7 @@ export declare interface ConvergenceDomainEvents {
   ERROR: string;
 }
 
-export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
 
   public static Events: any;
 
@@ -34,4 +34,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent>
   public dispose(): void;
 
   public isDisposed(): boolean;
+}
+
+interface ConvergenceDomainEvent extends ConvergenceEvent {
+  domain: ConvergenceDomain;
+}
+
+interface ConvergenceErrorEvent extends ConvergenceDomainEvent {
+  error: string;
 }

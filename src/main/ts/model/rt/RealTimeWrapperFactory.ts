@@ -26,19 +26,19 @@ export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<a
 
   protected _createWrapper(node: ModelNode<any>): RealTimeElement<any> {
     switch (node.type()) {
-      case ModelElementType.Array:
+      case ModelElementType.ARRAY:
         return new RealTimeArray(<ArrayNode> node, this._callbacks, this, this._model);
-      case ModelElementType.Object:
+      case ModelElementType.OBJECT:
         return new RealTimeObject(<ObjectNode> node, this._callbacks, this, this._model);
-      case ModelElementType.Boolean:
+      case ModelElementType.BOOLEAN:
           return new RealTimeBoolean(<BooleanNode> node, this._callbacks, this, this._model);
-      case ModelElementType.Null:
+      case ModelElementType.NULL:
         return new RealTimeNull(<NullNode> node, this._callbacks, this, this._model);
-      case ModelElementType.Number:
+      case ModelElementType.NUMBER:
         return new RealTimeNumber(<NumberNode> node, this._callbacks, this, this._model);
-      case ModelElementType.String:
+      case ModelElementType.STRING:
         return new RealTimeString(<StringNode> node, this._callbacks, this, this._model);
-      case ModelElementType.Undefined:
+      case ModelElementType.UNDEFINED:
         return new RealTimeUndefined(<UndefinedNode> node, this._callbacks, this, this._model);
       default:
         return null;

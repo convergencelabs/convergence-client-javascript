@@ -23,11 +23,13 @@ export interface VersionChangedEvent extends ModelEvent {
 }
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
+  readonly element?: ObservableElement<any>;
+  readonly model?: ObservableModel;
   readonly reference: ModelReference<any>;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  readonly src: ObservableElement<any>;
+  readonly element: ObservableElement<any>;
   readonly local: boolean;
 }
 
@@ -47,7 +49,7 @@ export class ModelChangedEvent implements ConvergenceModelValueEvent {
   public static readonly NAME = "model_changed";
   public readonly name: string = ModelChangedEvent.NAME;
 
-  constructor(public readonly src: ObservableElement<any>,
+  constructor(public readonly element: ObservableElement<any>,
               public readonly relativePath: Path,
               public readonly childEvent: ValueChangedEvent,
               public readonly sessionId: string,
@@ -61,7 +63,7 @@ export class ArrayInsertEvent implements ValueChangedEvent {
   public static readonly NAME = "insert";
   public readonly name: string = ArrayInsertEvent.NAME;
 
-  constructor(public readonly src: ObservableArray,
+  constructor(public readonly element: ObservableArray,
               public readonly index: number,
               public readonly value: ObservableElement<any>,
               public readonly sessionId: string,
@@ -75,7 +77,7 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
   public readonly name: string = ArrayRemoveEvent.NAME;
 
-  constructor(public readonly src: ObservableArray,
+  constructor(public readonly element: ObservableArray,
               public readonly index: number,
               public readonly sessionId: string,
               public readonly username: string,
@@ -88,7 +90,7 @@ export class ArraySetEvent implements ValueChangedEvent {
   public static readonly NAME = "set";
   public readonly name: string = ArraySetEvent.NAME;
 
-  constructor(public readonly src: ObservableArray,
+  constructor(public readonly element: ObservableArray,
               public readonly index: number,
               public readonly value: ObservableElement<any>,
               public readonly sessionId: string,
@@ -102,7 +104,7 @@ export class ArrayReorderEvent implements ValueChangedEvent {
   public static readonly NAME = "reorder";
   public readonly name: string = ArrayReorderEvent.NAME;
 
-  constructor(public readonly src: ObservableArray,
+  constructor(public readonly element: ObservableArray,
               public readonly fromIndex: number,
               public readonly toIndex: number,
               public readonly sessionId: string,
@@ -116,7 +118,7 @@ export class ArraySetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
   public readonly name: string = ArraySetValueEvent.NAME;
 
-  constructor(public readonly src: ObservableArray,
+  constructor(public readonly element: ObservableArray,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -128,7 +130,7 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
   public readonly name: string = BooleanSetValueEvent.NAME;
 
-  constructor(public readonly src: ObservableBoolean,
+  constructor(public readonly element: ObservableBoolean,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -140,7 +142,7 @@ export class NumberSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
   public readonly name: string = NumberSetValueEvent.NAME;
 
-  constructor(public readonly src: ObservableNumber,
+  constructor(public readonly element: ObservableNumber,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -152,7 +154,7 @@ export class NumberDeltaEvent implements ValueChangedEvent {
   public static readonly NAME = "delta";
   public readonly name: string = NumberDeltaEvent.NAME;
 
-  constructor(public readonly src: ObservableNumber,
+  constructor(public readonly element: ObservableNumber,
               public readonly value: number,
               public readonly sessionId: string,
               public readonly username: string,
@@ -165,7 +167,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
   public static readonly NAME = "set";
   public readonly name: string = ObjectSetEvent.NAME;
 
-  constructor(public readonly src: ObservableObject,
+  constructor(public readonly element: ObservableObject,
               public readonly key: string,
               public readonly value: ObservableElement<any>,
               public readonly sessionId: string,
@@ -179,7 +181,7 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
   public readonly name: string = ObjectRemoveEvent.NAME;
 
-  constructor(public readonly src: ObservableObject,
+  constructor(public readonly element: ObservableObject,
               public readonly key: string,
               public readonly sessionId: string,
               public readonly username: string,
@@ -192,7 +194,7 @@ export class ObjectSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
   public readonly name: string = ObjectSetValueEvent.NAME;
 
-  constructor(public readonly src: ObservableObject,
+  constructor(public readonly element: ObservableObject,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -204,7 +206,7 @@ export class StringInsertEvent implements ValueChangedEvent {
   public static readonly NAME = "insert";
   public readonly name: string = StringInsertEvent.NAME;
 
-  constructor(public readonly src: ObservableString,
+  constructor(public readonly element: ObservableString,
               public readonly index: number,
               public readonly value: string,
               public readonly sessionId: string,
@@ -218,7 +220,7 @@ export class StringRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
   public readonly name: string = StringRemoveEvent.NAME;
 
-  constructor(public readonly src: ObservableString,
+  constructor(public readonly element: ObservableString,
               public readonly index: number,
               public readonly value: string,
               public readonly sessionId: string,
@@ -232,7 +234,7 @@ export class StringSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
   public readonly name: string = StringSetValueEvent.NAME;
 
-  constructor(public readonly src: ObservableString,
+  constructor(public readonly element: ObservableString,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {

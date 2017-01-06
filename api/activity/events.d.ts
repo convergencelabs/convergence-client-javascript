@@ -4,7 +4,6 @@ import {Activity} from "../../src/main/ts/activity/Activity";
 
 export interface ActivityEvent extends ConvergenceEvent {
   readonly activity: Activity;
-  readonly activityId: string;
   readonly username: string;
   readonly sessionId: string;
   readonly local: boolean;
@@ -13,7 +12,6 @@ export interface ActivityEvent extends ConvergenceEvent {
 export declare class SessionJoinedEvent implements ActivityEvent {
   public readonly name: string;
   public readonly activity: Activity;
-  public readonly activityId: string;
   public readonly username: string;
   public readonly sessionId: string;
   public readonly local: boolean;
@@ -23,7 +21,6 @@ export declare class SessionJoinedEvent implements ActivityEvent {
 export declare class SessionLeftEvent implements ActivityEvent {
   public readonly name: string;
   public readonly activity: Activity;
-  public readonly activityId: string;
   public readonly username: string;
   public readonly sessionId: string;
   public readonly local: boolean;
@@ -32,7 +29,6 @@ export declare class SessionLeftEvent implements ActivityEvent {
 export declare class StateSetEvent implements ActivityEvent {
   public readonly name: string;
   public readonly activity: Activity;
-  public readonly activityId: string;
   public readonly username: string;
   public readonly sessionId: string;
   public readonly local: boolean;
@@ -43,7 +39,6 @@ export declare class StateSetEvent implements ActivityEvent {
 export declare class StateClearedEvent implements ActivityEvent {
   public readonly name: string;
   public readonly activity: Activity;
-  public readonly activityId: string;
   public readonly username: string;
   public readonly sessionId: string;
   public readonly local: boolean;

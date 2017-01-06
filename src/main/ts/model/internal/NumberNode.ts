@@ -29,7 +29,7 @@ export class NumberNode extends ModelNode<number> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.Number, data.id, path, model, sessionId, username);
+    super(ModelElementType.NUMBER, data.id, path, model, sessionId, username);
 
     this._data = data.value;
   }

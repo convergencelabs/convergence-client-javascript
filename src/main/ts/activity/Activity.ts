@@ -149,7 +149,6 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       Object.keys(state).forEach((key) => {
         this._emitEvent(new StateSetEvent (
           this,
-          this.id(),
           this._connection.session().username(),
           this._connection.session().sessionId(),
           true,
@@ -178,7 +177,6 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       (<string[]> keys).forEach((key) => {
         this._emitEvent(new StateRemovedEvent(
           this,
-          this.id(),
           this._connection.session().username(),
           this._connection.session().sessionId(),
           true,
@@ -198,7 +196,6 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
       this._emitEvent(new StateClearedEvent(
         this,
-        this.id(),
         this._connection.session().username(),
         this._connection.session().sessionId(),
         true

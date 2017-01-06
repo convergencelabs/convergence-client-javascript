@@ -25,19 +25,19 @@ export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalEleme
 
   protected _createWrapper(node: ModelNode<any>): HistoricalElement<any> {
     switch (node.type()) {
-      case ModelElementType.Array:
+      case ModelElementType.ARRAY:
         return new HistoricalArray(<ArrayNode> node, this);
-      case ModelElementType.Object:
+      case ModelElementType.OBJECT:
         return new HistoricalObject(<ObjectNode> node, this);
-      case ModelElementType.Boolean:
+      case ModelElementType.BOOLEAN:
           return new HistoricalBoolean(<BooleanNode> node, this);
-      case ModelElementType.Null:
+      case ModelElementType.NULL:
         return new HistoricalNull(<NullNode> node, this);
-      case ModelElementType.Number:
+      case ModelElementType.NUMBER:
         return new HistoricalNumber(<NumberNode> node, this);
-      case ModelElementType.String:
+      case ModelElementType.STRING:
         return new HistoricalString(<StringNode> node, this);
-      case ModelElementType.Undefined:
+      case ModelElementType.UNDEFINED:
         return new HistoricalUndefined(<UndefinedNode> node, this);
       default:
         return null;

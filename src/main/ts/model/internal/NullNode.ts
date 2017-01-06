@@ -19,7 +19,7 @@ export class NullNode extends ModelNode<void> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.Null, id, path, model, sessionId, username);
+    super(ModelElementType.NULL, id, path, model, sessionId, username);
   }
 
   public dataValue(): NullValue {

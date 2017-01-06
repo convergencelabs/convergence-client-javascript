@@ -62,7 +62,6 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             false);
           return [new SessionJoinedEvent(
             activity,
-            joinedMsg.activityId,
             username,
             joinedMsg.sessionId,
             false,
@@ -71,7 +70,6 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           const leftMsg: ActivitySessionLeft = <ActivitySessionLeft> message;
           return [new SessionLeftEvent(
             activity,
-            leftMsg.activityId,
             SessionIdParser.parseUsername(leftMsg.sessionId),
             leftMsg.sessionId,
             false
@@ -81,7 +79,6 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           return Object.keys(stateSetMsg.state).map(key => {
             return new StateSetEvent(
               activity,
-              stateSetMsg.activityId,
               SessionIdParser.parseUsername(stateSetMsg.sessionId),
               stateSetMsg.sessionId,
               false,
@@ -93,7 +90,6 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           const stateClearedMsg: ActivityRemoteStateCleared = <ActivityRemoteStateCleared> message;
           return [new StateClearedEvent(
             activity,
-            stateClearedMsg.activityId,
             SessionIdParser.parseUsername(stateClearedMsg.sessionId),
             stateClearedMsg.sessionId,
             false
@@ -103,7 +99,6 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           return stateRemovedMsg.keys.map(key => {
             return new StateRemovedEvent(
               activity,
-              stateRemovedMsg.activityId,
               SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
               stateRemovedMsg.sessionId,
               false,
@@ -149,7 +144,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         });
 
         const filteredEvents: Observable<ActivityEvent> = this.events().filter(event => {
-          return event.activityId === id;
+          return event.activity.id() === id;
         });
 
         const activity: Activity = new Activity(

@@ -19,7 +19,7 @@ export class UndefinedNode extends ModelNode<void> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.Undefined, id, path, model, sessionId, username);
+    super(ModelElementType.UNDEFINED, id, path, model, sessionId, username);
   }
 
   public dataValue(): DataValue {

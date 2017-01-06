@@ -545,7 +545,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._referencesBySession[reference.sessionId()].push(reference);
     const createdEvent: RemoteReferenceCreatedEvent = {
       name: RealTimeModel.Events.REFERENCE,
-      src: this,
+      model: this,
       reference
     };
     this._emitEvent(createdEvent);

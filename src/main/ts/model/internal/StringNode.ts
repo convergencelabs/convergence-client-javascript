@@ -32,7 +32,7 @@ export class StringNode extends ModelNode<string> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.String, data.id, path, model, sessionId, username);
+    super(ModelElementType.STRING, data.id, path, model, sessionId, username);
 
     this._data = data.value;
   }

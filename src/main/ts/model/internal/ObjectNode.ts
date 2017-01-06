@@ -40,7 +40,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
               sessionId: string,
               username: string,
               private dataValueFactory: DataValueFactory) {
-    super(ModelElementType.Object, data.id, path, model, sessionId, username);
+    super(ModelElementType.OBJECT, data.id, path, model, sessionId, username);
 
     this._children = new Map<string, ModelNode<any>>();
 
@@ -158,7 +158,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
     }
 
     if (pathArgs.length > 1) {
-      if (child.type() === ModelElementType.Object || child.type() === ModelElementType.Array) {
+      if (child.type() === ModelElementType.OBJECT || child.type() === ModelElementType.ARRAY) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         // TODO: Determine correct way to handle undefined

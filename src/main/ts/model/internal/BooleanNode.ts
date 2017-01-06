@@ -26,7 +26,7 @@ export class BooleanNode extends ModelNode<boolean> {
               model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.Boolean, data.id, path, model, sessionId, username);
+    super(ModelElementType.BOOLEAN, data.id, path, model, sessionId, username);
     this._data = data.value;
   }
 

@@ -1,9 +1,9 @@
 export class ModelElementType {
-  public static readonly Object = "object";
-  public static readonly Array = "array";
-  public static readonly String = "string";
-  public static readonly Number = "number";
-  public static readonly Boolean = "boolean";
-  public static readonly Null = "null";
-  public static readonly Undefined = "undefined";
+  public static readonly OBJECT = "object";
+  public static readonly ARRAY = "array";
+  public static readonly STRING = "string";
+  public static readonly NUMBER = "number";
+  public static readonly BOOLEAN = "boolean";
+  public static readonly NULL = "null";
+  public static readonly UNDEFINED = "undefined";
 }

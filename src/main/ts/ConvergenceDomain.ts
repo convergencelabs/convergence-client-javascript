@@ -21,7 +21,7 @@ export interface ConvergenceDomainEvents {
   ERROR: string;
 }
 
-export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
 
   public static readonly Events: ConvergenceDomainEvents = {
     CONNECTED: "connected",
@@ -68,19 +68,19 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent>
     );
 
     this._connection.on(ConvergenceConnection.Events.CONNECTED, () =>
-      this._emitEvent({src: this, name: ConvergenceDomain.Events.CONNECTED}));
+      this._emitEvent({domain: this, name: ConvergenceDomain.Events.CONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () =>
-      this._emitEvent({src: this, name: ConvergenceDomain.Events.INTERRUPTED}));
+      this._emitEvent({domain: this, name: ConvergenceDomain.Events.INTERRUPTED}));
 
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () =>
-      this._emitEvent({src: this, name: ConvergenceDomain.Events.DISCONNECTED}));
+      this._emitEvent({domain: this, name: ConvergenceDomain.Events.DISCONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () =>
-      this._emitEvent({src: this, name: ConvergenceDomain.Events.RECONNECTED}));
+      this._emitEvent({domain: this, name: ConvergenceDomain.Events.RECONNECTED}));
 
     this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) => {
-      const evt: ConvergenceErrorEvent = {src: this, name: ConvergenceDomain.Events.ERROR, error};
+      const evt: ConvergenceErrorEvent = {domain: this, name: ConvergenceDomain.Events.ERROR, error};
       this._emitEvent(evt);
     });
   }
@@ -173,6 +173,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceEvent>
 }
 Object.freeze(ConvergenceDomain.Events);
 
-interface ConvergenceErrorEvent extends ConvergenceEvent {
+export interface ConvergenceDomainEvent extends ConvergenceEvent {
+  domain: ConvergenceDomain;
+}
+
+export interface ConvergenceErrorEvent extends ConvergenceDomainEvent {
   error: string;
 }
