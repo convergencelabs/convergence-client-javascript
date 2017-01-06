@@ -1,7 +1,7 @@
-import { IncomingProtocolNormalMessage } from "../protocol";
 import { OutgoingProtocolNormalMessage } from "../protocol";
 import { MessageBodySerializer } from "../MessageSerializer";
 import { MessageBodyDeserializer } from "../MessageSerializer";
+import {IncomingActivityMessage} from "./incomingActivityMessage";
 
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {
   activityId: string;
@@ -37,8 +37,7 @@ export const ActivityClearStateSerializer: MessageBodySerializer = (request: Act
   };
 };
 
-export interface ActivityRemoteStateSet extends IncomingProtocolNormalMessage {
-  activityId: string;
+export interface ActivityRemoteStateSet extends IncomingActivityMessage {
   sessionId: string;
   state: {[key: string]: any};
 }
@@ -52,8 +51,7 @@ export const ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<Activit
   return result;
 };
 
-export interface ActivityRemoteStateRemoved extends IncomingProtocolNormalMessage {
-  activityId: string;
+export interface ActivityRemoteStateRemoved extends IncomingActivityMessage {
   sessionId: string;
   keys: string[];
 }
@@ -68,8 +66,7 @@ export const ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<Act
     return result;
   };
 
-export interface ActivityRemoteStateCleared extends IncomingProtocolNormalMessage {
-  activityId: string;
+export interface ActivityRemoteStateCleared extends IncomingActivityMessage {
   sessionId: string;
 }
 

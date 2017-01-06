@@ -1,12 +1,12 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
 export interface  PresenceSubscriptionEvent extends ConvergenceEvent {
-  username: string;
+  readonly username: string;
 }
 
 export class PresenceStateSetEvent implements PresenceSubscriptionEvent {
   public static readonly NAME = "state_set";
-  public name: string = PresenceStateSetEvent.NAME;
+  public readonly name: string = PresenceStateSetEvent.NAME;
 
   constructor(public readonly username: string,
               public state: Map<string, any>) {
@@ -16,7 +16,7 @@ export class PresenceStateSetEvent implements PresenceSubscriptionEvent {
 
 export class PresenceStateRemovedEvent implements PresenceSubscriptionEvent {
   public static readonly NAME = "state_removed";
-  public name: string = PresenceStateRemovedEvent.NAME;
+  public readonly name: string = PresenceStateRemovedEvent.NAME;
 
   constructor(public readonly username: string,
               public readonly keys: string[]) {
@@ -26,7 +26,7 @@ export class PresenceStateRemovedEvent implements PresenceSubscriptionEvent {
 
 export class PresenceStateClearedEvent implements PresenceSubscriptionEvent {
   public static readonly NAME = "state_cleared";
-  public name: string = PresenceStateClearedEvent.NAME;
+  public readonly name: string = PresenceStateClearedEvent.NAME;
 
   constructor(public readonly username: string) {
     Object.freeze(this);
@@ -35,7 +35,7 @@ export class PresenceStateClearedEvent implements PresenceSubscriptionEvent {
 
 export class PresenceAvailabilityChangedEvent implements PresenceSubscriptionEvent {
   public static readonly NAME = "availability_changed";
-  public name: string = PresenceAvailabilityChangedEvent.NAME;
+  public readonly name: string = PresenceAvailabilityChangedEvent.NAME;
 
   constructor(public readonly username: string,
               public readonly available: boolean) {

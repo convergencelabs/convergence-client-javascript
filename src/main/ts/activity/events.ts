@@ -1,7 +1,9 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ActivityParticipant} from "./ActivityParticipant";
+import {Activity} from "./Activity";
 
 export interface ActivityEvent extends ConvergenceEvent {
+  src: Activity;
   activityId: string;
   username: string;
   sessionId: string;
@@ -10,9 +12,10 @@ export interface ActivityEvent extends ConvergenceEvent {
 
 export class SessionJoinedEvent implements ActivityEvent {
   public static readonly NAME = "session_joined";
-  public name: string = SessionJoinedEvent.NAME;
+  public readonly name: string = SessionJoinedEvent.NAME;
 
-  constructor(public readonly activityId: string,
+  constructor(public readonly src: Activity,
+              public readonly activityId: string,
               public readonly username: string,
               public readonly sessionId: string,
               public readonly local: boolean,
@@ -23,9 +26,10 @@ export class SessionJoinedEvent implements ActivityEvent {
 
 export class SessionLeftEvent implements ActivityEvent {
   public static readonly NAME = "session_left";
-  public name: string = SessionLeftEvent.NAME;
+  public readonly name: string = SessionLeftEvent.NAME;
 
-  constructor(public readonly activityId: string,
+  constructor(public readonly src: Activity,
+              public readonly activityId: string,
               public readonly username: string,
               public readonly sessionId: string,
               public readonly local: boolean) {
@@ -35,9 +39,10 @@ export class SessionLeftEvent implements ActivityEvent {
 
 export class StateSetEvent implements ActivityEvent {
   public static readonly NAME = "state_set";
-  public name: string = StateSetEvent.NAME;
+  public readonly name: string = StateSetEvent.NAME;
 
-  constructor(public readonly activityId: string,
+  constructor(public readonly src: Activity,
+              public readonly activityId: string,
               public readonly username: string,
               public readonly sessionId: string,
               public readonly local: boolean,
@@ -49,25 +54,27 @@ export class StateSetEvent implements ActivityEvent {
 
 export class StateRemovedEvent implements ActivityEvent {
   public static readonly NAME = "state_removed";
-  public name: string = StateRemovedEvent.NAME;
+  public readonly name: string = StateRemovedEvent.NAME;
 
-  constructor(public activityId: string,
-              public username: string,
-              public sessionId: string,
-              public local: boolean,
-              public key: string) {
+  constructor(public readonly src: Activity,
+              public readonly activityId: string,
+              public readonly username: string,
+              public readonly sessionId: string,
+              public readonly local: boolean,
+              public readonly key: string) {
     Object.freeze(this);
   }
 }
 
 export class StateClearedEvent implements ActivityEvent {
   public static readonly NAME = "state_cleared";
-  public name: string = StateClearedEvent.NAME;
+  public readonly name: string = StateClearedEvent.NAME;
 
-  constructor(public activityId: string,
-              public username: string,
-              public sessionId: string,
-              public local: boolean) {
+  constructor(public readonly src: Activity,
+              public readonly activityId: string,
+              public readonly username: string,
+              public readonly sessionId: string,
+              public readonly local: boolean) {
     Object.freeze(this);
   }
 }

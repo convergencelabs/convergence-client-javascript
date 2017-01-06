@@ -1,7 +1,7 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
 export interface PresenceSubscriptionEvent extends ConvergenceEvent {
-  username: string;
+  readonly username: string;
 }
 
 export declare class PresenceStateSetEvent implements PresenceSubscriptionEvent {

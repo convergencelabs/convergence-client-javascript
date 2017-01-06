@@ -1,8 +1,7 @@
-import {IncomingProtocolNormalMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
+import {IncomingActivityMessage} from "./incomingActivityMessage";
 
-export interface ActivitySessionJoined extends IncomingProtocolNormalMessage {
-  activityId: string;
+export interface ActivitySessionJoined extends IncomingActivityMessage {
   sessionId: string;
   state: Map<string, any>;
 }

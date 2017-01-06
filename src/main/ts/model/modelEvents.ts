@@ -10,42 +10,42 @@ import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
 
 export interface ModelEvent extends ConvergenceEvent {
-  src: ObservableModel;
+  readonly src: ObservableModel;
 }
 
 export interface ModelClosedEvent extends ModelEvent {
-  local: boolean;
-  reason?: string;
+  readonly local: boolean;
+  readonly reason?: string;
 }
 
 export interface VersionChangedEvent extends ModelEvent {
-  version: number;
+  readonly version: number;
 }
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  reference: ModelReference<any>;
+  readonly reference: ModelReference<any>;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: ObservableElement<any>;
-  local: boolean;
+  readonly src: ObservableElement<any>;
+  readonly local: boolean;
 }
 
 export class ElementDetachedEvent implements ConvergenceEvent {
-  public name: string = "detached";
+  public readonly name: string = "detached";
 
   constructor(public src: ObservableElement<any>) {
   }
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
-  sessionId: string;
-  username: string;
+  readonly sessionId: string;
+  readonly username: string;
 }
 
 export class ModelChangedEvent implements ConvergenceModelValueEvent {
   public static readonly NAME = "model_changed";
-  public name: string = ModelChangedEvent.NAME;
+  public readonly name: string = ModelChangedEvent.NAME;
 
   constructor(public readonly src: ObservableElement<any>,
               public readonly relativePath: Path,
@@ -59,7 +59,7 @@ export class ModelChangedEvent implements ConvergenceModelValueEvent {
 
 export class ArrayInsertEvent implements ValueChangedEvent {
   public static readonly NAME = "insert";
-  public name: string = ArrayInsertEvent.NAME;
+  public readonly name: string = ArrayInsertEvent.NAME;
 
   constructor(public readonly src: ObservableArray,
               public readonly index: number,
@@ -73,7 +73,7 @@ export class ArrayInsertEvent implements ValueChangedEvent {
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
-  public name: string = ArrayRemoveEvent.NAME;
+  public readonly name: string = ArrayRemoveEvent.NAME;
 
   constructor(public readonly src: ObservableArray,
               public readonly index: number,
@@ -86,7 +86,7 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
 
 export class ArraySetEvent implements ValueChangedEvent {
   public static readonly NAME = "set";
-  public name: string = ArraySetEvent.NAME;
+  public readonly name: string = ArraySetEvent.NAME;
 
   constructor(public readonly src: ObservableArray,
               public readonly index: number,
@@ -100,7 +100,7 @@ export class ArraySetEvent implements ValueChangedEvent {
 
 export class ArrayReorderEvent implements ValueChangedEvent {
   public static readonly NAME = "reorder";
-  public name: string = ArrayReorderEvent.NAME;
+  public readonly name: string = ArrayReorderEvent.NAME;
 
   constructor(public readonly src: ObservableArray,
               public readonly fromIndex: number,
@@ -114,7 +114,7 @@ export class ArrayReorderEvent implements ValueChangedEvent {
 
 export class ArraySetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
-  public name: string = ArraySetValueEvent.NAME;
+  public readonly name: string = ArraySetValueEvent.NAME;
 
   constructor(public readonly src: ObservableArray,
               public readonly sessionId: string,
@@ -126,7 +126,7 @@ export class ArraySetValueEvent implements ValueChangedEvent {
 
 export class BooleanSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
-  public name: string = BooleanSetValueEvent.NAME;
+  public readonly name: string = BooleanSetValueEvent.NAME;
 
   constructor(public readonly src: ObservableBoolean,
               public readonly sessionId: string,
@@ -138,7 +138,7 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
 
 export class NumberSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
-  public name: string = NumberSetValueEvent.NAME;
+  public readonly name: string = NumberSetValueEvent.NAME;
 
   constructor(public readonly src: ObservableNumber,
               public readonly sessionId: string,
@@ -150,7 +150,7 @@ export class NumberSetValueEvent implements ValueChangedEvent {
 
 export class NumberDeltaEvent implements ValueChangedEvent {
   public static readonly NAME = "delta";
-  public name: string = NumberDeltaEvent.NAME;
+  public readonly name: string = NumberDeltaEvent.NAME;
 
   constructor(public readonly src: ObservableNumber,
               public readonly value: number,
@@ -163,7 +163,7 @@ export class NumberDeltaEvent implements ValueChangedEvent {
 
 export class ObjectSetEvent implements ValueChangedEvent {
   public static readonly NAME = "set";
-  public name: string = ObjectSetEvent.NAME;
+  public readonly name: string = ObjectSetEvent.NAME;
 
   constructor(public readonly src: ObservableObject,
               public readonly key: string,
@@ -177,7 +177,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
-  public name: string = ObjectRemoveEvent.NAME;
+  public readonly name: string = ObjectRemoveEvent.NAME;
 
   constructor(public readonly src: ObservableObject,
               public readonly key: string,
@@ -190,7 +190,7 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
-  public name: string = ObjectSetValueEvent.NAME;
+  public readonly name: string = ObjectSetValueEvent.NAME;
 
   constructor(public readonly src: ObservableObject,
               public readonly sessionId: string,
@@ -202,7 +202,7 @@ export class ObjectSetValueEvent implements ValueChangedEvent {
 
 export class StringInsertEvent implements ValueChangedEvent {
   public static readonly NAME = "insert";
-  public name: string = StringInsertEvent.NAME;
+  public readonly name: string = StringInsertEvent.NAME;
 
   constructor(public readonly src: ObservableString,
               public readonly index: number,
@@ -216,7 +216,7 @@ export class StringInsertEvent implements ValueChangedEvent {
 
 export class StringRemoveEvent implements ValueChangedEvent {
   public static readonly NAME = "remove";
-  public name: string = StringRemoveEvent.NAME;
+  public readonly name: string = StringRemoveEvent.NAME;
 
   constructor(public readonly src: ObservableString,
               public readonly index: number,
@@ -230,7 +230,7 @@ export class StringRemoveEvent implements ValueChangedEvent {
 
 export class StringSetValueEvent implements ValueChangedEvent {
   public static readonly NAME = "value";
-  public name: string = StringSetValueEvent.NAME;
+  public readonly name: string = StringSetValueEvent.NAME;
 
   constructor(public readonly src: ObservableString,
               public readonly sessionId: string,

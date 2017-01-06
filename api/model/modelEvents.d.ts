@@ -10,25 +10,25 @@ import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
 
 export interface ModelEvent extends ConvergenceEvent {
-  src: ObservableModel;
+  readonly src: ObservableModel;
 }
 
 export interface ModelClosedEvent extends ModelEvent {
-  local: boolean;
-  reason?: string;
+  readonly local: boolean;
+  readonly reason?: string;
 }
 
 export interface VersionChangedEvent extends ModelEvent {
-  version: number;
+  readonly version: number;
 }
 
 export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  reference: ModelReference<any>;
+  readonly reference: ModelReference<any>;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  src: ObservableElement<any>;
-  local: boolean;
+  readonly src: ObservableElement<any>;
+  readonly local: boolean;
 }
 
 export declare class ElementDetachedEvent implements ConvergenceEvent {
@@ -37,8 +37,8 @@ export declare class ElementDetachedEvent implements ConvergenceEvent {
 }
 
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
-  sessionId: string;
-  username: string;
+  readonly sessionId: string;
+  readonly username: string;
 }
 
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {

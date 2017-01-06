@@ -1,10 +1,10 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 
 export interface ChatEvent extends ConvergenceEvent {
-  roomId: string;
-  username: string;
-  sessionId: string;
-  timestamp: number;
+  readonly roomId: string;
+  readonly username: string;
+  readonly sessionId: string;
+  readonly timestamp: number;
 }
 
 export declare class ChatMessageEvent implements ChatEvent {
