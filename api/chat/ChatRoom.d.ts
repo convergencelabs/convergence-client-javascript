@@ -14,15 +14,15 @@ export declare class ChatRoom extends ConvergenceEventEmitter<ChatEvent> {
 
   public id(): string;
 
-  public isJoined(): boolean;
-
-  public leave(): void;
-
-  public send(message: string): void;
-
   public members(): ChatMember[];
 
   public messageCount(): number;
 
   public lastMessageTime(): number;
+
+  public isJoined(): boolean;
+
+  public leave(): void;
+
+  public send(message: string): void;
 }

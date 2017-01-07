@@ -1,5 +1,5 @@
 export class ChatMember {
-    constructor(public username: string, public sessionId: string) {
+    constructor(public readonly username: string, public readonly sessionId: string) {
         Object.freeze(this);
     }
 }
