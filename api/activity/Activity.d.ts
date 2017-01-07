@@ -3,6 +3,7 @@ import {ActivityEvent} from "./events";
 import {Observable} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {StringMapLike} from "../util/StringMap";
 
 export declare interface ActivityEvents {
   readonly SESSION_JOINED: string;
@@ -24,9 +25,9 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public isJoined(): boolean;
 
   public state(key: string): any;
-  public state(): {[key: string]: any};
+  public state(): Map<string, any>;
 
-  public setState(state: {[key: string]: any}): void;
+  public setState(state: StringMapLike): void;
   public setState(key: string, value: any): void;
 
   public removeState(key: string): void;

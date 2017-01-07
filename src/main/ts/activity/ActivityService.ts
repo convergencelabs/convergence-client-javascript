@@ -17,7 +17,8 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
 import {ActivityEvent} from "./events";
 import {StateRemovedEvent} from "./events";
-import {mapToObject, objectToMap} from "../util/ObjectUtils";
+import {StringMap, StringMapLike} from "../util/StringMap";
+import {deepClone} from "../util/ObjectUtils";
 import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
 
 export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
@@ -73,7 +74,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             SessionIdParser.parseUsername(leftMsg.sessionId),
             leftMsg.sessionId,
             false
-        )];
+          )];
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
           const stateSetMsg: ActivityRemoteStateSet = <ActivityRemoteStateSet> message;
           return Object.keys(stateSetMsg.state).map(key => {
@@ -93,7 +94,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             SessionIdParser.parseUsername(stateClearedMsg.sessionId),
             stateClearedMsg.sessionId,
             false
-        )];
+          )];
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
           const stateRemovedMsg: ActivityRemoteStateRemoved = <ActivityRemoteStateRemoved> message;
           return stateRemovedMsg.keys.map(key => {
@@ -120,25 +121,31 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
   public join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
     if (!this.isJoined(id)) {
-      if (options === undefined) {
-        options = <ActivityJoinOptions> {
-          state: new Map<string, any>()
-        };
+      options = options || {};
+
+      let initialState: Map<string, any> = new Map<string, any>();
+      if (options.state) {
+        if (options.state.constructor !== Map) {
+          initialState = StringMap.objectToMap(options.state);
+        } else {
+          initialState = deepClone(options.state);
+        }
       }
+
       let deferred: Deferred<Activity> = new Deferred<Activity>();
       this._joinedDeferreds.set(id, deferred);
       this._connection.request(<ActivityJoinRequest> {
         type: MessageType.ACTIVITY_JOIN_REQUEST,
         activityId: id,
-        state: options.state
+        state: initialState
       }).then((response: ActivityJoinResponse) => {
         const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
 
         Object.keys(response.participants).forEach(sessionId => {
           const username: string = SessionIdParser.parseUsername(sessionId);
           const local: boolean = sessionId === this._connection.session().sessionId();
-          const state: { [key: string]: any } = response.participants[sessionId];
-          let stateMap: Map<string, any> = objectToMap(state);
+          const state: {[key: string]: any} = response.participants[sessionId];
+          let stateMap: Map<string, any> = StringMap.objectToMap(state);
           const participant = new ActivityParticipant(sessionId, username, stateMap, local);
           participants.set(sessionId, participant);
         });
@@ -150,7 +157,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         const activity: Activity = new Activity(
           id,
           participants,
-          this._leftCB(id).bind(this),
+          () => this._onActivityLeave(id),
           filteredEvents,
           this._connection);
 
@@ -159,26 +166,23 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
       });
     }
 
-    // TODO: validate that this works
     return this._joinedDeferreds.get(id).promise();
   }
 
-  public joined(): { [key: string]: Activity } {
-    return mapToObject(this._joinedDeferreds);
+  public joined(): Map<string, Activity> {
+    return deepClone(this._joinedActivities);
   }
 
   public isJoined(id: string): boolean {
     return this._joinedDeferreds.has(id);
   }
 
-  private _leftCB: (id: string) => () => void = (id: string) => {
-    return () => {
-      this._joinedDeferreds.delete(id);
-      this._joinedActivities.delete(id);
-    };
+  private _onActivityLeave(id: string): void {
+    this._joinedDeferreds.delete(id);
+    this._joinedActivities.delete(id);
   }
 }
 
 export interface ActivityJoinOptions {
-  state?: Map<string, any> | {[key: string]: any};
+  state?: StringMapLike;
 }

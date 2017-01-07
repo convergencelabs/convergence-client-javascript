@@ -28,35 +28,4 @@ export class Immutable {
   public static update(current: any, update: any): any {
     return update !== undefined ? update : current;
   }
-
-  public static deepClone(from: any): any {
-    const type: string = typeof from;
-
-    // Primitive types
-    if (from === null || from === undefined || type === "string" || type === "number" || type === "boolean" ) {
-      return from;
-    }
-
-    // Handle Date
-    if (from instanceof Date) {
-      return new Date(from.getTime());
-    }
-
-    // Handle Array
-    if (from instanceof Array) {
-      return from.map(e => Immutable.deepClone(e));
-    }
-
-    // Handle Object
-    if (from.constructor === Object ) {
-      const result: Object = {};
-      Object.keys(from).forEach(key => {
-        result[key] = Immutable.deepClone(from[key]);
-      });
-      return result;
-    }
-
-    const name: string = from.constructor.name || from.constructor.toString();
-    throw new Error("Can not clone unknown type: " + name);
-  }
 }

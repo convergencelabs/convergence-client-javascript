@@ -10,7 +10,7 @@ import { ActivityLeaveRequest } from "../connection/protocol/activity/leaveActiv
 import { ActivitySetState, ActivityClearState } from "../connection/protocol/activity/activityState";
 import { ActivityRemoveState } from "../connection/protocol/activity/activityState";
 import { StateRemovedEvent } from "./events";
-import { mapToObject } from "../util/ObjectUtils";
+import {StringMap, StringMapLike} from "../util/StringMap";
 
 export interface ActivityEvents {
   readonly SESSION_JOINED: string;
@@ -116,24 +116,24 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   }
 
   public state(key: string): any;
-  public state(): {[key: string]: any};
+  public state(): Map<string, any>;
   public state(key?: string): any {
     const localParticipant: ActivityParticipant =
       this._participants.getValue().get(this._connection.session().sessionId());
     if (typeof key === "undefined") {
-      return mapToObject(localParticipant.state());
+      return localParticipant.state();
     } else {
       return localParticipant.state().get(key);
     }
   }
 
-  public setState(state: {[key: string]: any}): void
+  public setState(state: StringMapLike): void
   public setState(key: string, value: any): void
   public setState(): void {
     if (this.isJoined()) {
       let state: {[key: string]: any};
       if (arguments.length === 1) {
-        state = arguments[0];
+        state = StringMap.toStringMap(arguments[0]);
       } else if (arguments.length === 2) {
         state = {};
         state[arguments[0]] = arguments[1];

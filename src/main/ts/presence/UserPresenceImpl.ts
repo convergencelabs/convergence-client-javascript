@@ -1,4 +1,5 @@
 import {UserPresence} from "./UserPresence";
+import {deepClone} from "../util/ObjectUtils";
 
 export class UserPresenceImpl implements UserPresence {
 
@@ -23,11 +24,10 @@ export class UserPresenceImpl implements UserPresence {
   public state(key: string): any
   public state(): Map<string, any>
   public state(key?: string): any {
-    // FIXME make result be cloned / immutable.
     if (typeof key === "undefined") {
-      return this._state;
+      return deepClone(this._state);
     } else {
-      return this._state.get(key);
+      return deepClone(this._state.get(key));
     }
   }
 }

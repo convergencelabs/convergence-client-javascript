@@ -2,6 +2,7 @@ import {OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {IncomingProtocolResponseMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
+import {StringMap} from "../../../util/StringMap";
 
 export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
@@ -11,7 +12,7 @@ export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
 export const ActivityJoinRequestSerializer: MessageBodySerializer = (request: ActivityJoinRequest) => {
   return {
     i: request.activityId,
-    s: request.state
+    s: StringMap.mapToObject(request.state)
   };
 };
 

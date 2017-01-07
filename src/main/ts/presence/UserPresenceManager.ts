@@ -15,6 +15,7 @@ import {
   PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
   PresenceAvailabilityChangedEvent
 } from "./events";
+import {deepClone} from "../util/ObjectUtils";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> implements UserPresence {
 
@@ -85,9 +86,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
   }
 
   public set(state: Map<string, any>): void {
-    // fixme clone
     let newState: Map<string, any> = this._presence.state();
-    state.forEach((v, k) => newState.set(k, v));
+    state.forEach((v, k) => newState.set(k, deepClone(v)));
 
     this._presence = new UserPresenceImpl(
       this._presence.username(),
@@ -100,7 +100,6 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
   }
 
   public remove(keys: string[]): void {
-    // fixme clone
     let newState: Map<string, any> = this._presence.state();
     keys.forEach(k => newState.delete(k));
 

@@ -9,7 +9,7 @@ import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
 import {ConvergenceEventEmitter} from "./util/ConvergenceEventEmitter";
 import {UserPresence} from "./presence/UserPresence";
-import {objectToMap} from "./util/ObjectUtils";
+import {StringMap} from "./util/StringMap";
 import {UserPresenceImpl} from "./presence/UserPresenceImpl";
 import {
   ConnectionErrorEvent, ConnectedEvent, ConvergenceDomainEvent, InterruptedEvent,
@@ -156,7 +156,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
 
   private _init(m: AuthResponse): void {
     const session: Session = this._connection.session();
-    const presenceState: Map<string, any> = objectToMap(m.state);
+    const presenceState: Map<string, any> = StringMap.objectToMap(m.state);
     const initialPresence: UserPresence = new UserPresenceImpl(session.username(), true, presenceState);
     this._modelService = new ModelService(this._connection);
     this._identityService = new IdentityService(this._connection);

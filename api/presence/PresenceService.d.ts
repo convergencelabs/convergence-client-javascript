@@ -3,6 +3,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
+import {StringMapLike} from "../util/StringMap";
 
 export interface PresenceServiceEvents {
   readonly STATE_SET: string;
@@ -19,7 +20,7 @@ export declare class PresenceService extends ConvergenceEventEmitter<Convergence
 
   public isAvailable(): boolean;
 
-  public setState(state: {[key: string]: any}): void;
+  public setState(state: StringMapLike): void;
   public setState(key: string, value: any): void;
 
   // public replace(state: Map<string, any>);

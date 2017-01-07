@@ -4,10 +4,10 @@ import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/Rx";
 
 export interface UserPresenceSubscriptionEvents {
-  STATE_SET: string;
-  STATE_REMOVED: string;
-  STATE_CLEARED: string;
-  AVAILABILITY_CHANGED: string;
+  readonly STATE_SET: string;
+  readonly STATE_REMOVED: string;
+  readonly STATE_CLEARED: string;
+  readonly AVAILABILITY_CHANGED: string;
 }
 
 export declare class UserPresenceSubscription

@@ -14,11 +14,12 @@ import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePr
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
-import {objectToMap, mapToObject} from "../util/ObjectUtils";
+import {StringMap, StringMapLike} from "../util/StringMap";
 import {
   PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
   PresenceAvailabilityChangedEvent
 } from "./events";
+import {deepClone} from "../util/ObjectUtils";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -80,12 +81,12 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._localPresence.isAvailable();
   }
 
-  public setState(state: {[key: string]: any}): void
+  public setState(state: StringMapLike): void
   public setState(key: string, value: any): void
   public setState(): void {
     let state: Map<string, any>;
     if (arguments.length === 1) {
-      state = objectToMap(arguments[0]);
+      state = StringMap.objectToMap(arguments[0]);
     } else if (arguments.length === 2) {
       state = new Map<string, any>();
       state.set(arguments[0], arguments[1]);
@@ -95,7 +96,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     const message: PresenceSetState = {
       type: MessageType.PRESENCE_SET_STATE,
-      state: mapToObject(state),
+      state: StringMap.mapToObject(state),
       all: false
     };
 
@@ -133,10 +134,12 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  public state(): {[key: string]: any}
+  public state(): Map<string, any>
   public state(key: string): any
   public state(key?: string): any {
-    return mapToObject(this._localPresence.state(key));
+    // The underlying class takes care of returning a single value or the whole
+    // map as well as cloning.
+    return this._localPresence.state(key);
   }
 
   public presence(username: string): Promise<UserPresence>
@@ -186,7 +189,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     return this._connection.request(message).then((response: RequestPresenceResponse) => {
       return response.userPresences.map(p =>
-        new UserPresenceImpl(p.username, p.available, objectToMap(p.state))
+        new UserPresenceImpl(p.username, p.available, StringMap.objectToMap(p.state))
       );
     });
   }
@@ -214,7 +217,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
       return this._connection.request(message).then((response: SubscribePresenceResponse) => {
         response.userPresences.forEach(presence => {
           const manager: UserPresenceManager = new UserPresenceManager(
-            new UserPresenceImpl(presence.username, presence.available, objectToMap(presence.state)),
+            new UserPresenceImpl(presence.username, presence.available, StringMap.objectToMap(presence.state)),
             this._presenceStreams.get(presence.username),
             (username) => this._unsubscribe(username)
           );
