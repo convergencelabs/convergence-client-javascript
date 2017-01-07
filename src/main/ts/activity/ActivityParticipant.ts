@@ -29,7 +29,7 @@ export class ActivityParticipant {
     }
   }
 
-  public isLocal() {
+  public isLocal(): boolean {
     return this._local;
   }
 }

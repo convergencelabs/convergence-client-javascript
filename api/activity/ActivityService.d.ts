@@ -8,11 +8,11 @@ export declare class ActivityService extends ConvergenceEventEmitter<Convergence
 
   public join(id: string, options?: ActivityJoinOptions): Promise<Activity>;
 
-  public joined(): Map<string, Activity>;
+  public joined(): { [key: string]: Activity };
 
   public isJoined(id: string): boolean;
 }
 
 export interface ActivityJoinOptions {
-  state?: Map<string, any>;
+  state?: Map<string, any> | {[key: string]: any};
 }

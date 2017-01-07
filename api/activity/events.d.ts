@@ -36,11 +36,19 @@ export declare class StateSetEvent implements ActivityEvent {
   public readonly value: any;
 }
 
-export declare class StateClearedEvent implements ActivityEvent {
+export declare class StateRemovedEvent implements ActivityEvent {
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
   public readonly sessionId: string;
   public readonly local: boolean;
   public readonly key: string;
+}
+
+export declare class StateClearedEvent implements ActivityEvent {
+  public readonly name: string;
+  public readonly activity: Activity;
+  public readonly username: string;
+  public readonly sessionId: string;
+  public readonly local: boolean;
 }
