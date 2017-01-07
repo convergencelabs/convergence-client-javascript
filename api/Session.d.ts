@@ -1,8 +1,8 @@
-import ConvergenceDomain from "./ConvergenceDomain";
+import {ConvergenceDomain} from "./ConvergenceDomain";
 
 export interface Session {
   /**
-   * @return The ConvergenceDomain for this session
+   * @return The ConvergenceDomain this session belongs to.
    */
   domain(): ConvergenceDomain;
 
