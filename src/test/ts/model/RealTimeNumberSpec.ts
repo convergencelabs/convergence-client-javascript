@@ -95,8 +95,10 @@ describe("RealTimeNumber", () => {
     const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.add(5);
 
-    // const expectedOp: NumberAddOperation = new NumberAddOperation(initialValue.id, false, 5);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: NumberAddOperation = new NumberAddOperation(myNumber.id(), false, 5);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after subtract", () => {
@@ -105,8 +107,10 @@ describe("RealTimeNumber", () => {
     const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.subtract(5);
 
-    // const expectedOp: NumberAddOperation = new NumberAddOperation(initialValue.id, false, -5);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: NumberAddOperation = new NumberAddOperation(myNumber.id(), false, -5);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after set", () => {
@@ -115,8 +119,10 @@ describe("RealTimeNumber", () => {
     const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.value(20);
 
-    // const expectedOp: NumberSetOperation = new NumberSetOperation(initialValue.id, false, 20);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: NumberSetOperation = new NumberSetOperation(myNumber.id(), false, 20);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Value is correct after NumberAddOperation", () => {

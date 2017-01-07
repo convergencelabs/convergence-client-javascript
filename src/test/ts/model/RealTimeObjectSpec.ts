@@ -2,7 +2,7 @@ import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
 import {RealTimeObject} from "../../../main/ts/model/rt/RealTimeObject";
 import {ObjectSetOperation} from "../../../main/ts/model/ot/ops/ObjectSetOperation";
 import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
-import {ObjectValue} from "../../../main/ts/model/dataValue";
+import {ObjectValue, StringValue, DataValueType} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValue} from "../../../main/ts/model/dataValue";
@@ -14,6 +14,7 @@ import {ObjectNode} from "../../../main/ts/model/internal/ObjectNode";
 import * as chai from "chai";
 import {SinonSpy} from "sinon";
 import * as sinon from "sinon";
+import {ObjectSetValueEvent} from "../../../main/ts/model/modelEvents";
 
 const expect: any = chai.expect;
 
@@ -86,8 +87,14 @@ describe("RealTimeObject", () => {
     const myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
     myObject.value({string: "test"});
 
-    // const expectedOp: ObjectSetOperation = new ObjectSetOperation(initialValue.id, false, setValue);
-    // expect((<any>callbacks.sendOperationCallback).lastCall.args[0]).to.be.deep.equal(expectedOp);
+    const expectedDataValue: {[key: string]: DataValue} = {
+      string: <StringValue> {id: myObject.get("string").id(), type: DataValueType.STRING, value: "test"}
+    };
+
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ObjectSetOperation = new ObjectSetOperation(myObject.id(), false, expectedDataValue);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Value is correct after ObjectSetOperation", () => {
@@ -115,15 +122,13 @@ describe("RealTimeObject", () => {
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    // const expectedEvent: ObjectSetValueEvent = {
-    //  src: myObject,
-    //  name: RealTimeObject.Events.VALUE,
-    //  sessionId: sessionId,
-    //  userId: username,
-    //  version: version,
-    //  timestamp: timestamp,
-    //  value: {string: "test"}
-    // };
-    // expect(eventCallback.lastCall.args[0]).to.deep.equal(expectedEvent);
+    const expectedEvent: ObjectSetValueEvent = {
+     element: myObject,
+     name: RealTimeObject.Events.VALUE,
+     sessionId,
+     username,
+     local: false
+    };
+    expect(eventCallback.lastCall.args[0]).to.deep.equal(expectedEvent);
   });
 });

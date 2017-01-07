@@ -8,7 +8,7 @@ import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
 import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {DataValue, StringValue} from "../../../main/ts/model/dataValue";
+import {DataValue, StringValue, DataValueType} from "../../../main/ts/model/dataValue";
 import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {ArrayValue} from "../../../main/ts/model/dataValue";
 import {Model} from "../../../main/ts/model/internal/Model";
@@ -60,7 +60,7 @@ describe("RealTimeArray", () => {
 
   let callbacks: ModelEventCallbacks;
 
-  beforeEach( () => {
+  beforeEach(() => {
     callbacks = {
       sendOperationCallback: sinon.spy(),
       referenceEventCallbacks: {
@@ -80,7 +80,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after creation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     expect(myArray.value()).to.deep.equal(primitiveValue);
   });
@@ -88,7 +88,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after set", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.value(["X", "Y", "Z"]);
     expect(myArray.value()).to.deep.equal(["X", "Y", "Z"]);
@@ -97,7 +97,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after insert", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.insert(2, "X");
     expect(myArray.value()).to.deep.equal(["A", "B", "X", "C"]);
@@ -106,7 +106,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after remove", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.remove(1);
     expect(myArray.value()).to.deep.equal(["A", "C"]);
@@ -115,7 +115,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after set", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.set(1, "X");
     expect(myArray.value()).to.deep.equal(["A", "X", "C"]);
@@ -124,7 +124,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after move", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.reorder(1, 2);
     expect(myArray.value()).to.deep.equal(["A", "C", "B"]);
@@ -133,62 +133,89 @@ describe("RealTimeArray", () => {
   it("Correct operation is sent after set value", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.value(["X", "Y", "Z"]);
 
-    // const expectedOp: ArraySetOperation = new ArraySetOperation([], false, ["X", "Y", "Z"]);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const expectedDataValue: DataValue[] = [
+      <StringValue> { id: myArray.get(0).id(), type: DataValueType.STRING, value: "X" },
+      <StringValue> { id: myArray.get(1).id(), type: DataValueType.STRING, value: "Y" },
+      <StringValue> { id: myArray.get(2).id(), type: DataValueType.STRING, value: "Z" },
+    ];
+
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ArraySetOperation = new ArraySetOperation(myArray.id(), false, expectedDataValue);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after insert", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
-    myArray.insert(2, "X");
+    const value: RealTimeElement<any> = myArray.insert(2, "X");
+    const expectedDataValue = <StringValue> {
+      id: value.id(),
+      type: DataValueType.STRING,
+      value: "X"
+    };
 
-    // const expectedOp: ArrayInsertOperation = new ArrayInsertOperation([], false, 2, "X");
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ArrayInsertOperation = new ArrayInsertOperation(myArray.id(), false, 2, expectedDataValue);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after remove", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.remove(1);
 
-    // const expectedOp: ArrayRemoveOperation = new ArrayRemoveOperation([], false, 1);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ArrayRemoveOperation = new ArrayRemoveOperation(myArray.id(), false, 1);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after set", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
-    myArray.set(1, "X");
+    const value: RealTimeElement<any> = myArray.set(1, "X");
 
-    // const expectedOp: ArrayReplaceOperation = new ArrayReplaceOperation([], false, 1, "X");
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const expectedDataValue = <StringValue> {
+      id: value.id(),
+      type: DataValueType.STRING,
+      value: "X"
+    };
+
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ArrayReplaceOperation = new ArrayReplaceOperation(myArray.id(), false, 1, expectedDataValue);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after move", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.reorder(1, 2);
 
-    // const expectedOp: ArrayMoveOperation = new ArrayMoveOperation([], false, 1, 2);
-    // expect(lastOp).to.deep.equal(expectedOp);
+    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    expect(opSpy.called).to.be.true;
+    const expectedOp: ArrayMoveOperation = new ArrayMoveOperation(myArray.id(), false, 1, 2);
+    expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Value is correct after ArraySetOperation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
 
     const incomingOp: ArraySetOperation = new ArraySetOperation(arrayValue.id, false, newArray);
@@ -202,7 +229,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after ArrayInsertOperation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
 
     const newValue: DataValue = dataValueFactory.createDataValue("X");
@@ -218,7 +245,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after ArrayRemoveOperation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
 
     const incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation(arrayValue.id, false, 1);
@@ -232,7 +259,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after ArrayReplaceOperation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
 
     const incomingOp: ArrayReplaceOperation =
@@ -247,7 +274,7 @@ describe("RealTimeArray", () => {
   it("Value is correct after ArrayMoveOperation", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
 
     const incomingOp: ArrayMoveOperation =
@@ -263,7 +290,7 @@ describe("RealTimeArray", () => {
     lastEvent = null;
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.VALUE, lastEventCallback);
 
@@ -280,7 +307,7 @@ describe("RealTimeArray", () => {
     lastEvent = null;
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.INSERT, lastEventCallback);
 
@@ -299,7 +326,7 @@ describe("RealTimeArray", () => {
     lastEvent = null;
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.REMOVE, lastEventCallback);
 
@@ -316,7 +343,7 @@ describe("RealTimeArray", () => {
     lastEvent = null;
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.SET, lastEventCallback);
 
@@ -328,7 +355,7 @@ describe("RealTimeArray", () => {
     delegate._handleModelOperationEvent(incomingEvent);
 
     const valueDelegate: StringNode =
-      new StringNode(<StringValue> newValue, () => { return []; }, model, sessionId, username);
+      new StringNode(<StringValue> newValue, () => [], model, sessionId, username);
     const stringElement: RealTimeString = <RealTimeString> wrapperFactory.wrap(valueDelegate);
     const expectedEvent: ArraySetEvent = new ArraySetEvent(myArray, 1, stringElement, sessionId, username, false);
     expect(lastEvent).to.deep.equal(expectedEvent);
@@ -338,7 +365,7 @@ describe("RealTimeArray", () => {
     lastEvent = null;
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.REORDER, lastEventCallback);
 
@@ -354,7 +381,7 @@ describe("RealTimeArray", () => {
   it("ForEach is called on all elements", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.forEach((element: RealTimeElement<any>) => {
       element.value("R");
@@ -365,7 +392,7 @@ describe("RealTimeArray", () => {
   it("Some returns true if callback returns true for any element", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const some = myArray.some((element: RealTimeElement<any>) => {
       return element.value() === "A";
@@ -376,7 +403,7 @@ describe("RealTimeArray", () => {
   it("Some returns false if callback returns false for all elements", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const some = myArray.some((element: RealTimeElement<any>) => {
       return element.value() === "R";
@@ -387,7 +414,7 @@ describe("RealTimeArray", () => {
   it("Every returns true if callback returns true for all elements", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const every = myArray.every((element: RealTimeElement<any>) => {
       return element instanceof RealTimeString;
@@ -398,7 +425,7 @@ describe("RealTimeArray", () => {
   it("Every returns false if callback returns false for any element", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const every = myArray.every((element: RealTimeElement<any>) => {
       return element.value() === "A";
@@ -409,7 +436,7 @@ describe("RealTimeArray", () => {
   it("Find returns the correct element", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const found = myArray.find((element: RealTimeElement<any>) => {
       return element.value() === "B";
@@ -420,7 +447,7 @@ describe("RealTimeArray", () => {
   it("Find returns undefined if nothing is found", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const found = myArray.find((element: RealTimeElement<any>) => {
       return element.value() === "R";
@@ -431,7 +458,7 @@ describe("RealTimeArray", () => {
   it("FindIndex returns the correct index", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const foundIndex = myArray.findIndex((element: RealTimeElement<any>) => {
       return element.value() === "B";
@@ -442,7 +469,7 @@ describe("RealTimeArray", () => {
   it("FindIndex returns undefined if nothing is found", () => {
     const wrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ArrayNode =
-      new ArrayNode(arrayValue, () => { return []; }, model, sessionId, username, dataValueFactory);
+      new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     const foundIndex = myArray.find((element: RealTimeElement<any>) => {
       return element.value() === "R";
