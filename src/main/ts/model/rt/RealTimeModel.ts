@@ -148,10 +148,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     });
 
     const referenceCallbacks: ModelReferenceCallbacks = {
-      onShare: this._onShareReference,
-      onUnshare: this._onUnshareReference,
-      onSet: this._onSetReference,
-      onClear: this._onClearReference
+      onShare: this._onShareReference.bind(this),
+      onUnshare: this._onUnshareReference.bind(this),
+      onSet: this._onSetReference.bind(this),
+      onClear: this._onClearReference.bind(this)
     };
 
     this._callbacks = {
