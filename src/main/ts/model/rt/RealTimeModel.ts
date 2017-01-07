@@ -66,7 +66,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
     COMMITTED: "committed",
     COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
     COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
-    REFERENCE: "reference"
+    REFERENCE: RemoteReferenceCreatedEvent.NAME
   },
   ObservableModelEventConstants);
 
@@ -539,12 +539,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
 
   private _onRemoteReferencePublished(reference: ModelReference<any>): void {
     this._referencesBySession[reference.sessionId()].push(reference);
-    const createdEvent: RemoteReferenceCreatedEvent = {
-      name: RealTimeModel.Events.REFERENCE,
-      model: this,
-      reference
-    };
-    this._emitEvent(createdEvent);
+    this._emitEvent(new RemoteReferenceCreatedEvent(reference, undefined, this));
   }
 
   private _getMessageValues(ref: ModelReferenceData): string[] {

@@ -22,10 +22,15 @@ export interface VersionChangedEvent extends ModelEvent {
   readonly version: number;
 }
 
-export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  readonly element?: ObservableElement<any>;
-  readonly model?: ObservableModel;
-  readonly reference: ModelReference<any>;
+export class RemoteReferenceCreatedEvent implements ConvergenceEvent {
+  public static readonly NAME = "reference";
+  public readonly name: string = RemoteReferenceCreatedEvent.NAME;
+
+  constructor(public readonly reference: ModelReference<any>,
+              public readonly element?: ObservableElement<any>,
+              public readonly model?: ObservableModel) {
+    Object.freeze(this);
+  }
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
