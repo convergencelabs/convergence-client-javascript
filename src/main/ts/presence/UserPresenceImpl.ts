@@ -10,7 +10,7 @@ export class UserPresenceImpl implements UserPresence {
   constructor(username: string, available: boolean, state: Map<string, any>) {
     this._username = username;
     this._available = available;
-    this._state = state; // TODO copy
+    this._state = deepClone(state);
   }
 
   public username(): string {

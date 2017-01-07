@@ -1,3 +1,4 @@
+import {deepClone} from "../util/ObjectUtils";
 export class ActivityParticipant {
 
   private _username: string;
@@ -9,7 +10,7 @@ export class ActivityParticipant {
     this._local = local;
     this._username = username;
     this._sessionId = session;
-    this._stateMap = stateMap;
+    this._stateMap = deepClone(stateMap);
   }
 
   public username(): string {
@@ -23,9 +24,9 @@ export class ActivityParticipant {
   public state(): Map<string, any>
   public state(key?: string): any {
     if (key !== undefined) {
-      return this._stateMap[key];
+      return deepClone(this._stateMap[key]);
     } else {
-      return this._stateMap;
+      return deepClone(this._stateMap);
     }
   }
 
