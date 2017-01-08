@@ -5,7 +5,7 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {RealTimeModel} from "../../../src/main/ts/model/rt/RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }

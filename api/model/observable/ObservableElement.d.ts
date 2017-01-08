@@ -1,7 +1,7 @@
 import {Path} from "../Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {ObservableModel} from "../../../src/main/ts/model/observable/ObservableModel";
+import {ObservableModel} from "./ObservableModel";
 
 export interface ObservableElementEvents {
   readonly VALUE: string;

@@ -1,6 +1,6 @@
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ActivityParticipant} from "./ActivityParticipant";
-import {Activity} from "../../src/main/ts/activity/Activity";
+import {Activity} from "./Activity";
 
 export interface ActivityEvent extends ConvergenceEvent {
   readonly activity: Activity;
