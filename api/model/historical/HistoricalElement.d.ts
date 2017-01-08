@@ -2,6 +2,7 @@ import {Path} from "../Path";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
+import {HistoricalModel} from "../../../src/main/ts/model/historical/HistoricalModel";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -20,4 +21,6 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
   public isDetached(): boolean;
 
   public value(): T;
+
+  public model(): HistoricalModel;
 }

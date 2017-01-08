@@ -1,6 +1,7 @@
 import {Path} from "../Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ObservableModel} from "../../../src/main/ts/model/observable/ObservableModel";
 
 export interface ObservableElementEvents {
   readonly VALUE: string;
@@ -19,4 +20,6 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
   isDetached(): boolean;
 
   value(): T;
+
+  model(): ObservableModel;
 }

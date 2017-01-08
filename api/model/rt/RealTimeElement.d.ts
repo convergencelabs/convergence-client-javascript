@@ -5,6 +5,7 @@ import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {RealTimeModel} from "../../../src/main/ts/model/rt/RealTimeModel";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -32,4 +33,6 @@ export declare abstract class RealTimeElement<T>
   public reference(sessionId: string, key: string): ModelReference<any>;
 
   public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
+
+  public model(): RealTimeModel;
 }
