@@ -3,6 +3,11 @@ import {ConvergenceEvent} from "./ConvergenceEvent";
 
 export type EventListener<T> = (e: T) => void;
 
+interface EventRegistration<T> {
+  listener: EventListener<T>;
+  subscription: Subscription;
+}
+
 export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
   private static _resolveEventKey(event: string): string {
@@ -13,16 +18,14 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     }
   }
 
-  private _eventSubscriptions: {[key: string]: Subscription[]};
-  private _listeners: {[key: string]: Array<EventListener<T>>};
+  private _listeners: {[key: string]: Array<EventRegistration<T>>};
 
   private _defaultSubject: Subject<T>;
   private _observable: Observable<T>;
 
   constructor() {
     this._defaultSubject = new Subject<T>();
-    this._observable = this._defaultSubject.asObservable();
-    this._eventSubscriptions = {};
+    this._observable = this._defaultSubject.asObservable().share();
     this._listeners = {};
   }
 
@@ -32,26 +35,20 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     }
 
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    let listeners: Array<EventListener<T>> = this._listeners[event];
-    let subscriptions: Subscription[] = this._eventSubscriptions[event];
+    let listeners: Array<EventRegistration<T>> = this._listeners[event];
     if (listeners === undefined) {
       listeners = [];
       this._listeners[event] = listeners;
-      subscriptions = [];
-      this._eventSubscriptions[event] = subscriptions;
+    } else if (listeners.find(r => r.listener === listener) !== undefined) {
+      // we don't add duplicates, so return early.
+      return this;
     }
 
-    if (listeners.indexOf(listener) >= 0) {
-      // we don't add duplicates.
-      return;
-    }
+    const subscription: Subscription =
+      this._observable.filter((e) => e.name.toLowerCase() === event).subscribe((e: T) => listener(e));
 
-    const subscription: Subscription = this._observable.filter((e) => {
-      return e.name.toLowerCase() === (<string> event);
-    }).subscribe((e) => listener(<T> e));
+    listeners.push({listener, subscription});
 
-    listeners.push(listener);
-    subscriptions.push(subscription);
     return this;
   }
 
@@ -68,33 +65,29 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
   }
 
   public removeAllListenersForAllEvents(): ConvergenceEventEmitter<T> {
-    Object.keys(this._listeners).forEach((event) => {
-      this.removeAllListeners(event);
-    });
+    Object.keys(this._listeners).forEach(event => this.removeAllListeners(event));
     return this;
   }
 
   public removeAllListeners(event: string): ConvergenceEventEmitter<T> {
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    const subscriptions: Subscription[] = this._eventSubscriptions[event];
-    subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
-    delete this._eventSubscriptions[event];
+    const registrations: Array<EventRegistration<T>> = this._listeners[event];
+    registrations.forEach(r => r.subscription.unsubscribe());
     delete this._listeners[event];
-
     return this;
   }
 
   public removeListener(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    const listeners: Array<EventListener<T>> = this._listeners[event];
-    const subscriptions: Subscription[] = this._eventSubscriptions[event];
-    const index: number = listeners.indexOf(listener);
-    if (index !== -1) {
-      listeners.splice(index, 1);
-      subscriptions[index].unsubscribe();
-      subscriptions.splice(index, 1);
+    const listeners: Array<EventRegistration<T>> = this._listeners[event];
+
+    if (listeners !== undefined) {
+      const index: number = listeners.findIndex(r => r.listener === listener);
+      if (index !== -1) {
+        const r: EventRegistration<T> = listeners[index];
+        listeners.splice(index, 1);
+        r.subscription.unsubscribe();
+      }
     }
 
     return this;
