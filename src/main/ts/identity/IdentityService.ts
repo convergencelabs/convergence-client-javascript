@@ -75,7 +75,7 @@ export class IdentityService {
     return this._users(unique, UserFields.USERNAME).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
-        mapped[user.username()] = user;
+        mapped[user.username] = user;
       });
       return mapped;
     });
@@ -86,7 +86,7 @@ export class IdentityService {
     return this._users(unique, UserFields.EMAIL).then(users => {
       const mapped: {[key: string]: DomainUser} = {};
       users.forEach(user => {
-        mapped[user.email()] = user;
+        mapped[user.email] = user;
       });
       return mapped;
     });

@@ -18,8 +18,8 @@ export declare class IdentityService {
   public user(username: string): Promise<DomainUser>;
   public userByEmail(email: string): Promise<DomainUser>;
 
-  public users(values: string[]): Promise<DomainUser[]>;
-  public usersByEmail(values: string[]): Promise<DomainUser[]>;
+  public users(usernames: string[]): Promise<{[key: string]: DomainUser}>;
+  public usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}>;
 
   public search(query: UserQuery): Promise<DomainUser[]>;
 }
