@@ -5,8 +5,8 @@ import {ObservableObject, ObservableObjectEvents} from "../observable/Observable
 export interface HistoricalObjectEvents extends ObservableObjectEvents {
 }
 
-export declare class HistoricalObject extends HistoricalElement<Map<string, any>>
-  implements HistoricalContainerElement<Map<string, any>>, ObservableObject {
+export declare class HistoricalObject extends HistoricalElement<{[key: string]: any}>
+  implements HistoricalContainerElement<{[key: string]: any}>, ObservableObject {
 
   public static readonly Events: HistoricalObjectEvents;
 
