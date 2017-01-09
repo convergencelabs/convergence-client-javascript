@@ -8,6 +8,8 @@ export interface ChatEvent extends ConvergenceEvent {
 }
 
 export declare class ChatMessageEvent implements ChatEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly roomId: string;
   public readonly username: string;
@@ -17,6 +19,8 @@ export declare class ChatMessageEvent implements ChatEvent {
 }
 
 export declare class  UserJoinedEvent implements ChatEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly roomId: string;
   public readonly username: string;
@@ -25,6 +29,8 @@ export declare class  UserJoinedEvent implements ChatEvent {
 }
 
 export declare class  UserLeftEvent implements ChatEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly roomId: string;
   public readonly username: string;

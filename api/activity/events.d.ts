@@ -10,6 +10,8 @@ export interface ActivityEvent extends ConvergenceEvent {
 }
 
 export declare class SessionJoinedEvent implements ActivityEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
@@ -19,6 +21,8 @@ export declare class SessionJoinedEvent implements ActivityEvent {
 }
 
 export declare class SessionLeftEvent implements ActivityEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
@@ -27,6 +31,8 @@ export declare class SessionLeftEvent implements ActivityEvent {
 }
 
 export declare class StateSetEvent implements ActivityEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
@@ -37,6 +43,8 @@ export declare class StateSetEvent implements ActivityEvent {
 }
 
 export declare class StateRemovedEvent implements ActivityEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
@@ -46,6 +54,8 @@ export declare class StateRemovedEvent implements ActivityEvent {
 }
 
 export declare class StateClearedEvent implements ActivityEvent {
+  static readonly NAME: string;
+
   public readonly name: string;
   public readonly activity: Activity;
   public readonly username: string;
