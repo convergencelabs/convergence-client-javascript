@@ -8,6 +8,8 @@ export interface ObservableModelEvents {
   readonly VERSION_CHANGED: string;
 }
 
+export const ObservableModelEventConstants: ObservableModelEvents;
+
 export interface ObservableModel {
 
   session(): Session;

@@ -6,6 +6,8 @@ export interface ObservableObjectEvents extends ObservableElementEvents {
   readonly REMOVE: string;
 }
 
+export const ObservableObjectEventConstants: ObservableObjectEvents;
+
 export interface ObservableObject extends ObservableContainerElement<{[key: string]: any}> {
 
   get(key: string): ObservableElement<any>;

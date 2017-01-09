@@ -5,6 +5,8 @@ export interface ObservableStringEvents extends ObservableElementEvents {
   readonly REMOVE: string;
 }
 
+export const ObservableStringEventConstants: ObservableStringEvents;
+
 export interface ObservableString extends ObservableElement<string> {
   length(): number;
 }
