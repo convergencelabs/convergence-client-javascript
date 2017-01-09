@@ -10,7 +10,6 @@ export interface ModelReferenceCallbacks {
   onSet: (reference: LocalModelReference<any, any>) => void;
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
-export declare type ReferenceDisposedCallback = (reference: LocalModelReference<any, any>) => void;
 
 export declare abstract class LocalModelReference<V, R extends ModelReference<V>>
   extends ConvergenceEventEmitter<ConvergenceEvent> {
@@ -32,10 +31,8 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
   public isDisposed(): boolean;
 
   public value(): V;
-  public value(value: V): void;
 
   public values(): V[];
-  public values(values: V[]): void;
 
   public reference(): R;
 
@@ -45,11 +42,15 @@ export declare abstract class LocalModelReference<V, R extends ModelReference<V>
 
   public isShared(): boolean;
 
+  public set(value: V): void;
+
+  public set(value: V[]): void;
+
   public clear(): void;
 
-  public dispose(): void;
-
   public isSet(): boolean;
+
+  public dispose(): void;
 
   protected _fireSet(): void;
 
