@@ -24,27 +24,15 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
 
   public session(): Session;
 
+  public emitLocalEvents(): boolean;
+
+  public emitLocalEvents(emit: boolean): void;
+
   public collaborators(): ModelCollaborator[];
 
   public collectionId(): string;
 
   public modelId(): string;
-
-  /**
-   * The current, latest version of the model.
-   */
-  public version(): number;
-
-  /**
-   * The minimum version of the model. Normally 0 unless the history has been truncated.
-   */
-  public minVersion(): number;
-
-  /**
-   * The maximum version available for this model.  Synonymous for version() for the
-   * RealTimeModel
-   */
-  public maxVersion(): number;
 
   /**
    * The current, latest time of the model.
@@ -67,9 +55,23 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
    */
   public createdTime(): Date;
 
-  public root(): RealTimeObject;
+  /**
+   * The current, latest version of the model.
+   */
+  public version(): number;
 
-  public element(id: string): RealTimeElement<any>
+  /**
+   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   */
+  public minVersion(): number;
+
+  /**
+   * The maximum version available for this model.  Synonymous for version() for the
+   * RealTimeModel
+   */
+  public maxVersion(): number;
+
+  public root(): RealTimeObject;
 
   public elementAt(path: any): RealTimeElement<any>;
 
@@ -88,12 +90,4 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
   public reference(sessionId: string, key: string): ModelReference<any>;
 
   public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
-}
-
-export interface CollaboratorOpenedEvent extends ModelEvent {
-  collaborator: ModelCollaborator;
-}
-
-export interface CollaboratorClosedEvent extends ModelEvent {
-  collaborator: ModelCollaborator;
 }

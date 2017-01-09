@@ -172,6 +172,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._initializeReferences(references);
   }
 
+  public session(): Session {
+    return this._connection.session();
+  }
+
   // fixme inconsistent with isOpen()
   public emitLocalEvents(): boolean
   public emitLocalEvents(emit: boolean): void
@@ -239,10 +243,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
 
   public elementAt(path: any): RealTimeElement<any> {
     return this.root().elementAt(path);
-  }
-
-  public session(): Session {
-    return this._connection.session();
   }
 
   public isOpen(): boolean {

@@ -1,4 +1,4 @@
 export declare class ModelCollaborator {
-  public sessionId(): string;
-  public username(): string;
+  public readonly sessionId: string;
+  public readonly username: string;
 }

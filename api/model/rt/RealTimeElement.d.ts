@@ -15,17 +15,15 @@ export declare abstract class RealTimeElement<T>
 
   public static readonly Events: RealTimeElementEvents;
 
+  public model(): RealTimeModel;
+
   public id(): string;
 
   public type(): string;
 
   public path(): Path;
 
-  public isAttached(): boolean;
-
   public isDetached(): boolean;
-
-  public parent(): RealTimeContainerElement<any>
 
   public value(): T;
   public value(value: T): void;
@@ -33,6 +31,4 @@ export declare abstract class RealTimeElement<T>
   public reference(sessionId: string, key: string): ModelReference<any>;
 
   public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
-
-  public model(): RealTimeModel;
 }
