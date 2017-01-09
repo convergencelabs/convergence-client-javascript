@@ -1,6 +1,6 @@
 {
   "name": "@convergence/convergence-internal",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-SNAPSHOT",
   "description": "Convergence JavaScript client library.",
   "keywords": [
     "Convergence",
