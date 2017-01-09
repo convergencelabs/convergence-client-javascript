@@ -42,7 +42,7 @@ export function deepClone(from: any): any {
 
   // Handle Object
   if (from.constructor === Object ) {
-    const result: Object = {};
+    const result: {[key: string]: any} = {};
     Object.keys(from).forEach(key => {
       result[key] = deepClone(from[key]);
     });

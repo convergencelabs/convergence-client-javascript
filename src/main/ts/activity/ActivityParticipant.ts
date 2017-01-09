@@ -4,7 +4,7 @@ export class ActivityParticipant {
   private _username: string;
   private _sessionId: string;
   private _stateMap: Map<string, any>;
-  private _local;
+  private _local: boolean;
 
   constructor(session: string, username: string, stateMap: Map<string, any>, local: boolean) {
     this._local = local;
@@ -24,7 +24,7 @@ export class ActivityParticipant {
   public state(): Map<string, any>
   public state(key?: string): any {
     if (key !== undefined) {
-      return deepClone(this._stateMap[key]);
+      return deepClone(this._stateMap.get(key));
     } else {
       return deepClone(this._stateMap);
     }

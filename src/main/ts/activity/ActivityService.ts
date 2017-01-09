@@ -3,7 +3,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
 import {MessageType} from "../connection/protocol/MessageType";
 import {MessageEvent} from "../connection/ConvergenceConnection";
-import {Observable} from "rxjs/Rx";
+import {Observable, Observer} from "rxjs/Rx";
 import {SessionJoinedEvent, SessionLeftEvent, StateClearedEvent, StateSetEvent} from "./events";
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
@@ -33,7 +33,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     this._joinedDeferreds = new Map<string, Deferred<Activity>>();
     this._joinedActivities = new Map<string, Activity>();
 
-    let messageObs: Observable<MessageEvent> = Observable.create(observer => {
+    let messageObs: Observable<MessageEvent> = Observable.create((observer: Observer<MessageEvent>) => {
       this._connection.addMultipleMessageListener(
         [MessageType.ACTIVITY_SESSION_JOINED,
           MessageType.ACTIVITY_SESSION_LEFT,

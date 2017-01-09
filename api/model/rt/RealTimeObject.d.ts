@@ -8,8 +8,8 @@ import {ObservableObject, ObservableObjectEvents} from "../observable/Observable
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
 
-export declare class RealTimeObject extends RealTimeElement<Map<string, any>>
-  implements RealTimeContainerElement<Map<string, any>>, ObservableObject {
+export declare class RealTimeObject extends RealTimeElement<{[key: string]: any}>
+  implements RealTimeContainerElement<{[key: string]: any}>, ObservableObject {
 
   public static readonly Events: RealTimeObjectEvents;
 

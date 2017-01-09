@@ -1,6 +1,6 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable} from "rxjs/Rx";
+import {Observable, Observer} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ChatRoom} from "./ChatRoom";
 import {UserJoinedRoomMessage} from "../connection/protocol/chat/joinRoom";
@@ -36,7 +36,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     super();
     this._connection = connection;
 
-    let messageObs: Observable<MessageEvent> = Observable.create(observer => {
+    let messageObs: Observable<MessageEvent> = Observable.create((observer: Observer<MessageEvent>) => {
       this._connection.addMultipleMessageListener([MessageType.USER_JOINED_ROOM,
         MessageType.USER_LEFT_ROOM,
         MessageType.CHAT_MESSAGE_PUBLISHED], (event) => {

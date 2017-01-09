@@ -66,7 +66,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: null,
+      d: <any> null,
       e: [1, "2", true, null]
     };
 
@@ -76,7 +76,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: null,
+      d: <any> null,
       e: [1, "2", true, null]
     };
 
@@ -90,7 +90,7 @@ describe("EqualUtil", () => {
       c: {
         x: 3
       },
-      d: null,
+      d: <any> null,
       e: [1, "2", true, null]
     };
 
@@ -100,7 +100,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: null,
+      d: <any> null,
       e: [1, "2", true, null]
     };
 
