@@ -22,16 +22,21 @@ export interface VersionChangedEvent extends ModelEvent {
   readonly version: number;
 }
 
-export interface RemoteReferenceCreatedEvent extends ConvergenceEvent {
-  readonly reference: ModelReference<any>;
+export declare class RemoteReferenceCreatedEvent implements ConvergenceEvent {
+  public static readonly NAME: string;
+  public readonly name: string;
+  public readonly reference: ModelReference<any>;
+  public readonly element?: ObservableElement<any>;
+  public readonly model?: ObservableModel;
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {
-  readonly src: ObservableElement<any>;
+  readonly element: ObservableElement<any>;
   readonly local: boolean;
 }
 
 export declare class ElementDetachedEvent implements ConvergenceEvent {
+  public static readonly NAME: string;
   public readonly name: string;
   public readonly src: ObservableElement<any>;
 }
@@ -42,8 +47,9 @@ export interface ValueChangedEvent extends ConvergenceModelValueEvent {
 }
 
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableElement<any>;
+  public readonly element: ObservableElement<any>;
   public readonly relativePath: Path;
   public readonly childEvent: ValueChangedEvent;
   public readonly sessionId: string;
@@ -52,8 +58,9 @@ export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
 }
 
 export class ArrayInsertEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableArray;
+  public readonly element: ObservableArray;
   public readonly index: number;
   public readonly value: ObservableElement<any>;
   public readonly sessionId: string;
@@ -63,8 +70,9 @@ export class ArrayInsertEvent implements ValueChangedEvent {
 }
 
 export class ArrayRemoveEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableArray;
+  public readonly element: ObservableArray;
   public readonly index: number;
   public readonly sessionId: string;
   public readonly username: string;
@@ -72,8 +80,9 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
 }
 
 export class ArraySetEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableArray;
+  public readonly element: ObservableArray;
   public readonly index: number;
   public readonly value: ObservableElement<any>;
   public readonly sessionId: string;
@@ -82,8 +91,9 @@ export class ArraySetEvent implements ValueChangedEvent {
 }
 
 export class ArrayReorderEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableArray;
+  public readonly element: ObservableArray;
   public readonly fromIndex: number;
   public readonly toIndex: number;
   public readonly sessionId: string;
@@ -92,32 +102,36 @@ export class ArrayReorderEvent implements ValueChangedEvent {
 }
 
 export class ArraySetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableArray;
+  public readonly element: ObservableArray;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;
 }
 
 export class BooleanSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableBoolean;
+  public readonly element: ObservableBoolean;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;
 }
 
 export class NumberSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableNumber;
+  public readonly element: ObservableNumber;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;
 }
 
 export class NumberDeltaEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableNumber;
+  public readonly element: ObservableNumber;
   public readonly value: number;
   public readonly sessionId: string;
   public readonly username: string;
@@ -125,8 +139,9 @@ export class NumberDeltaEvent implements ValueChangedEvent {
 }
 
 export class ObjectSetEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableObject;
+  public readonly element: ObservableObject;
   public readonly key: string;
   public readonly value: ObservableElement<any>;
   public readonly sessionId: string;
@@ -135,8 +150,9 @@ export class ObjectSetEvent implements ValueChangedEvent {
 }
 
 export class ObjectRemoveEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableObject;
+  public readonly element: ObservableObject;
   public readonly key: string;
   public readonly sessionId: string;
   public readonly username: string;
@@ -144,16 +160,18 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 }
 
 export class ObjectSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableObject;
+  public readonly element: ObservableObject;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;
 }
 
 export class StringInsertEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableString;
+  public readonly element: ObservableString;
   public readonly index: number;
   public readonly value: string;
   public readonly sessionId: string;
@@ -162,8 +180,9 @@ export class StringInsertEvent implements ValueChangedEvent {
 }
 
 export class StringRemoveEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableString;
+  public readonly element: ObservableString;
   public readonly index: number;
   public readonly value: string;
   public readonly sessionId: string;
@@ -172,8 +191,9 @@ export class StringRemoveEvent implements ValueChangedEvent {
 }
 
 export class StringSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
   public readonly name: string;
-  public readonly src: ObservableString;
+  public readonly element: ObservableString;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;

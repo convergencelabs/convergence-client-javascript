@@ -9,7 +9,7 @@ import {ConvergenceEvent} from "../util/ConvergenceEvent";
 export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public session(): Session;
 
-  public query(query: ModelQuery): Promise<ModelResult>;
+  public query(query: ModelQuery): Promise<ModelResult[]>;
 
   public open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel>;
 

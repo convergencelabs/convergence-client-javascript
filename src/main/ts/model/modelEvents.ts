@@ -39,9 +39,10 @@ export interface ConvergenceModelValueEvent extends ConvergenceEvent {
 }
 
 export class ElementDetachedEvent implements ConvergenceEvent {
-  public readonly name: string = "detached";
+  public static readonly NAME = "detached";
+  public readonly name: string = ElementDetachedEvent.NAME;
 
-  constructor(public src: ObservableElement<any>) {
+  constructor(public readonly src: ObservableElement<any>) {
   }
 }
 
