@@ -58,8 +58,8 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     return this._wrapperFactory.wrap(delegateChild);
   }
 
-  public remove(key: string): void {
-    this._delegate.remove(key);
+  public remove(key: string): RealTimeElement<any> {
+    return this._wrapperFactory.wrap(this._delegate.remove(key));
   }
 
   public keys(): string[] {

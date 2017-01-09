@@ -65,8 +65,8 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
     return this._wrapperFactory.wrap(this._delegate.insert(index, value));
   }
 
-  public remove(index: number): Object|number|string|boolean {
-    return this._delegate.remove(index);
+  public remove(index: number): RealTimeElement<any> {
+    return this._wrapperFactory.wrap(this._delegate.remove(index));
   }
 
   public reorder(fromIndex: number, toIndex: number): void {

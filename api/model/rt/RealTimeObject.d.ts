@@ -17,7 +17,7 @@ export declare class RealTimeObject extends RealTimeElement<{[key: string]: any}
 
   public set(key: string, value: any): RealTimeElement<any>;
 
-  public remove(key: string): void;
+  public remove(key: string): RealTimeElement<any>;
 
   public keys(): string[];
 

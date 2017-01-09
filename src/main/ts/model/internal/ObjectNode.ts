@@ -80,8 +80,10 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
     return this.get(key);
   }
 
-  public remove(key: string): void {
+  public remove(key: string): ModelNode<any> {
+    const oldValue: ModelNode<any> = this.get(key);
     this._applyRemove(key, true, this.sessionId, this.username);
+    return oldValue;
   }
 
   public keys(): string[] {

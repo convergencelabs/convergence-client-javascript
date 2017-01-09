@@ -87,8 +87,8 @@ export class ArrayNode extends ContainerNode<any[]> {
     return this.get(index);
   }
 
-  public remove(index: number): Object|number|string|boolean {
-    const oldValue: Object|number|string|boolean = this.get(index).data();
+  public remove(index: number): ModelNode<any> {
+    const oldValue: ModelNode<any> = this.get(index);
     this._applyRemove(index, true, this.sessionId, this.username);
     return oldValue;
   }
