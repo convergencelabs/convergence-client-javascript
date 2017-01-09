@@ -10,8 +10,7 @@ export interface UserPresenceSubscriptionEvents {
   readonly AVAILABILITY_CHANGED: string;
 }
 
-export declare class UserPresenceSubscription
-  extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
+export declare class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public readonly username: string;
 
