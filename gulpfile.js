@@ -35,7 +35,7 @@ gulp.task("dist", ["dist-internal", "dist-npmjs"], function (cb) {
 
 gulp.task("dist-internal",
   ["dist-typings", "dist-cjs-min", "dist-umd-min", "dist-umd-bundle", "dist-umd-bundle-min", "copy-package"],
-  function (cb) {
+  function () {
     if (packageJson.version.endsWith("SNAPSHOT")) {
       return gulp.src(`${distInternal}/package.json`)
         .pipe(bump({version: packageJson.version + "." + new Date().getTime()}))
