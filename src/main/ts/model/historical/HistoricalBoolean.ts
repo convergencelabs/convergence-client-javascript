@@ -6,6 +6,7 @@ import {
   ObservableBooleanEvents,
   ObservableBooleanEventConstants
 } from "../observable/ObservableBoolean";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalBooleanEvents extends ObservableBooleanEvents {
 }
@@ -14,7 +15,7 @@ export class HistoricalBoolean extends HistoricalElement<boolean> implements Obs
 
   public static readonly Events: HistoricalBooleanEvents = ObservableBooleanEventConstants;
 
-  constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
+  constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(_delegate, _wrapperFactory, model);
   }
 }

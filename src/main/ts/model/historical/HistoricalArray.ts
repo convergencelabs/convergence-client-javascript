@@ -3,6 +3,7 @@ import {HistoricalContainerElement} from "./HistoricalContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalArrayEvents extends ObservableArrayEvents {
 }
@@ -13,8 +14,8 @@ export class HistoricalArray
 
   public static readonly Events: HistoricalArrayEvents = ObservableArrayEventConstants;
 
-  constructor(protected _delegate: ArrayNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
+  constructor(protected _delegate: ArrayNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(_delegate, wrapperFactory, model);
   }
 
   public get(index: number): HistoricalElement<any> {

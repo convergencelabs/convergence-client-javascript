@@ -6,6 +6,7 @@ import {
   ObservableStringEvents,
   ObservableStringEventConstants
 } from "../observable/ObservableString";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalStringEvents extends ObservableStringEvents {
 }
@@ -14,8 +15,8 @@ export class HistoricalString extends HistoricalElement<string> implements Obser
 
   public static readonly Events: HistoricalStringEvents = ObservableStringEventConstants;
 
-  constructor(protected _delegate: StringNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
+  constructor(protected _delegate: StringNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(_delegate, _wrapperFactory, model);
   }
 
   public length(): number {

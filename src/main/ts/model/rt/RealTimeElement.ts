@@ -40,7 +40,6 @@ export abstract class RealTimeElement<T>
               wrapperFactory: RealTimeWrapperFactory,
               model: RealTimeModel,
               referenceTypes: string[]) {
-
     super();
 
     this._delegate = delegate;

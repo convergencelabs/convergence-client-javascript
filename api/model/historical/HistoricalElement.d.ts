@@ -21,4 +21,6 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
   public isDetached(): boolean;
 
   public value(): T;
+
+  public model(): HistoricalModel;
 }

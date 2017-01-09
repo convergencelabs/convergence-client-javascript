@@ -16,29 +16,30 @@ import {HistoricalNull} from "./HistoricalNull";
 import {HistoricalNumber} from "./HistoricalNumber";
 import {HistoricalString} from "./HistoricalString";
 import {HistoricalUndefined} from "./HistoricalUndefined";
+import {HistoricalModel} from "./HistoricalModel";
 
 export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalElement<any>> {
 
-  constructor() {
+  constructor(private _model: HistoricalModel) {
     super();
   }
 
   protected _createWrapper(node: ModelNode<any>): HistoricalElement<any> {
     switch (node.type()) {
       case ModelElementType.ARRAY:
-        return new HistoricalArray(<ArrayNode> node, this);
+        return new HistoricalArray(<ArrayNode> node, this, this._model);
       case ModelElementType.OBJECT:
-        return new HistoricalObject(<ObjectNode> node, this);
+        return new HistoricalObject(<ObjectNode> node, this, this._model);
       case ModelElementType.BOOLEAN:
-          return new HistoricalBoolean(<BooleanNode> node, this);
+          return new HistoricalBoolean(<BooleanNode> node, this, this._model);
       case ModelElementType.NULL:
-        return new HistoricalNull(<NullNode> node, this);
+        return new HistoricalNull(<NullNode> node, this, this._model);
       case ModelElementType.NUMBER:
-        return new HistoricalNumber(<NumberNode> node, this);
+        return new HistoricalNumber(<NumberNode> node, this, this._model);
       case ModelElementType.STRING:
-        return new HistoricalString(<StringNode> node, this);
+        return new HistoricalString(<StringNode> node, this, this._model);
       case ModelElementType.UNDEFINED:
-        return new HistoricalUndefined(<UndefinedNode> node, this);
+        return new HistoricalUndefined(<UndefinedNode> node, this, this._model);
       default:
         return null;
       }

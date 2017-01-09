@@ -22,4 +22,6 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
   isDetached(): boolean;
 
   value(): T;
+
+  model(): ObservableModel;
 }

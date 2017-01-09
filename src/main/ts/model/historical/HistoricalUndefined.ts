@@ -6,6 +6,7 @@ import {
   ObservableUndefinedEvents,
   ObservableUndefinedEventConstants
 } from "../observable/ObservableUndefined";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -14,7 +15,7 @@ export class HistoricalUndefined extends HistoricalElement<void> implements Obse
 
   public static readonly Events: HistoricalUndefinedEvents = ObservableUndefinedEventConstants;
 
-  constructor(_delegate: UndefinedNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
+  constructor(_delegate: UndefinedNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(_delegate, _wrapperFactory, model);
   }
 }

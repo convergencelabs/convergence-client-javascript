@@ -9,6 +9,7 @@ import {
   ObservableElementEvents,
   ObservableElementEventConstants
 } from "../observable/ObservableElement";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -18,8 +19,14 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
 
   public static readonly Events: HistoricalElementEvents = ObservableElementEventConstants;
 
-  constructor(protected _delegate: ModelNode<T>, protected _wrapperFactory: HistoricalWrapperFactory) {
+  private _model: HistoricalModel;
+
+  constructor(protected _delegate: ModelNode<T>,
+              protected _wrapperFactory: HistoricalWrapperFactory,
+              model: HistoricalModel) {
     super();
+
+    this._model = model;
 
     this._delegate.events().subscribe((event: ConvergenceEvent) => {
       let convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
@@ -45,5 +52,9 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
 
   public value(): T {
     return this._delegate.data();
+  }
+
+  public model(): HistoricalModel {
+    return this._model;
   }
 }

@@ -7,6 +7,7 @@ import {
   ObservableObjectEvents,
   ObservableObjectEventConstants
 } from "../observable/ObservableObject";
+import {HistoricalModel} from "./HistoricalModel";
 
 export interface HistoricalObjectEvents extends ObservableObjectEvents {
 }
@@ -16,8 +17,8 @@ export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
 
   public static readonly Events: HistoricalObjectEvents = ObservableObjectEventConstants;
 
-  constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory) {
-    super(_delegate, _wrapperFactory);
+  constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(_delegate, _wrapperFactory, model);
   }
 
   public get(key: string): HistoricalElement<any> {
