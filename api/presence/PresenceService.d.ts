@@ -30,8 +30,8 @@ export declare class PresenceService extends ConvergenceEventEmitter<Convergence
 
   public clearState(): void;
 
+  public state(): Map<string, any>;
   public state(key: string): any;
-  public state(): {[key: string]: any};
 
   public presence(username: string): Promise<UserPresence>;
   public presence(usernames: string[]): Promise<UserPresence[]>;

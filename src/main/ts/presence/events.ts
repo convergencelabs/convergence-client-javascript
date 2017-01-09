@@ -9,7 +9,7 @@ export class PresenceStateSetEvent implements PresenceSubscriptionEvent {
   public readonly name: string = PresenceStateSetEvent.NAME;
 
   constructor(public readonly username: string,
-              public state: Map<string, any>) {
+              public readonly state: Map<string, any>) {
     Object.freeze(this);
   }
 }
