@@ -64,7 +64,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           break;
         case Activity.Events.STATE_SET:
           let setEvent: StateSetEvent = <StateSetEvent> event;
-          let setState: Map<string, any> = newMap.get(setEvent.sessionId).state();
+          let setState: Map<string, any> = newMap.get(setEvent.sessionId).state;
           setState.set(setEvent.key, setEvent.value);
           newMap.set(
             setEvent.sessionId,
@@ -73,7 +73,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           break;
         case Activity.Events.STATE_REMOVED:
           let removeEvent: StateRemovedEvent = <StateRemovedEvent> event;
-          let removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state();
+          let removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state;
           removeState.delete(removeEvent.key);
           newMap.set(removeEvent.sessionId,
             new ActivityParticipant(removeEvent.sessionId, removeEvent.username, removeState, false));
@@ -115,16 +115,10 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joined;
   }
 
-  public state(key: string): any;
-  public state(): Map<string, any>;
-  public state(key?: string): any {
+  public state(): Map<string, any> {
     const localParticipant: ActivityParticipant =
       this._participants.getValue().get(this._connection.session().sessionId());
-    if (typeof key === "undefined") {
-      return localParticipant.state();
-    } else {
-      return localParticipant.state().get(key);
-    }
+    return localParticipant.state;
   }
 
   public setState(state: StringMapLike): void

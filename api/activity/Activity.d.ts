@@ -24,7 +24,6 @@ export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public leave(): void;
   public isJoined(): boolean;
 
-  public state(key: string): any;
   public state(): Map<string, any>;
 
   public setState(state: StringMapLike): void;

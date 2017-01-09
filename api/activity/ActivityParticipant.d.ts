@@ -1,11 +1,9 @@
 export declare class ActivityParticipant {
-  public username(): string;
+  public readonly username: string;
 
-  public sessionId(): string;
+  public readonly sessionId: string;
 
-  public state(): Map<string, any>;
+  public readonly state: Map<string, any>;
 
-  public state(key?: string): any;
-
-  public isLocal(): boolean;
+  public readonly local: boolean;
 }
