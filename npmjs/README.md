@@ -1,9 +1,9 @@
 # Overview
-This package provides a npm version of the Convergene JavaScript API, for use with the [Convergence](http://convergencelabs.com) host platform.
+This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](http://convergencelabs.com) host platform.
 
-Convergence is a hosted platform for rapidly developing real-time collaborative applications. At the heart of Convergence is it's collaborative real time data store. However, where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
+Convergence is a hosted platform for rapidly developing real-time collaborative applications. At the heart of Convergence is it's collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
 
-* **Real-time Data**: Allows users to edit the same data at the same time, keeping everyones view of the data in sync.
+* **Real-time Data**: Allows users to edit the same data at the same time, keeping everyone's view of the data in sync.
 * **Users and Identity**: Allows developers to create and manage users and their identity within the system so users know who they are collaborating with.
 * **Presence**: Allows users to know "who is here?" and "who is available" so they can more effectively collaborate with the other users they need to.
 * **Collaboration Awareness**: The best way to resolve editing conflicts is to avoid them in the fist place. Convergence provides robust collaboration awareness capabilities that help users work together without conflicts.
