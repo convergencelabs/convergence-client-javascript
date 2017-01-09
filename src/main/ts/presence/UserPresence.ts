@@ -1,9 +1,17 @@
-export interface UserPresence {
-  username(): string;
+import {deepClone} from "../util/ObjectUtils";
 
-  isAvailable(): boolean;
+export class UserPresence {
 
-  state(key: string): any;
+  private readonly _state: Map<string, any>;
 
-  state(): Map<string, any>;
+  constructor(public readonly username: string,
+              public readonly available: boolean,
+              state: Map<string, any>) {
+    this._state = deepClone(state);
+    Object.freeze(this);
+  }
+
+  public get state(): Map<string, any> {
+    return deepClone(this._state);
+  }
 }

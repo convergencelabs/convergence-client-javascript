@@ -2,7 +2,6 @@ import {Session} from "../Session";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {UserPresence} from "./UserPresence";
-import {UserPresenceImpl} from "./UserPresenceImpl";
 import {Observable} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
 import {RequestPresence} from "../connection/protocol/presence/requestPresence";
@@ -78,7 +77,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   public isAvailable(): boolean {
-    return this._localPresence.isAvailable();
+    return this._localPresence.available;
   }
 
   public setState(state: StringMapLike): void
@@ -134,12 +133,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  public state(): Map<string, any>
-  public state(key: string): any
-  public state(key?: string): any {
+  public state(): Map<string, any> {
     // The underlying class takes care of returning a single value or the whole
     // map as well as cloning.
-    return this._localPresence.state(key);
+    return this._localPresence.state;
   }
 
   public presence(username: string): Promise<UserPresence>
@@ -189,7 +186,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     return this._connection.request(message).then((response: RequestPresenceResponse) => {
       return response.userPresences.map(p =>
-        new UserPresenceImpl(p.username, p.available, StringMap.objectToMap(p.state))
+        new UserPresence(p.username, p.available, StringMap.objectToMap(p.state))
       );
     });
   }
@@ -217,7 +214,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
       return this._connection.request(message).then((response: SubscribePresenceResponse) => {
         response.userPresences.forEach(presence => {
           const manager: UserPresenceManager = new UserPresenceManager(
-            new UserPresenceImpl(presence.username, presence.available, StringMap.objectToMap(presence.state)),
+            new UserPresence(presence.username, presence.available, StringMap.objectToMap(presence.state)),
             this._presenceStreams.get(presence.username),
             (username) => this._unsubscribe(username)
           );

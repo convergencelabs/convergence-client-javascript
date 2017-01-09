@@ -13,5 +13,5 @@ export declare class CollaboratorClosedEvent implements ModelEvent {
   public static readonly NAME: string;
   public readonly name: string;
   public readonly src: RealTimeModel;
-  public readonly collaborator: ModelCollaborator
+  public readonly collaborator: ModelCollaborator;
 }

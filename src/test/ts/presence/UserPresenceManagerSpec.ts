@@ -2,7 +2,7 @@ import {Subject} from "rxjs/Rx";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
-import {UserPresenceImpl} from "../../../main/ts/presence/UserPresenceImpl";
+import {UserPresence} from "../../../main/ts/presence/UserPresence";
 import {UserPresenceManager} from "../../../main/ts/presence/UserPresenceManager";
 import {MessageEvent} from "../../../main/ts/connection/ConvergenceConnection";
 
@@ -17,14 +17,13 @@ describe("UserPresenceManager", () => {
     state.set("key", 9);
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", true, state);
+    const initialPresence = new UserPresence("test", true, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
-    expect(mgr.username()).to.equal(initialPresence.username());
-    expect(mgr.isAvailable()).to.equal(initialPresence.isAvailable());
+    expect(mgr.username()).to.equal(initialPresence.username);
+    expect(mgr.isAvailable()).to.equal(initialPresence.available);
     expect(mgr.state().size).to.equal(1);
     expect(mgr.state().get("key")).to.equal(9);
-    expect(mgr.state("key")).to.equal(9);
   });
 
   it("availability is set properly", () => {
@@ -32,7 +31,7 @@ describe("UserPresenceManager", () => {
     state.set("key", 9);
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     mgr.availability(true);
@@ -46,7 +45,7 @@ describe("UserPresenceManager", () => {
     state.set("key2", "value2");
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     const add = new Map<string, any>();
@@ -55,9 +54,9 @@ describe("UserPresenceManager", () => {
     mgr.set(add);
 
     expect(mgr.state().size).to.equal(3);
-    expect(mgr.state("key1")).to.equal("value1");
-    expect(mgr.state("key2")).to.equal("2");
-    expect(mgr.state("key3")).to.equal("3");
+    expect(mgr.state().get("key1")).to.equal("value1");
+    expect(mgr.state().get("key2")).to.equal("2");
+    expect(mgr.state().get("key3")).to.equal("3");
   });
 
   it("new state is removed properly", () => {
@@ -67,13 +66,13 @@ describe("UserPresenceManager", () => {
     state.set("key3", "value3");
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     mgr.remove(["key1", "key2"]);
 
     expect(mgr.state().size).to.equal(1);
-    expect(mgr.state("key3")).to.equal("value3");
+    expect(mgr.state().get("key3")).to.equal("value3");
   });
 
   it("new state is cleared properly", () => {
@@ -83,7 +82,7 @@ describe("UserPresenceManager", () => {
     state.set("key3", "value3");
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     mgr.clear();
@@ -95,14 +94,14 @@ describe("UserPresenceManager", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
     mgr.on("state_set", (e) => {
       firedEvent++;
       expect(e.name).to.equal("state_set");
-      expect(e.username).to.equal(initialPresence.username());
+      expect(e.username).to.equal(initialPresence.username);
       expect(e.state.size).to.equal(1);
       expect(e.state.get("key")).to.equal("value");
     });
@@ -124,13 +123,13 @@ describe("UserPresenceManager", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
     mgr.on("state_cleared", (e) => {
       expect(e.name).to.equal("state_cleared");
-      expect(e.username).to.equal(initialPresence.username());
+      expect(e.username).to.equal(initialPresence.username);
       firedEvent++;
     });
 
@@ -149,13 +148,13 @@ describe("UserPresenceManager", () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
     mgr.on("state_removed", (e) => {
       firedEvent++;
-      expect(e.username).to.equal(initialPresence.username());
+      expect(e.username).to.equal(initialPresence.username);
       expect(e.name).to.equal("state_removed");
       expect(e.keys).to.deep.equal(["k1", "k2"]);
     });
@@ -176,16 +175,15 @@ describe("UserPresenceManager", () => {
     state.set("key", 9);
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     const s = mgr.subscribe();
 
-    expect(s.username()).to.equal(initialPresence.username());
-    expect(s.isAvailable()).to.equal(initialPresence.isAvailable());
-    expect(s.state().size).to.equal(1);
-    expect(s.state().get("key")).to.equal(9);
-    expect(s.state("key")).to.equal(9);
+    expect(s.username).to.equal(initialPresence.username);
+    expect(s.available).to.equal(initialPresence.available);
+    expect(s.state.size).to.equal(1);
+    expect(s.state.get("key")).to.equal(9);
   });
 
   it("unsubscribe correctly called", () => {
@@ -194,10 +192,10 @@ describe("UserPresenceManager", () => {
     let called: number = 0;
 
     const testSubject = new Subject<MessageEvent>();
-    const initialPresence = new UserPresenceImpl("test", false, state);
+    const initialPresence = new UserPresence("test", false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), (username) => {
       called++;
-      expect(username).to.equal(initialPresence.username());
+      expect(username).to.equal(initialPresence.username);
     });
 
     const s1 = mgr.subscribe();

@@ -13,13 +13,11 @@ export interface UserPresenceSubscriptionEvents {
 export declare class UserPresenceSubscription
   extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
 
-  public username(): string;
+  public readonly username: string;
 
-  public isAvailable(): boolean;
+  public readonly available: boolean;
 
-  public state(key: string): any;
-
-  public state(): Map<string, any>;
+  public readonly state: Map<string, any>;
 
   public asObservable(): Observable<UserPresence>;
 

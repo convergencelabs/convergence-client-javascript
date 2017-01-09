@@ -40,9 +40,9 @@ describe("PresenceService.presence()", () => {
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.presence().presence("notFound");
     }).then(userPresence => {
-      expect(userPresence.username()).to.equal("notFound");
-      expect(userPresence.isAvailable()).to.equal(false);
-      expect(userPresence.state()).to.deep.equal({});
+      expect(userPresence.username).to.equal("notFound");
+      expect(userPresence.available).to.equal(false);
+      expect(userPresence.state).to.deep.equal({});
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
       mockServer.doneManager().testFailure(error);
@@ -65,9 +65,9 @@ describe("PresenceService.subscribe()", () => {
 
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.presence().subscribe("u1").then(userPresence => {
-        expect(userPresence.username()).to.equal("u1");
-        expect(userPresence.isAvailable()).to.equal(false);
-        expect(userPresence.state()).to.deep.equal({});
+        expect(userPresence.username).to.equal("u1");
+        expect(userPresence.available).to.equal(false);
+        expect(userPresence.state).to.deep.equal({});
         mockServer.doneManager().testSuccess();
       });
     }).catch((error: Error) => {

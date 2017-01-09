@@ -2,7 +2,6 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {UserPresence} from "./UserPresence";
 import {Observable, Subscription, BehaviorSubject} from "rxjs/Rx";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
-import {UserPresenceImpl} from "./UserPresenceImpl";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
@@ -17,7 +16,7 @@ import {
 } from "./events";
 import {deepClone} from "../util/ObjectUtils";
 
-export class UserPresenceManager extends ConvergenceEventEmitter<any> implements UserPresence {
+export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
   private _presence: UserPresence;
   private _subscriptions: UserPresenceSubscription[];
@@ -30,10 +29,10 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
               onUnsubscribe: (username: string) => void) {
     super();
 
-    this._presence = new UserPresenceImpl(
-      initialPresence.username(),
-      initialPresence.isAvailable(),
-      initialPresence.state()
+    this._presence = new UserPresence(
+      initialPresence.username,
+      initialPresence.available,
+      initialPresence.state
     );
 
     this._subscriptions = [];
@@ -43,17 +42,15 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
   }
 
   public username(): string {
-    return this._presence.username();
+    return this._presence.username;
   }
 
   public isAvailable(): boolean {
-    return this._presence.isAvailable();
+    return this._presence.available;
   }
 
-  public state(key: string): any
-  public state(): Map<string, any>
-  public state(key?: string): any {
-    return this._presence.state(key);
+  public state(): Map<string, any> {
+    return this._presence.state;
   }
 
   public asObservable(): Observable<UserPresence> {
@@ -77,49 +74,49 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> implements
 
   public availability(availability: boolean): void {
     this._presence =
-      new UserPresenceImpl(this._presence.username(), availability, this._presence.state());
+      new UserPresence(this._presence.username, availability, this._presence.state);
 
     const event: PresenceAvailabilityChangedEvent =
-      new PresenceAvailabilityChangedEvent(this._presence.username(), availability);
+      new PresenceAvailabilityChangedEvent(this._presence.username, availability);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
 
   public set(state: Map<string, any>): void {
-    let newState: Map<string, any> = this._presence.state();
+    let newState: Map<string, any> = this._presence.state;
     state.forEach((v, k) => newState.set(k, deepClone(v)));
 
-    this._presence = new UserPresenceImpl(
-      this._presence.username(),
-      this._presence.isAvailable(),
+    this._presence = new UserPresence(
+      this._presence.username,
+      this._presence.available,
       newState);
 
-    const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.username(), newState);
+    const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.username, newState);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
 
   public remove(keys: string[]): void {
-    let newState: Map<string, any> = this._presence.state();
+    let newState: Map<string, any> = this._presence.state;
     keys.forEach(k => newState.delete(k));
 
-    this._presence = new UserPresenceImpl(
-      this._presence.username(),
-      this._presence.isAvailable(),
+    this._presence = new UserPresence(
+      this._presence.username,
+      this._presence.available,
       newState);
 
-    const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.username(), keys);
+    const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.username, keys);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
 
   public clear(): void {
-    this._presence = new UserPresenceImpl(
-      this._presence.username(),
-      this._presence.isAvailable(),
+    this._presence = new UserPresence(
+      this._presence.username,
+      this._presence.available,
       new Map<string, any>());
 
-    const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.username());
+    const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.username);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }

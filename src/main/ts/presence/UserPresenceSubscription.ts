@@ -15,7 +15,7 @@ export interface UserPresenceSubscriptionEvents {
   AVAILABILITY_CHANGED: string;
 }
 
-export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> implements UserPresence {
+export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static readonly Events: UserPresenceSubscriptionEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,
@@ -32,18 +32,16 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<Convergenc
     this._emitFrom(delegate.events());
   }
 
-  public username(): string {
+  public get username(): string {
     return this._manager.username();
   }
 
-  public isAvailable(): boolean {
+  public get available(): boolean {
     return this._manager.isAvailable();
   }
 
-  public state(key: string): any
-  public state(): Map<string, any>
-  public state(key?: string): any {
-    return this._manager.state(key);
+  public get state(): Map<string, any> {
+    return this._manager.state();
   }
 
   public asObservable(): Observable<UserPresence> {

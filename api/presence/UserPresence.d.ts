@@ -1,9 +1,7 @@
 export interface UserPresence {
-  username(): string;
+  readonly username: string;
 
-  isAvailable(): boolean;
+  readonly available: boolean;
 
-  state(key: string): any;
-
-  state(): Map<string, any>;
+  readonly state: Map<string, any>;
 }
