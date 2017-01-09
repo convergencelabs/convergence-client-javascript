@@ -1,7 +1,7 @@
 export class UserPresence {
-  readonly username: string;
+  public readonly username: string;
 
-  readonly available: boolean;
+  public readonly available: boolean;
 
-  readonly state: Map<string, any>;
+  public readonly state: Map<string, any>;
 }

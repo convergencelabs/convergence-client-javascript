@@ -14,7 +14,7 @@ export declare class ConnectedEvent implements ConvergenceDomainEvent {
 export declare class InterruptedEvent implements ConvergenceDomainEvent {
   public static readonly NAME: string;
   public readonly name: string;
-  public readonly domain: ConvergenceDomain
+  public readonly domain: ConvergenceDomain;
 }
 
 export declare class ReconnectedEvent implements ConvergenceDomainEvent {
