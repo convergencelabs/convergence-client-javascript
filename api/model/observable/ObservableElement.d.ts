@@ -10,6 +10,8 @@ export interface ObservableElementEvents {
   readonly REFERENCE: string;
 }
 
+export const ObservableElementEventConstants: ObservableElementEvents;
+
 export interface ObservableElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
   id(): string;
 
@@ -20,6 +22,4 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
   isDetached(): boolean;
 
   value(): T;
-
-  model(): ObservableModel;
 }

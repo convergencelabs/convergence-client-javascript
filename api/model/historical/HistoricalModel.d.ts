@@ -20,21 +20,6 @@ export declare class HistoricalModel implements ObservableModel {
   public modelId(): string;
 
   /**
-   * The version the model is currently in.
-   */
-  public version(): number;
-
-  /**
-   * The minimum version of the model. Normally 0 unless the history has been truncated.
-   */
-  public minVersion(): number;
-
-  /**
-   * The maximum version available for this model.
-   */
-  public maxVersion(): number;
-
-  /**
    * The time of the last change to the model.
    */
   public time(): Date;
@@ -53,6 +38,25 @@ export declare class HistoricalModel implements ObservableModel {
    * The time the model was created.
    */
   public createdTime(): Date;
+
+  /**
+   * The version the model is currently in.
+   */
+  public version(): number;
+
+  /**
+   * The minimum version of the model. Normally 0 unless the history has been truncated.
+   */
+  public minVersion(): number;
+
+  /**
+   * The maximum version available for this model.
+   */
+  public maxVersion(): number;
+
+  public targetVersion(): number;
+
+  public isTransitioning(): boolean;
 
   public root(): HistoricalObject;
 
