@@ -93,7 +93,7 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this;
   }
 
-  public  off(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
+  public off(event: string, listener: EventListener<T>): ConvergenceEventEmitter<T> {
     return this.removeListener(event, listener);
   }
 
