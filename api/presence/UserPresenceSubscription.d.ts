@@ -23,5 +23,5 @@ export declare class UserPresenceSubscription
 
   public asObservable(): Observable<UserPresence>;
 
-  public unsubscribe();
+  public unsubscribe(): void;
 }
