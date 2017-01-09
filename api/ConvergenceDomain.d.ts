@@ -6,6 +6,7 @@ import {ActivityService} from "./activity/ActivityService";
 import {IdentityService} from "./identity/IdentityService";
 import {PresenceService} from "./presence/PresenceService";
 import {ChatService} from "./chat/ChatService";
+import {ConvergenceDomainEvent} from "./events";
 
 export declare interface ConvergenceDomainEvents {
   readonly CONNECTED: string;
@@ -34,12 +35,4 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   public dispose(): void;
 
   public isDisposed(): boolean;
-}
-
-interface ConvergenceDomainEvent extends ConvergenceEvent {
-  domain: ConvergenceDomain;
-}
-
-interface ConvergenceErrorEvent extends ConvergenceDomainEvent {
-  error: string;
 }
