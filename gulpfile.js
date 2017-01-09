@@ -86,7 +86,7 @@ gulp.task("dist-umd-min", ["dist-umd"], function () {
     `${distInternal}/browser`);
 });
 
-gulp.task("dist-umd-bundle-min", ["dist-umd"], function () {
+gulp.task("dist-umd-bundle-min", ["dist-umd-min"], function () {
   const files = ["node_modules/rxjs/bundles/Rx.min.js", `${distInternal}/browser/convergence.min.js`];
   return gulp.src(files)
     .pipe(concat("convergence-all.min.js"))
