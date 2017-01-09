@@ -1,9 +1,9 @@
 export class ModelResult {
-  constructor(public collectionId: string,
-              public modelId: string,
-              public created: Date,
-              public modified: Date,
-              public version: Date) {
+  constructor(public readonly collectionId: string,
+              public readonly modelId: string,
+              public readonly created: Date,
+              public readonly modified: Date,
+              public readonly version: Date) {
     Object.freeze(this);
   }
 }

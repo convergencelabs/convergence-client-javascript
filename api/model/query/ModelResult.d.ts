@@ -1,7 +1,7 @@
 export declare class ModelResult {
-  public collectionId: string;
-  public modelId: string;
-  public created: Date;
-  public modified: Date;
-  public version: Date;
+  public readonly collectionId: string;
+  public readonly modelId: string;
+  public readonly created: Date;
+  public readonly modified: Date;
+  public readonly version: Date;
 }
