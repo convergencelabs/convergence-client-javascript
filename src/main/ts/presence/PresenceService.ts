@@ -18,7 +18,6 @@ import {
   PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
   PresenceAvailabilityChangedEvent
 } from "./events";
-import {deepClone} from "../util/ObjectUtils";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
