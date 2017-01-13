@@ -1,4 +1,4 @@
-import {DataValue} from "./dataValue";
+import {DataValue, DateValue} from "./dataValue";
 import {NullValue} from "./dataValue";
 import {StringValue} from "./dataValue";
 import {ArrayValue} from "./dataValue";
@@ -18,6 +18,9 @@ export class DataValueFactory {
     } else if (type === "string") {
       const stringValue: StringValue = {id, type, value: data};
       return stringValue;
+    } else if (data instanceof Date) {
+      const dateValue: DateValue = {id, type: "date", value: data};
+      return dateValue;
     } else if (Array.isArray(data)) {
       const list: DataValue[] = data.map((child: any) => {
         return this.createDataValue(child);

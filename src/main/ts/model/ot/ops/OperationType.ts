@@ -14,7 +14,8 @@ const types: {[key: string]: string}  = {
   OBJECT_VALUE: "ObjectValue",
   STRING_INSERT: "StringInsert",
   STRING_REMOVE: "StringRemove",
-  STRING_VALUE: "StringValue"
+  STRING_VALUE: "StringValue",
+  DATE_VALUE: "DateValue"
 };
 
 Object.freeze(types);

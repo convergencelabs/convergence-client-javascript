@@ -8,3 +8,4 @@ export * from "./HistoricalNumber";
 export * from "./HistoricalObject";
 export * from "./HistoricalString";
 export * from "./HistoricalUndefined";
+export * from "./HistoricalDate";

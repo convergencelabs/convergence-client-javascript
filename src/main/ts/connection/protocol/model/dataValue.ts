@@ -1,5 +1,5 @@
 import {CodeMap} from "../../../util/CodeMap";
-import {DataValueType} from "../../../model/dataValue";
+import {DataValueType, DateValue} from "../../../model/dataValue";
 import {DataValue} from "../../../model/dataValue";
 import {ObjectValue} from "../../../model/dataValue";
 import {StringValue} from "../../../model/dataValue";
@@ -14,6 +14,7 @@ DataValueTypeCodes.put(2, DataValueType.STRING);
 DataValueTypeCodes.put(3, DataValueType.NUMBER);
 DataValueTypeCodes.put(4, DataValueType.BOOLEAN);
 DataValueTypeCodes.put(5, DataValueType.NULL);
+DataValueTypeCodes.put(6, DataValueType.DATE);
 
 export const DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
   const result: any = {"i": dv.id, "?": "" + DataValueTypeCodes.code(dv.type)};
@@ -40,6 +41,9 @@ export const DataValueSerializer: (dv: DataValue) => any = (dv: DataValue) => {
       break;
     case DataValueType.BOOLEAN:
       result.v = (<BooleanValue> dv).value;
+      break;
+    case DataValueType.DATE:
+      result.v = (<DateValue> dv).value.getTime();
       break;
     case DataValueType.NULL:
       // No Op
@@ -73,6 +77,12 @@ export const DataValueDeserializer: (dv: any) => DataValue = (dv: any) => {
         id,
         type,
         children: arrayChildren
+      };
+    case DataValueType.DATE:
+      return <DateValue> {
+        id,
+        type,
+        value: new Date(dv.v)
       };
     case DataValueType.STRING:
     case DataValueType.NUMBER:

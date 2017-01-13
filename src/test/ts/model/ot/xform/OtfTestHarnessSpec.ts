@@ -21,6 +21,7 @@ import {OperationTransformationFunction} from "../../../../../main/ts/model/ot/x
 import ExpectStatic = Chai.ExpectStatic;
 import * as chai from "chai";
 import * as fs from "fs";
+import {DateSetOperation} from "../../../../../main/ts/model/ot/ops/DateSetOperation";
 
 const expect: ExpectStatic = chai.expect;
 const fail: Function = chai.assert.fail;
@@ -103,6 +104,8 @@ function json2Operation(opData: any): DiscreteOperation {
     case "NumberSet":
       return new NumberSetOperation(commonId, opData.noOp, opData.value);
 
+    case "DateSet":
+      return new DateSetOperation(commonId, opData.noOp, new Date(opData.value));
     default:
       throw new Error("Invalid operation definition");
   }

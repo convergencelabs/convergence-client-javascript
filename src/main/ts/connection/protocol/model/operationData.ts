@@ -22,6 +22,7 @@ import {DataValueSerializer} from "./dataValue";
 import {mapObject} from "../../../util/ObjectUtils";
 import {DataValue} from "../../../model/dataValue";
 import {DataValueDeserializer} from "./dataValue";
+import {DateSetOperation} from "../../../model/ot/ops/DateSetOperation";
 
 const OperationTypeCodes: CodeMap = new CodeMap();
 OperationTypeCodes.put(0, OperationType.COMPOUND);
@@ -40,6 +41,7 @@ OperationTypeCodes.put(12, OperationType.OBJECT_VALUE);
 OperationTypeCodes.put(13, OperationType.STRING_INSERT);
 OperationTypeCodes.put(14, OperationType.STRING_REMOVE);
 OperationTypeCodes.put(15, OperationType.STRING_VALUE);
+OperationTypeCodes.put(16, OperationType.DATE_VALUE);
 
 export class OperationSerializer {
   public static serialize(operation: Operation): any {
@@ -94,6 +96,8 @@ export class DiscreteOperationSerializer {
       return StringRemoveOperationSerializer.serialize(operation);
     } else if (operation instanceof StringSetOperation) {
       return StringSetOperationSerializer.serialize(operation);
+    } else if (operation instanceof DateSetOperation) {
+      return DateSetOperationSerializer.serialize(operation);
     }
   }
 }
@@ -131,6 +135,8 @@ export class DiscreteOperationDeserializer {
         return StringRemoveOperationDeserializer.deserialize(body);
       case OperationType.STRING_VALUE:
         return StringSetOperationDeserializer.deserialize(body);
+      case OperationType.DATE_VALUE:
+        return DateSetOperationDeserializer.deserialize(body);
       default:
         throw new Error("Can't deserialize unknown operation type: " + body.t);
     }
@@ -423,5 +429,22 @@ export class StringSetOperationSerializer {
 export class StringSetOperationDeserializer {
   public static deserialize(body: any): StringSetOperation {
     return new StringSetOperation(body.d, body.n, body.v);
+  }
+}
+
+export class DateSetOperationSerializer {
+  public static serialize(operation: DateSetOperation): any {
+    return {
+      t: OperationTypeCodes.code(OperationType.Date_VALUE),
+      d: operation.id,
+      n: operation.noOp,
+      v: operation.value.getTime()
+    };
+  }
+}
+
+export class DateSetOperationDeserializer {
+  public static deserialize(body: any): DateSetOperation {
+    return new DateSetOperation(body.d, body.n, new Date(body.v));
   }
 }

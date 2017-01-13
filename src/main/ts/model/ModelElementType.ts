@@ -6,4 +6,5 @@ export class ModelElementType {
   public static readonly BOOLEAN = "boolean";
   public static readonly NULL = "null";
   public static readonly UNDEFINED = "undefined";
+  public static readonly DATE = "date";
 }

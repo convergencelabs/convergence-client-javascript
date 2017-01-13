@@ -17,6 +17,8 @@ import {StringNode} from "../internal/StringNode";
 import {UndefinedNode} from "../internal/UndefinedNode";
 import {RealTimeUndefined} from "./RealTimeUndefined";
 import {RealTimeModel} from "./RealTimeModel";
+import {RealTimeDate} from "./RealTimeDate";
+import {DateNode} from "../internal/DateNode";
 
 export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<any>> {
 
@@ -40,6 +42,8 @@ export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<a
         return new RealTimeString(<StringNode> node, this._callbacks, this, this._model);
       case ModelElementType.UNDEFINED:
         return new RealTimeUndefined(<UndefinedNode> node, this._callbacks, this, this._model);
+      case ModelElementType.DATE:
+        return new RealTimeDate(<DateNode> node, this._callbacks, this, this._model);
       default:
         return null;
       }

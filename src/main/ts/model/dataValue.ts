@@ -4,7 +4,8 @@ const types: {[key: string]: string}  = {
   STRING: "string",
   NUMBER: "number",
   BOOLEAN: "boolean",
-  NULL: "null"
+  NULL: "null",
+  DATE: "date"
 };
 
 Object.freeze(types);
@@ -38,4 +39,8 @@ export interface ObjectValue extends DataValue {
 
 export interface ArrayValue extends DataValue {
   children: DataValue[];
+}
+
+export interface DateValue extends DataValue {
+  value: Date;
 }

@@ -17,6 +17,8 @@ import {HistoricalNumber} from "./HistoricalNumber";
 import {HistoricalString} from "./HistoricalString";
 import {HistoricalUndefined} from "./HistoricalUndefined";
 import {HistoricalModel} from "./HistoricalModel";
+import {HistoricalDate} from "./HistoricalDate";
+import {DateNode} from "../internal/DateNode";
 
 export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalElement<any>> {
 
@@ -40,6 +42,8 @@ export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalEleme
         return new HistoricalString(<StringNode> node, this, this._model);
       case ModelElementType.UNDEFINED:
         return new HistoricalUndefined(<UndefinedNode> node, this, this._model);
+      case ModelElementType.DATE:
+        return new HistoricalDate(<DateNode> node, this, this._model);
       default:
         return null;
       }

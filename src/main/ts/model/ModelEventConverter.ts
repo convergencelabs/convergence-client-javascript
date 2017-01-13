@@ -1,7 +1,7 @@
 import {NodeWrapperFactory} from "./internal/NodeWrapperFactory";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ObservableElement} from "./observable/ObservableElement";
-import {NodeChangedEvent} from "./internal/events";
+import {NodeChangedEvent, DateNodeSetValueEvent} from "./internal/events";
 import {ObservableArray} from "./observable/ObservableArray";
 import {ArrayNodeInsertEvent} from "./internal/events";
 import {ArrayNodeRemoveEvent} from "./internal/events";
@@ -22,7 +22,7 @@ import {StringNodeInsertEvent} from "./internal/events";
 import {ObservableString} from "./observable/ObservableString";
 import {StringNodeRemoveEvent} from "./internal/events";
 import {StringNodeSetValueEvent} from "./internal/events";
-import {ElementDetachedEvent} from "./modelEvents";
+import {ElementDetachedEvent, DateSetValueEvent} from "./modelEvents";
 import {ModelChangedEvent} from "./modelEvents";
 import {ValueChangedEvent} from "./modelEvents";
 import {ArrayInsertEvent} from "./modelEvents";
@@ -39,6 +39,7 @@ import {ObjectSetEvent} from "./modelEvents";
 import {StringInsertEvent} from "./modelEvents";
 import {StringRemoveEvent} from "./modelEvents";
 import {StringSetValueEvent} from "./modelEvents";
+import {ObservableDate} from "./observable/ObservableDate";
 
 export class ModelEventConverter {
 
@@ -91,6 +92,9 @@ export class ModelEventConverter {
         event.sessionId, event.username, event.local);
     } else if (event instanceof StringNodeSetValueEvent) {
       return new StringSetValueEvent(<ObservableString> wrapperFactory.wrap(event.src),
+        event.sessionId, event.username, event.local);
+    } else if (event instanceof DateNodeSetValueEvent) {
+      return new DateSetValueEvent(<ObservableDate> wrapperFactory.wrap(event.src),
         event.sessionId, event.username, event.local);
     } else {
       throw new Error("Unable to convert event: " + event.name);

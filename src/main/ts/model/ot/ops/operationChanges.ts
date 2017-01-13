@@ -78,3 +78,8 @@ export interface StringSet extends DiscreteChange {
   noOp: boolean;
   value: string;
 }
+
+export interface DateSet extends DiscreteChange {
+  noOp: boolean;
+  value: Date;
+}

@@ -65,6 +65,7 @@ import {StringSetIndexTransformationFunction} from "./reference/IndexTransformat
 import {StringInsertRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
 import {StringRemoveRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
 import {StringSetRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
+import {DateSetSetOTF} from "./date/DateSetSetOTF";
 
 export class TransformationFunctionRegistry {
   private _otfs: {[key: string]: OperationTransformationFunction<any, any>};
@@ -148,6 +149,9 @@ export class TransformationFunctionRegistry {
 
     // boolean Functions
     this.registerOtf(OperationType.BOOLEAN_VALUE, OperationType.BOOLEAN_VALUE, BooleanSetSetOTF);
+
+    // date Functions
+    this.registerOtf(OperationType.DATE_VALUE, OperationType.DATE_VALUE, DateSetSetOTF);
 
     //
     // Reference Transformation Functions

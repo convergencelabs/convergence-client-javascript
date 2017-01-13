@@ -8,6 +8,7 @@ import {ObservableBoolean} from "./observable/ObservableBoolean";
 import {ObservableNumber} from "./observable/ObservableNumber";
 import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
+import {ObservableDate} from "./observable/ObservableDate";
 
 export interface ModelEvent extends ConvergenceEvent {
   readonly src: ObservableModel;
@@ -241,6 +242,18 @@ export class StringSetValueEvent implements ValueChangedEvent {
   public readonly name: string = StringSetValueEvent.NAME;
 
   constructor(public readonly element: ObservableString,
+              public readonly sessionId: string,
+              public readonly username: string,
+              public readonly local: boolean) {
+    Object.freeze(this);
+  }
+}
+
+export class DateSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME = "value";
+  public readonly name: string = DateSetValueEvent.NAME;
+
+  constructor(public readonly element: ObservableDate,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {

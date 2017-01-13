@@ -22,6 +22,7 @@ import {mapObject} from "../../../util/ObjectUtils";
 import {ModelOperation} from "../../../model/ot/applied/ModelOperation";
 import {ModelFqn} from "../../../model/ModelFqn";
 import {AppliedDiscreteOperation} from "../../../model/ot/applied/AppliedDiscreteOperation";
+import {AppliedDateSetOperation} from "../../../model/ot/applied/AppliedDateSetOperation";
 
 const OperationTypeCodes: CodeMap = new CodeMap();
 OperationTypeCodes.put(0, OperationType.COMPOUND);
@@ -83,6 +84,8 @@ export class AppliedOperationDeserializer {
         return AppliedStringRemoveOperationDeserializer.deserialize(body);
       case OperationType.STRING_VALUE:
         return AppliedStringSetOperationDeserializer.deserialize(body);
+      case OperationType.DATE_VALUE:
+        return AppliedDateSetOperationDeserializer.deserialize(body);
       default:
         throw new Error("Can't deserialize unknown operation type: " + body.t);
     }
@@ -193,5 +196,11 @@ export class AppliedStringRemoveOperationDeserializer {
 export class AppliedStringSetOperationDeserializer {
   public static deserialize(body: any): AppliedStringSetOperation {
     return new AppliedStringSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
+  }
+}
+
+export class AppliedDateSetOperationDeserializer {
+  public static deserialize(body: any): AppliedDateSetOperation {
+    return new AppliedDateSetOperation(body.d, body.n, new Date(body.v), body.o ? new Date(body.o) : null);
   }
 }

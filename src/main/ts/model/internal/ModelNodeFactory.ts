@@ -1,4 +1,4 @@
-import {DataValue} from "../dataValue";
+import {DataValue, DateValue} from "../dataValue";
 import {Model} from "./Model";
 import {ModelNode} from "./ModelNode";
 import {UndefinedNode} from "./UndefinedNode";
@@ -15,6 +15,7 @@ import {BooleanValue} from "../dataValue";
 import {BooleanNode} from "./BooleanNode";
 import {Path} from "../Path";
 import {DataValueFactory} from "../DataValueFactory";
+import {DateNode} from "./DateNode";
 
 export class ModelNodeFactory {
 
@@ -41,6 +42,8 @@ export class ModelNodeFactory {
       return new NumberNode(<NumberValue> data, path, model, sessionId, username);
     } else if (type === "boolean") {
       return new BooleanNode(<BooleanValue> data, path, model, sessionId, username);
+    } else if (type === "date") {
+      return new DateNode(<DateValue> data, path, model, sessionId, username);
     } else {
       throw new Error("Invalid data type: " + type);
     }
