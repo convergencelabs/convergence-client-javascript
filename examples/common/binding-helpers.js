@@ -67,10 +67,10 @@ function bindNumberInput(numberInput, numberModel) {
   };
 
   numberModel.on("value", function (evt) {
-    numberInput.value = evt.value;
+    numberInput.value = evt.element.value();
   });
 
-  numberModel.on("add", function (evt) {
+  numberModel.on("delta", function (evt) {
     numberInput.value = Number(numberInput.value) + evt.value;
   });
 }
@@ -82,6 +82,6 @@ function bindCheckboxInput(checkboxInput, booleanModel) {
   };
 
   booleanModel.on("value", function (evt) {
-    booleanInput.checked = evt.value;
+    booleanInput.checked = evt.element.value();
   });
 }
