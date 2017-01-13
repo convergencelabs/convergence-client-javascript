@@ -435,7 +435,7 @@ export class StringSetOperationDeserializer {
 export class DateSetOperationSerializer {
   public static serialize(operation: DateSetOperation): any {
     return {
-      t: OperationTypeCodes.code(OperationType.Date_VALUE),
+      t: OperationTypeCodes.code(OperationType.DATE_VALUE),
       d: operation.id,
       n: operation.noOp,
       v: operation.value.getTime()

@@ -4,13 +4,14 @@ var booleanInput = document.getElementById("booleanVal");
 var numberInput = document.getElementById("numberVal");
 var arrayInput = document.getElementById("arrayVal");
 var objectTable = document.getElementById("objectVal");
+var dateInput = document.getElementById("currentDate");
 
 
 // The realTimeModel.
 var model;
 
 // Connect to the domain.
-Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
+Convergence.connectAnonymously(ConvergenceConfig.DOMAIN_URL).then(function(domain) {
   return domain.models().open("test", "basic-example", function (collectionId, modelId) {
     return {
       "string": "test value",
@@ -27,7 +28,8 @@ Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
         "key2": "value2",
         "key3": "value3",
         "key4": "value4"
-      }
+      },
+      "date": new Date()
     };
   });
 }).then(function (model) {
@@ -54,6 +56,7 @@ function bindToModel(realTimeModel) {
   renderTable(model.elementAt("object"));
   bindTableButtons();
   bindTableEvents();
+  bindDateEvents();
 }
 
 //
@@ -247,4 +250,19 @@ function addTableRow(prop, val) {
   row.appendChild(valElement);
 
   objectTable.tBodies[0].appendChild(row);
+}
+
+function bindDateEvents() {
+  var rtDate = model.elementAt("date");
+  dateInput.value = rtDate.value().toUTCString();
+  rtDate.on("value", function(evt) {
+    dateInput.value = evt.element.value().toUTCString();
+  });
+}
+
+function setDate() {
+  var rtDate = model.elementAt("date");
+  var date = new Date();
+  rtDate.value(date);
+  dateInput.value = date.toUTCString()
 }
