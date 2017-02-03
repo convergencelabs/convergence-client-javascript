@@ -3,28 +3,15 @@ import {OutgoingProtocolRequestMessage} from "../../protocol";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelResult} from "../../../../model/query/ModelResult";
-import {OrderBy} from "../../../../util/OrderBy";
 
 export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
-  collection?: string;
-  limit?: number;
-  offset?: number;
-  orderBy?: OrderBy;
+  query: string;
 }
 
 export const ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
   const query: any = {
-    c: request.collection,
-    l: request.limit,
-    f: request.offset,
+    q: request.query
   };
-
-  if (request.orderBy) {
-    query.o = {
-      f: request.orderBy.field,
-      a: request.orderBy.ascending
-    };
-  }
 
   return query;
 };
@@ -35,7 +22,8 @@ export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (bo
     modelId: body.m,
     created: body.c,
     modified: body.d,
-    version: body.v
+    version: body.v,
+    data: body.a
   };
 };
 

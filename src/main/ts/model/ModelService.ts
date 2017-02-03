@@ -55,14 +55,8 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._connection.session();
   }
 
-  public query(query: ModelQuery): Promise<ModelResult[]> {
-    const message: ModelsQueryRequest = {
-      type: MessageType.MODELS_QUERY_REQUEST,
-      collection: query.collection,
-      limit: query.limit,
-      offset: query.offset,
-      orderBy: query.orderBy
-    };
+  public query(query: string): Promise<ModelResult[]> {
+    const message: ModelsQueryRequest = { type: MessageType.MODELS_QUERY_REQUEST, query };
 
     return this._connection.request(message).then((response: ModelsQueryResponse) => {
       return response.result;
@@ -144,7 +138,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return deferred.promise();
   }
 
-  public create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void> {
+  public create(collectionId: string, modelId: string, data: { [key: string]: any }): Promise<void> {
     const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
     const idGen: InitialIdGenerator = new InitialIdGenerator();
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
