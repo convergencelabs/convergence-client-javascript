@@ -157,7 +157,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._callbacks = {
       sendOperationCallback: (operation: DiscreteOperation): void => {
         const opEvent: UnprocessedOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
-        if (!this._concurrencyControl.isCompoundOperationInProgress()) {
+        if (!this._concurrencyControl.isBatchOperationInProgress()) {
           this._sendOperation(opEvent);
         }
       },
@@ -261,16 +261,24 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   }
 
   public startBatch(): void {
-    this._concurrencyControl.startCompoundOperation();
+    this._concurrencyControl.startBatchOperation();
   }
 
   public endBatch(): void {
-    const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeCompoundOperation();
+    const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeBatchOperation();
     this._sendOperation(opEvent);
   }
 
+  public batchSize(): number {
+    return this._concurrencyControl.batchSize();
+  }
+
+  public cancelBatch(): void {
+    return this._concurrencyControl.cancelBatchOperation();
+  }
+
   public isBatchStarted(): boolean {
-    return this._concurrencyControl.isCompoundOperationInProgress();
+    return this._concurrencyControl.isBatchOperationInProgress();
   }
 
   public elementReference(key: string): LocalElementReference {

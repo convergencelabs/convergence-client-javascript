@@ -82,24 +82,36 @@ export class ClientConcurrencyControl extends EventEmitter {
     }
   }
 
-  public startCompoundOperation(): void {
+  public startBatchOperation(): void {
     if (this._compoundOpInProgress) {
-      throw new Error("Compound operation already in progress.");
+      throw new Error("Batch operation already in progress.");
     }
 
     this._pendingCompoundOperation = [];
     this._compoundOpInProgress = true;
   }
 
-  public completeCompoundOperation(): UnprocessedOperationEvent {
+  public cancelBatchOperation(): void {
     if (!this._compoundOpInProgress) {
-      throw new Error("Compound operation not in progress.");
+      throw new Error("Batch operation not in progress.");
+    }
+
+    if (this._pendingCompoundOperation.length !== 0) {
+      throw new Error("Can not cancel a batch operation if operation shave been issued.");
+    }
+
+    this._compoundOpInProgress = false;
+  }
+
+  public completeBatchOperation(): UnprocessedOperationEvent {
+    if (!this._compoundOpInProgress) {
+      throw new Error("Batch operation not in progress.");
     }
 
     this._compoundOpInProgress = false;
 
     if (this._pendingCompoundOperation.length === 0) {
-      throw new Error("A compound operation must have at least one operation.");
+      throw new Error("A Batch operation must have at least one operation.");
 
     }
 
@@ -117,7 +129,11 @@ export class ClientConcurrencyControl extends EventEmitter {
     return event;
   }
 
-  public isCompoundOperationInProgress(): boolean {
+  public batchSize(): number {
+    return this._pendingCompoundOperation.length;
+  }
+
+  public isBatchOperationInProgress(): boolean {
     return this._compoundOpInProgress;
   }
 
