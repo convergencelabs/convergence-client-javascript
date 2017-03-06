@@ -20,7 +20,6 @@ import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {Validation} from "../util/Validation";
 import {RealTimeModel} from "./rt/RealTimeModel";
-import {ModelQuery} from "./query/ModelQuery";
 import {HistoricalModel} from "./historical/HistoricalModel";
 import {HistoricalDataRequest} from "../connection/protocol/model/historical/historicalDataRequest";
 import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";

@@ -23,6 +23,8 @@ export declare abstract class RealTimeElement<T>
 
   public path(): Path;
 
+  public parent(): RealTimeContainerElement<any>;
+
   public isDetached(): boolean;
 
   public value(): T;

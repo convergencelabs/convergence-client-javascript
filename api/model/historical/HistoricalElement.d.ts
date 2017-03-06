@@ -3,6 +3,7 @@ import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {HistoricalModel} from "./HistoricalModel";
+import {HistoricalContainerElement} from "./HistoricalContainerElement";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -17,6 +18,8 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
   public type(): string;
 
   public path(): Path;
+
+  public parent(): HistoricalContainerElement<any>
 
   public isDetached(): boolean;
 

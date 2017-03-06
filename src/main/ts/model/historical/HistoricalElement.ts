@@ -10,6 +10,7 @@ import {
   ObservableElementEventConstants
 } from "../observable/ObservableElement";
 import {HistoricalModel} from "./HistoricalModel";
+import {HistoricalContainerElement} from "./HistoricalContainerElement";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -44,6 +45,13 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
 
   public path(): Path {
     return this._delegate.path();
+  }
+
+  public parent(): HistoricalContainerElement<any> {
+    const parentPath = this._delegate.path().slice(0);
+    parentPath.pop();
+    const parent = this._model.elementAt(parentPath);
+    return parent as any as HistoricalContainerElement<any>;
   }
 
   public isDetached(): boolean {
