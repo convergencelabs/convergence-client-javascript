@@ -1,127 +1,86 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Quill Editor Set Up
 ///////////////////////////////////////////////////////////////////////////////
-
-// Initialize editor with custom theme and modules
-var quillEditor = new Quill('#quill-editor', {
-  modules: {
-    'multi-cursor': true
-  },
-  theme: 'snow',
-  formats: []
+const quillEditor = new Quill('#quill-editor', {
+  theme: 'snow'
 });
 
-// Create a cursor manager for showing remote cursors
-var cursorManager = quillEditor.getModule('multi-cursor');
-
 ///////////////////////////////////////////////////////////////////////////////
-// Convergence Set Up
+// Convergence Connection / Model Open
 ///////////////////////////////////////////////////////////////////////////////
-
-var model; // The RealTimeModel.
-var rtString; // The RealTimeString that holds the text document
-var localCursor; // The local cursor reference
-
-// Connect to the domain.
-ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
-domain.on("connected", function () {
-  console.log("connected");
-});
-
-// Now authenticate.  This is deferred unti connection is successful.
-domain.authenticateWithPassword("test1", "password").then(function (username) {
-  return domain.modelService().open("example", "quill-plain-text", function (collectionId, modelId) {
-    return {
-      "text": "test value"
-    };
+Convergence.connectAnonymously(DOMAIN_URL).then(function (domain) {
+  return domain.models().open("example", "quill-plain-text", function (collectionId, modelId) {
+    return {"text": "test value"};
   });
-}).then(function (model) {
-  bind(model);
-});
+}).then(bind);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Two Way Binding from Quill to Convergence
 ///////////////////////////////////////////////////////////////////////////////
+function bind(model) {
 
-//
-// Create a two way binding between Quill and Convergence.
-//
-function bind(realTimeModel) {
-  model = realTimeModel;
-  rtString = model.dataAt("text");
+  const rtString = model.elementAt("text");
 
   // Initialize editor with current text.
   quillEditor.setText(rtString.value());
 
   // bind to editing events and send them to the Quill API.
-  rtString.on("insert", function (e) {
+  rtString.on(Convergence.RealTimeString.Events.INSERT, function (e) {
     quillEditor.insertText(e.index, e.value);
   });
 
-  rtString.on("remove", function (e) {
+  rtString.on(Convergence.RealTimeString.Events.REMOVE, function (e) {
     quillEditor.deleteText(e.index, e.index + e.value.length);
   });
 
-  rtString.on("value", function (e) {
-    quillEditor.setText(e.value);
-  });
-
-  // Create and publish a local cursor.
-  localCursor = rtString.indexReference("cursor");
-  localCursor.publish();
-
-  // Listen for remote references.
-  rtString.on("reference", function (e) {
-    if (e.reference.key() === "cursor") {
-      handleRemoteCursorReference(e.reference);
-    }
+  rtString.on(Convergence.RealTimeString.Events.VALUE, function (e) {
+    quillEditor.setText(e.element.value());
   });
 
   // Listen for text changes in the editor and pipe them into convergence
-  quillEditor.on('text-change', function (delta, source) {
+  quillEditor.on('text-change', function (delta, oldDelta, source) {
+    //console.log(JSON.stringify(quillEditor.getContents()));
     if (source === 'user') {
-      var deltaOps = delta.ops;
-      var cursor = 0;
-      for (var i = 0; i < deltaOps.length; i++) {
-        var deltaOp = deltaOps[i];
+      const deltaOps = delta.ops;
+      let cursor = 0;
+      for (let i = 0; i < deltaOps.length; i++) {
+        const deltaOp = deltaOps[i];
+        //console.log(deltaOp);
         if (typeof deltaOp.retain === "number") {
+          const end = cursor + deltaOp.retain;
+          if (deltaOp.attributes !== undefined) {
+            console.log("Change style from: " + cursor + " to: " + end, deltaOp.attributes);
+          } else {
+            console.log("advance cursor to: " + end);
+          }
           cursor += deltaOp.retain;
         } else if (typeof deltaOp.delete === "number") {
-          rtString.remove(cursor, deltaOp.delete);
+          //rtString.remove(cursor, deltaOp.delete);
           cursor += deltaOp.delete;
         } else if (typeof deltaOp.insert === "string") {
-          rtString.insert(cursor, deltaOp.insert);
+
+          const attributes = deltaOp.attributes;
+          const text = deltaOp.insert;
+
+          const lines = text.split("\n");
+          for(let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.length > 0) {
+              console.log("Inserted: " + line + ", with style: " + JSON.stringify(attributes));
+            }
+
+            if (i < lines.length - 1) {
+              console.log("Create new block");
+            }
+            // if (i === 0 && line.length === 0) {
+            //   continue;
+            // }
+          }
+
+
           cursor += deltaOp.insert.length;
         }
       }
     }
-  });
-
-  // Handle cursor and selection changes.
-  quillEditor.on('selection-change', function (range) {
-    if (range) {
-      localCursor.set(range.end);
-    } else {
-      console.log('Cursor not in the editor');
-    }
-  });
-}
-
-function handleRemoteCursorReference(reference) {
-  reference.on("set", function (e) {
-    cursorManager.setCursor(
-      reference.sessionId(),
-      reference.value(),
-      reference.userId(),
-      'rgba(255,153,51,0.9)');
-  });
-
-  reference.on("cleared", function (e) {
-    cursorManager.removeCursor(reference.sessionId());
-  });
-
-  reference.on("disposed", function (e) {
-    cursorManager.removeCursor(reference.sessionId());
   });
 }
