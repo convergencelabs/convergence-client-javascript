@@ -17,6 +17,7 @@ import {
   ObservableElement,
   ObservableElementEvents,
   ObservableElementEventConstants} from "../observable/ObservableElement";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {}
 
@@ -77,6 +78,13 @@ export abstract class RealTimeElement<T>
 
   public path(): Path {
     return this._delegate.path();
+  }
+
+  public parent(): RealTimeContainerElement<any> {
+    const parentPath = this._delegate.path().slice(0);
+    parentPath.pop();
+    const parent = this._model.elementAt(parentPath);
+    return parent as any as RealTimeContainerElement<any>;
   }
 
   public isDetached(): boolean {
