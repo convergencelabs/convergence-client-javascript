@@ -42,6 +42,10 @@ export class NumberNode extends ModelNode<number> {
     };
   }
 
+  public toJson(): any {
+    return this._data;
+  }
+
   public add(value: number): void {
     this._applyAdd(value, true);
   }

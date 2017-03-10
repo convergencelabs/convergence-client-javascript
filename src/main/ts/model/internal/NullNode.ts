@@ -30,6 +30,10 @@ export class NullNode extends ModelNode<void> {
     };
   }
 
+  public toJson(): any {
+    return null;
+  }
+
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     throw new Error("Null values do not process operations");
   }

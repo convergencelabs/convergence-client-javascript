@@ -26,6 +26,10 @@ export class UndefinedNode extends ModelNode<void> {
     return undefined;
   }
 
+  public toJson(): any {
+    return undefined;
+  }
+
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     throw new Error("Undefined values do not process operations");
   }

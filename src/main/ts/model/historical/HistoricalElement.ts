@@ -62,6 +62,10 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return this._delegate.data();
   }
 
+  public toJson(): any {
+    return this._delegate.toJson();
+  }
+
   public model(): HistoricalModel {
     return this._model;
   }

@@ -70,6 +70,14 @@ export class ArrayNode extends ContainerNode<any[]> {
     };
   }
 
+  public toJson(): any {
+    const jsonArray: any[] = [];
+    this.forEach(node => {
+      jsonArray.push(node.toJson());
+    });
+    return jsonArray;
+  }
+
   public get(index: number): ModelNode<any> {
     return this._children[index];
   }

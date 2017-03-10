@@ -81,6 +81,8 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
 
   public abstract dataValue(): DataValue
 
+  public abstract toJson(): any;
+
   public abstract _handleModelOperationEvent(operationEvent: ModelOperationEvent): void;
 
   protected _emitValueEvent(event: NodeValueChangedEvent): void {

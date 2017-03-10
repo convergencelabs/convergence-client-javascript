@@ -69,6 +69,14 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
     };
   }
 
+  public toJson(): any {
+    const jsonObject: any = {};
+    this.forEach((node, key) => {
+      jsonObject[key] = node.toJson();
+    });
+    return jsonObject;
+  }
+
   public get(key: string): ModelNode<any> {
     Validation.isString(key, "key");
     return this._children.get(key);

@@ -38,6 +38,10 @@ export class BooleanNode extends ModelNode<boolean> {
     };
   }
 
+  public toJson(): any {
+    return this._data;
+  }
+
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     const type: string = operationEvent.operation.type;
     if (type === OperationType.BOOLEAN_VALUE) {

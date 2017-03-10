@@ -28,12 +28,26 @@ export class DataValueFactory {
       const arrayValue: ArrayValue = {id, type: "array", children: list};
       return arrayValue;
     } else if (type === "object") {
-      const props: {[key: string]: DataValue} = {};
-      Object.getOwnPropertyNames(data).forEach((prop: string) => {
-        props[prop] = this.createDataValue(data[prop]);
-      });
-      const objectValue: ObjectValue = {id, type, children: props};
-      return objectValue;
+      if (data.hasOwnProperty("$convergenceType")) {
+        const convergenceType: string = data["$convergenceType"];
+        if (convergenceType === "date") {
+          if (data.hasOwnProperty("value")) {
+            const dateValue: DateValue = { id, type: "date", value: new Date(data["value"]) };
+            return dateValue;
+          } else {
+            throw new Error("Invalid convergence data type: " + type + " value field missing.");
+          }
+        } else {
+          throw new Error("Invalid convergence data type: " + type + " supported types are [date].");
+        }
+      } else {
+        const props: { [key: string]: DataValue } = {};
+        Object.getOwnPropertyNames(data).forEach((prop: string) => {
+          props[prop] = this.createDataValue(data[prop]);
+        });
+        const objectValue: ObjectValue = { id, type, children: props };
+        return objectValue;
+      }
     } else if (type === "number") {
       const numberValue: NumberValue = {id, type, value: data};
       return numberValue;

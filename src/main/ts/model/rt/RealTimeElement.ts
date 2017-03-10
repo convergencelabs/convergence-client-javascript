@@ -102,6 +102,10 @@ export abstract class RealTimeElement<T>
     }
   }
 
+  public toJson(): any {
+    return this._delegate.toJson();
+  }
+
   public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
   }

@@ -45,6 +45,10 @@ export class StringNode extends ModelNode<string> {
     };
   }
 
+  public toJson(): any {
+    return this._data;
+  }
+
   public insert(index: number, value: string): void {
     this._applyInsert(index, value, true, this.sessionId, this.username);
   }

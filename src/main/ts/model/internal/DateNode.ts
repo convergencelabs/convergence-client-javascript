@@ -38,6 +38,13 @@ export class DateNode extends ModelNode<Date> {
     };
   }
 
+  public toJson(): any {
+    return {
+      $convergenceType: "date",
+      value: this._data.toISOString()
+    };
+  }
+
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     const type: string = operationEvent.operation.type;
     if (type === OperationType.DATE_VALUE) {

@@ -10,6 +10,10 @@ import {OpenRealTimeModelRequestSerializer} from "../../main/ts/connection/proto
 import {DataValueSerializer} from "../../main/ts/connection/protocol/model/dataValue";
 import {DataValueFactory} from "../../main/ts/model/DataValueFactory";
 import {Convergence} from "../../main/ts/Convergence";
+import * as chai from "chai";
+import ExpectStatic = Chai.ExpectStatic;
+
+const expect: ExpectStatic = chai.expect;
 
 describe("Open Real Time Model E2E", () => {
 
@@ -40,7 +44,14 @@ describe("Open Real Time Model E2E", () => {
       c: new Date().getTime(),
       m: new Date().getTime(),
       d: {
-        d: DataValueSerializer(dataValueFactory.createDataValue({num: 10})),
+        d: DataValueSerializer(dataValueFactory.createDataValue(
+          {
+            num: 10,
+            myDate: {
+              $convergenceType: "date",
+              value: "2006-01-02T15:04:05.000Z"
+            }
+          })),
         s: [],
         r: []
       },
@@ -51,6 +62,12 @@ describe("Open Real Time Model E2E", () => {
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
       return domain.models().open("collection", "model");
     }).then((model: RealTimeModel) => {
+      expect(model.root().get("num").value()).to.equal(10);
+      expect(model.root().get("myDate").value()).to.deep.equal(new Date("2006-01-02T15:04:05.000Z"));
+      expect(model.root().get("myDate").toJson()).to.deep.equal({
+        $convergenceType: "date",
+        value: "2006-01-02T15:04:05.000Z"
+      });
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
       mockServer.doneManager().testFailure(error);
