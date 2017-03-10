@@ -33,4 +33,6 @@ export declare abstract class RealTimeElement<T>
   public reference(sessionId: string, key: string): ModelReference<any>;
 
   public references(filter?: ReferenceFilter): Array<ModelReference<any>>;
+
+  public toJSON(): any;
 }

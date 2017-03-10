@@ -64,10 +64,12 @@ describe("Open Real Time Model E2E", () => {
     }).then((model: RealTimeModel) => {
       expect(model.root().get("num").value()).to.equal(10);
       expect(model.root().get("myDate").value()).to.deep.equal(new Date("2006-01-02T15:04:05.000Z"));
-      expect(model.root().get("myDate").toJson()).to.deep.equal({
+      const expected = {
         $convergenceType: "date",
         value: "2006-01-02T15:04:05.000Z"
-      });
+      };
+      expect(model.root().get("myDate").toJSON()).to.deep.equal(expected);
+      expect(JSON.parse(JSON.stringify(model.root().get("myDate")))).to.deep.equal(expected);
       mockServer.doneManager().testSuccess();
     }).catch((error: Error) => {
       mockServer.doneManager().testFailure(error);

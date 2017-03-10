@@ -62,7 +62,7 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return this._delegate.data();
   }
 
-  public toJson(): any {
+  public toJSON(): any {
     return this._delegate.toJson();
   }
 

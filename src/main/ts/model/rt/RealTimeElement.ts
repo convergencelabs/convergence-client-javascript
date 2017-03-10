@@ -102,7 +102,7 @@ export abstract class RealTimeElement<T>
     }
   }
 
-  public toJson(): any {
+  public toJSON(): any {
     return this._delegate.toJson();
   }
 

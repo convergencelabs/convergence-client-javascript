@@ -26,4 +26,6 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
   public value(): T;
 
   public model(): HistoricalModel;
+
+  public toJSON(): any;
 }

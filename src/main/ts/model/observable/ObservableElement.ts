@@ -31,5 +31,5 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
 
   model(): ObservableModel;
 
-  toJson(): any;
+  toJSON(): any;
 }
