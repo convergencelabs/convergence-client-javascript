@@ -1,6 +1,6 @@
 {
   "name": "@convergence/convergence",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Convergence JavaScript client library.",
   "keywords": [
     "Convergence",
@@ -27,7 +27,7 @@
   "main": "convergence.js",
   "typings": "typings/index.d.ts",
   "dependencies": {
-    "rxjs": "5.0.1"
+    "rxjs": "5.2.0"
   },
   "license": "SEE LICENSE IN http://www.convergencelabs.com/terms/services/",
   "publishConfig": {

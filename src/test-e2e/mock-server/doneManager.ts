@@ -14,10 +14,10 @@ export interface IDoneManager {
   testSuccess(): void;
 
   /**
-   * Indicates that the until test has enounctered some failure.  This will
+   * Indicates that the until test has encountered some failure.  This will
    * immediately fail the test.
    *
-   * @param error The error that occured.
+   * @param error The error that occurred.
    */
   testFailure(error?: Error): void;
 }
@@ -46,6 +46,10 @@ export abstract class AbstractDoneManager implements IDoneManager {
   }
 
   public testFailure(error?: Error): void {
+    if (error === undefined) {
+      error = new Error("Test Failure");
+    }
+
     if (!this._resolved) {
       this._resolved = true;
       this._mockServer.stop();

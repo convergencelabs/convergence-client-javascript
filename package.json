@@ -32,7 +32,7 @@
     "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
   },
   "dependencies": {
-    "rxjs": "5.0.2"
+    "rxjs": "5.2.0"
   },
   "devDependencies": {
     "@types/chai": "3.4.34",
