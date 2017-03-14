@@ -1,4 +1,4 @@
-export declare interface ModelPermissions {
+export interface ModelPermissions {
   readonly read: boolean;
   readonly write: boolean;
   readonly remove: boolean;
