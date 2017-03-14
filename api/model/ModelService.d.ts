@@ -13,7 +13,8 @@ export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEve
 
   public open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel>;
 
-  public create(collectionId: string, modelId: string, data: {[key: string]: any}): Promise<void>;
+  public create(collectionId: string, modelId: string, data: {[key: string]: any}):
+    Promise<{collectionId: string, modelId: string}>;
 
   public remove(collectionId: string, modelId: string): Promise<void>;
 

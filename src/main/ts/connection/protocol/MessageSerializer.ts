@@ -19,7 +19,10 @@ import { OperationAckDeserializer } from "./model/operationAck";
 import { RemoteOperationDeserializer } from "./model/remoteOperation";
 import { ForceCloseRealTimeModelDeserializer } from "./model/forceCloseRealtimeModel";
 import { DeleteRealTimeModelRequestSerializer } from "./model/deleteRealtimeModel";
-import { CreateRealTimeModelRequestSerializer } from "./model/createRealtimeModel";
+import {
+  CreateRealTimeModelRequestSerializer,
+  CreateRealTimeModelResponseDeserializer
+} from "./model/createRealtimeModel";
 import { CloseRealTimeModelRequestSerializer } from "./model/closeRealtimeModel";
 import { UserLookUpRequestSerializer } from "./user/userLookUps";
 import { UserSearchRequestSerializer } from "./user/userLookUps";
@@ -219,6 +222,8 @@ MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PONG);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.AUTHENTICATE_RESPONSE,
   AuthenticationResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.ERROR, ErrorMessageDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_MODEL_RESPONSE,
+  CreateRealTimeModelResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.OPEN_REAL_TIME_MODEL_RESPONSE,
   OpenRealTimeModelResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_DATA_REQUEST, ModelDataRequestDeserializer);
@@ -234,7 +239,6 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_CLIENT_CLOS
 MessageSerializer.registerMessageBodyDeserializer(MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
   ForceCloseRealTimeModelDeserializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.DELETE_REAL_TIME_MODEL_RESPONSE);
-MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_MODEL_RESPONSE);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.CLOSE_REAL_TIME_MODEL_RESPONSE);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_SET, RemoteReferenceSetDeserializer);

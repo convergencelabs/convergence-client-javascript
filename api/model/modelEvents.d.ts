@@ -8,6 +8,8 @@ import {ObservableBoolean} from "./observable/ObservableBoolean";
 import {ObservableNumber} from "./observable/ObservableNumber";
 import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
+import {ModelPermissions} from "./ModelPermissions";
+import {RealTimeModel} from "./rt/RealTimeModel";
 
 export interface ModelEvent extends ConvergenceEvent {
   readonly src: ObservableModel;
@@ -28,6 +30,14 @@ export declare class RemoteReferenceCreatedEvent implements ConvergenceEvent {
   public readonly reference: ModelReference<any>;
   public readonly element?: ObservableElement<any>;
   public readonly model?: ObservableModel;
+}
+
+export declare class ModelPermissionsChangedEvent implements ConvergenceEvent {
+  public static readonly NAME: string;
+  public readonly name: string;
+  public readonly model: RealTimeModel;
+  public readonly permissions: ModelPermissions;
+  public readonly changes: string[];
 }
 
 export interface ConvergenceModelValueEvent extends ConvergenceEvent {

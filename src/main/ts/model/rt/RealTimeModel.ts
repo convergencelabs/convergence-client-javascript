@@ -42,7 +42,7 @@ import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {MessageEvent} from "../../connection/ConvergenceConnection";
-import {RemoteReferenceCreatedEvent} from "../modelEvents";
+import {RemoteReferenceCreatedEvent, ModelPermissionsChangedEvent} from "../modelEvents";
 import {ModelEvent} from "../modelEvents";
 import {ModelClosedEvent} from "../modelEvents";
 import {VersionChangedEvent} from "../modelEvents";
@@ -61,6 +61,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly COLLABORATOR_OPENED: string;
   readonly COLLABORATOR_CLOSED: string;
   readonly REFERENCE: string;
+  readonly PERMISSIONS_CHANGED: string;
 }
 
 const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
@@ -68,7 +69,8 @@ const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
     COMMITTED: "committed",
     COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
     COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
-    REFERENCE: RemoteReferenceCreatedEvent.NAME
+    REFERENCE: RemoteReferenceCreatedEvent.NAME,
+    PERMISSIONS_CHANGED: ModelPermissionsChangedEvent.NAME
   },
   ObservableModelEventConstants);
 

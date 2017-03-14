@@ -7,7 +7,10 @@ import {MessageType} from "../connection/protocol/MessageType";
 import {OperationTransformer} from "./ot/xform/OperationTransformer";
 import {TransformationFunctionRegistry} from "./ot/xform/TransformationFunctionRegistry";
 import {ClientConcurrencyControl} from "./ot/ClientConcurrencyControl";
-import {CreateRealTimeModelRequest} from "../connection/protocol/model/createRealtimeModel";
+import {
+  CreateRealTimeModelRequest,
+  CreateRealTimeModelResponse
+} from "../connection/protocol/model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import {Deferred} from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
@@ -31,9 +34,9 @@ import {ModelPermissionManager} from "./ModelPermissionManager";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  private _openRequestsByFqn: { [key: string]: OpenRequest; } = {};
-  private _openModelsByFqn: { [key: string]: RealTimeModel; } = {};
-  private _openModelsByRid: { [key: string]: RealTimeModel; } = {};
+  private _openRequestsByFqn: {[key: string]: OpenRequest} = {};
+  private _openModelsByFqn: {[key: string]: RealTimeModel} = {};
+  private _openModelsByRid: {[key: string]: RealTimeModel} = {};
 
   constructor(private _connection: ConvergenceConnection) {
     super();
@@ -56,7 +59,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   public query(query: string): Promise<ModelResult[]> {
-    const message: ModelsQueryRequest = { type: MessageType.MODELS_QUERY_REQUEST, query };
+    const message: ModelsQueryRequest = {type: MessageType.MODELS_QUERY_REQUEST, query};
 
     return this._connection.request(message).then((response: ModelsQueryResponse) => {
       return response.result;
@@ -138,8 +141,9 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return deferred.promise();
   }
 
-  public create(collectionId: string, modelId: string, data: { [key: string]: any }): Promise<void> {
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+  public create(collectionId: string,
+                modelId: string,
+                data: {[key: string]: any}): Promise<{collectionId: string, modelId: string}> {
     const idGen: InitialIdGenerator = new InitialIdGenerator();
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
@@ -147,12 +151,16 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
     const request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
-      modelFqn: fqn,
+      collectionId,
+      modelId,
       data: dataValue
     };
 
-    return this._connection.request(request).then(() => {
-      return; // convert to Promise<void>
+    return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {
+      return {
+        collectionId: response.collectionId,
+        modelId: response.modelId
+      };
     });
   }
 

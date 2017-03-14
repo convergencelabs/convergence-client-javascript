@@ -18,6 +18,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   COLLABORATOR_OPENED: string;
   COLLABORATOR_CLOSED: string;
   REFERENCE: string;
+  PERMISSIONS_CHANGED: string;
 }
 
 export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {

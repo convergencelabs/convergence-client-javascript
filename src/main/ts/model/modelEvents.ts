@@ -9,6 +9,8 @@ import {ObservableNumber} from "./observable/ObservableNumber";
 import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
 import {ObservableDate} from "./observable/ObservableDate";
+import {RealTimeModel} from "./rt/RealTimeModel";
+import {ModelPermissions} from "./ModelPermissions";
 
 export interface ModelEvent extends ConvergenceEvent {
   readonly src: ObservableModel;
@@ -30,6 +32,17 @@ export class RemoteReferenceCreatedEvent implements ConvergenceEvent {
   constructor(public readonly reference: ModelReference<any>,
               public readonly element?: ObservableElement<any>,
               public readonly model?: ObservableModel) {
+    Object.freeze(this);
+  }
+}
+
+export class ModelPermissionsChangedEvent implements ConvergenceEvent {
+  public static readonly NAME = "permissions_changed";
+  public readonly name: string = ModelPermissionsChangedEvent.NAME;
+
+  constructor(public readonly model: RealTimeModel,
+              public readonly permissions: ModelPermissions,
+              public readonly changes: string[]) {
     Object.freeze(this);
   }
 }
