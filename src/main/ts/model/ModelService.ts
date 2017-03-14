@@ -27,7 +27,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ModelResult} from "./query/ModelResult";
 import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
-import {ModelPermissionService} from "./ModelPermissionService";
+import {ModelPermissionManager} from "./ModelPermissionManager";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -183,8 +183,8 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  public permissions(collectionId: string, modelId: string): ModelPermissionService {
-    return new ModelPermissionService(collectionId, modelId, this._connection);
+  public permissions(collectionId: string, modelId: string): ModelPermissionManager {
+    return new ModelPermissionManager(collectionId, modelId, this._connection);
   }
 
   public _close(resourceId: string): Promise<void> {

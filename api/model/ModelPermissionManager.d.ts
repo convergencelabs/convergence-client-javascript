@@ -1,6 +1,6 @@
 import {ModelPermissions} from "./ModelPermissions";
 
-export declare class ModelPermissionService {
+export declare class ModelPermissionManager {
 
   public readonly collectionId: string;
   public readonly modelId: string;

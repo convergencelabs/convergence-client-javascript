@@ -4,7 +4,7 @@ import {RealTimeModel} from "./rt/RealTimeModel";
 import {HistoricalModel} from "./historical/HistoricalModel";
 import {ModelResult} from "./query/ModelResult";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
-import {ModelPermissionService} from "./ModelPermissionService"
+import {ModelPermissionManager} from "./ModelPermissionManager";
 
 export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public session(): Session;
@@ -19,5 +19,5 @@ export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEve
 
   public history(collectionId: string, modelId: string): Promise<HistoricalModel>;
 
-  public permissions(collectionId: string, modelId: string): ModelPermissionService;
+  public permissions(collectionId: string, modelId: string): ModelPermissionManager;
 }

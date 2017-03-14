@@ -52,7 +52,8 @@ import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
 import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
-import {ModelPermissionService} from "../ModelPermissionService";
+import {ModelPermissionManager} from "../ModelPermissionManager";
+import {ModelPermissions} from "../ModelPermissions";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -173,8 +174,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._initializeReferences(references);
   }
 
-  public permissions(): ModelPermissionService {
-    return new ModelPermissionService(this._modelFqn.collectionId, this._modelFqn.modelId, this._connection);
+  public permissions(): ModelPermissions {
+    return {read: false, write: false, remove: false, manage: false};
+  }
+
+  public permissionsManager(): ModelPermissionManager {
+    return new ModelPermissionManager(this._modelFqn.collectionId, this._modelFqn.modelId, this._connection);
   }
 
   public session(): Session {

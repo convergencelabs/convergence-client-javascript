@@ -8,5 +8,5 @@ export * from "./rt/index";
 export * from "./query/index";
 export * from "./reference/index";
 
-export * from "./ModelPermissionService";
+export * from "./ModelPermissionManager";
 export * from "./ModelPermissions";

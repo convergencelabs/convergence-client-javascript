@@ -9,7 +9,8 @@ import {ModelCollaborator} from "./ModelCollaborator";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableModel, ObservableModelEvents} from "../observable/ObservableModel";
 import {ModelEvent} from "../modelEvents";
-import {ModelPermissionService} from "../ModelPermissionService";
+import {ModelPermissionManager} from "../ModelPermissionManager";
+import {ModelPermissions} from "../../../src/main/ts/model/ModelPermissions";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   MODIFIED: string;
@@ -35,7 +36,9 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
 
   public modelId(): string;
 
-  public permissions(): ModelPermissionService;
+  public permissions(): ModelPermissions;
+
+  public permissionsManager(): ModelPermissionManager;
 
   /**
    * The current, latest time of the model.

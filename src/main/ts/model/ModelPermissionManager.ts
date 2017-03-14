@@ -1,7 +1,7 @@
 import {ModelPermissions} from "./ModelPermissions";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 
-export class ModelPermissionService {
+export class ModelPermissionManager {
 
   private readonly _collectionId: string;
   private readonly _modelId: string;
