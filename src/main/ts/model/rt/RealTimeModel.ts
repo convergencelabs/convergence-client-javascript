@@ -54,7 +54,7 @@ import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} f
 import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
-import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsUpdated";
+import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsChanged";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;

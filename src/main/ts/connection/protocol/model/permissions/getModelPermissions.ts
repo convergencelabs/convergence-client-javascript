@@ -10,7 +10,7 @@ export interface GetModelPermissionsRequest extends OutgoingProtocolRequestMessa
   modelFqn: ModelFqn;
 }
 
-export const GetModelUserPermissionsSerializer: MessageBodySerializer = (request: GetModelPermissionsRequest) => {
+export const GetModelPermissionsSerializer: MessageBodySerializer = (request: GetModelPermissionsRequest) => {
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId
@@ -43,5 +43,3 @@ export const GetModelPermissionsResponseDeserializer: MessageBodyDeserializer<Ge
       users
     };
   };
-
-

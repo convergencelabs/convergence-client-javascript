@@ -75,6 +75,12 @@ import { ActivityRemoteStateRemovedDeserializer } from "./activity/activityState
 import { ActivityJoinResponseDeserializer } from "./activity/joinActivity";
 import { JoinRoomRequestMessageSerializer } from "./chat/joinRoom";
 import { JoinRoomResponseMessageDeserializer } from "./chat/joinRoom";
+import {
+  GetModelPermissionsResponseDeserializer,
+  GetModelPermissionsSerializer
+} from "./model/permissions/getModelPermissions";
+import {ModelPermissionsChangedDeserializer} from "./model/permissions/modelPermissionsChanged";
+import {SetModelPermissionsSerializer} from "./model/permissions/setModelPermissions";
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
 export type MessageBodyDeserializer<T> = (message: any) => T;
@@ -179,6 +185,12 @@ MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_REAL_TIME_MOD
 MessageSerializer.registerMessageBodySerializer(MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
   CloseRealTimeModelRequestSerializer);
 
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_MODEL_PERMISSIONS_REQUEST,
+  GetModelPermissionsSerializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.SET_MODEL_PERMISSIONS_REQUEST,
+  SetModelPermissionsSerializer);
+
 MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_REFERENCE, PublishReferenceSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.SET_REFERENCE, SetReferenceSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.CLEAR_REFERENCE, ClearReferenceMessageSerializer);
@@ -247,6 +259,12 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_PUBLISHE
 MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_CLEARED, RemoteReferenceClearedDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.REFERENCE_UNPUBLISHED,
   RemoteReferenceUnpublishedDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_MODEL_PERMISSIONS_RESPONSE,
+  GetModelPermissionsResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_PERMISSIONS_CHANGED,
+  ModelPermissionsChangedDeserializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.SET_MODEL_PERMISSIONS_RESPONSE);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LIST_RESPONSE, UserListResponseDeserializer);
 
