@@ -39,18 +39,22 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
   }
 
   public add(value: number): void {
+    this._assertWritable();
     this._delegate.add(value);
   }
 
   public subtract(value: number): void {
+    this._assertWritable();
     this._delegate.subtract(value);
   }
 
   public increment(): void {
+    this._assertWritable();
     this._delegate.increment();
   }
 
   public decrement(): void {
+    this._assertWritable();
     this._delegate.decrement();
   }
 

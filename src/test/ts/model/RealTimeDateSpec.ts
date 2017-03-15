@@ -34,6 +34,14 @@ describe("RealTimeDate", () => {
   rtModel.emitLocalEvents = () => {
     return false;
   };
+  rtModel.permissions = () => {
+    return  {
+      read: true,
+      write: true,
+      remove: true,
+      manage: true
+    };
+  };
 
   const testDate = new Date();
 

@@ -1,5 +1,11 @@
 import {ModelPermissions} from "./ModelPermissions";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {
+  GetModelPermissionsRequest,
+  GetModelPermissionsResponse
+} from "../connection/protocol/model/permissions/getModelPermissions";
+import {ModelFqn} from "./ModelFqn";
+import {SetModelPermissionsRequest} from "../connection/protocol/model/permissions/setModelPermissions";
 
 export class ModelPermissionManager {
 
@@ -22,30 +28,93 @@ export class ModelPermissionManager {
   }
 
   public getPermissions(): Promise<ModelPermissions> {
-    return Promise.reject<ModelPermissions>(new Error("not implemented"));
+    const request: GetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+    };
+
+    return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
+      return response.users.get(this._connection.session().username());
+    });
   }
 
   public getWorldPermissions(): Promise<ModelPermissions> {
-    return Promise.reject<ModelPermissions>(new Error("not implemented"));
+    const request: GetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+    };
+
+    return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
+      return response.world;
+    });
   }
 
   public setWorldPermissions(permissions: ModelPermissions): Promise<void> {
-    return Promise.reject<void>(new Error("not implemented"));
+    const request: SetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      world: permissions
+    };
+
+    return this._connection.request(request).then(() => {
+      return;
+    });
   }
 
   public getAllUserPermissions(): Promise<Map<string, ModelPermissions>> {
-    return Promise.reject<Map<string, ModelPermissions>>(new Error("not implemented"));
+    const request: GetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+    };
+
+    return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
+      return response.users;
+    });
   }
 
-  public getUserPermissions(userId: string): Promise<ModelPermissions> {
-    return Promise.reject<ModelPermissions>(new Error("not implemented"));
+  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void> {
+    const request: SetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      users: permissions,
+      allUsers: true
+    };
+
+    return this._connection.request(request).then(() => {
+      return;
+    });
   }
 
-  public setUserPermissions(userId: string, permissions: ModelPermissions): Promise<void> {
-    return Promise.reject<void>(new Error("not implemented"));
+  public getUserPermissions(username: string): Promise<ModelPermissions> {
+    const request: GetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+    };
+
+    return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
+      return response.users.get(username);
+    });
   }
 
-  public removeUserPermissions(userId: string): Promise<void> {
-    return Promise.reject<void>(new Error("not implemented"));
+  public setUserPermissions(username: string, permissions: ModelPermissions): Promise<void> {
+    const p = new Map<string, ModelPermissions>();
+    p.set(username, permissions);
+    const request: SetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      users: p,
+      allUsers: false
+    };
+
+    return this._connection.request(request).then(() => {
+      return;
+    });
+  }
+
+  public removeUserPermissions(username: string): Promise<void> {
+    const p = new Map<string, ModelPermissions>();
+    p.set(username, null);
+    const request: SetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      users: p,
+      allUsers: false
+    };
+
+    return this._connection.request(request).then(() => {
+      return;
+    });
   }
 }

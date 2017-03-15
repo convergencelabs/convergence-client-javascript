@@ -39,6 +39,7 @@ describe("Reference Transformation E2E", () => {
         s: [remoteSessionId],
         r: []
       },
+      a: {r: true, w: true, d: true, m: true},
       t: MessageType.OPEN_REAL_TIME_MODEL_RESPONSE
     });
 

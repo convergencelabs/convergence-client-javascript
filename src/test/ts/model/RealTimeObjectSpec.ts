@@ -20,6 +20,7 @@ const expect: any = chai.expect;
 
 describe("RealTimeObject", () => {
 
+  // TODO most of this set up is common.
   const sessionId: string = "mySession";
   const username: string = "myUser";
   const version: number = 1;
@@ -37,6 +38,14 @@ describe("RealTimeObject", () => {
   const rtModel: RealTimeModel = <RealTimeModel> <any> sinon.createStubInstance(RealTimeModel);
   rtModel.emitLocalEvents = () => {
     return false;
+  };
+  rtModel.permissions = () => {
+    return  {
+      read: true,
+      write: true,
+      remove: true,
+      manage: true
+    };
   };
 
   const initialValue: ObjectValue =

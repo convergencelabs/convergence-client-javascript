@@ -45,6 +45,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   }
 
   public set(key: string, value: any): RealTimeElement<any> {
+    this._assertWritable();
     let propSet: boolean = this._delegate.hasKey(key);
     let delegateChild: ModelNode<any> = this._delegate.set(key, value);
     let operation: DiscreteOperation;
@@ -59,6 +60,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   }
 
   public remove(key: string): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.remove(key));
   }
 

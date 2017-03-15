@@ -54,6 +54,7 @@ import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} f
 import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
+import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsUpdated";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -99,6 +100,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   private _concurrencyControl: ClientConcurrencyControl;
   private _connection: ConvergenceConnection;
   private _modelService: ModelService;
+  private _permissions: ModelPermissions;
 
   private _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
 
@@ -110,6 +112,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
               data: ObjectValue,
               sessions: string[],
               references: ReferenceData[],
+              permissions: ModelPermissions,
               version: number,
               createdTime: Date,
               modifiedTime: Date,
@@ -127,6 +130,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._concurrencyControl = concurrencyControl;
     this._connection = connection;
     this._modelService = modelService;
+    this._permissions = permissions;
 
     this._model = new Model(this.session().sessionId(), this.session().username(), valueIdPrefix, data);
 
@@ -177,7 +181,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   }
 
   public permissions(): ModelPermissions {
-    return {read: false, write: false, remove: false, manage: false};
+    return this._permissions;
   }
 
   public permissionsManager(): ModelPermissionManager {
@@ -357,9 +361,37 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
       case MessageType.REMOTE_CLIENT_CLOSED:
         this._handleClientClosed(<RemoteClientClosedModel> messageEvent.message);
         break;
+      case MessageType.MODEL_PERMISSIONS_CHANGED:
+        this._handleModelPermissionsChanged(<ModelPermissionsChanged> messageEvent.message);
+        break;
       default:
         throw new Error("Unexpected message");
     }
+  }
+
+  private _handleModelPermissionsChanged(message: ModelPermissionsChanged): void {
+    const oldPermissions = this._permissions;
+    this._permissions = message.permissions;
+
+    const changes = [];
+    if (this._permissions.read !== oldPermissions.read) {
+      changes.push("read");
+    }
+
+    if (this._permissions.write !== oldPermissions.write) {
+      changes.push("write");
+    }
+
+    if (this._permissions.remove !== oldPermissions.remove) {
+      changes.push("remove");
+    }
+
+    if (this._permissions.manage !== oldPermissions.manage) {
+      changes.push("manage");
+    }
+
+    const event = new ModelPermissionsChangedEvent(this, this._permissions, changes);
+    this._emitEvent(event);
   }
 
   private _handleClientOpen(message: RemoteClientOpenedModel): void {

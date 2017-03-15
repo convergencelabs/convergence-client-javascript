@@ -6,6 +6,8 @@ import {MessageBodyDeserializer} from "../MessageSerializer";
 import {ReferenceTypeCodes} from "./reference/ReferenceEvent";
 import {deserializeReferenceValues} from "./reference/ReferenceEvent";
 import {DataValueDeserializer} from "./dataValue";
+import {ModelPermissions} from "../../../model/ModelPermissions";
+import {deserializeModelPermissions} from "./permissions/modelPermissions";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
@@ -29,6 +31,7 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   data: any;
   connectedClients: string[];
   references: ReferenceData[];
+  permissions: ModelPermissions;
 }
 
 export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> =
@@ -41,7 +44,8 @@ export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<Open
       modifiedTime: body.m,
       data: DataValueDeserializer(body.d.d),
       connectedClients: body.d.s,
-      references: convertReferences(body.d.r)
+      references: convertReferences(body.d.r),
+      permissions: deserializeModelPermissions(body.a)
     };
   };
 

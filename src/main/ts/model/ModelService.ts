@@ -115,6 +115,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         response.data,
         response.connectedClients,
         response.references,
+        response.permissions,
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),

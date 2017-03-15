@@ -38,10 +38,12 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
   }
 
   public insert(index: number, value: string): void {
+    this._assertWritable();
     this._delegate.insert(index, value);
   }
 
   public remove(index: number, length: number): void {
+    this._assertWritable();
     this._delegate.remove(index, length);
   }
 

@@ -16,14 +16,15 @@ import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager
 import {
   ObservableElement,
   ObservableElementEvents,
-  ObservableElementEventConstants} from "../observable/ObservableElement";
+  ObservableElementEventConstants
+} from "../observable/ObservableElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
-export interface RealTimeElementEvents extends ObservableElementEvents {}
+export interface RealTimeElementEvents extends ObservableElementEvents {
+}
 
 export abstract class RealTimeElement<T>
-  extends ConvergenceEventEmitter<ConvergenceEvent>
-  implements ObservableElement<T> {
+extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
 
   public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
 
@@ -55,8 +56,7 @@ export abstract class RealTimeElement<T>
     this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference);
 
     this._delegate.events().filter(event => {
-      return this._model.emitLocalEvents() ||
-        !event.local ||
+      return this._model.emitLocalEvents() || !event.local ||
         event instanceof NodeDetachedEvent;
     }).subscribe(event => {
       let convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
@@ -97,6 +97,7 @@ export abstract class RealTimeElement<T>
     if (arguments.length === 0) {
       return this._delegate.data();
     } else {
+      this._assertWritable();
       this._delegate.data(value);
       return;
     }
@@ -119,18 +120,24 @@ export abstract class RealTimeElement<T>
   }
 
   protected _sendOperation(operation: DiscreteOperation): void {
-    this._exceptionIfDetached();
     this._callbacks.sendOperationCallback(operation);
+  }
+
+  protected _assertWritable(): void {
+    if (!this._model.permissions().write) {
+      throw new Error("The user does not have write permissions for the model.");
+    }
+    this._assertAttached();
+  }
+
+  protected _assertAttached(): void {
+    if (this.isDetached()) {
+      throw Error("Can not perform actions on a detached RealTimeElement.");
+    }
   }
 
   private _fireReferenceCreated(reference: ModelReference<any>): void {
     this._emitEvent(new RemoteReferenceCreatedEvent(reference, this));
-  }
-
-  private _exceptionIfDetached(): void {
-    if (this.isDetached()) {
-      throw Error("Can not perform actions on a detached RealTimeElement.");
-    }
   }
 }
 Object.freeze(RealTimeElement.Events);

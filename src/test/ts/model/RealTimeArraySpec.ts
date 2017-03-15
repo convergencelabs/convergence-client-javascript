@@ -44,6 +44,14 @@ describe("RealTimeArray", () => {
   const model: Model = <Model> <any> sinon.createStubInstance(Model);
 
   const rtModel: RealTimeModel = <RealTimeModel> <any> sinon.createStubInstance(RealTimeModel);
+  rtModel.permissions = () => {
+    return  {
+      read: true,
+      write: true,
+      remove: true,
+      manage: true
+    };
+  };
   rtModel.emitLocalEvents = () => {
     return false;
   };

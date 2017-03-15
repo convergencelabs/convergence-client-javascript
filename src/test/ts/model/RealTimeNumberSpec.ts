@@ -36,6 +36,14 @@ describe("RealTimeNumber", () => {
   rtModel.emitLocalEvents = () => {
     return false;
   };
+  rtModel.permissions = () => {
+    return  {
+      read: true,
+      write: true,
+      remove: true,
+      manage: true
+    };
+  };
 
   const initialValue: NumberValue =
     <NumberValue> dataValueFactory.createDataValue(10);

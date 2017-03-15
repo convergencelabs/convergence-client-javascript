@@ -58,34 +58,42 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
   }
 
   public set(index: number, value: any): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.set(index, value));
   }
 
   public insert(index: number, value: any): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.insert(index, value));
   }
 
   public remove(index: number): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.remove(index));
   }
 
   public reorder(fromIndex: number, toIndex: number): void {
+    this._assertWritable();
     this._delegate.reorder(fromIndex, toIndex);
   }
 
   public push(value: any): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.push(value));
   }
 
   public pop(): any {
+    this._assertWritable();
     return this._delegate.pop();
   }
 
   public unshift(value: any): RealTimeElement<any> {
+    this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.unshift(value));
   }
 
   public shift(): any {
+    this._assertWritable();
     return this._delegate.shift();
   }
 
