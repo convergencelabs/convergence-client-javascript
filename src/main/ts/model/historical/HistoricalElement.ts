@@ -54,6 +54,10 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return parent as any as HistoricalContainerElement<any>;
   }
 
+  public isAttached(): boolean {
+    return !this._delegate.isDetached();
+  }
+
   public isDetached(): boolean {
     return this._delegate.isDetached();
   }

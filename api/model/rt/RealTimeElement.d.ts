@@ -25,6 +25,8 @@ export declare abstract class RealTimeElement<T>
 
   public parent(): RealTimeContainerElement<any>;
 
+  public isAttached(): boolean;
+
   public isDetached(): boolean;
 
   public value(): T;

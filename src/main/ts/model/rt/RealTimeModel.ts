@@ -280,7 +280,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._concurrencyControl.startBatchOperation();
   }
 
+  /** @deprecated */
   public endBatch(): void {
+    this.completeBatch();
+  }
+
+  public completeBatch(): void {
     const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeBatchOperation();
     this._sendOperation(opEvent);
   }

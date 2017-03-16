@@ -91,6 +91,10 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return this._delegate.isDetached();
   }
 
+  public isAttached(): boolean {
+    return !this._delegate.isDetached();
+  }
+
   public value(): T
   public value(value: T): void
   public value(value?: T): any {

@@ -50,7 +50,10 @@ export class ModelPermissionManager {
   public setWorldPermissions(permissions: ModelPermissions): Promise<void> {
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
-      world: permissions
+      setWorld: true,
+      world: permissions,
+      allUsers: false,
+      users: new Map<string, ModelPermissions>()
     };
 
     return this._connection.request(request).then(() => {
@@ -71,6 +74,7 @@ export class ModelPermissionManager {
   public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void> {
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      setWorld: false,
       users: permissions,
       allUsers: true
     };
@@ -95,6 +99,7 @@ export class ModelPermissionManager {
     p.set(username, permissions);
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      setWorld: false,
       users: p,
       allUsers: false
     };
@@ -109,6 +114,7 @@ export class ModelPermissionManager {
     p.set(username, null);
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      setWorld: false,
       users: p,
       allUsers: false
     };

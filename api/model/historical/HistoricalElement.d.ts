@@ -21,6 +21,8 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
 
   public parent(): HistoricalContainerElement<any>
 
+  public isAttached(): boolean;
+
   public isDetached(): boolean;
 
   public value(): T;

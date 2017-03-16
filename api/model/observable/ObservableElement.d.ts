@@ -22,6 +22,8 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
 
   parent(): ObservableContainerElement<any>;
 
+  isAttached(): boolean;
+
   isDetached(): boolean;
 
   value(): T;
