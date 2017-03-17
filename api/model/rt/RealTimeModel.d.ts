@@ -88,7 +88,7 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
 
   public startBatch(): void;
 
-  /** @deprecated **/
+  /** @deprecated */
   public endBatch(): void;
 
   public completeBatch(): void;
