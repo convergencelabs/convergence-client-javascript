@@ -2,6 +2,7 @@ import {Path} from "../Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ObservableModel} from "./ObservableModel";
+import {ObservableContainerElement} from "./ObservableContainerElement";
 
 export interface ObservableElementEvents {
   readonly VALUE: string;
@@ -24,6 +25,8 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
   type(): string;
 
   path(): Path;
+
+  parent(): ObservableContainerElement<any>;
 
   isDetached(): boolean;
 

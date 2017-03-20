@@ -5,6 +5,7 @@ import {ObservableModel} from "./observable/ObservableModel";
 import {ObservableElement} from "./observable/ObservableElement";
 import {ObservableArray} from "./observable/ObservableArray";
 import {ObservableBoolean} from "./observable/ObservableBoolean";
+import {ObservableDate} from "./observable/ObservableDate";
 import {ObservableNumber} from "./observable/ObservableNumber";
 import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
@@ -124,6 +125,15 @@ export class BooleanSetValueEvent implements ValueChangedEvent {
   public static readonly NAME: string;
   public readonly name: string;
   public readonly element: ObservableBoolean;
+  public readonly sessionId: string;
+  public readonly username: string;
+  public readonly local: boolean;
+}
+
+export class DateSetValueEvent implements ValueChangedEvent {
+  public static readonly NAME: string;
+  public readonly name: string;
+  public readonly element: ObservableDate;
   public readonly sessionId: string;
   public readonly username: string;
   public readonly local: boolean;
