@@ -55,6 +55,7 @@ export declare class ElementDetachedEvent implements ConvergenceEvent {
 export interface ValueChangedEvent extends ConvergenceModelValueEvent {
   readonly sessionId: string;
   readonly username: string;
+  readonly local: boolean;
 }
 
 export declare class ModelChangedEvent implements ConvergenceModelValueEvent {
