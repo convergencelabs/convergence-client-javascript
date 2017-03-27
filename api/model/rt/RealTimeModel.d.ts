@@ -10,7 +10,7 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableModel, ObservableModelEvents} from "../observable/ObservableModel";
 import {ModelEvent} from "../modelEvents";
 import {ModelPermissionManager} from "../ModelPermissionManager";
-import {ModelPermissions} from "../../../src/main/ts/model/ModelPermissions";
+import {ModelPermissions} from "../ModelPermissions";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   MODIFIED: string;
