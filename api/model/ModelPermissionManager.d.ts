@@ -7,6 +7,9 @@ export declare class ModelPermissionManager {
 
   public getPermissions(): Promise<ModelPermissions>;
 
+  public getOverridesCollection(): Promise<boolean>;
+  public setOverridesCollection(overridesCollection: boolean): Promise<void>;
+
   public getWorldPermissions(): Promise<ModelPermissions>;
   public setWorldPermissions(permissions: ModelPermissions): Promise<void>;
 
