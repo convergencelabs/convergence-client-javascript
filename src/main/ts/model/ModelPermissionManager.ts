@@ -6,6 +6,10 @@ import {
 } from "../connection/protocol/model/permissions/getModelPermissions";
 import {ModelFqn} from "./ModelFqn";
 import {SetModelPermissionsRequest} from "../connection/protocol/model/permissions/setModelPermissions";
+import {
+  GetOverridesCollectionRequest,
+  GetOverridesCollectionResponse
+} from "../connection/protocol/model/permissions/getOverridesCollection";
 
 export class ModelPermissionManager {
 
@@ -37,6 +41,29 @@ export class ModelPermissionManager {
     });
   }
 
+  public setOverridesCollection(overrideWorld: boolean): Promise<void> {
+    const request: SetModelPermissionsRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      overridesCollection: true,
+      allUsers: false,
+      users: new Map<string, ModelPermissions>()
+    };
+
+    return this._connection.request(request).then(() => {
+      return;
+    });
+  }
+
+  public getOverridesCollection(): Promise<boolean> {
+    const request: GetOverridesCollectionRequest = {
+      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+    };
+
+    return this._connection.request(request).then((response: GetOverridesCollectionResponse) => {
+      return response.overridesCollection;
+    });
+  }
+
   public getWorldPermissions(): Promise<ModelPermissions> {
     const request: GetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId)
@@ -50,7 +77,6 @@ export class ModelPermissionManager {
   public setWorldPermissions(permissions: ModelPermissions): Promise<void> {
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
-      setWorld: true,
       world: permissions,
       allUsers: false,
       users: new Map<string, ModelPermissions>()
@@ -74,7 +100,6 @@ export class ModelPermissionManager {
   public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void> {
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
-      setWorld: false,
       users: permissions,
       allUsers: true
     };
@@ -99,7 +124,6 @@ export class ModelPermissionManager {
     p.set(username, permissions);
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
-      setWorld: false,
       users: p,
       allUsers: false
     };
@@ -114,7 +138,6 @@ export class ModelPermissionManager {
     p.set(username, null);
     const request: SetModelPermissionsRequest = {
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
-      setWorld: false,
       users: p,
       allUsers: false
     };

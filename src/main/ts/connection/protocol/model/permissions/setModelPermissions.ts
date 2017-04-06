@@ -8,7 +8,7 @@ import {ModelPermissionsImpl} from "../../../../model/ModelPermissionsImpl";
 
 export interface SetModelPermissionsRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
-  setWorld: boolean;
+  overridesCollection?: boolean;
   world?: ModelPermissions;
   allUsers: boolean;
   users?: Map<string, ModelPermissions>;
@@ -23,7 +23,7 @@ export const SetModelPermissionsSerializer: MessageBodySerializer = (request: Se
   return {
     c: request.modelFqn.collectionId,
     m: request.modelFqn.modelId,
-    s: request.setWorld,
+    s: request.overridesCollection,
     w: serializeModelPermissions(request.world),
     a: request.allUsers,
     u: users
