@@ -1,12 +1,11 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {Path} from "../Path";
+import {Path, PathElement} from "../Path";
 import {ModelReference} from "../reference/ModelReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {RealTimeModel} from "./RealTimeModel";
-import {PathElement} from "../../../src/main/ts/model/Path";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }

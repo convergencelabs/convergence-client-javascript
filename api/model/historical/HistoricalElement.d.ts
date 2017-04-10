@@ -1,10 +1,9 @@
-import {Path} from "../Path";
+import {Path, PathElement} from "../Path";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {HistoricalModel} from "./HistoricalModel";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
-import {PathElement} from "../../../src/main/ts/model/Path";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
