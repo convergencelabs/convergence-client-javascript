@@ -33,6 +33,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   };
 
   private _children: Array<ModelNode<any>>;
+  private _dataValueFactory: DataValueFactory;
 
   /**
    * Constructs a new RealTimeArray.
@@ -42,10 +43,11 @@ export class ArrayNode extends ContainerNode<any[]> {
               model: Model,
               sessionId: string,
               username: string,
-              private dataValueFactory: DataValueFactory) {
+              dataValueFactory: DataValueFactory) {
     super(ModelElementType.ARRAY, data.id, path, model, sessionId, username);
 
     this._children = [];
+    this._dataValueFactory = dataValueFactory;
 
     for (let i: number = 0; i < data.children.length; i++) {
       let child: DataValue = data.children[i];
@@ -79,29 +81,34 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   public get(index: number): ModelNode<any> {
+    this._validateIndex(index, false);
     return this._children[index];
   }
 
   public set(index: number, value: any): ModelNode<any> {
-    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+    this._validateIndex(index, false);
+    const dataValue: DataValue = this._dataValueFactory.createDataValue(value);
     this._applySet(index, dataValue, true, this.sessionId, this.username);
     return this.get(index);
-
   }
 
   public insert(index: number, value: any): ModelNode<any> {
-    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+    this._validateIndex(index, true);
+    const dataValue: DataValue = this._dataValueFactory.createDataValue(value);
     this._applyInsert(index, dataValue, true, this.sessionId, this.username);
     return this.get(index);
   }
 
   public remove(index: number): ModelNode<any> {
+    this._validateIndex(index, false);
     const oldValue: ModelNode<any> = this.get(index);
     this._applyRemove(index, true, this.sessionId, this.username);
     return oldValue;
   }
 
   public reorder(fromIndex: number, toIndex: number): void {
+    this._validateIndex(fromIndex, false, "fromIndex");
+    this._validateIndex(toIndex, false, "toIndex");
     this._applyReorder(fromIndex, toIndex, true, this.sessionId, this.username);
   }
 
@@ -175,7 +182,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
   protected _setData(data: any[]): void {
     const dataValues: DataValue[] = data.map((value: any) => {
-      return this.dataValueFactory.createDataValue(value);
+      return this._dataValueFactory.createDataValue(value);
     });
 
     this._applySetValue(dataValues, true, this.sessionId, this.username);
@@ -212,6 +219,19 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
+  private _validateIndex(index: number, includeEnd: boolean, name?: string): void {
+    if (index < 0) {
+      const iName = name ? name : "index";
+      throw new Error(`${iName} must be >= 0: ${index}`);
+    }
+
+    if ((!includeEnd && index >= this._children.length) || (includeEnd && index > this._children.length)) {
+      const iName = name ? name : "index";
+      const comparison = includeEnd ? "<=" : "<";
+      throw new Error(`${iName} must be ${comparison} the length of the array: ${index}`);
+    }
+  }
+
   // Handlers for incoming operations
 
   private _applyInsert(index: number, value: DataValue, local: boolean, sessionId: string, username: string): void {
@@ -224,7 +244,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       this._model,
       this.sessionId,
       this.username,
-      this.dataValueFactory);
+      this._dataValueFactory);
     child.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children.splice(index, 0, child);
     this._updateIdToPathElementMap(index);
@@ -241,7 +261,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
     this._idToPathElement.set(value.id, index);
     const newChild: ModelNode<any> = ModelNodeFactory.create(value,
-      this._pathCB(value.id), this.model(), this.sessionId, this.username, this.dataValueFactory);
+      this._pathCB(value.id), this.model(), this.sessionId, this.username, this._dataValueFactory);
     newChild.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children[index] = newChild;
     this._updateIdToPathElementMap(index);
@@ -271,7 +291,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._children = data.map((value: any, i: number) => {
       this._idToPathElement.set(value.id, i);
       return ModelNodeFactory.create(value, this._pathCB(value.id), this.model(), this.sessionId,
-        this.username, this.dataValueFactory);
+        this.username, this._dataValueFactory);
     });
 
     this._children.forEach((child: ModelNode<any>) => {
@@ -376,6 +396,8 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   // Private Functions
+  // FIXME this function actually does more that it needs to when we are doing a move.
+  // we should take an optional end parameter.
   /**
    * Update id to index mapping for all children.
    * @param {number} start

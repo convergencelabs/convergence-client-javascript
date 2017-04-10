@@ -4,6 +4,7 @@ import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {HistoricalModel} from "./HistoricalModel";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
+import {PathElement} from "../../../src/main/ts/model/Path";
 
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -18,6 +19,8 @@ export declare abstract class HistoricalElement<T> extends ConvergenceEventEmitt
   public type(): string;
 
   public path(): Path;
+
+  public relativePath(): PathElement;
 
   public parent(): HistoricalContainerElement<any>
 

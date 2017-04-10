@@ -17,6 +17,7 @@ import {ArrayNodeSetEvent} from "../internal/events";
 import {ArrayNodeSetValueEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
+import {PathElement} from "../Path";
 
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -139,6 +140,14 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
 
   public elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
+  }
+
+  public _removeChild(relPath: PathElement): void {
+    if (typeof relPath !== "number") {
+      throw new Error("The relative path of a child must be a number: " + (typeof relPath));
+    }
+
+    this.remove(relPath);
   }
 
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {

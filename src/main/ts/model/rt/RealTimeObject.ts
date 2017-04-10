@@ -19,6 +19,7 @@ import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants} from "../observable/ObservableObject";
+import {PathElement} from "../Path";
 
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
@@ -80,6 +81,14 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
 
   public elementAt(pathArgs: any): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
+  }
+
+  public _removeChild(relPath: PathElement): void {
+    if (typeof relPath !== "string") {
+      throw new Error("The relative path of a child must be a string: " + (typeof relPath));
+    }
+
+    this.remove(relPath);
   }
 
   public propertyReference(key: string): LocalPropertyReference {

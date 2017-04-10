@@ -1,4 +1,4 @@
-import {Path} from "../Path";
+import {Path, PathElement} from "../Path";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ObservableModel} from "./ObservableModel";
@@ -25,6 +25,8 @@ export interface ObservableElement<T> extends ConvergenceEventEmitter<Convergenc
   type(): string;
 
   path(): Path;
+
+  relativePath(): PathElement;
 
   parent(): ObservableContainerElement<any>;
 

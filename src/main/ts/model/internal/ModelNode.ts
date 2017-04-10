@@ -37,7 +37,9 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     this._model = model;
     this._path = path;
 
-    this._model._registerValue(this);
+    if (this._model) {
+      this._model._registerValue(this);
+    }
   }
 
   public id(): string {

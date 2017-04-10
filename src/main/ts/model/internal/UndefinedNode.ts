@@ -16,10 +16,9 @@ export class UndefinedNode extends ModelNode<void> {
    */
   constructor(id: string,
               path: () => Path,
-              model: Model,
               sessionId: string,
               username: string) {
-    super(ModelElementType.UNDEFINED, id, path, model, sessionId, username);
+    super(ModelElementType.UNDEFINED, id, path, undefined, sessionId, username);
   }
 
   public dataValue(): DataValue {

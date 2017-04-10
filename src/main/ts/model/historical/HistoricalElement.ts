@@ -1,4 +1,4 @@
-import {Path} from "../Path";
+import {Path, PathElement} from "../Path";
 import {ModelNode} from "../internal/ModelNode";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
@@ -45,6 +45,15 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
 
   public path(): Path {
     return this._delegate.path();
+  }
+
+  public relativePath(): PathElement {
+    const parentPath = this._delegate.path().slice(0);
+    if (parentPath.length > 0) {
+      return parentPath.pop();
+    } else {
+      return null;
+    }
   }
 
   public parent(): HistoricalContainerElement<any> {

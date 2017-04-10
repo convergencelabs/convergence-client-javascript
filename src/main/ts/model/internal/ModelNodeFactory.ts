@@ -26,7 +26,7 @@ export class ModelNodeFactory {
                        dataValueFactory?: DataValueFactory): ModelNode<any> {
 
     if (data === undefined) {
-      return new UndefinedNode(undefined, path, model, sessionId, username);
+      return new UndefinedNode(undefined, path, sessionId, username);
     }
 
     const type: string = data.type;

@@ -1,6 +1,6 @@
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ModelNode} from "../internal/ModelNode";
-import {Path} from "../Path";
+import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "../reference/ModelReference";
@@ -85,6 +85,28 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     parentPath.pop();
     const parent = this._model.elementAt(parentPath);
     return parent as any as RealTimeContainerElement<any>;
+  }
+
+  public relativePath(): PathElement {
+    const parentPath = this._delegate.path().slice(0);
+    if (parentPath.length > 0) {
+      return parentPath.pop();
+    } else {
+      return null;
+    }
+  }
+
+  public removeFromParent(): void {
+    this._assertWritable();
+    const parentPath = this._delegate.path().slice(0);
+
+    if (parentPath.length === 0) {
+      throw new Error("Can not remove the root object from the model");
+    }
+
+    const relPath = parentPath.pop();
+    const parent = this._model.elementAt(parentPath) as any as RealTimeContainerElement<any>;
+    parent._removeChild(relPath);
   }
 
   public isDetached(): boolean {

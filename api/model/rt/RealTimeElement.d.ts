@@ -6,6 +6,7 @@ import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObservableElement, ObservableElementEvents} from "../observable/ObservableElement";
 import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {RealTimeModel} from "./RealTimeModel";
+import {PathElement} from "../../../src/main/ts/model/Path";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -23,7 +24,11 @@ export declare abstract class RealTimeElement<T>
 
   public path(): Path;
 
+  public relativePath(): PathElement;
+
   public parent(): RealTimeContainerElement<any>;
+
+  public removeFromParent(): void;
 
   public isAttached(): boolean;
 

@@ -32,7 +32,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     // We're letting them pass in individual path arguments or a single array of path arguments
     const pathArgsForReal: Path = <Path> (Array.isArray(pathArgs) ? pathArgs : arguments);
     if (pathArgsForReal.length === 0) {
-      throw new Error("relative path of child must contain at least one element.");
+      return this;
     }
     return this._valueAt(pathArgsForReal);
   }
@@ -60,7 +60,7 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     return ModelNodeFactory.create(
       undefined,
       () => null,
-      this.model(),
+      undefined,
       this.sessionId,
       this.username) as UndefinedNode;
   }

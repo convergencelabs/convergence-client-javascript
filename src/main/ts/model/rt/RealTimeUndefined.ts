@@ -7,7 +7,10 @@ import {RealTimeModel} from "./RealTimeModel";
 import {
   ObservableUndefined,
   ObservableUndefinedEvents,
-  ObservableUndefinedEventConstants} from "../observable/ObservableUndefined";
+  ObservableUndefinedEventConstants
+} from "../observable/ObservableUndefined";
+import {Path, PathElement} from "../Path";
+import {RealTimeContainerElement} from "./RealTimeContainerElement";
 
 export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -24,6 +27,22 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
     super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  }
+
+  public path(): Path {
+    return null;
+  }
+
+  public relativePath(): PathElement {
+    return null;
+  }
+
+  public parent(): RealTimeContainerElement<any> {
+    return null;
+  }
+
+  public removeFromParent(): void {
+    // no-op
   }
 
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
