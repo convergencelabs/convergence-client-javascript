@@ -10,7 +10,7 @@ export abstract class NodeWrapperFactory<T> {
 
   public wrap(node: ModelNode<any>): T {
     let wrapper: T = this._wrappers.get(node.id());
-    if (typeof wrapper === "undefined") {
+    if (wrapper === undefined) {
       wrapper = this._createWrapper(node);
       this._wrappers.set(node.id(), wrapper);
       node.on(ModelNode.Events.DETACHED, () => {

@@ -3,6 +3,8 @@ import {Model} from "./Model";
 import {Path} from "../Path";
 import {ModelNode} from "./ModelNode";
 import {NodeChangedEvent} from "./events";
+import {UndefinedNode} from "./UndefinedNode";
+import {ModelNodeFactory} from "./ModelNodeFactory";
 
 export abstract class ContainerNode<T> extends ModelNode<T> {
 
@@ -52,5 +54,14 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
       new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
 
     this._emitEvent(newEvent);
+  }
+
+  protected _createUndefinedNode(): UndefinedNode {
+    return ModelNodeFactory.create(
+      undefined,
+      () => null,
+      this.model(),
+      this.sessionId,
+      this.username) as UndefinedNode;
   }
 }

@@ -163,18 +163,16 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
 
     const prop: string = <string> pathArgs[0];
     const child: ModelNode<any> = this._children.get(prop);
-    if (typeof child === "undefined") {
-      return;
+
+    if (child === undefined) {
+      return this._createUndefinedNode();
     }
 
     if (pathArgs.length > 1) {
       if (child.type() === ModelElementType.OBJECT || child.type() === ModelElementType.ARRAY) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
-        // TODO: Determine correct way to handle undefined
-        return ModelNodeFactory.create(undefined, () => {
-          return null;
-        }, this.model(), this.sessionId, this.username, this.dataValueFactory);
+        return this._createUndefinedNode();
       }
     } else {
       return child;

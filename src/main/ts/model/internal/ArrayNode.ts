@@ -196,12 +196,16 @@ export class ArrayNode extends ContainerNode<any[]> {
 
     const index: number = <number> pathArgs[0];
     const child: ModelNode<any> = this._children[index];
+
+    if (child === undefined) {
+      return this._createUndefinedNode();
+    }
+
     if (pathArgs.length > 1) {
       if (child.type() === ModelElementType.OBJECT || child.type() === ModelElementType.ARRAY) {
         return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
-        // TODO: Determine correct way to handle undefined
-        return ModelNodeFactory.create(undefined, null, null, this.sessionId, this.username, this.dataValueFactory);
+        return this._createUndefinedNode();
       }
     } else {
       return child;

@@ -23,7 +23,7 @@ export class ModelNodeFactory {
                        path: () => Path,
                        model: Model, sessionId: string,
                        username: string,
-                       dataValueFactory: DataValueFactory): ModelNode<any> {
+                       dataValueFactory?: DataValueFactory): ModelNode<any> {
 
     if (data === undefined) {
       return new UndefinedNode(undefined, path, model, sessionId, username);
