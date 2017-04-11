@@ -18,6 +18,7 @@ export const GetModelPermissionsSerializer: MessageBodySerializer = (request: Ge
 };
 
 export interface GetModelPermissionsResponse extends IncomingProtocolResponseMessage {
+  overridesCollection: boolean;
   world: ModelPermissions;
   users: Map<string, ModelPermissions>;
 }
@@ -25,6 +26,7 @@ export interface GetModelPermissionsResponse extends IncomingProtocolResponseMes
 export const GetModelPermissionsResponseDeserializer: MessageBodyDeserializer<GetModelPermissionsResponse> =
   (body: any) => {
 
+    const overridesCollection = body.o;
     const world = deserializeModelPermissions(body.w);
 
     let users = new Map<string, ModelPermissions>();
@@ -39,6 +41,7 @@ export const GetModelPermissionsResponseDeserializer: MessageBodyDeserializer<Ge
     }
 
     return {
+      overridesCollection,
       world,
       users
     };
