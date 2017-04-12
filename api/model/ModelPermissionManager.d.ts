@@ -14,7 +14,11 @@ export declare class ModelPermissionManager {
   public setWorldPermissions(permissions: ModelPermissions): Promise<void>;
 
   public getAllUserPermissions(): Promise<Map<string, ModelPermissions>>;
-  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void>;
+  
+  public setAllUserPermissions(permissions: {[key: string]: ModelPermissions}): Promise<void>
+  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void>
+  public setAllUserPermissions(
+    permissions: Map<string, ModelPermissions> | {[key: string]: ModelPermissions}): Promise<void>;
 
   public getUserPermissions(username: string): Promise<ModelPermissions>;
   public setUserPermissions(username: string, permissions: ModelPermissions): Promise<void>;

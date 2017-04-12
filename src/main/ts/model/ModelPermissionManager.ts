@@ -100,7 +100,19 @@ export class ModelPermissionManager {
     });
   }
 
-  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void> {
+  public setAllUserPermissions(permissions: {[key: string]: ModelPermissions}): Promise<void>
+  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void>
+  public setAllUserPermissions(
+    permissions: Map<string, ModelPermissions> | {[key: string]: ModelPermissions}): Promise<void> {
+    if (!(permissions instanceof Map)) {
+      const permsObject = permissions as {[key: string]: ModelPermissions};
+      const map = new Map<string, ModelPermissions>();
+      Object.keys(permsObject).forEach(key => {
+        map.set(key, permsObject[key]);
+      });
+      permissions = map;
+    }
+
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
       modelFqn: new ModelFqn(this._collectionId, this._modelId),
