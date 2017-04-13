@@ -75,7 +75,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._open(id);
   }
 
-  public openWithCreate(options: AutoCreateModelOptions): Promise<RealTimeModel> {
+  public openAutoCreate(options: AutoCreateModelOptions): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
@@ -99,7 +99,88 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._open(undefined, options);
   }
 
-  public _open(id?: string, options?: AutoCreateModelOptions): Promise<RealTimeModel> {
+  public create(options: CreateModelOptions): Promise<string> {
+    const collection = options.collection;
+    if (!Validation.nonEmptyString(options.collection)) {
+      return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
+    }
+
+    const data = options.data || {};
+
+    const idGen: InitialIdGenerator = new InitialIdGenerator();
+    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
+      return idGen.id();
+    });
+    const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
+    const request: CreateRealTimeModelRequest = {
+      type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
+      collectionId: collection,
+      modelId: options.id,
+      data: dataValue
+    };
+
+    return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {
+      return response.modelId;
+    });
+  }
+
+  public remove(collectionId: string, modelId: string): Promise<void> {
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+
+    const request: DeleteRealTimeModelRequest = {
+      type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
+      modelFqn: fqn
+    };
+
+    return this._connection.request(request).then(() => {
+      return; // convert to Promise<void>
+    });
+  }
+
+  public history(collectionId: string, modelId: string): Promise<HistoricalModel> {
+    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
+
+    const request: HistoricalDataRequest = {
+      type: MessageType.HISTORICAL_DATA_REQUEST,
+      modelFqn: fqn
+    };
+
+    return this._connection.request(request).then((response: HistoricalDataResponse) => {
+      return new HistoricalModel(response.data, response.version, response.modifiedTime, response.createdTime,
+        request.modelFqn, this._connection, this.session());
+    });
+  }
+
+  public permissions(collectionId: string, modelId: string): ModelPermissionManager {
+    return new ModelPermissionManager(collectionId, modelId, this._connection);
+  }
+
+  public _close(resourceId: string): Promise<void> {
+    const request: CloseRealTimeModelRequest = {
+      type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
+      resourceId
+    };
+
+    const model: RealTimeModel = this._openModelsByRid[resourceId];
+    delete this._openModelsByRid[resourceId];
+
+    const fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
+    const k: string = fqn.hash();
+
+    delete this._openModelsByFqn[k];
+
+    return this._connection.request(request).then(() => {
+      return; // convert to Promise<void>
+    });
+  }
+
+  public _dispose(): void {
+    Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
+      this._openModelsByFqn[fqn].close();
+    });
+  }
+
+  private _open(id?: string, options?: AutoCreateModelOptions): Promise<RealTimeModel> {
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
     }
@@ -185,87 +266,6 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return deferred.promise();
   }
 
-  public create(options: CreateModelOptions): Promise<string> {
-    const collection = options.collection;
-    if (!Validation.nonEmptyString(options.collection)) {
-      return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
-    }
-
-    const data = options.data || {};
-
-    const idGen: InitialIdGenerator = new InitialIdGenerator();
-    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return idGen.id();
-    });
-    const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
-    const request: CreateRealTimeModelRequest = {
-      type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
-      collectionId: collection,
-      modelId: options.id,
-      data: dataValue
-    };
-
-    return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {
-      return response.modelId;
-    });
-  }
-
-  public remove(collectionId: string, modelId: string): Promise<void> {
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-
-    const request: DeleteRealTimeModelRequest = {
-      type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
-      modelFqn: fqn
-    };
-
-    return this._connection.request(request).then(() => {
-      return; // convert to Promise<void>
-    });
-  }
-
-  public history(collectionId: string, modelId: string): Promise<HistoricalModel> {
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-
-    const request: HistoricalDataRequest = {
-      type: MessageType.HISTORICAL_DATA_REQUEST,
-      modelFqn: fqn
-    };
-
-    return this._connection.request(request).then((response: HistoricalDataResponse) => {
-      return new HistoricalModel(response.data, response.version, response.modifiedTime, response.createdTime,
-        request.modelFqn, this._connection, this.session());
-    });
-  }
-
-  public permissions(collectionId: string, modelId: string): ModelPermissionManager {
-    return new ModelPermissionManager(collectionId, modelId, this._connection);
-  }
-
-  public _close(resourceId: string): Promise<void> {
-    const request: CloseRealTimeModelRequest = {
-      type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
-      resourceId
-    };
-
-    const model: RealTimeModel = this._openModelsByRid[resourceId];
-    delete this._openModelsByRid[resourceId];
-
-    const fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
-    const k: string = fqn.hash();
-
-    delete this._openModelsByFqn[k];
-
-    return this._connection.request(request).then(() => {
-      return; // convert to Promise<void>
-    });
-  }
-
-  public _dispose(): void {
-    Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
-      this._openModelsByFqn[fqn].close();
-    });
-  }
-
   private _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
       case MessageType.MODEL_DATA_REQUEST:
@@ -305,14 +305,9 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 }
 
-export interface AutoCreateModelOptions {
-  collection: string;
-  id?: string;
-  data?: {[key: string]: any};
+export interface AutoCreateModelOptions extends CreateModelOptions {
   dataCallback?: () => {[key: string]: any};
-  overrideWorld?: boolean;
-  worldPermissions?: ModelPermissions;
-  userPermissions?: {[key: string]: ModelPermissions};
+  ephemeral: boolean;
 }
 
 export interface CreateModelOptions {
