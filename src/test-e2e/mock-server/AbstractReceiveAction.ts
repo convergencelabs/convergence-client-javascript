@@ -29,7 +29,7 @@ abstract class AbstractReceiveAction extends MockServerAction {
   protected _validateBody(expected: any, actual: any, doneManager: IDoneManager): boolean {
     if (!EqualsUtil.deepEquals(expected, actual)) {
       doneManager.testFailure(new Error(
-        `Expected body '${JSON.stringify(expected)}, but received '${JSON.stringify(actual)}'.`));
+        `Expected body '${JSON.stringify(expected)}', but received '${JSON.stringify(actual)}'.`));
       return false;
     }
     return true;

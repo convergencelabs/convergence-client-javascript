@@ -11,26 +11,30 @@ var dateInput = document.getElementById("currentDate");
 var model;
 
 // Connect to the domain.
-Convergence.connectAnonymously(ConvergenceConfig.DOMAIN_URL).then(function(domain) {
-  return domain.models().open("test", "basic-example", function (collectionId, modelId) {
-    return {
-      "string": "test value",
-      "number": 10,
-      "boolean": true,
-      "array": [
-        "Apples",
-        "Bananas",
-        "Pears",
-        "Orange"
-      ],
-      "object": {
-        "key1": "value1",
-        "key2": "value2",
-        "key3": "value3",
-        "key4": "value4"
-      },
-      "date": new Date()
-    };
+Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
+  return domain.models().openWithCreate({
+    collection: "test",
+    id: "basic-example",
+    dataCallback: function (collectionId, modelId) {
+      return {
+        "string": "test value",
+        "number": 10,
+        "boolean": true,
+        "array": [
+          "Apples",
+          "Bananas",
+          "Pears",
+          "Orange"
+        ],
+        "object": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": "value3",
+          "key4": "value4"
+        },
+        "date": new Date()
+      };
+    }
   });
 }).then(function (model) {
   bindToModel(model);

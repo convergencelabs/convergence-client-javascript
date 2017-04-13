@@ -31,6 +31,7 @@ import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ModelResult} from "./query/ModelResult";
 import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 import {ModelPermissionManager} from "./ModelPermissionManager";
+import {ModelPermissions} from "./ModelPermissions";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
@@ -66,36 +67,71 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  public open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel> {
-    if (!Validation.nonEmptyString(collectionId)) {
-      return Promise.reject<RealTimeModel>(new Error("collectionId must be a non-null, non empty string."));
-    }
-
-    if (!Validation.nonEmptyString(modelId)) {
+  public open(id: string): Promise<RealTimeModel> {
+    if (!Validation.nonEmptyString(id)) {
       return Promise.reject<RealTimeModel>(new Error("modelId must be a non-null, non empty string."));
     }
 
-    if (arguments.length > 2 && typeof initializer !== "function") {
-      return Promise.reject<RealTimeModel>(new Error("initializer, supplied as an argument, must be a function."));
+    return this._open(id);
+  }
+
+  public openWithCreate(options: AutoCreateModelOptions): Promise<RealTimeModel> {
+    if (!Validation.nonEmptyString(options.collection)) {
+      return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
 
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-    const k: string = fqn.hash();
-
-    const openModel: RealTimeModel = this._openModelsByFqn[k];
-    if (openModel !== undefined) {
-      return Promise.resolve(openModel);
+    if (options.dataCallback !== undefined && typeof options.dataCallback !== "function") {
+      return Promise.reject<RealTimeModel>(new Error("options.dataCallback, if set, must be a function."));
     }
 
-    const openRequest: OpenRequest = this._openRequestsByFqn[k];
-    if (openRequest !== undefined) {
-      return openRequest.deferred.promise();
+    if (options.data !== undefined && options.dataCallback !== undefined) {
+      return Promise.reject<RealTimeModel>(new Error("options.data and options.dataCallback can not both be defined."));
     }
+
+    if (options.id === undefined && typeof options.dataCallback !== "function") {
+      return Promise.reject<RealTimeModel>(new Error("options.dataCallback, if set, must be a function."));
+    }
+
+    if (options.id === undefined && options.dataCallback !== undefined) {
+      return Promise.reject<RealTimeModel>(new Error("options.dataCallback can only be set options.id is set."));
+    }
+
+    return this._open(undefined, options);
+  }
+
+  public _open(id?: string, options?: AutoCreateModelOptions): Promise<RealTimeModel> {
+    if (id === undefined && options === undefined) {
+      throw new Error("Internal error, id or options must be defined.");
+    }
+
+    if (id === undefined) {
+      id = options.id;
+    }
+
+    // Opening by a known model id, and this model is already open.
+    // return it.
+    if (id && this._openModelsByFqn[id] !== undefined) {
+      return Promise.resolve(this._openModelsByFqn[id]);
+    }
+
+    // Opening by a known model id and we are already opening it.
+    // return the promise for the open request.
+    if (id && this._openRequestsByFqn[id] !== undefined) {
+      return this._openRequestsByFqn[id].deferred.promise();
+    }
+
+    const collection = options ? options.collection : undefined;
+    const initializer = options ? options.dataCallback  : undefined;
+    const initializerProvided = initializer !== undefined;
+
+    // At this point we know we don't have the model open, or are not
+    // already opening it.
 
     const request: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      modelFqn: fqn,
-      initializerProvided: initializer !== undefined
+      id,
+      collection,
+      initializerProvided
     };
 
     const deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
@@ -119,32 +155,42 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),
-        fqn,
+        new ModelFqn(response.collection, response.id),
         clientConcurrencyControl,
         this._connection,
         this
       );
 
-      this._openModelsByFqn[k] = model;
+      this._openModelsByFqn[id] = model;
       this._openModelsByRid[response.resourceId] = model;
-      delete this._openRequestsByFqn[k];
+
+      if (this._openRequestsByFqn[id] !== undefined) {
+        delete this._openRequestsByFqn[id];
+      }
 
       deferred.resolve(model);
     }).catch((error: Error) => {
       deferred.reject(error);
     });
 
-    this._openRequestsByFqn[k] = {
-      deferred,
-      initializer
-    };
+    if (id) {
+      this._openRequestsByFqn[id] = {
+        deferred,
+        initializer
+      };
+    }
 
     return deferred.promise();
   }
 
-  public create(collectionId: string,
-                modelId: string,
-                data: {[key: string]: any}): Promise<{collectionId: string, modelId: string}> {
+  public create(options: CreateModelOptions): Promise<string> {
+    const collection = options.collection;
+    if (!Validation.nonEmptyString(options.collection)) {
+      return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
+    }
+
+    const data = options.data || {};
+
     const idGen: InitialIdGenerator = new InitialIdGenerator();
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
@@ -152,16 +198,13 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
     const request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
-      collectionId,
-      modelId,
+      collectionId: collection,
+      modelId: options.id,
       data: dataValue
     };
 
     return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {
-      return {
-        collectionId: response.collectionId,
-        modelId: response.modelId
-      };
+      return response.modelId;
     });
   }
 
@@ -259,6 +302,25 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       replyCallback.reply(response);
     }
   }
+}
+
+export interface AutoCreateModelOptions {
+  collection: string;
+  id?: string;
+  data?: {[key: string]: any};
+  dataCallback?: () => {[key: string]: any};
+  overrideWorld?: boolean;
+  worldPermissions?: ModelPermissions;
+  userPermissions?: {[key: string]: ModelPermissions};
+}
+
+export interface CreateModelOptions {
+  collection: string;
+  id?: string;
+  data?: {[key: string]: any};
+  overrideWorld?: boolean;
+  worldPermissions?: ModelPermissions;
+  userPermissions?: {[key: string]: ModelPermissions};
 }
 
 class InitialIdGenerator {

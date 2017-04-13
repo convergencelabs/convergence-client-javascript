@@ -10,20 +10,23 @@ import {ModelPermissions} from "../../../model/ModelPermissions";
 import {deserializeModelPermissions} from "./permissions/modelPermissions";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
-  modelFqn: ModelFqn;
+  id?: string;
+  collection?: string;
   initializerProvided: boolean;
 }
 
 export const OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request: OpenRealTimeModelRequest) => {
   return {
-    c: request.modelFqn.collectionId,
-    m: request.modelFqn.modelId,
+    c: request.collection,
+    m: request.id,
     i: request.initializerProvided
   };
 };
 
 export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessage {
   resourceId: string;
+  id: string;
+  collection: string;
   valueIdPrefix: string;
   version: number;
   createdTime: number;
@@ -38,6 +41,8 @@ export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<Open
   (body: any) => {
     return {
       resourceId: body.r,
+      id: body.mi,
+      collection: body.ci,
       valueIdPrefix: body.p,
       version: body.v,
       createdTime: body.c,

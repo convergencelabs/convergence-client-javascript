@@ -31,15 +31,19 @@ describe("Open Real Time Model E2E", () => {
 
     const openRequest: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      modelFqn: fqn,
+      id: fqn.modelId,
       initializerProvided: false
     };
 
     const expectOpen = OpenRealTimeModelRequestSerializer(openRequest);
+    // FIXME hacked because the serializer adds the key, but with a value of undefined.
+    delete expectOpen["c"];
     expectOpen.t = MessageType.OPEN_REAL_TIME_MODEL_REQUEST;
     const openReq: IReceiveRequestRecord = mockServer.expectRequest(expectOpen, 300);
     mockServer.sendReplyTo(openReq, {
       r: "1",
+      ci: "collection",
+      mi: "model",
       v: 0,
       c: new Date().getTime(),
       m: new Date().getTime(),
@@ -60,7 +64,7 @@ describe("Open Real Time Model E2E", () => {
     mockServer.start();
 
     Convergence.connectWithJwt(mockServer.url(), "token").then(domain => {
-      return domain.models().open("collection", "model");
+      return domain.models().open("model");
     }).then((model: RealTimeModel) => {
       expect(model.root().get("num").value()).to.equal(10);
       expect(model.root().get("myDate").value()).to.deep.equal(new Date("2006-01-02T15:04:05.000Z"));
