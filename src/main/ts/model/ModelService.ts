@@ -121,7 +121,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
 
     const collection = options ? options.collection : undefined;
-    const initializer = options ? options.dataCallback  : undefined;
+    const initializer = options ? options.dataCallback : undefined;
     const initializerProvided = initializer !== undefined;
 
     // At this point we know we don't have the model open, or are not
@@ -135,6 +135,15 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     };
 
     const deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
+
+    // If we don't have an id 1) we can't have an initializer, and 2) we couldn't possibly
+    // ask for this model again since we don't know what the id is until the promise returns.
+    if (id !== undefined) {
+      this._openRequestsByFqn[id] = {
+        deferred,
+        initializer
+      };
+    }
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
       const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
@@ -172,13 +181,6 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }).catch((error: Error) => {
       deferred.reject(error);
     });
-
-    if (id) {
-      this._openRequestsByFqn[id] = {
-        deferred,
-        initializer
-      };
-    }
 
     return deferred.promise();
   }
@@ -282,8 +284,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
-    const fqn: ModelFqn = request.modelFqn;
-    const openReq: OpenRequest = this._openRequestsByFqn[fqn.hash()];
+    const openReq: OpenRequest = this._openRequestsByFqn[request.modelFqn.modelId];
     if (openReq === undefined) {
       replyCallback.expectedError("unknown_model", "the requested model is not being opened");
     } else if (openReq.initializer === undefined) {
