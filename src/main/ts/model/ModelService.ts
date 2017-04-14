@@ -15,9 +15,11 @@ import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRea
 import {Deferred} from "../util/Deferred";
 import {MessageEvent} from "../connection/ConvergenceConnection";
 import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
-import {ModelDataRequest} from "../connection/protocol/model/modelDataRequest";
+import {
+  AutoCreateModelConfigRequest,
+  AutoCreateModelConfigResponse
+} from "../connection/protocol/model/autoCreateConfigRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
-import {ModelDataResponse} from "../connection/protocol/model/modelDataRequest";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
@@ -35,9 +37,12 @@ import {ModelPermissions} from "./ModelPermissions";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
-  private _openRequestsByFqn: {[key: string]: OpenRequest} = {};
-  private _openModelsByFqn: {[key: string]: RealTimeModel} = {};
+  private _openRequestsByModelId: {[key: string]: Deferred<RealTimeModel>} = {};
+  private _openModelsByModelId: {[key: string]: RealTimeModel} = {};
   private _openModelsByRid: {[key: string]: RealTimeModel} = {};
+  private _autoRequestId: number;
+
+  private _autoCreateRequests: {[key: number]: AutoCreateModelOptions} = {};
 
   constructor(private _connection: ConvergenceConnection) {
     super();
@@ -45,7 +50,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
         MessageType.OPERATION_ACKNOWLEDGEMENT,
-        MessageType.MODEL_DATA_REQUEST,
+        MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST,
         MessageType.REMOTE_CLIENT_OPENED,
         MessageType.REMOTE_CLIENT_CLOSED,
         MessageType.REFERENCE_PUBLISHED,
@@ -53,6 +58,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         MessageType.REFERENCE_SET,
         MessageType.REFERENCE_CLEARED],
       (message: MessageEvent) => this._handleMessage(message));
+    this._autoRequestId = 0;
   }
 
   public session(): Session {
@@ -78,22 +84,6 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public openAutoCreate(options: AutoCreateModelOptions): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
-    }
-
-    if (options.dataCallback !== undefined && typeof options.dataCallback !== "function") {
-      return Promise.reject<RealTimeModel>(new Error("options.dataCallback, if set, must be a function."));
-    }
-
-    if (options.data !== undefined && options.dataCallback !== undefined) {
-      return Promise.reject<RealTimeModel>(new Error("options.data and options.dataCallback can not both be defined."));
-    }
-
-    if (options.id === undefined && typeof options.dataCallback !== "function") {
-      return Promise.reject<RealTimeModel>(new Error("options.dataCallback, if set, must be a function."));
-    }
-
-    if (options.id === undefined && options.dataCallback !== undefined) {
-      return Promise.reject<RealTimeModel>(new Error("options.dataCallback can only be set options.id is set."));
     }
 
     return this._open(undefined, options);
@@ -167,7 +157,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     const fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
     const k: string = fqn.hash();
 
-    delete this._openModelsByFqn[k];
+    delete this._openModelsByModelId[k];
 
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
@@ -175,8 +165,8 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   }
 
   public _dispose(): void {
-    Object.getOwnPropertyNames(this._openModelsByFqn).forEach((fqn: string) => {
-      this._openModelsByFqn[fqn].close();
+    Object.getOwnPropertyNames(this._openModelsByModelId).forEach((fqn: string) => {
+      this._openModelsByModelId[fqn].close();
     });
   }
 
@@ -191,39 +181,38 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     // Opening by a known model id, and this model is already open.
     // return it.
-    if (id && this._openModelsByFqn[id] !== undefined) {
-      return Promise.resolve(this._openModelsByFqn[id]);
+    if (id && this._openModelsByModelId[id] !== undefined) {
+      return Promise.resolve(this._openModelsByModelId[id]);
     }
 
     // Opening by a known model id and we are already opening it.
     // return the promise for the open request.
-    if (id && this._openRequestsByFqn[id] !== undefined) {
-      return this._openRequestsByFqn[id].deferred.promise();
+    if (id && this._openRequestsByModelId[id] !== undefined) {
+      return this._openRequestsByModelId[id].promise();
     }
 
-    const collection = options ? options.collection : undefined;
-    const initializer = options ? options.dataCallback : undefined;
-    const initializerProvided = initializer !== undefined;
-
     // At this point we know we don't have the model open, or are not
-    // already opening it.
+    // already opening it, possible because we are creating a new model with
+    // an new id.
+
+    const autoRequestId: number = options ? this._autoRequestId++ : 0;
 
     const request: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
       id,
-      collection,
-      initializerProvided
+      autoCreateId: autoRequestId
     };
+
+    if (options !== undefined) {
+      this._autoCreateRequests[autoRequestId] = options;
+    }
 
     const deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
 
     // If we don't have an id 1) we can't have an initializer, and 2) we couldn't possibly
     // ask for this model again since we don't know what the id is until the promise returns.
     if (id !== undefined) {
-      this._openRequestsByFqn[id] = {
-        deferred,
-        initializer
-      };
+      this._openRequestsByModelId[id] = deferred;
     }
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
@@ -251,11 +240,15 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         this
       );
 
-      this._openModelsByFqn[id] = model;
+      this._openModelsByModelId[id] = model;
       this._openModelsByRid[response.resourceId] = model;
 
-      if (this._openRequestsByFqn[id] !== undefined) {
-        delete this._openRequestsByFqn[id];
+      if (this._openRequestsByModelId[id] !== undefined) {
+        delete this._openRequestsByModelId[id];
+      }
+
+      if (options !== undefined) {
+        delete this._autoCreateRequests[autoRequestId];
       }
 
       deferred.resolve(model);
@@ -268,9 +261,9 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   private _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
-      case MessageType.MODEL_DATA_REQUEST:
+      case MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST:
         this._handleModelDataRequest(
-          <ModelDataRequest> messageEvent.message,
+          <AutoCreateModelConfigRequest> messageEvent.message,
           messageEvent.callback);
         break;
       default:
@@ -283,37 +276,50 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
-  private _handleModelDataRequest(request: ModelDataRequest, replyCallback: ReplyCallback): void {
-    const openReq: OpenRequest = this._openRequestsByFqn[request.modelFqn.modelId];
-    if (openReq === undefined) {
-      replyCallback.expectedError("unknown_model", "the requested model is not being opened");
-    } else if (openReq.initializer === undefined) {
-      replyCallback.expectedError("no_initializer", "No initializer was provided when opening the model");
+  private _handleModelDataRequest(request: AutoCreateModelConfigRequest, replyCallback: ReplyCallback): void {
+    const options: AutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
+    if (options === undefined) {
+      const message = `Received a request for an auto create id that was not expected: ${request.autoCreateId}`;
+      console.error(message);
+      replyCallback.expectedError("unknown_model", message);
     } else {
-      const data: any = openReq.initializer();
-      const idGen: InitialIdGenerator = new InitialIdGenerator();
-      const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-        return idGen.id();
-      });
-      const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
-      const response: ModelDataResponse = {
+      let data: ModelDataInitializer = options.data;
+      if (typeof data === "function") {
+        data = data();
+      }
+
+      let dataValue: ObjectValue;
+      if (data !== undefined) {
+        const idGen: InitialIdGenerator = new InitialIdGenerator();
+        const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
+          return idGen.id();
+        });
+        dataValue = <ObjectValue> dataValueFactory.createDataValue(data);
+      }
+
+      const response: AutoCreateModelConfigResponse = {
+        type: MessageType.MODEL_AUTO_CREATE_CONFIG_RESPONSE,
         data: dataValue,
-        type: MessageType.MODEL_DATA_RESPONSE
+        collection: options.collection,
+        overrideWorld: options.overrideWorld,
+        worldPermissions: options.worldPermissions,
+        userPermissions: options.userPermissions,
       };
       replyCallback.reply(response);
     }
   }
 }
 
+export type ModelDataInitializer = {[key: string]: any} | (() => {[key: string]: any});
+
 export interface AutoCreateModelOptions extends CreateModelOptions {
-  dataCallback?: () => {[key: string]: any};
   ephemeral: boolean;
 }
 
 export interface CreateModelOptions {
   collection: string;
   id?: string;
-  data?: {[key: string]: any};
+  data?: ModelDataInitializer;
   overrideWorld?: boolean;
   worldPermissions?: ModelPermissions;
   userPermissions?: {[key: string]: ModelPermissions};
@@ -326,9 +332,4 @@ class InitialIdGenerator {
   public id(): string {
     return this._prefix + ":" + this._id++;
   }
-}
-
-interface OpenRequest {
-  deferred: Deferred<RealTimeModel>;
-  initializer: () => any;
 }

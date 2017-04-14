@@ -12,30 +12,31 @@ var model;
 
 // Connect to the domain.
 Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
-  return domain.models().openWithCreate({
-    collection: "test",
-    id: "basic-example",
-    dataCallback: function (collectionId, modelId) {
-      return {
-        "string": "test value",
-        "number": 10,
-        "boolean": true,
-        "array": [
-          "Apples",
-          "Bananas",
-          "Pears",
-          "Orange"
-        ],
-        "object": {
-          "key1": "value1",
-          "key2": "value2",
-          "key3": "value3",
-          "key4": "value4"
-        },
-        "date": new Date()
-      };
-    }
-  });
+  // return domain.models().openWithCreate({
+  //   collection: "test",
+  //   id: "basic-example",
+  //   dataCallback: function (collectionId, modelId) {
+  //     return {
+  //       "string": "test value",
+  //       "number": 10,
+  //       "boolean": true,
+  //       "array": [
+  //         "Apples",
+  //         "Bananas",
+  //         "Pears",
+  //         "Orange"
+  //       ],
+  //       "object": {
+  //         "key1": "value1",
+  //         "key2": "value2",
+  //         "key3": "value3",
+  //         "key4": "value4"
+  //       },
+  //       "date": new Date()
+  //     };
+  //   }
+  // });
+  return domain.models().open("basic-example");
 }).then(function (model) {
   bindToModel(model);
 });

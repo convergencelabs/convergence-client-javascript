@@ -1,10 +1,8 @@
 import {OutgoingProtocolRequestMessage} from "../../protocol";
 import {ModelFqn} from "../../../../model/ModelFqn";
 import {MessageBodySerializer} from "../../MessageSerializer";
-import {IncomingProtocolResponseMessage} from "../../protocol";
-import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelPermissions} from "../../../../model/ModelPermissions";
-import {ModelPermissionsImpl} from "../../../../model/ModelPermissionsImpl";
+import {serializeModelPermissions} from "./modelPermissions";
 
 export interface SetModelPermissionsRequest extends OutgoingProtocolRequestMessage {
   modelFqn: ModelFqn;
@@ -29,16 +27,3 @@ export const SetModelPermissionsSerializer: MessageBodySerializer = (request: Se
     u: users
   };
 };
-
-function serializeModelPermissions(permissions: ModelPermissions): any {
-  if (!permissions) {
-    return null;
-  }
-
-  return {
-    r: permissions.read,
-    w: permissions.write,
-    d: permissions.remove,
-    m: permissions.manage
-  };
-}

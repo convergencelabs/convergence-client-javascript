@@ -11,15 +11,13 @@ import {deserializeModelPermissions} from "./permissions/modelPermissions";
 
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   id?: string;
-  collection?: string;
-  initializerProvided: boolean;
+  autoCreateId?: number;
 }
 
 export const OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request: OpenRealTimeModelRequest) => {
   return {
-    c: request.collection,
     m: request.id,
-    i: request.initializerProvided
+    a: request.autoCreateId
   };
 };
 
