@@ -17,7 +17,7 @@ describe("Reference Transformation E2E", () => {
 
     const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
 
-    const expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, m: "model", i: false};
+    const expectedOpen: any = {t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST, m: "model"};
     const openReq: IReceiveRequestRecord = mockServer.expectRequest(expectedOpen, 300);
     mockServer.sendReplyTo(openReq, {
       r: resourceId,

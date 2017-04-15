@@ -12,8 +12,8 @@ import { AuthenticationResponseDeserializer } from "./authentication";
 import { ErrorMessageSerializer } from "./ErrorMessage";
 import { ErrorMessageDeserializer } from "./ErrorMessage";
 import { OpenRealTimeModelRequestSerializer } from "./model/openRealtimeModel";
-import { ModelDataRequestDeserializer } from "./model/autoCreateConfigRequest";
-import { ModelDataResponseSerializer } from "./model/autoCreateConfigRequest";
+import { AutoCreateModelConfigRequestDeserializer } from "./model/autoCreateConfigRequest";
+import { AutoCreateModelConfigResponseSerializer } from "./model/autoCreateConfigRequest";
 import { OperationSubmissionSerializer } from "./model/operationSubmission";
 import { OperationAckDeserializer } from "./model/operationAck";
 import { RemoteOperationDeserializer } from "./model/remoteOperation";
@@ -175,7 +175,9 @@ MessageSerializer.registerMessageBodySerializer(MessageType.ERROR, ErrorMessageS
 
 MessageSerializer.registerMessageBodySerializer(MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
   OpenRealTimeModelRequestSerializer);
-MessageSerializer.registerMessageBodySerializer(MessageType.MODEL_DATA_RESPONSE, ModelDataResponseSerializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.MODEL_AUTO_CREATE_CONFIG_RESPONSE,
+  AutoCreateModelConfigResponseSerializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.OPERATION_SUBMISSION, OperationSubmissionSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
@@ -238,7 +240,8 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.CREATE_REAL_TIME_M
   CreateRealTimeModelResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.OPEN_REAL_TIME_MODEL_RESPONSE,
   OpenRealTimeModelResponseDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_DATA_REQUEST, ModelDataRequestDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST,
+  AutoCreateModelConfigRequestDeserializer);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.OPERATION_ACKNOWLEDGEMENT, OperationAckDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_OPERATION, RemoteOperationDeserializer);

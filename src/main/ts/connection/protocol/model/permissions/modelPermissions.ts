@@ -13,7 +13,6 @@ export function deserializeModelPermissions(serialized: any): ModelPermissions {
     serialized.m);
 }
 
-
 export function serializeModelPermissions(permissions: ModelPermissions): any {
   if (permissions === null) {
     return null;
@@ -30,4 +29,3 @@ export function serializeModelPermissions(permissions: ModelPermissions): any {
     m: permissions.manage
   };
 }
-

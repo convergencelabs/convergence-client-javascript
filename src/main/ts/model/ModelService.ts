@@ -195,7 +195,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     // already opening it, possible because we are creating a new model with
     // an new id.
 
-    const autoRequestId: number = options ? this._autoRequestId++ : 0;
+    const autoRequestId: number = options ? this._autoRequestId++ : undefined;
 
     const request: OpenRealTimeModelRequest = {
       type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,

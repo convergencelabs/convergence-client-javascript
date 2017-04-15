@@ -29,17 +29,12 @@ describe("Open Real Time Model E2E", () => {
 
     const fqn: ModelFqn = new ModelFqn("collection", "model");
 
-    const openRequest: OpenRealTimeModelRequest = {
-      type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      id: fqn.modelId,
-      initializerProvided: false
+    const openRequest: any = {
+      t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
+      m: fqn.modelId
     };
 
-    const expectOpen = OpenRealTimeModelRequestSerializer(openRequest);
-    // FIXME hacked because the serializer adds the key, but with a value of undefined.
-    delete expectOpen["c"];
-    expectOpen.t = MessageType.OPEN_REAL_TIME_MODEL_REQUEST;
-    const openReq: IReceiveRequestRecord = mockServer.expectRequest(expectOpen, 300);
+    const openReq: IReceiveRequestRecord = mockServer.expectRequest(openRequest, 300);
     mockServer.sendReplyTo(openReq, {
       r: "1",
       ci: "collection",
