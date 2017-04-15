@@ -1,3 +1,8 @@
+div.directions {
+  margin-bottom: 20px;
+  border-bottom: 1px solid darkblue;
+}
+
 div.dt {
   margin-bottom: 15px;
 }

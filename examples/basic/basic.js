@@ -1,43 +1,48 @@
 // These are the various inputs in the example page.
-var stringInput = document.getElementById("stringVal");
-var booleanInput = document.getElementById("booleanVal");
-var numberInput = document.getElementById("numberVal");
-var arrayInput = document.getElementById("arrayVal");
-var objectTable = document.getElementById("objectVal");
-var dateInput = document.getElementById("currentDate");
-
+const stringInput = document.getElementById("stringVal");
+const booleanInput = document.getElementById("booleanVal");
+const numberInput = document.getElementById("numberVal");
+const arrayInput = document.getElementById("arrayVal");
+const objectTable = document.getElementById("objectVal");
+const dateInput = document.getElementById("currentDate");
 
 // The realTimeModel.
 var model;
 
+const baseURL = window.location.href.split('?')[0];
+const modelId = getParameterByName("modelId");
+
 // Connect to the domain.
-Convergence.connectAnonymously(DOMAIN_URL).then(function(domain) {
-  // return domain.models().openWithCreate({
-  //   collection: "test",
-  //   id: "basic-example",
-  //   dataCallback: function (collectionId, modelId) {
-  //     return {
-  //       "string": "test value",
-  //       "number": 10,
-  //       "boolean": true,
-  //       "array": [
-  //         "Apples",
-  //         "Bananas",
-  //         "Pears",
-  //         "Orange"
-  //       ],
-  //       "object": {
-  //         "key1": "value1",
-  //         "key2": "value2",
-  //         "key3": "value3",
-  //         "key4": "value4"
-  //       },
-  //       "date": new Date()
-  //     };
-  //   }
-  // });
-  return domain.models().open("basic-example");
+Convergence.connectAnonymously(DOMAIN_URL).then(function (domain) {
+  return domain.models().openAutoCreate({
+    collection: "test",
+    id: modelId,
+    data: {
+      "string": "test value",
+      "number": 10,
+      "boolean": true,
+      "array": [
+        "Apples",
+        "Bananas",
+        "Pears",
+        "Orange"
+      ],
+      "object": {
+        "key1": "value1",
+        "key2": "value2",
+        "key3": "value3",
+        "key4": "value4"
+      },
+      "date": new Date()
+    },
+    overrideWorld: true,
+    worldPermissions: {read: true, write: true, remove: false, manage: false},
+    ephemeral: true
+  });
 }).then(function (model) {
+  const modelId = model.modelId();
+  const url = baseURL + "?modelId=" + modelId;
+  window.history.pushState(modelId, modelId, url);
   bindToModel(model);
 });
 
@@ -200,17 +205,17 @@ var objectRenameNewProp = document.getElementById("objectRenameNewProp");
 function bindTableButtons() {
   var rtObject = model.elementAt("object");
 
-  objectRemoveButton.onclick = function() {
+  objectRemoveButton.onclick = function () {
     rtObject.remove(objectRemoveProp.value);
     renderTable(rtObject);
   };
 
-  objectSetButton.onclick = function() {
+  objectSetButton.onclick = function () {
     rtObject.set(objectSetProp.value, objectSetValue.value);
     renderTable(rtObject);
   };
 
-  objectRenameButton.onclick = function() {
+  objectRenameButton.onclick = function () {
     model.startCompound();
     var curVal = rtObject.get(objectRenameOldProp.value).value();
     rtObject.remove(objectRenameOldProp.value);
@@ -222,11 +227,11 @@ function bindTableButtons() {
 
 function bindTableEvents() {
   var rtObject = model.elementAt("object");
-  rtObject.on("remove", function(evt) {
+  rtObject.on("remove", function (evt) {
     renderTable(rtObject);
   });
 
-  rtObject.on("set", function(evt) {
+  rtObject.on("set", function (evt) {
     renderTable(rtObject);
   });
 }
@@ -260,7 +265,7 @@ function addTableRow(prop, val) {
 function bindDateEvents() {
   var rtDate = model.elementAt("date");
   dateInput.value = rtDate.value().toUTCString();
-  rtDate.on("value", function(evt) {
+  rtDate.on("value", function (evt) {
     dateInput.value = evt.element.value().toUTCString();
   });
 }
@@ -270,4 +275,17 @@ function setDate() {
   var date = new Date();
   rtDate.value(date);
   dateInput.value = date.toUTCString()
+}
+
+
+function getParameterByName(name, url) {
+  if (!url) {
+    url = window.location.href;
+  }
+  name = name.replace(/[\[\]]/g, "\\$&");
+  const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
