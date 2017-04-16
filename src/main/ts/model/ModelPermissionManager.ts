@@ -36,7 +36,7 @@ export class ModelPermissionManager {
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
       modelId: this._modelId,
-      overridesCollection: true,
+      overridesCollection: overrideWorld,
       allUsers: false,
       users: new Map<string, ModelPermissions>()
     };

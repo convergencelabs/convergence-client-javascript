@@ -105,7 +105,10 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       collectionId: collection,
       modelId: options.id,
-      data: dataValue
+      data: dataValue,
+      overrideWorld: options.overrideWorld,
+      worldPermissions: options.worldPermissions,
+      userPermissions: options.userPermissions
     };
 
     return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {

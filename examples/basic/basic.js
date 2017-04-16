@@ -8,12 +8,14 @@ const dateInput = document.getElementById("currentDate");
 
 // The realTimeModel.
 var model;
+var domain;
 
 const baseURL = window.location.href.split('?')[0];
 const modelId = getParameterByName("modelId");
 
 // Connect to the domain.
-Convergence.connectAnonymously(DOMAIN_URL).then(function (domain) {
+Convergence.connectAnonymously(DOMAIN_URL).then(d => {
+  domain = d;
   return domain.models().openAutoCreate({
     collection: "test",
     id: modelId,
