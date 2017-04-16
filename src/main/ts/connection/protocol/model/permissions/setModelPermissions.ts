@@ -1,11 +1,10 @@
 import {OutgoingProtocolRequestMessage} from "../../protocol";
-import {ModelFqn} from "../../../../model/ModelFqn";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {ModelPermissions} from "../../../../model/ModelPermissions";
 import {serializeModelPermissions} from "./modelPermissions";
 
 export interface SetModelPermissionsRequest extends OutgoingProtocolRequestMessage {
-  modelFqn: ModelFqn;
+  modelId: string;
   overridesCollection?: boolean;
   world?: ModelPermissions;
   allUsers: boolean;
@@ -19,8 +18,7 @@ export const SetModelPermissionsSerializer: MessageBodySerializer = (request: Se
     request.users.forEach((v, k) => users[k] = serializeModelPermissions(v));
   }
   return {
-    c: request.modelFqn.collectionId,
-    m: request.modelFqn.modelId,
+    m: request.modelId,
     s: request.overridesCollection,
     w: serializeModelPermissions(request.world),
     a: request.allUsers,

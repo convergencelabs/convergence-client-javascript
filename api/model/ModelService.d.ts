@@ -5,20 +5,37 @@ import {HistoricalModel} from "./historical/HistoricalModel";
 import {ModelResult} from "./query/ModelResult";
 import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {ModelPermissionManager} from "./ModelPermissionManager";
+import {ModelPermissions} from "./ModelPermissions";
 
 export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public session(): Session;
 
   public query(query: string): Promise<ModelResult[]>;
 
-  public open(collectionId: string, modelId: string, initializer?: () => any): Promise<RealTimeModel>;
+  public open(modelId: string): Promise<RealTimeModel>;
 
-  public create(collectionId: string, modelId: string, data: {[key: string]: any}):
-    Promise<{collectionId: string, modelId: string}>;
+  public openAutoCreate(options: AutoCreateModelOptions): Promise<RealTimeModel>;
 
-  public remove(collectionId: string, modelId: string): Promise<void>;
+  public create(options: CreateModelOptions): Promise<string>;
 
-  public history(collectionId: string, modelId: string): Promise<HistoricalModel>;
+  public remove(modelId: string): Promise<void>;
 
-  public permissions(collectionId: string, modelId: string): ModelPermissionManager;
+  public history(modelId: string): Promise<HistoricalModel>;
+
+  public permissions(modelId: string): ModelPermissionManager;
+}
+
+export type ModelDataInitializer = {[key: string]: any} | (() => {[key: string]: any});
+
+export interface AutoCreateModelOptions extends CreateModelOptions {
+  ephemeral: boolean;
+}
+
+export interface CreateModelOptions {
+  collection: string;
+  id?: string;
+  data?: ModelDataInitializer;
+  overrideWorld?: boolean;
+  worldPermissions?: ModelPermissions;
+  userPermissions?: {[key: string]: ModelPermissions};
 }

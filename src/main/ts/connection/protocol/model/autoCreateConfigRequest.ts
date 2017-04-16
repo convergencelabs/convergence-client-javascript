@@ -24,6 +24,7 @@ export interface AutoCreateModelConfigResponse extends OutgoingProtocolResponseM
 }
 
 export function AutoCreateModelConfigResponseSerializer(response: AutoCreateModelConfigResponse): any {
+  const c = response.collection;
   const d: any = response.data ? DataValueSerializer(response.data) : undefined;
   const w = serializeModelPermissions(response.worldPermissions);
   const v = response.overrideWorld;
@@ -35,11 +36,5 @@ export function AutoCreateModelConfigResponseSerializer(response: AutoCreateMode
     });
   }
 
-  return {
-    c: response.collection,
-    d,
-    v,
-    w,
-    u
-  };
+  return { c, d, v, w, u };
 }

@@ -1,5 +1,4 @@
 import {Session} from "../Session";
-import {ModelFqn} from "./ModelFqn";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
 import {OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
@@ -114,12 +113,10 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  public remove(collectionId: string, modelId: string): Promise<void> {
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-
+  public remove(modelId: string): Promise<void> {
     const request: DeleteRealTimeModelRequest = {
       type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
-      modelFqn: fqn
+      modelId
     };
 
     return this._connection.request(request).then(() => {
@@ -127,22 +124,27 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
-  public history(collectionId: string, modelId: string): Promise<HistoricalModel> {
-    const fqn: ModelFqn = new ModelFqn(collectionId, modelId);
-
+  public history(modelId: string): Promise<HistoricalModel> {
     const request: HistoricalDataRequest = {
       type: MessageType.HISTORICAL_DATA_REQUEST,
-      modelFqn: fqn
+      modelId
     };
 
     return this._connection.request(request).then((response: HistoricalDataResponse) => {
-      return new HistoricalModel(response.data, response.version, response.modifiedTime, response.createdTime,
-        request.modelFqn, this._connection, this.session());
+      return new HistoricalModel(
+        response.data,
+        response.version,
+        response.modifiedTime,
+        response.createdTime,
+        modelId,
+        response.collectionId,
+        this._connection,
+        this.session());
     });
   }
 
-  public permissions(collectionId: string, modelId: string): ModelPermissionManager {
-    return new ModelPermissionManager(collectionId, modelId, this._connection);
+  public permissions(modelId: string): ModelPermissionManager {
+    return new ModelPermissionManager(modelId, this._connection);
   }
 
   public _close(resourceId: string): Promise<void> {
@@ -153,11 +155,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     const model: RealTimeModel = this._openModelsByRid[resourceId];
     delete this._openModelsByRid[resourceId];
-
-    const fqn: ModelFqn = new ModelFqn(model.collectionId(), model.modelId());
-    const k: string = fqn.hash();
-
-    delete this._openModelsByModelId[k];
+    delete this._openModelsByModelId[model.modelId()];
 
     return this._connection.request(request).then(() => {
       return; // convert to Promise<void>
@@ -234,7 +232,8 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         response.version,
         new Date(response.createdTime),
         new Date(response.modifiedTime),
-        new ModelFqn(response.collection, response.id),
+        response.id,
+        response.collection,
         clientConcurrencyControl,
         this._connection,
         this

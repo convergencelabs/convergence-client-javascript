@@ -1,7 +1,6 @@
 import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
-import {ModelFqn} from "../ModelFqn";
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
@@ -42,7 +41,8 @@ export class HistoricalModel implements ObservableModel {
   private _session: Session;
   private _connection: ConvergenceConnection;
 
-  private _modelFqn: ModelFqn;
+  private _modelId: string;
+  private _collectionId: string;
   private _model: Model;
   private _wrapperFactory: HistoricalWrapperFactory;
 
@@ -60,14 +60,16 @@ export class HistoricalModel implements ObservableModel {
               version: number,
               modifiedTime: Date,
               createdTime: Date,
-              modelFqn: ModelFqn,
+              modelId: string,
+              collectionId: string,
               connection: ConvergenceConnection,
               session: Session) {
 
     this._session = session;
     this._connection = connection;
 
-    this._modelFqn = modelFqn;
+    this._modelId = modelId;
+    this._collectionId = collectionId;
     this._model = new Model(this.session().sessionId(), this.session().username(), null, data);
     this._wrapperFactory = new HistoricalWrapperFactory(this);
 
@@ -88,11 +90,11 @@ export class HistoricalModel implements ObservableModel {
   }
 
   public collectionId(): string {
-    return this._modelFqn.collectionId;
+    return this._collectionId;
   }
 
   public modelId(): string {
-    return this._modelFqn.modelId;
+    return this._modelId;
   }
 
   public time(): Date {
@@ -168,7 +170,7 @@ export class HistoricalModel implements ObservableModel {
 
     const request: HistoricalOperationsRequest = {
       type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelFqn: this._modelFqn,
+      modelId: this._modelId,
       first: firstVersion,
       last: lastVersion
     };

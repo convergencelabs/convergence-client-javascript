@@ -6,7 +6,6 @@ import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
-import {ModelFqn} from "../ModelFqn";
 import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
@@ -96,7 +95,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   private _version: number;
   private _createdTime: Date;
   private _time: Date;
-  private _modelFqn: ModelFqn;
+  private _modelId: string;
+  private _collectionId: string;
   private _concurrencyControl: ClientConcurrencyControl;
   private _connection: ConvergenceConnection;
   private _modelService: ModelService;
@@ -116,7 +116,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
               version: number,
               createdTime: Date,
               modifiedTime: Date,
-              modelFqn: ModelFqn,
+              modelId: string,
+              collectionId: string,
               concurrencyControl: ClientConcurrencyControl,
               connection: ConvergenceConnection,
               modelService: ModelService) {
@@ -126,7 +127,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     this._version = version;
     this._createdTime = createdTime;
     this._time = modifiedTime;
-    this._modelFqn = modelFqn;
+    this._modelId = modelId;
+    this._collectionId = collectionId;
     this._concurrencyControl = concurrencyControl;
     this._connection = connection;
     this._modelService = modelService;
@@ -185,7 +187,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   }
 
   public permissionsManager(): ModelPermissionManager {
-    return new ModelPermissionManager(this._modelFqn.collectionId, this._modelFqn.modelId, this._connection);
+    return new ModelPermissionManager(this._modelId, this._connection);
   }
 
   public session(): Session {
@@ -218,11 +220,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   }
 
   public collectionId(): string {
-    return this._modelFqn.collectionId;
+    return this._collectionId;
   }
 
   public modelId(): string {
-    return this._modelFqn.modelId;
+    return this._modelId;
   }
 
   public time(): Date {

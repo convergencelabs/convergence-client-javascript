@@ -1,5 +1,4 @@
 import {OutgoingProtocolRequestMessage} from "../../protocol";
-import {ModelFqn} from "../../../../model/ModelFqn";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {IncomingProtocolResponseMessage} from "../../protocol";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
@@ -7,13 +6,12 @@ import {ModelPermissions} from "../../../../model/ModelPermissions";
 import {deserializeModelPermissions} from "./modelPermissions";
 
 export interface GetModelPermissionsRequest extends OutgoingProtocolRequestMessage {
-  modelFqn: ModelFqn;
+  modelId: string;
 }
 
 export const GetModelPermissionsSerializer: MessageBodySerializer = (request: GetModelPermissionsRequest) => {
   return {
-    c: request.modelFqn.collectionId,
-    m: request.modelFqn.modelId
+    m: request.modelId
   };
 };
 

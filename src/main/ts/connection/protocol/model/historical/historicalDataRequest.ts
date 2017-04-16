@@ -1,18 +1,15 @@
-import {ModelFqn} from "../../../../model/ModelFqn";
 import {OutgoingProtocolRequestMessage} from "../../protocol";
 import {MessageBodySerializer} from "../../MessageSerializer";
 import {DataValueDeserializer} from "../dataValue";
 import {IncomingProtocolResponseMessage} from "../../protocol";
-import {MessageBodyDeserializer} from "../../MessageSerializer";
 
 export interface HistoricalDataRequest extends OutgoingProtocolRequestMessage {
-  modelFqn: ModelFqn;
+  modelId: string;
 }
 
 export const HistoricalDataRequestSerializer: MessageBodySerializer = (request: HistoricalDataRequest) => {
   return {
-    c: request.modelFqn.collectionId,
-    m: request.modelFqn.modelId,
+    m: request.modelId,
   };
 };
 
@@ -21,13 +18,15 @@ export interface HistoricalDataResponse extends IncomingProtocolResponseMessage 
   createdTime: Date;
   modifiedTime: Date;
   data: any;
+  collectionId: string;
 }
 
-export const HistoricalDataResponseDeserializer: MessageBodyDeserializer<HistoricalDataResponse> = (body: any) => {
+export function HistoricalDataResponseDeserializer(body: any) {
   return {
     version: body.v,
     createdTime: body.c,
     modifiedTime: body.m,
-    data: DataValueDeserializer(body.d)
+    data: DataValueDeserializer(body.d),
+    collectionId: body.i
   };
-};
+}

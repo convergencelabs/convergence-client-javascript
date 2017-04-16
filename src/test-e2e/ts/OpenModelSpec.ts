@@ -1,12 +1,9 @@
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
 import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
-import {OpenRealTimeModelRequest} from "../../main/ts/connection/protocol/model/openRealtimeModel";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord} from "../mock-server/records";
-import {ModelFqn} from "../../main/ts/model/ModelFqn";
-import {OpenRealTimeModelRequestSerializer} from "../../main/ts/connection/protocol/model/openRealtimeModel";
 import {DataValueSerializer} from "../../main/ts/connection/protocol/model/dataValue";
 import {DataValueFactory} from "../../main/ts/model/DataValueFactory";
 import {Convergence} from "../../main/ts/Convergence";
@@ -27,11 +24,11 @@ describe("Open Real Time Model E2E", () => {
 
     const mockServer: MockConvergenceServer = new MockConvergenceServer(expectedSuccessOptions(done));
 
-    const fqn: ModelFqn = new ModelFqn("collection", "model");
+    const modelId = "model";
 
     const openRequest: any = {
       t: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      m: fqn.modelId
+      m: modelId
     };
 
     const openReq: IReceiveRequestRecord = mockServer.expectRequest(openRequest, 300);

@@ -4,24 +4,17 @@ import {
   GetModelPermissionsRequest,
   GetModelPermissionsResponse
 } from "../connection/protocol/model/permissions/getModelPermissions";
-import {ModelFqn} from "./ModelFqn";
 import {SetModelPermissionsRequest} from "../connection/protocol/model/permissions/setModelPermissions";
 import {MessageType} from "../connection/protocol/MessageType";
 
 export class ModelPermissionManager {
 
-  private readonly _collectionId: string;
   private readonly _modelId: string;
   private readonly _connection: ConvergenceConnection;
 
-  constructor(collectionId: string, modelId: string, connection: ConvergenceConnection) {
-    this._collectionId = collectionId;
+  constructor(modelId: string, connection: ConvergenceConnection) {
     this._modelId = modelId;
     this._connection = connection;
-  }
-
-  get collectionId() {
-    return this._collectionId;
   }
 
   get modelId() {
@@ -31,7 +24,7 @@ export class ModelPermissionManager {
   public getPermissions(): Promise<ModelPermissions> {
     const request: GetModelPermissionsRequest = {
       type: MessageType.GET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+      modelId: this._modelId
     };
 
     return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
@@ -42,7 +35,7 @@ export class ModelPermissionManager {
   public setOverridesCollection(overrideWorld: boolean): Promise<void> {
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      modelId: this._modelId,
       overridesCollection: true,
       allUsers: false,
       users: new Map<string, ModelPermissions>()
@@ -56,7 +49,7 @@ export class ModelPermissionManager {
   public getOverridesCollection(): Promise<boolean> {
     const request: GetModelPermissionsRequest = {
       type: MessageType.GET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+      modelId: this._modelId,
     };
 
     return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
@@ -67,7 +60,7 @@ export class ModelPermissionManager {
   public getWorldPermissions(): Promise<ModelPermissions> {
     const request: GetModelPermissionsRequest = {
       type: MessageType.GET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+      modelId: this._modelId,
     };
 
     return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
@@ -78,7 +71,7 @@ export class ModelPermissionManager {
   public setWorldPermissions(permissions: ModelPermissions): Promise<void> {
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      modelId: this._modelId,
       world: permissions,
       allUsers: false,
       users: new Map<string, ModelPermissions>()
@@ -92,7 +85,7 @@ export class ModelPermissionManager {
   public getAllUserPermissions(): Promise<Map<string, ModelPermissions>> {
     const request: GetModelPermissionsRequest = {
       type: MessageType.GET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+      modelId: this._modelId,
     };
 
     return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
@@ -115,7 +108,7 @@ export class ModelPermissionManager {
 
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      modelId: this._modelId,
       users: permissions,
       allUsers: true
     };
@@ -128,7 +121,7 @@ export class ModelPermissionManager {
   public getUserPermissions(username: string): Promise<ModelPermissions> {
     const request: GetModelPermissionsRequest = {
       type: MessageType.GET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId)
+      modelId: this._modelId,
     };
 
     return this._connection.request(request).then((response: GetModelPermissionsResponse) => {
@@ -141,7 +134,7 @@ export class ModelPermissionManager {
     p.set(username, permissions);
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      modelId: this._modelId,
       users: p,
       allUsers: false
     };
@@ -156,7 +149,7 @@ export class ModelPermissionManager {
     p.set(username, null);
     const request: SetModelPermissionsRequest = {
       type: MessageType.SET_MODEL_PERMISSIONS_REQUEST,
-      modelFqn: new ModelFqn(this._collectionId, this._modelId),
+      modelId: this._modelId,
       users: p,
       allUsers: false
     };

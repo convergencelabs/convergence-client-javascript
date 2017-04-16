@@ -20,7 +20,6 @@ import {AppliedStringSetOperation} from "../../../model/ot/applied/AppliedString
 import {CodeMap} from "../../../util/CodeMap";
 import {mapObject} from "../../../util/ObjectUtils";
 import {ModelOperation} from "../../../model/ot/applied/ModelOperation";
-import {ModelFqn} from "../../../model/ModelFqn";
 import {AppliedDiscreteOperation} from "../../../model/ot/applied/AppliedDiscreteOperation";
 import {AppliedDateSetOperation} from "../../../model/ot/applied/AppliedDateSetOperation";
 
@@ -44,7 +43,7 @@ OperationTypeCodes.put(15, OperationType.STRING_VALUE);
 
 export class ModelOperationDeserializer {
   public static deserialize(body: any): ModelOperation {
-    return new ModelOperation(new ModelFqn(body.c, body.m), body.v, body.p, body.u, body.s,
+    return new ModelOperation(body.m, body.v, body.p, body.u, body.s,
       AppliedOperationDeserializer.deserialize(body.o));
   }
 }
