@@ -1,6 +1,5 @@
 import {IncomingProtocolResponseMessage} from "../protocol";
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import {ModelFqn} from "../../../model/ModelFqn";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 import {ReferenceTypeCodes} from "./reference/ReferenceEvent";

@@ -1,5 +1,4 @@
 import {OutgoingProtocolRequestMessage} from "../../protocol";
-import {MessageBodySerializer} from "../../MessageSerializer";
 import {DataValueDeserializer} from "../dataValue";
 import {IncomingProtocolResponseMessage} from "../../protocol";
 
@@ -7,11 +6,11 @@ export interface HistoricalDataRequest extends OutgoingProtocolRequestMessage {
   modelId: string;
 }
 
-export const HistoricalDataRequestSerializer: MessageBodySerializer = (request: HistoricalDataRequest) => {
+export function HistoricalDataRequestSerializer(request: HistoricalDataRequest): any {
   return {
     m: request.modelId,
   };
-};
+}
 
 export interface HistoricalDataResponse extends IncomingProtocolResponseMessage {
   version: number;
@@ -21,7 +20,7 @@ export interface HistoricalDataResponse extends IncomingProtocolResponseMessage 
   collectionId: string;
 }
 
-export function HistoricalDataResponseDeserializer(body: any) {
+export function HistoricalDataResponseDeserializer(body: any): HistoricalDataResponse {
   return {
     version: body.v,
     createdTime: body.c,

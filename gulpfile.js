@@ -29,7 +29,7 @@ const dist = "./dist";
 
 gulp.task("default", ["dist"]);
 
-gulp.task("dist", ["dist-internal", "dist-npmjs"], function (cb) {
+gulp.task("dist", ["dist-internal", "dist-npmjs", "validate-api"], function (cb) {
 
 });
 
@@ -176,6 +176,13 @@ function minify(src, dest) {
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest(dest));
 }
+
+gulp.task("validate-api", function () {
+  const tsProject = ts.createProject("tsconfig.json");
+
+  return gulp.src(["api/**/*.d.ts"])
+    .pipe(tsProject());
+});
 
 function generateRollUpConfig(format) {
   return {
