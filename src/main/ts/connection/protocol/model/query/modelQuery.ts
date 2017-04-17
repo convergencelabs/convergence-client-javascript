@@ -17,14 +17,14 @@ export const ModelsQueryRequestSerializer: MessageBodySerializer = (request: Mod
 };
 
 export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body: any) => {
-  return {
-    collectionId: body.l,
-    modelId: body.m,
-    created: body.c,
-    modified: body.d,
-    version: body.v,
-    data: body.a
-  };
+  return new ModelResult(
+    body.a,
+    body.l,
+    body.m,
+    body.c,
+    body.d,
+    body.v,
+  );
 };
 
 export interface ModelsQueryResponse extends IncomingProtocolResponseMessage {
