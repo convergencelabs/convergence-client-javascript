@@ -21,8 +21,8 @@ export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (bo
     body.a,
     body.l,
     body.m,
-    body.c,
-    body.d,
+    new Date(body.c),
+    new Date(body.d),
     body.v,
   );
 };
