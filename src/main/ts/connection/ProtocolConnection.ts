@@ -15,6 +15,7 @@ import {OutgoingProtocolResponseMessage} from "./protocol/protocol";
 import {EventEmitter} from "../util/EventEmitter";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
+import {ConvergenceServerError} from "../util/ConvergenceServerError";
 
 export class ProtocolConnection extends EventEmitter {
 
@@ -109,7 +110,7 @@ export class ProtocolConnection extends EventEmitter {
       },
       timeout);
 
-    this._requests[reqId] = <RequestRecord> { reqId, replyDeferred, timeoutTask };
+    this._requests[reqId] = <RequestRecord> {reqId, replyDeferred, timeoutTask};
 
     this.sendMessage(new MessageEnvelope(message, reqId));
 
@@ -221,7 +222,8 @@ export class ProtocolConnection extends EventEmitter {
       const type: MessageType = envelope.body.type;
       if (type === MessageType.ERROR) {
         const errorMessage: ErrorMessage = <ErrorMessage> envelope.body;
-        record.replyDeferred.reject(new Error(errorMessage.code + ": " + errorMessage.details));
+        record.replyDeferred.reject(
+          new ConvergenceServerError(errorMessage.message, errorMessage.code, errorMessage.details));
       } else {
         record.replyDeferred.resolve(envelope.body);
       }
@@ -264,14 +266,16 @@ class ReplyCallbackImpl implements ReplyCallback {
     this.unexpectedError("An unknown error has occurred");
   }
 
-  public unexpectedError(details: string): void {
-    this.expectedError("unknown", details);
+  public unexpectedError(message: string): void {
+    this.expectedError("unknown", message);
   }
 
-  public expectedError(code: string, details: string): void {
+  public expectedError(code: string, message: string, details?: {[key: string]: any}): void {
+    details = details || {};
     const errorMessage: ErrorMessage = {
       type: MessageType.ERROR,
       code,
+      message,
       details
     };
 
