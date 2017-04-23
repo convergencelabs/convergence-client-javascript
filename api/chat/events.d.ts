@@ -18,7 +18,7 @@ export declare class ChatMessageEvent implements ChatEvent {
   public readonly message: string;
 }
 
-export declare class  UserJoinedEvent implements ChatEvent {
+export declare class UserJoinedEvent implements ChatEvent {
   public static readonly NAME: string;
 
   public readonly name: string;
@@ -28,7 +28,7 @@ export declare class  UserJoinedEvent implements ChatEvent {
   public readonly timestamp: number;
 }
 
-export declare class  UserLeftEvent implements ChatEvent {
+export declare class UserLeftEvent implements ChatEvent {
   public static readonly NAME: string;
 
   public readonly name: string;
