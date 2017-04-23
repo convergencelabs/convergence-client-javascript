@@ -1,6 +1,6 @@
-import {ChatChannelInfo} from "./ChatChannel";
+import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 
-export declare class MultiUserChat extends MessageChannel {
+export declare class MultiUserChat extends ChatChannel {
   public info(): MultiUserChatInfo;
 
   public leave(): Promise<void>;

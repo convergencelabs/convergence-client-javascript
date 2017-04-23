@@ -1,6 +1,6 @@
-import {ChatChannelInfo} from "./ChatChannel";
+import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 
-export declare class SingleUserChat extends MessageChannel {
+export declare class SingleUserChat extends ChatChannel {
   public info(): SingleUserChatInfo;
 }
 

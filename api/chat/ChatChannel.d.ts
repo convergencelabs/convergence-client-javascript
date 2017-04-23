@@ -2,6 +2,7 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatChannelType} from "./ChatService";
 import {ChatEvent} from "./events";
 import {Session} from "../Session";
+import {ChatHistoryEntry} from "./ChatHistoryEntry";
 
 export declare interface ChatChannelEvents {
   readonly MESSAGE: string;
@@ -38,11 +39,11 @@ export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEv
 
   public send(message: string): Promise<void>;
 
-  public name(name: string): Promise<void>;
+  public setName(name: string): Promise<void>;
 
-  public topic(topic: string): Promise<void>;
+  public setTopic(topic: string): Promise<void>;
 
-  public seen(seqNo: number): Promise<void>;
+  public markSeen(seqNo: number): Promise<void>;
 
-  public history(eventTypes?: string[]): Promise<MessageEvent>;
+  public getHistory(eventTypes?: string[]): Promise<ChatHistoryEntry>;
 }

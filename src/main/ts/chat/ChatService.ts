@@ -1,117 +1,221 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable, Observer} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
-import {ChatRoom} from "./ChatRoom";
-import {UserJoinedRoomMessage} from "../connection/protocol/chat/joinRoom";
-import {UserLeftRoomMessage} from "../connection/protocol/chat/leaveRoom";
-import {UserChatMessage} from "../connection/protocol/chat/chatMessage";
-import {ChatMessageEvent, UserLeftEvent, UserJoinedEvent} from "./events";
-import {Deferred} from "../util/Deferred";
-import {JoinRoomRequestMessage} from "../connection/protocol/chat/joinRoom";
-import {JoinRoomResponseMessage} from "../connection/protocol/chat/joinRoom";
-import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {ChatMember} from "./ChatMember";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatEvent} from "./events";
+import {
+  ChatMessageEvent,
+  UserJoinedChannelEvent,
+  UserLeftChannelEvent,
+  UserAddedEvent,
+  UserRemovedEvent,
+  ChannelJoinedEvent,
+  ChannelLeftEvent
+} from "./events";
+import {processChatMessage} from "./ChatMessageProcessor";
+import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
+import {SingleUserChatChannel} from "./SingleUserChatChannel";
+import {JoinChatChannelRequestMessage} from "../connection/protocol/chat/joining";
+import {LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
+import {CreateChatChannelRequestMessage, CreateChatChannelResponseMessage} from "../connection/protocol/chat/create";
+import {
+  GetChatChannelsResponseMessage, GetChatChannelsRequestMessage,
+  GetJoinedChannelsRequestMessage, GetDirectChannelsRequestMessage, SearchChatChannelsRequestMessage
+} from "../connection/protocol/chat/getChannel";
+import {MultiUserChatChannel, MultiUserChatInfo} from "./MultiUserChatChannel";
+import {Observable} from "rxjs";
+import {ChatChannelInfoData} from "../connection/protocol/chat/info";
 
-export interface ChatServiceEvents {
+export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
   readonly USER_JOINED: string;
   readonly USER_LEFT: string;
+  readonly USER_ADDED: string;
+  readonly USER_REMOVED: string;
+  readonly CHANNEL_JOINED: string;
+  readonly CHANNEL_LEFT: string;
 }
+
+const Events: ChatServiceEvents = {
+  MESSAGE: ChatMessageEvent.NAME,
+  USER_JOINED: UserJoinedChannelEvent.NAME,
+  USER_LEFT: UserLeftChannelEvent.NAME,
+  USER_ADDED: UserAddedEvent.NAME,
+  USER_REMOVED: UserRemovedEvent.NAME,
+  CHANNEL_JOINED: ChannelJoinedEvent.NAME,
+  CHANNEL_LEFT: ChannelLeftEvent.NAME
+};
+Object.freeze(Events);
+
+export declare type ChatChannelType = "user" | "group" | "room";
 
 export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
-  public static readonly Events: ChatServiceEvents = {
-    MESSAGE: ChatMessageEvent.NAME,
-    USER_JOINED: UserJoinedEvent.NAME,
-    USER_LEFT: UserLeftEvent.NAME
-  };
+  public static readonly Events: ChatServiceEvents = Events;
 
   private _connection: ConvergenceConnection;
-  private _joinedMap: Map<string, Deferred<ChatRoom>>;
+  private _messageStream: Observable<ChatEvent>;
 
   constructor(connection: ConvergenceConnection) {
     super();
     this._connection = connection;
 
-    let messageObs: Observable<MessageEvent> = Observable.create((observer: Observer<MessageEvent>) => {
-      this._connection.addMultipleMessageListener([MessageType.USER_JOINED_ROOM,
-        MessageType.USER_LEFT_ROOM,
-        MessageType.CHAT_MESSAGE_PUBLISHED], (event) => {
-        observer.next(event);
-      });
-    });
+    const messageTypes = [
+      MessageType.USER_JOINED_CHAT_CHANNEL,
+      MessageType.USER_LEFT_CHAT_CHANNEL,
+      MessageType.USER_ADDED_TO_CHAT_CHANNEL,
+      MessageType.USER_REMOVED_FROM_CHAT_CHANNEL,
+      MessageType.CHAT_CHANNEL_JOINED,
+      MessageType.CHAT_CHANNEL_LEFT,
+      MessageType.CHAT_CHANNEL_REMOVED,
+      MessageType.CHAT_CHANNEL_NAME_CHANGED,
+      MessageType.CHAT_CHANNEL_TOPIC_CHANGED,
+      MessageType.REMOTE_CHAT_MESSAGE
+    ];
 
-    let eventStream: Observable<ChatEvent> = messageObs.pluck("message").map(message => {
-      const msg: any = message;
-      switch (msg.type) {
-        case MessageType.USER_JOINED_ROOM:
-          const joinedMsg: UserJoinedRoomMessage = <UserJoinedRoomMessage> message;
-          return new UserJoinedEvent(
-            joinedMsg.roomId,
-            joinedMsg.username,
-            joinedMsg.sessionId,
-            joinedMsg.timestamp
-        );
-        case MessageType.USER_LEFT_ROOM:
-          const leftMsg: UserLeftRoomMessage = <UserLeftRoomMessage> message;
-          return new UserLeftEvent(
-            leftMsg.roomId,
-            leftMsg.username,
-            leftMsg.sessionId,
-            leftMsg.timestamp
-        );
-        case MessageType.CHAT_MESSAGE_PUBLISHED:
-          const chatMsg: UserChatMessage = <UserChatMessage> message;
-          return new ChatMessageEvent(
-            chatMsg.roomId,
-            chatMsg.username,
-            chatMsg.sessionId,
-            chatMsg.timestamp,
-            chatMsg.message
-        );
-        default:
-        // This should be impossible
-      }
-    });
+    this._messageStream = this._connection
+      .messages(messageTypes)
+      .pluck("message")
+      .map(message => processChatMessage(message))
+      .share();
 
-    this._emitFrom(eventStream);
-
-    this._joinedMap = new Map<string, Deferred<ChatRoom>>();
+    this._emitFrom(this._messageStream);
   }
 
   public session(): Session {
     return this._connection.session();
   }
 
-  public joinRoom(id: string): Promise<ChatRoom> {
-    if (!this._joinedMap.has(id)) {
-      this._joinedMap.set(id, new Deferred<ChatRoom>());
-
-      this._connection.request(<JoinRoomRequestMessage> {
-        type: MessageType.JOIN_ROOM_REQUEST,
-        roomId: id
-      }).then((response: JoinRoomResponseMessage) => {
-        this._joinedMap.get(id).resolve(new ChatRoom(id,
-          response.members.map(sessionId => {
-            return new ChatMember(SessionIdParser.parseUsername(sessionId), sessionId);
-          }),
-          response.messageCount,
-          response.lastMessageTime,
-          this._leftCB(id),
-          this.events().filter(event => {
-            return event.roomId === id;
-          }), this._connection));
-      });
-    }
-
-    return this._joinedMap.get(id).promise();
+  public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]> {
+    return this._connection.request(<SearchChatChannelsRequestMessage> {
+      type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
+    }).then((message: GetChatChannelsResponseMessage) => {
+      return message.channels.map(channel => this._createChannelInfo(channel));
+    });
   }
 
-  private _leftCB: (id: string) => () => void = (id: string) => {
-    return () => this._joinedMap.delete(id);
+  public get(channelId: string): Promise<ChatChannel> {
+    return this._connection.request(<GetChatChannelsRequestMessage> {
+      type: MessageType.GET_CHAT_CHANNELS_REQUEST,
+      channelIds: [channelId]
+    }).then((message: GetChatChannelsResponseMessage) => {
+      const channelData = message.channels[0];
+      const channelInfo = this._createChannelInfo(channelData);
+      return this._createChannel(channelInfo);
+    });
+  }
+
+  // Methods that apply to Group Chat Channels.
+  public joined(): Promise<ChatChannelInfo[]> {
+    return this._connection.request(<GetJoinedChannelsRequestMessage> {
+      type: MessageType.CREATE_CHAT_CHANNEL_REQUEST
+    }).then((message: GetChatChannelsResponseMessage) => {
+      return message.channels.map(channel => this._createChannelInfo(channel));
+    });
+  }
+
+  public create(options: CreateChatChannelOptions): Promise<string> {
+    const {channelId, channelType, name, topic, privateChannel, members} = options;
+    return this._connection.request(<CreateChatChannelRequestMessage> {
+      type: MessageType.CREATE_CHAT_CHANNEL_REQUEST,
+      channelId, channelType, name, topic, privateChannel, members
+    }).then((message: CreateChatChannelResponseMessage) => {
+      return message.channelId;
+    });
+  }
+
+  public remove(channelId: string): Promise<void> {
+    return this._connection.request(<JoinChatChannelRequestMessage> {
+      type: MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
+      channelId
+    }).then(() => {
+      return;
+    });
+  }
+
+  public join(channelId: string): Promise<void> {
+    return this._connection.request(<JoinChatChannelRequestMessage> {
+      type: MessageType.JOIN_CHAT_CHANNEL_REQUEST,
+      channelId
+    }).then(() => {
+      return;
+    });
+  }
+
+  public leave(channelId: string): Promise<void> {
+    return this._connection.request(<LeaveChatChannelRequestMessage> {
+      type: MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
+      channelId
+    }).then(() => {
+      return;
+    });
+  }
+
+  // Methods that apply to Single User Chat Channels.
+  public direct(username: string): Promise<SingleUserChatChannel> {
+    return this._connection.request(<GetDirectChannelsRequestMessage> {
+      type: MessageType.GET_DIRECT_CHAT_CHANNELS_REQUEST,
+      usernames: [username]
+    }).then((message: GetChatChannelsResponseMessage) => {
+      const channelData = message.channels[0];
+      const info = this._createChannelInfo(channelData);
+      const channel = this._createChannel(info);
+      return channel;
+    });
+  }
+
+  private _createChannelInfo(channelData: ChatChannelInfoData): ChatChannelInfo {
+    if (channelData.channelType === "user") {
+      return {
+        channelId: channelData.channelId,
+        channelType: channelData.channelType,
+        name: channelData.name,
+        topic: channelData.topic,
+        createdTime: channelData.createdTime,
+        lastEventTime: channelData.lastEventTime,
+        eventCount: channelData.eventCount,
+        unseenCount: channelData.unseenCount,
+        members: channelData.members
+      };
+    } else {
+      return {
+        channelId: channelData.channelId,
+        channelType: channelData.channelType,
+        channelMembership: channelData.channelMembership,
+        name: channelData.name,
+        topic: channelData.topic,
+        createdTime: channelData.createdTime,
+        lastEventTime: channelData.lastEventTime,
+        eventCount: channelData.eventCount,
+        unseenCount: channelData.unseenCount,
+        members: channelData.members
+      } as MultiUserChatInfo;
+    }
+  }
+
+  private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
+    const messageStream = this._messageStream.filter(msg => msg.channelId === channelInfo.channelId);
+    let channel: ChatChannel;
+    if (channelInfo.channelType === "user") {
+      return new SingleUserChatChannel(this._connection, messageStream, channelInfo);
+    } else {
+      const info: MultiUserChatInfo = channelInfo as MultiUserChatInfo;
+      return new MultiUserChatChannel(this._connection, messageStream, info);
+    }
   }
 }
-Object.freeze(ChatService.Events);
+
+export declare interface ChatSearchCriteria {
+  type?: string;
+  name?: string;
+  topic?: string;
+}
+
+export declare interface CreateChatChannelOptions {
+  channelId?: string;
+  channelType: string;
+  name?: string;
+  topic?: string;
+  privateChannel?: boolean;
+  members?: string[];
+}

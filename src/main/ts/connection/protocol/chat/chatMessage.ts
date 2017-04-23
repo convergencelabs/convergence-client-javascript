@@ -1,35 +1,34 @@
-import {IncomingProtocolNormalMessage} from "../protocol";
-import {OutgoingProtocolNormalMessage} from "../protocol";
-import {MessageBodySerializer} from "../MessageSerializer";
-import {MessageBodyDeserializer} from "../MessageSerializer";
+import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 
-export interface PublishChatMessage extends OutgoingProtocolNormalMessage {
-  roomId: string;
+export interface PublishChatMessage extends OutgoingProtocolRequestMessage {
+  channelId: string;
   message: string;
 }
 
-export const PublishChatMessageSerializer: MessageBodySerializer = (request: PublishChatMessage) => {
+export function PublishChatMessageSerializer(request: PublishChatMessage): any {
   return {
-    r: request.roomId,
+    i: request.channelId,
     m: request.message
   };
-};
+}
 
-export interface UserChatMessage extends IncomingProtocolNormalMessage {
-  roomId: string;
-  message: string;
+export interface RemoteChatMessage extends IncomingProtocolNormalMessage {
+  channelId: string;
+  eventNumber: number;
   username: string;
   sessionId: string;
   timestamp: number;
+  message: string;
 }
 
-export const UserChatMessageDeserializer: MessageBodyDeserializer<UserChatMessage> = (body: any) => {
-  const result: UserChatMessage = {
-    roomId: body.r,
+export function RemoteChatMessageDeserializer(body: any): RemoteChatMessage {
+  const result: RemoteChatMessage = {
+    channelId: body.i,
+    eventNumber: body.e,
     message: body.m,
     username: body.u,
     sessionId: body.s,
     timestamp: body.p
   };
   return result;
-};
+}

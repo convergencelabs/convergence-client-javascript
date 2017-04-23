@@ -3,7 +3,7 @@ import {ChatRoom} from "./ChatRoom";
 import {ChatEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
-import {SingleUserChat} from "./SingleUserChat";
+import {SingleUserChat} from "./SingleUserChatChannel";
 import {Observable} from "rxjs";
 
 export interface ChatServiceEvents {
@@ -23,12 +23,12 @@ export declare class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public session(): Session;
 
-  public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo>
+  public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]>
 
   public get(channelId: string): Promise<ChatChannel>;
 
   // Methods that apply to Group Chat Channels.
-  public joined(): ChatChannelInfo[];
+  public joined(): Promise<ChatChannelInfo[]>;
 
   public create(options: CreateChatChannelOptions): Promise<string>;
 

@@ -1,86 +1,100 @@
-import { MessageType } from "./MessageType";
-import { MessageEnvelope } from "./protocol";
-import { IncomingProtocolMessage } from "./protocol";
-import { OutgoingProtocolMessage } from "./protocol";
-import { HandshakeRequestSerializer } from "./handhsake";
-import { HandshakeResponseDeserializer } from "./handhsake";
+import {MessageType} from "./MessageType";
+import {MessageEnvelope} from "./protocol";
+import {IncomingProtocolMessage} from "./protocol";
+import {OutgoingProtocolMessage} from "./protocol";
+import {HandshakeRequestSerializer} from "./handhsake";
+import {HandshakeResponseDeserializer} from "./handhsake";
 import {
   PasswordAuthRequestSerializer, AnonymousAuthRequestSerializer,
 } from "./authentication";
-import { TokenAuthRequestSerializer } from "./authentication";
-import { AuthenticationResponseDeserializer } from "./authentication";
-import { ErrorMessageSerializer } from "./ErrorMessage";
-import { ErrorMessageDeserializer } from "./ErrorMessage";
-import { OpenRealTimeModelRequestSerializer } from "./model/openRealtimeModel";
-import { AutoCreateModelConfigRequestDeserializer } from "./model/autoCreateConfigRequest";
-import { AutoCreateModelConfigResponseSerializer } from "./model/autoCreateConfigRequest";
-import { OperationSubmissionSerializer } from "./model/operationSubmission";
-import { OperationAckDeserializer } from "./model/operationAck";
-import { RemoteOperationDeserializer } from "./model/remoteOperation";
-import { ForceCloseRealTimeModelDeserializer } from "./model/forceCloseRealtimeModel";
-import { DeleteRealTimeModelRequestSerializer } from "./model/deleteRealtimeModel";
+import {TokenAuthRequestSerializer} from "./authentication";
+import {AuthenticationResponseDeserializer} from "./authentication";
+import {ErrorMessageSerializer} from "./ErrorMessage";
+import {ErrorMessageDeserializer} from "./ErrorMessage";
+import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
+import {AutoCreateModelConfigRequestDeserializer} from "./model/autoCreateConfigRequest";
+import {AutoCreateModelConfigResponseSerializer} from "./model/autoCreateConfigRequest";
+import {OperationSubmissionSerializer} from "./model/operationSubmission";
+import {OperationAckDeserializer} from "./model/operationAck";
+import {RemoteOperationDeserializer} from "./model/remoteOperation";
+import {ForceCloseRealTimeModelDeserializer} from "./model/forceCloseRealtimeModel";
+import {DeleteRealTimeModelRequestSerializer} from "./model/deleteRealtimeModel";
 import {
   CreateRealTimeModelRequestSerializer,
   CreateRealTimeModelResponseDeserializer
 } from "./model/createRealtimeModel";
-import { CloseRealTimeModelRequestSerializer } from "./model/closeRealtimeModel";
-import { UserLookUpRequestSerializer } from "./user/userLookUps";
-import { UserSearchRequestSerializer } from "./user/userLookUps";
-import { UserListResponseDeserializer } from "./user/userLookUps";
-import { OpenRealTimeModelResponseDeserializer } from "./model/openRealtimeModel";
-import { SetReferenceSerializer } from "./model/reference/ReferenceEvent";
-import { ClearReferenceMessageSerializer } from "./model/reference/ReferenceEvent";
-import { UnpublishReferenceSerializer } from "./model/reference/ReferenceEvent";
-import { RemoteReferenceSetDeserializer } from "./model/reference/ReferenceEvent";
-import { RemoteReferencePublishedDeserializer } from "./model/reference/ReferenceEvent";
-import { RemoteReferenceClearedDeserializer } from "./model/reference/ReferenceEvent";
-import { RemoteReferenceUnpublishedDeserializer } from "./model/reference/ReferenceEvent";
-import { PublishReferenceSerializer } from "./model/reference/ReferenceEvent";
-import { RemoteClientOpenedModelDeserializer } from "./model/remoteOpenClose";
-import { RemoteClientClosedModelDeserializer } from "./model/remoteOpenClose";
-import { ActivityJoinRequestSerializer } from "./activity/joinActivity";
-import { ActivityLeaveRequestSerializer } from "./activity/leaveActivity";
-import { ActivitySetStateSerializer } from "./activity/activityState";
-import { ActivityClearStateSerializer } from "./activity/activityState";
-import { ActivitySessionJoinedDeserializer } from "./activity/sessionJoined";
-import { ActivitySessionLeftDeserializer } from "./activity/sessionLeft";
-import { ActivityRemoteStateSetDeserializer } from "./activity/activityState";
-import { ActivityRemoteStateClearedDeserializer } from "./activity/activityState";
-import { PresenceAvailabilityChangedDeserializer } from "./presence/pressenceAvailability";
+import {CloseRealTimeModelRequestSerializer} from "./model/closeRealtimeModel";
+import {UserLookUpRequestSerializer} from "./user/userLookUps";
+import {UserSearchRequestSerializer} from "./user/userLookUps";
+import {UserListResponseDeserializer} from "./user/userLookUps";
+import {OpenRealTimeModelResponseDeserializer} from "./model/openRealtimeModel";
+import {SetReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {ClearReferenceMessageSerializer} from "./model/reference/ReferenceEvent";
+import {UnpublishReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {RemoteReferenceSetDeserializer} from "./model/reference/ReferenceEvent";
+import {RemoteReferencePublishedDeserializer} from "./model/reference/ReferenceEvent";
+import {RemoteReferenceClearedDeserializer} from "./model/reference/ReferenceEvent";
+import {RemoteReferenceUnpublishedDeserializer} from "./model/reference/ReferenceEvent";
+import {PublishReferenceSerializer} from "./model/reference/ReferenceEvent";
+import {RemoteClientOpenedModelDeserializer} from "./model/remoteOpenClose";
+import {RemoteClientClosedModelDeserializer} from "./model/remoteOpenClose";
+import {ActivityJoinRequestSerializer} from "./activity/joinActivity";
+import {ActivityLeaveRequestSerializer} from "./activity/leaveActivity";
+import {ActivitySetStateSerializer} from "./activity/activityState";
+import {ActivityClearStateSerializer} from "./activity/activityState";
+import {ActivitySessionJoinedDeserializer} from "./activity/sessionJoined";
+import {ActivitySessionLeftDeserializer} from "./activity/sessionLeft";
+import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
+import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
+import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
 import {
   PresenceStateClearedDeserializer, PresenceStateSetDeserializer,
   PresenceSetStateSerializer, PresenceRemoveStateSerializer, PresenceStateRemovedDeserializer
 } from "./presence/presenceState";
-import { UnsubscribePresenceSerializer } from "./presence/unsubscribePresence";
-import { RequestPresenceSerializer, RequestPresenceResponseDeserializer } from "./presence/requestPresence";
+import {UnsubscribePresenceSerializer} from "./presence/unsubscribePresence";
+import {RequestPresenceSerializer, RequestPresenceResponseDeserializer} from "./presence/requestPresence";
 import {
   SubscribePresenceRequestSerializer,
   SubscribePresenceResponseDeserializer
 } from "./presence/subscribePresence";
-import { UserJoinedRoomMessageDeserializer } from "./chat/joinRoom";
-import { UserLeftRoomMessageDeserializer } from "./chat/leaveRoom";
-import { UserChatMessageDeserializer } from "./chat/chatMessage";
-import { LeaveRoomMessageSerializer } from "./chat/leaveRoom";
-import { PublishChatMessageSerializer } from "./chat/chatMessage";
-import { ParticipantsResponseDeserializer } from "./activity/participants";
-import { ParticipantsRequestSerializer } from "./activity/participants";
-import { ModelsQueryRequestSerializer } from "./model/query/modelQuery";
-import { ModelsQueryResponseDeserializer } from "./model/query/modelQuery";
-import { HistoricalDataResponseDeserializer } from "./model/historical/historicalDataRequest";
-import { HistoricalOperationsResponseDeserializer } from "./model/historical/historicalOperationsRequest";
-import { HistoricalDataRequestSerializer } from "./model/historical/historicalDataRequest";
-import { HistoricalOperationsRequestSerializer } from "./model/historical/historicalOperationsRequest";
-import { ActivityRemoveStateSerializer } from "./activity/activityState";
-import { ActivityRemoteStateRemovedDeserializer } from "./activity/activityState";
-import { ActivityJoinResponseDeserializer } from "./activity/joinActivity";
-import { JoinRoomRequestMessageSerializer } from "./chat/joinRoom";
-import { JoinRoomResponseMessageDeserializer } from "./chat/joinRoom";
+import {
+  JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer
+} from "./chat/joining";
+import {PublishChatMessageSerializer} from "./chat/chatMessage";
+import {ParticipantsResponseDeserializer} from "./activity/participants";
+import {ParticipantsRequestSerializer} from "./activity/participants";
+import {ModelsQueryRequestSerializer} from "./model/query/modelQuery";
+import {ModelsQueryResponseDeserializer} from "./model/query/modelQuery";
+import {HistoricalDataResponseDeserializer} from "./model/historical/historicalDataRequest";
+import {HistoricalOperationsResponseDeserializer} from "./model/historical/historicalOperationsRequest";
+import {HistoricalDataRequestSerializer} from "./model/historical/historicalDataRequest";
+import {HistoricalOperationsRequestSerializer} from "./model/historical/historicalOperationsRequest";
+import {ActivityRemoveStateSerializer} from "./activity/activityState";
+import {ActivityRemoteStateRemovedDeserializer} from "./activity/activityState";
+import {ActivityJoinResponseDeserializer} from "./activity/joinActivity";
 import {
   GetModelPermissionsResponseDeserializer,
   GetModelPermissionsSerializer
 } from "./model/permissions/getModelPermissions";
 import {ModelPermissionsChangedDeserializer} from "./model/permissions/modelPermissionsChanged";
 import {SetModelPermissionsSerializer} from "./model/permissions/setModelPermissions";
+import {CreateChatChannelRequestMessageSerializer, CreateChatChannelResponseMessageDeserializer} from "./chat/create";
+import {RemoveChatChannelRequestMessageSerializer} from "./chat/remove";
+import {
+  GetChatChannelsRequestMessageSerializer,
+  GetDirectChannelsRequestMessage, GetChatChannelsResponseMessageDeserializer
+} from "./chat/getChannel";
+import {LeaveChatChannelRequestMessageSerializer, RemoveUserFromChatChannelMessageSerializer} from "./chat/leaving";
+import {SetChatChannelTopicMessageSerializer} from "./chat/setTopic";
+import {SetChatChannelNameMessageSerializer} from "./chat/setName";
+import {
+  MarkChatChannelEventsSeenMessageSerializer,
+  ChatChannelEventsMarkedSeenMessageDeserializer
+} from "./chat/markSeen";
+import {
+  ChatChannelHistoryRequestMessageSerializer,
+  ChatChannelHistoryResponseMessageDeserializer
+} from "./chat/getHistory";
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
 export type MessageBodyDeserializer<T> = (message: any) => T;
@@ -219,10 +233,6 @@ MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_SUBSCRIBE_R
   SubscribePresenceRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.PRESENCE_UNSUBSCRIBE, UnsubscribePresenceSerializer);
 
-MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_ROOM_REQUEST, JoinRoomRequestMessageSerializer);
-MessageSerializer.registerMessageBodySerializer(MessageType.LEAVE_ROOM, LeaveRoomMessageSerializer);
-MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE, PublishChatMessageSerializer);
-
 MessageSerializer.registerMessageBodySerializer(MessageType.MODELS_QUERY_REQUEST, ModelsQueryRequestSerializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.HISTORICAL_DATA_REQUEST, HistoricalDataRequestSerializer);
@@ -294,14 +304,78 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_RESPONSE,
 MessageSerializer.registerMessageBodyDeserializer(MessageType.PRESENCE_SUBSCRIBE_RESPONSE,
   SubscribePresenceResponseDeserializer);
 
-MessageSerializer.registerMessageBodyDeserializer(MessageType.JOIN_ROOM_RESPONSE, JoinRoomResponseMessageDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_JOINED_ROOM, UserJoinedRoomMessageDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_LEFT_ROOM, UserLeftRoomMessageDeserializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_MESSAGE_PUBLISHED, UserChatMessageDeserializer);
-
 MessageSerializer.registerMessageBodyDeserializer(MessageType.MODELS_QUERY_RESPONSE, ModelsQueryResponseDeserializer);
 
 MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_DATA_RESPONSE,
   HistoricalDataResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_OPERATIONS_RESPONSE,
   HistoricalOperationsResponseDeserializer);
+
+// Chat Messages
+MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_CHAT_CHANNEL_REQUEST,
+  CreateChatChannelRequestMessageSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.CREATE_CHAT_CHANNEL_RESPONSE,
+  CreateChatChannelResponseMessageDeserializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
+  RemoveChatChannelRequestMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.REMOVE_CHAT_CHANNEL_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_CHAT_CHANNELS_REQUEST,
+  GetChatChannelsRequestMessageSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_CHAT_CHANNELS_RESPONSE,
+  GetChatChannelsResponseMessageDeserializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_DIRECT_CHAT_CHANNELS_REQUEST,
+  GetDirectChannelsRequestMessage);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_DIRECT_CHAT_CHANNELS_RESPONSE,
+  GetChatChannelsResponseMessageDeserializer);
+
+MessageSerializer.registerDefaultMessageBodySerializer(MessageType.GET_JOINED_CHAT_CHANNELS_REQUEST);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_JOINED_CHAT_CHANNELS_RESPONSE,
+  GetChatChannelsResponseMessageDeserializer);
+
+MessageSerializer.registerDefaultMessageBodySerializer(MessageType.SEARCH_CHAT_CHANNELS_REQUEST);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.SEARCH_CHAT_CHANNELS_RESPONSE,
+  GetChatChannelsResponseMessageDeserializer);
+
+// missing 2
+
+MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_CHAT_CHANNEL_REQUEST,
+  JoinChatChannelRequestMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.JOIN_CHAT_CHANNEL_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
+  LeaveChatChannelRequestMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.LEAVE_CHAT_CHANNEL_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.ADD_USER_TO_CHAT_CHANNEL_REQUEST,
+  AddUserToChatChannelMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ADD_USER_TO_CHAT_CHANNEL_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.REMOVE_USER_FROM_CHAT_CHANNEL_REQUEST,
+  RemoveUserFromChatChannelMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.REMOVE_USER_FROM_CHAT_CHANNEL_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.SET_CHAT_CHANNEL_NAME_REQUEST,
+  SetChatChannelNameMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.SET_CHAT_CHANNEL_NAME_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.SET_CHAT_CHANNEL_TOPIC_REQUEST,
+  SetChatChannelTopicMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.SET_CHAT_CHANNEL_TOPIC_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.MARK_CHAT_CHANNEL_EVENTS_SEEN_REQUEST,
+  MarkChatChannelEventsSeenMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.MARK_CHAT_CHANNEL_EVENTS_SEEN_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_CHANNEL_EVENTS_MARKED_SEEN,
+  ChatChannelEventsMarkedSeenMessageDeserializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE_REQUEST,
+  PublishChatMessageSerializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PUBLISH_CHAT_MESSAGE_RESPONSE);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
+  ChatChannelHistoryRequestMessageSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_CHAT_CHANNEL_HISTORY_RESPONSE,
+  ChatChannelHistoryResponseMessageDeserializer);
