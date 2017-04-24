@@ -4,66 +4,108 @@ export interface ChatEvent extends ConvergenceEvent {
   readonly channelId: string;
 }
 
-export class ChatMessageEvent implements ChatEvent {
+export abstract class ChatChannelEvent implements ChatEvent {
+  public abstract readonly name: string;
+
+  constructor(public readonly channelId: string,
+              public readonly eventNumber: number,
+              public readonly timestamp: Date) {
+  }
+}
+
+export class ChatMessageEvent extends ChatChannelEvent {
   public static readonly NAME = "message";
   public readonly name: string = ChatMessageEvent.NAME;
 
-  constructor(public readonly channelId: string,
-              public readonly eventNo: number,
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
               public readonly username: string,
               public readonly sessionId: string,
-              public readonly timestamp: number,
               public readonly message: string) {
+    super(channelId, eventNumber, timestamp);
     Object.freeze(this);
   }
 }
 
-export class UserJoinedChannelEvent implements ChatEvent {
+export class UserJoinedEvent extends ChatChannelEvent {
   public static readonly NAME = "user_joined";
-  public readonly name: string = UserJoinedChannelEvent.NAME;
+  public readonly name: string = UserJoinedEvent.NAME;
 
-  constructor(public readonly channelId: string,
-              public readonly eventNo: number,
-              public readonly username: string,
-              public readonly timestamp: number) {
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
+              public readonly username: string) {
+    super(channelId, eventNumber, timestamp);
     Object.freeze(this);
   }
 }
 
-export class UserLeftChannelEvent implements ChatEvent {
+export class UserLeftEvent extends ChatChannelEvent {
   public static readonly NAME = "user_left";
-  public readonly name: string = UserLeftChannelEvent.NAME;
+  public readonly name: string = UserLeftEvent.NAME;
 
-  constructor(public readonly channelId: string,
-              public readonly eventNo: number,
-              public readonly username: string,
-              public readonly timestamp: number) {
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
+              public readonly username: string) {
+    super(channelId, eventNumber, timestamp);
     Object.freeze(this);
   }
 }
 
-export class UserAddedEvent implements ChatEvent {
+export class UserAddedEvent extends ChatChannelEvent {
   public static readonly NAME = "user_added";
   public readonly name: string = UserAddedEvent.NAME;
 
-  constructor(public readonly channelId: string,
-              public readonly eventNo: number,
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
               public readonly username: string,
-              public readonly addedBy: string,
-              public readonly timestamp: number) {
+              public readonly addedBy: string) {
+    super(channelId, eventNumber, timestamp);
     Object.freeze(this);
   }
 }
 
-export class UserRemovedEvent implements ChatEvent {
+export class UserRemovedEvent extends ChatChannelEvent {
   public static readonly NAME = "user_removed";
   public readonly name: string = UserRemovedEvent.NAME;
 
-  constructor(public readonly channelId: string,
-              public readonly eventNo: number,
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
               public readonly username: string,
-              public readonly removedBy: string,
-              public readonly timestamp: number) {
+              public readonly removedBy: string) {
+    super(channelId, eventNumber, timestamp);
+    Object.freeze(this);
+  }
+}
+
+export class ChatChannelNameChanged extends ChatChannelEvent {
+  public static readonly NAME = "name_changed";
+  public readonly name: string = ChatChannelNameChanged.NAME;
+
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
+              public readonly channelName: string,
+              public readonly changedBy: string) {
+    super(channelId, eventNumber, timestamp);
+    Object.freeze(this);
+  }
+}
+
+export class ChatChannelTopicChanged extends ChatChannelEvent {
+  public static readonly NAME = "topic_changed";
+  public readonly name: string = ChatChannelTopicChanged.NAME;
+
+  constructor(channelId: string,
+              eventNumber: number,
+              timestamp: Date,
+              public readonly topic: string,
+              public readonly changedBy: string) {
+    super(channelId, eventNumber, timestamp);
     Object.freeze(this);
   }
 }
@@ -91,26 +133,6 @@ export class ChannelRemovedEvent implements ChatEvent {
   public readonly name: string = ChannelRemovedEvent.NAME;
 
   constructor(public readonly channelId: string) {
-    Object.freeze(this);
-  }
-}
-
-export class ChannelNameChanged implements ChatEvent {
-  public static readonly NAME = "name_changed";
-  public readonly name: string = ChannelNameChanged.NAME;
-
-  constructor(public readonly channelId: string,
-              public readonly channelName: string) {
-    Object.freeze(this);
-  }
-}
-
-export class ChannelTopicChanged implements ChatEvent {
-  public static readonly NAME = "topic_changed";
-  public readonly name: string = ChannelTopicChanged.NAME;
-
-  constructor(public readonly channelId: string,
-              public readonly topic: string) {
     Object.freeze(this);
   }
 }

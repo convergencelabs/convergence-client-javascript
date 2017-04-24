@@ -5,8 +5,8 @@ import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatEvent} from "./events";
 import {
   ChatMessageEvent,
-  UserJoinedChannelEvent,
-  UserLeftChannelEvent,
+  UserJoinedEvent,
+  UserLeftEvent,
   UserAddedEvent,
   UserRemovedEvent,
   ChannelJoinedEvent,
@@ -38,8 +38,8 @@ export declare interface ChatServiceEvents {
 
 const Events: ChatServiceEvents = {
   MESSAGE: ChatMessageEvent.NAME,
-  USER_JOINED: UserJoinedChannelEvent.NAME,
-  USER_LEFT: UserLeftChannelEvent.NAME,
+  USER_JOINED: UserJoinedEvent.NAME,
+  USER_LEFT: UserLeftEvent.NAME,
   USER_ADDED: UserAddedEvent.NAME,
   USER_REMOVED: UserRemovedEvent.NAME,
   CHANNEL_JOINED: ChannelJoinedEvent.NAME,

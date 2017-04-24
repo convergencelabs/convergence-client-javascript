@@ -4,16 +4,20 @@ export interface ChatHistoryEntryTypes {
   USER_LEFT: string;
   USER_ADDED: string;
   USER_REMOVED: string;
+  NAME_CHANGED: string;
+  TOPIC_CHANGED: string;
 }
 
 export abstract class ChatHistoryEntry {
 
-  public static readonly TYPES = {
+  public static readonly TYPES: ChatHistoryEntryTypes = {
     MESSAGE: "message",
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
     USER_ADDED: "user_added",
-    USER_REMOVED: "user_removed"
+    USER_REMOVED: "user_removed",
+    NAME_CHANGED: "name_changed",
+    TOPIC_CHANGED: "topic_changed"
   };
 
   constructor(public type: string,
@@ -77,6 +81,30 @@ export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
               timestamp: Date,
               username: string,
               public removedBy: string) {
+    super(UserRemovedChatHistoryEntry.TYPE, eventNumber, timestamp, username);
+    Object.freeze(this);
+  }
+}
+
+export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
+  public static readonly TYPE = "name_changed";
+
+  constructor(eventNumber: number,
+              timestamp: Date,
+              username: string,
+              public channelName: string) {
+    super(UserRemovedChatHistoryEntry.TYPE, eventNumber, timestamp, username);
+    Object.freeze(this);
+  }
+}
+
+export class TopicChangedChatHistoryEntry extends ChatHistoryEntry {
+  public static readonly TYPE = "topic_changed";
+
+  constructor(eventNumber: number,
+              timestamp: Date,
+              username: string,
+              public channelTopic: string) {
     super(UserRemovedChatHistoryEntry.TYPE, eventNumber, timestamp, username);
     Object.freeze(this);
   }

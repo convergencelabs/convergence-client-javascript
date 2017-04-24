@@ -6,7 +6,7 @@ import {
 
 export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
-  backward: boolean;
+  forward: boolean;
   limit?: number;
   offset?: number;
   eventTypes?: string[];
@@ -15,7 +15,7 @@ export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolReques
 export function ChatChannelHistoryRequestMessageSerializer(request: ChatChannelHistoryRequestMessage): any {
   return {
     i: request.channelId,
-    b: request.backward,
+    f: request.forward,
     l: request.limit,
     o: request.offset,
     e: request.eventTypes,

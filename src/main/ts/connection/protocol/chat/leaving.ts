@@ -15,7 +15,7 @@ export interface UserLeftChatChannelMessage extends IncomingProtocolNormalMessag
   channelId: string;
   eventNumber: number;
   username: string;
-  timestamp: number;
+  timestamp: Date;
 }
 
 export function UserLeftChatChannelMessageDeserializer(body: any): UserLeftChatChannelMessage {
@@ -23,7 +23,7 @@ export function UserLeftChatChannelMessageDeserializer(body: any): UserLeftChatC
     channelId: body.i,
     eventNumber: body.n,
     username: body.u,
-    timestamp: body.p
+    timestamp: new Date(body.p)
   };
   return result;
 }
@@ -45,7 +45,7 @@ export interface UserRemovedFromChatChannelMessage extends IncomingProtocolNorma
   eventNumber: number;
   username: string;
   removedBy: string;
-  timestamp: number;
+  timestamp: Date;
 }
 
 export function UserRemovedFromChatChannelMessageDeserializer(body: any): UserRemovedFromChatChannelMessage {
@@ -54,7 +54,7 @@ export function UserRemovedFromChatChannelMessageDeserializer(body: any): UserRe
     eventNumber: body.n,
     removedBy: body.b,
     username: body.u,
-    timestamp: body.p
+    timestamp: new Date(body.p)
   };
   return result;
 }

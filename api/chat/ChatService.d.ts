@@ -1,9 +1,8 @@
 import {Session} from "../Session";
-import {ChatRoom} from "./ChatRoom";
 import {ChatEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
-import {SingleUserChat} from "./SingleUserChatChannel";
+import {SingleUserChatChannel} from "./SingleUserChatChannel";
 import {Observable} from "rxjs";
 
 export interface ChatServiceEvents {
@@ -23,7 +22,7 @@ export declare class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public session(): Session;
 
-  public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]>
+  public findChannels(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]>
 
   public get(channelId: string): Promise<ChatChannel>;
 
@@ -39,7 +38,7 @@ export declare class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   public leave(channelId: string): Promise<void>;
 
   // Methods that apply to Single User Chat Channels.
-  public direct(userId: string): Promise<SingleUserChat>;
+  public direct(userId: string): Promise<SingleUserChatChannel>;
 }
 
 export declare interface ChatSearchCriteria {

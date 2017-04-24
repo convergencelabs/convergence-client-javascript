@@ -8,19 +8,25 @@ export interface SetChatChannelTopicMessage extends OutgoingProtocolRequestMessa
 export function SetChatChannelTopicMessageSerializer(request: SetChatChannelTopicMessage): any {
   return {
     i: request.channelId,
-    t: request.topic
+    c: request.topic,
   };
 }
 
 export interface ChatChannelTopicSetMessage extends IncomingProtocolNormalMessage {
   channelId: string;
+  eventNumber: number;
+  timestamp: Date;
   topic: string;
+  changedBy: string;
 }
 
 export function ChatChannelTopicSetMessageDeserializer(body: any): ChatChannelTopicSetMessage {
   const result: ChatChannelTopicSetMessage = {
     channelId: body.i,
-    topic: body.t
+    eventNumber: body.e,
+    timestamp: new Date(body.p),
+    topic: body.c,
+    changedBy: body.b
   };
   return result;
 }

@@ -17,7 +17,7 @@ export interface RemoteChatMessage extends IncomingProtocolNormalMessage {
   eventNumber: number;
   username: string;
   sessionId: string;
-  timestamp: number;
+  timestamp: Date;
   message: string;
 }
 
@@ -28,7 +28,7 @@ export function RemoteChatMessageDeserializer(body: any): RemoteChatMessage {
     message: body.m,
     username: body.u,
     sessionId: body.s,
-    timestamp: body.p
+    timestamp: new Date(body.p)
   };
   return result;
 }

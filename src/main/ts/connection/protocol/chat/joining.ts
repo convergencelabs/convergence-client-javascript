@@ -15,7 +15,7 @@ export interface UserJoinedChatChannelMessage extends IncomingProtocolNormalMess
   channelId: string;
   eventNumber: number;
   username: string;
-  timestamp: number;
+  timestamp: Date;
 }
 
 export function UserJoinedRoomMessageDeserializer(body: any): UserJoinedChatChannelMessage {
@@ -23,7 +23,7 @@ export function UserJoinedRoomMessageDeserializer(body: any): UserJoinedChatChan
     channelId: body.i,
     eventNumber: body.n,
     username: body.u,
-    timestamp: body.p
+    timestamp: new Date(body.p)
   };
   return result;
 }
@@ -45,7 +45,7 @@ export interface UserAddedToChatChannelMessage extends IncomingProtocolNormalMes
   eventNumber: number;
   username: string;
   addedBy: string;
-  timestamp: number;
+  timestamp: Date;
 }
 
 export function UserAddedToChatChannelMessageDeserializer(body: any): UserAddedToChatChannelMessage {
@@ -54,7 +54,7 @@ export function UserAddedToChatChannelMessageDeserializer(body: any): UserAddedT
     eventNumber: body.n,
     addedBy: body.b,
     username: body.u,
-    timestamp: body.p
+    timestamp: new Date(body.p)
   };
   return result;
 }

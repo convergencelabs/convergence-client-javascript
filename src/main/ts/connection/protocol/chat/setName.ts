@@ -14,13 +14,19 @@ export function SetChatChannelNameMessageSerializer(request: SetChatChannelNameM
 
 export interface ChatChannelNameSetMessage extends IncomingProtocolNormalMessage {
   channelId: string;
+  eventNumber: number;
+  timestamp: Date;
   name: string;
+  changedBy: string;
 }
 
 export function ChatChannelNameSetMessageDeserializer(body: any): ChatChannelNameSetMessage {
   const result: ChatChannelNameSetMessage = {
     channelId: body.i,
-    name: body.n
+    eventNumber: body.e,
+    timestamp: new Date(body.p),
+    name: body.n,
+    changedBy: body.b
   };
   return result;
 }

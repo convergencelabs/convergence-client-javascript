@@ -3,8 +3,8 @@ import {
   ChatMessageEvent,
   UserAddedEvent,
   UserRemovedEvent,
-  UserJoinedChannelEvent,
-  UserLeftChannelEvent
+  UserJoinedEvent, ChatChannelEvent, UserLeftEvent, ChatChannelNameChanged,
+  ChatChannelTopicChanged
 } from "./events";
 import {ChatChannelType} from "./ChatService";
 import {ChatEvent} from "./events";
@@ -44,8 +44,8 @@ export declare interface ChatChannelEvents {
 
 const Events: ChatChannelEvents = {
   MESSAGE: ChatMessageEvent.NAME,
-  USER_JOINED: UserJoinedChannelEvent.NAME,
-  USER_LEFT: UserLeftChannelEvent.NAME,
+  USER_JOINED: UserJoinedEvent.NAME,
+  USER_LEFT: UserLeftEvent.NAME,
   USER_ADDED: UserAddedEvent.NAME,
   USER_REMOVED: UserRemovedEvent.NAME,
 };
@@ -138,7 +138,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
     return this._connection.request(<ChatChannelHistoryRequestMessage> {
       type: MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
       channelId: this._info.channelId,
-      backward: options.backward,
+      forward: options.forward,
       limit: options.limit,
       offset: options.offset,
       eventTypes: options.eventTypes
@@ -154,13 +154,35 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   private _processEvent(event: ChatEvent): void {
-    // TODO
+    if (event instanceof ChatChannelEvent) {
+      const lastEventTime = event.timestamp;
+      const eventCount = event.eventNumber;
+      this._info = Object.assign({}, this._info, {eventCount, lastEventTime});
+    }
+
+    if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
+      const members = this._info.members.slice(0);
+      members.push(event.username);
+      this._info = Object.assign({}, this._info, {members});
+    } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
+      const removedUsername = event.username;
+      const members = this._info.members.filter(username => username !== removedUsername);
+      this._info = Object.assign({}, this._info, {members});
+    } else if (event instanceof ChatChannelNameChanged) {
+      const name = event.channelName;
+      this._info = Object.assign({}, this._info, {name});
+    } else if (event instanceof ChatChannelTopicChanged) {
+      const topic = event.topic;
+      this._info = Object.assign({}, this._info, {topic});
+    }
+
+    Object.freeze(this._info);
   }
 }
 
 export interface ChatHistorySearchOptions {
-  backward: boolean;
   limit?: number;
   offset?: number;
+  forward?: boolean;
   eventTypes?: string[];
 }
