@@ -1,4 +1,4 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
+import {OutgoingProtocolRequestMessage, IncomingProtocolNormalMessage} from "../protocol";
 
 export interface RemoveChatChannelRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
@@ -9,3 +9,15 @@ export function RemoveChatChannelRequestMessageSerializer(request: RemoveChatCha
     i: request.channelId
   };
 }
+
+export interface ChatChannelRemovedMessage extends IncomingProtocolNormalMessage {
+  channelId: string;
+}
+
+export function ChatChannelRemovedMessageDeserializer(body: any): ChatChannelRemovedMessage {
+  const result: ChatChannelRemovedMessage = {
+    channelId: body.i
+  };
+  return result;
+}
+

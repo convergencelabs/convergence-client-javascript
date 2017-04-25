@@ -16,8 +16,8 @@ export interface ChatChannelInfoData {
 
 export function ChannelInfoDataDeserializer(info: any): ChatChannelInfoData {
   const result: ChatChannelInfoData = {
-    channelType: info.p,
     channelId: info.i,
+    channelType: info.p,
     channelMembership: info.cm,
     name: info.n,
     topic: info.o,
@@ -25,7 +25,7 @@ export function ChannelInfoDataDeserializer(info: any): ChatChannelInfoData {
     lastEventTime: info.l,
     eventCount: info.ec,
     unseenCount: info.uc,
-    members: info.m,
+    members: info.m
   };
   Object.freeze(result);
   return result;

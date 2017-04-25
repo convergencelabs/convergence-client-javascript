@@ -14,16 +14,16 @@ export function JoinChatChannelRequestMessageSerializer(request: JoinChatChannel
 export interface UserJoinedChatChannelMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
-  username: string;
   timestamp: Date;
+  username: string;
 }
 
-export function UserJoinedRoomMessageDeserializer(body: any): UserJoinedChatChannelMessage {
+export function UserJoinedChatChannelMessageDeserializer(body: any): UserJoinedChatChannelMessage {
   const result: UserJoinedChatChannelMessage = {
     channelId: body.i,
     eventNumber: body.n,
-    username: body.u,
-    timestamp: new Date(body.p)
+    timestamp: new Date(body.p),
+    username: body.u
   };
   return result;
 }
@@ -43,18 +43,18 @@ export function AddUserToChatChannelMessageSerializer(request: AddUserToChatChan
 export interface UserAddedToChatChannelMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
+  timestamp: Date;
   username: string;
   addedBy: string;
-  timestamp: Date;
 }
 
 export function UserAddedToChatChannelMessageDeserializer(body: any): UserAddedToChatChannelMessage {
   const result: UserAddedToChatChannelMessage = {
     channelId: body.i,
     eventNumber: body.n,
+    timestamp: new Date(body.p),
     addedBy: body.b,
-    username: body.u,
-    timestamp: new Date(body.p)
+    username: body.u
   };
   return result;
 }

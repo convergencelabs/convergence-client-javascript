@@ -69,14 +69,3 @@ export function ChatChannelLeftMessageDeserializer(body: any): ChatChannelLeftMe
   };
   return result;
 }
-
-export interface ChatChannelRemovedMessage extends IncomingProtocolNormalMessage {
-  channelId: string;
-}
-
-export function ChatChannelRemovedMessageDeserializer(body: any): ChatChannelRemovedMessage {
-  const result: ChatChannelLeftMessage = {
-    channelId: body.i
-  };
-  return result;
-}

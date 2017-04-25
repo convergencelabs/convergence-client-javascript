@@ -1,4 +1,5 @@
 import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
+import {SessionIdParser} from "../SessionIdParser";
 
 export interface PublishChatMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
@@ -25,10 +26,10 @@ export function RemoteChatMessageDeserializer(body: any): RemoteChatMessage {
   const result: RemoteChatMessage = {
     channelId: body.i,
     eventNumber: body.e,
-    message: body.m,
-    username: body.u,
+    timestamp: new Date(body.p),
+    username: SessionIdParser.parseUsername(body.s),
     sessionId: body.s,
-    timestamp: new Date(body.p)
+    message: body.m
   };
   return result;
 }

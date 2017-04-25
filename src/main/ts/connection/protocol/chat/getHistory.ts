@@ -6,7 +6,7 @@ import {
 
 export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
-  forward: boolean;
+  forward?: boolean;
   limit?: number;
   offset?: number;
   eventTypes?: string[];
@@ -23,7 +23,6 @@ export function ChatChannelHistoryRequestMessageSerializer(request: ChatChannelH
 }
 
 export interface ChatChannelHistoryResponseMessage extends IncomingProtocolNormalMessage {
-  channelId: string;
   entries: ChatHistoryEntry[];
 }
 
@@ -31,7 +30,6 @@ export function ChatChannelHistoryResponseMessageDeserializer(body: any): ChatCh
   const e: any[] = body.e;
   const entries: ChatHistoryEntry[] = e.map(entry => ChatHistoryEntryDeserializer(entry));
   const result: ChatChannelHistoryResponseMessage = {
-    channelId: body.i,
     entries
   };
   return result;
