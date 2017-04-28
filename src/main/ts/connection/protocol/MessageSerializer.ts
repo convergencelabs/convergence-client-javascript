@@ -61,7 +61,7 @@ import {
   JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer,
   UserJoinedChatChannelMessageDeserializer
 } from "./chat/joining";
-import {PublishChatMessageSerializer} from "./chat/chatMessage";
+import {PublishChatMessageSerializer, RemoteChatMessageDeserializer} from "./chat/chatMessage";
 import {ParticipantsResponseDeserializer} from "./activity/participants";
 import {ParticipantsRequestSerializer} from "./activity/participants";
 import {ModelsQueryRequestSerializer} from "./model/query/modelQuery";
@@ -380,6 +380,8 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_CHANNEL_EVENT
 MessageSerializer.registerMessageBodySerializer(MessageType.PUBLISH_CHAT_MESSAGE_REQUEST,
   PublishChatMessageSerializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PUBLISH_CHAT_MESSAGE_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.REMOTE_CHAT_MESSAGE,
+  RemoteChatMessageDeserializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
   ChatChannelHistoryRequestMessageSerializer);

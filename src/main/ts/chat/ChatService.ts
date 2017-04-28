@@ -216,7 +216,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
         createdTime: channelData.createdTime,
         lastEventTime: channelData.lastEventTime,
         eventCount: channelData.eventCount,
-        unseenCount: channelData.unseenCount,
+        unseenCount: channelData.lastSeenEvent,
         members: channelData.members
       };
     } else {
@@ -229,7 +229,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
         createdTime: channelData.createdTime,
         lastEventTime: channelData.lastEventTime,
         eventCount: channelData.eventCount,
-        unseenCount: channelData.unseenCount,
+        unseenCount: channelData.lastSeenEvent,
         members: channelData.members
       } as MembershipChatChannelInfo;
     }

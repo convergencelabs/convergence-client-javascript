@@ -67,6 +67,9 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
     this._connection = connection;
     this._info = info;
 
+    // TODO this might not make sense for rooms
+    this._joined = info.members.includes(this.session().username());
+
     messageStream.subscribe(event => {
       this._processEvent(event);
       this._emitEvent(event);
@@ -163,9 +166,17 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
     if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
       const members = this._info.members.slice(0);
       members.push(event.username);
+      if (event.username === this.session().username()) {
+        // FIXME this might not be right for rooms
+        this._joined = true;
+      }
       this._info = Object.assign({}, this._info, {members});
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
       const removedUsername = event.username;
+      if (removedUsername === this.session().username()) {
+        // FIXME this might not be right for rooms
+        this._joined = false;
+      }
       const members = this._info.members.filter(username => username !== removedUsername);
       this._info = Object.assign({}, this._info, {members});
     } else if (event instanceof ChatChannelNameChanged) {

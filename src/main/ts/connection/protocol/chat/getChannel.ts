@@ -28,7 +28,6 @@ export function GetChatChannelsResponseMessageDeserializer(body: any): GetChatCh
   const result: GetChatChannelsResponseMessage = {
     channels
   };
-  Object.freeze(result);
   return result;
 }
 
