@@ -1,9 +1,9 @@
 import {OutgoingProtocolRequestMessage, IncomingProtocolResponseMessage} from "../protocol";
 
 export interface CreateChatChannelRequestMessage extends OutgoingProtocolRequestMessage {
-  channelId?: string;
   channelType: string;
-  channelMembership: string;
+  membership: string;
+  id?: string;
   name?: string;
   topic?: string;
   members?: string[];
@@ -11,9 +11,9 @@ export interface CreateChatChannelRequestMessage extends OutgoingProtocolRequest
 
 export function CreateChatChannelRequestMessageSerializer(request: CreateChatChannelRequestMessage): any {
   return {
-    i: request.channelId,
+    i: request.id,
     e: request.channelType,
-    p: request.channelMembership,
+    p: request.membership,
     n: request.name,
     c: request.topic,
     m: request.members

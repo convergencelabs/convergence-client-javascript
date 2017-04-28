@@ -27,6 +27,7 @@ import {Observable} from "rxjs";
 import {ChatChannelInfoData} from "../connection/protocol/chat/info";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
+import {Validation} from "../util/Validation";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -110,6 +111,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public get(channelId: string): Promise<ChatChannel> {
+    Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request(<GetChatChannelsRequestMessage> {
       type: MessageType.GET_CHAT_CHANNELS_REQUEST,
       channelIds: [channelId]
@@ -130,16 +132,33 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public create(options: CreateChatChannelOptions): Promise<string> {
-    const {channelId, channelType, name, topic, channelMembership, members} = options;
+    if (!options) {
+      throw new Error("create options must be supplied");
+    }
+
+    if (options.type !== "group" && options.type !== "room") {
+      throw new Error(`type must be 'group' or 'room': ${options.type}`);
+    }
+
+    if (options.membership !== "public" && options.membership !== "private") {
+      throw new Error(`membership must be 'public' or 'private': ${options.membership}`);
+    }
+
+    if (options.id !== undefined) {
+      Validation.assertNonEmptyString(options.id, "id");
+    }
+
+    const {id, type: channelType, name, topic, membership, members} = options;
     return this._connection.request(<CreateChatChannelRequestMessage> {
       type: MessageType.CREATE_CHAT_CHANNEL_REQUEST,
-      channelId, channelType, name, topic, channelMembership, members
+      id, channelType, name, topic, membership, members
     }).then((message: CreateChatChannelResponseMessage) => {
       return message.channelId;
     });
   }
 
   public remove(channelId: string): Promise<void> {
+    Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request(<JoinChatChannelRequestMessage> {
       type: MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
       channelId
@@ -149,6 +168,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public join(channelId: string): Promise<void> {
+    Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request(<JoinChatChannelRequestMessage> {
       type: MessageType.JOIN_CHAT_CHANNEL_REQUEST,
       channelId
@@ -158,6 +178,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public leave(channelId: string): Promise<void> {
+    Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request(<LeaveChatChannelRequestMessage> {
       type: MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
       channelId
@@ -239,9 +260,9 @@ export declare interface ChatSearchCriteria {
 }
 
 export declare interface CreateChatChannelOptions {
-  channelId?: string;
-  channelType: string;
-  channelMembership?: string;
+  type: string;
+  membership: string;
+  id?: string;
   name?: string;
   topic?: string;
   members?: string[];

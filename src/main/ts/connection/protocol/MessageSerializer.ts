@@ -58,7 +58,8 @@ import {
   SubscribePresenceResponseDeserializer
 } from "./presence/subscribePresence";
 import {
-  JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer
+  JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer,
+  UserJoinedChatChannelMessageDeserializer
 } from "./chat/joining";
 import {PublishChatMessageSerializer} from "./chat/chatMessage";
 import {ParticipantsResponseDeserializer} from "./activity/participants";
@@ -84,7 +85,10 @@ import {
   GetChatChannelsRequestMessageSerializer,
   GetDirectChannelsRequestMessage, GetChatChannelsResponseMessageDeserializer
 } from "./chat/getChannel";
-import {LeaveChatChannelRequestMessageSerializer, RemoveUserFromChatChannelMessageSerializer} from "./chat/leaving";
+import {
+  LeaveChatChannelRequestMessageSerializer, RemoveUserFromChatChannelMessageSerializer,
+  UserLeftChatChannelMessageDeserializer
+} from "./chat/leaving";
 import {SetChatChannelTopicMessageSerializer} from "./chat/setTopic";
 import {SetChatChannelNameMessageSerializer} from "./chat/setName";
 import {
@@ -342,10 +346,14 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.SEARCH_CHAT_CHANNE
 MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_CHAT_CHANNEL_REQUEST,
   JoinChatChannelRequestMessageSerializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.JOIN_CHAT_CHANNEL_RESPONSE);
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_JOINED_CHAT_CHANNEL,
+  UserJoinedChatChannelMessageDeserializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
   LeaveChatChannelRequestMessageSerializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.LEAVE_CHAT_CHANNEL_RESPONSE);
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_LEFT_CHAT_CHANNEL,
+  UserLeftChatChannelMessageDeserializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.ADD_USER_TO_CHAT_CHANNEL_REQUEST,
   AddUserToChatChannelMessageSerializer);

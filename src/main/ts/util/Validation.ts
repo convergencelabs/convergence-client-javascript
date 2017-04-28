@@ -3,7 +3,17 @@ export class Validation {
     return typeof value === "string" && value.length > 0;
   }
 
-  public static isString(value: string, name?: string): void {
+  public static assertNonEmptyString(value: string, name?: string): void {
+    if (name === undefined) {
+      name = "value";
+    }
+
+    if (!Validation.nonEmptyString(value)) {
+      throw new Error(name + " must be a non-empty string: " + typeof value);
+    }
+  }
+
+  public static assertString(value: string, name?: string): void {
     if (name === undefined) {
       name = "value";
     }

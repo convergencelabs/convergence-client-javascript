@@ -78,7 +78,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   }
 
   public get(key: string): ModelNode<any> {
-    Validation.isString(key, "key");
+    Validation.assertString(key, "key");
     return this._children.get(key);
   }
 
@@ -195,7 +195,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   };
 
   private _applySet(key: string, value: DataValue, local: boolean, sessionId: string, username: string): void {
-    Validation.isString(key, "key");
+    Validation.assertString(key, "key");
 
     if (this._children.has(key)) {
       this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
@@ -213,7 +213,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   }
 
   private _applyRemove(key: string, local: boolean, sessionId: string, username: string): void {
-    Validation.isString(key, "key");
+    Validation.assertString(key, "key");
 
     if (this._children.has(key)) {
       this._idToPathElement.delete(key);
