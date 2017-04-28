@@ -3,9 +3,9 @@ import {OutgoingProtocolRequestMessage, IncomingProtocolResponseMessage} from ".
 export interface CreateChatChannelRequestMessage extends OutgoingProtocolRequestMessage {
   channelId?: string;
   channelType: string;
+  channelMembership: string;
   name?: string;
   topic?: string;
-  privateChannel?: boolean;
   members?: string[];
 }
 
@@ -13,9 +13,9 @@ export function CreateChatChannelRequestMessageSerializer(request: CreateChatCha
   return {
     i: request.channelId,
     e: request.channelType,
+    p: request.channelMembership,
     n: request.name,
     c: request.topic,
-    p: request.privateChannel,
     m: request.members
   };
 }

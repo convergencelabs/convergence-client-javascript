@@ -33,12 +33,12 @@ export function GetChatChannelsResponseMessageDeserializer(body: any): GetChatCh
 }
 
 export interface GetDirectChannelsRequestMessage extends OutgoingProtocolRequestMessage {
-  usernames: string[];
+  channelUsernames: string[][];
 }
 
 export function GetDirectChannelsRequestMessage(request: GetDirectChannelsRequestMessage): any {
   return {
-    u: request.usernames
+    u: request.channelUsernames
   };
 }
 

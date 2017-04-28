@@ -20,4 +20,3 @@ export function ChatChannelRemovedMessageDeserializer(body: any): ChatChannelRem
   };
   return result;
 }
-

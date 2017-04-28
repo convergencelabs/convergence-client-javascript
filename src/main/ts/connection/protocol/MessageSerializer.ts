@@ -339,8 +339,6 @@ MessageSerializer.registerDefaultMessageBodySerializer(MessageType.SEARCH_CHAT_C
 MessageSerializer.registerMessageBodyDeserializer(MessageType.SEARCH_CHAT_CHANNELS_RESPONSE,
   GetChatChannelsResponseMessageDeserializer);
 
-// missing 2
-
 MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_CHAT_CHANNEL_REQUEST,
   JoinChatChannelRequestMessageSerializer);
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.JOIN_CHAT_CHANNEL_RESPONSE);

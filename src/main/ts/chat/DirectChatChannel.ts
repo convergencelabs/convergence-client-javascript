@@ -3,7 +3,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {ChatEvent} from "./events";
 
-export class SingleUserChatChannel extends ChatChannel {
+export class DirectChatChannel extends ChatChannel {
 
   constructor(connection: ConvergenceConnection,
               messageStream: Observable<ChatEvent>,
@@ -11,13 +11,13 @@ export class SingleUserChatChannel extends ChatChannel {
     super(connection, messageStream, info);
   }
 
-  public info(): SingleUserChatInfo {
+  public info(): DirectChatChannelInfo {
     const info = super.info();
-    const otherUser = info.members.find(username => username !== this.session().username());
-    return Object.assign({}, info, {user: otherUser});
+    const otherUsers = info.members.filter(username => username !== this.session().username());
+    return Object.assign({}, info, {otherUsers});
   }
 }
 
-export declare interface SingleUserChatInfo extends ChatChannelInfo {
-  readonly user: string;
+export declare interface DirectChatChannelInfo extends ChatChannelInfo {
+  readonly otherUsers: string[];
 }

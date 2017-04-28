@@ -58,14 +58,3 @@ export function UserRemovedFromChatChannelMessageDeserializer(body: any): UserRe
   };
   return result;
 }
-
-export interface ChatChannelLeftMessage extends IncomingProtocolNormalMessage {
-  channelId: string;
-}
-
-export function ChatChannelLeftMessageDeserializer(body: any): ChatChannelLeftMessage {
-  const result: ChatChannelLeftMessage = {
-    channelId: body.i
-  };
-  return result;
-}

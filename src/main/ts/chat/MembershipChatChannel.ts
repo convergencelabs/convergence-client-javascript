@@ -6,16 +6,16 @@ import {AddUserToChatChannelMessage} from "../connection/protocol/chat/joining";
 import {MessageType} from "../connection/protocol/MessageType";
 import {RemoveUserFromChatChannelMessage, LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
 
-export class MultiUserChatChannel extends ChatChannel {
+export class MembershipChatChannel extends ChatChannel {
 
   constructor(connection: ConvergenceConnection,
               messageStream: Observable<ChatEvent>,
-              info: MultiUserChatInfo) {
+              info: MembershipChatChannelInfo) {
     super(connection, messageStream, info);
   }
 
-  public info(): MultiUserChatInfo {
-    return super.info() as MultiUserChatInfo;
+  public info(): MembershipChatChannelInfo {
+    return super.info() as MembershipChatChannelInfo;
   }
 
   public leave(): Promise<void> {
@@ -53,6 +53,6 @@ export class MultiUserChatChannel extends ChatChannel {
 
 export type ChatChannelMembership = "public" | "private";
 
-export declare interface MultiUserChatInfo extends ChatChannelInfo {
+export declare interface MembershipChatChannelInfo extends ChatChannelInfo {
   readonly channelMembership: ChatChannelMembership;
 }

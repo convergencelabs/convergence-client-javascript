@@ -1,5 +1,5 @@
 import {ChatChannelType} from "../../../chat/ChatService";
-import {ChatChannelMembership} from "../../../chat/MultiUserChatChannel";
+import {ChatChannelMembership} from "../../../chat/MembershipChatChannel";
 
 export interface ChatChannelInfoData {
   readonly channelId: string;

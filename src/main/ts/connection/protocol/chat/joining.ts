@@ -58,14 +58,3 @@ export function UserAddedToChatChannelMessageDeserializer(body: any): UserAddedT
   };
   return result;
 }
-
-export interface ChatChannelJoinedMessage extends IncomingProtocolNormalMessage {
-  channelId: string;
-}
-
-export function ChatChannelJoinedMessageDeserializer(body: any): ChatChannelJoinedMessage {
-  const result: ChatChannelJoinedMessage = {
-    channelId: body.i
-  };
-  return result;
-}

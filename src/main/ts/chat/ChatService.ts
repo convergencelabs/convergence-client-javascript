@@ -14,7 +14,7 @@ import {
 } from "./events";
 import {processChatMessage} from "./ChatMessageProcessor";
 import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
-import {SingleUserChatChannel} from "./SingleUserChatChannel";
+import {DirectChatChannel} from "./DirectChatChannel";
 import {JoinChatChannelRequestMessage} from "../connection/protocol/chat/joining";
 import {LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
 import {CreateChatChannelRequestMessage, CreateChatChannelResponseMessage} from "../connection/protocol/chat/create";
@@ -22,9 +22,11 @@ import {
   GetChatChannelsResponseMessage, GetChatChannelsRequestMessage,
   GetJoinedChannelsRequestMessage, GetDirectChannelsRequestMessage, SearchChatChannelsRequestMessage
 } from "../connection/protocol/chat/getChannel";
-import {MultiUserChatChannel, MultiUserChatInfo} from "./MultiUserChatChannel";
+import {MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {Observable} from "rxjs";
 import {ChatChannelInfoData} from "../connection/protocol/chat/info";
+import {GroupChatChannel} from "./GroupChatChannel";
+import {ChatRoomChannel} from "./ChatRoomChannel";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -47,7 +49,13 @@ const Events: ChatServiceEvents = {
 };
 Object.freeze(Events);
 
-export declare type ChatChannelType = "user" | "group" | "room";
+export type ChatChannelType = "direct" | "group" | "room";
+
+export const ChatChannelTypes = {
+  DIRECT: "direct",
+  GROUP: "group",
+  ROOM: "room"
+};
 
 export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
@@ -65,8 +73,6 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       MessageType.USER_LEFT_CHAT_CHANNEL,
       MessageType.USER_ADDED_TO_CHAT_CHANNEL,
       MessageType.USER_REMOVED_FROM_CHAT_CHANNEL,
-      MessageType.CHAT_CHANNEL_JOINED,
-      MessageType.CHAT_CHANNEL_LEFT,
       MessageType.CHAT_CHANNEL_REMOVED,
       MessageType.CHAT_CHANNEL_NAME_CHANGED,
       MessageType.CHAT_CHANNEL_TOPIC_CHANGED,
@@ -77,6 +83,15 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       .messages(messageTypes)
       .pluck("message")
       .map(message => processChatMessage(message))
+      .do(event => {
+        if (event instanceof UserJoinedEvent && event.username === this.session().username()) {
+          const joined = new ChannelJoinedEvent(event.channelId);
+          this._emitEvent(joined);
+        } else if (event instanceof UserLeftEvent && event.username === this.session().username()) {
+          const left = new ChannelLeftEvent(event.channelId);
+          this._emitEvent(left);
+        }
+      })
       .share();
 
     this._emitFrom(this._messageStream);
@@ -115,10 +130,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public create(options: CreateChatChannelOptions): Promise<string> {
-    const {channelId, channelType, name, topic, privateChannel, members} = options;
+    const {channelId, channelType, name, topic, channelMembership, members} = options;
     return this._connection.request(<CreateChatChannelRequestMessage> {
       type: MessageType.CREATE_CHAT_CHANNEL_REQUEST,
-      channelId, channelType, name, topic, privateChannel, members
+      channelId, channelType, name, topic, channelMembership, members
     }).then((message: CreateChatChannelResponseMessage) => {
       return message.channelId;
     });
@@ -152,10 +167,16 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   // Methods that apply to Single User Chat Channels.
-  public direct(username: string): Promise<SingleUserChatChannel> {
+  public direct(username: string): Promise<DirectChatChannel>
+  public direct(usernames: string[]): Promise<DirectChatChannel>
+  public direct(usernames: string | string[]): Promise<DirectChatChannel> {
+    if (typeof usernames === "string") {
+      usernames = [usernames];
+    }
+
     return this._connection.request(<GetDirectChannelsRequestMessage> {
       type: MessageType.GET_DIRECT_CHAT_CHANNELS_REQUEST,
-      usernames: [username]
+      channelUsernames: [usernames]
     }).then((message: GetChatChannelsResponseMessage) => {
       const channelData = message.channels[0];
       const info = this._createChannelInfo(channelData);
@@ -165,7 +186,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   private _createChannelInfo(channelData: ChatChannelInfoData): ChatChannelInfo {
-    if (channelData.channelType === "user") {
+    if (channelData.channelType === "direct") {
       return {
         channelId: channelData.channelId,
         channelType: channelData.channelType,
@@ -189,18 +210,24 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
         eventCount: channelData.eventCount,
         unseenCount: channelData.unseenCount,
         members: channelData.members
-      } as MultiUserChatInfo;
+      } as MembershipChatChannelInfo;
     }
   }
 
   private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
     const messageStream = this._messageStream.filter(msg => msg.channelId === channelInfo.channelId);
     let channel: ChatChannel;
-    if (channelInfo.channelType === "user") {
-      return new SingleUserChatChannel(this._connection, messageStream, channelInfo);
-    } else {
-      const info: MultiUserChatInfo = channelInfo as MultiUserChatInfo;
-      return new MultiUserChatChannel(this._connection, messageStream, info);
+    switch (channelInfo.channelType) {
+      case ChatChannelTypes.DIRECT:
+        return new DirectChatChannel(this._connection, messageStream, channelInfo);
+      case ChatChannelTypes.GROUP:
+        const groupInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
+        return new GroupChatChannel(this._connection, messageStream, groupInfo);
+      case ChatChannelTypes.ROOM:
+        const roomInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
+        return new ChatRoomChannel(this._connection, messageStream, roomInfo);
+      default:
+        throw new Error(`Invalid chat channel type: ${channelInfo.channelType}`);
     }
   }
 }
@@ -214,8 +241,8 @@ export declare interface ChatSearchCriteria {
 export declare interface CreateChatChannelOptions {
   channelId?: string;
   channelType: string;
+  channelMembership?: string;
   name?: string;
   topic?: string;
-  privateChannel?: boolean;
   members?: string[];
 }

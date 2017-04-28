@@ -6,15 +6,14 @@ import {
 } from "./events";
 import {RemoteChatMessage} from "../connection/protocol/chat/chatMessage";
 import {
-  UserLeftChatChannelMessage, UserRemovedFromChatChannelMessage,
-  ChatChannelLeftMessage, ChatChannelRemovedMessage
+  UserLeftChatChannelMessage, UserRemovedFromChatChannelMessage
 } from "../connection/protocol/chat/leaving";
 import {
-  UserJoinedChatChannelMessage, UserAddedToChatChannelMessage,
-  ChatChannelJoinedMessage
+  UserJoinedChatChannelMessage, UserAddedToChatChannelMessage
 } from "../connection/protocol/chat/joining";
 import {ChatChannelNameSetMessage} from "../connection/protocol/chat/setName";
 import {ChatChannelTopicSetMessage} from "../connection/protocol/chat/setTopic";
+import {ChatChannelRemovedMessage} from "../connection/protocol/chat/remove";
 
 export function processChatMessage(message: any): any {
   switch (message.type) {
@@ -35,12 +34,6 @@ export function processChatMessage(message: any): any {
       return new UserRemovedEvent(
         userRemoved.channelId, userRemoved.eventNumber, userRemoved.timestamp,
         userRemoved.username, userRemoved.removedBy);
-    case MessageType.CHAT_CHANNEL_JOINED:
-      const joined: ChatChannelJoinedMessage = <ChatChannelJoinedMessage> message;
-      return new ChannelJoinedEvent(joined.channelId);
-    case MessageType.CHAT_CHANNEL_LEFT:
-      const left: ChatChannelLeftMessage = <ChatChannelLeftMessage> message;
-      return new ChannelLeftEvent(left.channelId);
     case MessageType.CHAT_CHANNEL_REMOVED:
       const leftMsg: ChatChannelRemovedMessage = <ChatChannelRemovedMessage> message;
       return new ChannelRemovedEvent(leftMsg.channelId);
