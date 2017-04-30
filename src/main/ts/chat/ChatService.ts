@@ -157,6 +157,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       throw new Error(`membership must be 'public' or 'private': ${options.membership}`);
     }
 
+    if (options.type === "room" && options.membership === "private") {
+      throw new Error(`membership must be 'public' for a 'room': ${options.membership}`);
+    }
+
     if (options.id !== undefined) {
       Validation.assertNonEmptyString(options.id, "id");
     }
