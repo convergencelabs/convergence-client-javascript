@@ -83,7 +83,8 @@ import {CreateChatChannelRequestMessageSerializer, CreateChatChannelResponseMess
 import {RemoveChatChannelRequestMessageSerializer} from "./chat/remove";
 import {
   GetChatChannelsRequestMessageSerializer,
-  GetDirectChannelsRequestMessage, GetChatChannelsResponseMessageDeserializer
+  GetDirectChannelsRequestMessage, GetChatChannelsResponseMessageDeserializer,
+  ChatChannelExistsRequestMessageSerializer, ChatChannelExistsResponseMessageDeserializer
 } from "./chat/getChannel";
 import {
   LeaveChatChannelRequestMessageSerializer, RemoveUserFromChatChannelMessageSerializer,
@@ -387,3 +388,8 @@ MessageSerializer.registerMessageBodySerializer(MessageType.GET_CHAT_CHANNEL_HIS
   ChatChannelHistoryRequestMessageSerializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_CHAT_CHANNEL_HISTORY_RESPONSE,
   ChatChannelHistoryResponseMessageDeserializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.CHAT_CHANNEL_EXISTS_REQUEST,
+  ChatChannelExistsRequestMessageSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_CHANNEL_EXISTS_RESPONSE,
+  ChatChannelExistsResponseMessageDeserializer);

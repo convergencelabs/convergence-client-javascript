@@ -50,3 +50,24 @@ export function SearchChatChannelsRequestMessageSerializer(request: SearchChatCh
 
   };
 }
+
+export interface ChatChannelExistsRequestMessage extends OutgoingProtocolRequestMessage {
+  channelIds: string[];
+}
+
+export function ChatChannelExistsRequestMessageSerializer(request: ChatChannelExistsRequestMessage): any {
+  return {
+    i: request.channelIds
+  };
+}
+
+export interface ChatChannelExistsResponseMessage extends IncomingProtocolResponseMessage {
+  exists: boolean[];
+}
+
+export function ChatChannelExistsResponseMessageDeserializer(body: any): ChatChannelExistsResponseMessage {
+  const result: ChatChannelExistsResponseMessage = {
+    exists: body.e
+  };
+  return result;
+}

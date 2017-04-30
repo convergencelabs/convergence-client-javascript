@@ -20,7 +20,8 @@ import {LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leavin
 import {CreateChatChannelRequestMessage, CreateChatChannelResponseMessage} from "../connection/protocol/chat/create";
 import {
   GetChatChannelsResponseMessage, GetChatChannelsRequestMessage,
-  GetJoinedChannelsRequestMessage, GetDirectChannelsRequestMessage, SearchChatChannelsRequestMessage
+  GetJoinedChannelsRequestMessage, GetDirectChannelsRequestMessage, SearchChatChannelsRequestMessage,
+  ChatChannelExistsResponseMessage
 } from "../connection/protocol/chat/getChannel";
 import {MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {Observable} from "rxjs";
@@ -107,6 +108,17 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
     }).then((message: GetChatChannelsResponseMessage) => {
       return message.channels.map(channel => this._createChannelInfo(channel));
+    });
+  }
+
+  public exists(channelId: string): Promise<boolean> {
+    Validation.assertNonEmptyString(channelId, "channelId");
+    return this._connection.request(<GetChatChannelsRequestMessage> {
+      type: MessageType.CHAT_CHANNEL_EXISTS_REQUEST,
+      channelIds: [channelId]
+    }).then((message: ChatChannelExistsResponseMessage) => {
+      const exists = message.exists[0];
+      return exists;
     });
   }
 
