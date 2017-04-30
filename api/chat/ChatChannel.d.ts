@@ -17,13 +17,14 @@ export declare interface ChatChannelEvents {
 export declare interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
   readonly channelId: string;
+  readonly channelMembership: string;
   readonly name: string;
   readonly topic: string;
   readonly createdTime: Date;
   readonly lastEventTime: Date;
-  readonly eventCount: number;
-  readonly unseenCount: number;
-  readonly private: boolean;
+  readonly lastEventNumber: number;
+  readonly maxSeenEvent: number;
+  readonly members: string[];
 }
 
 export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
@@ -31,7 +32,7 @@ export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEv
 
   public session(): Session;
 
-  public type(): ChatChannelType;
+  public dispose(): void;
 
   public info(): ChatChannelInfo;
 

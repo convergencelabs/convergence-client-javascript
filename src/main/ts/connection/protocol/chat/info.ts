@@ -9,8 +9,8 @@ export interface ChatChannelInfoData {
   readonly topic: string;
   readonly createdTime: Date;
   readonly lastEventTime: Date;
-  readonly eventCount: number;
-  readonly lastSeenEvent: number;
+  readonly lastEventNumber: number;
+  readonly maxSeenEvent: number;
   readonly members: string[];
 }
 
@@ -23,8 +23,8 @@ export function ChannelInfoDataDeserializer(info: any): ChatChannelInfoData {
     topic: info.o,
     createdTime: info.c,
     lastEventTime: info.l,
-    eventCount: info.ec,
-    lastSeenEvent: info.ls,
+    lastEventNumber: info.ec,
+    maxSeenEvent: info.ls,
     members: info.m
   };
   return result;

@@ -30,6 +30,7 @@ import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
 import {Validation} from "../util/Validation";
 import {RemoveChatChannelRequestMessage} from "../connection/protocol/chat/remove";
+import {ConvergenceServerError} from "../util/ConvergenceServerError";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -171,6 +172,18 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       id, channelType, name, topic, membership, members
     }).then((message: CreateChatChannelResponseMessage) => {
       return message.channelId;
+    }).catch(error => {
+      if (error instanceof ConvergenceServerError &&
+        error.code === "channel_already_exists" &&
+        options.ignoreExistsError) {
+        // The channel already exists, this can only happen if the user specified the id.
+        // they have indicated that they want to ignore the situation where the channel already
+        // exists, so we just resolve with the id they passed in.
+        return Promise.resolve(id);
+      } else {
+        // This is an unexpected error, pass it along.
+        return Promise.reject(error);
+      }
     });
   }
 
@@ -229,12 +242,13 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       return {
         channelId: channelData.channelId,
         channelType: channelData.channelType,
+        channelMembership: channelData.channelMembership,
         name: channelData.name,
         topic: channelData.topic,
         createdTime: channelData.createdTime,
         lastEventTime: channelData.lastEventTime,
-        eventCount: channelData.eventCount,
-        unseenCount: channelData.lastSeenEvent,
+        lastEventNumber: channelData.lastEventNumber,
+        maxSeenEvent: channelData.maxSeenEvent,
         members: channelData.members
       };
     } else {
@@ -246,8 +260,8 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
         topic: channelData.topic,
         createdTime: channelData.createdTime,
         lastEventTime: channelData.lastEventTime,
-        eventCount: channelData.eventCount,
-        unseenCount: channelData.lastSeenEvent,
+        lastEventNumber: channelData.maxSeenEvent,
+        maxSeenEvent: channelData.maxSeenEvent,
         members: channelData.members
       } as MembershipChatChannelInfo;
     }
@@ -271,17 +285,18 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 }
 
-export declare interface ChatSearchCriteria {
+export interface ChatSearchCriteria {
   type?: string;
   name?: string;
   topic?: string;
 }
 
-export declare interface CreateChatChannelOptions {
+export interface CreateChatChannelOptions {
   type: string;
   membership: string;
   id?: string;
   name?: string;
   topic?: string;
   members?: string[];
+  ignoreExistsError?: boolean;
 }

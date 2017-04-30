@@ -18,6 +18,6 @@ export class DirectChatChannel extends ChatChannel {
   }
 }
 
-export declare interface DirectChatChannelInfo extends ChatChannelInfo {
+export interface DirectChatChannelInfo extends ChatChannelInfo {
   readonly otherUsers: string[];
 }

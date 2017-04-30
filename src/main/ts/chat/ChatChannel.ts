@@ -22,19 +22,20 @@ import {
 } from "../connection/protocol/chat/getHistory";
 import {Subscription, Observable} from "rxjs";
 
-export declare interface ChatChannelInfo {
+export interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
   readonly channelId: string;
+  readonly channelMembership: string;
   readonly name: string;
   readonly topic: string;
   readonly createdTime: Date;
   readonly lastEventTime: Date;
-  readonly eventCount: number;
-  readonly unseenCount: number;
+  readonly lastEventNumber: number;
+  readonly maxSeenEvent: number;
   readonly members: string[];
 }
 
-export declare interface ChatChannelEvents {
+export interface ChatChannelEvents {
   readonly MESSAGE: string;
   readonly USER_JOINED: string;
   readonly USER_LEFT: string;

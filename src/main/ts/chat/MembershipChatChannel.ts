@@ -41,6 +41,6 @@ export class MembershipChatChannel extends ChatChannel {
 
 export type ChatChannelMembership = "public" | "private";
 
-export declare interface MembershipChatChannelInfo extends ChatChannelInfo {
+export interface MembershipChatChannelInfo extends ChatChannelInfo {
   readonly channelMembership: ChatChannelMembership;
 }
