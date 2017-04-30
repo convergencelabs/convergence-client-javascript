@@ -15,7 +15,7 @@ import {
 import {processChatMessage} from "./ChatMessageProcessor";
 import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
 import {DirectChatChannel} from "./DirectChatChannel";
-import {JoinChatChannelRequestMessage} from "../connection/protocol/chat/joining";
+import {JoinChatChannelRequestMessage, JoinChatChannelResponseMessage} from "../connection/protocol/chat/joining";
 import {LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
 import {CreateChatChannelRequestMessage, CreateChatChannelResponseMessage} from "../connection/protocol/chat/create";
 import {
@@ -29,6 +29,7 @@ import {ChatChannelInfoData} from "../connection/protocol/chat/info";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
 import {Validation} from "../util/Validation";
+import {RemoveChatChannelRequestMessage} from "../connection/protocol/chat/remove";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -171,7 +172,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public remove(channelId: string): Promise<void> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<JoinChatChannelRequestMessage> {
+    return this._connection.request(<RemoveChatChannelRequestMessage> {
       type: MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
       channelId
     }).then(() => {
@@ -179,13 +180,14 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     });
   }
 
-  public join(channelId: string): Promise<void> {
+  public join(channelId: string): Promise<ChatChannel> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request(<JoinChatChannelRequestMessage> {
       type: MessageType.JOIN_CHAT_CHANNEL_REQUEST,
       channelId
-    }).then(() => {
-      return;
+    }).then((message: JoinChatChannelResponseMessage) => {
+      const channelInfo = this._createChannelInfo(message.channel);
+      return this._createChannel(channelInfo);
     });
   }
 

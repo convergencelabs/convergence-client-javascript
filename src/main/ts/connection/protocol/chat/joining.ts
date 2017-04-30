@@ -1,5 +1,6 @@
-import {IncomingProtocolNormalMessage} from "../protocol";
+import {IncomingProtocolNormalMessage, IncomingProtocolResponseMessage} from "../protocol";
 import {OutgoingProtocolRequestMessage} from "../protocol";
+import {ChatChannelInfoData, ChannelInfoDataDeserializer} from "./info";
 
 export interface JoinChatChannelRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
@@ -9,6 +10,17 @@ export function JoinChatChannelRequestMessageSerializer(request: JoinChatChannel
   return {
     i: request.channelId
   };
+}
+
+export interface JoinChatChannelResponseMessage extends IncomingProtocolResponseMessage {
+  channel: ChatChannelInfoData;
+}
+
+export function JoinChatChannelResponseMessageDeserializer(body: any): JoinChatChannelResponseMessage {
+  const result: JoinChatChannelResponseMessage = {
+    channel: ChannelInfoDataDeserializer(body.c)
+  };
+  return result;
 }
 
 export interface UserJoinedChatChannelMessage extends IncomingProtocolNormalMessage {

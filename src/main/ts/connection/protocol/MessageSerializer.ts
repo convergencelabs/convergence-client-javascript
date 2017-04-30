@@ -59,7 +59,7 @@ import {
 } from "./presence/subscribePresence";
 import {
   JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer,
-  UserJoinedChatChannelMessageDeserializer
+  UserJoinedChatChannelMessageDeserializer, JoinChatChannelResponseMessageDeserializer
 } from "./chat/joining";
 import {PublishChatMessageSerializer, RemoteChatMessageDeserializer} from "./chat/chatMessage";
 import {ParticipantsResponseDeserializer} from "./activity/participants";
@@ -346,7 +346,8 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.SEARCH_CHAT_CHANNE
 
 MessageSerializer.registerMessageBodySerializer(MessageType.JOIN_CHAT_CHANNEL_REQUEST,
   JoinChatChannelRequestMessageSerializer);
-MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.JOIN_CHAT_CHANNEL_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.JOIN_CHAT_CHANNEL_RESPONSE,
+  JoinChatChannelResponseMessageDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_JOINED_CHAT_CHANNEL,
   UserJoinedChatChannelMessageDeserializer);
 
