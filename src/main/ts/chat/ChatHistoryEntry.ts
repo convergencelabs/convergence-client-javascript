@@ -1,4 +1,5 @@
 export interface ChatHistoryEntryTypes {
+  CREATED: string;
   MESSAGE: string;
   USER_JOINED: string;
   USER_LEFT: string;
@@ -11,6 +12,7 @@ export interface ChatHistoryEntryTypes {
 export abstract class ChatHistoryEntry {
 
   public static readonly TYPES: ChatHistoryEntryTypes = {
+    CREATED: "created",
     MESSAGE: "message",
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
@@ -27,6 +29,20 @@ export abstract class ChatHistoryEntry {
   }
 }
 Object.freeze(ChatHistoryEntry.TYPES);
+
+export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
+  public static readonly TYPE = "created";
+
+  constructor(eventNumber: number,
+              timestamp: Date,
+              username: string,
+              public name: string,
+              public topic: string,
+              public members: string[]) {
+    super(ChannelCreatedHistoryEntry.TYPE, eventNumber, timestamp, username);
+    Object.freeze(this);
+  }
+}
 
 export class MessageChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "message";
