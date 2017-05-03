@@ -8,18 +8,18 @@ import {ChatChannelNameChanged} from "../../../chat/events";
 
 export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
-  forward?: boolean;
+  startEvent?: number;
   limit?: number;
-  offset?: number;
+  forward?: boolean;
   eventFilter?: string[];
 }
 
 export function ChatChannelHistoryRequestMessageSerializer(request: ChatChannelHistoryRequestMessage): any {
   return {
     i: request.channelId,
-    f: request.forward,
+    s: request.startEvent,
     l: request.limit,
-    o: request.offset,
+    f: request.forward,
     e: request.eventFilter.map(type => toChatChannelEventTypeCode(type))
   };
 }

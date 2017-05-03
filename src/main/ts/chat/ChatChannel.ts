@@ -143,9 +143,9 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
     return this._connection.request(<ChatChannelHistoryRequestMessage> {
       type: MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
       channelId: this._info.channelId,
-      forward: options.forward,
+      startEvent: options.startEvent,
       limit: options.limit,
-      offset: options.offset,
+      forward: options.forward,
       eventFilter: options.eventFilter
     }).then((message: ChatChannelHistoryResponseMessage) => {
       return message.entries;
@@ -194,8 +194,8 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
 }
 
 export interface ChatHistorySearchOptions {
+  startEvent?: number;
   limit?: number;
-  offset?: number;
   forward?: boolean;
   eventFilter?: string[];
 }

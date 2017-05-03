@@ -46,5 +46,12 @@ export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEv
 
   public markSeen(seqNo: number): Promise<void>;
 
-  public getHistory(eventTypes?: string[]): Promise<ChatHistoryEntry>;
+  public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]>;
+}
+
+export declare interface ChatHistorySearchOptions {
+  startEvent?: number;
+  limit?: number;
+  forward?: boolean;
+  eventFilter?: string[];
 }
