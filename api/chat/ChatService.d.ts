@@ -34,7 +34,7 @@ export declare class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public remove(channelId: string): Promise<void>;
 
-  public join(channelId: string): Promise<ChatChannelInfo>;
+  public join(channelId: string): Promise<ChatChannel>;
 
   public leave(channelId: string): Promise<void>;
 
