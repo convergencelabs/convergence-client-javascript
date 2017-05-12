@@ -315,7 +315,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 export type ModelDataInitializer = {[key: string]: any} | (() => {[key: string]: any});
 
 export interface AutoCreateModelOptions extends CreateModelOptions {
-  ephemeral: boolean;
+  ephemeral?: boolean;
 }
 
 export interface CreateModelOptions {

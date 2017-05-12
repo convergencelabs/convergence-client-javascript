@@ -2,7 +2,7 @@ import {Session} from "../Session";
 import {ChatEvent} from "./events";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
-import {DirectChatChannel} from "../../src/main/ts/chat/DirectChatChannel";
+import {DirectChatChannel} from "./DirectChatChannel";
 
 export interface ChatServiceEvents {
   readonly MESSAGE: string;
