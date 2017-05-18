@@ -76,6 +76,12 @@ export enum MessageType {
   USER_SEARCH_REQUEST = 201,
   USER_LIST_RESPONSE = 202,
 
+  USER_GROUP_REQUEST = 203,
+  USER_GROUP_RESPONSE = 204,
+
+  USER_GROUPS_REQUEST = 205,
+  USER_GROUPS_RESPONSE = 206,
+
     //
     // Activity
     //

@@ -2,10 +2,12 @@ import {Session} from "../Session";
 import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
-import {UserLookUpRequest} from "../connection/protocol/user/userLookUps";
-import {UserSearchRequest} from "../connection/protocol/user/userLookUps";
-import {UserListResponse} from "../connection/protocol/user/userLookUps";
+import {UserLookUpRequest} from "../connection/protocol/identity/userLookUps";
+import {UserSearchRequest} from "../connection/protocol/identity/userLookUps";
+import {UserListResponse} from "../connection/protocol/identity/userLookUps";
 import {UserQuery} from "./UserQuery";
+import {UserGroup} from "./UserGroup";
+import {UserGroupsResponse, UserGroupRequest, UserGroupResponse} from "../connection/protocol/identity/userGroups";
 
 export interface UserField {
   USERNAME: string;
@@ -42,6 +44,10 @@ export class IdentityService {
 
   public session(): Session {
     return this._connection.session();
+  }
+
+  public profile(): Promise<DomainUser> {
+    return this.user(this._connection.session().username());
   }
 
   public user(username: string): Promise<DomainUser> {
@@ -121,6 +127,27 @@ export class IdentityService {
         return response.users;
       });
     }
+  }
+
+  public groups(): Promise<UserGroup[]> {
+    const message: any = {
+      type: MessageType.USER_GROUPS_REQUEST
+    };
+
+    return this._connection.request(message).then((response: UserGroupsResponse) => {
+      return response.groups;
+    });
+  }
+
+  public group(id: string): Promise<UserGroup> {
+    const message: UserGroupRequest = {
+      type: MessageType.USER_GROUPS_REQUEST,
+      id
+    };
+
+    return this._connection.request(message).then((response: UserGroupResponse) => {
+      return response.group;
+    });
   }
 
   private _users(values: string | string[], field: string = UserFields.USERNAME): Promise<DomainUser[]> {
