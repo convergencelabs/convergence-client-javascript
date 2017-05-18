@@ -104,6 +104,26 @@ import {
   UserGroupsResponseDeserializer, UserGroupResponseDeserializer,
   UserGroupRequestSerializer
 } from "./identity/userGroups";
+import {
+  GetClientPermissionsRequestSerializer,
+  GetClientPermissionsResponseDeserializer
+} from "./permissions/getClientPermissions";
+import {AddPermissionsRequestSerializer} from "./permissions/addPermissions";
+import {RemovePermissionsRequestSerializer} from "./permissions/removePermissions";
+import {SetPermissionsRequestSerializer} from "./permissions/setPermissions";
+import {
+  GetWorldPermissionsRequestSerializer,
+  GetWorldPermissionsResponseDeserializer
+} from "./permissions/getWorldPermissions";
+import {GetAllUserPermissionsRequestSerializer} from "./permissions/getAllUserPermissions";
+import {
+  GetUserPermissionsRequestSerializer,
+  GetUserPermissionsResponseDeserializer
+} from "./permissions/getUserPermissions";
+import {
+  GetAllGroupPermissionsRequestSerializer,
+  GetAllGroupPermissionsResponseDeserializer
+} from "./permissions/getAllGroupPermissions";
 
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
 export type MessageBodyDeserializer<T> = (message: any) => T;
@@ -171,8 +191,8 @@ export class MessageSerializer {
     };
   }
 
-  private static _serializers: {[key: number]: MessageBodySerializer} = {};
-  private static _deserializers: {[key: number]: MessageBodyDeserializer<any>} = {};
+  private static _serializers: { [key: number]: MessageBodySerializer } = {};
+  private static _deserializers: { [key: number]: MessageBodyDeserializer<any> } = {};
 
   private static _defaultBodyDeserializer: MessageBodyDeserializer<any> = (message: any) => {
     return {};
@@ -247,6 +267,25 @@ MessageSerializer.registerMessageBodySerializer(MessageType.MODELS_QUERY_REQUEST
 MessageSerializer.registerMessageBodySerializer(MessageType.HISTORICAL_DATA_REQUEST, HistoricalDataRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.HISTORICAL_OPERATIONS_REQUEST,
   HistoricalOperationsRequestSerializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_CLIENT_PERMISSIONS_REQUEST,
+  GetClientPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.ADD_PERMISSIONS_REQUEST,
+  AddPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.REMOVE_PERMISSIONS_REQUEST,
+  RemovePermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.SET_PERMISSIONS_REQUEST,
+  SetPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_WORLD_PERMISSIONS_REQUEST,
+  GetWorldPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_ALL_USER_PERMISSIONS_REQUEST,
+  GetAllUserPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_USER_PERMISSIONS_REQUEST,
+  GetUserPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_ALL_GROUP_PERMISSIONS_REQUEST,
+  GetAllGroupPermissionsRequestSerializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.GET_GROUP_PERMISSIONS_REQUEST,
+  GetAllGroupPermissionsRequestSerializer);
 
 // Deserializers
 MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.PING);
@@ -407,3 +446,19 @@ MessageSerializer.registerMessageBodySerializer(MessageType.CHAT_CHANNEL_EXISTS_
   ChatChannelExistsRequestMessageSerializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.CHAT_CHANNEL_EXISTS_RESPONSE,
   ChatChannelExistsResponseMessageDeserializer);
+
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_CLIENT_PERMISSIONS_RESPONSE,
+  GetClientPermissionsResponseDeserializer);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.ADD_PERMISSIONS_RESPONSE);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.REMOVE_PERMISSIONS_RESPONSE);
+MessageSerializer.registerDefaultMessageBodyDeserializer(MessageType.SET_PERMISSIONS_RESPONSE);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_WORLD_PERMISSIONS_RESPONSE,
+  GetWorldPermissionsResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_ALL_USER_PERMISSIONS_RESPONSE,
+  GetAllGroupPermissionsResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_USER_PERMISSIONS_RESPONSE,
+  GetUserPermissionsResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_ALL_GROUP_PERMISSIONS_RESPONSE,
+  GetAllGroupPermissionsResponseDeserializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.GET_GROUP_PERMISSIONS_RESPONSE,
+  GetAllGroupPermissionsResponseDeserializer);

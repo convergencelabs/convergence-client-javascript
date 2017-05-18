@@ -31,6 +31,7 @@ import {ChatRoomChannel} from "./ChatRoomChannel";
 import {Validation} from "../util/Validation";
 import {RemoveChatChannelRequestMessage} from "../connection/protocol/chat/remove";
 import {ConvergenceServerError} from "../util/ConvergenceServerError";
+import {ChatPermissionManager} from "./ChatPermissionManager";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -235,6 +236,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       const channel = this._createChannel(info);
       return channel;
     });
+  }
+
+  public permissions(channelId: string): ChatPermissionManager {
+    return new ChatPermissionManager(channelId, this._connection);
   }
 
   private _createChannelInfo(channelData: ChatChannelInfoData): ChatChannelInfo {
