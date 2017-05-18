@@ -1,13 +1,13 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import {UserGroup} from "../../../identity/UserGroup";
 
-export interface UserGroupRequest extends OutgoingProtocolRequestMessage {
-  id: string;
+export interface UserGroupsRequest extends OutgoingProtocolRequestMessage {
+  ids?: string[];
 }
 
-export function UserGroupRequestSerializer(request: UserGroupRequest): any {
+export function UserGroupRequestSerializer(request: UserGroupsRequest): any {
   return {
-    i: request.id
+    i: request.ids
   };
 }
 
@@ -22,17 +22,27 @@ export function UserGroupsResponseDeserializer(body: any): UserGroupsResponse {
   return result;
 }
 
-export interface UserGroupResponse {
-  group: UserGroup;
-}
-
-export function UserGroupResponseDeserializer(body: any): UserGroupResponse {
-  const result: UserGroupResponse = {
-    group: deserializeUserGroup(body)
-  };
-  return result;
-}
-
 export function deserializeUserGroup(body: any): UserGroup {
   return new UserGroup(body.i, body.d, body.m);
+}
+
+export interface UserGroupsForUsersRequest extends OutgoingProtocolRequestMessage {
+  usernames: string[];
+}
+
+export function UserGroupsForUsersRequestSerializer(request: UserGroupsForUsersRequest): any {
+  return {
+    u: request.usernames
+  };
+}
+
+export interface UserGroupsForUsersResponse {
+  groupsByUser: {[key: string]: string[]};
+}
+
+export function UserGroupsForUsersResponseDeserializer(body: any): UserGroupsForUsersResponse {
+  const result: UserGroupsForUsersResponse = {
+    groupsByUser: body.g
+  };
+  return result;
 }

@@ -101,8 +101,8 @@ import {
   ChatChannelHistoryResponseMessageDeserializer
 } from "./chat/getHistory";
 import {
-  UserGroupsResponseDeserializer, UserGroupResponseDeserializer,
-  UserGroupRequestSerializer
+  UserGroupsResponseDeserializer,
+  UserGroupRequestSerializer, UserGroupsForUsersRequestSerializer, UserGroupsForUsersResponseDeserializer
 } from "./identity/userGroups";
 import {
   GetClientPermissionsRequestSerializer,
@@ -364,9 +364,10 @@ MessageSerializer.registerDefaultMessageBodySerializer(MessageType.USER_GROUPS_R
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_RESPONSE,
   UserGroupsResponseDeserializer);
 
-MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUP_REQUEST, UserGroupRequestSerializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUP_RESPONSE,
-  UserGroupResponseDeserializer);
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUPS_FOR_USER_REQUEST,
+  UserGroupsForUsersRequestSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_FOR_USER_RESPONSE,
+  UserGroupsForUsersResponseDeserializer);
 
 // Chat Messages
 MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_CHAT_CHANNEL_REQUEST,

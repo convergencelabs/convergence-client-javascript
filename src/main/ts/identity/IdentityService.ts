@@ -7,7 +7,10 @@ import {UserSearchRequest} from "../connection/protocol/identity/userLookUps";
 import {UserListResponse} from "../connection/protocol/identity/userLookUps";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
-import {UserGroupsResponse, UserGroupRequest, UserGroupResponse} from "../connection/protocol/identity/userGroups";
+import {
+  UserGroupsResponse,
+  UserGroupsForUsersRequest, UserGroupsRequest, UserGroupsForUsersResponse
+} from "../connection/protocol/identity/userGroups";
 
 export interface UserField {
   USERNAME: string;
@@ -129,9 +132,12 @@ export class IdentityService {
     }
   }
 
-  public groups(): Promise<UserGroup[]> {
-    const message: any = {
-      type: MessageType.USER_GROUPS_REQUEST
+  public groups(): Promise<UserGroup[]>
+  public groups(ids: string[]): Promise<UserGroup[]>
+  public groups(ids?: string[]): Promise<UserGroup[]> {
+    const message: UserGroupsRequest = {
+      type: MessageType.USER_GROUPS_REQUEST,
+      ids
     };
 
     return this._connection.request(message).then((response: UserGroupsResponse) => {
@@ -140,13 +146,22 @@ export class IdentityService {
   }
 
   public group(id: string): Promise<UserGroup> {
-    const message: UserGroupRequest = {
-      type: MessageType.USER_GROUPS_REQUEST,
-      id
+    return this.groups([id]).then(groups => groups[0]);
+  }
+
+  public groupsForUser(username: string): Promise<string[]> {
+    return this.groupsForUsers([username])
+      .then(users => users[username]);
+  }
+
+  public groupsForUsers(usernames: string[]): Promise<{[key: string]: string[]}> {
+    const message: UserGroupsForUsersRequest = {
+      type: MessageType.USER_GROUPS_FOR_USER_REQUEST,
+      usernames
     };
 
-    return this._connection.request(message).then((response: UserGroupResponse) => {
-      return response.group;
+    return this._connection.request(message).then((response: UserGroupsForUsersResponse) => {
+      return response.groupsByUser;
     });
   }
 
