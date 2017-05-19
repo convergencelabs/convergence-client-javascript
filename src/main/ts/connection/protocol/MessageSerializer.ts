@@ -24,9 +24,9 @@ import {
   CreateRealTimeModelResponseDeserializer
 } from "./model/createRealtimeModel";
 import {CloseRealTimeModelRequestSerializer} from "./model/closeRealtimeModel";
-import {UserLookUpRequestSerializer} from "./user/userLookUps";
-import {UserSearchRequestSerializer} from "./user/userLookUps";
-import {UserListResponseDeserializer} from "./user/userLookUps";
+import {UserLookUpRequestSerializer} from "./identity/userLookUps";
+import {UserSearchRequestSerializer} from "./identity/userLookUps";
+import {UserListResponseDeserializer} from "./identity/userLookUps";
 import {OpenRealTimeModelResponseDeserializer} from "./model/openRealtimeModel";
 import {SetReferenceSerializer} from "./model/reference/ReferenceEvent";
 import {ClearReferenceMessageSerializer} from "./model/reference/ReferenceEvent";
@@ -100,6 +100,10 @@ import {
   ChatChannelHistoryRequestMessageSerializer,
   ChatChannelHistoryResponseMessageDeserializer
 } from "./chat/getHistory";
+import {
+  UserGroupsResponseDeserializer,
+  UserGroupRequestSerializer, UserGroupsForUsersRequestSerializer, UserGroupsForUsersResponseDeserializer
+} from "./identity/userGroups";
 import {
   GetClientPermissionsRequestSerializer,
   GetClientPermissionsResponseDeserializer
@@ -354,6 +358,16 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_DATA_RE
   HistoricalDataResponseDeserializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_OPERATIONS_RESPONSE,
   HistoricalOperationsResponseDeserializer);
+
+// Identity
+MessageSerializer.registerDefaultMessageBodySerializer(MessageType.USER_GROUPS_REQUEST);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_RESPONSE,
+  UserGroupsResponseDeserializer);
+
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUPS_FOR_USER_REQUEST,
+  UserGroupsForUsersRequestSerializer);
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_FOR_USER_RESPONSE,
+  UserGroupsForUsersResponseDeserializer);
 
 // Chat Messages
 MessageSerializer.registerMessageBodySerializer(MessageType.CREATE_CHAT_CHANNEL_REQUEST,
