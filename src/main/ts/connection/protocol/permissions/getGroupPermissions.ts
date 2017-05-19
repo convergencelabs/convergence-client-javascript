@@ -3,7 +3,7 @@ import {IdType} from "./IdType";
 
 export interface GetGroupPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
-  id: any;
+  id: string;
   groupId: string;
 }
 

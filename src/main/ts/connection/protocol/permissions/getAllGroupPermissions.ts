@@ -3,7 +3,7 @@ import {IdType} from "./IdType";
 
 export interface GetAllGroupPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
-  id: any;
+  id: string;
 }
 
 export function GetAllGroupPermissionsRequestSerializer(request: GetAllGroupPermissionsRequest): any {

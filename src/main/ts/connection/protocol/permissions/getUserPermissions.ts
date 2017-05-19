@@ -3,7 +3,7 @@ import {IdType} from "./IdType";
 
 export interface GetUserPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
-  id: any;
+  id: string;
   username: string;
 }
 

@@ -3,7 +3,7 @@ import {IdType} from "./IdType";
 
 export interface GetClientPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
-  id: any;
+  id: string;
 }
 
 export function GetClientPermissionsRequestSerializer(request: GetClientPermissionsRequest): any {

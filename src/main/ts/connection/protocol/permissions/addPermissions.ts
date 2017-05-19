@@ -3,7 +3,7 @@ import {IdType} from "./IdType";
 
 export interface AddPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
-  id: any;
+  id: string;
   world?: string[];
   users?: Map<string, string[]>;
   groups?: Map<string, string[]>;
