@@ -10,11 +10,23 @@ export interface AddPermissionsRequest extends OutgoingProtocolRequestMessage {
 }
 
 export function AddPermissionsRequestSerializer(request: AddPermissionsRequest): any {
+  let users: {[key: string]: string[]};
+  if (request.users) {
+    users = {};
+    request.users.forEach((v, k) => users[k] = v);
+  }
+
+  let groups: {[key: string]: string[]};
+  if (request.groups) {
+    groups = {};
+    request.groups.forEach((v, k) => groups[k] = v);
+  }
+
   return {
     p: request.idType,
     i: request.id,
     w: request.world,
-    u: request.users,
-    g: request.groups
+    u: users,
+    g: groups
   };
 }

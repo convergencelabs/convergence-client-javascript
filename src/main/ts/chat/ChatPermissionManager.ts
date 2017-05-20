@@ -129,7 +129,7 @@ export class ChatPermissionManager {
       Object.keys(permsObject).forEach(key => {
         map.set(key, permsObject[key]);
       });
-    }
+  }
 
     const request: AddPermissionsRequest = {
       type: MessageType.ADD_PERMISSIONS_REQUEST,
@@ -137,7 +137,7 @@ export class ChatPermissionManager {
       id: this._channelId,
       users: map
     };
-
+    console.log(JSON.stringify(map));
     return this._connection.request(request).then(() => {
       return;
     });
