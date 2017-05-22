@@ -40,6 +40,18 @@ export type ChatPermission =
     | "set_topic"
     | "manage_chat_permissions";
 
+const Permissions = {
+  CREATE_CHAT: "create_chat_channel",
+  REMOVE_CHAT: "remove_chat_channel",
+  JOIN_CHAT: "join_chat_channel",
+  LEAVE_CHAT: "leave_chat_channel",
+  ADD_USER: "add_chat_user",
+  REMOVE_USER: "remove_chat_user",
+  SET_NAME: "set_chat_name",
+  SET_TOPIC: "set_topic",
+  MANAGE_PERMISSIONS: "manage_chat_permissions"
+};
+
 export class ChatPermissionManager {
 
   private readonly _channelId: string;
@@ -129,7 +141,7 @@ export class ChatPermissionManager {
       Object.keys(permsObject).forEach(key => {
         map.set(key, permsObject[key]);
       });
-  }
+    }
 
     const request: AddPermissionsRequest = {
       type: MessageType.ADD_PERMISSIONS_REQUEST,
