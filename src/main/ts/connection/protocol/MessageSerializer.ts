@@ -191,8 +191,8 @@ export class MessageSerializer {
     };
   }
 
-  private static _serializers: { [key: number]: MessageBodySerializer } = {};
-  private static _deserializers: { [key: number]: MessageBodyDeserializer<any> } = {};
+  private static _serializers: {[key: number]: MessageBodySerializer} = {};
+  private static _deserializers: {[key: number]: MessageBodyDeserializer<any>} = {};
 
   private static _defaultBodyDeserializer: MessageBodyDeserializer<any> = (message: any) => {
     return {};
@@ -360,13 +360,14 @@ MessageSerializer.registerMessageBodyDeserializer(MessageType.HISTORICAL_OPERATI
   HistoricalOperationsResponseDeserializer);
 
 // Identity
-MessageSerializer.registerDefaultMessageBodySerializer(MessageType.USER_GROUPS_REQUEST);
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUPS_REQUEST,
+  UserGroupRequestSerializer);
 MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_RESPONSE,
   UserGroupsResponseDeserializer);
 
-MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUPS_FOR_USER_REQUEST,
+MessageSerializer.registerMessageBodySerializer(MessageType.USER_GROUPS_FOR_USERS_REQUEST,
   UserGroupsForUsersRequestSerializer);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_FOR_USER_RESPONSE,
+MessageSerializer.registerMessageBodyDeserializer(MessageType.USER_GROUPS_FOR_USERS_RESPONSE,
   UserGroupsForUsersResponseDeserializer);
 
 // Chat Messages

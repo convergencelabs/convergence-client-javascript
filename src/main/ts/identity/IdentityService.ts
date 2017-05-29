@@ -156,7 +156,7 @@ export class IdentityService {
 
   public groupsForUsers(usernames: string[]): Promise<{[key: string]: string[]}> {
     const message: UserGroupsForUsersRequest = {
-      type: MessageType.USER_GROUPS_FOR_USER_REQUEST,
+      type: MessageType.USER_GROUPS_FOR_USERS_REQUEST,
       usernames
     };
 
