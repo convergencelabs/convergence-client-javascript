@@ -12,6 +12,10 @@ export declare class ModelService extends ConvergenceEventEmitter<ConvergenceEve
 
   public query(query: string): Promise<ModelResult[]>;
 
+  public isOpen(id: string): boolean;
+
+  public isOpening(id: string): boolean;
+
   public open(modelId: string): Promise<RealTimeModel>;
 
   public openAutoCreate(options: AutoCreateModelOptions): Promise<RealTimeModel>;

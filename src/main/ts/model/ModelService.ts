@@ -72,6 +72,14 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
+  public isOpen(id: string): boolean {
+    return this._openModelsByModelId[id] !== undefined;
+  }
+
+  public isOpening(id: string): boolean {
+    return this._openRequestsByModelId[id] !== undefined;
+  }
+
   public open(id: string): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(id)) {
       return Promise.reject<RealTimeModel>(new Error("modelId must be a non-null, non empty string."));
