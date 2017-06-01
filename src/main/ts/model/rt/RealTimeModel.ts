@@ -504,6 +504,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
   }
 
   private _handleForceClose(message: ForceCloseRealTimeModel): void {
+    console.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
+
     const event: ModelClosedEvent = {
       src: this,
       name: RealTimeModel.Events.CLOSED,
