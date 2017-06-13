@@ -1,7 +1,7 @@
 var domain;
 
 // Connect to the domain.
-Convergence.connect(DOMAIN_URL, test, password).then(d => {
+Convergence.connectAnonymously(DOMAIN_URL).then(d => {
   domain = d;
   console.log("connected");
 }).catch(error => {
