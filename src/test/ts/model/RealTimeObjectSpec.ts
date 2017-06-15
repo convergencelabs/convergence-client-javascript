@@ -67,6 +67,13 @@ describe("RealTimeObject", () => {
     };
   });
 
+  it("Get on missing value return UndefinedNode", () => {
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
+    const delegate: ObjectNode = new ObjectNode(initialValue, () => [], model, sessionId, username, dataValueFactory);
+    const myObject: RealTimeObject = <RealTimeObject> wrapperFactory.wrap(delegate);
+    expect(myObject.get("nonExistent").id()).to.deep.equal(undefined);
+  });
+
   it("Value is correct after creation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: ObjectNode = new ObjectNode(initialValue, () => [], model, sessionId, username, dataValueFactory);

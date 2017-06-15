@@ -79,7 +79,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
 
   public get(key: string): ModelNode<any> {
     Validation.assertString(key, "key");
-    return this._children.get(key);
+    return this._valueAt([key]);
   }
 
   public set(key: string, value: any): ModelNode<any> {
