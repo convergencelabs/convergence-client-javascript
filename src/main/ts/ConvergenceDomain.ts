@@ -48,6 +48,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   private _chatService: ChatService;
   private _connection: ConvergenceConnection;
   private _options: ConvergenceOptions;
+  private _disposed: boolean;
 
   /**
    * Constructs a new ConvergenceDomain using the default options.
@@ -59,6 +60,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     super();
 
     this._options = this._processOptions(options);
+    this._disposed = false;
 
     // todo make this optional params
     this._connection = new ConvergenceConnection(
@@ -119,14 +121,14 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     return this._chatService;
   }
 
-  public dispose(): void {
+  public dispose(): Promise<void> {
+    this._disposed = true;
     this._modelService._dispose();
-    this._connection.disconnect();
-    this._connection = undefined;
+    return this._connection.disconnect();
   }
 
   public isDisposed(): boolean {
-    return this._connection === undefined;
+    return this._disposed;
   }
 
   // TODO seems like a jquery.extend approach here would be simpler.

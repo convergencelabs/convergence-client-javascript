@@ -134,11 +134,18 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._connectionState = ConnectionState.DISCONNECTING;
 
-    return this._protocolConnection.close().then(() => {
-      this._connectionState = ConnectionState.DISCONNECTED;
-    }).catch((reason: Error) => {
-      this._connectionState = ConnectionState.INTERRUPTED;
-    });
+    this._protocolConnection
+      .close()
+      .then(() => {
+        this._connectionState = ConnectionState.DISCONNECTED;
+        deferred.resolve();
+      })
+      .catch((err: Error) => {
+        this._connectionState = ConnectionState.INTERRUPTED;
+        deferred.reject(err);
+      });
+
+    return deferred.promise();
   }
 
   public isConnected(): boolean {

@@ -109,7 +109,7 @@ export default class ConvergenceSocket extends EventEmitter {
         console.error("Error closing Web Socket connection.", e);
         this._closeDeferred.reject(e);
       } finally {
-        // detatch from all events except close immediately.
+        // detach from all events except close immediately.
         this.detachFromSocket(this._socket);
         this._socket = null;
       }
