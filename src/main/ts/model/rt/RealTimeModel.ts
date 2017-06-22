@@ -533,7 +533,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     const unprocessed: UnprocessedOperationEvent = new UnprocessedOperationEvent(
       message.sessionId,
       -1, // fixme not needed, this is only needed when going to the server.  Perhaps
-      // this should probalby go in the op submission message.
+      // this should probably go in the op submission message.
       message.version,
       message.timestamp,
       message.operation

@@ -111,14 +111,20 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
   }
 
   public _set(values: V[], local: boolean = false): void {
+    const oldValues: V[] = this._values;
     this._values = values;
-    const event: ReferenceChangedEvent = new ReferenceChangedEvent(this, local);
+
+    const added = this._values.filter(v => !oldValues.includes(v));
+    const removed = oldValues.filter(v => !this._values.includes(v));
+
+    const event: ReferenceChangedEvent<V> = new ReferenceChangedEvent(this, oldValues, added, removed, local);
     this._emitEvent(event);
   }
 
-  public _clear(): void {
+  public _clear(local: boolean): void {
+    const oldValues: V[] = this._values;
     this._values = [];
-    const event: ReferenceClearedEvent = new ReferenceClearedEvent(this);
+    const event: ReferenceClearedEvent<V> = new ReferenceClearedEvent(this, oldValues, local);
     this._emitEvent(event);
   }
 

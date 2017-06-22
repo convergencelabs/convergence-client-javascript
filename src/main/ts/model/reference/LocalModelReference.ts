@@ -103,7 +103,7 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public clear(): void {
     this._ensureAttached();
-    this._reference._clear();
+    this._reference._clear(true);
     this._callbacks.onClear(this);
   }
 
