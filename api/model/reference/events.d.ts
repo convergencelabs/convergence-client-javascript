@@ -9,7 +9,6 @@ export declare class ReferenceChangedEvent<T> implements ConvergenceEvent {
   public readonly oldValue: T;
   public readonly addedValues: T[];
   public readonly removedValues: T[];
-  public readonly local: boolean;
 }
 
 export declare class ReferenceClearedEvent<T> implements ConvergenceEvent {
@@ -18,7 +17,6 @@ export declare class ReferenceClearedEvent<T> implements ConvergenceEvent {
   public readonly src: ModelReference<any>;
   public readonly oldValues: T[];
   public readonly oldValue: T;
-  public readonly local: boolean;
 }
 
 export declare class ReferenceDisposedEvent implements ConvergenceEvent {

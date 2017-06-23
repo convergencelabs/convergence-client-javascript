@@ -141,7 +141,7 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceCleared(event: RemoteReferenceCleared): void {
     const reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
-    reference._clear(false);
+    reference._clear();
   }
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {

@@ -9,8 +9,7 @@ export class ReferenceChangedEvent<T> implements ConvergenceEvent {
   constructor(public readonly src: ModelReference<any>,
               public readonly oldValues: T[],
               public readonly addedValues: T[],
-              public readonly removedValues: T[],
-              public readonly local: boolean) {
+              public readonly removedValues: T[]) {
     if (oldValues.length > 0) {
       this.oldValue = oldValues[0];
     }
@@ -25,8 +24,7 @@ export class ReferenceClearedEvent<T> implements ConvergenceEvent {
   public readonly oldValue: T;
 
   constructor(public readonly src: ModelReference<any>,
-              public readonly oldValues: T[],
-              public readonly local: boolean) {
+              public readonly oldValues: T[]) {
     if (oldValues.length > 0) {
       this.oldValue = oldValues[0];
     }

@@ -15,7 +15,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
     super(referenceManager, ModelReference.Types.ELEMENT, key, source, username, sessionId, local);
   }
 
-  public _set(values: Array<RealTimeElement<any>>, local: boolean = false): void {
+  public _set(values: Array<RealTimeElement<any>>): void {
     for (let oldElement of this.values()) {
       oldElement.removeListener(RealTimeElement.Events.DETACHED, this._detachedListener);
     }
@@ -24,7 +24,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
     for (let newElement of values) {
       newElement.addListener(RealTimeElement.Events.DETACHED, this._detachedListener);
     }
-    super._set(values, local);
+    super._set(values);
   }
 
   public _clear(): void {

@@ -91,9 +91,9 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._ensureAttached();
 
     if (value instanceof Array) {
-      this._reference._set(value, true);
+      this._reference._set(value);
     } else {
-      this._reference._set([value], true);
+      this._reference._set([value]);
     }
 
     if (this.isShared()) {
@@ -103,7 +103,7 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public clear(): void {
     this._ensureAttached();
-    this._reference._clear(true);
+    this._reference._clear();
     this._callbacks.onClear(this);
   }
 
