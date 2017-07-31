@@ -106,8 +106,7 @@ export class StringNode extends ModelNode<string> {
   }
 
   private _applySetValue(value: string, local: boolean, sessionId: string, username: string): void {
-    this._validateSet(value);
-
+    this._validateStringValue(value);
     this._data = value;
 
     const event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, username);
@@ -140,9 +139,7 @@ export class StringNode extends ModelNode<string> {
       throw new Error("Index out of bounds: " + index);
     }
 
-    if (typeof value !== "string") {
-      throw new Error("Value must be a string");
-    }
+    this._validateStringValue(value);
   }
 
   private _validateRemove(index: number, length: number): void {
@@ -152,9 +149,10 @@ export class StringNode extends ModelNode<string> {
     }
   }
 
-  private _validateSet(value: string): void {
+  private _validateStringValue(value: string): void {
     if (typeof value !== "string") {
-      throw new Error("Value must be a string");
+      throw new Error(`The value must be a string but was: ${typeof value}`);
+
     }
   }
 }

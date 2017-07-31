@@ -93,9 +93,7 @@ export class NumberNode extends ModelNode<number> {
   }
 
   private _applySet(value: number, local: boolean, sessionId: string, username: string): void {
-    if (isNaN(value)) {
-      throw new Error("Value is NaN");
-    }
+    this._validateNumber(value);
     this._data = value;
 
     const event: NumberNodeSetValueEvent =
@@ -115,8 +113,12 @@ export class NumberNode extends ModelNode<number> {
   }
 
   private _validateNumber(value: number): void {
+    if (typeof value !== "number") {
+      throw new Error(`The value must be a number but was: ${typeof value}`);
+    }
+
     if (isNaN(value)) {
-      throw new Error("Value is NaN");
+      throw new Error("The value must not be NaN");
     }
   }
 }

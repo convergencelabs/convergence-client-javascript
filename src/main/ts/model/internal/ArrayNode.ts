@@ -285,7 +285,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   private _applySetValue(data: DataValue[], local: boolean, sessionId: string, username: string): void {
-    this._validateSet(data);
+    this._validateArray(data);
 
     this._detachChildren(local);
     this._children = data.map((value: any, i: number) => {
@@ -389,9 +389,9 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
-  private _validateSet(values: Array<Object|number|string|boolean>): void {
+  private _validateArray(values: Array<Object|number|string|boolean>): void {
     if (!Array.isArray(values)) {
-      throw new Error("Illegal argument!");
+      throw new Error(`The value must be an Array but was: ${typeof values}`);
     }
   }
 

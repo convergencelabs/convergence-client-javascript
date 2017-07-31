@@ -64,7 +64,7 @@ export class BooleanNode extends ModelNode<boolean> {
   }
 
   private _applySetValue(value: boolean, local: boolean, sessionId: string, username: string): void {
-    this._validateSet(value);
+    this._validateBooleanValue(value);
     this._data = value;
 
     const event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, username);
@@ -79,9 +79,10 @@ export class BooleanNode extends ModelNode<boolean> {
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
-  private _validateSet(value: boolean): void {
+  private _validateBooleanValue(value: boolean): void {
     if (typeof value !== "boolean") {
-      throw new Error("Value must be a boolean");
+      throw new Error(`The value must be a boolean but was: ${typeof value}`);
+
     }
   }
 }
