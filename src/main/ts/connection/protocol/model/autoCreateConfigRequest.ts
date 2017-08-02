@@ -17,6 +17,7 @@ export function AutoCreateModelConfigRequestDeserializer(body: any): AutoCreateM
 
 export interface AutoCreateModelConfigResponse extends OutgoingProtocolResponseMessage {
   collection: string;
+  ephemeral?: boolean;
   data?: ObjectValue;
   overrideWorld?: boolean;
   worldPermissions?: ModelPermissions;
@@ -35,6 +36,7 @@ export function AutoCreateModelConfigResponseSerializer(response: AutoCreateMode
       u[username] = serializeModelPermissions(response.userPermissions[username]);
     });
   }
+  const e = response.ephemeral;
 
-  return { c, d, v, w, u };
+  return { c, d, v, w, u, e };
 }

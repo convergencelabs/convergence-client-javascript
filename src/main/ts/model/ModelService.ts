@@ -310,6 +310,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
       const response: AutoCreateModelConfigResponse = {
         type: MessageType.MODEL_AUTO_CREATE_CONFIG_RESPONSE,
         data: dataValue,
+        ephemeral: options.ephemeral,
         collection: options.collection,
         overrideWorld: options.overrideWorld,
         worldPermissions: options.worldPermissions,
