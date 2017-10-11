@@ -7,6 +7,8 @@ import { ObjectValue } from "../dataValue";
 import { ConvergenceEvent } from "../../util/ConvergenceEvent";
 import { ConvergenceEventEmitter } from "../../util/ConvergenceEventEmitter";
 
+const _separator: string = ":";
+
 export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static Events: any = {
@@ -32,7 +34,7 @@ export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._vidCounter = 0;
 
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return this.valueIdPrefix + this._vidCounter++;
+      return this.valueIdPrefix + _separator + this._vidCounter++;
     });
 
     this._data = new ObjectNode(data, () => {
