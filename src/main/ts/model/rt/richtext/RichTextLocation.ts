@@ -1,19 +1,20 @@
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
+import {RichTextNode} from "./RichTextNode";
 
 export type RichTextPath = number[];
 
 export interface RichTextPosition {
   path: RichTextPath;
-  offset: number;
+  index: number;
 }
 
 export class RichTextLocation {
   private _document: RichTextDocument;
   private _root: RichTextElement;
 
-  constructor(document: RichTextDocument, root: RichTextElement, location: RichTextLocationLike) {
-
+  constructor(location: RichTextLocationData, document: RichTextDocument, root: RichTextElement) {
+    // todo
   }
 
   public textOffset(): number {
@@ -23,6 +24,18 @@ export class RichTextLocation {
   public position(): RichTextPosition {
     return null;
   }
+
+  public getNode(): RichTextNode {
+    return null;
+  }
+
+  public getIndex(): number {
+    return 0;
+  }
+
+  public getNearestCommonAncestor(other: RichTextLocation): RichTextElement {
+    return null;
+  }
 }
 
-export type RichTextLocationLike = number | RichTextLocation;
+export type RichTextLocationData = number | RichTextPosition | RichTextLocation;

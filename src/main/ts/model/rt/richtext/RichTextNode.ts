@@ -1,18 +1,28 @@
 import {RichTextDocument} from "./RichTextDocument";
+import {RichTextElement} from "./RichTextElement";
 
-export abstract class RichTextNode {
-  private _parent: RichTextNode;
+export abstract class RichTextNode implements RichTextContent {
+  private _parent: RichTextElement;
   private _document: RichTextDocument;
   private _attributes: Map<string, any>;
 
-  constructor(parent: RichTextNode, document: RichTextDocument) {
+  constructor(parent: RichTextElement, document: RichTextDocument, attributes?: Map<string, any>) {
     this._parent = parent;
     this._document = document;
-    this._attributes = new Map<string, any>();
+    this._attributes = attributes || new Map<string, any>();
   }
 
-  public parent(): RichTextNode {
+  public parent(): RichTextElement {
     return this._parent;
+  }
+
+  public index(): number {
+    const pos = this._parent.getChildIndex(this);
+    return pos;
+  }
+
+  public removeFromParent(): void {
+    this._parent.removeChild(this.index());
   }
 
   public root(): RichTextNode {
