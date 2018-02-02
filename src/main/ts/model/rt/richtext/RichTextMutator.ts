@@ -5,12 +5,14 @@ import {RichTextString} from "./RichTextString";
 import {RichTextElement} from "./RichTextElement";
 import {AttributeUtils} from "./AttributeUtils";
 import {RichTextRange} from "./RichTextRange";
+import {RichTextPartialString} from "./RichTextStringPartial";
+import {RichTextFragment} from "./RichTextFragement";
 
 export class RichTextMutator {
-  private _doc: RichTextDocument;
+  private _document: RichTextDocument;
 
   constructor(document: RichTextDocument) {
-    this._doc = document;
+    this._document = document;
   }
 
   public insertText(text: string, location: RichTextLocation, attributes?: Map<string, any>): RichTextMutator {
@@ -24,7 +26,7 @@ export class RichTextMutator {
       // splitting and merging required
       parent.insert(index, text);
     } else if (parent instanceof RichTextElement) {
-      this.insert(new RichTextString(parent, this._doc, text, attributes), location);
+      this.insert(new RichTextString(parent, this._document, text, attributes), location);
     } else {
       // fixme throw error
     }
@@ -60,6 +62,9 @@ export class RichTextMutator {
   }
 
   public removeRange(range: RichTextRange): RichTextMutator {
+    const fragment = this._extractFromRangeContent(range);
+
+
     return this;
   }
 
@@ -70,8 +75,25 @@ export class RichTextMutator {
   private _splitStingNode(node: RichTextString, index: number): void {
     const parent: RichTextElement = node.parent();
     node.removeFromParent();
-    const leftNode = new RichTextString(parent, this._doc, node.getData().substr(0, index), parent.attributes());
-    const rightNode = new RichTextString(parent, this._doc, node.getData().substr(index), parent.attributes());
+    const leftNode = new RichTextString(parent, this._document, node.getData().substr(0, index), parent.attributes());
+    const rightNode = new RichTextString(parent, this._document, node.getData().substr(index), parent.attributes());
     parent.insertChildren(index, [leftNode, rightNode]);
+  }
+
+  private _extractFromRangeContent(range: RichTextRange): RichTextFragment {
+    const content: RichTextContent[] = range.getContent();
+    const children: RichTextNode[] = [];
+
+    content.forEach(c => {
+      if (c instanceof RichTextPartialString) {
+        c.removeFromString();
+        children.push(c.toRichTextString());
+      } else if (c instanceof RichTextElement) {
+        c.removeFromParent();
+        children.push(c);
+      }
+    });
+
+    return new RichTextFragment(this._document, children);
   }
 }

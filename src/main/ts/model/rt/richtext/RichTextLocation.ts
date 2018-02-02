@@ -1,6 +1,7 @@
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
+import {RichTextFragment} from "./RichTextFragement";
 
 export type RichTextPath = number[];
 

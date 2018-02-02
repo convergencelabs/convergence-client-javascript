@@ -36,4 +36,8 @@ export class RichTextPartialString {
   public textContentLength(): number {
     return this._str.textContentLength();
   }
+
+  public toRichTextString(): RichTextString {
+    return new RichTextString(null, this._str.document(), this.getData(), this._str.attributes());
+  }
 }

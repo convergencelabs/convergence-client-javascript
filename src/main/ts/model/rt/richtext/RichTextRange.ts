@@ -1,11 +1,17 @@
 import {RichTextLocation} from "./RichTextLocation";
 import {RichTextElement} from "./RichTextElement";
+import {RichTextFragment} from "./RichTextFragement";
+import {RichTextPartialString} from "./RichTextStringPartial";
+import {RichTextNode} from "./RichTextNode";
+import {RichTextDocument} from "./RichTextDocument";
 
 export class RichTextRange {
+  private _document: RichTextDocument;
   private _start: RichTextLocation;
   private _end: RichTextLocation;
 
-  constructor(start: RichTextLocation, end: RichTextLocation) {
+  constructor(document: RichTextDocument, start: RichTextLocation, end: RichTextLocation) {
+    this._document = document;
     this._start = start;
     this._end = end;
   }
@@ -22,7 +28,7 @@ export class RichTextRange {
     return this._start.getNearestCommonAncestor(this._end);
   }
 
-  public getRoots(): RichTextContent[] {
+  public getContent(): RichTextContent[] {
     return [];
   }
 }

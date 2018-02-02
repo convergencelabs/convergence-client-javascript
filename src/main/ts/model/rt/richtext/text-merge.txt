@@ -1,0 +1,26 @@
+1. Start
+
+<root>
+  <line>AB<span>C[D</span>EF</line>
+  <line>GH</line>
+  <line>IJ<span>K]L</span>MN</line>
+</root>
+
+2. After Removal
+
+<root>
+  <line>AB<span>C[</span></line>
+  <line><span>]L</span>MN</line>
+</root>
+
+3. After Merge 1
+
+<root>
+  <line>AB<span>C[</span><span>]L</span>MN</line>
+</root>
+
+4. After Merge 2 (Final)
+
+<root>
+  <line>AB<span>C[]L</span>MN</line>
+</root>

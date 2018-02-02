@@ -16,13 +16,24 @@ export abstract class RichTextNode implements RichTextContent {
     return this._parent;
   }
 
+  public _setParent(parent: RichTextElement): void {
+    this._parent = parent;
+  }
+
   public index(): number {
-    const pos = this._parent.getChildIndex(this);
-    return pos;
+    if (this._parent !== null) {
+      const pos = this._parent.getChildIndex(this);
+      return pos;
+    } else {
+      return -1;
+    }
   }
 
   public removeFromParent(): void {
-    this._parent.removeChild(this.index());
+    if (this._parent !== null) {
+      this._parent.removeChild(this.index());
+      this._parent = null;
+    }
   }
 
   public root(): RichTextNode {
