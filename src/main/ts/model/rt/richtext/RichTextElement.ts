@@ -21,6 +21,10 @@ export class RichTextElement extends RichTextNode {
     this._name = name;
   }
 
+  public hasChildren(): boolean {
+    return this._children.length > 0;
+  }
+
   public getChildren(): RichTextNode[] {
     return this._children.slice(0);
   }
@@ -33,10 +37,10 @@ export class RichTextElement extends RichTextNode {
     return this._children.indexOf(child);
   }
 
-  public getChildByPath( path: RichTextPath ): RichTextNode {
+  public getChildByPath(path: RichTextPath): RichTextNode {
     let node: RichTextNode = this;
 
-    for ( const index of path ) {
+    for (const index of path) {
       if (node instanceof RichTextElement) {
         node = node.getChild(index);
       } else {

@@ -62,8 +62,12 @@ export class RichTextMutator {
   }
 
   public removeRange(range: RichTextRange): RichTextMutator {
+    const startLocation = range.start();
+    const endLocation: RichTextLocation = null; // need this to be tracked.
+
     const fragment = this._extractFromRangeContent(range);
 
+    this._mergeSubtrees(startLocation, endLocation);
 
     return this;
   }
@@ -95,5 +99,38 @@ export class RichTextMutator {
     });
 
     return new RichTextFragment(this._document, children);
+  }
+
+  private _mergeSubtrees(start: RichTextLocation, end: RichTextLocation): void {
+    const commonParent = start.getNearestCommonAncestor(end);
+
+    // We are done merging since the start or end is already in the common parent.
+    if (commonParent === start.getNode() || commonParent === end.getNode()) {
+      return;
+    }
+
+    // now we need to get the two children of the common parent.
+    const left: RichTextElement = null;
+    const right: RichTextElement = null;
+
+    // now we merge them
+    this._merge(left, right);
+
+    // now we remove any empty ancestors.
+    let nextEnd = end.getNode() as RichTextElement;
+    while (!nextEnd.hasChildren()) {
+      nextEnd.removeFromParent();
+      nextEnd = nextEnd.parent();
+    }
+
+    end = nextEnd.location();
+
+    // Continue merging next level.
+    this._mergeSubtrees(start, end);
+
+  }
+
+  private _merge(left: RichTextElement, right: RichTextElement): void {
+
   }
 }
