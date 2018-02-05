@@ -52,7 +52,6 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
 
     this._individualCharacters = !!options.individualCharacters;
     this._shallow = options.shallow || false;
-    this._ignoreElementEnd = !!options.ignoreElementEnd;
     this._boundaryStartParent = this._boundary ? this._boundary.start().getNode().parent() : null;
     this._boundaryEndParent = this._boundary ? this._boundary.end().getNode().parent() : null;
     this._visitedParent = this._location.getNode().parent();
@@ -138,11 +137,7 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
 
     if (node instanceof RichTextElement) {
       if (this._shallow) {
-        if (this._ignoreElementEnd) {
-          // todo
-        } else {
-          // todo
-        }
+        // todo
       } else {
         // todo
       }
