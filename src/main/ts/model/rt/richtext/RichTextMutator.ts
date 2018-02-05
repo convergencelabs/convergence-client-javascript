@@ -7,6 +7,7 @@ import {AttributeUtils} from "./AttributeUtils";
 import {RichTextRange} from "./RichTextRange";
 import {RichTextPartialString} from "./RichTextStringPartial";
 import {RichTextFragment} from "./RichTextFragement";
+import {RichTextContent} from "./RichTextContent";
 
 export class RichTextMutator {
   private _document: RichTextDocument;
@@ -72,15 +73,40 @@ export class RichTextMutator {
     return this;
   }
 
-  public setAttributes(range: RichTextRange, key: string, value: any): RichTextMutator {
-    let subRangeStart: RichTextLocation = range.start();
-    let subRangeEnd: RichTextLocation;
+  public setAttribute(range: RichTextRange, key: string, value: any): RichTextMutator {
+    let currentRangeStart: RichTextLocation = range.start();
 
-    let currentValue: any;
-    let nextValue: any;
+    let currentRangeValue: any;
+    let first = true;
 
-    for (let item of range) {
-      console.log(item);
+    let iter = range.iterator();
+    let item: IteratorResult<RichTextContent> = iter.next();
+
+    while (!item.done) {
+      // get the value of the current element.
+      const itemValue = item.value.getAttribute(key);
+
+      if (first) {
+        first = false;
+        currentRangeValue = itemValue;
+      }
+
+      if (currentRangeValue !== itemValue || item.done) {
+        // We are at the contiguous range, either because the value has changed
+        // or because we are at the end of iteration.
+
+        if (currentRangeValue !== value) {
+          // The current range value is not the same as what we are trying to
+          // set to, so we need a mutation.
+          console.log(currentRangeStart,
+            new RichTextLocation(item.value.location(), this._document, item.value.root()));
+        }
+
+        currentRangeValue = itemValue;
+        currentRangeStart = new RichTextLocation(item.value.location(), this._document, item.value.root());
+      }
+
+      item = iter.next();
     }
 
     return this;

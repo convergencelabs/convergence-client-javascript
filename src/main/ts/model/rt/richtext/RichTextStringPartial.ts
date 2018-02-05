@@ -40,4 +40,12 @@ export class RichTextPartialString {
   public toRichTextString(): RichTextString {
     return new RichTextString(null, this._str.document(), this.getData(), this._str.attributes());
   }
+
+  public getAttribute(key: string): any {
+    return this._str.getAttribute(key);
+  }
+
+  public hasAttribute(key: string): boolean {
+    return this._str.hasAttribute(key);
+  }
 }

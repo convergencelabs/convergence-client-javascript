@@ -2,6 +2,7 @@ import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextRootElement} from "./RichTextRootElement";
+import {RichTextContent} from "./RichTextContent";
 
 export abstract class RichTextNode implements RichTextContent {
   private _parent: RichTextElement;
@@ -71,6 +72,10 @@ export abstract class RichTextNode implements RichTextContent {
 
   public setAttribute(key: string, value: any): void {
     this._attributes.set(key, value);
+  }
+
+  public hasAttribute(key: string): boolean {
+    return this._attributes.get(key) !== undefined;
   }
 
   public getAttribute(key: string): any {

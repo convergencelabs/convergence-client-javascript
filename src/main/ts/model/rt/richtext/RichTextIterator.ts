@@ -4,6 +4,7 @@ import {RichTextRange} from "./RichTextRange";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextString} from "./RichTextString";
+import {RichTextContent} from "./RichTextContent";
 
 export type RichTextIteratorDirection = "forward" | "backward";
 
@@ -159,13 +160,7 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
                                 length: number): IteratorResult<RichTextContent> {
     return {
       done: false,
-      value: {
-        type,
-        item,
-        prevLocation,
-        nextLocation,
-        length
-      }
+      value: item
     };
   }
 }
