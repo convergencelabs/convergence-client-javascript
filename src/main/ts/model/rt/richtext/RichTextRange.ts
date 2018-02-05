@@ -1,11 +1,9 @@
 import {RichTextLocation} from "./RichTextLocation";
 import {RichTextElement} from "./RichTextElement";
-import {RichTextFragment} from "./RichTextFragement";
-import {RichTextPartialString} from "./RichTextStringPartial";
-import {RichTextNode} from "./RichTextNode";
 import {RichTextDocument} from "./RichTextDocument";
+import {RichTextIterator} from "./RichTextIterator";
 
-export class RichTextRange {
+export class RichTextRange implements Iterable<RichTextContent> {
   private _document: RichTextDocument;
   private _start: RichTextLocation;
   private _end: RichTextLocation;
@@ -28,7 +26,17 @@ export class RichTextRange {
     return this._start.getNearestCommonAncestor(this._end);
   }
 
-  public getContent(): RichTextContent[] {
-    return [];
+  public getContentRoots(): RichTextContent[] {
+    const iterator = new RichTextIterator({boundary: this, shallow: true});
+    const result: RichTextContent[] = [];
+
+    for (let content of iterator) {
+      result.push(content);
+    }
+    return result;
+  }
+
+  public * [ Symbol.iterator ](): Iterator<RichTextContent> {
+    yield* new RichTextIterator({boundary: this, ignoreElementEnd: true});
   }
 }

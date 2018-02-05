@@ -1,6 +1,7 @@
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
+import {RichTextRootElement} from "./RichTextRootElement";
 
 export abstract class RichTextNode implements RichTextContent {
   private _parent: RichTextElement;
@@ -50,9 +51,10 @@ export abstract class RichTextNode implements RichTextContent {
       this.root());
   }
 
-  public root(): RichTextElement {
-    if (this._parent === null) {
-      // todo fix this.
+  public root(): RichTextRootElement {
+    if (this instanceof RichTextRootElement) {
+      return this;
+    } else if (this._parent === null || this._parent === undefined) {
       return null;
     } else {
       return this._parent.root();

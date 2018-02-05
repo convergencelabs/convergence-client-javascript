@@ -1,4 +1,4 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
+import {IncomingProtocolResponseMessage, OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {DomainUser} from "../../../identity/DomainUser";
 import {MessageBodyDeserializer} from "../MessageSerializer";
@@ -52,7 +52,7 @@ export const UserSearchRequestSerializer: MessageBodySerializer = (request: User
   };
 };
 
-export interface UserListResponse {
+export interface UserListResponse extends IncomingProtocolResponseMessage {
   users: DomainUser[];
 }
 

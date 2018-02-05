@@ -127,7 +127,7 @@ export class IdentityService {
       };
 
       return this._connection.request(message).then((response: UserListResponse) => {
-        return response.users;
+        return response.users as DomainUser[];
       });
     }
   }
@@ -141,7 +141,7 @@ export class IdentityService {
     };
 
     return this._connection.request(message).then((response: UserGroupsResponse) => {
-      return response.groups;
+      return response.groups as UserGroup[];
     });
   }
 
@@ -161,7 +161,7 @@ export class IdentityService {
     };
 
     return this._connection.request(message).then((response: UserGroupsForUsersResponse) => {
-      return response.groupsByUser;
+      return response.groupsByUser as {[key: string]: string[]};
     });
   }
 
@@ -185,7 +185,7 @@ export class IdentityService {
       };
 
       return this._connection.request(message).then((response: UserListResponse) => {
-        return response.users;
+        return response.users as DomainUser[];
       });
     }
   }

@@ -7,8 +7,8 @@ export class RichTextElement extends RichTextNode {
   private _name: string;
   private _children: RichTextNode[];
 
-  constructor(parent: RichTextElement, document: RichTextDocument, name: string) {
-    super(parent, document);
+  constructor(parent: RichTextElement, document: RichTextDocument, name: string, attributes?: Map<string, any>) {
+    super(parent, document, attributes);
     this._name = name;
     this._children = [];
   }
@@ -51,12 +51,28 @@ export class RichTextElement extends RichTextNode {
     return node;
   }
 
+  public childCount(): number {
+    return this._children.length;
+  }
+
   public insertChild(index: number, child: RichTextNode): void {
     this._children.splice(index, 0, child);
+    child._setParent(this);
   }
 
   public insertChildren(index: number, children: RichTextNode[]): void {
     this._children.splice(index, 0, ...children);
+    children.forEach(c => c._setParent(this));
+  }
+
+  public appendChild(child: RichTextNode): void {
+    this._children.push(child);
+    child._setParent(this);
+  }
+
+  public appendChildren(children: RichTextNode[]): void {
+    this._children.push(...children);
+    children.forEach(c => c._setParent(this));
   }
 
   public removeChild(index: number): void;

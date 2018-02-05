@@ -72,7 +72,17 @@ export class RichTextMutator {
     return this;
   }
 
-  public setAttributes(): RichTextMutator {
+  public setAttributes(range: RichTextRange, key: string, value: any): RichTextMutator {
+    let subRangeStart: RichTextLocation = range.start();
+    let subRangeEnd: RichTextLocation;
+
+    let currentValue: any;
+    let nextValue: any;
+
+    for (let item of range) {
+      console.log(item);
+    }
+
     return this;
   }
 
@@ -85,7 +95,7 @@ export class RichTextMutator {
   }
 
   private _extractFromRangeContent(range: RichTextRange): RichTextFragment {
-    const content: RichTextContent[] = range.getContent();
+    const content: RichTextContent[] = range.getContentRoots();
     const children: RichTextNode[] = [];
 
     content.forEach(c => {
@@ -131,6 +141,9 @@ export class RichTextMutator {
   }
 
   private _merge(left: RichTextElement, right: RichTextElement): void {
+    const children = right.getChildren();
+    left.appendChildren(children);
 
+    right.removeFromParent();
   }
 }
