@@ -1,7 +1,3 @@
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextElement} from "./RichTextElement";
-import {RichTextLocation, RichTextPath} from "./RichTextLocation";
-import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextContent} from "./RichTextContent";
 
 export abstract class RichTextNode implements RichTextContent {
@@ -45,17 +41,15 @@ export abstract class RichTextNode implements RichTextContent {
 
   public location(): RichTextLocation {
     return new RichTextLocation({
-      path: this.parent().path(),
-      index: this.index()
-    },
-    this._document,
+        path: this.parent().path(),
+        index: this.index()
+      },
+      this._document,
       this.root());
   }
 
   public root(): RichTextRootElement {
-    if (this instanceof RichTextRootElement) {
-      return this;
-    } else if (this._parent === null || this._parent === undefined) {
+    if (this._parent === null || this._parent === undefined) {
       return null;
     } else {
       return this._parent.root();
@@ -87,4 +81,13 @@ export abstract class RichTextNode implements RichTextContent {
   }
 
   public abstract textContentLength(): number;
+  public abstract type(): RichTextContentType;
+  public abstract isA(type: RichTextContentType): boolean;
 }
+
+// Note: These import have to be down here for the circular dependency to work.
+import {RichTextElement} from "./RichTextElement";
+import {RichTextRootElement} from "./RichTextRootElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextLocation, RichTextPath} from "./RichTextLocation";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";

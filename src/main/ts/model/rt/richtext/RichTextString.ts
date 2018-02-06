@@ -1,6 +1,4 @@
-import {RichTextDocument} from "./RichTextDocument";
 import {RichTextNode} from "./RichTextNode";
-import {RichTextElement} from "./RichTextElement";
 
 export class RichTextString extends RichTextNode {
   private _data: string;
@@ -32,4 +30,16 @@ export class RichTextString extends RichTextNode {
   public textContentLength(): number {
     return this._data.length;
   }
+
+  public type(): RichTextContentType {
+    return RichTextContentTypes.STRING;
+  }
+
+  public isA(type: RichTextContentType): boolean {
+    return type === RichTextContentTypes.STRING;
+  }
 }
+
+import {RichTextElement} from "./RichTextElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";

@@ -1,5 +1,3 @@
-import {RichTextString} from "./RichTextString";
-
 export class RichTextPartialString {
   private _str: RichTextString;
   private _offset: number;
@@ -48,4 +46,15 @@ export class RichTextPartialString {
   public hasAttribute(key: string): boolean {
     return this._str.hasAttribute(key);
   }
+
+  public type(): RichTextContentType {
+    return RichTextContentTypes.PARTIAL_STRING;
+  }
+
+  public isA(type: RichTextContentType): boolean {
+    return type === RichTextContentTypes.PARTIAL_STRING;
+  }
 }
+
+import {RichTextString} from "./RichTextString";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";

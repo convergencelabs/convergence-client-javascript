@@ -1,9 +1,3 @@
-import {RichTextLocation} from "./RichTextLocation";
-import {ConvergenceError} from "../../../util/ConvergenceError";
-import {RichTextRange} from "./RichTextRange";
-import {RichTextElement} from "./RichTextElement";
-import {RichTextNode} from "./RichTextNode";
-import {RichTextString} from "./RichTextString";
 import {RichTextContent} from "./RichTextContent";
 
 export type RichTextIteratorDirection = "forward" | "backward";
@@ -95,11 +89,11 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
     const parent = this._visitedParent;
 
     if (parent.parent === null && location.getIndex() === parent.childCount() - 1) {
-      return {done: true};
+      return {done: true, value: null};
     }
 
     if (parent === this._boundaryEndParent && location.getIndex() === this._boundary.end().getIndex() - 1) {
-      return {done: true};
+      return {done: true, value: null};
     }
 
     const node = location.getNode();
@@ -127,11 +121,11 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
     const parent = this._visitedParent;
 
     if (parent.parent === null && location.getIndex() === 0) {
-      return {done: true};
+      return {done: true, value: null};
     }
 
     if (parent === this._boundaryStartParent && location.getIndex() === this._boundary.start().getIndex() - 1) {
-      return {done: true};
+      return {done: true, value: null};
     }
 
     const node = location.getNode();
@@ -164,3 +158,10 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
     };
   }
 }
+
+import {RichTextLocation} from "./RichTextLocation";
+import {ConvergenceError} from "../../../util/ConvergenceError";
+import {RichTextRange} from "./RichTextRange";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextNode} from "./RichTextNode";
+import {RichTextString} from "./RichTextString";

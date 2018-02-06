@@ -1,18 +1,14 @@
-import {StringMapLike} from "../../../util/StringMap";
-import {RichTextLocation, RichTextLocationData} from "./RichTextLocation";
 import {EventEmitter} from "../../../util/EventEmitter";
-import {RichTextElement} from "./RichTextElement";
-import {RichTextMutator} from "./RichTextMutator";
 
 export class RichTextDocument extends EventEmitter {
   private _attributes: Map<string, any>;
-  private _roots: Map<string, RichTextElement>;
+  private _roots: Map<string, RichTextRootElement>;
   private _mutator: RichTextMutator;
 
   constructor() {
     super();
     this._mutator = new RichTextMutator(this);
-    this._roots = new Map<string, RichTextElement>();
+    this._roots = new Map<string, RichTextRootElement>();
     this._attributes = new Map<string, any>();
   }
 
@@ -22,7 +18,6 @@ export class RichTextDocument extends EventEmitter {
 
   // Basic Text Manipulation
   public insertText(text: string, location: RichTextLocationData, attributes?: StringMapLike): void {
-
     // todo
   }
 
@@ -46,16 +41,16 @@ export class RichTextDocument extends EventEmitter {
     // todo
   }
 
-  public addRoot(name: string, root: RichTextElement): void {
-    this._roots.set(name, root);
+  public addRoot(root: RichTextRootElement): void {
+    this._roots.set(root.getRootName(), root);
   }
 
-  public getRoot(name: string): RichTextElement {
+  public getRoot(name: string): RichTextRootElement {
     return this._roots.get(name);
   }
 
-  public removeRoot(name: string): RichTextElement {
-    const root: RichTextElement =  this._roots.get(name);
+  public removeRoot(name: string): RichTextRootElement {
+    const root: RichTextRootElement =  this._roots.get(name);
     if (root) {
       this._roots.delete(name);
     }
@@ -63,3 +58,8 @@ export class RichTextDocument extends EventEmitter {
     return root;
   }
 }
+
+import {RichTextRootElement} from "./RichTextRootElement";
+import {StringMapLike} from "../../../util/StringMap";
+import {RichTextLocation, RichTextLocationData} from "./RichTextLocation";
+import {RichTextMutator} from "./RichTextMutator";

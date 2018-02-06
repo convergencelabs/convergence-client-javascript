@@ -1,6 +1,3 @@
-import {RichTextNode} from "./RichTextNode";
-import {RichTextDocument} from "./RichTextDocument";
-
 export class RichTextFragment {
   private _children: RichTextNode[];
 
@@ -18,3 +15,6 @@ export class RichTextFragment {
     return length;
   }
 }
+
+import {RichTextNode} from "./RichTextNode";
+import {RichTextDocument} from "./RichTextDocument";

@@ -1,7 +1,4 @@
-import {RichTextDocument} from "./RichTextDocument";
 import {RichTextNode} from "./RichTextNode";
-import {RichTextPath} from "./RichTextLocation";
-import {ConvergenceError} from "../../../util/ConvergenceError";
 
 export class RichTextElement extends RichTextNode {
   private _name: string;
@@ -94,4 +91,17 @@ export class RichTextElement extends RichTextNode {
     this._children.forEach(c => length += c.textContentLength());
     return length;
   }
+
+  public type(): RichTextContentType {
+    return RichTextContentTypes.ELEMENT;
+  }
+
+  public isA(type: RichTextContentType): boolean {
+    return type === RichTextContentTypes.ELEMENT;
+  }
 }
+
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextPath} from "./RichTextLocation";
+import {ConvergenceError} from "../../../util/ConvergenceError";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";

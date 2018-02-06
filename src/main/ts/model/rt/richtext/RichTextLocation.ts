@@ -1,8 +1,3 @@
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextElement} from "./RichTextElement";
-import {RichTextNode} from "./RichTextNode";
-import {RichTextFragment} from "./RichTextFragement";
-
 export type RichTextPath = number[];
 
 export interface RichTextPosition {
@@ -40,3 +35,7 @@ export class RichTextLocation {
 }
 
 export type RichTextLocationData = number | RichTextPosition | RichTextLocation;
+
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextNode} from "./RichTextNode";

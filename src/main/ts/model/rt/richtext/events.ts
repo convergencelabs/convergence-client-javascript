@@ -1,13 +1,8 @@
-import {RichTextString} from "./RichTextString";
-import {RichTextRange} from "./RichTextRange";
-import {RichTextLocation} from "./RichTextLocation";
-
 export interface RichTextEvent {
-
 }
 
 export interface RichTextNodeEvent extends RichTextEvent {
-  readonly node: Node;
+  readonly node: RichTextNode;
 }
 
 export interface RichTextNodeAttributesSet extends RichTextNodeEvent {
@@ -19,7 +14,7 @@ export interface RichTextNodeAttributesRemoved extends RichTextNodeEvent {
 }
 
 export interface RichTextElementEvent extends RichTextNodeEvent {
-  readonly element: Element;
+  readonly element: RichTextElement;
 }
 
 export interface RichTextNodeInsertedEvent extends RichTextElementEvent {
@@ -74,3 +69,9 @@ export interface RichTextStringRemoveEvent extends DocumentOperation {
   location: RichTextLocation;
   length: number;
 }
+
+import {RichTextString} from "./RichTextString";
+import {RichTextRange} from "./RichTextRange";
+import {RichTextLocation} from "./RichTextLocation";
+import {RichTextNode} from "./RichTextNode";
+import {RichTextElement} from "./RichTextElement";

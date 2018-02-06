@@ -1,22 +1,32 @@
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextNode} from "./RichTextNode";
-import {RichTextPath} from "./RichTextLocation";
-import {ConvergenceError} from "../../../util/ConvergenceError";
 import {RichTextElement} from "./RichTextElement";
 
 export class RichTextRootElement extends RichTextElement {
   private _rootName: string;
 
-  constructor(parent: RichTextElement,
-              document: RichTextDocument,
-              name: string,
+  constructor(document: RichTextDocument,
               rootName: string,
+              name: string,
               attributes?: Map<string, any>) {
-    super(parent, document, name, attributes);
+    super(null, document, name, attributes);
     this._rootName = rootName;
   }
 
   public getRootName(): string {
     return this._rootName;
   }
+
+  public type(): RichTextContentType {
+    return RichTextContentTypes.ROOT;
+  }
+
+  public isA(type: RichTextContentType): boolean {
+    return type === RichTextContentTypes.ROOT;
+  }
+
+  public root(): RichTextRootElement {
+    return this;
+  }
 }
+
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";

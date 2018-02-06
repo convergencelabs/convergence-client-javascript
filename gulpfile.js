@@ -124,6 +124,9 @@ gulp.task("copy-npmjs", function (cb) {
 gulp.task("test", ["test-build"], function () {
   return gulp.src("build/test*/**/*.js")
     .pipe(mocha({reporter: "progress"}));
+
+  // return gulp.src("src/test*/**/*Spec.ts")
+  //   .pipe(mocha({reporter: "progress", require: ['ts-node/register']}));
 });
 
 gulp.task("test-build", [], function () {
@@ -131,7 +134,7 @@ gulp.task("test-build", [], function () {
 
   // We need this here because we need to create the d.ts, but we
   // can"t put this in the tsconfig because the other steps bomb out.
-  tsProject.options.declaration = true;
+  // tsProject.options.declaration = true;
 
   const tsResult = gulp.src(["src/**/*.ts"])
     .pipe(tsProject());

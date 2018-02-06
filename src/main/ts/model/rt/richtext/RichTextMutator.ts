@@ -1,14 +1,3 @@
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextLocation} from "./RichTextLocation";
-import {RichTextNode} from "./RichTextNode";
-import {RichTextString} from "./RichTextString";
-import {RichTextElement} from "./RichTextElement";
-import {AttributeUtils} from "./AttributeUtils";
-import {RichTextRange} from "./RichTextRange";
-import {RichTextPartialString} from "./RichTextStringPartial";
-import {RichTextFragment} from "./RichTextFragement";
-import {RichTextContent} from "./RichTextContent";
-
 export class RichTextMutator {
   private _document: RichTextDocument;
 
@@ -74,7 +63,7 @@ export class RichTextMutator {
   }
 
   public setAttribute(range: RichTextRange, key: string, value: any): RichTextMutator {
-    let currentRangeStart: RichTextLocation = range.start();
+    let currentRangeStart: RichTextLocation = null;
 
     let currentRangeValue: any;
     let first = true;
@@ -83,11 +72,11 @@ export class RichTextMutator {
     let item: IteratorResult<RichTextContent> = iter.next();
 
     while (!item.done) {
-      // get the value of the current element.
+      // get the value of the current ELEMENT.
       const itemValue = item.value.getAttribute(key);
 
-      if (first) {
-        first = false;
+      if (currentRangeStart === null) {
+        currentRangeStart = item.value.location();
         currentRangeValue = itemValue;
       }
 
@@ -103,7 +92,7 @@ export class RichTextMutator {
         }
 
         currentRangeValue = itemValue;
-        currentRangeStart = new RichTextLocation(item.value.location(), this._document, item.value.root());
+        currentRangeStart = null;
       }
 
       item = iter.next();
@@ -173,3 +162,14 @@ export class RichTextMutator {
     right.removeFromParent();
   }
 }
+
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextLocation} from "./RichTextLocation";
+import {RichTextNode} from "./RichTextNode";
+import {RichTextString} from "./RichTextString";
+import {RichTextElement} from "./RichTextElement";
+import {AttributeUtils} from "./AttributeUtils";
+import {RichTextRange} from "./RichTextRange";
+import {RichTextPartialString} from "./RichTextStringPartial";
+import {RichTextFragment} from "./RichTextFragement";
+import {RichTextContent} from "./RichTextContent";

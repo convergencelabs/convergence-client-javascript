@@ -1,7 +1,3 @@
-import {RichTextLocation} from "./RichTextLocation";
-import {RichTextElement} from "./RichTextElement";
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextIterator} from "./RichTextIterator";
 import {RichTextContent} from "./RichTextContent";
 
 export class RichTextRange implements Iterable<RichTextContent> {
@@ -45,3 +41,8 @@ export class RichTextRange implements Iterable<RichTextContent> {
     return new RichTextIterator({boundary: this});
   }
 }
+
+import {RichTextLocation} from "./RichTextLocation";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextIterator} from "./RichTextIterator";
