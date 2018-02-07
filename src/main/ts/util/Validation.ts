@@ -1,4 +1,8 @@
 export class Validation {
+  public static isSet(value: any): boolean {
+    return value !== undefined && value !== null;
+  }
+
   public static nonEmptyString(value: string): boolean {
     return typeof value === "string" && value.length > 0;
   }

@@ -22,6 +22,10 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
   private _visitedParent: RichTextElement;
 
   constructor(options: RichTextIteratorOptions) {
+    if (!Validation.isSet(options)) {
+      throw new ConvergenceError("options must be specified.", "rich-text-iterator-no-options");
+    }
+
     if (!options.boundary && !options.startLocation) {
       throw new ConvergenceError(
         "Either a range or starting location must be defined.",
@@ -165,3 +169,4 @@ import {RichTextRange} from "./RichTextRange";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextString} from "./RichTextString";
+import {Validation} from "../../../util/Validation";

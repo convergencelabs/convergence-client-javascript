@@ -5,7 +5,7 @@ export abstract class RichTextNode implements RichTextContent {
   private _document: RichTextDocument;
   private _attributes: Map<string, any>;
 
-  constructor(parent: RichTextElement, document: RichTextDocument, attributes?: Map<string, any>) {
+  constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
     this._parent = parent;
     this._document = document;
     this._attributes = attributes || new Map<string, any>();
@@ -24,6 +24,7 @@ export abstract class RichTextNode implements RichTextContent {
       const pos = this._parent.getChildIndex(this);
       return pos;
     } else {
+      // fixme should this be an exception?
       return -1;
     }
   }
@@ -31,25 +32,36 @@ export abstract class RichTextNode implements RichTextContent {
   public removeFromParent(): void {
     if (this._parent !== null) {
       this._parent.removeChild(this.index());
-      this._parent = null;
+      this._setParent(null);
     }
   }
 
   public path(): RichTextPath {
-    return null;
-  }
+    if (!this._parent) {
+      return null;
+    }
 
-  public location(): RichTextLocation {
-    return new RichTextLocation({
-        path: this.parent().path(),
-        index: this.index()
-      },
-      this._document,
-      this.root());
+    const path = this._parent.path();
+    if (path === null) {
+      // We don't have a parent chain that goes all the way up to a
+      // root element, therefore we have no path.
+      return null;
+    }
+
+    const index = this.index();
+    if (index < 0) {
+      // We don't actually exist in our parent element.
+      // todo this should be an error.
+      return null;
+    }
+
+    path.push(index);
+
+    return path;
   }
 
   public root(): RichTextRootElement {
-    if (this._parent === null || this._parent === undefined) {
+    if (!Validation.isSet(this._parent)) {
       return null;
     } else {
       return this._parent.root();
@@ -81,7 +93,9 @@ export abstract class RichTextNode implements RichTextContent {
   }
 
   public abstract textContentLength(): number;
+
   public abstract type(): RichTextContentType;
+
   public abstract isA(type: RichTextContentType): boolean;
 }
 
@@ -91,3 +105,4 @@ import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {Validation} from "../../../util/Validation";

@@ -13,7 +13,7 @@ describe("RichTextElement", () => {
       const attrs = new Map<string, any>();
       attrs.set("foo", "bar");
       const name = "paragraph";
-      const element = new RichTextElement(root, document, name, attrs);
+      const element = new RichTextElement(document, root, name, attrs);
 
       expect(element.childCount()).to.equal(0);
       expect(element.getName()).to.equal(name);
@@ -29,7 +29,7 @@ describe("RichTextElement", () => {
       const attrs = new Map<string, any>();
       attrs.set("foo", "bar");
       const name = "paragraph";
-      const element = new RichTextElement(root, document, name);
+      const element = new RichTextElement(document, root, name);
 
       expect(element.attributes().size).to.equal(0);
     });

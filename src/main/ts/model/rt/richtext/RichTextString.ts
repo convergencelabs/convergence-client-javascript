@@ -3,8 +3,8 @@ import {RichTextNode} from "./RichTextNode";
 export class RichTextString extends RichTextNode {
   private _data: string;
 
-  constructor(parent: RichTextElement, document: RichTextDocument, data: string, attributes?: Map<string, any>) {
-    super(parent, document, attributes);
+  constructor(document: RichTextDocument, parent: RichTextElement, data: string, attributes?: Map<string, any>) {
+    super(document, parent, attributes);
     this._data = data;
   }
 

@@ -4,8 +4,8 @@ export class RichTextElement extends RichTextNode {
   private _name: string;
   private _children: RichTextNode[];
 
-  constructor(parent: RichTextElement, document: RichTextDocument, name: string, attributes?: Map<string, any>) {
-    super(parent, document, attributes);
+  constructor(document: RichTextDocument, parent: RichTextElement, name: string, attributes?: Map<string, any>) {
+    super(document, parent, attributes);
     this._name = name;
     this._children = [];
   }
@@ -81,8 +81,10 @@ export class RichTextElement extends RichTextNode {
     } else {
       index = this._children.indexOf(child);
     }
+
     if (index >= 0) {
-      this._children.splice(index, 1);
+      const removed = this._children.splice(index, 1);
+      removed.forEach(c => c._setParent(null));
     }
   }
 

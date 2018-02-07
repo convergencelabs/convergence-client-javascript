@@ -1,4 +1,7 @@
 import {RichTextElement} from "./RichTextElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {RichTextPath} from "./RichTextLocation";
 
 export class RichTextRootElement extends RichTextElement {
   private _rootName: string;
@@ -7,12 +10,16 @@ export class RichTextRootElement extends RichTextElement {
               rootName: string,
               name: string,
               attributes?: Map<string, any>) {
-    super(null, document, name, attributes);
+    super(document, null, name, attributes);
     this._rootName = rootName;
   }
 
   public getRootName(): string {
     return this._rootName;
+  }
+
+  public path(): RichTextPath {
+    return [];
   }
 
   public type(): RichTextContentType {
@@ -27,6 +34,3 @@ export class RichTextRootElement extends RichTextElement {
     return this;
   }
 }
-
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
