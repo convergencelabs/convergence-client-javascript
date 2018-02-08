@@ -8,7 +8,7 @@ export const TWO_PARAGRAPHS: DocumentData = {
       {type: "string", data: "But this text is not. "}
     ]},
     {type: "element", name: "paragraph", children: [
-      {type: "string", data: "This is another paragraph. "}
+      {type: "string", data: "This is another paragraph."}
     ]}
   ]}
 };

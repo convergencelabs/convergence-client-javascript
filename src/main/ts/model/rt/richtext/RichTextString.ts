@@ -38,8 +38,19 @@ export class RichTextString extends RichTextNode {
   public isA(type: RichTextContentType): boolean {
     return type === RichTextContentTypes.STRING;
   }
+
+  public isLeaf(): boolean {
+    return true;
+  }
+
+  public toString(): string {
+    return `[RichTextString ` +
+      `data: '${this._data}', ` +
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+  }
 }
 
 import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {StringMap} from "../../../util/StringMap";

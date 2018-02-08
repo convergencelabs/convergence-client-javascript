@@ -22,6 +22,10 @@ export class RichTextElement extends RichTextNode {
     return this._children.length > 0;
   }
 
+  public childCount(): number {
+    return this._children.length;
+  }
+
   public getChildren(): RichTextNode[] {
     return this._children.slice(0);
   }
@@ -48,8 +52,8 @@ export class RichTextElement extends RichTextNode {
     return node;
   }
 
-  public childCount(): number {
-    return this._children.length;
+  public isLeaf(): boolean {
+    return !this.hasChildren();
   }
 
   public insertChild(index: number, child: RichTextNode): void {
@@ -101,9 +105,18 @@ export class RichTextElement extends RichTextNode {
   public isA(type: RichTextContentType): boolean {
     return type === RichTextContentTypes.ELEMENT;
   }
+
+  public toString(): string {
+    return `[RichTextElement ` +
+      `name: '${this._name}', ` +
+      `children: [${this._children.length}], ` +
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+  }
 }
 
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextPath} from "./RichTextLocation";
 import {ConvergenceError} from "../../../util/ConvergenceError";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {Validation} from "../../../util/Validation";
+import {StringMap} from "../../../util/StringMap";

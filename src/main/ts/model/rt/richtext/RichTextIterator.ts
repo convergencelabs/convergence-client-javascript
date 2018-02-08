@@ -7,19 +7,17 @@ export interface RichTextIteratorOptions {
   startLocation?: RichTextLocation;
   direction?: RichTextIteratorDirection;
   shallow?: boolean;
-  individualCharacters?: boolean;
 }
 
 export class RichTextIterator implements IterableIterator<RichTextContent> {
 
   private _direction: RichTextIteratorDirection;
-  private _location: RichTextLocation;
+  private _startLocation: RichTextLocation;
+  private _lastLocation: RichTextLocation;
   private _shallow: boolean;
   private _boundary: RichTextRange;
-  private _individualCharacters: boolean;
-  private _boundaryStartParent: RichTextNode;
-  private _boundaryEndParent: RichTextNode;
-  private _visitedParent: RichTextElement;
+  private _boundaryStartNode: RichTextNode;
+  private _boundaryEndNode: RichTextNode;
 
   constructor(options: RichTextIteratorOptions) {
     if (!Validation.isSet(options)) {
@@ -40,44 +38,43 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
         "rich-text-iterator-invalid-direction");
     }
 
-    this._direction = direction;
-    this._boundary = options.boundary || null;
-
     if (options.startLocation) {
-      this._location = options.startLocation;
+      this._startLocation = options.startLocation;
     } else {
-      this._location = this._direction === "backward" ? this._boundary.start() : this._boundary.end();
+      this._startLocation = this._direction === "backward" ? this._boundary.start() : this._boundary.end();
     }
 
-    this._individualCharacters = !!options.individualCharacters;
+    this._lastLocation = null;
+
+    this._direction = direction;
+    this._boundary = options.boundary || null;
     this._shallow = options.shallow || false;
-    this._boundaryStartParent = this._boundary ? this._boundary.start().getNode().parent() : null;
-    this._boundaryEndParent = this._boundary ? this._boundary.end().getNode().parent() : null;
-    this._visitedParent = this._location.getNode().parent();
+    this._boundaryStartNode = this._boundary ? this._boundary.start().getNode() : null;
+    this._boundaryEndNode = this._boundary ? this._boundary.end().getNode() : null;
   }
 
   public [ Symbol.iterator ](): IterableIterator<RichTextContent> {
     return this;
   }
 
-  public skip(skip: (node: RichTextContent) => boolean) {
-    let done: boolean;
-    let value: RichTextContent;
-    let prevLocation: RichTextLocation;
-    let prevVisitedParent: RichTextElement;
-
-    do {
-      prevLocation = this._location;
-      prevVisitedParent = this._visitedParent;
-
-      ( {done, value} = this.next() );
-    } while (!done && skip(value));
-
-    if (!done) {
-      this._location = prevLocation;
-      this._visitedParent = prevVisitedParent;
-    }
-  }
+  // public skip(skip: (node: RichTextContent) => boolean) {
+  //   let done: boolean;
+  //   let value: RichTextContent;
+  //   let prevLocation: RichTextLocation;
+  //   let prevVisitedParent: RichTextElement;
+  //
+  //   do {
+  //     prevLocation = this._location;
+  //     prevVisitedParent = this._visitedParent;
+  //
+  //     ( {done, value} = this.next() );
+  //   } while (!done && skip(value));
+  //
+  //   if (!done) {
+  //     this._location = prevLocation;
+  //     this._visitedParent = prevVisitedParent;
+  //   }
+  // }
 
   public next(): IteratorResult<RichTextContent> {
     if (this._direction === "forward") {
@@ -87,75 +84,105 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
     }
   }
 
+  // Pre-order traversal
   private _next(): IteratorResult<RichTextContent> {
-    const prevLocation = this._location;
-    const location = this._location;
-    const parent = this._visitedParent;
+    let nodeToProcess: RichTextNode = null;
+    let locationToProcesses = null;
 
-    if (parent.parent === null && location.getIndex() === parent.childCount() - 1) {
-      return {done: true, value: null};
-    }
-
-    if (parent === this._boundaryEndParent && location.getIndex() === this._boundary.end().getIndex() - 1) {
-      return {done: true, value: null};
-    }
-
-    const node = location.getNode();
-
-    if (node instanceof RichTextElement) {
-      if (this._shallow) {
-        // todo
-      } else {
-        // todo
-      }
-    } else if (node instanceof RichTextString) {
-      if (this._individualCharacters) {
-        // todo
-      } else {
-        // todo
-      }
+    if (this._lastLocation === null) {
+      // This is our first move. Therefore the first node we need to visit is the starting location.
+      locationToProcesses = this._startLocation;
+      nodeToProcess = locationToProcesses.getNode();
     } else {
-      // todo
+      const lastNode = this._lastLocation.getNode();
+      if (lastNode === this._boundaryEndNode) {
+        return {done: true, value: null};
+      } else if (lastNode instanceof RichTextElement && lastNode.hasChildren() && !this._shallow) {
+        // This is non-leaf node in the tree
+        nodeToProcess = lastNode.getChild(0);
+      } else {
+        nodeToProcess = this._getNextAncestorSibling(lastNode);
+        if (nodeToProcess === null) {
+          return {done: true, value: null};
+        }
+      }
+      locationToProcesses = RichTextLocation.ofContent(nodeToProcess);
     }
+
+    this._lastLocation = locationToProcesses;
+
+    if (nodeToProcess instanceof RichTextElement) {
+      return this._createIteratorResult(nodeToProcess);
+    } else if (nodeToProcess instanceof RichTextString) {
+      let start = 0;
+      let end = nodeToProcess.getData().length - 1;
+
+      if (nodeToProcess === this._boundaryStartNode) {
+        start = this._boundary.start().getIndexInParent();
+      }
+
+      if ( nodeToProcess === this._boundaryEndNode) {
+        end = this._boundary.end().getIndexInParent();
+      }
+
+      if (start !== 0 || end !== nodeToProcess.getData().length - 1) {
+        const fragment = new RichTextStringFragment(nodeToProcess, start, end - start);
+        return this._createIteratorResult(fragment);
+      } else {
+        return this._createIteratorResult(nodeToProcess);
+      }
+    } else if (nodeToProcess === null) {
+      return {done: true, value: null};
+    }
+  }
+
+  private _getNextAncestorSibling(node: RichTextNode): RichTextNode {
+    let cur = node;
+    let sibling: RichTextNode = null;
+    while (cur !== null && sibling === null) {
+      sibling = cur.nextSibling();
+      if (sibling === null) {
+        cur = cur.parent();
+      }
+    }
+
+    return sibling;
   }
 
   private _prev(): IteratorResult<RichTextContent> {
-    const prevLocation = this._location;
-    const location = this._location;
-    const parent = this._visitedParent;
-
-    if (parent.parent === null && location.getIndex() === 0) {
-      return {done: true, value: null};
-    }
-
-    if (parent === this._boundaryStartParent && location.getIndex() === this._boundary.start().getIndex() - 1) {
-      return {done: true, value: null};
-    }
-
-    const node = location.getNode();
-
-    if (node instanceof RichTextElement) {
-      if (this._shallow) {
-        // todo
-      } else {
-        // todo
-      }
-    } else if (node instanceof RichTextString) {
-      if (this._individualCharacters) {
-        // todo
-      } else {
-        // todo
-      }
-    } else {
-      // todo
-    }
+    // const prevLocation = this._location;
+    // const location = this._location;
+    // const parent = this._visitedParent;
+    //
+    // if (parent.parent === null && location.getIndex() === 0) {
+    //   return {done: true, value: null};
+    // }
+    //
+    // if (parent === this._boundaryStartParent && location.getIndex() === this._boundary.start().getIndex() - 1) {
+    //   return {done: true, value: null};
+    // }
+    //
+    // const node = location.getNode();
+    //
+    // if (node instanceof RichTextElement) {
+    //   if (this._shallow) {
+    //     // todo
+    //   } else {
+    //     // todo
+    //   }
+    // } else if (node instanceof RichTextString) {
+    //   if (this._individualCharacters) {
+    //     // todo
+    //   } else {
+    //     // todo
+    //   }
+    // } else {
+    //   // todo
+    // }
+    return null;
   }
 
-  private _createIteratorResult(type: string,
-                                item: RichTextContent,
-                                prevLocation: RichTextLocation,
-                                nextLocation: RichTextLocation,
-                                length: number): IteratorResult<RichTextContent> {
+  private _createIteratorResult(item: RichTextContent): IteratorResult<RichTextContent> {
     return {
       done: false,
       value: item
@@ -170,3 +197,5 @@ import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextString} from "./RichTextString";
 import {Validation} from "../../../util/Validation";
+import {RichTextContentTypes} from "./RichTextContentType";
+// import {RichTextStringFragment} from "./RichTextStringFragment";

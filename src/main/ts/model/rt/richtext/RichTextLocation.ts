@@ -3,7 +3,7 @@ import {RichTextContentTypes} from "./RichTextContentType";
 export type RichTextPath = number[];
 
 export class RichTextLocation {
-  public static ofElement(node: RichTextElement): RichTextLocation {
+  public static ofContent(node: RichTextContent): RichTextLocation {
     return new RichTextLocation(node.root(), node.path());
   }
 
@@ -20,7 +20,7 @@ export class RichTextLocation {
   }
 
   public getParent(): RichTextNode {
-    let parent = this._root;
+    let parent: RichTextNode = this._root;
 
     for (let i = 0; i < this._path.length - 1; i++) {
       parent = parent.getChild(this._path[i]);
@@ -35,7 +35,7 @@ export class RichTextLocation {
     }
 
     let node = this.getParent();
-    if (node.isA(RichTextContentTypes.ELEMENT)) {
+    if (node.isA(RichTextContentTypes.ELEMENT) || node.isA(RichTextContentTypes.ROOT)) {
       node = (node as RichTextElement).getChild(this._path[this._path.length - 1]);
     }
 
@@ -54,3 +54,4 @@ export class RichTextLocation {
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextRootElement} from "./RichTextRootElement";
+import {RichTextContent} from "./RichTextContent";

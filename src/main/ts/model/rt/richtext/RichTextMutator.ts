@@ -7,7 +7,7 @@ export class RichTextMutator {
 
   public insertText(text: string, location: RichTextLocation, attributes?: Map<string, any>): RichTextMutator {
     const parent: RichTextNode = location.getNode();
-    const index: number = location.getIndex();
+    const index: number = location.getIndexInParent();
 
     if (parent instanceof RichTextString && (
         !attributes || AttributeUtils.areAttributesEqual(attributes, parent.attributes()))) {
@@ -16,7 +16,7 @@ export class RichTextMutator {
       // splitting and merging required
       parent.insert(index, text);
     } else if (parent instanceof RichTextElement) {
-      this.insert(new RichTextString(parent, this._document, text, attributes), location);
+      this.insert(new RichTextString(this._document, parent, text, attributes), location);
     } else {
       // fixme throw error
     }
@@ -26,7 +26,7 @@ export class RichTextMutator {
 
   public insert(content: RichTextNode, location: RichTextLocation): RichTextMutator {
     const node: RichTextNode = location.getNode();
-    const index: number = location.getIndex();
+    const index: number = location.getIndexInParent();
 
     if (node instanceof RichTextString) {
       if (content instanceof RichTextString &&
@@ -76,7 +76,7 @@ export class RichTextMutator {
       const itemValue = item.value.getAttribute(key);
 
       if (currentRangeStart === null) {
-        currentRangeStart = item.value.location();
+        currentRangeStart = RichTextLocation.ofContent(item.value);
         currentRangeValue = itemValue;
       }
 
@@ -87,8 +87,7 @@ export class RichTextMutator {
         if (currentRangeValue !== value) {
           // The current range value is not the same as what we are trying to
           // set to, so we need a mutation.
-          console.log(currentRangeStart,
-            new RichTextLocation(item.value.location(), this._document, item.value.root()));
+          // fixme
         }
 
         currentRangeValue = itemValue;
@@ -104,8 +103,8 @@ export class RichTextMutator {
   private _splitStingNode(node: RichTextString, index: number): void {
     const parent: RichTextElement = node.parent();
     node.removeFromParent();
-    const leftNode = new RichTextString(parent, this._document, node.getData().substr(0, index), parent.attributes());
-    const rightNode = new RichTextString(parent, this._document, node.getData().substr(index), parent.attributes());
+    const leftNode = new RichTextString(this._document, parent, node.getData().substr(0, index), parent.attributes());
+    const rightNode = new RichTextString(this._document, parent, node.getData().substr(index), parent.attributes());
     parent.insertChildren(index, [leftNode, rightNode]);
   }
 
@@ -114,9 +113,10 @@ export class RichTextMutator {
     const children: RichTextNode[] = [];
 
     content.forEach(c => {
-      if (c instanceof RichTextPartialString) {
+      if (c instanceof RichTextStringFragment) {
+        const str = new RichTextString(this._document, null, c.getData(), c.attributes());
+        children.push(str);
         c.removeFromString();
-        children.push(c.toRichTextString());
       } else if (c instanceof RichTextElement) {
         c.removeFromParent();
         children.push(c);
@@ -148,7 +148,7 @@ export class RichTextMutator {
       nextEnd = nextEnd.parent();
     }
 
-    end = nextEnd.location();
+    end = RichTextLocation.ofContent(nextEnd);
 
     // Continue merging next level.
     this._mergeSubtrees(start, end);
@@ -170,6 +170,6 @@ import {RichTextString} from "./RichTextString";
 import {RichTextElement} from "./RichTextElement";
 import {AttributeUtils} from "./AttributeUtils";
 import {RichTextRange} from "./RichTextRange";
-import {RichTextPartialString} from "./RichTextStringPartial";
 import {RichTextFragment} from "./RichTextFragement";
 import {RichTextContent} from "./RichTextContent";
+import {RichTextStringFragment} from "./RichTextStringFragment";

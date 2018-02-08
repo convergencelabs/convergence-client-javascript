@@ -68,6 +68,54 @@ export abstract class RichTextNode implements RichTextContent {
     }
   }
 
+  public hasParent(): boolean {
+    return Validation.isSet(this._parent);
+  }
+
+  public hasNextSibling(): boolean {
+    if (!this.hasParent()) {
+      return false;
+    } else {
+      const nextIndex = this.index() + 1;
+      return nextIndex < this._parent.childCount();
+    }
+  }
+
+  public nextSibling(): RichTextNode {
+    if (!this.hasParent()) {
+      return null;
+    }
+
+    const nextIndex = this.index() + 1;
+    if (nextIndex >= this._parent.childCount()) {
+      return null;
+    }
+
+    return this._parent.getChild(nextIndex);
+  }
+
+  public hasPreviousSibling(): boolean {
+    if (!this.hasParent()) {
+      return false;
+    } else {
+      const index = this.index();
+      return index > 0;
+    }
+  }
+
+  public previousSibling(): RichTextNode {
+    if (!this.hasParent()) {
+      return null;
+    }
+
+    const prevIndex = this.index() - 1;
+    if (prevIndex < 0) {
+      return null;
+    }
+
+    return this._parent.getChild(prevIndex);
+  }
+
   public document(): RichTextDocument {
     return this._document;
   }
@@ -97,6 +145,8 @@ export abstract class RichTextNode implements RichTextContent {
   public abstract type(): RichTextContentType;
 
   public abstract isA(type: RichTextContentType): boolean;
+
+  public abstract isLeaf(): boolean;
 }
 
 // Note: These import have to be down here for the circular dependency to work.

@@ -1,9 +1,14 @@
-export const RichTextContentTypes: any = {
+export const RichTextContentTypes: {
+  ELEMENT: "element";
+  ROOT: "root";
+  STRING: "string";
+  STRING_FRAGMENT: "stringFragment";
+} = {
   ELEMENT: "element",
   ROOT: "root",
   STRING: "string",
-  PARTIAL_STRING: "partialString"
+  STRING_FRAGMENT: "stringFragment"
 };
 Object.freeze(RichTextContentTypes);
 
-export type RichTextContentType = "element" | "root" | "string" | "partialString";
+export type RichTextContentType = "element" | "root" | "string" | "stringFragment";
