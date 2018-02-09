@@ -1,7 +1,6 @@
 import {RichTextElement} from "./RichTextElement";
 
 export interface RichTextContent {
-
   document(): RichTextDocument;
   root(): RichTextRootElement;
   parent(): RichTextElement;

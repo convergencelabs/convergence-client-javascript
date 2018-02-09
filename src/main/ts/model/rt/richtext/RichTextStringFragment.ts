@@ -2,12 +2,12 @@ import {RichTextContent} from "./RichTextContent";
 
 export class RichTextStringFragment implements RichTextContent {
   private _str: RichTextString;
-  private _offset: number;
+  private _index: number;
   private _length: number;
 
-  constructor(str: RichTextString, offset: number, length: number) {
+  constructor(str: RichTextString, index: number, length: number) {
     this._str = str;
-    this._offset = offset;
+    this._index = index;
     this._length = length;
   }
 
@@ -27,8 +27,8 @@ export class RichTextStringFragment implements RichTextContent {
     return this._str.path();
   }
 
-  public offset(): number {
-    return this._offset;
+  public index(): number {
+    return this._index;
   }
 
   public length(): number {
@@ -40,12 +40,12 @@ export class RichTextStringFragment implements RichTextContent {
   }
 
   public getData(): string {
-    return this._str.getData().substring(this._offset, this._offset + this._length);
+    return this._str.getData().substring(this._index, this._index + this._length);
   }
 
   public removeFromString(): void {
-    this._str.remove(this._offset, this._length);
-    this._offset = 0;
+    this._str.remove(this._index, this._length);
+    this._index = 0;
     this._length = 0;
   }
 
@@ -83,8 +83,9 @@ export class RichTextStringFragment implements RichTextContent {
 
   public toString(): string {
     return `[RichTextStringFragment ` +
-      `data: '${this.getData}', ` +
-      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+      `data: '${this.getData()}', ` +
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))}, ` +
+      `path: ${JSON.stringify((this.path()))} ]`;
   }
 }
 

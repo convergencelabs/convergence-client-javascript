@@ -46,7 +46,8 @@ export class RichTextString extends RichTextNode {
   public toString(): string {
     return `[RichTextString ` +
       `data: '${this._data}', ` +
-      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))}, ` +
+      `path: ${JSON.stringify((this.path()))} ]`;
   }
 }
 

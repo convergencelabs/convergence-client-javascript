@@ -94,6 +94,19 @@ export abstract class RichTextNode implements RichTextContent {
     return this._parent.getChild(nextIndex);
   }
 
+  public nextShallowestSibling(): RichTextNode {
+    let cur: RichTextNode = this;
+    let sibling: RichTextNode = null;
+    while (cur !== null && sibling === null) {
+      sibling = cur.nextSibling();
+      if (sibling === null) {
+        cur = cur.parent();
+      }
+    }
+
+    return sibling;
+  }
+
   public hasPreviousSibling(): boolean {
     if (!this.hasParent()) {
       return false;

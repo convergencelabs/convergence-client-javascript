@@ -41,13 +41,13 @@ export class RichTextElement extends RichTextNode {
   public getChildByPath(path: RichTextPath): RichTextNode {
     let node: RichTextNode = this;
 
-    for (const index of path) {
-      if (node instanceof RichTextElement) {
-        node = node.getChild(index);
-      } else {
+    path.forEach((val, index) => {
+      if (node.isA(RichTextContentTypes.ELEMENT) || node.isA(RichTextContentTypes.ROOT)) {
+        node = (node as RichTextElement).getChild(val);
+      } else if (!(node.isA(RichTextContentTypes.STRING) && index === path.length - 1)) {
         throw new ConvergenceError(`Invalid RichTextPath: ${path}`, "invalid-rich-text-path");
       }
-    }
+    });
 
     return node;
   }
@@ -110,7 +110,8 @@ export class RichTextElement extends RichTextNode {
     return `[RichTextElement ` +
       `name: '${this._name}', ` +
       `children: [${this._children.length}], ` +
-      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))}, ` +
+      `path: ${JSON.stringify((this.path()))} ]`;
   }
 }
 

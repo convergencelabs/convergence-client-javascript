@@ -1,12 +1,10 @@
 import {RichTextContent} from "./RichTextContent";
 
 export class RichTextRange implements Iterable<RichTextContent> {
-  private _document: RichTextDocument;
   private _start: RichTextLocation;
   private _end: RichTextLocation;
 
-  constructor(document: RichTextDocument, start: RichTextLocation, end: RichTextLocation) {
-    this._document = document;
+  constructor(start: RichTextLocation, end: RichTextLocation) {
     this._start = start;
     this._end = end;
   }
@@ -24,7 +22,7 @@ export class RichTextRange implements Iterable<RichTextContent> {
   }
 
   public getContentRoots(): RichTextContent[] {
-    const iterator = new RichTextIterator({boundary: this, shallow: true});
+    const iterator = new RichTextIterator({range: this, shallow: true});
     const result: RichTextContent[] = [];
 
     for (let content of iterator) {
@@ -34,15 +32,14 @@ export class RichTextRange implements Iterable<RichTextContent> {
   }
 
   public * [ Symbol.iterator ](): IterableIterator<RichTextContent> {
-    yield* new RichTextIterator({boundary: this});
+    yield* new RichTextIterator({range: this});
   }
 
   public iterator(): IterableIterator<RichTextContent> {
-    return new RichTextIterator({boundary: this});
+    return new RichTextIterator({range: this});
   }
 }
 
 import {RichTextLocation} from "./RichTextLocation";
 import {RichTextElement} from "./RichTextElement";
-import {RichTextDocument} from "./RichTextDocument";
 import {RichTextIterator} from "./RichTextIterator";

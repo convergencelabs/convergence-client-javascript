@@ -7,7 +7,7 @@ export class RichTextMutator {
 
   public insertText(text: string, location: RichTextLocation, attributes?: Map<string, any>): RichTextMutator {
     const parent: RichTextNode = location.getNode();
-    const index: number = location.getIndexInParent();
+    const index: number = location.getIndex();
 
     if (parent instanceof RichTextString && (
         !attributes || AttributeUtils.areAttributesEqual(attributes, parent.attributes()))) {
@@ -26,7 +26,7 @@ export class RichTextMutator {
 
   public insert(content: RichTextNode, location: RichTextLocation): RichTextMutator {
     const node: RichTextNode = location.getNode();
-    const index: number = location.getIndexInParent();
+    const index: number = location.getIndex();
 
     if (node instanceof RichTextString) {
       if (content instanceof RichTextString &&

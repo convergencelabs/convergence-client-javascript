@@ -40,6 +40,7 @@ export class RichTextRootElement extends RichTextElement {
       `rootName: '${this._rootName}', ` +
       `name: '${this._name}', ` +
       `children: [${this._children.length}], ` +
-      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))} ]`;
+      `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))}, ` +
+      `path: ${JSON.stringify((this.path()))} ]`;
   }
 }
