@@ -3,7 +3,7 @@ export class ConvergenceError extends Error {
   private _code: string;
   private _details: { [key: string]: any };
 
-  constructor(message: string, code: string, details?: { [key: string]: any }) {
+  constructor(message: string, code?: string, details?: { [key: string]: any }) {
     super(message);
 
     this._code = code;

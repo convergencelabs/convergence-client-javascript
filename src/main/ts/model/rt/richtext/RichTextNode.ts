@@ -6,6 +6,10 @@ export abstract class RichTextNode implements RichTextContent {
   private _attributes: Map<string, any>;
 
   constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
+    if (Validation.isNotSet(document)) {
+      throw new ConvergenceError("The document must be set.", "rich-text-node-document-not-set");
+    }
+
     this._parent = parent;
     this._document = document;
     this._attributes = attributes || new Map<string, any>();
@@ -24,7 +28,6 @@ export abstract class RichTextNode implements RichTextContent {
       const pos = this._parent.getChildIndex(this);
       return pos;
     } else {
-      // fixme should this be an exception?
       return -1;
     }
   }
@@ -37,14 +40,7 @@ export abstract class RichTextNode implements RichTextContent {
   }
 
   public path(): RichTextPath {
-    if (!this._parent) {
-      return null;
-    }
-
-    const path = this._parent.path();
-    if (path === null) {
-      // We don't have a parent chain that goes all the way up to a
-      // root element, therefore we have no path.
+    if (Validation.isNotSet(this._parent)) {
       return null;
     }
 
@@ -52,6 +48,13 @@ export abstract class RichTextNode implements RichTextContent {
     if (index < 0) {
       // We don't actually exist in our parent element.
       // todo this should be an error.
+      return null;
+    }
+
+    const path = this._parent.path();
+    if (path === null) {
+      // We don't have a parent chain that goes all the way up to a
+      // root element, therefore we have no path.
       return null;
     }
 
@@ -92,19 +95,6 @@ export abstract class RichTextNode implements RichTextContent {
     }
 
     return this._parent.getChild(nextIndex);
-  }
-
-  public nextShallowestSibling(): RichTextNode {
-    let cur: RichTextNode = this;
-    let sibling: RichTextNode = null;
-    while (cur !== null && sibling === null) {
-      sibling = cur.nextSibling();
-      if (sibling === null) {
-        cur = cur.parent();
-      }
-    }
-
-    return sibling;
   }
 
   public hasPreviousSibling(): boolean {
@@ -169,3 +159,4 @@ import {RichTextDocument} from "./RichTextDocument";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
 import {Validation} from "../../../util/Validation";
+import {ConvergenceError} from "../../../util/ConvergenceError";

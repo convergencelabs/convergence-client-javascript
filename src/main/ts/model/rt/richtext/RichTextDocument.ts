@@ -12,44 +12,62 @@ export class RichTextDocument extends EventEmitter {
     this._attributes = new Map<string, any>();
   }
 
-  public getLocation(location: RichTextLocationData, root?: string): RichTextLocation {
-    return new RichTextLocation(location, this, this.getRoot(root));
-  }
+  // // Basic Text Manipulation
+  // public insertText(text: string, location: RichTextLocationData, attributes?: StringMapLike): void {
+  //   // todo
+  // }
+  //
+  // public removeText(text: string, location: RichTextLocationData, length: number): void {
+  //   // todo
+  // }
+  //
+  // public setAttributes(location: RichTextLocationData, length: number, attributes: StringMapLike): void {
+  //   // todo
+  // }
+  //
+  // public setAttribute(location: RichTextLocationData, length: number, key: string, value: any): void {
+  //   // todo
+  // }
+  //
+  // public removeAttributes(location: RichTextLocationData, length: number, key: string[]): void {
+  //   // todo
+  // }
+  //
+  // public removeAttribute(location: RichTextLocationData, length: number, key: string): void {
+  //   // todo
+  // }
 
-  // Basic Text Manipulation
-  public insertText(text: string, location: RichTextLocationData, attributes?: StringMapLike): void {
-    // todo
-  }
-
-  public removeText(text: string, location: RichTextLocationData, length: number): void {
-    // todo
-  }
-
-  public setAttributes(location: RichTextLocationData, length: number, attributes: StringMapLike): void {
-    // todo
-  }
-
-  public setAttribute(location: RichTextLocationData, length: number, key: string, value: any): void {
-    // todo
-  }
-
-  public removeAttributes(location: RichTextLocationData, length: number, key: string[]): void {
-    // todo
-  }
-
-  public removeAttribute(location: RichTextLocationData, length: number, key: string): void {
-    // todo
-  }
-
-  public addRoot(root: RichTextRootElement): void {
-    this._roots.set(root.getRootName(), root);
+  public getRoots(): Map<string, RichTextRootElement> {
+    return new Map(this._roots.entries());
   }
 
   public getRoot(name: string): RichTextRootElement {
     return this._roots.get(name);
   }
 
+  public hasRoot(name: string): boolean {
+    return this._roots.has(name);
+  }
+
+  public addRoot(root: RichTextRootElement): void {
+    if (Validation.isNotSet(root)) {
+      throw new ConvergenceError("Can not add a null or undefined root");
+    }
+
+    const rootName = root.getRootName();
+
+    if (Validation.isSet(this._roots.get(rootName))) {
+      throw new ConvergenceError(`A root with the same name already exists: ${root.getRootName()}`);
+    }
+
+    this._roots.set(rootName, root);
+  }
+
   public removeRoot(name: string): RichTextRootElement {
+    if (Validation.isNotSet(name)) {
+      throw new ConvergenceError(`The root name was not specified: ${name}`);
+    }
+
     const root: RichTextRootElement =  this._roots.get(name);
     if (root) {
       this._roots.delete(name);
@@ -60,6 +78,6 @@ export class RichTextDocument extends EventEmitter {
 }
 
 import {RichTextRootElement} from "./RichTextRootElement";
-import {StringMapLike} from "../../../util/StringMap";
-import {RichTextLocation, RichTextLocationData} from "./RichTextLocation";
 import {RichTextMutator} from "./RichTextMutator";
+import {Validation} from "../../../util/Validation";
+import {ConvergenceError} from "../../../util/ConvergenceError";
