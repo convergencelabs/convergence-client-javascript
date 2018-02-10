@@ -105,12 +105,12 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
       let start = 0;
       let end = nodeToProcess.getData().length - 1;
 
-      if (nodeToProcess === this._startNode && Validation.isSet(this._startLocation.getSubpath())) {
-        start = this._startLocation.getSubpath();
+      if (nodeToProcess === this._startNode && Validation.isSet(this._startLocation.getSubPath())) {
+        start = this._startLocation.getSubPath();
       }
 
-      if (nodeToProcess === this._endNode && Validation.isSet(this._endLocation.getSubpath())) {
-        end = this._endLocation.getSubpath();
+      if (nodeToProcess === this._endNode && Validation.isSet(this._endLocation.getSubPath())) {
+        end = this._endLocation.getSubPath();
       }
 
       if (start !== 0 || end !== nodeToProcess.getData().length - 1) {

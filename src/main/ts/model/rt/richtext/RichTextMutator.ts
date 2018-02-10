@@ -7,7 +7,7 @@ export class RichTextMutator {
 
   public insertText(text: string, location: RichTextLocation, attributes?: Map<string, any>): RichTextMutator {
     const parent: RichTextNode = location.getNode();
-    const index: number = location.getIndex();
+    const index: number = location.getSubPath();
 
     if (parent instanceof RichTextString && (
         !attributes || AttributeUtils.areAttributesEqual(attributes, parent.attributes()))) {
@@ -26,7 +26,7 @@ export class RichTextMutator {
 
   public insert(content: RichTextNode, location: RichTextLocation): RichTextMutator {
     const node: RichTextNode = location.getNode();
-    const index: number = location.getIndex();
+    const index: number = location.getSubPath();
 
     if (node instanceof RichTextString) {
       if (content instanceof RichTextString &&
@@ -127,7 +127,7 @@ export class RichTextMutator {
   }
 
   private _mergeSubtrees(start: RichTextLocation, end: RichTextLocation): void {
-    const commonParent = start.getNearestCommonAncestor(end);
+    const commonParent = start.getNearestCommonAncestor(end).getNode();
 
     // We are done merging since the start or end is already in the common parent.
     if (commonParent === start.getNode() || commonParent === end.getNode()) {
