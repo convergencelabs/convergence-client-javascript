@@ -30,7 +30,7 @@
   },
   "typings": "typings/index.d.ts",
   "publishConfig": {
-    "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
+    "registry": "https://nexus.dev.int.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
     "rxjs": "^5.4.3"
