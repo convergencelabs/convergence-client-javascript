@@ -11,9 +11,9 @@
   "author": {
     "name": "Convergence Labs, Inc.",
     "email": "info@convergencelabs.com",
-    "url": "http://convergencelabs.com"
+    "url": "https://convergence.io"
   },
-  "homepage": "http://convergencelabs.com",
+  "homepage": "https://convergence.io",
   "repository": {
     "type": "git",
     "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"

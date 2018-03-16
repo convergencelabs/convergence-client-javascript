@@ -1,5 +1,5 @@
 # Overview
-This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](http://convergencelabs.com) host platform.
+This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](https://convergence.io host platform.
 
 Convergence is a hosted platform for rapidly developing real-time collaborative applications. At the heart of Convergence is it's collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
 
@@ -55,7 +55,7 @@ Convergence.connect("<domain-url>", "username", "password").then(domain => {
 # Documentation
 The full compliment of Convergence documentation can be found here:
 
-http://convergencelabs.com/learn/
+https://convergence.io/learn/
 
 # Hot-Linking in the Browser
 Convergence requires RxJS 5.x.  This dependency is taken care of when using the npm module.  If including via a script tag, you have two options.

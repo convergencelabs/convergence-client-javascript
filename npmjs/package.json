@@ -12,15 +12,15 @@
   "author": {
     "name": "Convergence Labs, Inc.",
     "email": "info@convergencelabs.com",
-    "url": "http://convergencelabs.com"
+    "url": "https://convergence.io"
   },
   "maintainers": [{
       "name": "Convergence Labs, Inc.",
       "email": "info@convergencelabs.com",
-      "url": "http://convergencelabs.com"
+      "url": "https://convergence.io"
   }],
   "contributors": [],
-  "homepage": "http://convergencelabs.com",
+  "homepage": "https://convergence.io",
   "bugs": {
     "email": "support@convergencelabs.com"
   },
@@ -29,14 +29,14 @@
   "dependencies": {
     "rxjs": "^5.4.3"
   },
-  "license": "SEE LICENSE IN http://www.convergencelabs.com/terms/services/",
+  "license": "SEE LICENSE IN https://convergence.io/terms",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "repository": {
     "type": "none",
-    "url": "http://convergencelabs.com/"
+    "url": "https://convergence.io"
   },
   "engines" : {
     "node" : ">=6.0.0"

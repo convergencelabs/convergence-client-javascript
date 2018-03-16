@@ -1,5 +1,5 @@
 /**!
 © 2016-2017 Convergence Labs, Inc.; All Rights Reserved.
 @version <%= package.version %>
-@license http://convergencelabs.com/terms/services/
+@license https://convergence.io/terms
 */
