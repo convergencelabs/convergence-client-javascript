@@ -1,4 +1,4 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
+import {IncomingProtocolResponseMessage, OutgoingProtocolRequestMessage} from "../protocol";
 import {UserGroup} from "../../../identity/UserGroup";
 
 export interface UserGroupsRequest extends OutgoingProtocolRequestMessage {
@@ -11,7 +11,7 @@ export function UserGroupRequestSerializer(request: UserGroupsRequest): any {
   };
 }
 
-export interface UserGroupsResponse {
+export interface UserGroupsResponse extends IncomingProtocolResponseMessage {
   groups: UserGroup[];
 }
 
@@ -36,7 +36,7 @@ export function UserGroupsForUsersRequestSerializer(request: UserGroupsForUsersR
   };
 }
 
-export interface UserGroupsForUsersResponse {
+export interface UserGroupsForUsersResponse extends IncomingProtocolResponseMessage {
   groupsByUser: {[key: string]: string[]};
 }
 

@@ -15,3 +15,4 @@ typings
 /.project
 examples/connection.js
 .npmrc
+.nyc_output

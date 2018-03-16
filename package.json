@@ -23,13 +23,14 @@
   "license": "UNLICENSED",
   "scripts": {
     "dist": "gulp",
-    "test": "gulp test",
     "clean": "gulp clean",
-    "lint": "gulp lint"
+    "lint": "gulp lint",
+    "test": "gulp test",
+    "test:cover": "mocha --recursive src/**/*Spec.ts --compilers ts:ts-node/register -R spec"
   },
   "typings": "typings/index.d.ts",
   "publishConfig": {
-    "registry": "https://nexus.convergencelabs.tech/repository/convergence-npm/"
+    "registry": "https://nexus.dev.int.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
     "rxjs": "^5.4.3"
@@ -61,16 +62,39 @@
     "mocha": "3.2.0",
     "mocha-typescript": "1.0.15",
     "mock-socket": "6.0.4",
+    "nyc": "^11.4.1",
     "rollup": "0.39.2",
     "rollup-plugin-typescript": "0.8.1",
     "rollup-stream": "1.16.0",
     "run-sequence": "1.2.2",
     "sinon": "1.17.7",
     "sinon-chai": "2.8.0",
+    "ts-node": "^4.1.0",
     "tslint": "4.2.0",
-    "typescript": "2.3.4",
+    "typescript": "2.7.1",
     "uglify-js": "2.7.5",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
+  },
+  "nyc": {
+    "include": [
+      "src/*.ts",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "typings",
+      "**/*.d.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "json",
+      "html"
+    ],
+    "all": true
   }
 }

@@ -153,7 +153,7 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   public subscribe(username: string): Promise<UserPresenceSubscription>
   public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>
   public subscribe(usernames: string | string[]):
-    Promise<UserPresenceSubscription> | Promise<UserPresenceSubscription[]> {
+    Promise<UserPresenceSubscription | UserPresenceSubscription[]> {
     let requested: string[];
     if (typeof usernames === "string") {
       requested = [<string> usernames];

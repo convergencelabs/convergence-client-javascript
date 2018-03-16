@@ -234,7 +234,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
       const channelData = message.channels[0];
       const info = this._createChannelInfo(channelData);
       const channel = this._createChannel(info);
-      return channel;
+      return channel as DirectChatChannel;
     });
   }
 

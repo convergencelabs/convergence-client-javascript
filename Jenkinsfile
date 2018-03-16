@@ -1,36 +1,19 @@
-node {
-  notifyFor() {
-    deleteDir()
-    withCredentials([[$class: 'StringBinding', credentialsId: 'NpmAuthToken', variable: 'NPM_TOKEN'],
-    [$class: 'StringBinding', credentialsId: 'ConvNpmAuthToken', variable: 'C_NPM_TOKEN']]) {
+nodePod { label ->
+  runInNode(label) {
+    container('node') {
+      npmLogin()
 
-      stage 'Checkout'
-      checkout scm
+      stage('NPM Install') {
+        sh 'npm install'
+      }
 
-      gitlabCommitStatus {
-        stage 'Setup Registry'
-        sh '''
-          npm config set registry https://nexus.convergencelabs.tech/repository/npm/
-          npm config set //nexus.convergencelabs.tech/repository/npm/:_authToken=$NPM_TOKEN
-          npm config set //nexus.convergencelabs.tech/repository/convergence-npm/:_authToken=$C_NPM_TOKEN
-        '''
+      stage('Compile') {
+        sh 'npm run dist'
+      }
 
-        stage 'NPM Install'
-        sh '''
-          npm install
-        '''
-
-        stage 'Compile'
-        sh '''
-          npm run dist
-        '''
-
-        stage 'Publish'
-        sh '''
-          npm publish dist-internal
-        '''
+      stage('Publish') {
+        sh 'npm publish dist-internal'
       }
     }
-    deleteDir()
   }
 }

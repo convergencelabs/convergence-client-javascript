@@ -27,6 +27,7 @@ const mockSocket: any = require('mock-socket');
 if (typeof global['WebSocket'] === "undefined") {
   global['WebSocket'] = mockSocket.WebSocket;
 }
+
 /* tslint:enable */
 
 /**
@@ -51,8 +52,12 @@ export class MockConvergenceServer {
 
   private _currentReceiveAction: AbstractReceiveAction;
 
+  private _debugging: boolean = false;
+
   constructor(options: IMockServerOptions) {
     this._url = options.url;
+
+    this._debugging = options.debugging || false;
 
     switch (options.doneType) {
       case DoneType.MOCHA:
@@ -211,7 +216,8 @@ export class MockConvergenceServer {
 
     this._mockSocketServer = new mockSocket.Server(this._url);
     this._mockSocketServer.on("connection", (server: any, ws: any) => {
-      console.log("Client connected to mock server");
+
+      this._debug("Client connected to mock server");
       this._flushSendsAndWait();
       server.on("message", (message: string) => {
         // this is needed to keep everything properly async.
@@ -223,7 +229,7 @@ export class MockConvergenceServer {
       });
 
       server.on("close", (code: number, reason: string) => {
-        console.log("Mock Server connection closed");
+        this._debug("Mock Server connection closed");
       });
     });
   }
@@ -308,7 +314,7 @@ export class MockConvergenceServer {
     if (envelope.b.t === MessageType.PING) {
       this._mockSocketServer.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
     } else {
-      console.log("Server Receive: " + json);
+      this._debug("Server Receive: " + json);
 
       if (this._currentReceiveAction === undefined) {
         this._doneManager.testFailure(new Error("Received a message, but was not expecting one"));
@@ -346,8 +352,14 @@ export class MockConvergenceServer {
 
   private _send(envelope: any): void {
     const json: string = JSON.stringify(envelope);
-    console.log("Server Sending: " + json);
+    this._debug("Server Sending: " + json);
     this._mockSocketServer.send(json);
+  }
+
+  private _debug(msg: string): void {
+    if (this._debugging) {
+      console.log(msg);
+    }
   }
 }
 
@@ -376,6 +388,8 @@ export interface IMockServerOptions {
 
   successCallback?: SuccessCallback;
   failureCallback?: FailureCallback;
+
+  debugging?: boolean;
 }
 
 export type SuccessCallback = () => void;

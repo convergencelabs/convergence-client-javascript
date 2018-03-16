@@ -121,43 +121,17 @@ gulp.task("copy-npmjs", function (cb) {
   return gulp.src(["./npmjs/**/*"]).pipe(gulp.dest(dist));
 });
 
-gulp.task("test", ["test-build"], function () {
-  return gulp.src("build/test*/**/*.js")
-    .pipe(mocha({reporter: "progress"}));
-});
-
-gulp.task("test-build", [], function () {
-  const tsProject = ts.createProject("tsconfig.json");
-
-  // We need this here because we need to create the d.ts, but we
-  // can"t put this in the tsconfig because the other steps bomb out.
-  tsProject.options.declaration = true;
-
-  const tsResult = gulp.src(["src/**/*.ts"])
-    .pipe(tsProject());
-
-  return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done.
-    tsResult.dts.pipe(gulp.dest("build")),
-    tsResult.js.pipe(gulp.dest("build"))
-  ]);
-});
-
-gulp.task("coverage", ["test-build"], function () {
-  return gulp.src("build/**/*.js")
-    .pipe(istanbul()) // Covering files
-    .pipe(istanbul.hookRequire()) // Force `require` to return covered files
-    .on("finish", function () {
-      gulp.src("build/test*/**/*.js")
-        .pipe(mocha({reporter: "progress"}))
-        .pipe(istanbul.writeReports()) // Creating the reports after tests run
-        .on("finish", function () {
-          process.chdir(__dirname);
-        });
-    });
+gulp.task("test", function () {
+  // todo consolidate with the npm version
+  return gulp.src("src/test*/**/*Spec.ts")
+    .pipe(mocha({
+      reporter: "progress",
+      require: ['ts-node/register']
+    }));
 });
 
 gulp.task("clean", function () {
-  return del(["dist-internal", "dist", "build", "coverage"]);
+  return del(["dist-internal", "dist", "build", "coverage", ".nyc_output"]);
 });
 
 function minify(src, dest) {

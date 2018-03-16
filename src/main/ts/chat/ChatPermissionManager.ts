@@ -74,7 +74,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetClientPermissionsResponse) => {
-      return response.permissions;
+      return response.permissions as ChatPermission[];
     });
   }
 
@@ -125,7 +125,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetWorldPermissionsResponse) => {
-      return response.permissions;
+      return response.permissions as ChatPermission[];
     });
   }
 
@@ -215,7 +215,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetAllUserPermissionsResponse) => {
-      return response.users;
+      return response.users as Map<string, ChatPermission[]>;
     });
   }
 
@@ -228,7 +228,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetUserPermissionsResponse) => {
-      return response.permissions;
+      return response.permissions as ChatPermission[];
     });
   }
 
@@ -318,7 +318,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetAllGroupPermissionsResponse) => {
-      return response.groups;
+      return response.groups as Map<string, ChatPermission[]>;
     });
   }
 
@@ -331,7 +331,7 @@ export class ChatPermissionManager {
     };
 
     return this._connection.request(request).then((response: GetGroupPermissionsResponse) => {
-      return response.permissions;
+      return response.permissions as ChatPermission[];
     });
   }
 
