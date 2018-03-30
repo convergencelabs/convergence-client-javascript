@@ -10,7 +10,7 @@ import {EventEmitter} from "../util/EventEmitter";
 import {SessionImpl} from "../SessionImpl";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Session} from "../Session";
-import {PasswordAuthRequest, AnonymousAuthRequest} from "./protocol/authentication";
+import {PasswordAuthRequest, AnonymousAuthRequest, ReconnectTokenResponse} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
 import {TokenAuthRequest} from "./protocol/authentication";
 import {AuthRequest} from "./protocol/authentication";
@@ -152,6 +152,14 @@ export class ConvergenceConnection extends EventEmitter {
     return this._connectionState === ConnectionState.CONNECTED;
   }
 
+  public getReconnectToken(): Promise<string> {
+    const message: OutgoingProtocolRequestMessage = {type: MessageType.RECONNECT_TOKEN_REQUEST};
+
+    return this.request(message).then((response: ReconnectTokenResponse) => {
+      return response.token;
+    });
+  }
+
   public send(message: OutgoingProtocolMessage): void {
     this._protocolConnection.send(message);
   }
@@ -172,6 +180,14 @@ export class ConvergenceConnection extends EventEmitter {
   public authenticateWithToken(token: string): Promise<AuthResponse> {
     const authRequest: TokenAuthRequest = {
       type: MessageType.TOKEN_AUTH_REQUEST,
+      token
+    };
+    return this._authenticate(authRequest);
+  }
+
+  public authenticateWithReconnectToken(token: string): Promise<AuthResponse> {
+    const authRequest: ReconnectTokenAuthRequest = {
+      type: MessageType.RECONNECT_AUTH_REQUEST,
       token
     };
     return this._authenticate(authRequest);
@@ -356,7 +372,7 @@ export interface MessageEvent {
 }
 
 export interface AuthResponse {
-  state: {[key: string]: void};
+  state: { [key: string]: void };
 }
 
 enum ConnectionState {

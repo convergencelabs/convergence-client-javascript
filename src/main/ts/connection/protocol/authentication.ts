@@ -28,6 +28,16 @@ export const TokenAuthRequestSerializer: MessageBodySerializer = (request: Token
   };
 };
 
+export interface ReconnectAuthRequest extends AuthRequest {
+  token: string;
+}
+
+export const ReconnectAuthRequestSerializer: MessageBodySerializer = (request: ReconnectAuthRequest) => {
+  return {
+    k: request.token
+  };
+};
+
 export interface AnonymousAuthRequest extends AuthRequest {
   displayName?: string;
 }
@@ -51,6 +61,16 @@ export const AuthenticationResponseDeserializer: MessageBodyDeserializer<Authent
     username: body.n,
     sessionId: body.e,
     state: body.p
+  };
+};
+
+export interface ReconnectTokenResponse extends IncomingProtocolResponseMessage {
+  token: string;
+}
+
+export const ReconnectTokenResponseDeserializer: MessageBodyDeserializer<ReconnectTokenResponse> = (body: any) => {
+  return {
+    token: body.k
   };
 };
 

@@ -89,6 +89,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     return this._connection.authenticateWithToken(token).then(m => this._init(m));
   }
 
+  public _authenticateWithReconnectToken(token: string): Promise<void> {
+    return this._connection.authenticateWithReconnectToken(token).then(m => this._init(m));
+  }
+
   public _authenticateAnonymously(displayName?: string): Promise<void> {
     return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
   }
@@ -119,6 +123,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
 
   public chat(): ChatService {
     return this._chatService;
+  }
+
+  public getReconnectToken(): Promise<string> {
+    return this._connection.getReconnectToken();
   }
 
   public dispose(): Promise<void> {
