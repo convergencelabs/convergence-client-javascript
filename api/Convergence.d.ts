@@ -17,7 +17,7 @@ export declare class Convergence {
                                options?: ConvergenceOptions): Promise<ConvergenceDomain>;
 
   public static reconnect(url: string,
-                          token: string): Promise<ConvergenceDomain>;
+                          token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;
 }
 
 export declare function connect(url: string, username: string, password: string,
@@ -29,4 +29,4 @@ export declare function connectAnonymously(url: string, displayName?: string,
 export declare function connectWithJwt(url: string, token: string,
                                        options?: ConvergenceOptions): Promise<ConvergenceDomain>;
 
-export declare function reconnect(url: string, token: string): Promise<ConvergenceDomain>;
+export declare function reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain>;

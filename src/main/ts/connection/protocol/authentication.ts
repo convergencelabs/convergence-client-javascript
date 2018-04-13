@@ -52,6 +52,7 @@ export interface AuthenticationResponse extends IncomingProtocolResponseMessage 
   success: boolean;
   username: string;
   sessionId: string;
+  reconnectToken: string;
   state: {[key: string]: any};
 }
 
@@ -60,17 +61,8 @@ export const AuthenticationResponseDeserializer: MessageBodyDeserializer<Authent
     success: body.s,
     username: body.n,
     sessionId: body.e,
+    reconnectToken: body.k,
     state: body.p
-  };
-};
-
-export interface ReconnectTokenResponse extends IncomingProtocolResponseMessage {
-  token: string;
-}
-
-export const ReconnectTokenResponseDeserializer: MessageBodyDeserializer<ReconnectTokenResponse> = (body: any) => {
-  return {
-    token: body.k
   };
 };
 

@@ -14,9 +14,6 @@ export enum MessageType {
 
   AUTHENTICATE_RESPONSE = 10,
 
-  RECONNECT_TOKEN_REQUEST = 20,
-  RECONNECT_TOKEN_RESPONSE = 21,
-
     //
     // Models
     //

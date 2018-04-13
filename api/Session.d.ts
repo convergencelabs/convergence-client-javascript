@@ -17,6 +17,11 @@ export interface Session {
   username(): string;
 
   /**
+   * @return The reconnectToken for the authenticated client or null if not authenticated
+   */
+  reconnectToken(): string;
+
+  /**
    * @return True if the client is connected to the domain
    */
   isConnected(): boolean;

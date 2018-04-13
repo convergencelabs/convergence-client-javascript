@@ -35,6 +35,4 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   public dispose(): void;
 
   public isDisposed(): boolean;
-
-  public getReconnectToken(): Promise<string>;
 }

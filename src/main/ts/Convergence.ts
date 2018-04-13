@@ -32,8 +32,8 @@ export class Convergence {
     });
   }
 
-  public static reconnect(url: string, token: string): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url);
+  public static reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithReconnectToken(token);
     }).then(() => {
@@ -56,6 +56,6 @@ export function connectWithJwt(url: string, token: string, options?: Convergence
   return Convergence.connectWithJwt(url, token, options);
 }
 
-export function reconnect(url: string, token: string): Promise<ConvergenceDomain> {
-  return Convergence.reconnect(url, token);
+export function reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  return Convergence.reconnect(url, token, options);
 }

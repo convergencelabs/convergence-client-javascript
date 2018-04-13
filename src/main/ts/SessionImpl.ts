@@ -1,6 +1,6 @@
-import { ConvergenceConnection } from "./connection/ConvergenceConnection";
-import { ConvergenceDomain } from "./ConvergenceDomain";
-import { Session } from "./Session";
+import {ConvergenceConnection} from "./connection/ConvergenceConnection";
+import {ConvergenceDomain} from "./ConvergenceDomain";
+import {Session} from "./Session";
 
 export class SessionImpl implements Session {
 
@@ -8,12 +8,15 @@ export class SessionImpl implements Session {
   private _connection: ConvergenceConnection;
   private _sessionId: string;
   private _username: string;
+  private _reconnectToken: string;
   private _authenticated: boolean;
 
-  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection, sessionId: string, username: string) {
+  constructor(domain: ConvergenceDomain, connection: ConvergenceConnection,
+              sessionId: string, username: string, reconnectToken: string) {
     this._domain = domain;
     this._sessionId = sessionId;
     this._username = username;
+    this._reconnectToken = reconnectToken;
     this._connection = connection;
     this._authenticated = false;
   }
@@ -45,6 +48,17 @@ export class SessionImpl implements Session {
 
   public _setUsername(username: string): void {
     this._username = username;
+  }
+
+  /**
+   * @return The reconnectToken for the authenticated client or null if not authenticated
+   */
+  public reconnectToken(): string {
+    return this._reconnectToken;
+  }
+
+  public _setReconnectToken(reconnectToken: string): void {
+    this._reconnectToken = reconnectToken;
   }
 
   /**

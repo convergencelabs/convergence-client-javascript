@@ -10,7 +10,7 @@ import {EventEmitter} from "../util/EventEmitter";
 import {SessionImpl} from "../SessionImpl";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Session} from "../Session";
-import {PasswordAuthRequest, AnonymousAuthRequest, ReconnectTokenResponse} from "./protocol/authentication";
+import {PasswordAuthRequest, AnonymousAuthRequest} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
 import {TokenAuthRequest} from "./protocol/authentication";
 import {AuthRequest} from "./protocol/authentication";
@@ -88,7 +88,7 @@ export class ConvergenceConnection extends EventEmitter {
     this._messageEmitter = new EventEmitter();
     this._messageSubject = new Subject();
 
-    this._session = new SessionImpl(domain, this, null, null);
+    this._session = new SessionImpl(domain, this, null, null, null);
   }
 
   public session(): Session {
@@ -150,14 +150,6 @@ export class ConvergenceConnection extends EventEmitter {
 
   public isConnected(): boolean {
     return this._connectionState === ConnectionState.CONNECTED;
-  }
-
-  public getReconnectToken(): Promise<string> {
-    const message: OutgoingProtocolRequestMessage = {type: MessageType.RECONNECT_TOKEN_REQUEST};
-
-    return this.request(message).then((response: ReconnectTokenResponse) => {
-      return response.token;
-    });
   }
 
   public send(message: OutgoingProtocolMessage): void {
@@ -251,10 +243,11 @@ export class ConvergenceConnection extends EventEmitter {
       if (response.success === true) {
         this._session._setUsername(response.username);
         this._session._setSessionId(response.sessionId);
+        this._session._setReconnectToken(response.reconnectToken);
         this._session.setAuthenticated(true);
         const resp: AuthResponse = {
           state: response.state
-        };
+      };
         return resp;
       } else {
         throw new Error("Authentication failed");

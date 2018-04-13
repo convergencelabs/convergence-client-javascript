@@ -6,7 +6,6 @@ import {HandshakeRequestSerializer} from "./handhsake";
 import {HandshakeResponseDeserializer} from "./handhsake";
 import {
   PasswordAuthRequestSerializer, AnonymousAuthRequestSerializer, ReconnectAuthRequestSerializer,
-  ReconnectTokenResponseDeserializer
 } from "./authentication";
 import {TokenAuthRequestSerializer} from "./authentication";
 import {AuthenticationResponseDeserializer} from "./authentication";
@@ -215,10 +214,6 @@ MessageSerializer.registerMessageBodySerializer(MessageType.PASSWORD_AUTH_REQUES
 MessageSerializer.registerMessageBodySerializer(MessageType.TOKEN_AUTH_REQUEST, TokenAuthRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.ANONYMOUS_AUTH_REQUEST, AnonymousAuthRequestSerializer);
 MessageSerializer.registerMessageBodySerializer(MessageType.RECONNECT_AUTH_REQUEST, ReconnectAuthRequestSerializer);
-
-MessageSerializer.registerDefaultMessageBodySerializer(MessageType.RECONNECT_TOKEN_REQUEST);
-MessageSerializer.registerMessageBodyDeserializer(MessageType.RECONNECT_TOKEN_RESPONSE,
-  ReconnectTokenResponseDeserializer);
 
 MessageSerializer.registerMessageBodySerializer(MessageType.ERROR, ErrorMessageSerializer);
 

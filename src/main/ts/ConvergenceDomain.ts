@@ -125,10 +125,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     return this._chatService;
   }
 
-  public getReconnectToken(): Promise<string> {
-    return this._connection.getReconnectToken();
-  }
-
   public dispose(): Promise<void> {
     this._disposed = true;
     this._modelService._dispose();
