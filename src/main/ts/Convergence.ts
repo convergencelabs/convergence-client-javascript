@@ -31,6 +31,15 @@ export class Convergence {
       return domain;
     });
   }
+
+  public static reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    return domain._connect().then((response) => {
+      return domain._authenticateWithReconnectToken(token);
+    }).then(() => {
+      return domain;
+    });
+  }
 }
 
 export function connect(url: string, username: string, password: string,
@@ -45,4 +54,8 @@ export function connectAnonymously(url: string, displayName?: string,
 
 export function connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
   return Convergence.connectWithJwt(url, token, options);
+}
+
+export function reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  return Convergence.reconnect(url, token, options);
 }

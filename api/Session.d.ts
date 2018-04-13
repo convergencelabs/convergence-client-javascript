@@ -12,9 +12,14 @@ export interface Session {
   sessionId(): string;
 
   /**
-   * @return The username of the authenticated client or null if not authenticated
+   * @return The username of the authenticated client
    */
   username(): string;
+
+  /**
+   * @return The reconnectToken for the authenticated client
+   */
+  reconnectToken(): string;
 
   /**
    * @return True if the client is connected to the domain

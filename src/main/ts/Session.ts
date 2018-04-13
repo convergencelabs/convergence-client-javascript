@@ -1,4 +1,4 @@
-import { ConvergenceDomain } from "./ConvergenceDomain";
+import {ConvergenceDomain} from "./ConvergenceDomain";
 
 export interface Session {
   /**
@@ -15,6 +15,11 @@ export interface Session {
    * @return The username of the authenticated client or null if not authenticated
    */
   username(): string;
+
+  /**
+   * @return The reconnectToken for the authenticated client or null if not authenticated
+   */
+  reconnectToken(): string;
 
   /**
    * @return True if the client is connected to the domain

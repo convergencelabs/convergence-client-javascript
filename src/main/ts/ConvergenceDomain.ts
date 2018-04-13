@@ -89,6 +89,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     return this._connection.authenticateWithToken(token).then(m => this._init(m));
   }
 
+  public _authenticateWithReconnectToken(token: string): Promise<void> {
+    return this._connection.authenticateWithReconnectToken(token).then(m => this._init(m));
+  }
+
   public _authenticateAnonymously(displayName?: string): Promise<void> {
     return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
   }
