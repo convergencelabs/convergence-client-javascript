@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/AttributeUtils";
+import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/model/AttributeUtils";
 
 describe("AttributeUtils", () => {
   describe("areAttributesEqual", () => {

@@ -158,5 +158,5 @@ import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
-import {Validation} from "../../../util/Validation";
-import {ConvergenceError} from "../../../util/ConvergenceError";
+import {Validation} from "../../../../util/Validation";
+import {ConvergenceError} from "../../../../util/ConvergenceError";

@@ -12,7 +12,7 @@ Convergence.connectAnonymously(DOMAIN_URL).then(function (domain) {
   return domain.models().open("example", "quill-plain-text", function (collectionId, modelId) {
     return {"text": "test value"};
   });
-}).then(bind);
+}).then((model));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Two Way Binding from Quill to Convergence

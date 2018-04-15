@@ -1,8 +1,8 @@
 import {expect} from "chai";
-import {RichTextElement} from "../../../../main/ts/model/rt/richtext/RichTextElement";
-import {RichTextDocument} from "../../../../main/ts/model/rt/richtext/RichTextDocument";
-import {RichTextRootElement} from "../../../../main/ts/model/rt/richtext/RichTextRootElement";
-import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/AttributeUtils";
+import {RichTextElement} from "../../../../main/ts/model/rt/richtext/model/RichTextElement";
+import {RichTextDocument} from "../../../../main/ts/model/rt/richtext/model/RichTextDocument";
+import {RichTextRootElement} from "../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
+import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/model/AttributeUtils";
 
 describe("RichTextElement", () => {
   describe("constructor", () => {

@@ -95,4 +95,4 @@ import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextPath} from "./RichTextLocation";
-import {StringMap} from "../../../util/StringMap";
+import {StringMap} from "../../../../util/StringMap";

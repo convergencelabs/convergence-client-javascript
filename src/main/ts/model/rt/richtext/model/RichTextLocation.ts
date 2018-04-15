@@ -1,10 +1,10 @@
-import {ConvergenceError} from "../../../util/ConvergenceError";
+import {ConvergenceError} from "../../../../util/ConvergenceError";
 
 export type RichTextPath = number[];
 
 export class RichTextLocation {
 
-  public static ofRoot(root: RichTextRootElement) {
+  public static ofRoot(root: RichTextRootElement): RichTextLocation  {
     return new RichTextLocation(root, []);
   }
 
@@ -12,12 +12,16 @@ export class RichTextLocation {
     return new RichTextLocation(node.root(), node.path());
   }
 
-  public static ofPath(root: RichTextRootElement, path: RichTextPath) {
+  public static ofPath(root: RichTextRootElement, path: RichTextPath): RichTextLocation  {
     return new RichTextLocation(root, path);
   }
 
-  public static ofStringIndex(node: RichTextString, index?: number) {
+  public static ofStringIndex(node: RichTextString, index?: number): RichTextLocation  {
     return new RichTextLocation(node.root(), node.path(), index);
+  }
+
+  public static ofTextOffset(root: RichTextRootElement, offset: number): RichTextLocation  {
+    throw new Error("not implemented");
   }
 
   private _root: RichTextRootElement;
@@ -108,4 +112,5 @@ import {RichTextNode} from "./RichTextNode";
 import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextContent} from "./RichTextContent";
 import {RichTextString} from "./RichTextString";
-import {Validation} from "../../../util/Validation";
+import {Validation} from "../../../../util/Validation";
+import {RichTextDocument} from "./RichTextDocument";

@@ -1,8 +1,8 @@
-import {RichTextDocument} from "../../../../../main/ts/model/rt/richtext/RichTextDocument";
-import {RichTextRootElement} from "../../../../../main/ts/model/rt/richtext/RichTextRootElement";
-import {RichTextString} from "../../../../../main/ts/model/rt/richtext/RichTextString";
-import {RichTextElement} from "../../../../../main/ts/model/rt/richtext/RichTextElement";
-import {RichTextNode} from "../../../../../main/ts/model/rt/richtext/RichTextNode";
+import {RichTextDocument} from "../../../../../main/ts/model/rt/richtext/model/RichTextDocument";
+import {RichTextRootElement} from "../../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
+import {RichTextString} from "../../../../../main/ts/model/rt/richtext/model/RichTextString";
+import {RichTextElement} from "../../../../../main/ts/model/rt/richtext/model/RichTextElement";
+import {RichTextNode} from "../../../../../main/ts/model/rt/richtext/model/RichTextNode";
 
 export class TestDocumentCreator {
   public static createDocument(data: DocumentData): RichTextDocument {

@@ -1,10 +1,10 @@
 import {TestDocumentCreator} from "./documents/TestDocumentCreator";
 import {TWO_PARAGRAPHS} from "./documents/two_paragraphs";
-import {RichTextIterator, RichTextIteratorOptions} from "../../../../main/ts/model/rt/richtext/RichTextIterator";
-import {RichTextLocation} from "../../../../main/ts/model/rt/richtext/RichTextLocation";
+import {RichTextIterator, RichTextIteratorOptions} from "../../../../main/ts/model/rt/richtext/model/RichTextIterator";
+import {RichTextLocation} from "../../../../main/ts/model/rt/richtext/model/RichTextLocation";
 import {RichTextIterationValidator} from "./documents/RichTextIterationValidator";
-import {RichTextString} from "../../../../main/ts/model/rt/richtext/RichTextString";
-import {RichTextRange} from "../../../../main/ts/model/rt/richtext/RichTextRange";
+import {RichTextString} from "../../../../main/ts/model/rt/richtext/model/RichTextString";
+import {RichTextRange} from "../../../../main/ts/model/rt/richtext/model/RichTextRange";
 
 describe("RichTextIterator", () => {
   describe("Forward traversal", () => {

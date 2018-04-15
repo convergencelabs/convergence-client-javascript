@@ -1,9 +1,9 @@
-import {RichTextContentTypes} from "../../../../../main/ts/model/rt/richtext/RichTextContentType";
-import {RichTextString} from "../../../../../main/ts/model/rt/richtext/RichTextString";
-import {RichTextStringFragment} from "../../../../../main/ts/model/rt/richtext/RichTextStringFragment";
-import {RichTextIterator} from "../../../../../main/ts/model/rt/richtext/RichTextIterator";
-import {RichTextContent} from "../../../../../main/ts/model/rt/richtext/RichTextContent";
-import {RichTextNode} from "../../../../../main/ts/model/rt/richtext/RichTextNode";
+import {RichTextContentTypes} from "../../../../../main/ts/model/rt/richtext/model/RichTextContentType";
+import {RichTextString} from "../../../../../main/ts/model/rt/richtext/model/RichTextString";
+import {RichTextStringFragment} from "../../../../../main/ts/model/rt/richtext/model/RichTextStringFragment";
+import {RichTextIterator} from "../../../../../main/ts/model/rt/richtext/model/RichTextIterator";
+import {RichTextContent} from "../../../../../main/ts/model/rt/richtext/model/RichTextContent";
+import {RichTextNode} from "../../../../../main/ts/model/rt/richtext/model/RichTextNode";
 
 export class RichTextIterationValidator {
   private _expectations: IterationExpectation[];

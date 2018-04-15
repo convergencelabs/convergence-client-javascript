@@ -2,7 +2,7 @@ import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
 import {RichTextPath} from "./RichTextLocation";
-import {StringMap} from "../../../util/StringMap";
+import {StringMap} from "../../../../util/StringMap";
 
 export class RichTextRootElement extends RichTextElement {
   private _rootName: string;
@@ -38,8 +38,8 @@ export class RichTextRootElement extends RichTextElement {
   public toString(): string {
     return `[RichTextRootElement ` +
       `rootName: '${this._rootName}', ` +
-      `name: '${this._name}', ` +
-      `children: [${this._children.length}], ` +
+      `name: '${this.getName()}', ` +
+      `children: [${this.childCount()}], ` +
       `attributes: ${JSON.stringify(StringMap.mapToObject(this.attributes()))}, ` +
       `path: ${JSON.stringify((this.path()))} ]`;
   }

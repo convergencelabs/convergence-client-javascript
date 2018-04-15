@@ -3,7 +3,7 @@ import {expect} from "chai";
 import {RichTextDocument} from "../../../../main/ts/model/rt/richtext/model/RichTextDocument";
 import {RichTextRootElement} from "../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
 
-describe("RichTextDocument", () => {
+describe("RichTextMutator", () => {
   describe("constructor", () => {
     it("Initial document has not roots", () => {
       const doc = new RichTextDocument();

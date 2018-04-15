@@ -5,18 +5,18 @@ export class RichTextMutator {
     this._document = document;
   }
 
-  public insertText(text: string, location: RichTextLocation, attributes?: Map<string, any>): RichTextMutator {
-    const parent: RichTextNode = location.getNode();
+  public insertText(location: RichTextLocation, text: string, attributes?: Map<string, any>): RichTextMutator {
+    const node: RichTextNode = location.getNode();
     const index: number = location.getSubPath();
 
-    if (parent instanceof RichTextString && (
-        !attributes || AttributeUtils.areAttributesEqual(attributes, parent.attributes()))) {
+    if (node instanceof RichTextString && (
+        !attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes()))) {
 
       // Its the same style so we can just insert into the existing node, no
       // splitting and merging required
-      parent.insert(index, text);
+      node.insert(index, text);
     } else if (parent instanceof RichTextElement) {
-      this.insert(new RichTextString(this._document, parent, text, attributes), location);
+      this.insert(location, new RichTextString(this._document, parent, text, attributes));
     } else {
       // fixme throw error
     }
@@ -24,7 +24,7 @@ export class RichTextMutator {
     return this;
   }
 
-  public insert(content: RichTextNode, location: RichTextLocation): RichTextMutator {
+  public insert(location: RichTextLocation, content: RichTextNode): RichTextMutator {
     const node: RichTextNode = location.getNode();
     const index: number = location.getSubPath();
 
@@ -62,14 +62,16 @@ export class RichTextMutator {
     return this;
   }
 
+  // fixme the logic in here probable is needed for remove attribute as well. We should find a way to abstract
+  // it.
   public setAttribute(range: RichTextRange, key: string, value: any): RichTextMutator {
     let currentRangeStart: RichTextLocation = null;
 
     let currentRangeValue: any;
     let first = true;
 
-    let iter = range.iterator();
-    let item: IteratorResult<RichTextContent> = iter.next();
+    let iterator: IterableIterator<RichTextContent> = range.iterator();
+    let item: IteratorResult<RichTextContent> = iterator.next();
 
     while (!item.done) {
       // get the value of the current ELEMENT.
@@ -87,14 +89,14 @@ export class RichTextMutator {
         if (currentRangeValue !== value) {
           // The current range value is not the same as what we are trying to
           // set to, so we need a mutation.
-          // fixme
+          // fixme add the mutation.
         }
 
         currentRangeValue = itemValue;
         currentRangeStart = null;
       }
 
-      item = iter.next();
+      item = iterator.next();
     }
 
     return this;

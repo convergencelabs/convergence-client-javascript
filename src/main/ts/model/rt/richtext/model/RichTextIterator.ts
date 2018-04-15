@@ -198,11 +198,11 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
 }
 
 import {RichTextLocation} from "./RichTextLocation";
-import {ConvergenceError} from "../../../util/ConvergenceError";
+import {ConvergenceError} from "../../../../util/ConvergenceError";
 import {RichTextRange} from "./RichTextRange";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextString} from "./RichTextString";
-import {Validation} from "../../../util/Validation";
+import {Validation} from "../../../../util/Validation";
 import {RichTextStringFragment} from "./RichTextStringFragment";
 import {RichTextRootElement} from "./RichTextRootElement";

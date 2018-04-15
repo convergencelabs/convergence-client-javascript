@@ -16,13 +16,13 @@ export class RichTextRange implements Iterable<RichTextContent> {
   public end(): RichTextLocation {
     return this._end;
   }
-
-  public getCommonParent(): RichTextElement {
-    return this._start.getNearestCommonAncestor(this._end);
-  }
+  //
+  // public getCommonParent(): RichTextElement {
+  //   return this._start.getNearestCommonAncestor(this._end.);
+  // }
 
   public getContentRoots(): RichTextContent[] {
-    const iterator = new RichTextIterator({range: this, shallow: true});
+    const iterator = new RichTextIterator({range: this});
     const result: RichTextContent[] = [];
 
     for (let content of iterator) {

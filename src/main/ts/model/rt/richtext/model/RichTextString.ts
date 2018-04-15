@@ -54,4 +54,4 @@ export class RichTextString extends RichTextNode {
 import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
-import {StringMap} from "../../../util/StringMap";
+import {StringMap} from "../../../../util/StringMap";
