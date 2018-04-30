@@ -93,9 +93,27 @@ export class RichTextElement extends RichTextNode {
   }
 
   public textContentLength(): number {
+    // TODO we should cache this and then bubble up events to the root when it changes.
     let length = 0;
     this._children.forEach(c => length += c.textContentLength());
     return length;
+  }
+
+  public textOffsetToPath(offset: number): any {
+    // looking for 17
+    // [5, 10, 4, 6]
+    let start = 0;
+    let end = 0;
+    for (let i = 0; i < this._children.length && offset < start; i++) {
+      const child = this._children[i];
+      const len = child.textContentLength();
+
+      if (start + len >= offset) {
+        return [child]
+      } else {
+        start = start + len;
+      }
+    }
   }
 
   public type(): RichTextContentType {

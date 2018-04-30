@@ -21,6 +21,7 @@ export class RichTextLocation {
   }
 
   public static ofTextOffset(root: RichTextRootElement, offset: number): RichTextLocation  {
+
     throw new Error("not implemented");
   }
 

@@ -6,7 +6,7 @@ import {RichTextRootElement} from "../../model/RichTextRootElement";
 import {RichTextRange} from "../../model/RichTextRange";
 import {RichTextLocation} from "../../model/RichTextLocation";
 
-class RealTimeQuillDocument extends EventEmitter {
+export class RealTimeQuillDocument extends EventEmitter {
   public static Events = {
     DELTA: "delta"
   };
@@ -26,7 +26,7 @@ class RealTimeQuillDocument extends EventEmitter {
 
   public setValue(delta: Delta): void {
     const root: RichTextRootElement = DeltaConverter.deltaToRoot(delta, this._doc);
-    this._doc.setRoot(root);
+    this._doc.replaceRoot(root);
   }
 
   public updateContents(delta: Delta) {
