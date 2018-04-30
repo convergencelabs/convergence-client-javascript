@@ -109,7 +109,7 @@ export class RichTextElement extends RichTextNode {
       const len = child.textContentLength();
 
       if (start + len >= offset) {
-        return [child]
+        return [child];
       } else {
         start = start + len;
       }
