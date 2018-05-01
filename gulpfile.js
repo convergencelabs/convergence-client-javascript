@@ -10,7 +10,7 @@ const tsLint = require("gulp-tslint");
 const istanbul = require("gulp-istanbul");
 const mocha = require("gulp-mocha");
 const rollup = require("rollup");
-const rollupTypescript = require("rollup-plugin-typescript");
+const rollupTypescript2 = require("rollup-plugin-typescript2");
 const sourceMaps = require("gulp-sourcemaps");
 const uglify = require("gulp-uglify");
 const fs = require("fs");
@@ -179,7 +179,14 @@ function generateRollUpConfig(format) {
       "rxjs/BehaviorSubject": "Rx"
     },
     plugins: [
-      rollupTypescript({typescript: typescript})
+      rollupTypescript2({
+        typescript: typescript,
+        tsconfigOverride: {
+          compilerOptions: {
+            module: "ES2015"
+          }
+        }
+      })
     ]
   };
 }

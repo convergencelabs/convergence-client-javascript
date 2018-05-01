@@ -16,3 +16,4 @@ typings
 examples/connection.js
 .npmrc
 .nyc_output
+.rpt2_cache

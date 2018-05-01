@@ -10,7 +10,7 @@ import {EventEmitter} from "../util/EventEmitter";
 import {SessionImpl} from "../SessionImpl";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Session} from "../Session";
-import {PasswordAuthRequest, AnonymousAuthRequest} from "./protocol/authentication";
+import {PasswordAuthRequest, AnonymousAuthRequest, ReconnectAuthRequest} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
 import {TokenAuthRequest} from "./protocol/authentication";
 import {AuthRequest} from "./protocol/authentication";
@@ -178,7 +178,7 @@ export class ConvergenceConnection extends EventEmitter {
   }
 
   public authenticateWithReconnectToken(token: string): Promise<AuthResponse> {
-    const authRequest: ReconnectTokenAuthRequest = {
+    const authRequest: ReconnectAuthRequest = {
       type: MessageType.RECONNECT_AUTH_REQUEST,
       token
     };
