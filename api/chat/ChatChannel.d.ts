@@ -28,7 +28,7 @@ export declare interface ChatChannelInfo {
 }
 
 export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
-  public readonly Events: ChatChannelEvents;
+  public static readonly Events: ChatChannelEvents;
 
   public session(): Session;
 

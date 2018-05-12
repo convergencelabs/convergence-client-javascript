@@ -1,5 +1,5 @@
 import {debugFlags} from "../Debug";
-import {EventEmitter} from "../util/EventEmitter";
+import {EventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
 
 export default class ConvergenceSocket extends EventEmitter {

@@ -15,6 +15,8 @@ export declare const UserFields: UserField;
 export declare class IdentityService {
   public session(): Session;
 
+  public profile(): Promise<DomainUser>;
+
   public user(username: string): Promise<DomainUser>;
   public userByEmail(email: string): Promise<DomainUser>;
 
