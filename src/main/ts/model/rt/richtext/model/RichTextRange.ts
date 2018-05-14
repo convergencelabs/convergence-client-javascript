@@ -41,5 +41,4 @@ export class RichTextRange implements Iterable<RichTextContent> {
 }
 
 import {RichTextLocation} from "./RichTextLocation";
-import {RichTextElement} from "./RichTextElement";
 import {RichTextIterator} from "./RichTextIterator";

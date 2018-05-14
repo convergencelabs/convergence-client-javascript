@@ -13,11 +13,11 @@ import {ActivityParticipant} from "./ActivityParticipant";
 import {ActivityJoinRequest} from "../connection/protocol/activity/joinActivity";
 import {ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/";
 import {ActivityRemoteStateRemoved} from "../connection/protocol/activity/activityState";
 import {ActivityEvent} from "./events";
 import {StateRemovedEvent} from "./events";
-import {StringMap, StringMapLike} from "../util/StringMap";
+import {StringMap, StringMapLike} from "../util/";
 import {deepClone} from "../util/ObjectUtils";
 import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
 
@@ -170,7 +170,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
   }
 
   public joined(): Map<string, Activity> {
-    return deepClone(this._joinedActivities);
+    return new Map(this._joinedActivities);
   }
 
   public isJoined(id: string): boolean {
