@@ -21,6 +21,7 @@ export default class ConvergenceSocket extends EventEmitter {
     tmp = tmp.replace(/https:/i, "wss:");
     tmp = tmp.replace(/http:/i, "ws:");
     this._url = tmp;
+    this._socket = null;
   }
 
   get url(): string {
@@ -119,7 +120,15 @@ export default class ConvergenceSocket extends EventEmitter {
   }
 
   public isOpen(): boolean {
-    return this._socket != null && this._socket.readyState === WebSocket.OPEN;
+    return this._socket !== null && this._socket.readyState === WebSocket.OPEN;
+  }
+
+  public isConnecting(): boolean {
+    return this._socket === null || this._socket.readyState === WebSocket.CONNECTING;
+  }
+
+  public isClosed(): boolean {
+    return this._socket === null || this._socket.readyState === WebSocket.CLOSED;
   }
 
   public send(message: any): void {

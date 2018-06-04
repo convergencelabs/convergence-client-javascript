@@ -121,7 +121,17 @@ export class ProtocolConnection extends EventEmitter {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-    this._socket.terminate(reason);
+
+    if (this._socket.isOpen() || this._socket.isConnecting()) {
+      this._socket.terminate(reason)
+        .then(() => {
+          // no-op
+        })
+        .catch((error) => {
+          console.debug("Unable to terminate web socket connection: " + error);
+        });
+    }
+
     this.onSocketDropped();
   }
 
@@ -135,8 +145,8 @@ export class ProtocolConnection extends EventEmitter {
 
   public sendMessage(envelope: MessageEnvelope): void {
     if ((debugFlags.PROTOCOL_MESSAGES &&
-      envelope.body.type !== MessageType.PING &&
-      envelope.body.type !== MessageType.PONG) ||
+        envelope.body.type !== MessageType.PING &&
+        envelope.body.type !== MessageType.PONG) ||
       debugFlags.PROTOCOL_PINGS) {
       console.log("S: " + JSON.stringify(envelope));
     }
@@ -154,8 +164,8 @@ export class ProtocolConnection extends EventEmitter {
     const type: MessageType = envelope.body.type;
 
     if ((debugFlags.PROTOCOL_MESSAGES &&
-      type !== MessageType.PING &&
-      type !== MessageType.PONG) ||
+        type !== MessageType.PING &&
+        type !== MessageType.PONG) ||
       debugFlags.PROTOCOL_PINGS) {
       console.log("R: " + JSON.stringify(envelope));
     }
@@ -243,8 +253,11 @@ interface RequestRecord {
 
 export interface ReplyCallback {
   reply(message: OutgoingProtocolResponseMessage): void;
+
   unknownError(): void;
+
   unexpectedError(details: String): void;
+
   expectedError(code: String, details: String): void;
 }
 
@@ -270,7 +283,7 @@ class ReplyCallbackImpl implements ReplyCallback {
     this.expectedError("unknown", message);
   }
 
-  public expectedError(code: string, message: string, details?: {[key: string]: any}): void {
+  public expectedError(code: string, message: string, details?: { [key: string]: any }): void {
     details = details || {};
     const errorMessage: ErrorMessage = {
       type: MessageType.ERROR,
