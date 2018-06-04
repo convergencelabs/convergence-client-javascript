@@ -168,6 +168,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       throw new Error("Invalid operation!");
     }
   }
+
   //
   // protected and private methods.
   //
@@ -267,7 +268,9 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._updateIdToPathElementMap(index);
     oldChild._detach(local);
 
-    const event: ArrayNodeSetEvent = new ArrayNodeSetEvent(this, local, index, newChild, sessionId, username);
+    const event: ArrayNodeSetEvent =
+      new ArrayNodeSetEvent(this, local, index, newChild, oldChild, sessionId, username);
+
     this._emitValueEvent(event);
   }
 
@@ -280,7 +283,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._updateIdToPathElementMap(index);
     child._detach(local);
 
-    const event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, sessionId, username);
+    const event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, child, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -353,7 +356,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
   // Private Validation Methods
 
-  private _validateInsert(index: number, value: Object|number|string|boolean): void {
+  private _validateInsert(index: number, value: Object | number | string | boolean): void {
     // TODO: Add integer check
     if (this._children.length < index || index < 0) {
       throw new Error("Index out of bounds!");
@@ -378,7 +381,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
-  private _validateReplace(index: number, value: Object|number|string|boolean): void {
+  private _validateReplace(index: number, value: Object | number | string | boolean): void {
     // TODO: Add integer check
     if (this._children.length <= index || index < 0) {
       throw new Error("Index out of bounds!");
@@ -389,7 +392,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
-  private _validateArray(values: Array<Object|number|string|boolean>): void {
+  private _validateArray(values: Array<Object | number | string | boolean>): void {
     if (!Array.isArray(values)) {
       throw new Error(`The value must be an Array but was: ${typeof values}`);
     }

@@ -15,6 +15,7 @@ import {
   ConnectionErrorEvent, ConnectedEvent, ConvergenceDomainEvent, InterruptedEvent,
   ReconnectedEvent, DisconnectedEvent
 } from "./events";
+import {Validation} from "./util";
 
 export interface ConvergenceDomainEvents {
   readonly CONNECTED: string;
@@ -58,6 +59,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
    */
   constructor(url: string, options?: ConvergenceOptions) {
     super();
+
+    if (!Validation.nonEmptyString(url)) {
+      throw new Error("The Convergence connection url must be provided.");
+    }
 
     this._options = this._processOptions(options);
     this._disposed = false;
@@ -171,4 +176,5 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
     this._chatService = new ChatService(this._connection);
   }
 }
+
 Object.freeze(ConvergenceDomain.Events);

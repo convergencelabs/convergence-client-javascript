@@ -17,8 +17,8 @@ export class NodeDetachedEvent implements ModelNodeEvent {
   public static readonly NAME = "detached";
   public name: string = NodeDetachedEvent.NAME;
 
-  constructor(public src: ModelNode<any>,
-              public local: boolean) {}
+  constructor(public readonly src: ModelNode<any>,
+              public readonly local: boolean) {}
 }
 
 export interface NodeValueChangedEvent extends ModelNodeEvent {
@@ -61,6 +61,7 @@ export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
   constructor(public readonly src: ArrayNode,
               public readonly local: boolean,
               public readonly index: number,
+              public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
               public readonly username: string) {
     Object.freeze(this);
@@ -75,6 +76,7 @@ export class ArrayNodeSetEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly index: number,
               public readonly value: ModelNode<any>,
+              public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
               public readonly username: string) {
     Object.freeze(this);
@@ -155,6 +157,7 @@ export class ObjectNodeSetEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly key: string,
               public readonly value: ModelNode<any>,
+              public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
               public readonly username: string) {
     Object.freeze(this);
@@ -165,11 +168,12 @@ export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
   public static readonly NAME = "remove";
   public name: string = ObjectNodeRemoveEvent.NAME;
 
-  constructor(public src: ObjectNode,
-              public local: boolean,
-              public key: string,
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: ObjectNode,
+              public readonly local: boolean,
+              public readonly key: string,
+              public readonly oldValue: ModelNode<any>,
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }
@@ -178,11 +182,11 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = ObjectNodeSetValueEvent.NAME;
 
-  constructor(public src: ObjectNode,
-              public local: boolean,
-              public value: { [key: string]: any; },
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: ObjectNode,
+              public readonly local: boolean,
+              public readonly value: { [key: string]: any; },
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }
@@ -191,12 +195,12 @@ export class StringNodeInsertEvent implements NodeValueChangedEvent {
   public static readonly NAME = "insert";
   public name: string = StringNodeInsertEvent.NAME;
 
-  constructor(public src: StringNode,
-              public local: boolean,
-              public index: number,
-              public value: string,
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: StringNode,
+              public readonly local: boolean,
+              public readonly index: number,
+              public readonly value: string,
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }
@@ -205,12 +209,12 @@ export class StringNodeRemoveEvent implements NodeValueChangedEvent {
   public static readonly NAME = "remove";
   public name: string = StringNodeRemoveEvent.NAME;
 
-  constructor(public src: StringNode,
-              public local: boolean,
-              public index: number,
-              public value: string,
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: StringNode,
+              public readonly local: boolean,
+              public readonly index: number,
+              public readonly value: string,
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }
@@ -219,11 +223,11 @@ export class StringNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = StringNodeSetValueEvent.NAME;
 
-  constructor(public src: StringNode,
-              public local: boolean,
-              public value: string,
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: StringNode,
+              public readonly local: boolean,
+              public readonly value: string,
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }
@@ -232,11 +236,11 @@ export class DateNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = DateNodeSetValueEvent.NAME;
 
-  constructor(public src: DateNode,
-              public local: boolean,
-              public value: Date,
-              public sessionId: string,
-              public username: string) {
+  constructor(public readonly src: DateNode,
+              public readonly local: boolean,
+              public readonly value: Date,
+              public readonly sessionId: string,
+              public readonly username: string) {
     Object.freeze(this);
   }
 }

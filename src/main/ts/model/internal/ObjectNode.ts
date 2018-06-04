@@ -2,7 +2,7 @@ import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
 import {ObjectValue, DataValueType} from "../dataValue";
-import {Validation} from "../../util/Validation";
+import {Validation} from "../../util";
 import {DataValue} from "../dataValue";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -18,7 +18,7 @@ import {ObjectSetProperty} from "../ot/ops/operationChanges";
 import {ObjectRemoveProperty} from "../ot/ops/operationChanges";
 import {ObjectSet} from "../ot/ops/operationChanges";
 
-export class ObjectNode extends ContainerNode<{[key: string]: any}> {
+export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
   public static Events: any = {
     SET: "set",
@@ -57,7 +57,7 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   }
 
   public dataValue(): ObjectValue {
-    let values: {[key: string]: DataValue} = {};
+    let values: { [key: string]: DataValue } = {};
     this._children.forEach((value, key) => {
       values[key] = value.dataValue();
     });
@@ -135,16 +135,16 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   // private / protected methods.
   //
 
-  protected _getData(): {[key: string]: any} {
-    const returnObject: {[key: string]: any} = {};
+  protected _getData(): { [key: string]: any } {
+    const returnObject: { [key: string]: any } = {};
     this.forEach((model: ModelNode<any>, key: string) => {
       returnObject[key] = model.data();
     });
     return returnObject;
   }
 
-  protected _setData(data?: {[key: string]: any}): void {
-    let values: {[key: string]: DataValue} = {};
+  protected _setData(data?: { [key: string]: any }): void {
+    let values: { [key: string]: DataValue } = {};
 
     for (let prop in data) {
       if (data.hasOwnProperty(prop)) {
@@ -197,9 +197,10 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
   private _applySet(key: string, value: DataValue, local: boolean, sessionId: string, username: string): void {
     Validation.assertString(key, "key");
 
-    if (this._children.has(key)) {
-      this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-      this._children.get(key)._detach(local);
+    let oldValue = this._children.get(key);
+    if (oldValue !== undefined) {
+      oldValue.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+      oldValue._detach(local);
     }
 
     const child: ModelNode<any> = ModelNodeFactory.create(value, this._pathCB(value.id), this._model,
@@ -208,7 +209,9 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
     this._children.set(key, child);
     this._idToPathElement.set(child.id(), key);
 
-    const event: ObjectNodeSetEvent = new ObjectNodeSetEvent(this, local, key, child, this.sessionId, this.username);
+    const event: ObjectNodeSetEvent =
+      new ObjectNodeSetEvent(this, local, key, child, oldValue, this.sessionId, this.username);
+
     this._emitValueEvent(event);
   }
 
@@ -217,16 +220,18 @@ export class ObjectNode extends ContainerNode<{[key: string]: any}> {
 
     if (this._children.has(key)) {
       this._idToPathElement.delete(key);
-      this._children.get(key).removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-      this._children.get(key)._detach(local);
+      const child = this._children.get(key);
+      child.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+      child._detach(local);
       this._children.delete(key);
 
-      const event: ObjectNodeRemoveEvent = new ObjectNodeRemoveEvent(this, local, key, this.sessionId, this.username);
+      const event: ObjectNodeRemoveEvent =
+        new ObjectNodeRemoveEvent(this, local, key, child, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
   }
 
-  private _applySetValue(values: {[key: string]: DataValue},
+  private _applySetValue(values: { [key: string]: DataValue },
                          local: boolean, sessionId: string, username: string): void {
     let oldChildren: Map<string, ModelNode<any>> = this._children;
 

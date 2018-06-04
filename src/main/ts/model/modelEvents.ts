@@ -100,6 +100,7 @@ export class ArrayRemoveEvent implements ValueChangedEvent {
 
   constructor(public readonly element: ObservableArray,
               public readonly index: number,
+              public readonly oldValue: ObservableElement<any>,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -114,6 +115,7 @@ export class ArraySetEvent implements ValueChangedEvent {
   constructor(public readonly element: ObservableArray,
               public readonly index: number,
               public readonly value: ObservableElement<any>,
+              public readonly oldValue: ObservableElement<any>,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -191,6 +193,7 @@ export class ObjectSetEvent implements ValueChangedEvent {
   constructor(public readonly element: ObservableObject,
               public readonly key: string,
               public readonly value: ObservableElement<any>,
+              public readonly oldValue: ObservableElement<any>,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
@@ -204,6 +207,7 @@ export class ObjectRemoveEvent implements ValueChangedEvent {
 
   constructor(public readonly element: ObservableObject,
               public readonly key: string,
+              public readonly oldValue: ObservableElement<any>,
               public readonly sessionId: string,
               public readonly username: string,
               public readonly local: boolean) {
