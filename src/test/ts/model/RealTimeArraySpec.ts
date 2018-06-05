@@ -337,14 +337,21 @@ describe("RealTimeArray", () => {
       new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.REMOVE, lastEventCallback);
+    const oldStringElement: RealTimeString = <RealTimeString> wrapperFactory.wrap(delegate.get(1));
 
     const incomingOp: ArrayRemoveOperation = new ArrayRemoveOperation(arrayValue.id, false, 1);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    const expectedEvent: ArrayRemoveEvent = new ArrayRemoveEvent(myArray, 1, sessionId, username, false);
-    expect(lastEvent).to.deep.equal(expectedEvent);
+    const expectedEvent: ArrayRemoveEvent =
+      new ArrayRemoveEvent(myArray, 1, oldStringElement, sessionId, username, false);
+    expect(lastEvent.element).to.equal(expectedEvent.element);
+    expect(lastEvent.index).to.equal(expectedEvent.index);
+    expect(lastEvent.oldValue.value()).to.equal(lastEvent.oldValue.value());
+    expect(lastEvent.sessionId).to.equal(expectedEvent.sessionId);
+    expect(lastEvent.username).to.equal(expectedEvent.username);
+    expect(lastEvent.local).to.equal(expectedEvent.local);
   });
 
   it("Correct event is fired after ArrayReplaceOperation", () => {
@@ -354,9 +361,9 @@ describe("RealTimeArray", () => {
       new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
     const myArray: RealTimeArray = <RealTimeArray> wrapperFactory.wrap(delegate);
     myArray.on(RealTimeArray.Events.SET, lastEventCallback);
+    const oldElement = myArray.get(1);
 
     const newValue: DataValue = dataValueFactory.createDataValue("X");
-
     const incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation(arrayValue.id, false, 1, newValue);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
@@ -364,9 +371,18 @@ describe("RealTimeArray", () => {
 
     const valueDelegate: StringNode =
       new StringNode(<StringValue> newValue, () => [], model, sessionId, username);
+
     const stringElement: RealTimeString = <RealTimeString> wrapperFactory.wrap(valueDelegate);
-    const expectedEvent: ArraySetEvent = new ArraySetEvent(myArray, 1, stringElement, sessionId, username, false);
-    expect(lastEvent).to.deep.equal(expectedEvent);
+    const expectedEvent: ArraySetEvent =
+      new ArraySetEvent(myArray, 1, stringElement, oldElement, sessionId, username, false);
+
+    expect(lastEvent.element).to.equal(expectedEvent.element);
+    expect(lastEvent.index).to.equal(expectedEvent.index);
+    expect(lastEvent.value).to.equal(expectedEvent.value);
+    expect(lastEvent.oldValue.value()).to.equal(lastEvent.oldValue.value());
+    expect(lastEvent.sessionId).to.equal(expectedEvent.sessionId);
+    expect(lastEvent.username).to.equal(expectedEvent.username);
+    expect(lastEvent.local).to.equal(expectedEvent.local);
   });
 
   it("Correct event is fired after ArrayMoveOperation", () => {
