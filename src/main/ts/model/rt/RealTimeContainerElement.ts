@@ -1,8 +1,9 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {ObservableContainerElement} from "../observable/ObservableContainerElement";
-import {PathElement} from "../Path";
+import {Path, PathElement} from "../Path";
 
 export interface RealTimeContainerElement<T> extends ObservableContainerElement<T> {
-  elementAt(pathArgs: any): RealTimeElement<T>;
+  elementAt(path: Path): RealTimeElement<any>;
+  elementAt(...elements: PathElement[]): RealTimeElement<any>;
   _removeChild(relPath: PathElement): void;
 }

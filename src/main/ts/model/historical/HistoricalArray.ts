@@ -4,6 +4,7 @@ import {ArrayNode} from "../internal/ArrayNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
 import {HistoricalModel} from "./HistoricalModel";
+import {Path, PathElement} from "../Path";
 
 export interface HistoricalArrayEvents extends ObservableArrayEvents {
 }
@@ -32,7 +33,9 @@ export class HistoricalArray
     });
   }
 
-  public elementAt(pathArgs: any): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
+  public elementAt(path: Path): HistoricalElement<any>;
+  public elementAt(...elements: PathElement[]): HistoricalElement<any>;
+  public elementAt(...path: any[]): HistoricalElement<any> {
+    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 }

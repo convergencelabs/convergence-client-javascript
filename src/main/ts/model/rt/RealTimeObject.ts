@@ -19,7 +19,7 @@ import {ObjectNodeSetEvent} from "../internal/events";
 import {ModelNodeEvent} from "../internal/events";
 import {RealTimeModel} from "./RealTimeModel";
 import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants} from "../observable/ObservableObject";
-import {PathElement} from "../Path";
+import {Path, PathElement} from "../Path";
 
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
@@ -79,8 +79,10 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     });
   }
 
-  public elementAt(pathArgs: any): RealTimeElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
+  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
+  public elementAt(...path: any[]): RealTimeElement<any> {
+    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 
   public _removeChild(relPath: PathElement): void {

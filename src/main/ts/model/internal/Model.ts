@@ -1,5 +1,5 @@
 import { ModelOperationEvent } from "../ModelOperationEvent";
-import { Path } from "../Path";
+import {Path, PathElement} from "../Path";
 import { ModelNode } from "./ModelNode";
 import { DataValueFactory } from "../DataValueFactory";
 import { ObjectNode } from "./ObjectNode";
@@ -46,9 +46,10 @@ export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._data;
   }
 
-  public valueAt(path: any): ModelNode<any> {
-    const pathArgs: Path = <Path> (Array.isArray(path) ? path : arguments);
-    return this._data.valueAt(pathArgs);
+  public valueAt(path: Path): ModelNode<any>;
+  public valueAt(...elements: PathElement[]): ModelNode<any>;
+  public valueAt(...path: any[]): ModelNode<any> {
+    return this._data.valueAt(...path);
   }
 
   //

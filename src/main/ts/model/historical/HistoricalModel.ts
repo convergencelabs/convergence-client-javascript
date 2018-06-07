@@ -14,6 +14,7 @@ import {OperationType} from "../ot/ops/OperationType";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
+import {Path, PathElement} from "../Path";
 
 interface OperationRequest {
   forward: boolean;
@@ -137,8 +138,10 @@ export class HistoricalModel implements ObservableModel {
     return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  public elementAt(path: any): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._model.valueAt(path));
+  public elementAt(path: Path): HistoricalElement<any>;
+  public elementAt(...elements: PathElement[]): HistoricalElement<any>;
+  public elementAt(...path: any[]): HistoricalElement<any> {
+    return this._wrapperFactory.wrap(this._model.valueAt(...path));
   }
 
   public playTo(version: number): Promise<void> {

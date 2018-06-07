@@ -1,6 +1,7 @@
 import {HistoricalElement} from "./HistoricalElement";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
 import {ObservableObject, ObservableObjectEvents} from "../observable/ObservableObject";
+import {Path, PathElement} from "../";
 
 export interface HistoricalObjectEvents extends ObservableObjectEvents {
 }
@@ -18,5 +19,6 @@ export declare class HistoricalObject extends HistoricalElement<{[key: string]: 
 
   public forEach(callback: (model: HistoricalElement<any>, key?: string) => void): void;
 
-  public elementAt(pathArgs: any): HistoricalElement<any>;
+  public elementAt(path: Path): HistoricalElement<any>;
+  public elementAt(...elements: PathElement[]): HistoricalElement<any>;
 }

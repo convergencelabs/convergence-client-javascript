@@ -1,6 +1,7 @@
 import {Session} from "../../Session";
 import {ObservableObject} from "./ObservableObject";
 import {ObservableElement} from "./ObservableElement";
+import {Path, PathElement} from "../";
 
 export interface ObservableModelEvents {
   readonly CLOSED: string;
@@ -34,5 +35,6 @@ export interface ObservableModel {
 
   root(): ObservableObject;
 
-  elementAt(path: any): ObservableElement<any>;
+  elementAt(path: Path): ObservableElement<any>;
+  elementAt(...elements: PathElement[]): ObservableElement<any>;
 }

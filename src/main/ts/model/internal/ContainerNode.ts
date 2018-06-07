@@ -28,13 +28,22 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     this._idToPathElement = new Map<string, PathElement>();
   }
 
-  public valueAt(pathArgs: any): ModelNode<any> {
-    // We're letting them pass in individual path arguments or a single array of path arguments
-    const pathArgsForReal: Path = <Path> (Array.isArray(pathArgs) ? pathArgs : arguments);
-    if (pathArgsForReal.length === 0) {
+  public valueAt(path: Path): ModelNode<any>;
+  public valueAt(...elements: PathElement[]): ModelNode<any>;
+  public valueAt(...path: any[]): ModelNode<any> {
+    let resolved: Path;
+
+    if (path.length === 1 && Array.isArray(path[0])) {
+      resolved = path[0] as Path;
+    } else {
+      resolved = path as Path;
+    }
+
+    if (path.length === 0) {
       return this;
     }
-    return this._valueAt(pathArgsForReal);
+
+    return this._valueAt(resolved);
   }
 
   public _detach(local: boolean): void {

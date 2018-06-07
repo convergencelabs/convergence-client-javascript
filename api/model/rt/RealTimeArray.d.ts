@@ -1,6 +1,7 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObservableArray, ObservableArrayEvents} from "../observable/ObservableArray";
+import {Path, PathElement} from "../";
 
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -40,5 +41,6 @@ export declare class RealTimeArray extends RealTimeElement<any[]>
 
   public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void;
 
-  public elementAt(pathArgs: any): RealTimeElement<any>;
+  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
 }

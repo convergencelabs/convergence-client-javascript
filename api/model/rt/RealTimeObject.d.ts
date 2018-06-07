@@ -4,6 +4,7 @@ import {ModelReference} from "../reference/ModelReference";
 import {LocalPropertyReference} from "../reference/LocalPropertyReference";
 import {ReferenceFilter} from "../reference/ReferenceFilter";
 import {ObservableObject, ObservableObjectEvents} from "../observable/ObservableObject";
+import {Path, PathElement} from "../";
 
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
@@ -25,7 +26,8 @@ export declare class RealTimeObject extends RealTimeElement<{[key: string]: any}
 
   public forEach(callback: (element: RealTimeElement<any>, key?: string) => void): void;
 
-  public elementAt(pathArgs: any): RealTimeElement<any>;
+  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
 
   public propertyReference(key: string): LocalPropertyReference;
 }

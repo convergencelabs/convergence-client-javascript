@@ -11,6 +11,7 @@ import {ObservableModel, ObservableModelEvents} from "../observable/ObservableMo
 import {ModelEvent} from "../modelEvents";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
+import {PathElement, Path} from "../";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   MODIFIED: string;
@@ -80,7 +81,8 @@ export declare class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEv
 
   public root(): RealTimeObject;
 
-  public elementAt(path: any): RealTimeElement<any>;
+  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
 
   public isOpen(): boolean;
 

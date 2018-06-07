@@ -4,7 +4,6 @@ const concat = require("gulp-concat");
 const del = require("del");
 const merge = require("merge2");
 const rename = require("gulp-rename");
-const replace = require("gulp-replace");
 const ts = require("gulp-typescript");
 const tsLint = require("gulp-tslint");
 const istanbul = require("gulp-istanbul");
@@ -17,8 +16,7 @@ const fs = require("fs");
 const typescript = require("typescript");
 const rollupStream = require("rollup-stream");
 const source = require("vinyl-source-stream");
-const vinyBuffer = require("vinyl-buffer");
-const mkdirp = require("mkdirp");
+const vinylBuffer = require("vinyl-buffer");
 const header = require('gulp-header');
 
 const packageJson = JSON.parse(fs.readFileSync("./package.json"));
@@ -58,7 +56,7 @@ gulp.task("dist-cjs", ["lint", "test"], function () {
   // The sourcemaps below are mapping back to the typescript files.
   return rollupStream(config)
     .pipe(source(`${distInternal}/convergence.js`))
-    .pipe(vinyBuffer())
+    .pipe(vinylBuffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("./"));
@@ -68,7 +66,7 @@ gulp.task("dist-umd", ["lint", "test"], function () {
   const config = generateRollUpConfig("umd");
   return rollupStream(config)
     .pipe(source(`${distInternal}/browser/convergence.js`))
-    .pipe(vinyBuffer())
+    .pipe(vinylBuffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
     .pipe(gulp.dest("./"));

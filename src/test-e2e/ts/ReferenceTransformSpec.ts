@@ -1,13 +1,11 @@
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
-import {RealTimeModel} from "../../main/ts/model/rt/RealTimeModel";
+import {RealTimeModel, RealTimeString} from "../../main/ts/model/rt/";
 import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord, ISendRecord} from "../mock-server/records";
-import {RealTimeString} from "../../main/ts/model/rt/RealTimeString";
-import {debugFlags} from "../../main/ts/Debug";
-import {RemoteReferenceCreatedEvent} from "../../main/ts/model/modelEvents";
-import {Convergence} from "../../main/ts/Convergence";
+import {RemoteReferenceCreatedEvent} from "../../main/ts/model/";
+import {Convergence} from "../../main/ts/";
 
 describe("Reference Transformation E2E", () => {
 

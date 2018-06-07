@@ -8,6 +8,7 @@ import {
   ObservableObjectEventConstants
 } from "../observable/ObservableObject";
 import {HistoricalModel} from "./HistoricalModel";
+import {Path, PathElement} from "../Path";
 
 export interface HistoricalObjectEvents extends ObservableObjectEvents {
 }
@@ -39,7 +40,9 @@ export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
     });
   }
 
-  public elementAt(pathArgs: any): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(pathArgs));
+  public elementAt(path: Path): HistoricalElement<any>;
+  public elementAt(...elements: PathElement[]): HistoricalElement<any>;
+  public elementAt(...path: any[]): HistoricalElement<any> {
+    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 }

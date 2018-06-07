@@ -1,6 +1,6 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
-import {ModelReference} from "../reference/ModelReference";
+import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {Model} from "../internal/Model";
@@ -9,8 +9,8 @@ import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
 import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
-import {ModelReferenceCallbacks} from "../reference/LocalModelReference";
-import {LocalModelReference} from "../reference/LocalModelReference";
+import {ModelReferenceCallbacks} from "../reference";
+import {LocalModelReference} from "../reference";
 import {PublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {MessageType} from "../../connection/protocol/MessageType";
 import {UnpublishReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -24,9 +24,9 @@ import {RemoteReferencePublished} from "../../connection/protocol/model/referenc
 import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {Session} from "../../Session";
-import {LocalElementReference} from "../reference/LocalElementReference";
-import {ElementReference} from "../reference/ElementReference";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
+import {LocalElementReference} from "../reference/";
+import {ElementReference} from "../reference/";
+import {ReferenceFilter} from "../reference/";
 import {ForceCloseRealTimeModel} from "../../connection/protocol/model/forceCloseRealtimeModel";
 import {RemoteOperation} from "../../connection/protocol/model/remoteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
@@ -45,7 +45,7 @@ import {RemoteReferenceCreatedEvent, ModelPermissionsChangedEvent} from "../mode
 import {ModelEvent} from "../modelEvents";
 import {ModelClosedEvent} from "../modelEvents";
 import {VersionChangedEvent} from "../modelEvents";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
@@ -54,6 +54,7 @@ import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
 import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsChanged";
+import {Path, PathElement} from "../Path";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -259,8 +260,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> imp
     return <RealTimeObject> this._wrapperFactory.wrap(this._model.root());
   }
 
-  public elementAt(path: any): RealTimeElement<any> {
-    return this.root().elementAt(path);
+  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
+  public elementAt(...path: any[]): RealTimeElement<any> {
+    return this._wrapperFactory.wrap(this._model.valueAt(...path));
   }
 
   public isOpen(): boolean {

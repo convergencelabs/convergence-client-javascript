@@ -1,5 +1,7 @@
 import {ObservableElement, ObservableElementEvents, ObservableElementEventConstants} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
+import {Path, PathElement} from "../Path";
+import {RealTimeElement} from "../rt/RealTimeElement";
 
 export interface ObservableObjectEvents extends ObservableElementEvents {
   readonly SET: string;
@@ -22,6 +24,4 @@ export interface ObservableObject extends ObservableContainerElement<{[key: stri
   hasKey(key: string): boolean;
 
   forEach(callback: (model: ObservableElement<any>, key?: string) => void): void;
-
-  elementAt(pathArgs: any): ObservableElement<any>;
 }

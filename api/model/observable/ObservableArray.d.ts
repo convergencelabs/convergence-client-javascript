@@ -1,5 +1,6 @@
 import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 import {ObservableContainerElement} from "./ObservableContainerElement";
+import {Path, PathElement} from "../";
 
 export interface ObservableArrayEvents extends ObservableElementEvents {
   readonly INSERT: string;
@@ -15,5 +16,6 @@ export interface ObservableArray extends ObservableContainerElement<any[]> {
 
   forEach(callback: (value: ObservableElement<any>, index?: number) => void): void;
 
-  elementAt(pathArgs: any): ObservableElement<any>;
+  elementAt(path: Path): ObservableElement<any>;
+  elementAt(...elements: PathElement[]): ObservableElement<any>;
 }

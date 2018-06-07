@@ -2,6 +2,7 @@ import {Session} from "../../Session";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
 import {ObservableModel, ObservableModelEvents} from "../observable/ObservableModel";
+import {Path, PathElement} from "../";
 
 export interface HistoricalModelEvents extends ObservableModelEvents {
   TARGET_CHANGED: string;
@@ -60,7 +61,8 @@ export declare class HistoricalModel implements ObservableModel {
 
   public root(): HistoricalObject;
 
-  public elementAt(path: any): HistoricalElement<any>;
+  public elementAt(path: Path): HistoricalElement<any>;
+  public elementAt(...elements: PathElement[]): HistoricalElement<any>;
 
   public playTo(version: number): Promise<void>;
 
