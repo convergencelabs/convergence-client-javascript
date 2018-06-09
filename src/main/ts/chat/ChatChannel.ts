@@ -59,7 +59,6 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
   protected _connection: ConvergenceConnection;
 
   private _joined: boolean;
-  private _subscription: Subscription;
 
   constructor(connection: ConvergenceConnection,
               messageStream: Observable<ChatEvent>,
@@ -79,10 +78,6 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
 
   public session(): Session {
     return this._connection.session();
-  }
-
-  public dispose(): void {
-    this._subscription.unsubscribe();
   }
 
   public info(): ChatChannelInfo {

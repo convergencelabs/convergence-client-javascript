@@ -32,8 +32,6 @@ export declare abstract class ChatChannel extends ConvergenceEventEmitter<ChatEv
 
   public session(): Session;
 
-  public dispose(): void;
-
   public info(): ChatChannelInfo;
 
   public isJoined(): boolean;
