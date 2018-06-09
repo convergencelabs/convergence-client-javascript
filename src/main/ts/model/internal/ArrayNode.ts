@@ -65,6 +65,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     let values: DataValue[] = this._children.map((node: ModelNode<any>) => {
       return node.dataValue();
     });
+
     return <ArrayValue> {
       id: this.id(),
       type: DataValueType.ARRAY,
@@ -257,8 +258,11 @@ export class ArrayNode extends ContainerNode<any[]> {
   private _applySet(index: number, value: DataValue, local: boolean, sessionId: string, username: string): void {
     this._validateReplace(index, value);
 
-    const oldChild: ModelNode<any> = this._children[index];
-    oldChild.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+    const oldChild: ModelNode<any> = this._valueAt([index]);
+    if (oldChild.type() !== ModelElementType.UNDEFINED) {
+      oldChild.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+      oldChild._detach(local);
+    }
 
     this._idToPathElement.set(value.id, index);
     const newChild: ModelNode<any> = ModelNodeFactory.create(value,
@@ -266,7 +270,6 @@ export class ArrayNode extends ContainerNode<any[]> {
     newChild.on(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     this._children[index] = newChild;
     this._updateIdToPathElementMap(index);
-    oldChild._detach(local);
 
     const event: ArrayNodeSetEvent =
       new ArrayNodeSetEvent(this, local, index, newChild, oldChild, sessionId, username);
@@ -277,13 +280,16 @@ export class ArrayNode extends ContainerNode<any[]> {
   private _applyRemove(index: number, local: boolean, sessionId: string, username: string): void {
     this._validateRemove(index);
 
-    const child: ModelNode<any> = this._children[index];
-    child.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+    const oldChild: ModelNode<any> = this._valueAt([index]);
+    if (oldChild.type() !== ModelElementType.UNDEFINED) {
+      oldChild.removeListener(ArrayNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+      oldChild._detach(local);
+    }
+
     this._children.splice(index, 1);
     this._updateIdToPathElementMap(index);
-    child._detach(local);
 
-    const event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, child, sessionId, username);
+    const event: ArrayNodeRemoveEvent = new ArrayNodeRemoveEvent(this, local, index, oldChild, sessionId, username);
     this._emitValueEvent(event);
   }
 
@@ -291,6 +297,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._validateArray(data);
 
     this._detachChildren(local);
+
     this._children = data.map((value: any, i: number) => {
       this._idToPathElement.set(value.id, i);
       return ModelNodeFactory.create(value, this._pathCB(value.id), this.model(), this.sessionId,

@@ -89,7 +89,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   public remove(key: string): ModelNode<any> {
-    const oldValue: ModelNode<any> = this.get(key);
+    const oldValue: ModelNode<any> = this._valueAt([key]);
     this._applyRemove(key, true, this.sessionId, this.username);
     return oldValue;
   }
@@ -182,6 +182,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   protected _detachChildren(local: boolean): void {
     this.forEach((child: ModelNode<any>) => {
       child._detach(local);
+      child.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
     });
   }
 
@@ -197,8 +198,8 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   private _applySet(key: string, value: DataValue, local: boolean, sessionId: string, username: string): void {
     Validation.assertString(key, "key");
 
-    let oldValue = this._children.get(key);
-    if (oldValue !== undefined) {
+    const oldValue = this._valueAt([key]);
+    if (oldValue.type() !== ModelElementType.UNDEFINED) {
       oldValue.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
       oldValue._detach(local);
     }
@@ -220,20 +221,24 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
     if (this._children.has(key)) {
       this._idToPathElement.delete(key);
-      const child = this._children.get(key);
-      child.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-      child._detach(local);
+      const oldChild = this._children.get(key);
+      oldChild.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
+      oldChild._detach(local);
       this._children.delete(key);
 
       const event: ObjectNodeRemoveEvent =
-        new ObjectNodeRemoveEvent(this, local, key, child, this.sessionId, this.username);
+        new ObjectNodeRemoveEvent(this, local, key, oldChild, this.sessionId, this.username);
       this._emitValueEvent(event);
     }
+
+    // todo should we throw an error if the object doesn't have this key.
   }
 
   private _applySetValue(values: { [key: string]: DataValue },
                          local: boolean, sessionId: string, username: string): void {
     let oldChildren: Map<string, ModelNode<any>> = this._children;
+
+    this._detachChildren(local);
 
     this._children = new Map<string, ModelNode<any>>();
 
@@ -254,11 +259,6 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
     const event: ObjectNodeSetValueEvent =
       new ObjectNodeSetValueEvent(this, local, this.data(), this.sessionId, this.username);
     this._emitValueEvent(event);
-
-    oldChildren.forEach((child: ModelNode<any>) => {
-      child._detach(local);
-      child.removeListener(ObjectNode.Events.NODE_CHANGED, this._nodeChangedHandler);
-    });
   }
 
   /////////////////////////////////////////////////////////////////////////////
