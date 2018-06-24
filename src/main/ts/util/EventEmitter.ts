@@ -42,10 +42,9 @@ export class EventEmitter {
   }
 
   public once(event: EventKey, listener: Function): EventEmitter {
-    const self: EventEmitter = this;
-    const wrapper: Function = () => {
-      self.removeListener(event, wrapper);
-      listener();
+    const wrapper: Function = (e: any) => {
+      this.removeListener(event, wrapper);
+      listener(e);
     };
     return this.addListener(event, wrapper);
   }

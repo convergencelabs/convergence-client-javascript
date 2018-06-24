@@ -1,34 +1,27 @@
-import { ConvergenceEventEmitter } from "../util/ConvergenceEventEmitter";
+import { ConvergenceEventEmitter } from "../util/";
 import { ConvergenceConnection } from "../connection/ConvergenceConnection";
 import { BehaviorSubject } from "rxjs/Rx";
 import { ActivityParticipant } from "./ActivityParticipant";
 import { Observable } from "rxjs/Observable";
-import { ActivityEvent, SessionJoinedEvent, SessionLeftEvent, StateSetEvent, StateClearedEvent } from "./events";
+import {
+  ActivityEvent,
+  ActivityEvents,
+  SessionJoinedEvent,
+  SessionLeftEvent,
+  StateSetEvent,
+  StateClearedEvent,
+  StateRemovedEvent
+} from "./events";
 import { Session } from "../Session";
 import { MessageType } from "../connection/protocol/MessageType";
 import { ActivityLeaveRequest } from "../connection/protocol/activity/leaveActivity";
 import { ActivitySetState, ActivityClearState } from "../connection/protocol/activity/activityState";
 import { ActivityRemoveState } from "../connection/protocol/activity/activityState";
-import { StateRemovedEvent } from "./events";
-import {StringMap, StringMapLike} from "../util/StringMap";
-
-export interface ActivityEvents {
-  readonly SESSION_JOINED: string;
-  readonly SESSION_LEFT: string;
-  readonly STATE_SET: string;
-  readonly STATE_REMOVED: string;
-  readonly STATE_CLEARED: string;
-}
+import {StringMap, StringMapLike} from "../util/";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
-  public static readonly Events: ActivityEvents = {
-    SESSION_JOINED: SessionJoinedEvent.NAME,
-    SESSION_LEFT: SessionLeftEvent.NAME,
-    STATE_SET: StateSetEvent.NAME,
-    STATE_REMOVED: StateRemovedEvent.NAME,
-    STATE_CLEARED: StateClearedEvent.NAME
-  };
+  public static readonly Events = ActivityEvents;
 
   private _id: string;
   private _leftCB: () => void;

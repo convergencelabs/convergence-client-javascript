@@ -1,17 +1,9 @@
 import {Session} from "../Session";
-import {ActivityEvent} from "./events";
+import {ActivityEvent, ActivityEvents} from "./events";
 import {Observable} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {StringMapLike} from "../util/StringMap";
-
-export declare interface ActivityEvents {
-  readonly SESSION_JOINED: string;
-  readonly SESSION_LEFT: string;
-  readonly STATE_SET: string;
-  readonly STATE_REMOVED: string;
-  readonly STATE_CLEARED: string;
-}
 
 export declare class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
