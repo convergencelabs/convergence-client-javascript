@@ -2,13 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "preserveConstEnums": true,
     "outDir": "build",
     "sourceMap": true,
     "moduleResolution": "node",
     "downlevelIteration": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "lib": ["es2015", "dom", "es7"]
   },
   "exclude": [
     "node_modules",

@@ -32,11 +32,11 @@ export class RichTextString extends RichTextNode {
   }
 
   public type(): RichTextContentType {
-    return RichTextContentTypes.STRING;
+    return RichTextContentType.STRING;
   }
 
   public isA(type: RichTextContentType): boolean {
-    return type === RichTextContentTypes.STRING;
+    return type === RichTextContentType.STRING;
   }
 
   public isLeaf(): boolean {
@@ -53,5 +53,5 @@ export class RichTextString extends RichTextNode {
 
 import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
-import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
-import {StringMap} from "../../../../util/StringMap";
+import {RichTextContentType} from "./RichTextContentType";
+import {StringMap} from "../../../../util/";

@@ -70,11 +70,11 @@ export class RichTextStringFragment implements RichTextContent {
   }
 
   public type(): RichTextContentType {
-    return RichTextContentTypes.STRING_FRAGMENT;
+    return RichTextContentType.STRING_FRAGMENT;
   }
 
   public isA(type: RichTextContentType): boolean {
-    return type === RichTextContentTypes.STRING_FRAGMENT;
+    return type === RichTextContentType.STRING_FRAGMENT;
   }
 
   public isLeaf(): boolean {
@@ -90,9 +90,9 @@ export class RichTextStringFragment implements RichTextContent {
 }
 
 import {RichTextString} from "./RichTextString";
-import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {RichTextContentType} from "./RichTextContentType";
 import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextPath} from "./RichTextLocation";
-import {StringMap} from "../../../../util/StringMap";
+import {StringMap} from "../../../../util/";

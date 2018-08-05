@@ -8,14 +8,14 @@ export class StringMap {
   }
 
   public static mapToObject(map: Map<string, any>): {[key: string]: any} {
-    let obj: {[key: string]: any} = {};
+    const obj: {[key: string]: any} = {};
     map.forEach((v, k) => obj[k] = v);
     return obj;
   }
 
   public static toStringMap(map: StringMapLike): Map<string, any> {
     if (!map) {
-      return <Map<string, any>> map;
+      return map as Map<string, any>;
     }
 
     if (map instanceof Map) {

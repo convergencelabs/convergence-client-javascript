@@ -1,2 +1,2 @@
-export * from "./DeltaConverter";
+export * from "./QuillDeltaConverter";
 export * from "./RealTimeQuillDocument";

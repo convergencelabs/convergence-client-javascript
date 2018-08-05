@@ -1,33 +1,33 @@
 import {MessageType} from "../../main/ts/connection/protocol/MessageType";
 import AbstractReceiveAction from "./AbstractReceiveAction";
 import AbstractSendAction from "./AbstractSendAction";
-import {IReceiveRequestRecord} from "./records";
 import MockServerAction from "./MockServerAction";
-import {ISendResponseRecord} from "./records";
 import SendResponseAction from "./SendResponseAction";
 import {SendRequestAction} from "./SendRequestAction";
-import {ISendRequestRecord} from "./records";
-import {ISendRecord} from "./records";
+import {
+  IReceiveResponseRecord,
+  IReceiveRequestRecord,
+  IReceiveRecord,
+  ISendRecord,
+  ISendRequestRecord,
+  ISendResponseRecord
+} from "./records";
 import SendAction from "./SendAction";
 import ReceiveResponseAction from "./ReceiveResponseAction";
-import {IReceiveResponseRecord} from "./records";
+
 import ReceiveRequestAction from "./ReceiveRequestAction";
-import {IReceiveRecord} from "./records";
 import ReceiveAction from "./ReceiveAction";
-import {IDoneManager} from "./doneManager";
-import {CallbackDoneManager} from "./doneManager";
-import {MochaDoneManager} from "./doneManager";
-import {AbstractDoneManager} from "./doneManager";
+import {AbstractDoneManager, CallbackDoneManager, IDoneManager, MochaDoneManager} from "./doneManager";
+import { WebSocket, Server } from "mock-socket";
+
 
 /* tslint:disable */
 // This block of code is necessary to enable the mock socket framework in
 // node.
 declare var global: any;
-const mockSocket: any = require('mock-socket');
 if (typeof global['WebSocket'] === "undefined") {
-  global['WebSocket'] = mockSocket.WebSocket;
+  global['WebSocket'] = WebSocket;
 }
-
 /* tslint:enable */
 
 /**
@@ -37,7 +37,8 @@ export class MockConvergenceServer {
   private _url: string;
   private _doneManager: AbstractDoneManager;
 
-  private _mockSocketServer: any;
+  private _mockSocketServer: Server;
+  private _serverSocket: WebSocket;
 
   private _actionId: number;
   private _actions: MockServerAction[];
@@ -214,12 +215,12 @@ export class MockConvergenceServer {
       throw new Error("MockConvergenceServer already started");
     }
 
-    this._mockSocketServer = new mockSocket.Server(this._url);
-    this._mockSocketServer.on("connection", (server: any, ws: any) => {
-
+    this._mockSocketServer = new Server(this._url);
+    this._mockSocketServer.on("connection", (socket: any) => {
+      this._serverSocket = socket;
       this._debug("Client connected to mock server");
       this._flushSendsAndWait();
-      server.on("message", (message: string) => {
+      socket.on("message", (message: string) => {
         // this is needed to keep everything properly async.
         setTimeout(
           () => {
@@ -228,7 +229,7 @@ export class MockConvergenceServer {
           0);
       });
 
-      server.on("close", (code: number, reason: string) => {
+      socket.on("close", (code: number, reason: string) => {
         this._debug("Mock Server connection closed");
       });
     });
@@ -236,8 +237,9 @@ export class MockConvergenceServer {
 
   public stop(): void {
     if (this._mockSocketServer !== undefined) {
-      this._mockSocketServer.close();
+      this._mockSocketServer.close({code: 1000, reason: "", wasClean: true});
       this._mockSocketServer = undefined;
+      this._serverSocket = undefined;
 
       this._actionQueue.forEach((action: MockServerAction) => {
         action.complete();
@@ -312,7 +314,7 @@ export class MockConvergenceServer {
   private _handleMessage(json: string): void {
     const envelope: any = JSON.parse(json);
     if (envelope.b.t === MessageType.PING) {
-      this._mockSocketServer.sendText(JSON.stringify({b: {t: MessageType.PONG}}));
+      this._serverSocket.send(JSON.stringify({b: {t: MessageType.PONG}}));
     } else {
       this._debug("Server Receive: " + json);
 
@@ -332,12 +334,12 @@ export class MockConvergenceServer {
 
   private _flushSendsAndWait(): void {
     while (this._actionQueue.length > 0 && this._actionQueue[0] instanceof AbstractSendAction) {
-      const sendAction: AbstractSendAction = <AbstractSendAction> this._actionQueue.shift();
+      const sendAction: AbstractSendAction = this._actionQueue.shift() as AbstractSendAction;
       sendAction.execute();
     }
 
     if (this._actionQueue.length > 0) {
-      this._currentReceiveAction = <AbstractReceiveAction> this._actionQueue.shift();
+      this._currentReceiveAction = this._actionQueue.shift() as AbstractReceiveAction;
       this._currentReceiveAction.execute();
     }
 
@@ -353,7 +355,7 @@ export class MockConvergenceServer {
   private _send(envelope: any): void {
     const json: string = JSON.stringify(envelope);
     this._debug("Server Sending: " + json);
-    this._mockSocketServer.send(json);
+    this._serverSocket.send(json);
   }
 
   private _debug(msg: string): void {

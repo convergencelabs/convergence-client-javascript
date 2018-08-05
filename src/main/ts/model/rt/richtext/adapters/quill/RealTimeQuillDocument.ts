@@ -1,36 +1,33 @@
-import {EventEmitter} from "../../../../../util/EventEmitter";
-import {RichTextDocument} from "../../model/RichTextDocument";
-import {Delta} from "quill";
-import {DeltaConverter} from "./DeltaConverter";
-import {RichTextRootElement} from "../../model/RichTextRootElement";
-import {RichTextRange} from "../../model/RichTextRange";
-import {RichTextLocation} from "../../model/RichTextLocation";
+import {EventEmitter} from "../../../../../util/";
+import {RichTextDocument, RichTextRootElement, RichTextRange, RichTextLocation} from "../../model/";
+import {QuillDeltaConverter} from "./QuillDeltaConverter";
+import {QuillDelta} from "./QuillDelta";
 
 export class RealTimeQuillDocument extends EventEmitter {
   public static Events = {
     DELTA: "delta"
   };
 
-  private _doc: RichTextDocument;
-  private _root: RichTextRootElement;
+  private readonly _doc: RichTextDocument;
+  private readonly _root: RichTextRootElement;
 
   constructor(document: RichTextDocument) {
     super();
     this._doc = document;
-    this._root = DeltaConverter.getRoot(document);
+    this._root = QuillDeltaConverter.getRoot(document);
   }
 
-  public getValue(): Delta {
-    return DeltaConverter.docToDelta(this._doc);
+  public getValue(): QuillDelta {
+    return QuillDeltaConverter.docToDelta(this._doc);
   }
 
-  public setValue(delta: Delta): void {
-    const root: RichTextRootElement = DeltaConverter.deltaToRoot(delta, this._doc);
+  public setValue(delta: QuillDelta): void {
+    const root: RichTextRootElement = QuillDeltaConverter.deltaToRoot(delta, this._doc);
     this._doc.replaceRoot(root);
   }
 
-  public updateContents(delta: Delta) {
-    const deltaOps = delta.ops;
+  public updateContents(delta: QuillDelta) {
+    const deltaOps = delta.ops as any[];
     let cursor = 0;
     deltaOps.forEach((deltaOp) => {
       if (typeof deltaOp.retain === "number") {
@@ -53,7 +50,7 @@ export class RealTimeQuillDocument extends EventEmitter {
         }
         cursor += deltaOp.retain;
       } else if (typeof deltaOp.delete === "number") {
-        const endIndex = cursor + deltaOp.retain;
+        const endIndex = cursor + deltaOp.delete;
         const range: RichTextRange = new RichTextRange(
           RichTextLocation.ofTextOffset(this._root, cursor),
           RichTextLocation.ofTextOffset(this._root, endIndex)
@@ -62,7 +59,7 @@ export class RealTimeQuillDocument extends EventEmitter {
         console.log(`Delete(${range})`);
         cursor += deltaOp.delete;
       } else if (deltaOp.insert !== undefined) {
-        const node = DeltaConverter.convertInsertOp(deltaOp, this._root);
+        const node = QuillDeltaConverter.convertInsertOp(deltaOp, this._root);
         const location = RichTextLocation.ofTextOffset(this._root, cursor);
         console.log(`Insert(${location}, ${node})`);
         this._doc.insert(location, node);

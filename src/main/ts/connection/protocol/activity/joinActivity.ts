@@ -2,7 +2,7 @@ import {OutgoingProtocolRequestMessage} from "../protocol";
 import {MessageBodySerializer} from "../MessageSerializer";
 import {IncomingProtocolResponseMessage} from "../protocol";
 import {MessageBodyDeserializer} from "../MessageSerializer";
-import {StringMap} from "../../../util/StringMap";
+import {StringMap} from "../../../util/";
 
 export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
   activityId: string;

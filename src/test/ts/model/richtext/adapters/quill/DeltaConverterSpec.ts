@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {DeltaConverter} from "../../../../../../main/ts/model/rt/richtext/adapters/quill";
+import {QuillDeltaConverter} from "../../../../../../main/ts/model/rt/richtext/adapters/quill";
 import {RichTextDocument} from "../../../../../../main/ts/model/rt/richtext/model/RichTextDocument";
 import {RichTextRootElement} from "../../../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
 import * as Delta from "quill-delta";
@@ -19,7 +19,7 @@ describe("DeltaConverter", () => {
       const delta = new Delta(ops);
 
       const doc: RichTextDocument = new RichTextDocument();
-      const root: RichTextRootElement = DeltaConverter.deltaToRoot(delta, doc);
+      const root: RichTextRootElement = QuillDeltaConverter.deltaToRoot(delta, doc);
 
       expect(root.getChildren().length).to.eq(3);
 
@@ -49,7 +49,7 @@ describe("DeltaConverter", () => {
     const delta = new Delta(ops);
 
     const doc: RichTextDocument = new RichTextDocument();
-    const root: RichTextRootElement = DeltaConverter.deltaToRoot(delta, doc);
+    const root: RichTextRootElement = QuillDeltaConverter.deltaToRoot(delta, doc);
 
     expect(root.getChildren().length).to.eq(3);
 
@@ -61,8 +61,10 @@ describe("DeltaConverter", () => {
     const node1: RichTextElement = root.getChild(1) as RichTextElement;
     expect(node1 instanceof RichTextElement).to.eq(true);
     expect(node1.getName()).to.eq("image");
-    expect(StringMap.mapToObject(node1.attributes()))
-      .to.deep.eq(Object.assign({$$blotValue: "url"}, ops[1].attributes));
+
+    const expected = Object.assign({$$ConvergenceQuillBlotValue$$: "url"}, ops[1].attributes);
+    const attrs = StringMap.mapToObject(node1.attributes());
+    expect(attrs).to.deep.eq(expected);
 
     const node2: RichTextString = root.getChild(2) as RichTextString;
     expect(node2 instanceof RichTextString).to.eq(true);
@@ -83,7 +85,7 @@ describe("DeltaConverter", () => {
         }
       });
 
-      const delta: Delta = DeltaConverter.docToDelta(doc);
+      const delta: Delta = QuillDeltaConverter.docToDelta(doc);
       expect(delta.ops).to.deep.eq([
         {insert: "Gandalf", attributes: {bold: true}},
         {insert: " the "},

@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Quill Editor Set Up
 ///////////////////////////////////////////////////////////////////////////////
+
+
 const quillEditor = new Quill('#quill-editor', {
   modules: {
     'formula': false,
@@ -19,6 +21,16 @@ const quillEditor = new Quill('#quill-editor', {
   theme: 'snow'
 });
 
-const element = new QuillDocumentElement();
+quillEditor.setContents({
+  ops: [
+    { insert: 'Gandalf', attributes: { bold: true } },
+    { insert: ' the ' },
+    { insert: 'Grey', attributes: { color: '#cccccc' } }
+  ]
+});
 
-const adapter = new QuillAdapter(quillEditor, element);
+
+const rtDoc = new Convergence.QuillDeltaConverter.deltaToDoc(quillEditor.getContents());
+const quillDoc = new Convergence.RealTimeQuillDocument(rtDoc);
+
+const adapter = new QuillAdapter(quillEditor, quillDoc);

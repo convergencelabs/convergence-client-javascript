@@ -9,6 +9,7 @@
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
     "no-console": false,
     "arrow-parens": false,
-    "max-classes-per-file": false
+    "max-classes-per-file": false,
+    "no-submodule-imports": false
   }
 }

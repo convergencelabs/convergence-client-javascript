@@ -1,10 +1,21 @@
-import {ConvergenceError} from "../../../../util/ConvergenceError";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextNode} from "./RichTextNode";
+import {RichTextRootElement} from "./RichTextRootElement";
+import {RichTextContent} from "./RichTextContent";
+import {RichTextString} from "./RichTextString";
+import {ConvergenceError, Validation} from "../../../../util/";
+import {RichTextContentType} from "./RichTextContentType";
 
 export type RichTextPath = number[];
 
+interface PathAndOffset {
+  path: RichTextPath;
+  offset?: number;
+}
+
 export class RichTextLocation {
 
-  public static ofRoot(root: RichTextRootElement): RichTextLocation  {
+  public static ofRoot(root: RichTextRootElement): RichTextLocation {
     return new RichTextLocation(root, []);
   }
 
@@ -12,22 +23,57 @@ export class RichTextLocation {
     return new RichTextLocation(node.root(), node.path());
   }
 
-  public static ofPath(root: RichTextRootElement, path: RichTextPath): RichTextLocation  {
+  public static ofPath(root: RichTextRootElement, path: RichTextPath): RichTextLocation {
     return new RichTextLocation(root, path);
   }
 
-  public static ofStringIndex(node: RichTextString, index?: number): RichTextLocation  {
+  public static ofStringIndex(node: RichTextString, index?: number): RichTextLocation {
     return new RichTextLocation(node.root(), node.path(), index);
   }
 
-  public static ofTextOffset(root: RichTextRootElement, offset: number): RichTextLocation  {
+  public static ofTextOffset(root: RichTextRootElement, offset: number): RichTextLocation {
+    const pao = RichTextLocation.findPathAndOffset(root, offset);
 
-    throw new Error("not implemented");
+    return new RichTextLocation(root, pao.path, pao.offset);
   }
 
-  private _root: RichTextRootElement;
-  private _path: RichTextPath;
-  private _subPath: any;
+  private static findPathAndOffset(element: RichTextElement, offset: number): PathAndOffset {
+    let currentOffset = 0;
+
+    for (let i = 0; i < element.childCount() && currentOffset <= offset; i++) {
+      const child = element.getChild(i);
+      const childLength = child.textContentLength();
+
+      if (currentOffset + childLength > offset) {
+        const remainingOffset = offset - currentOffset;
+
+        if (child.type() === RichTextContentType.ELEMENT) {
+          const pao = RichTextLocation.findPathAndOffset(child as RichTextElement, remainingOffset);
+          return {
+            path: [i].concat(pao.path),
+            offset: pao.offset
+          };
+        } else {
+          return {
+            path: [i],
+            offset: remainingOffset
+          };
+        }
+      } else if (currentOffset + childLength === offset) {
+        return {
+          path: [i + 1]
+        };
+      } else {
+        currentOffset = currentOffset + childLength;
+      }
+    }
+
+    throw new ConvergenceError("Text offset out of bounds.");
+  }
+
+  private readonly _root: RichTextRootElement;
+  private readonly _path: RichTextPath;
+  private readonly _subPath: any;
 
   constructor(root: RichTextRootElement, path: RichTextPath, subPath?: any) {
     if (Validation.isNotSet(root)) {
@@ -61,7 +107,6 @@ export class RichTextLocation {
   }
 
   public getParent(): RichTextLocation {
-    let parent: RichTextElement = this._root;
     const path = this._path.slice(0);
 
     if (path.length > 0) {
@@ -91,8 +136,8 @@ export class RichTextLocation {
     }
 
     const otherPath = other.path();
-    let minLen = Math.min(this._path.length, otherPath.length);
-    let commonPath: RichTextPath = [];
+    const minLen = Math.min(this._path.length, otherPath.length);
+    const commonPath: RichTextPath = [];
     for (let i = 0; i < minLen; i++) {
       const thisVal = this._path[i];
       const otherVal = otherPath[i];
@@ -107,11 +152,3 @@ export class RichTextLocation {
     return RichTextLocation.ofPath(this._root, commonPath);
   }
 }
-
-import {RichTextElement} from "./RichTextElement";
-import {RichTextNode} from "./RichTextNode";
-import {RichTextRootElement} from "./RichTextRootElement";
-import {RichTextContent} from "./RichTextContent";
-import {RichTextString} from "./RichTextString";
-import {Validation} from "../../../../util/Validation";
-import {RichTextDocument} from "./RichTextDocument";

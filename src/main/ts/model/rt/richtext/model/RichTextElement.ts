@@ -2,7 +2,7 @@ import {RichTextNode} from "./RichTextNode";
 
 export class RichTextElement extends RichTextNode {
   private _name: string;
-  private _children: RichTextNode[];
+  private readonly _children: RichTextNode[];
 
   constructor(document: RichTextDocument, parent: RichTextElement, name: string, attributes?: Map<string, any>) {
     super(document, parent, attributes);
@@ -42,9 +42,11 @@ export class RichTextElement extends RichTextNode {
     let node: RichTextNode = this;
 
     path.forEach((val, index) => {
-      if (node.isA(RichTextContentTypes.ELEMENT) || node.isA(RichTextContentTypes.ROOT)) {
+      if (node.isA(RichTextContentType.ELEMENT) ||
+        node.isA(RichTextContentType.ROOT) ||
+        node.isA(RichTextContentType.OBJECT)) {
         node = (node as RichTextElement).getChild(val);
-      } else if (!(node.isA(RichTextContentTypes.STRING) && index === path.length - 1)) {
+      } else if (!(node.isA(RichTextContentType.STRING) && index === path.length - 1)) {
         throw new ConvergenceError(`Invalid RichTextPath: ${path}`, "invalid-rich-text-path");
       }
     });
@@ -99,29 +101,33 @@ export class RichTextElement extends RichTextNode {
     return length;
   }
 
-  public textOffsetToPath(offset: number): any {
-    // looking for 17
-    // [5, 10, 4, 6]
+  public textOffsetToPath(offset: number): RichTextPath {
     let start = 0;
-    let end = 0;
     for (let i = 0; i < this._children.length && offset < start; i++) {
       const child = this._children[i];
       const len = child.textContentLength();
 
       if (start + len >= offset) {
-        return [child];
+        const childOffset = offset - start;
+        if (child instanceof RichTextElement) {
+          [i].concat(child.textOffsetToPath(childOffset));
+        } else {
+
+        }
+        return [i];
       } else {
         start = start + len;
       }
     }
+    return [];
   }
 
   public type(): RichTextContentType {
-    return RichTextContentTypes.ELEMENT;
+    return RichTextContentType.ELEMENT;
   }
 
   public isA(type: RichTextContentType): boolean {
-    return type === RichTextContentTypes.ELEMENT;
+    return type === RichTextContentType.ELEMENT;
   }
 
   public toString(): string {
@@ -135,7 +141,5 @@ export class RichTextElement extends RichTextNode {
 
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextPath} from "./RichTextLocation";
-import {ConvergenceError} from "../../../../util/ConvergenceError";
-import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
-import {Validation} from "../../../../util/Validation";
-import {StringMap} from "../../../../util/StringMap";
+import {ConvergenceError, StringMap} from "../../../../util/";
+import {RichTextContentType} from "./RichTextContentType";

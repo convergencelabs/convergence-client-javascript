@@ -1,5 +1,5 @@
 export class RichTextMutator {
-  private _document: RichTextDocument;
+  private readonly _document: RichTextDocument;
 
   constructor(document: RichTextDocument) {
     this._document = document;
@@ -9,14 +9,15 @@ export class RichTextMutator {
     const node: RichTextNode = location.getNode();
     const index: number = location.getSubPath();
 
+    // fixme need to handle if it is a rich text string, but different styels.
     if (node instanceof RichTextString && (
-        !attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes()))) {
+      !attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes()))) {
 
       // Its the same style so we can just insert into the existing node, no
       // splitting and merging required
       node.insert(index, text);
-    } else if (parent instanceof RichTextElement) {
-      this.insert(location, new RichTextString(this._document, parent, text, attributes));
+    } else if (node instanceof RichTextElement) {
+      this.insert(location, new RichTextString(this._document, node, text, attributes));
     } else {
       // fixme throw error
     }
@@ -37,7 +38,7 @@ export class RichTextMutator {
         node.insert(index, content.getData());
       } else {
         // otherwise split, add the content to the parent. We know we don't need to merge
-        // afterwards because the either this is not text, or text with different attribites.
+        // afterwards because the either this is not text, or text with different attributes.
         const parent = node.parent();
         const nodeIndex = node.index();
 
@@ -68,9 +69,8 @@ export class RichTextMutator {
     let currentRangeStart: RichTextLocation = null;
 
     let currentRangeValue: any;
-    let first = true;
 
-    let iterator: IterableIterator<RichTextContent> = range.iterator();
+    const iterator: IterableIterator<RichTextContent> = range.iterator();
     let item: IteratorResult<RichTextContent> = iterator.next();
 
     while (!item.done) {

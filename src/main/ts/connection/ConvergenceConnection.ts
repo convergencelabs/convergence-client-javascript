@@ -1,23 +1,27 @@
 import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ProtocolConnection} from "./ProtocolConnection";
+import {ProtocolConnection, ReplyCallback} from "./ProtocolConnection";
 import {debugFlags} from "../Debug";
 import ConvergenceSocket from "./ConvergenceSocket";
-import {OutgoingProtocolMessage} from "./protocol/protocol";
-import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
-import {IncomingProtocolResponseMessage} from "./protocol/protocol";
-import {EventEmitter} from "../util/EventEmitter";
+import {
+  IncomingProtocolResponseMessage,
+  OutgoingProtocolMessage,
+  OutgoingProtocolRequestMessage
+} from "./protocol/protocol";
 import {SessionImpl} from "../SessionImpl";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Session} from "../Session";
-import {PasswordAuthRequest, AnonymousAuthRequest, ReconnectAuthRequest} from "./protocol/authentication";
+import {
+  AuthenticationResponse,
+  AuthRequest,
+  AnonymousAuthRequest,
+  ReconnectAuthRequest,
+  PasswordAuthRequest,
+  TokenAuthRequest
+} from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
-import {TokenAuthRequest} from "./protocol/authentication";
-import {AuthRequest} from "./protocol/authentication";
-import {AuthenticationResponse} from "./protocol/authentication";
 import {Deferred} from "../util/Deferred";
-import {ReplyCallback} from "./ProtocolConnection";
-import {EventKey} from "../util/EventEmitter";
+import {EventKey, EventEmitter} from "../util/";
 import {Observable, Subject} from "rxjs/Rx";
 
 export class ConvergenceConnection extends EventEmitter {
@@ -30,22 +34,22 @@ export class ConvergenceConnection extends EventEmitter {
     ERROR: "error"
   };
 
-  private _session: SessionImpl;
+  private readonly _session: SessionImpl;
   private _connectionDeferred: Deferred<HandshakeResponse>;
-  private _connectionTimeout: number;  // seconds
-  private _maxReconnectAttempts: number;
+  private readonly _connectionTimeout: number;  // seconds
+  private readonly _maxReconnectAttempts: number;
   private _connectionAttempts: number;
   private _connectionAttemptTask: number;
   private _connectionTimeoutTask: number;
-  private _reconnectInterval: number; // seconds
-  private _retryOnOpen: boolean;
+  private readonly _reconnectInterval: number; // seconds
+  private readonly _retryOnOpen: boolean;
 
-  private _protocolConfig: ProtocolConfiguration;
+  private readonly _protocolConfig: ProtocolConfiguration;
 
   private _connectionState: ConnectionState;
 
   private _protocolConnection: ProtocolConnection;
-  private _url: string;
+  private readonly _url: string;
   private _messageEmitter: EventEmitter;
   private _messageSubject: Subject<MessageEvent>;
 
@@ -247,7 +251,7 @@ export class ConvergenceConnection extends EventEmitter {
         this._session.setAuthenticated(true);
         const resp: AuthResponse = {
           state: response.state
-      };
+        };
         return resp;
       } else {
         throw new Error("Authentication failed");
@@ -268,7 +272,7 @@ export class ConvergenceConnection extends EventEmitter {
       }
     }
 
-    const timeoutTask: Function = () => {
+    const timeoutTask = () => {
       this._protocolConnection.abort("connection timeout exceeded");
     };
 
@@ -348,7 +352,7 @@ export class ConvergenceConnection extends EventEmitter {
 
   private _scheduleReconnect(delay: number, reconnect: boolean): void {
     if (this._connectionAttempts < this._maxReconnectAttempts || this._maxReconnectAttempts < 0) {
-      const reconnectTask: Function = () => {
+      const reconnectTask = () => {
         this._attemptConnection(reconnect);
       };
       this._connectionAttemptTask = setTimeout(reconnectTask, delay * 1000);

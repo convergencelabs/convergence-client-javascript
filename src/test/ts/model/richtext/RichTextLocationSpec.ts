@@ -4,6 +4,8 @@ import {RichTextDocument} from "../../../../main/ts/model/rt/richtext/model/Rich
 import {RichTextRootElement} from "../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
 import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/model/AttributeUtils";
 import {RichTextLocation} from "../../../../main/ts/model/rt/richtext/model/RichTextLocation";
+import {TestDocumentCreator} from "./documents/TestDocumentCreator";
+import {TWO_PARAGRAPHS_WITH_OBJECT} from "./documents/two_paragraphs_with_object";
 
 describe("RichTextLocation", () => {
   describe("constructor", () => {
@@ -162,6 +164,13 @@ describe("RichTextLocation", () => {
       const root = new RichTextRootElement(document, "main", "root");
       const location = new RichTextLocation(root, [0, 2, 2, 4]);
       expect(() => location.getNearestCommonAncestor(null)).to.throw();
+    });
+
+    it("getting offset location", () => {
+      const document = TestDocumentCreator.createDocument(TWO_PARAGRAPHS_WITH_OBJECT);
+      const root = document.getRoot("main");
+      const location = RichTextLocation.ofTextOffset(root, 2);
+      console.log(location);
     });
   });
 });

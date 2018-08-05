@@ -3,6 +3,7 @@ import {RichTextRootElement} from "../../../../../main/ts/model/rt/richtext/mode
 import {RichTextString} from "../../../../../main/ts/model/rt/richtext/model/RichTextString";
 import {RichTextElement} from "../../../../../main/ts/model/rt/richtext/model/RichTextElement";
 import {RichTextNode} from "../../../../../main/ts/model/rt/richtext/model/RichTextNode";
+import {RichTextObject} from "../../../../../main/ts/model/rt/richtext/model";
 
 export class TestDocumentCreator {
   public static createDocument(data: DocumentData): RichTextDocument {
@@ -35,6 +36,8 @@ export class TestDocumentCreator {
     switch (data.type) {
       case "element":
         return TestDocumentCreator.createElement(doc, parent, data as ElementData);
+      case "object":
+        return TestDocumentCreator.createObject(doc, parent, data as ObjectData);
       case "string":
         return TestDocumentCreator.createString(doc, parent, data as StringData);
       default:
@@ -45,6 +48,15 @@ export class TestDocumentCreator {
   public static createElement(doc: RichTextDocument, parent: RichTextElement, data: ElementData): RichTextElement {
     const attrs = TestDocumentCreator.createAttributes(data.attributes);
     const element = new RichTextElement(doc, parent, data.name, attrs);
+    if (data.children) {
+      TestDocumentCreator.processChildren(doc, element, data.children);
+    }
+    return element;
+  }
+
+  public static createObject(doc: RichTextDocument, parent: RichTextElement, data: ObjectData): RichTextElement {
+    const attrs = TestDocumentCreator.createAttributes(data.attributes);
+    const element = new RichTextObject(doc, parent, data.name, attrs);
     if (data.children) {
       TestDocumentCreator.processChildren(doc, element, data.children);
     }
@@ -72,7 +84,13 @@ export interface NodeData {
 export interface ElementData extends NodeData {
   type: "element";
   name: string;
-  children?: Array<StringData | ElementData>;
+  children?: Array<StringData | ElementData | ObjectData>;
+}
+
+export interface ObjectData extends NodeData {
+  type: "object";
+  name: string;
+  children?: Array<StringData | ElementData | ObjectData>;
 }
 
 export interface RootElementData {
@@ -86,4 +104,4 @@ export interface StringData extends NodeData {
   data: string;
 }
 
-export type DocumentData = { [key: string]: RootElementData };
+export interface DocumentData  { [key: string]: RootElementData; }

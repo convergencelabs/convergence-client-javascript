@@ -1,8 +1,8 @@
 import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
-import {RichTextContentType, RichTextContentTypes} from "./RichTextContentType";
+import {RichTextContentType} from "./RichTextContentType";
 import {RichTextPath} from "./RichTextLocation";
-import {StringMap} from "../../../../util/StringMap";
+import {StringMap} from "../../../../util/";
 
 export class RichTextRootElement extends RichTextElement {
   private _rootName: string;
@@ -24,11 +24,11 @@ export class RichTextRootElement extends RichTextElement {
   }
 
   public type(): RichTextContentType {
-    return RichTextContentTypes.ROOT;
+    return RichTextContentType.ROOT;
   }
 
   public isA(type: RichTextContentType): boolean {
-    return type === RichTextContentTypes.ROOT;
+    return type === RichTextContentType.ROOT;
   }
 
   public root(): RichTextRootElement {

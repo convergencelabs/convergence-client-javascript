@@ -1,28 +1,27 @@
-import * as Delta from "quill-delta";
 import {RichTextDocument} from "../../model/RichTextDocument";
 import {RichTextRootElement} from "../../model/RichTextRootElement";
 import {RichTextString} from "../../model/RichTextString";
 import {RichTextElement} from "../../model/RichTextElement";
 import {StringMap} from "../../../../../util";
 import {RichTextNode} from "../../model/RichTextNode";
-import {DeltaOperation} from "quill";
+import {QuillDelta, QuillDeltaOperation} from "./QuillDelta";
 
 const ROOT_NAME: string = "quill";
 const ROOT_ELEMENT_NAME = "delta";
-const BLOT_VALUE_ATTR: string = "$$blotValue";
+const BLOT_VALUE_ATTR: string = "$$ConvergenceQuillBlotValue$$";
 
-export class DeltaConverter {
+export class QuillDeltaConverter {
 
   public static getRoot(doc: RichTextDocument): RichTextRootElement {
     return doc.getRoot(ROOT_NAME);
   }
 
-  public static docToDelta(doc: RichTextDocument): Delta {
+  public static docToDelta(doc: RichTextDocument): QuillDelta {
     const root: RichTextRootElement = doc.getRoot(ROOT_NAME);
-    const deltaOps: DeltaOperation[] = root.getChildren().map((child) => {
+    const deltaOps: QuillDeltaOperation[] = root.getChildren().map((child) => {
       if (child instanceof RichTextString) {
 
-        const result: DeltaOperation = {
+        const result: QuillDeltaOperation = {
           insert: child.getData()
         };
 
@@ -37,7 +36,7 @@ export class DeltaConverter {
         const blotValue = child.getAttribute(BLOT_VALUE_ATTR);
         insert[blotName] = blotValue;
 
-        const op: DeltaOperation = {insert};
+        const op: any = {insert};
 
         const attributes = StringMap.mapToObject(child.attributes());
         delete attributes[BLOT_VALUE_ATTR];
@@ -51,18 +50,25 @@ export class DeltaConverter {
       }
     });
 
-    return new Delta(deltaOps);
+    return {ops: deltaOps};
   }
 
-  public static deltaToRoot(delta: Delta, doc: RichTextDocument): RichTextRootElement {
+  public static deltaToDoc(delta: QuillDelta): RichTextDocument {
+    const doc = new RichTextDocument();
+    const root = QuillDeltaConverter.deltaToRoot(delta, doc);
+    doc.addRoot(root);
+    return doc;
+  }
+
+  public static deltaToRoot(delta: QuillDelta, doc: RichTextDocument): RichTextRootElement {
     const root = new RichTextRootElement(doc, ROOT_NAME, ROOT_ELEMENT_NAME);
-    delta.ops.forEach((op: DeltaOperation) => {
-      root.appendChild(DeltaConverter.convertInsertOp(op, root));
+    delta.ops.forEach((op: QuillDeltaOperation) => {
+      root.appendChild(QuillDeltaConverter.convertInsertOp(op, root));
     });
     return root;
   }
 
-  public static convertInsertOp(op: DeltaOperation, root: RichTextRootElement): RichTextNode {
+  public static convertInsertOp(op: any, root: RichTextRootElement): RichTextNode {
     switch (typeof op.insert) {
       case "undefined":
         throw new Error("Document deltas should only have insert operations: " + JSON.stringify(op));
@@ -78,7 +84,7 @@ export class DeltaConverter {
         const blotName = keys[0];
         const value: string = op.insert[blotName];
 
-        const attributes = Object.assign({}, op.attributes);
+        const attributes = {...op.attributes};
         attributes[BLOT_VALUE_ATTR] = value;
 
         return new RichTextElement(

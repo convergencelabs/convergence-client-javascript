@@ -1,4 +1,4 @@
-import {RichTextContentTypes} from "../../../../../main/ts/model/rt/richtext/model/RichTextContentType";
+import {RichTextContentType} from "../../../../../main/ts/model/rt/richtext/model/RichTextContentType";
 import {RichTextString} from "../../../../../main/ts/model/rt/richtext/model/RichTextString";
 import {RichTextStringFragment} from "../../../../../main/ts/model/rt/richtext/model/RichTextStringFragment";
 import {RichTextIterator} from "../../../../../main/ts/model/rt/richtext/model/RichTextIterator";
@@ -82,7 +82,7 @@ export class StringFragmentExpectation extends IterationExpectation {
   }
 
   public assertExpectation(content: RichTextContent): void {
-    if (!content.isA(RichTextContentTypes.STRING_FRAGMENT)) {
+    if (!content.isA(RichTextContentType.STRING_FRAGMENT)) {
       this._throw("The content was not a string fragment", this._stringFragment, content);
     }
 

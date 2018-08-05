@@ -1,4 +1,4 @@
-import {EventEmitter} from "../../../../util/EventEmitter";
+import {EventEmitter} from "../../../../util/";
 
 export class RichTextDocument extends EventEmitter {
   private _attributes: Map<string, any>;
