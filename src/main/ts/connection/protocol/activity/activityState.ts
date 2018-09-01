@@ -1,6 +1,5 @@
 import { OutgoingProtocolNormalMessage } from "../protocol";
-import { MessageBodySerializer } from "../MessageSerializer";
-import { MessageBodyDeserializer } from "../MessageSerializer";
+import { MessageBodySerializer, MessageBodyDeserializer } from "../MessageSerializer";
 import {IncomingActivityMessage} from "./incomingActivityMessage";
 
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {

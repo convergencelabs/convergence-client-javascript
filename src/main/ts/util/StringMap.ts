@@ -13,6 +13,22 @@ export class StringMap {
     return obj;
   }
 
+  public static coerceToObject(map: StringMapLike): {[key: string]: any} {
+    if (map instanceof Map) {
+      return StringMap.mapToObject(map);
+    } else {
+      return map;
+    }
+  }
+
+  public static coerceToMap(map: StringMapLike): Map<string, any> {
+    if (map instanceof Map) {
+      return map;
+    } else {
+      return StringMap.objectToMap(map);
+    }
+  }
+
   public static toStringMap(map: StringMapLike): Map<string, any> {
     if (!map) {
       return map as Map<string, any>;

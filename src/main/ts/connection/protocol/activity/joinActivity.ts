@@ -1,7 +1,5 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
-import {MessageBodySerializer} from "../MessageSerializer";
-import {IncomingProtocolResponseMessage} from "../protocol";
-import {MessageBodyDeserializer} from "../MessageSerializer";
+import {OutgoingProtocolRequestMessage, IncomingProtocolResponseMessage} from "../protocol";
+import {MessageBodySerializer, MessageBodyDeserializer} from "../MessageSerializer";
 import {StringMap} from "../../../util/";
 
 export interface ActivityJoinRequest extends OutgoingProtocolRequestMessage {
@@ -22,6 +20,5 @@ export interface ActivityJoinResponse extends IncomingProtocolResponseMessage {
 
 export const ActivityJoinResponseDeserializer: MessageBodyDeserializer<ActivityJoinResponse> = (body: any) => {
   const participants: {[key: string]: any} = body.s;
-  const result: ActivityJoinResponse = {participants};
-  return result;
+  return {participants} as ActivityJoinResponse;
 };

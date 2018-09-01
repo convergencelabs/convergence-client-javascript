@@ -12,7 +12,7 @@ export function deepClone(from: any): any {
   const type: string = typeof from;
 
   // Primitive types
-  if (from === null || from === undefined || type === "string" || type === "number" || type === "boolean" ) {
+  if (from === null || from === undefined || type === "string" || type === "number" || type === "boolean") {
     return from;
   }
 
@@ -22,7 +22,7 @@ export function deepClone(from: any): any {
   }
 
   // Handle Array
-  if (from instanceof Array) {
+  if (Array.isArray(from)) {
     return from.map(e => deepClone(e));
   }
 
@@ -41,7 +41,7 @@ export function deepClone(from: any): any {
   }
 
   // Handle Object
-  if (from.constructor === Object ) {
+  if (from.constructor === Object) {
     const result: {[key: string]: any} = {};
     Object.keys(from).forEach(key => {
       result[key] = deepClone(from[key]);

@@ -1,4 +1,3 @@
-import { ConvergenceEventEmitter } from "../util/";
 import { ConvergenceConnection } from "../connection/ConvergenceConnection";
 import { BehaviorSubject } from "rxjs/Rx";
 import { ActivityParticipant } from "./ActivityParticipant";
@@ -15,16 +14,19 @@ import {
 import { Session } from "../Session";
 import { MessageType } from "../connection/protocol/MessageType";
 import { ActivityLeaveRequest } from "../connection/protocol/activity/leaveActivity";
-import { ActivitySetState, ActivityClearState } from "../connection/protocol/activity/activityState";
-import { ActivityRemoveState } from "../connection/protocol/activity/activityState";
-import {StringMap, StringMapLike} from "../util/";
+import {
+  ActivitySetState,
+  ActivityClearState,
+  ActivityRemoveState
+} from "../connection/protocol/activity/activityState";
+import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 
 export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   public static readonly Events = ActivityEvents;
 
-  private _id: string;
-  private _leftCB: () => void;
+  private readonly _id: string;
+  private readonly _leftCB: () => void;
   private _joined: boolean;
   private _connection: ConvergenceConnection;
   private _participants: BehaviorSubject<Map<string, ActivityParticipant>>;
@@ -43,21 +45,21 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     this._connection = connection;
 
     this.events().subscribe((event: ActivityEvent) => {
-      let newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+      const newMap: Map<string, ActivityParticipant> = this._participants.getValue();
       switch (event.name) {
         case Activity.Events.SESSION_JOINED:
-          let joinedEvent: SessionJoinedEvent = <SessionJoinedEvent> event;
+          const joinedEvent: SessionJoinedEvent = event as SessionJoinedEvent;
           newMap.set(joinedEvent.sessionId, joinedEvent.participant);
           this._participants.next(newMap);
           break;
         case Activity.Events.SESSION_LEFT:
-          let leftEvent: SessionLeftEvent = <SessionLeftEvent> event;
+          const leftEvent: SessionLeftEvent = event as SessionLeftEvent;
           newMap.delete(leftEvent.sessionId);
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_SET:
-          let setEvent: StateSetEvent = <StateSetEvent> event;
-          let setState: Map<string, any> = newMap.get(setEvent.sessionId).state;
+          const setEvent: StateSetEvent = event as StateSetEvent;
+          const setState: Map<string, any> = newMap.get(setEvent.sessionId).state;
           setState.set(setEvent.key, setEvent.value);
           newMap.set(
             setEvent.sessionId,
@@ -65,15 +67,15 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_REMOVED:
-          let removeEvent: StateRemovedEvent = <StateRemovedEvent> event;
-          let removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state;
+          const removeEvent: StateRemovedEvent = event as StateRemovedEvent;
+          const removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state;
           removeState.delete(removeEvent.key);
           newMap.set(removeEvent.sessionId,
             new ActivityParticipant(removeEvent.sessionId, removeEvent.username, removeState, false));
           this._participants.next(newMap);
           break;
         case Activity.Events.STATE_CLEARED:
-          let clearEvent: StateClearedEvent = <StateClearedEvent> event;
+          const clearEvent: StateClearedEvent = event as StateClearedEvent;
           newMap.set(clearEvent.sessionId,
             new ActivityParticipant(clearEvent.sessionId, clearEvent.username, new Map<string, any>(), false));
           this._participants.next(newMap);
@@ -96,10 +98,10 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public leave(): void {
     if (this.isJoined()) {
       this._joined = false;
-      this._connection.send(<ActivityLeaveRequest> {
+      this._connection.send({
         type: MessageType.ACTIVITY_LEAVE_REQUEST,
         activityId: this._id
-      });
+      } as ActivityLeaveRequest);
       this._leftCB();
     }
   }
@@ -114,13 +116,13 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     return localParticipant.state;
   }
 
-  public setState(state: StringMapLike): void
-  public setState(key: string, value: any): void
+  public setState(state: StringMapLike): void;
+  public setState(key: string, value: any): void;
   public setState(): void {
     if (this.isJoined()) {
       let state: {[key: string]: any};
       if (arguments.length === 1) {
-        state = StringMap.toStringMap(arguments[0]);
+        state = StringMap.coerceToObject(arguments[0]);
       } else if (arguments.length === 2) {
         state = {};
         state[arguments[0]] = arguments[1];
@@ -146,22 +148,22 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     }
   }
 
-  public removeState(key: string): void
-  public removeState(keys: string[]): void
+  public removeState(key: string): void;
+  public removeState(keys: string[]): void;
   public removeState(keys: string | string[]): void {
     if (this.isJoined()) {
       if (typeof keys === "string") {
-        keys = [<string> keys];
+        keys = [keys as string];
       }
 
       const message: ActivityRemoveState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_REMOVED,
         activityId: this._id,
-        keys: <string[]> keys
+        keys: keys as string[]
       };
       this._connection.send(message);
 
-      (<string[]> keys).forEach((key) => {
+      (keys as string[]).forEach((key) => {
         this._emitEvent(new StateRemovedEvent(
           this,
           this._connection.session().username(),
