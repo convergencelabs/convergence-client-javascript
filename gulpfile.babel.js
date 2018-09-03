@@ -16,6 +16,10 @@ import rollupStream from "rollup-stream";
 import source from "vinyl-source-stream";
 import buffer from "vinyl-buffer";
 import header from 'gulp-header';
+import shell from "gulp-shell";
+import filter from 'gulp-filter-each';
+import trim from "trim";
+import insert from "gulp-insert";
 
 const npmPackageJson = JSON.parse(fs.readFileSync("./npmjs/package.json"));
 
@@ -137,6 +141,33 @@ const bumpPacakgeVersion = (cb) => {
   }
 };
 
+const docs =
+  shell.task([
+    'typedoc --options typedoc.config.json src/main',
+  ]);
+
+
+const tsDeclarations = () => {
+  const exportFilter = "export {};";
+  const tsProject = ts.createProject("tsconfig.json", {
+    declaration: true,
+    typescript: typescript
+  });
+
+  return src("src/main/ts/**/*.ts")
+    .pipe(tsProject())
+    .dts
+    .pipe(filter(content => trim(content) !== exportFilter))
+    .pipe(dest("dist/types"));
+};
+
+const declarationsNamedExport = () =>
+  src("./dist/types/index.d.ts")
+    .pipe(insert.append("\nexport as namespace Convergence;"))
+    .pipe(dest("./dist/types"));
+
+const types = series(tsDeclarations, declarationsNamedExport);
+
 const distInternal = series(
   typings,
   distCjs,
@@ -184,5 +215,7 @@ export {
   clean,
   validateApi,
   distInternal,
-  dist
+  dist,
+  docs,
+  types
 }

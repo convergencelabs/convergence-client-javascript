@@ -12,6 +12,7 @@
     "max-classes-per-file": false,
     "no-submodule-imports": false,
     "no-object-literal-type-assertion": false,
-    "unified-signatures": false
+    "unified-signatures": false,
+    "no-empty-interface": false
   }
 }

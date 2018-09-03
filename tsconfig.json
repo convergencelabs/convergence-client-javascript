@@ -8,6 +8,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "downlevelIteration": true,
+    "stripInternal": true,
     "importHelpers": true,
     "lib": ["es2015", "dom", "es7"]
   },
