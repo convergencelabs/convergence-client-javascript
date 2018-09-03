@@ -2,9 +2,7 @@ import {Session} from "../Session";
 import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
-import {UserLookUpRequest} from "../connection/protocol/identity/userLookUps";
-import {UserSearchRequest} from "../connection/protocol/identity/userLookUps";
-import {UserListResponse} from "../connection/protocol/identity/userLookUps";
+import {UserLookUpRequest, UserListResponse, UserSearchRequest} from "../connection/protocol/identity/userLookUps";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {
@@ -42,7 +40,17 @@ const validSearchFields: string[] = [
 
 export class IdentityService {
 
-  constructor(private _connection: ConvergenceConnection) {
+  /**
+   * @internal
+   */
+  private _connection: ConvergenceConnection;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  constructor(connection: ConvergenceConnection) {
+    this._connection = connection;
   }
 
   public session(): Session {
@@ -58,7 +66,7 @@ export class IdentityService {
       return Promise.reject<DomainUser>("Must specify a username.");
     }
 
-    return this.users([username]).then((users: {[key: string]: DomainUser}) => {
+    return this.users([username]).then((users: { [key: string]: DomainUser }) => {
       const keys: string[] = Object.keys(users);
       if (keys.length === 0 || keys.length === 1) {
         return Promise.resolve(users[username]);
@@ -69,7 +77,7 @@ export class IdentityService {
   }
 
   public userByEmail(email: string): Promise<DomainUser> {
-    return this.usersByEmail([email]).then((users: {[hey: string]: DomainUser}) => {
+    return this.usersByEmail([email]).then((users: { [hey: string]: DomainUser }) => {
       const keys: string[] = Object.keys(users);
       if (keys.length === 0 || keys.length === 1) {
         return Promise.resolve(users[email]);
@@ -79,10 +87,10 @@ export class IdentityService {
     });
   }
 
-  public users(usernames: string[]): Promise<{[key: string]: DomainUser}> {
+  public users(usernames: string[]): Promise<{ [key: string]: DomainUser }> {
     const unique: string[] = Array.from(new Set(usernames));
     return this._users(unique, UserFields.USERNAME).then(users => {
-      const mapped: {[key: string]: DomainUser} = {};
+      const mapped: { [key: string]: DomainUser } = {};
       users.forEach(user => {
         mapped[user.username] = user;
       });
@@ -90,10 +98,10 @@ export class IdentityService {
     });
   }
 
-  public usersByEmail(emails: string[]): Promise<{[key: string]: DomainUser}> {
+  public usersByEmail(emails: string[]): Promise<{ [key: string]: DomainUser }> {
     const unique: string[] = Array.from(new Set(emails));
     return this._users(unique, UserFields.EMAIL).then(users => {
-      const mapped: {[key: string]: DomainUser} = {};
+      const mapped: { [key: string]: DomainUser } = {};
       users.forEach(user => {
         mapped[user.email] = user;
       });
@@ -103,19 +111,19 @@ export class IdentityService {
 
   public search(query: UserQuery): Promise<DomainUser[]> {
     if (query.fields === undefined || query.fields === null ||
-      (Array.isArray(query.fields) && (<string[]> query.fields).length === 0)) {
+      (Array.isArray(query.fields) && (query.fields as string[]).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (query.term === undefined || query.term === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
     } else {
       let fields: string[] | string = query.fields;
       if (!Array.isArray(query.fields)) {
-        fields = [<string> query.fields];
+        fields = [query.fields];
       }
 
       const orderBy: any = query.orderBy || {};
 
-      const sanitized: string[] = this._sanitizeSearchFields(<string[]> fields);
+      const sanitized: string[] = this._sanitizeSearchFields(fields as string[]);
       const message: UserSearchRequest = {
         type: MessageType.USER_SEARCH_REQUEST,
         fields: sanitized,
@@ -132,8 +140,8 @@ export class IdentityService {
     }
   }
 
-  public groups(): Promise<UserGroup[]>
-  public groups(ids: string[]): Promise<UserGroup[]>
+  public groups(): Promise<UserGroup[]>;
+  public groups(ids: string[]): Promise<UserGroup[]>;
   public groups(ids?: string[]): Promise<UserGroup[]> {
     const message: UserGroupsRequest = {
       type: MessageType.USER_GROUPS_REQUEST,
@@ -154,34 +162,39 @@ export class IdentityService {
       .then(users => users[username]);
   }
 
-  public groupsForUsers(usernames: string[]): Promise<{[key: string]: string[]}> {
+  public groupsForUsers(usernames: string[]): Promise<{ [key: string]: string[] }> {
     const message: UserGroupsForUsersRequest = {
       type: MessageType.USER_GROUPS_FOR_USERS_REQUEST,
       usernames
     };
 
     return this._connection.request(message).then((response: UserGroupsForUsersResponse) => {
-      return response.groupsByUser as {[key: string]: string[]};
+      return response.groupsByUser as { [key: string]: string[] };
     });
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _users(values: string | string[], field: string = UserFields.USERNAME): Promise<DomainUser[]> {
     // TODO It is only valid to look up by email / username.
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
     } else if (validLookUpFields.indexOf(field) < 0) {
       return Promise.reject<DomainUser[]>(new Error("invalid lookup field"));
-    } else if (values === undefined || values === null || (Array.isArray(values) && (<string[]> values).length === 0)) {
+    } else if (values === undefined || values === null ||
+      (Array.isArray(values) && (values as string[]).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one value"));
     } else {
       if (!Array.isArray(values)) {
-        values = [<string> values];
+        values = [values as string];
       }
 
       const message: UserLookUpRequest = {
         type: MessageType.USER_LOOKUP_REQUEST,
         field,
-        values: <string[]> values
+        values: values as string[]
       };
 
       return this._connection.request(message).then((response: UserListResponse) => {
@@ -190,6 +203,10 @@ export class IdentityService {
     }
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _sanitizeSearchFields(fields: string[]): string[] {
     const result: string[] = [];
     fields.forEach((field: string) => {

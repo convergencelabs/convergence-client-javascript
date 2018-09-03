@@ -1,6 +1,10 @@
-import {IndexRange} from "../../../reference/RangeReference";
+import {IndexRange} from "../../../reference/";
 import {IndexTransformer} from "./IndexTransformer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RangeTransformer {
   public static handleInsert(ranges: IndexRange[], insertIndex: number, length: number): IndexRange[] {
     return ranges.map(range => {

@@ -1,10 +1,13 @@
 import {ModelNode} from "./ModelNode";
-import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path} from "../Path";
 import {DataValue} from "../dataValue";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class UndefinedNode extends ModelNode<void> {
 
   public static Events: any = {

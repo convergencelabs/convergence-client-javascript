@@ -15,6 +15,10 @@ export class HistoricalBoolean extends HistoricalElement<boolean> implements Obs
 
   public static readonly Events: HistoricalBooleanEvents = ObservableBooleanEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

@@ -1,13 +1,19 @@
-import {IncomingProtocolResponseMessage} from "./protocol";
-import {OutgoingProtocolRequestMessage} from "./protocol";
-import {MessageBodySerializer} from "./MessageSerializer";
-import {MessageBodyDeserializer} from "./MessageSerializer";
+import {IncomingProtocolResponseMessage, OutgoingProtocolRequestMessage} from "./protocol";
+import {MessageBodySerializer, MessageBodyDeserializer} from "./MessageSerializer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface HandshakeRequest extends OutgoingProtocolRequestMessage {
   reconnect: boolean;
   reconnectToken: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const HandshakeRequestSerializer: MessageBodySerializer = (request: HandshakeRequest) => {
   return {
     r: request.reconnect,
@@ -15,6 +21,10 @@ export const HandshakeRequestSerializer: MessageBodySerializer = (request: Hands
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
   reconnectToken: string;
@@ -23,6 +33,10 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   retryOk?: boolean;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
   return {
     success: body.s,

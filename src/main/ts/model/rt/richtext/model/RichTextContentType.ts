@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export enum RichTextContentType {
   ELEMENT = "element",
   OBJECT = "object",

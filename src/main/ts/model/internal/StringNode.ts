@@ -8,10 +8,12 @@ import {StringSetOperation} from "../ot/ops/StringSetOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
-import {StringNodeInsertEvent} from "./events";
-import {StringNodeRemoveEvent} from "./events";
-import {StringNodeSetValueEvent} from "./events";
+import {StringNodeInsertEvent, StringNodeRemoveEvent, StringNodeSetValueEvent} from "./events";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringNode extends ModelNode<string> {
 
   public static Events: any = {
@@ -38,11 +40,11 @@ export class StringNode extends ModelNode<string> {
   }
 
   public dataValue(): StringValue {
-    return <StringValue> {
+    return {
       id: this.id(),
       type: DataValueType.STRING,
       value: this.data()
-    };
+    } as StringValue;
   }
 
   public toJson(): any {
@@ -98,7 +100,7 @@ export class StringNode extends ModelNode<string> {
   private _applyRemove(index: number, length: number, local: boolean, sessionId: string, username: string): void {
     this._validateRemove(index, length);
 
-    let removedVal: string = this._data.slice(index, index + length);
+    const removedVal: string = this._data.slice(index, index + length);
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
 
     const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, username);
@@ -118,18 +120,18 @@ export class StringNode extends ModelNode<string> {
   //
 
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    const operation: StringInsertOperation = <StringInsertOperation> operationEvent.operation;
+    const operation: StringInsertOperation = operationEvent.operation as StringInsertOperation;
     this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    const operation: StringRemoveOperation = <StringRemoveOperation> operationEvent.operation;
+    const operation: StringRemoveOperation = operationEvent.operation as StringRemoveOperation;
     this._applyRemove(operation.index, operation.value.length, false,
       operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: StringSetOperation = <StringSetOperation> operationEvent.operation;
+    const operation: StringSetOperation = operationEvent.operation as StringSetOperation;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

@@ -6,6 +6,10 @@ import {ArrayMoveHelper} from "./ArrayMoveHelper";
 import {MoveDirection} from "./ArrayMoveHelper";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ArrayMoveInsertOTF: OperationTransformationFunction<ArrayMoveOperation, ArrayInsertOperation> =
   (s: ArrayMoveOperation, c: ArrayInsertOperation) => {
     switch (ArrayMoveHelper.getMoveDirection(s)) {

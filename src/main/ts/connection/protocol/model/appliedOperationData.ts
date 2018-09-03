@@ -41,6 +41,10 @@ OperationTypeCodes.put(13, OperationType.STRING_INSERT);
 OperationTypeCodes.put(14, OperationType.STRING_REMOVE);
 OperationTypeCodes.put(15, OperationType.STRING_VALUE);
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ModelOperationDeserializer {
   public static deserialize(body: any): ModelOperation {
     return new ModelOperation(body.m, body.v, body.p, body.u, body.s,
@@ -48,6 +52,10 @@ export class ModelOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedOperationDeserializer {
   public static deserialize(body: any): AppliedOperation {
     switch (OperationTypeCodes.value(body.t)) {
@@ -91,6 +99,10 @@ export class AppliedOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedCompoundDeserializer {
   public static deserialize(body: any): AppliedCompoundOperation {
     const ops: AppliedDiscreteOperation[] = [];
@@ -102,24 +114,40 @@ export class AppliedCompoundDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayInsertOperationDeserializer {
   public static deserialize(body: any): AppliedArrayInsertOperation {
     return new AppliedArrayInsertOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayMoveOperationDeserializer {
   public static deserialize(body: any): AppliedArrayMoveOperation {
     return new AppliedArrayMoveOperation(body.d, body.n, body.f, body.o);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayRemoveOperationDeserializer {
   public static deserialize(body: any): AppliedArrayRemoveOperation {
     return new AppliedArrayRemoveOperation(body.d, body.n, body.i, body.o ? DataValueDeserializer(body.o) : null);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayReplaceOperationDeserializer {
   public static deserialize(body: any): AppliedArrayReplaceOperation {
     return new AppliedArrayReplaceOperation(body.d, body.n, body.i, DataValueDeserializer(body.v),
@@ -127,6 +155,10 @@ export class AppliedArrayReplaceOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArraySetOperationDeserializer {
   public static deserialize(body: any): AppliedArraySetOperation {
     return new AppliedArraySetOperation(body.d, body.n, body.v.map((value: any) => DataValueDeserializer(value)),
@@ -134,30 +166,50 @@ export class AppliedArraySetOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedBooleanSetOperationDeserializer {
   public static deserialize(body: any): AppliedBooleanSetOperation {
     return new AppliedBooleanSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedNumberAddOperationDeserializer {
   public static deserialize(body: any): AppliedNumberAddOperation {
     return new AppliedNumberAddOperation(body.d, body.n, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedNumberSetOperationDeserializer {
   public static deserialize(body: any): AppliedNumberSetOperation {
     return new AppliedNumberSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectAddPropertyOperationDeserializer {
   public static deserialize(body: any): AppliedObjectAddPropertyOperation {
     return new AppliedObjectAddPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectRemovePropertyOperationDeserializer {
   public static deserialize(body: any): AppliedObjectRemovePropertyOperation {
     return new AppliedObjectRemovePropertyOperation(body.d, body.n, body.p,
@@ -165,6 +217,10 @@ export class AppliedObjectRemovePropertyOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectSetPropertyOperationDeserializer {
   public static deserialize(body: any): AppliedObjectSetPropertyOperation {
     return new AppliedObjectSetPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v),
@@ -172,6 +228,10 @@ export class AppliedObjectSetPropertyOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectSetOperationDeserializer {
   public static deserialize(body: any): AppliedObjectSetOperation {
     return new AppliedObjectSetOperation(body.d, body.n,
@@ -180,24 +240,40 @@ export class AppliedObjectSetOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedStringInsertOperationDeserializer {
   public static deserialize(body: any): AppliedStringInsertOperation {
     return new AppliedStringInsertOperation(body.d, body.n, body.i, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedStringRemoveOperationDeserializer {
   public static deserialize(body: any): AppliedStringRemoveOperation {
     return new AppliedStringRemoveOperation(body.d, body.n, body.i, body.l, body.o);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedStringSetOperationDeserializer {
   public static deserialize(body: any): AppliedStringSetOperation {
     return new AppliedStringSetOperation(body.d, body.n, body.v, body.o ? body.o : null);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedDateSetOperationDeserializer {
   public static deserialize(body: any): AppliedDateSetOperation {
     return new AppliedDateSetOperation(body.d, body.n, new Date(body.v), body.o ? new Date(body.o) : null);

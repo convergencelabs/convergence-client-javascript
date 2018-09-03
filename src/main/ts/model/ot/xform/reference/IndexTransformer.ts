@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class IndexTransformer {
   public static handleInsert(indices: number[], insertIndex: number, length: number): number[] {
     return indices.map((index: number) => {

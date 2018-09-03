@@ -14,6 +14,10 @@ export interface HistoricalNullEvents extends ObservableNullEvents {
 export class HistoricalNull extends HistoricalElement<void> implements ObservableNull {
   public static readonly Events: HistoricalNullEvents = ObservableNullEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(_delegate: NullNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

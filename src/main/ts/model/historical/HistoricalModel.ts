@@ -5,9 +5,11 @@ import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
-import {HistoricalOperationsRequest} from "../../connection/protocol/model/historical/historicalOperationsRequest";
+import {
+  HistoricalOperationsRequest,
+  HistoricalOperationsResponse
+} from "../../connection/protocol/model/historical/historicalOperationsRequest";
 import {MessageType} from "../../connection/protocol/MessageType";
-import {HistoricalOperationsResponse} from "../../connection/protocol/model/historical/historicalOperationsRequest";
 import {ModelOperation} from "../ot/applied/ModelOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -28,35 +30,84 @@ export interface HistoricalModelEvents extends ObservableModelEvents {
   readonly TRANSITION_END: string;
 }
 
-const HistoricalModelEventConstants = Object.assign({
+const HistoricalModelEventConstants = {
+  ...ObservableModelEventConstants,
   TARGET_VERSION_CHANGED: "target_changed",
   TRANSITION_START: "transition_start",
   TRANSITION_END: "transition_end"
-}, ObservableModelEventConstants);
+};
 Object.freeze(HistoricalModelEventConstants);
 
 export class HistoricalModel implements ObservableModel {
 
   public static readonly Events: HistoricalModelEvents = HistoricalModelEventConstants;
 
-  private _session: Session;
-  private _connection: ConvergenceConnection;
+  /**
+   * @internal
+   */
+  private readonly _session: Session;
 
-  private _modelId: string;
-  private _collectionId: string;
-  private _model: Model;
-  private _wrapperFactory: HistoricalWrapperFactory;
+  /**
+   * @internal
+   */
+  private readonly _connection: ConvergenceConnection;
 
+  /**
+   * @internal
+   */
+  private readonly _modelId: string;
+
+  /**
+   * @internal
+   */
+  private readonly _collectionId: string;
+
+  /**
+   * @internal
+   */
+  private readonly _model: Model;
+
+  /**
+   * @internal
+   */
+  private readonly _wrapperFactory: HistoricalWrapperFactory;
+
+  /**
+   * @internal
+   */
   private _version: number;
+
+  /**
+   * @internal
+   */
   private _targetVersion: number;
+
+  /**
+   * @internal
+   */
   private _maxVersion: number;
 
-  private _createdTime: Date;
+  /**
+   * @internal
+   */
+  private readonly _createdTime: Date;
+
+  /**
+   * @internal
+   */
   private _modifiedTime: Date;
+
+  /**
+   * @internal
+   */
   private _currentTime: Date;
 
   private _opRequests: OperationRequest[];
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(data: ObjectValue,
               version: number,
               modifiedTime: Date,
@@ -135,7 +186,7 @@ export class HistoricalModel implements ObservableModel {
   }
 
   public root(): HistoricalObject {
-    return <HistoricalObject> this._wrapperFactory.wrap(this._model.root());
+    return this._wrapperFactory.wrap(this._model.root()) as HistoricalObject;
   }
 
   public elementAt(path: Path): HistoricalElement<any>;
@@ -219,6 +270,9 @@ export class HistoricalModel implements ObservableModel {
     return this.playTo(desiredVersion);
   }
 
+  /**
+   * @internal
+   */
   private _checkAndProcess(): void {
     if (this._opRequests.length === 0) {
       throw new Error("There are no operation requests to process");
@@ -230,48 +284,51 @@ export class HistoricalModel implements ObservableModel {
     }
   }
 
+  /**
+   * @internal
+   */
   private _playOperations(operations: ModelOperation[], forward: boolean): void {
     // Going backwards
     if (!forward) {
       operations.reverse().forEach((op: ModelOperation) => {
         if (op.operation.type === OperationType.COMPOUND) {
-          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          const compoundOp: AppliedCompoundOperation = op.operation as AppliedCompoundOperation;
           compoundOp.ops.reverse().forEach((discreteOp: AppliedDiscreteOperation) => {
             this._playDiscreteOp(op, discreteOp, true);
           });
         } else {
-          this._playDiscreteOp(op, <AppliedDiscreteOperation> op.operation, true);
+          this._playDiscreteOp(op, op.operation as AppliedDiscreteOperation, true);
         }
       });
     } else {
       // Going forwards
       operations.forEach((op: ModelOperation) => {
         if (op.operation.type === OperationType.COMPOUND) {
-          let compoundOp: AppliedCompoundOperation = <AppliedCompoundOperation> op.operation;
+          const compoundOp: AppliedCompoundOperation = op.operation as AppliedCompoundOperation;
           compoundOp.ops.forEach((discreteOp: AppliedDiscreteOperation) => {
             this._playDiscreteOp(op, discreteOp, false);
           });
         } else {
-          this._playDiscreteOp(op, <AppliedDiscreteOperation> op.operation, false);
+          this._playDiscreteOp(op, op.operation as AppliedDiscreteOperation, false);
         }
       });
     }
   }
 
+  /**
+   * @internal
+   */
   private _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
     if (!discreteOp.noOp) {
-      let dOp: AppliedDiscreteOperation = null;
-
-      if (inverse) {
-        dOp = <AppliedDiscreteOperation> discreteOp.inverse();
-      } else {
-        dOp = discreteOp;
-      }
+      const dOp: AppliedDiscreteOperation = inverse ?
+        discreteOp.inverse() as AppliedDiscreteOperation :
+        discreteOp;
 
       this._model.handleModelOperationEvent(
         new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, dOp));
     }
 
+    // tslint:disable-next-line
     if (inverse) {
       this._version = op.version - 1;
     } else {

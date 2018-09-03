@@ -1,24 +1,37 @@
 export type EventKey = string | number;
 
+export type SimpleEventListener = (...args: any[]) => void;
+
 export class EventEmitter {
 
   public static defaultMaxListeners: number = 100;
 
+  /**
+   * @internal
+   */
   private _events: any;
+
+  /**
+   * @internal
+   */
   private _maxListeners: number;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor() {
     this._events = {};
     this._maxListeners = EventEmitter.defaultMaxListeners;
   }
 
-  public addListener(event: EventKey, listener: Function): EventEmitter {
+  public addListener(event: EventKey, listener: SimpleEventListener): EventEmitter {
     if (typeof listener !== "function") {
       throw new TypeError("Listeners must be functions");
     }
 
     event = this._resolveEventKey(event);
-    let listeners: Function[] = this._events[event];
+    let listeners: SimpleEventListener[] = this._events[event];
     if (listeners === undefined) {
       listeners = [];
       this._events[event] = listeners;
@@ -37,12 +50,12 @@ export class EventEmitter {
     return this;
   }
 
-  public on(event: EventKey, listener: Function): EventEmitter {
+  public on(event: EventKey, listener: SimpleEventListener): EventEmitter {
     return this.addListener(event, listener);
   }
 
-  public once(event: EventKey, listener: Function): EventEmitter {
-    const wrapper: Function = (e: any) => {
+  public once(event: EventKey, listener: SimpleEventListener): EventEmitter {
+    const wrapper: SimpleEventListener = (e: any) => {
       this.removeListener(event, wrapper);
       listener(e);
     };
@@ -60,9 +73,9 @@ export class EventEmitter {
     return this;
   }
 
-  public removeListener(event: EventKey, listener: Function): EventEmitter {
+  public removeListener(event: EventKey, listener: SimpleEventListener): EventEmitter {
     event = this._resolveEventKey(event);
-    const listeners: Function[] = this.listeners(event);
+    const listeners: SimpleEventListener[] = this.listeners(event);
     const index: number = listeners.indexOf(listener);
     if (index !== -1) {
       listeners.splice(index, 1);
@@ -71,11 +84,11 @@ export class EventEmitter {
     return this;
   }
 
-  public off(event: EventKey, listener: Function): EventEmitter {
+  public off(event: EventKey, listener: SimpleEventListener): EventEmitter {
     return this.removeListener(event, listener);
   }
 
-  public listeners(event: EventKey): Function[] {
+  public listeners(event: EventKey): SimpleEventListener[] {
     event = this._resolveEventKey(event);
     return this._events[event] || [];
   }
@@ -95,17 +108,21 @@ export class EventEmitter {
 
   public emit(event: EventKey, ...args: any[]): EventEmitter {
     event = this._resolveEventKey(event);
-    const listeners: Function[] = this.listeners(event);
-    listeners.slice(0).forEach((listener: Function) => {
+    const listeners: SimpleEventListener[] = this.listeners(event);
+    listeners.slice(0).forEach((listener: SimpleEventListener) => {
       listener.apply(this, args || []);
     });
     return this;
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _resolveEventKey(event: EventKey): EventKey {
     if (typeof event === "string") {
       return event.toLowerCase();
-    } else if ((<number> event) >= 0) {
+    } else if ((event as number) >= 0) {
       return event;
     } else {
       throw new Error("Event numbers must be >= 0");

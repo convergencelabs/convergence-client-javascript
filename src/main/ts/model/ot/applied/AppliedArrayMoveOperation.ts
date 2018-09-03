@@ -2,6 +2,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArrayMove} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayMoveOperation extends AppliedDiscreteOperation implements ArrayMove {
 
   constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {

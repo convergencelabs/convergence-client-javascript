@@ -8,11 +8,19 @@ import {DataValueDeserializer} from "./dataValue";
 import {ModelPermissions} from "../../../model/ModelPermissions";
 import {deserializeModelPermissions} from "./permissions/modelPermissions";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface OpenRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   id?: string;
   autoCreateId?: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const OpenRealTimeModelRequestSerializer: MessageBodySerializer = (request: OpenRealTimeModelRequest) => {
   return {
     m: request.id,
@@ -20,6 +28,10 @@ export const OpenRealTimeModelRequestSerializer: MessageBodySerializer = (reques
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessage {
   resourceId: string;
   id: string;
@@ -34,6 +46,10 @@ export interface OpenRealTimeModelResponse extends IncomingProtocolResponseMessa
   permissions: ModelPermissions;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<OpenRealTimeModelResponse> =
   (body: any) => {
     return {
@@ -51,6 +67,10 @@ export const OpenRealTimeModelResponseDeserializer: MessageBodyDeserializer<Open
     };
   };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ReferenceData {
   sessionId: string;
   id: string;

@@ -1,15 +1,20 @@
-import {ProtocolMessage} from "./protocol";
-import {OutgoingProtocolMessage} from "./protocol";
-import {IncomingProtocolMessage} from "./protocol";
-import {MessageBodyDeserializer} from "./MessageSerializer";
-import {MessageBodySerializer} from "./MessageSerializer";
+import {ProtocolMessage, OutgoingProtocolMessage, IncomingProtocolMessage} from "./protocol";
+import {MessageBodyDeserializer, MessageBodySerializer} from "./MessageSerializer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ErrorMessage extends ProtocolMessage, OutgoingProtocolMessage, IncomingProtocolMessage {
   code: string;
   message: string;
   details: {[key: string]: any};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ErrorMessageSerializer: MessageBodySerializer = (message: ErrorMessage) => {
   return {
     c: message.code,
@@ -18,6 +23,10 @@ export const ErrorMessageSerializer: MessageBodySerializer = (message: ErrorMess
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ErrorMessageDeserializer: MessageBodyDeserializer<ErrorMessage> = (body: any) => {
   return {
     code: body.c,

@@ -1,9 +1,12 @@
 import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
-import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
-import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
+import {RangeRangeRelationship, RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const StringRemoveRemoveOTF: OperationTransformationFunction<StringRemoveOperation, StringRemoveOperation> =
   (s: StringRemoveOperation, c: StringRemoveOperation) => {
     const cStart: number = c.index;

@@ -1,5 +1,9 @@
 import {RichTextElement} from "./RichTextElement";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RichTextContent {
   document(): RichTextDocument;
   root(): RichTextRootElement;

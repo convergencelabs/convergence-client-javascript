@@ -1,5 +1,9 @@
 import {RichTextNode} from "./RichTextNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextString extends RichTextNode {
   private _data: string;
 

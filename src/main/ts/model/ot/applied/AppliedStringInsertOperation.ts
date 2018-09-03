@@ -3,6 +3,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {StringInsert} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedStringInsertOperation extends AppliedDiscreteOperation implements StringInsert {
 
   constructor(id: string, noOp: boolean, public index: number, public value: string) {

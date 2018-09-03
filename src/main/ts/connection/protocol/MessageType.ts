@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export enum MessageType {
   ERROR = 0,
 

@@ -5,6 +5,10 @@ import {Model} from "./Model";
 import {Path} from "../Path";
 import {NullValue, DataValueType} from "../dataValue";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NullNode extends ModelNode<void> {
 
   public static Events: any = {
@@ -23,11 +27,11 @@ export class NullNode extends ModelNode<void> {
   }
 
   public dataValue(): NullValue {
-    return <NullValue> {
+    return {
       id: this.id(),
       type: DataValueType.NULL,
       value: this.data()
-    };
+    } as NullValue;
   }
 
   public toJson(): any {

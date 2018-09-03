@@ -1,5 +1,9 @@
 import {Operation} from "./ops/Operation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ProcessedOperationEvent {
   constructor(
     public clientId: string,

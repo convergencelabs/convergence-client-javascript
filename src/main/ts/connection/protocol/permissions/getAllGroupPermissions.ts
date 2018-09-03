@@ -1,11 +1,19 @@
 import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 import {IdType} from "./IdType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface GetAllGroupPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
   id: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function GetAllGroupPermissionsRequestSerializer(request: GetAllGroupPermissionsRequest): any {
   return {
     p: request.idType,
@@ -13,12 +21,20 @@ export function GetAllGroupPermissionsRequestSerializer(request: GetAllGroupPerm
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface GetAllGroupPermissionsResponse extends IncomingProtocolNormalMessage {
   groups: Map<string, string[]>;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function GetAllGroupPermissionsResponseDeserializer(body: any): GetAllGroupPermissionsResponse {
-  let groups = new Map<string, string[]>();
+  const groups = new Map<string, string[]>();
   Object.keys(body.u).forEach(groupId => {
     groups.set(groupId, body.u[groupId]);
   });

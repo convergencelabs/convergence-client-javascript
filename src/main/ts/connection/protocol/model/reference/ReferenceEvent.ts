@@ -11,6 +11,10 @@ import {SessionIdParser} from "../../SessionIdParser";
 // Constants
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ReferenceTypeCodes: CodeMap = new CodeMap();
 ReferenceTypeCodes.put(0, ModelReference.Types.INDEX);
 ReferenceTypeCodes.put(1, ModelReference.Types.RANGE);
@@ -21,6 +25,10 @@ ReferenceTypeCodes.put(3, ModelReference.Types.ELEMENT);
 // Incoming References
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   sessionId: string;
   username: string;
@@ -29,23 +37,43 @@ export interface RemoteReferenceEvent extends IncomingProtocolNormalMessage {
   id: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 // fixme this should be shared, not publish.  This is in a bunch of places.
 export interface RemoteReferencePublished extends RemoteReferenceEvent {
   referenceType: string;
   values?: any[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteReferenceUnpublished extends RemoteReferenceEvent {
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteReferenceSet extends RemoteReferenceEvent {
   referenceType: string;
   values: any[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteReferenceCleared extends RemoteReferenceEvent {
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const RemoteReferencePublishedDeserializer: MessageBodyDeserializer<RemoteReferencePublished> = (body: any) => {
   const type: string = ReferenceTypeCodes.value(body.c);
   const values: any = deserializeReferenceValues(body.v, type);
@@ -62,6 +90,10 @@ export const RemoteReferencePublishedDeserializer: MessageBodyDeserializer<Remot
   return result;
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export function deserializeReferenceValues(values: any, type: string): any {
   "use strict";
   if (values === undefined) {
@@ -74,9 +106,9 @@ export function deserializeReferenceValues(values: any, type: string): any {
     case ModelReference.Types.ELEMENT:
       return values;
     case ModelReference.Types.RANGE:
-      let ranges: IndexRange[] = [];
+      const ranges: IndexRange[] = [];
 
-      for (let range of values) {
+      for (const range of values) {
         ranges.push({
           start: range[0],
           end: range[1]
@@ -89,6 +121,10 @@ export function deserializeReferenceValues(values: any, type: string): any {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteReferenceSet> = (body: any) => {
   const type: string = ReferenceTypeCodes.value(body.c);
   const values: any = deserializeReferenceValues(body.v, type);
@@ -104,6 +140,10 @@ export const RemoteReferenceSetDeserializer: MessageBodyDeserializer<RemoteRefer
   return result;
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 const ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent> = (body: any) => {
   const result: RemoteReferenceEvent = {
     sessionId: body.s,
@@ -115,8 +155,17 @@ const ReferenceMessageDeserializer: MessageBodyDeserializer<RemoteReferenceEvent
   return result;
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export const RemoteReferenceClearedDeserializer: MessageBodyDeserializer<RemoteReferenceCleared> =
   ReferenceMessageDeserializer;
+
+/**
+ * @hidden
+ * @internal
+ */
 export const RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<RemoteReferenceUnpublished> =
   ReferenceMessageDeserializer;
 
@@ -124,30 +173,54 @@ export const RemoteReferenceUnpublishedDeserializer: MessageBodyDeserializer<Rem
 // Outgoing References
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface OutgoingReferenceEvent extends OutgoingProtocolNormalMessage {
   resourceId: string;
   id: string;
   key: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface PublishReferenceEvent extends OutgoingReferenceEvent {
   referenceType: string;
   values?: any;
   version?: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UnpublishReferenceEvent extends OutgoingReferenceEvent {
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface SetReferenceEvent extends OutgoingReferenceEvent {
   referenceType: string;
   values: any;
   version: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ClearReferenceEvent extends OutgoingReferenceEvent {
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const PublishReferenceSerializer: MessageBodySerializer = (message: PublishReferenceEvent) => {
   return {
     r: message.resourceId,
@@ -159,6 +232,10 @@ export const PublishReferenceSerializer: MessageBodySerializer = (message: Publi
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export const UnpublishReferenceSerializer: MessageBodySerializer = (message: UnpublishReferenceEvent) => {
   return {
     r: message.resourceId,
@@ -180,7 +257,7 @@ function serializeReferenceValue(values: any, type: string): any {
       return values;
     case ModelReference.Types.RANGE:
       const ranges: number[][] = [];
-      for (let range of values) {
+      for (const range of values) {
         ranges.push([range.start, range.end]);
       }
       return ranges;
@@ -189,6 +266,10 @@ function serializeReferenceValue(values: any, type: string): any {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const SetReferenceSerializer: MessageBodySerializer = (message: SetReferenceEvent) => {
   return {
     r: message.resourceId,
@@ -200,6 +281,10 @@ export const SetReferenceSerializer: MessageBodySerializer = (message: SetRefere
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ClearReferenceMessageSerializer: MessageBodySerializer = (message: ClearReferenceEvent) => {
   return {
     r: message.resourceId,

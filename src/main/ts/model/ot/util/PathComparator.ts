@@ -1,5 +1,9 @@
 import {Path} from "../../Path";
 
+/**
+ * @hidden
+ * @internal
+ */
 export default class PathComparator {
   /**
    * Determines if the two paths are equal.  Paths are equal if they are of the

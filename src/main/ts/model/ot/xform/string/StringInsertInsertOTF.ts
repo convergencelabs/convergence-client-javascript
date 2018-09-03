@@ -2,6 +2,10 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {StringInsertOperation} from "../../ops/StringInsertOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const StringInsertInsertOTF: OperationTransformationFunction<StringInsertOperation, StringInsertOperation> =
   (s: StringInsertOperation, c: StringInsertOperation) => {
     if (s.index <= c.index) {

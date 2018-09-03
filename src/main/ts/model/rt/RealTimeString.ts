@@ -27,6 +27,9 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
 
   /**
    * Constructs a new RealTimeString.
+   *
+   * @hidden
+   * @private
    */
   constructor(protected _delegate: StringNode,
               protected _callbacks: ModelEventCallbacks,

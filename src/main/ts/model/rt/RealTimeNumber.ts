@@ -58,6 +58,13 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
     this._delegate.decrement();
   }
 
+  /**
+   * @param event
+   *
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Number values do not process references");
   }

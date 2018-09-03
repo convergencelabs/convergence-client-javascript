@@ -1,6 +1,10 @@
-import {ChatChannelType} from "../../../chat/ChatService";
+import {ChatChannelType} from "../../../chat/";
 import {ChatChannelMembership} from "../../../chat/MembershipChatChannel";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ChatChannelInfoData {
   readonly channelId: string;
   readonly channelType: ChatChannelType;
@@ -14,6 +18,10 @@ export interface ChatChannelInfoData {
   readonly members: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function ChannelInfoDataDeserializer(info: any): ChatChannelInfoData {
   const result: ChatChannelInfoData = {
     channelId: info.i,

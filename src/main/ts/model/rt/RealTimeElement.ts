@@ -1,16 +1,13 @@
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter, ConvergenceEvent} from "../../util/";
 import {ModelNode} from "../internal/ModelNode";
 import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ModelReference} from "../reference/ModelReference";
-import {ReferenceFilter} from "../reference/ReferenceFilter";
-import {ModelEventCallbacks} from "./RealTimeModel";
+import {ModelReference, ReferenceFilter} from "../reference/";
+import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RemoteReferenceCreatedEvent} from "../modelEvents";
-import {RealTimeModel} from "./RealTimeModel";
 import {ModelEventConverter} from "../ModelEventConverter";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {
@@ -24,24 +21,50 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
 }
 
 export abstract class RealTimeElement<T>
-extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+  extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
 
   public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _delegate: ModelNode<T>;
+
+  /**
+   * @hidden
+   * @internal
+   */
   protected _callbacks: ModelEventCallbacks;
+
+  /**
+   * @hidden
+   * @internal
+   */
   protected _wrapperFactory: RealTimeWrapperFactory;
+
+  /**
+   * @hidden
+   * @internal
+   */
   protected _referenceManager: ReferenceManager;
-  private _model: RealTimeModel;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private readonly _model: RealTimeModel;
 
   /**
    * Constructs a new RealTimeElement.
+   * @hidden
+   * @internal
    */
-  constructor(delegate: ModelNode<T>,
-              callbacks: ModelEventCallbacks,
-              wrapperFactory: RealTimeWrapperFactory,
-              model: RealTimeModel,
-              referenceTypes: string[]) {
+  protected constructor(delegate: ModelNode<T>,
+                        callbacks: ModelEventCallbacks,
+                        wrapperFactory: RealTimeWrapperFactory,
+                        model: RealTimeModel,
+                        referenceTypes: string[]) {
     super();
 
     this._delegate = delegate;
@@ -59,7 +82,7 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
       return this._model.emitLocalEvents() || !event.local ||
         event instanceof NodeDetachedEvent;
     }).subscribe(event => {
-      let convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
+      const convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
   }
@@ -117,8 +140,8 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return !this._delegate.isDetached();
   }
 
-  public value(): T
-  public value(value: T): void
+  public value(): T;
+  public value(value: T): void;
   public value(value?: T): any {
     if (arguments.length === 0) {
       return this._delegate.data();
@@ -141,14 +164,26 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     return this._referenceManager.getAll(filter);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(event);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _sendOperation(operation: DiscreteOperation): void {
     this._callbacks.sendOperationCallback(operation);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _assertWritable(): void {
     if (!this._model.permissions().write) {
       throw new Error("The user does not have write permissions for the model.");
@@ -156,14 +191,23 @@ extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T
     this._assertAttached();
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _assertAttached(): void {
     if (this.isDetached()) {
       throw Error("Can not perform actions on a detached RealTimeElement.");
     }
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _fireReferenceCreated(reference: ModelReference<any>): void {
     this._emitEvent(new RemoteReferenceCreatedEvent(reference, this));
   }
 }
+
 Object.freeze(RealTimeElement.Events);

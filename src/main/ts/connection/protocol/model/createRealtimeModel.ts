@@ -5,6 +5,10 @@ import {DataValueSerializer} from "./dataValue";
 import {ModelPermissions} from "../../../model/ModelPermissions";
 import {serializeModelPermissions} from "./permissions/modelPermissions";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface CreateRealTimeModelRequest extends OutgoingProtocolRequestMessage {
   collectionId: string;
   modelId?: string;
@@ -14,6 +18,10 @@ export interface CreateRealTimeModelRequest extends OutgoingProtocolRequestMessa
   userPermissions?: {[key: string]: ModelPermissions};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const CreateRealTimeModelRequestSerializer: MessageBodySerializer = (request: CreateRealTimeModelRequest) => {
   const d: any = request.data ? DataValueSerializer(request.data) : undefined;
   const w = serializeModelPermissions(request.worldPermissions);
@@ -36,11 +44,19 @@ export const CreateRealTimeModelRequestSerializer: MessageBodySerializer = (requ
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface CreateRealTimeModelResponse extends IncomingProtocolResponseMessage {
   collectionId: string;
   modelId: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const CreateRealTimeModelResponseDeserializer: MessageBodyDeserializer<CreateRealTimeModelResponse> =
   (body: any) => {
     return {

@@ -5,11 +5,13 @@ import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
-import {NumberNodeDeltaEvent} from "./events";
-import {NumberNodeSetValueEvent} from "./events";
-import {NumberAdd} from "../ot/ops/operationChanges";
-import {NumberSet} from "../ot/ops/operationChanges";
+import {NumberNodeDeltaEvent, NumberNodeSetValueEvent} from "./events";
+import {NumberAdd, NumberSet} from "../ot/ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberNode extends ModelNode<number> {
 
   public static Events: any = {
@@ -35,11 +37,11 @@ export class NumberNode extends ModelNode<number> {
   }
 
   public dataValue(): NumberValue {
-    return <NumberValue> {
+    return {
       id: this.id(),
       type: DataValueType.NUMBER,
       value: this.data()
-    };
+    } as NumberValue;
   }
 
   public toJson(): any {
@@ -103,12 +105,12 @@ export class NumberNode extends ModelNode<number> {
 
   // Handlers for incoming operations
   private _handleAddOperation(operationEvent: ModelOperationEvent): void {
-    const operation: NumberAdd = <NumberAdd> operationEvent.operation;
+    const operation: NumberAdd = operationEvent.operation as NumberAdd;
     this._applyAdd(operation.value, false);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: NumberSet = <NumberSet> operationEvent.operation;
+    const operation: NumberSet = operationEvent.operation as NumberSet;
     this._applySet(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

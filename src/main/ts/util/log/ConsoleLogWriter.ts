@@ -2,6 +2,10 @@ import {StringLogWriter} from "./StringLogWriter";
 import {LogEvent} from "./LogEvent";
 import {LogLevel} from "./LogLevel";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ConsoleLogWriter extends StringLogWriter {
   constructor(pattern: string) {
     super(pattern);

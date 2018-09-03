@@ -3,6 +3,10 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {NumberSetOperation} from "../../ops/NumberSetOperation";
 import {NumberAddOperation} from "../../ops/NumberAddOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const NumberSetAddOTF: OperationTransformationFunction<NumberSetOperation, NumberAddOperation> =
   (s: NumberSetOperation, c: NumberAddOperation) => {
     // N-SA-1

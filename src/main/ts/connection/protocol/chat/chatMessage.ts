@@ -1,11 +1,19 @@
 import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 import {SessionIdParser} from "../SessionIdParser";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface PublishChatMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
   message: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function PublishChatMessageSerializer(request: PublishChatMessage): any {
   return {
     i: request.channelId,
@@ -13,6 +21,10 @@ export function PublishChatMessageSerializer(request: PublishChatMessage): any {
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteChatMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
@@ -22,6 +34,10 @@ export interface RemoteChatMessage extends IncomingProtocolNormalMessage {
   message: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function RemoteChatMessageDeserializer(body: any): RemoteChatMessage {
   const result: RemoteChatMessage = {
     channelId: body.i,

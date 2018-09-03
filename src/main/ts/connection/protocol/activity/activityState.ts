@@ -2,11 +2,19 @@ import { OutgoingProtocolNormalMessage } from "../protocol";
 import { MessageBodySerializer, MessageBodyDeserializer } from "../MessageSerializer";
 import {IncomingActivityMessage} from "./incomingActivityMessage";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {
   activityId: string;
   state: {[key: string]: any};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivitySetStateSerializer: MessageBodySerializer = (request: ActivitySetState) => {
   return {
     i: request.activityId,
@@ -14,11 +22,19 @@ export const ActivitySetStateSerializer: MessageBodySerializer = (request: Activ
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityRemoveState extends OutgoingProtocolNormalMessage {
   activityId: string;
   keys: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityRemoveStateSerializer: MessageBodySerializer = (request: ActivityRemoveState) => {
   return {
     i: request.activityId,
@@ -26,21 +42,37 @@ export const ActivityRemoveStateSerializer: MessageBodySerializer = (request: Ac
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityClearState extends OutgoingProtocolNormalMessage {
   activityId: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityClearStateSerializer: MessageBodySerializer = (request: ActivityClearState) => {
   return {
     i: request.activityId,
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityRemoteStateSet extends IncomingActivityMessage {
   sessionId: string;
   state: {[key: string]: any};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<ActivityRemoteStateSet> = (body: any) => {
   const result: ActivityRemoteStateSet = {
     activityId: body.i,
@@ -50,11 +82,19 @@ export const ActivityRemoteStateSetDeserializer: MessageBodyDeserializer<Activit
   return result;
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityRemoteStateRemoved extends IncomingActivityMessage {
   sessionId: string;
   keys: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<ActivityRemoteStateRemoved> =
   (body: any) => {
     const result: ActivityRemoteStateRemoved = {
@@ -65,10 +105,18 @@ export const ActivityRemoteStateRemovedDeserializer: MessageBodyDeserializer<Act
     return result;
   };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityRemoteStateCleared extends IncomingActivityMessage {
   sessionId: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityRemoteStateClearedDeserializer: MessageBodyDeserializer<ActivityRemoteStateCleared> =
   (body: any) => {
     const result: ActivityRemoteStateCleared = {

@@ -1,6 +1,10 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import {IdType} from "./IdType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AddPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
   id: string;
@@ -9,6 +13,10 @@ export interface AddPermissionsRequest extends OutgoingProtocolRequestMessage {
   groups?: Map<string, string[]>;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function AddPermissionsRequestSerializer(request: AddPermissionsRequest): any {
   let users: {[key: string]: string[]};
   if (request.users) {

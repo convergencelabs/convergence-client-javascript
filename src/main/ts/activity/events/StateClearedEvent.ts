@@ -6,6 +6,10 @@ export class StateClearedEvent implements ActivityEvent {
   public static readonly NAME = ActivityEvents.STATE_CLEARED;
   public readonly name: string = StateClearedEvent.NAME;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(public readonly activity: Activity,
               public readonly username: string,
               public readonly sessionId: string,

@@ -15,6 +15,10 @@ export class HistoricalDate extends HistoricalElement<Date> implements Observabl
 
   public static readonly Events: HistoricalDateEvents = ObservableDateEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(_delegate: DateNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

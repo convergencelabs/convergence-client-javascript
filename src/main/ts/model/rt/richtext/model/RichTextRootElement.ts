@@ -4,8 +4,12 @@ import {RichTextContentType} from "./RichTextContentType";
 import {RichTextPath} from "./RichTextLocation";
 import {StringMap} from "../../../../util/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextRootElement extends RichTextElement {
-  private _rootName: string;
+  private readonly _rootName: string;
 
   constructor(document: RichTextDocument,
               rootName: string,

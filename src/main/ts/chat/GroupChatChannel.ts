@@ -1,12 +1,16 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {MembershipChatChannel, MembershipChatChannelInfo} from "./MembershipChatChannel";
-import {ChatEvent} from "./events";
+import {ChatEvent} from "./events/";
 import {AddUserToChatChannelMessage} from "../connection/protocol/chat/joining";
 import {MessageType} from "../connection/protocol/MessageType";
 
 export class GroupChatChannel extends MembershipChatChannel {
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(connection: ConvergenceConnection,
               messageStream: Observable<ChatEvent>,
               info: MembershipChatChannelInfo) {
@@ -15,11 +19,11 @@ export class GroupChatChannel extends MembershipChatChannel {
 
   public add(username: string): Promise<void> {
     this._assertJoined();
-    return this._connection.request(<AddUserToChatChannelMessage> {
+    return this._connection.request({
       type: MessageType.ADD_USER_TO_CHAT_CHANNEL_REQUEST,
       channelId: this._info.channelId,
       username
-    }).then(() => {
+    } as AddUserToChatChannelMessage).then(() => {
       return;
     });
   }

@@ -1,10 +1,14 @@
 import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
-import {ChatEvent} from "./events";
+import {ChatEvent} from "./events/";
 
 export class DirectChatChannel extends ChatChannel {
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(connection: ConvergenceConnection,
               messageStream: Observable<ChatEvent>,
               info: ChatChannelInfo) {
@@ -14,7 +18,7 @@ export class DirectChatChannel extends ChatChannel {
   public info(): DirectChatChannelInfo {
     const info = super.info();
     const otherUsers = info.members.filter(username => username !== this.session().username());
-    return Object.assign({}, info, {otherUsers});
+    return {...info, otherUsers};
   }
 }
 

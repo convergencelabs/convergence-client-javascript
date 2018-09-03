@@ -67,9 +67,13 @@ import {StringRemoveRangeTransformationFunction} from "./reference/RangeTransfor
 import {StringSetRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
 import {DateSetSetOTF} from "./date/DateSetSetOTF";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class TransformationFunctionRegistry {
-  private _otfs: {[key: string]: OperationTransformationFunction<any, any>};
-  private _rtfs: {[key: string]: ReferenceTransformationFunction};
+  private _otfs: { [key: string]: OperationTransformationFunction<any, any> };
+  private _rtfs: { [key: string]: ReferenceTransformationFunction };
 
   constructor() {
     this._otfs = {};

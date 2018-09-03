@@ -6,6 +6,10 @@ import {RichTextString} from "./RichTextString";
 import {ConvergenceError, Validation} from "../../../../util/";
 import {RichTextContentType} from "./RichTextContentType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export type RichTextPath = number[];
 
 interface PathAndOffset {
@@ -13,6 +17,10 @@ interface PathAndOffset {
   offset?: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextLocation {
 
   public static ofRoot(root: RichTextRootElement): RichTextLocation {

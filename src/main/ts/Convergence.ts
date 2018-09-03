@@ -1,11 +1,17 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 
+/**
+ * The Convergence class is the main entry point into the Convergence Client.
+ * It allows users to connect to the Convergence, using a variety of
+ * authentication methods and will return a ConvergenceDomain configured to
+ * work with a the Convergence Domain at the specified url.
+ */
 export class Convergence {
 
   public static connect(url: string, username: string, password: string,
                         options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithPassword(username, password);
     }).then(() => {
@@ -15,7 +21,7 @@ export class Convergence {
 
   public static connectAnonymously(url: string, displayName?: string,
                                    options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateAnonymously(displayName);
     }).then(() => {
@@ -24,7 +30,7 @@ export class Convergence {
   }
 
   public static connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithToken(token);
     }).then(() => {
@@ -33,7 +39,7 @@ export class Convergence {
   }
 
   public static reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-    let domain: ConvergenceDomain = new ConvergenceDomain(url, options);
+    const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithReconnectToken(token);
     }).then(() => {
@@ -42,20 +48,7 @@ export class Convergence {
   }
 }
 
-export function connect(url: string, username: string, password: string,
-                        options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-  return Convergence.connect(url, username, password, options);
-}
-
-export function connectAnonymously(url: string, displayName?: string,
-                                   options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-  return Convergence.connectAnonymously(url, displayName, options);
-}
-
-export function connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-  return Convergence.connectWithJwt(url, token, options);
-}
-
-export function reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
-  return Convergence.reconnect(url, token, options);
-}
+export const connect = Convergence.connect;
+export const connectAnonymously = Convergence.connectAnonymously;
+export const connectWithJwt = Convergence.connectWithJwt;
+export const reconnect = Convergence.reconnect;

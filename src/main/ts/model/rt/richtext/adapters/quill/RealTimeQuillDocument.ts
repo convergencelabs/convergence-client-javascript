@@ -3,6 +3,10 @@ import {RichTextDocument, RichTextRootElement, RichTextRange, RichTextLocation} 
 import {QuillDeltaConverter} from "./QuillDeltaConverter";
 import {QuillDelta} from "./QuillDelta";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RealTimeQuillDocument extends EventEmitter {
   public static Events = {
     DELTA: "delta"

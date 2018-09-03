@@ -1,23 +1,26 @@
 import {Session} from "../Session";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {
+  ConvergenceEventEmitter,
+  ConvergenceEvent,
+  StringMap,
+  StringMapLike
+} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/Rx";
 import {MessageType} from "../connection/protocol/MessageType";
-import {RequestPresence} from "../connection/protocol/presence/requestPresence";
-import {RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
-import {PresenceSetState, PresenceRemoveState} from "../connection/protocol/presence/presenceState";
-import {PresenceClearState} from "../connection/protocol/presence/presenceState";
+import {RequestPresence, RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
+import {PresenceSetState, PresenceRemoveState, PresenceClearState} from "../connection/protocol/presence/presenceState";
 import {SubscribePresenceRequest, SubscribePresenceResponse} from "../connection/protocol/presence/subscribePresence";
 import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePresence";
-import {ConvergenceEvent} from "../util/ConvergenceEvent";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
-import {StringMap, StringMapLike} from "../util/StringMap";
 import {
-  PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
-  PresenceAvailabilityChangedEvent
-} from "./events";
+  PresenceAvailabilityChangedEvent,
+  PresenceStateSetEvent,
+  PresenceStateRemovedEvent,
+  PresenceStateClearedEvent
+} from "./events/";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -35,15 +38,40 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME,
   };
 
-  private _connection: ConvergenceConnection;
+  /**
+   * @internal
+   */
+  private readonly _connection: ConvergenceConnection;
 
-  private _messageStream: Observable<MessageEvent>;
+  /**
+   * @internal
+   */
+  private readonly _messageStream: Observable<MessageEvent>;
 
-  private _localPresence: UserPresenceSubscription;
-  private _localManager: UserPresenceManager;
-  private _managers: Map<string, UserPresenceManager>;
-  private _presenceStreams: Map<string, Observable<MessageEvent>>;
+  /**
+   * @internal
+   */
+  private readonly _localPresence: UserPresenceSubscription;
 
+  /**
+   * @internal
+   */
+  private readonly _localManager: UserPresenceManager;
+
+  /**
+   * @internal
+   */
+  private readonly _managers: Map<string, UserPresenceManager>;
+
+  /**
+   * @internal
+   */
+  private readonly _presenceStreams: Map<string, Observable<MessageEvent>>;
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(connection: ConvergenceConnection, presence: UserPresence) {
     super();
 
@@ -79,8 +107,8 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._localPresence.available;
   }
 
-  public setState(state: StringMapLike): void
-  public setState(key: string, value: any): void
+  public setState(state: StringMapLike): void;
+  public setState(key: string, value: any): void;
   public setState(): void {
     let state: Map<string, any>;
     if (arguments.length === 1) {
@@ -101,16 +129,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._connection.send(message);
   }
 
-  public removeState(key: string): void
-  public removeState(keys: string[]): void
+  public removeState(key: string): void;
+  public removeState(keys: string[]): void;
   public removeState(keys: string | string[]): void {
-    let stateKeys: string[] = null;
-
-    if (typeof keys === "string") {
-      stateKeys = [<string> keys];
-    } else {
-      stateKeys = <string[]> keys;
-    }
+    const stateKeys: string[] = typeof keys === "string" ? [keys] : keys;
 
     this._localManager.remove(stateKeys);
 
@@ -138,28 +160,25 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return this._localPresence.state;
   }
 
-  public presence(username: string): Promise<UserPresence>
-  public presence(usernames: string[]): Promise<UserPresence[]>
+  public presence(username: string): Promise<UserPresence>;
+  public presence(usernames: string[]): Promise<UserPresence[]>;
   public presence(usernames: string | string[]): Promise<UserPresence> | Promise<UserPresence[]> {
     if (typeof usernames === "string") {
       return this._get([usernames]).then(result => {
-        return <UserPresence> result[0];
+        return result[0] as UserPresence;
       });
     } else {
-      return this._get(<string[]> usernames);
+      return this._get(usernames as string[]);
     }
   }
 
-  public subscribe(username: string): Promise<UserPresenceSubscription>
-  public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>
+  public subscribe(username: string): Promise<UserPresenceSubscription>;
+  public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>;
   public subscribe(usernames: string | string[]):
     Promise<UserPresenceSubscription | UserPresenceSubscription[]> {
-    let requested: string[];
-    if (typeof usernames === "string") {
-      requested = [<string> usernames];
-    } else {
-      requested = usernames;
-    }
+    const requested: string[] = typeof usernames === "string" ?
+      [usernames as string] :
+      usernames;
 
     return this._subscribe(requested).then(() => {
       const subscriptions: UserPresenceSubscription[] =
@@ -177,6 +196,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
   // Private Methods
   /////////////////////////////////////////////////////////////////////////////
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _get(usernames: string[]): Promise<UserPresence[]> {
     const message: RequestPresence = {
       type: MessageType.PRESENCE_REQUEST,
@@ -190,12 +213,20 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _streamForUsername(username: string): Observable<MessageEvent> {
     return this._messageStream.filter(m => m.message.username === username);
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _subscribe(usernames: string[]): Promise<void> {
-    let notSubscribed: string[] = usernames.filter(username => {
+    const notSubscribed: string[] = usernames.filter(username => {
       return this._presenceStreams.get(username) === undefined;
     });
 
@@ -225,6 +256,10 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _unsubscribe(username: string): void {
     const message: UnsubscribePresence = {
       type: MessageType.PRESENCE_UNSUBSCRIBE,
@@ -235,5 +270,5 @@ export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
     this._managers.delete(username);
     this._presenceStreams.delete(username);
-  };
+  }
 }

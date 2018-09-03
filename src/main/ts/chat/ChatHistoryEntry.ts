@@ -22,17 +22,26 @@ export abstract class ChatHistoryEntry {
     TOPIC_CHANGED: "topic_changed"
   };
 
-  constructor(public type: string,
-              public eventNumber: number,
-              public timestamp: Date,
-              public username: string) {
+  /**
+   * @hidden
+   * @internal
+   */
+  protected constructor(public type: string,
+                        public eventNumber: number,
+                        public timestamp: Date,
+                        public username: string) {
   }
 }
+
 Object.freeze(ChatHistoryEntry.TYPES);
 
 export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "created";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,
@@ -47,6 +56,10 @@ export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
 export class MessageChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "message";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,
@@ -59,6 +72,10 @@ export class MessageChatHistoryEntry extends ChatHistoryEntry {
 export class UserJoinedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "user_joined";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string) {
@@ -70,6 +87,10 @@ export class UserJoinedChatHistoryEntry extends ChatHistoryEntry {
 export class UserLeftChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "user_left";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string) {
@@ -81,6 +102,10 @@ export class UserLeftChatHistoryEntry extends ChatHistoryEntry {
 export class UserAddedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "user_added";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,
@@ -93,6 +118,10 @@ export class UserAddedChatHistoryEntry extends ChatHistoryEntry {
 export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "user_removed";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,
@@ -105,6 +134,10 @@ export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
 export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "name_changed";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,
@@ -117,6 +150,10 @@ export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
 export class TopicChangedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "topic_changed";
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(eventNumber: number,
               timestamp: Date,
               username: string,

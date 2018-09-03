@@ -1,16 +1,28 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
 import {IncomingProtocolNormalMessage} from "../protocol";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface LeaveChatChannelRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function LeaveChatChannelRequestMessageSerializer(request: LeaveChatChannelRequestMessage): any {
   return {
     i: request.channelId
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UserLeftChatChannelMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
@@ -18,6 +30,10 @@ export interface UserLeftChatChannelMessage extends IncomingProtocolNormalMessag
   timestamp: Date;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function UserLeftChatChannelMessageDeserializer(body: any): UserLeftChatChannelMessage {
   const result: UserLeftChatChannelMessage = {
     channelId: body.i,
@@ -28,11 +44,19 @@ export function UserLeftChatChannelMessageDeserializer(body: any): UserLeftChatC
   return result;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoveUserFromChatChannelMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
   username: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function RemoveUserFromChatChannelMessageSerializer(request: RemoveUserFromChatChannelMessage): any {
   return {
     i: request.channelId,
@@ -40,6 +64,10 @@ export function RemoveUserFromChatChannelMessageSerializer(request: RemoveUserFr
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UserRemovedFromChatChannelMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
@@ -48,6 +76,10 @@ export interface UserRemovedFromChatChannelMessage extends IncomingProtocolNorma
   timestamp: Date;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function UserRemovedFromChatChannelMessageDeserializer(body: any): UserRemovedFromChatChannelMessage {
   const result: UserRemovedFromChatChannelMessage = {
     channelId: body.i,

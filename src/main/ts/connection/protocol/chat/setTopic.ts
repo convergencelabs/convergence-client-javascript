@@ -1,10 +1,18 @@
 import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface SetChatChannelTopicMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
   topic: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function SetChatChannelTopicMessageSerializer(request: SetChatChannelTopicMessage): any {
   return {
     i: request.channelId,
@@ -12,6 +20,10 @@ export function SetChatChannelTopicMessageSerializer(request: SetChatChannelTopi
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ChatChannelTopicSetMessage extends IncomingProtocolNormalMessage {
   channelId: string;
   eventNumber: number;
@@ -20,6 +32,10 @@ export interface ChatChannelTopicSetMessage extends IncomingProtocolNormalMessag
   changedBy: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function ChatChannelTopicSetMessageDeserializer(body: any): ChatChannelTopicSetMessage {
   const result: ChatChannelTopicSetMessage = {
     channelId: body.i,

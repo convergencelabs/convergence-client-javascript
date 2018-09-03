@@ -5,16 +5,28 @@ import {ObjectValue} from "../../../model/dataValue";
 import {ModelPermissions} from "../../../model/ModelPermissions";
 import {serializeModelPermissions} from "./permissions/modelPermissions";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AutoCreateModelConfigRequest extends IncomingProtocolRequestMessage {
   autoCreateId: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function AutoCreateModelConfigRequestDeserializer(body: any): AutoCreateModelConfigRequest  {
   return {
     autoCreateId: body.a
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AutoCreateModelConfigResponse extends OutgoingProtocolResponseMessage {
   collection: string;
   ephemeral?: boolean;
@@ -24,6 +36,10 @@ export interface AutoCreateModelConfigResponse extends OutgoingProtocolResponseM
   userPermissions?: {[key: string]: ModelPermissions};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function AutoCreateModelConfigResponseSerializer(response: AutoCreateModelConfigResponse): any {
   const c = response.collection;
   const d: any = response.data ? DataValueSerializer(response.data) : undefined;

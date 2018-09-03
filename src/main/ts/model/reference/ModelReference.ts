@@ -1,8 +1,11 @@
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 import {EqualsUtil} from "../../util/EqualsUtil";
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ReferenceManager} from "./ReferenceManager";
-import {ReferenceChangedEvent, ReferenceClearedEvent, ReferenceDisposedEvent} from "./events";
+import {
+  ReferenceDisposedEvent,
+  ReferenceChangedEvent,
+  ReferenceClearedEvent
+} from "./events/";
 
 export interface ModelReferenceTypes {
   readonly INDEX: string;
@@ -32,24 +35,59 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     ELEMENT: "element"
   };
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _values: V[];
 
-  private _referenceManager: ReferenceManager;
-  private _disposed: boolean;
-  private _type: string;
-  private _key: string;
-  private _source: any;
-  private _username: string;
-  private _sessionId: string;
-  private _local: boolean;
+  /**
+   * @internal
+   */
+  private readonly _referenceManager: ReferenceManager;
 
-  constructor(referenceManager: ReferenceManager,
-              type: string,
-              key: string,
-              source: any,
-              username: string,
-              sessionId: string,
-              local: boolean) {
+  /**
+   * @internal
+   */
+  private _disposed: boolean;
+
+  /**
+   * @internal
+   */
+  private readonly _type: string;
+
+  /**
+   * @internal
+   */
+  private readonly _key: string;
+
+  /**
+   * @internal
+   */
+  private readonly _source: any;
+
+  /**
+   * @internal
+   */
+  private readonly _username: string;
+
+  /**
+   * @internal
+   */
+  private readonly _sessionId: string;
+
+  /**
+   * @internal
+   */
+  private readonly _local: boolean;
+
+  protected constructor(referenceManager: ReferenceManager,
+                        type: string,
+                        key: string,
+                        source: any,
+                        username: string,
+                        sessionId: string,
+                        local: boolean) {
     super();
     this._referenceManager = referenceManager;
     this._disposed = false;
@@ -90,6 +128,10 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     return this._disposed;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   public _dispose(): void {
     this._disposed = true;
     const event: ReferenceDisposedEvent = new ReferenceDisposedEvent(this);
@@ -110,6 +152,10 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     return this._values.length > 0;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   public _set(values: V[]): void {
     const oldValues: V[] = this._values;
     this._values = values;
@@ -121,6 +167,10 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     this._emitEvent(event);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   public _clear(): void {
     const oldValues: V[] = this._values;
     this._values = [];
@@ -128,11 +178,16 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     this._emitEvent(event);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _setIfChanged(values: V[]): void {
     if (!EqualsUtil.deepEquals(this._values, values)) {
       this._set(values);
     }
   }
 }
+
 Object.freeze(ModelReference.Events);
 Object.freeze(ModelReference.Types);

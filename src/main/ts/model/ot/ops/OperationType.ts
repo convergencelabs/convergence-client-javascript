@@ -20,4 +20,8 @@ const types: {[key: string]: string}  = {
 
 Object.freeze(types);
 
+/**
+ * @hidden
+ * @internal
+ */
 export const OperationType: any = types;

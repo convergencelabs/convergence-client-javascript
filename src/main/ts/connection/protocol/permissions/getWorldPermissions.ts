@@ -1,11 +1,19 @@
 import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 import {IdType} from "./IdType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface GetWorldPermissionsRequest extends OutgoingProtocolRequestMessage {
   idType: IdType;
   id: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function GetWorldPermissionsRequestSerializer(request: GetWorldPermissionsRequest): any {
   return {
     p: request.idType,
@@ -13,10 +21,18 @@ export function GetWorldPermissionsRequestSerializer(request: GetWorldPermission
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface GetWorldPermissionsResponse extends IncomingProtocolNormalMessage {
   permissions: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function GetWorldPermissionsResponseDeserializer(body: any): GetWorldPermissionsResponse {
   const result: GetWorldPermissionsResponse = {
     permissions: body.p

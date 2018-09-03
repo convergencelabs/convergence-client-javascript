@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class SessionIdParser {
   public static serialize(sk: SessionKey): string {
     return `${sk.username}:${sk.sessionId}`;
@@ -17,6 +21,10 @@ export class SessionIdParser {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface SessionKey {
   username: string;
   sessionId: string;

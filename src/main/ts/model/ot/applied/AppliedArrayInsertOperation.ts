@@ -4,6 +4,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArrayInsert} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayInsertOperation extends AppliedDiscreteOperation implements ArrayInsert {
 
   constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {

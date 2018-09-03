@@ -1,12 +1,13 @@
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {ConvergenceEvent} from "../util/ConvergenceEvent";
+import {ConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
 import {
-  PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
-  PresenceAvailabilityChangedEvent
-} from "./events";
+  PresenceAvailabilityChangedEvent,
+  PresenceStateSetEvent,
+  PresenceStateRemovedEvent,
+  PresenceStateClearedEvent
+} from "./events/";
 
 export interface UserPresenceSubscriptionEvents {
   STATE_SET: string;
@@ -24,8 +25,15 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<Convergenc
     AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME,
   };
 
+  /**
+   * @internal
+   */
   private _manager: UserPresenceManager;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(delegate: UserPresenceManager) {
     super();
     this._manager = delegate;

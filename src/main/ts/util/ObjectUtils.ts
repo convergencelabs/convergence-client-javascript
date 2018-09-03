@@ -1,5 +1,13 @@
+/**
+ * @hidden
+ * @internal
+ */
 export type MapFunction = (val: any) => any;
 
+/**
+ * @hidden
+ * @internal
+ */
 export function mapObject(obj: any, mapFunc: MapFunction): any {
   "use strict";
   return Object.keys(obj).reduce((newObj: any, value: any) => {
@@ -8,6 +16,10 @@ export function mapObject(obj: any, mapFunc: MapFunction): any {
   }, {});
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function deepClone(from: any): any {
   const type: string = typeof from;
 

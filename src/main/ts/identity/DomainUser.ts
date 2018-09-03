@@ -3,6 +3,10 @@ export class DomainUser {
   public readonly anonymous: boolean;
   public readonly admin: boolean;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(public readonly userType: string,
               public readonly username: string,
               public readonly firstName: string,

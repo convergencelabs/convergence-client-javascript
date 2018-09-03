@@ -1,4 +1,4 @@
-import {OrderBy} from "../util/OrderBy";
+import {OrderBy} from "../util/";
 
 export declare interface UserQuery {
   term: string;

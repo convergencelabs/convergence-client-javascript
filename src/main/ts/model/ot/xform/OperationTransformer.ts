@@ -5,6 +5,10 @@ import {DiscreteOperation} from "../ops/DiscreteOperation";
 import {TransformationFunctionRegistry} from "./TransformationFunctionRegistry";
 import {OperationTransformationFunction} from "./OperationTransformationFunction";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class OperationTransformer {
   private _tfr: TransformationFunctionRegistry;
 

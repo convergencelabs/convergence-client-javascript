@@ -23,15 +23,29 @@ import {ActivityParticipant} from "./ActivityParticipant";
 import {ActivityJoinRequest, ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter, StringMap, StringMapLike} from "../util/";
-import {deepClone} from "../util/ObjectUtils";
 import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
 
 export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
-  private _connection: ConvergenceConnection;
-  private _joinedDeferreds: Map<string, Deferred<Activity>>;
-  private _joinedActivities: Map<string, Activity>;
+  /**
+   * @internal
+   */
+  private readonly _connection: ConvergenceConnection;
 
+  /**
+   * @internal
+   */
+  private readonly _joinedDeferreds: Map<string, Deferred<Activity>>;
+
+  /**
+   * @internal
+   */
+  private readonly _joinedActivities: Map<string, Activity>;
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(connection: ConvergenceConnection) {
     super();
     this._connection = connection;
@@ -183,6 +197,10 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joinedDeferreds.has(id);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _onActivityLeave(id: string): void {
     this._joinedDeferreds.delete(id);
     this._joinedActivities.delete(id);

@@ -10,6 +10,17 @@ export interface IndexRange {
 
 export class RangeReference extends ModelReference<IndexRange> {
 
+  /**
+   * @param referenceManager
+   * @param key
+   * @param source
+   * @param username
+   * @param sessionId
+   * @param local
+   *
+   * @hidden
+   * @internal
+   */
   constructor(referenceManager: ReferenceManager,
               key: string,
               source: RealTimeElement<any>,
@@ -19,14 +30,29 @@ export class RangeReference extends ModelReference<IndexRange> {
     super(referenceManager, ModelReference.Types.RANGE, key, source, username, sessionId, local);
   }
 
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleInsert(index: number, length: number): void {
     this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length));
   }
 
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleRemove(index: number, length: number): void {
     this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length));
   }
 
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleReorder(fromIndex: number, toIndex: number): void {
     this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex));
   }

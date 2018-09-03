@@ -43,6 +43,10 @@ OperationTypeCodes.put(14, OperationType.STRING_REMOVE);
 OperationTypeCodes.put(15, OperationType.STRING_VALUE);
 OperationTypeCodes.put(16, OperationType.DATE_VALUE);
 
+/**
+ * @hidden
+ * @internal
+ */
 export class OperationSerializer {
   public static serialize(operation: Operation): any {
     if (operation instanceof CompoundOperation) {
@@ -53,6 +57,10 @@ export class OperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class OperationDeserializer {
   public static deserialize(body: any): Operation {
     switch (OperationTypeCodes.value(body.t)) {
@@ -64,6 +72,10 @@ export class OperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DiscreteOperationSerializer {
   public static serialize(operation: DiscreteOperation): any {
     if (operation instanceof ArrayInsertOperation) {
@@ -102,6 +114,10 @@ export class DiscreteOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DiscreteOperationDeserializer {
   public static deserialize(body: any): DiscreteOperation {
     switch (OperationTypeCodes.value(body.t)) {
@@ -143,6 +159,10 @@ export class DiscreteOperationDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class CompoundOperationSerializer {
   public static serialize(operation: CompoundOperation): any {
     const ops: any[] = [];
@@ -159,6 +179,10 @@ export class CompoundOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class CompoundDeserializer {
   public static deserialize(body: any): CompoundOperation {
     const ops: DiscreteOperation[] = [];
@@ -170,6 +194,10 @@ export class CompoundDeserializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayInsertOperationSerializer {
   public static serialize(operation: ArrayInsertOperation): any {
     return {
@@ -182,12 +210,20 @@ export class ArrayInsertOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayInsertOperationDeserializer {
   public static deserialize(body: any): ArrayInsertOperation {
     return new ArrayInsertOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayMoveOperationSerializer {
   public static serialize(operation: ArrayMoveOperation): any {
     return {
@@ -200,12 +236,20 @@ export class ArrayMoveOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayMoveOperationDeserializer {
   public static deserialize(body: any): ArrayMoveOperation {
     return new ArrayMoveOperation(body.d, body.n, body.f, body.o);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayRemoveOperationSerializer {
   public static serialize(operation: ArrayRemoveOperation): any {
     return {
@@ -217,12 +261,20 @@ export class ArrayRemoveOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayRemoveOperationDeserializer {
   public static deserialize(body: any): ArrayRemoveOperation {
     return new ArrayRemoveOperation(body.d, body.n, body.i);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayReplaceOperationSerializer {
   public static serialize(operation: ArrayReplaceOperation): any {
     return {
@@ -235,12 +287,20 @@ export class ArrayReplaceOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayReplaceOperationDeserializer {
   public static deserialize(body: any): ArrayReplaceOperation {
     return new ArrayReplaceOperation(body.d, body.n, body.i, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArraySetOperationSerializer {
   public static serialize(operation: ArraySetOperation): any {
     return {
@@ -252,12 +312,20 @@ export class ArraySetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArraySetOperationDeserializer {
   public static deserialize(body: any): ArraySetOperation {
     return new ArraySetOperation(body.d, body.n, body.v.map((value: any) => DataValueDeserializer(value)));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class BooleanSetOperationSerializer {
   public static serialize(operation: BooleanSetOperation): any {
     return {
@@ -269,12 +337,20 @@ export class BooleanSetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class BooleanSetOperationDeserializer {
   public static deserialize(body: any): BooleanSetOperation {
     return new BooleanSetOperation(body.d, body.n, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberAddOperationSerializer {
   public static serialize(operation: NumberAddOperation): any {
     return {
@@ -286,12 +362,20 @@ export class NumberAddOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberAddOperationDeserializer {
   public static deserialize(body: any): NumberAddOperation {
     return new NumberAddOperation(body.d, body.n, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberSetOperationSerializer {
   public static serialize(operation: NumberSetOperation): any {
     return {
@@ -303,12 +387,20 @@ export class NumberSetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberSetOperationDeserializer {
   public static deserialize(body: any): NumberSetOperation {
     return new NumberSetOperation(body.d, body.n, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectAddPropertyOperationSerializer {
   public static serialize(operation: ObjectAddPropertyOperation): any {
     return {
@@ -321,12 +413,20 @@ export class ObjectAddPropertyOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectAddPropertyOperationDeserializer {
   public static deserialize(body: any): ObjectAddPropertyOperation {
     return new ObjectAddPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectRemovePropertyOperationSerializer {
   public static serialize(operation: ObjectRemovePropertyOperation): any {
     return {
@@ -338,12 +438,20 @@ export class ObjectRemovePropertyOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectRemovePropertyOperationDeserializer {
   public static deserialize(body: any): ObjectRemovePropertyOperation {
     return new ObjectRemovePropertyOperation(body.d, body.n, body.p);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectSetPropertyOperationSerializer {
   public static serialize(operation: ObjectSetPropertyOperation): any {
     return {
@@ -356,12 +464,20 @@ export class ObjectSetPropertyOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectSetPropertyOperationDeserializer {
   public static deserialize(body: any): ObjectSetPropertyOperation {
     return new ObjectSetPropertyOperation(body.d, body.n, body.p, DataValueDeserializer(body.v));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectSetOperationSerializer {
   public static serialize(operation: ObjectSetOperation): any {
     return {
@@ -373,12 +489,20 @@ export class ObjectSetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectSetOperationDeserializer {
   public static deserialize(body: any): ObjectSetOperation {
     return new ObjectSetOperation(body.d, body.n, mapObject(body.v, (value: any) => DataValueDeserializer(value)));
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringInsertOperationSerializer {
   public static serialize(operation: StringInsertOperation): any {
     return {
@@ -391,12 +515,20 @@ export class StringInsertOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringInsertOperationDeserializer {
   public static deserialize(body: any): StringInsertOperation {
     return new StringInsertOperation(body.d, body.n, body.i, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringRemoveOperationSerializer {
   public static serialize(operation: StringRemoveOperation): any {
     return {
@@ -409,12 +541,20 @@ export class StringRemoveOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringRemoveOperationDeserializer {
   public static deserialize(body: any): StringRemoveOperation {
     return new StringRemoveOperation(body.d, body.n, body.i, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringSetOperationSerializer {
   public static serialize(operation: StringSetOperation): any {
     return {
@@ -426,12 +566,20 @@ export class StringSetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringSetOperationDeserializer {
   public static deserialize(body: any): StringSetOperation {
     return new StringSetOperation(body.d, body.n, body.v);
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DateSetOperationSerializer {
   public static serialize(operation: DateSetOperation): any {
     return {
@@ -443,6 +591,10 @@ export class DateSetOperationSerializer {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DateSetOperationDeserializer {
   public static deserialize(body: any): DateSetOperation {
     return new DateSetOperation(body.d, body.n, new Date(body.v));

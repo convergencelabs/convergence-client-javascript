@@ -3,6 +3,10 @@ import {OperationPair} from "../OperationPair";
 import {ArrayInsertOperation} from "../../ops/ArrayInsertOperation";
 import {ArrayReplaceOperation} from "../../ops/ArrayReplaceOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ArrayInsertReplaceOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayReplaceOperation> =
   (s: ArrayInsertOperation, c: ArrayReplaceOperation) => {
     if (s.index <= c.index) {

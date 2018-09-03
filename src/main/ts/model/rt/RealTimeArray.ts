@@ -2,20 +2,21 @@ import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ArrayNode} from "../internal/ArrayNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {ArrayReplaceOperation} from "../ot/ops/ArrayReplaceOperation";
 import {ArrayInsertOperation} from "../ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
 import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
 import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {ModelNodeEvent} from "../internal/events";
-import {ArrayNodeInsertEvent} from "../internal/events";
-import {ArrayNodeRemoveEvent} from "../internal/events";
-import {ArrayNodeReorderEvent} from "../internal/events";
-import {ArrayNodeSetEvent} from "../internal/events";
-import {ArrayNodeSetValueEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
+import {
+  ModelNodeEvent,
+  ArrayNodeInsertEvent,
+  ArrayNodeRemoveEvent,
+  ArrayNodeReorderEvent,
+  ArrayNodeSetEvent,
+  ArrayNodeSetValueEvent
+} from "../internal/events";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
 import {Path, PathElement} from "../Path";
 
@@ -27,13 +28,28 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
   public static readonly Events: RealTimeArrayEvents = ObservableArrayEventConstants;
 
   /**
-   * Constructs a new RealTimeArray.
+   * @hidden
+   * @internal
    */
-  constructor(protected _delegate: ArrayNode,
-              protected _callbacks: ModelEventCallbacks,
+  protected _delegate: ArrayNode;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  protected _callbacks: ModelEventCallbacks;
+
+  /**
+   * Constructs a new RealTimeArray.
+   *
+   * @hidden
+   * @internal
+   */
+  constructor(delegate: ArrayNode,
+              callbacks: ModelEventCallbacks,
               _wrapperFactory: RealTimeWrapperFactory,
               _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+    super(delegate, callbacks, _wrapperFactory, _model, []);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
@@ -45,7 +61,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
         } else if (event instanceof ArrayNodeReorderEvent) {
           this._sendOperation(new ArrayMoveOperation(this.id(), false, event.fromIndex, event.toIndex));
         } else if (event instanceof ArrayNodeSetEvent) {
-          let index: number = event.index;
+          const index: number = event.index;
           this._sendOperation(new ArrayReplaceOperation(this.id(), false, index, event.src.get(index).dataValue()));
         } else if (event instanceof ArrayNodeSetValueEvent) {
           this._sendOperation(new ArraySetOperation(this.id(), false, event.src.dataValue().children));
@@ -144,6 +160,12 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
     return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 
+  /**
+   * @param relPath
+   * @private
+   * @internal
+   * @hidden
+   */
   public _removeChild(relPath: PathElement): void {
     if (typeof relPath !== "number") {
       throw new Error("The relative path of a child must be a number: " + (typeof relPath));
@@ -152,6 +174,12 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
     this.remove(relPath);
   }
 
+  /**
+   * @param event
+   * @private
+   * @internal
+   * @hidden
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Arrays to do have references yet.");
   }

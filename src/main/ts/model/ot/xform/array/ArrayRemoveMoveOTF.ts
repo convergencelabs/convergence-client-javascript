@@ -6,6 +6,10 @@ import {ArrayMoveHelper} from "./ArrayMoveHelper";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
 import {MoveDirection} from "./ArrayMoveHelper";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ArrayRemoveMoveOTF: OperationTransformationFunction<ArrayRemoveOperation, ArrayMoveOperation> =
   (s: ArrayRemoveOperation, c: ArrayMoveOperation) => {
     switch (ArrayMoveHelper.getMoveDirection(c)) {

@@ -1,9 +1,8 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {UndefinedNode} from "../internal/UndefinedNode";
-import {ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RealTimeModel} from "./RealTimeModel";
 import {
   ObservableUndefined,
   ObservableUndefinedEvents,
@@ -21,6 +20,9 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
 
   /**
    * Constructs a new RealTimeUndefined.
+   *
+   * @hidden
+   * @internal
    */
   constructor(_delegate: UndefinedNode,
               _callbacks: ModelEventCallbacks,
@@ -45,10 +47,21 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
     // no-op
   }
 
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Undefined values do not process references");
   }
 
+  /**
+   * @param data
+   * @private
+   * @hidden
+   * @internal
+   */
   protected _setData(data: any): void {
     throw new Error("Can not set the value on a Undefined type.");
   }

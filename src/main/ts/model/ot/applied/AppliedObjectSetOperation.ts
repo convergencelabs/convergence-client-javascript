@@ -3,6 +3,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ObjectSet} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectSetOperation extends AppliedDiscreteOperation implements ObjectSet {
 
   constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue},

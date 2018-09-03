@@ -1,8 +1,14 @@
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
-import {RangeRelationshipUtil} from "../../util/RangeRelationshipUtil";
-import {RangeRangeRelationship} from "../../util/RangeRelationshipUtil";
-import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
+import {
+  RangeRelationshipUtil,
+  RangeIndexRelationship,
+  RangeRangeRelationship
+} from "../../util/RangeRelationshipUtil";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayMoveHelper {
 
   /**
@@ -141,6 +147,10 @@ export class ArrayMoveHelper {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export enum MoveDirection {
   Forward, Backward, Identity
 }

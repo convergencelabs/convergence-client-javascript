@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {NumberSet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberSetOperation extends DiscreteOperation implements NumberSet {
 
   constructor(id: string, noOp: boolean, public value: number) {

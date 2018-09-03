@@ -4,6 +4,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArrayRemove} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayRemoveOperation extends AppliedDiscreteOperation implements ArrayRemove {
 
   constructor(id: string, noOp: boolean, public index: number, public oldValue: DataValue) {

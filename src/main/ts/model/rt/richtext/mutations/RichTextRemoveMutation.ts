@@ -1,12 +1,14 @@
 import {RichTextMutation} from "./RichTextMutation";
 import {RichTextDocument} from "../model/RichTextDocument";
-import {RichTextLocation} from "../model/RichTextLocation";
 import {RichTextFragment} from "../model/RichTextFragement";
 import {RichTextOperation} from "../operations/RichTextOperation";
-import {RichTextInsert} from "../operations/RichTextInsert";
 import {RichTextRange} from "../model/RichTextRange";
 import {RichTextRemove} from "../operations/RichTextRemove";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextInsertMutation extends RichTextMutation {
   public static get TYPE() {
     return "remove";

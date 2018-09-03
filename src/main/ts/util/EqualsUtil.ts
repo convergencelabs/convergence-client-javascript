@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class EqualsUtil {
   public static deepEquals(x: any, y: any): boolean {
     let p: string;

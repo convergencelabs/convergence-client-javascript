@@ -4,4 +4,16 @@ export * from "./GroupChatChannel";
 export * from "./DirectChatChannel";
 export * from "./ChatRoomChannel";
 export * from "./ChatHistoryEntry";
-export * from "./events";
+
+export {ChatEvent} from "./events/ChatEvent";
+export {ChatChannelEvent} from "./events/ChatChannelEvent";
+export {ChatMessageEvent} from "./events/ChatMessageEvent";
+export {UserJoinedEvent} from "./events/UserJoinedEvent";
+export {UserLeftEvent} from "./events/UserLeftEvent";
+export {UserAddedEvent} from "./events/UserAddedEvent";
+export {UserRemovedEvent} from "./events/UserRemovedEvent";
+export {ChatChannelNameChanged} from "./events/ChatChannelNameChanged";
+export {ChatChannelTopicChanged} from "./events/ChatChannelTopicChanged";
+export {ChannelJoinedEvent} from "./events/ChannelJoinedEvent";
+export {ChannelLeftEvent} from "./events/ChannelLeftEvent";
+export {ChannelRemovedEvent} from "./events/ChannelRemovedEvent";

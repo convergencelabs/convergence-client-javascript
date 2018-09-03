@@ -76,10 +76,6 @@ function generateRollUpConfig(format) {
   };
 }
 
-const typings = () =>
-  src("./api/**/*")
-    .pipe(dest(`${distInternalDir}/typings`));
-
 const distCjsMin = () => {
   return minify(`${distInternalDir}/convergence.js`, `${distInternalDir}`);
 };
@@ -125,7 +121,7 @@ const distUmdBundleMin = () => {
 };
 
 const lint = () =>
-  src(["src/**/*.ts", "api/**/*.ts"])
+  src(["src/**/*.ts"])
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 
@@ -143,9 +139,8 @@ const bumpPacakgeVersion = (cb) => {
 
 const docs =
   shell.task([
-    'typedoc --options typedoc.config.json src/main',
+    'typedoc --options typedoc.config.json src/main/ts',
   ]);
-
 
 const tsDeclarations = () => {
   const exportFilter = "export {};";
@@ -158,15 +153,15 @@ const tsDeclarations = () => {
     .pipe(tsProject())
     .dts
     .pipe(filter(content => trim(content) !== exportFilter))
-    .pipe(dest("dist/types"));
+    .pipe(dest("dist-internal/typings"));
 };
 
 const declarationsNamedExport = () =>
-  src("./dist/types/index.d.ts")
+  src("./dist-internal/typings/index.d.ts")
     .pipe(insert.append("\nexport as namespace Convergence;"))
-    .pipe(dest("./dist/types"));
+    .pipe(dest("./dist-internal/typings"));
 
-const types = series(tsDeclarations, declarationsNamedExport);
+const typings = series(tsDeclarations, declarationsNamedExport);
 
 const distInternal = series(
   typings,
@@ -188,9 +183,9 @@ const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`])
     }
   }))
   .pipe(dest(`${distDir}`));
-const copyTypings = () => src([`${distInternalDir}/typings/**/*`]).pipe(dest(`${distDir}/typings`));
+const copyTypes = () => src([`${distInternalDir}/typings/**/*`]).pipe(dest(`${distDir}/typings`));
 
-const distNpmJs = series(copyNpmJs, distCopyMin, copyTypings);
+const distNpmJs = series(copyNpmJs, distCopyMin, copyTypes);
 
 const test = () =>
   src("src/test*/**/*Spec.ts")
@@ -199,23 +194,16 @@ const test = () =>
       require: ['ts-node/register']
     }));
 
-const validateApi = () => {
-  const tsProject = ts.createProject("tsconfig.json");
-  return src(["api/**/*.d.ts"])
-    .pipe(tsProject());
-};
 
 const clean = () => del([distInternalDir, distDir, "build", "coverage", ".nyc_output"]);
-const dist = series(distInternal, distNpmJs, validateApi);
+const dist = series(distInternal, distNpmJs, docs);
 
 export {
   typings,
   test,
   lint,
   clean,
-  validateApi,
   distInternal,
   dist,
   docs,
-  types
 }

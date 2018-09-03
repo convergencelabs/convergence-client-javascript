@@ -1,5 +1,9 @@
 import {EventEmitter} from "../../../../util/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextDocument extends EventEmitter {
   private _attributes: Map<string, any>;
   private _roots: Map<string, RichTextRootElement>;

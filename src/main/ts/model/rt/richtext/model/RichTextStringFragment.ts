@@ -1,5 +1,9 @@
 import {RichTextContent} from "./RichTextContent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextStringFragment implements RichTextContent {
   private _str: RichTextString;
   private _index: number;

@@ -3,6 +3,10 @@ import {ObjectAddPropertyOperation} from "../../ops/ObjectAddPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../../ops/ObjectRemovePropertyOperation";
 import {OperationPair} from "../OperationPair";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ObjectAddPropertyRemovePropertyOTF: OperationTransformationFunction<ObjectAddPropertyOperation,
   ObjectRemovePropertyOperation> =
   (s: ObjectAddPropertyOperation, c: ObjectRemovePropertyOperation) => {

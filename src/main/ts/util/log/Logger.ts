@@ -2,6 +2,10 @@ import {LogLevel} from "./LogLevel";
 import {LogWriter} from "./LogWriter";
 import {LogEvent} from "./LogEvent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class Logger {
   private readonly _id: string;
   private _level: LogLevel;

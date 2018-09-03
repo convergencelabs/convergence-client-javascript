@@ -1,8 +1,15 @@
 import {deepClone} from "../util/ObjectUtils";
 export class ActivityParticipant {
 
-  private _state: Map<string, any>;
+  /**
+   * @internal
+   */
+  private readonly _state: Map<string, any>;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(public readonly sessionId: string,
               public readonly username: string,
               state: Map<string, any>,

@@ -1,11 +1,15 @@
 import {RichTextOperation} from "./RichTextOperation";
-import {RichTextRange} from "../model/RichTextRange";
+import {RichTextRange} from "../model/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextSetAttribute implements RichTextOperation {
-  private _range: RichTextRange;
-  private _key: string;
-  private _oldValue: any;
-  private _newValue: any;
+  private readonly _range: RichTextRange;
+  private readonly _key: string;
+  private readonly _oldValue: any;
+  private readonly _newValue: any;
 
   constructor(range: RichTextRange, key: string, oldValue: any, newValue: any) {
     this._range = range;

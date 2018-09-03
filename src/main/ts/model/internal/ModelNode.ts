@@ -1,13 +1,19 @@
 import {Model} from "./Model";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
-import {NodeValueChangedEvent} from "./events";
-import {NodeChangedEvent} from "./events";
-import {NodeDetachedEvent} from "./events";
+import {
+  NodeChangedEvent,
+  NodeValueChangedEvent,
+  NodeDetachedEvent,
+  ModelNodeEvent
+} from "./events";
 import {DataValue} from "../dataValue";
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {ModelNodeEvent} from "./events";
+import {ConvergenceEventEmitter} from "../../util/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEvent> {
 
   public static Events: any = {
@@ -19,18 +25,18 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
   protected _model: Model;
   protected _path: () => Path;
 
-  private _id: string;
-  private _modelType: string;
+  private readonly _id: string;
+  private readonly _modelType: string;
 
   /**
    * Constructs a new RealTimeElement.
    */
-  constructor(modelType: string,
-              id: string,
-              path: () => Path,
-              model: Model,
-              public sessionId: string,
-              public username: string) {
+  protected constructor(modelType: string,
+                        id: string,
+                        path: () => Path,
+                        model: Model,
+                        public sessionId: string,
+                        public username: string) {
     super();
     this._id = id;
     this._modelType = modelType;
@@ -51,7 +57,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
   }
 
   public path(): Path {
-   return this._path();
+    return this._path();
   }
 
   public model(): Model {
@@ -70,8 +76,8 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     this._emitEvent(event);
   }
 
-  public data(): T
-  public data(value: T): void
+  public data(): T;
+  public data(value: T): void;
   public data(value?: T): any {
     if (arguments.length === 0) {
       return this._getData();
@@ -81,7 +87,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     }
   }
 
-  public abstract dataValue(): DataValue
+  public abstract dataValue(): DataValue;
 
   public abstract toJson(): any;
 

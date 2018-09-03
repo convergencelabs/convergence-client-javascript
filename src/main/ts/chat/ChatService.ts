@@ -1,17 +1,17 @@
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {ChatEvent} from "./events";
+import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
 import {
+  ChatEvent,
+  ChannelLeftEvent,
   ChatMessageEvent,
   UserJoinedEvent,
   UserLeftEvent,
   UserAddedEvent,
   UserRemovedEvent,
-  ChannelJoinedEvent,
-  ChannelLeftEvent
-} from "./events";
+  ChannelJoinedEvent
+} from "./events/";
 import {processChatMessage} from "./ChatMessageProcessor";
 import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
 import {DirectChatChannel} from "./DirectChatChannel";
@@ -28,9 +28,7 @@ import {Observable} from "rxjs";
 import {ChatChannelInfoData} from "../connection/protocol/chat/info";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
-import {Validation} from "../util/Validation";
 import {RemoveChatChannelRequestMessage} from "../connection/protocol/chat/remove";
-import {ConvergenceServerError} from "../util/ConvergenceServerError";
 import {ChatPermissionManager} from "./ChatPermissionManager";
 
 export declare interface ChatServiceEvents {
@@ -66,9 +64,20 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public static readonly Events: ChatServiceEvents = Events;
 
-  private _connection: ConvergenceConnection;
-  private _messageStream: Observable<ChatEvent>;
+  /**
+   * @internal
+   */
+  private readonly _connection: ConvergenceConnection;
 
+  /**
+   * @internal
+   */
+  private readonly _messageStream: Observable<ChatEvent>;
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(connection: ConvergenceConnection) {
     super();
     this._connection = connection;
@@ -107,19 +116,19 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]> {
-    return this._connection.request(<SearchChatChannelsRequestMessage> {
+    return this._connection.request({
       type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
-    }).then((message: GetChatChannelsResponseMessage) => {
+    } as SearchChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
       return message.channels.map(channel => this._createChannelInfo(channel));
     });
   }
 
   public exists(channelId: string): Promise<boolean> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<GetChatChannelsRequestMessage> {
+    return this._connection.request({
       type: MessageType.CHAT_CHANNEL_EXISTS_REQUEST,
       channelIds: [channelId]
-    }).then((message: ChatChannelExistsResponseMessage) => {
+    } as GetChatChannelsRequestMessage).then((message: ChatChannelExistsResponseMessage) => {
       const exists = message.exists[0];
       return exists;
     });
@@ -127,10 +136,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public get(channelId: string): Promise<ChatChannel> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<GetChatChannelsRequestMessage> {
+    return this._connection.request({
       type: MessageType.GET_CHAT_CHANNELS_REQUEST,
       channelIds: [channelId]
-    }).then((message: GetChatChannelsResponseMessage) => {
+    } as GetChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
       const channelData = message.channels[0];
       const channelInfo = this._createChannelInfo(channelData);
       return this._createChannel(channelInfo);
@@ -139,9 +148,9 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   // Methods that apply to Group Chat Channels.
   public joined(): Promise<ChatChannelInfo[]> {
-    return this._connection.request(<GetJoinedChannelsRequestMessage> {
+    return this._connection.request({
       type: MessageType.CREATE_CHAT_CHANNEL_REQUEST
-    }).then((message: GetChatChannelsResponseMessage) => {
+    } as GetJoinedChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
       return message.channels.map(channel => this._createChannelInfo(channel));
     });
   }
@@ -168,10 +177,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     }
 
     const {id, type: channelType, name, topic, membership, members} = options;
-    return this._connection.request(<CreateChatChannelRequestMessage> {
+    return this._connection.request({
       type: MessageType.CREATE_CHAT_CHANNEL_REQUEST,
       id, channelType, name, topic, membership, members
-    }).then((message: CreateChatChannelResponseMessage) => {
+    } as CreateChatChannelRequestMessage).then((message: CreateChatChannelResponseMessage) => {
       return message.channelId;
     }).catch(error => {
       if (error instanceof ConvergenceServerError &&
@@ -190,20 +199,20 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public remove(channelId: string): Promise<void> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<RemoveChatChannelRequestMessage> {
+    return this._connection.request({
       type: MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
       channelId
-    }).then(() => {
+    } as RemoveChatChannelRequestMessage).then(() => {
       return;
     });
   }
 
   public join(channelId: string): Promise<ChatChannel> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<JoinChatChannelRequestMessage> {
+    return this._connection.request({
       type: MessageType.JOIN_CHAT_CHANNEL_REQUEST,
       channelId
-    }).then((message: JoinChatChannelResponseMessage) => {
+    } as JoinChatChannelRequestMessage).then((message: JoinChatChannelResponseMessage) => {
       const channelInfo = this._createChannelInfo(message.channel);
       return this._createChannel(channelInfo);
     });
@@ -211,26 +220,26 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
 
   public leave(channelId: string): Promise<void> {
     Validation.assertNonEmptyString(channelId, "channelId");
-    return this._connection.request(<LeaveChatChannelRequestMessage> {
+    return this._connection.request({
       type: MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
       channelId
-    }).then(() => {
+    } as LeaveChatChannelRequestMessage).then(() => {
       return;
     });
   }
 
   // Methods that apply to Single User Chat Channels.
-  public direct(username: string): Promise<DirectChatChannel>
-  public direct(usernames: string[]): Promise<DirectChatChannel>
+  public direct(username: string): Promise<DirectChatChannel>;
+  public direct(usernames: string[]): Promise<DirectChatChannel>;
   public direct(usernames: string | string[]): Promise<DirectChatChannel> {
     if (typeof usernames === "string") {
       usernames = [usernames];
     }
 
-    return this._connection.request(<GetDirectChannelsRequestMessage> {
+    return this._connection.request({
       type: MessageType.GET_DIRECT_CHAT_CHANNELS_REQUEST,
       channelUsernames: [usernames]
-    }).then((message: GetChatChannelsResponseMessage) => {
+    } as GetDirectChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
       const channelData = message.channels[0];
       const info = this._createChannelInfo(channelData);
       const channel = this._createChannel(info);
@@ -242,6 +251,10 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     return new ChatPermissionManager(channelId, this._connection);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _createChannelInfo(channelData: ChatChannelInfoData): ChatChannelInfo {
     if (channelData.channelType === "direct") {
       return {
@@ -272,9 +285,12 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     }
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
     const messageStream = this._messageStream.filter(msg => msg.channelId === channelInfo.channelId);
-    let channel: ChatChannel;
     switch (channelInfo.channelType) {
       case ChatChannelTypes.DIRECT:
         return new DirectChatChannel(this._connection, messageStream, channelInfo);

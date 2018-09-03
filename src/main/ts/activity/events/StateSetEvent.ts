@@ -6,6 +6,10 @@ export class StateSetEvent implements ActivityEvent {
   public static readonly NAME = ActivityEvents.STATE_SET;
   public readonly name: string = StateSetEvent.NAME;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(public readonly activity: Activity,
               public readonly username: string,
               public readonly sessionId: string,

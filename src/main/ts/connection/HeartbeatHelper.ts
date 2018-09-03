@@ -1,8 +1,16 @@
+/**
+ * @hidden
+ * @internal
+ */
 export interface HeartbeatHandler {
   sendPing(): void;
   onTimeout(): void;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class HeartbeatHelper {
 
   private _pingFuture: any;
@@ -47,7 +55,7 @@ export class HeartbeatHelper {
 
   public start(): void {
     if (this._handler == null) {
-      throw "Can't start the HeartbeatManager unless the callback is set.";
+      throw new Error("Can't start the HeartbeatManager unless the callback is set.");
     }
 
     if (this._debugFlags.heartbeatHelper) {
@@ -88,10 +96,9 @@ export class HeartbeatHelper {
   }
 
   private schedulePongTimeout(): void {
-    const self: HeartbeatHelper = this;
     this._timeoutFuture = setTimeout(
       () => {
-        self._handler.onTimeout();
+        this._handler.onTimeout();
       },
       this._pongTimeout * 1000);
   }
@@ -112,10 +119,9 @@ export class HeartbeatHelper {
 
   private restartPingTimeout(): void {
     this.stopPingTimer();
-    const self: HeartbeatHelper = this;
     this._pingFuture = setTimeout(
       () => {
-        self.sendPing();
+        this.sendPing();
       },
       this._pingInterval * 1000);
   }

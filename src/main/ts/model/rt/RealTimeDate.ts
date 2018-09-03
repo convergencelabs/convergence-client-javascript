@@ -2,17 +2,17 @@ import {RealTimeElement} from "./RealTimeElement";
 import {DateNode} from "../internal/DateNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {DateSetOperation} from "../ot/ops/DateSetOperation";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {DateNodeSetValueEvent} from "../internal/events";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {ModelNodeEvent, DateNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {
   ObservableDate,
   ObservableDateEvents,
-  ObservableDateEventConstants} from "../observable/ObservableDate";
+  ObservableDateEventConstants
+} from "../observable/ObservableDate";
 
-export interface RealTimeDateEvents extends ObservableDateEvents {}
+export interface RealTimeDateEvents extends ObservableDateEvents {
+}
 
 export class RealTimeDate extends RealTimeElement<Date> implements ObservableDate {
 
@@ -20,6 +20,9 @@ export class RealTimeDate extends RealTimeElement<Date> implements ObservableDat
 
   /**
    * Constructs a new RealTimeDate.
+   *
+   * @hidden
+   * @private
    */
   constructor(_delegate: DateNode,
               _callbacks: ModelEventCallbacks,
@@ -36,6 +39,13 @@ export class RealTimeDate extends RealTimeElement<Date> implements ObservableDat
     });
   }
 
+  /**
+   * @param event
+   *
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Date values do not process references");
   }

@@ -4,6 +4,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ObjectAddProperty} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedObjectAddPropertyOperation extends AppliedDiscreteOperation implements ObjectAddProperty {
 
   constructor(id: string, noOp: boolean, public prop: string, public value: DataValue) {

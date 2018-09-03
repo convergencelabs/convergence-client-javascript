@@ -1,6 +1,10 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class Deferred<R> {
 
-  private _promise: Promise<R>;
+  private readonly _promise: Promise<R>;
   private _resolve: (value?: R | PromiseLike<R>) => any;
   private _reject: (error: Error) => void;
 

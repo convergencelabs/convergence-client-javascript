@@ -1,8 +1,6 @@
 import {ModelReference, ModelReferenceEvents} from "./ModelReference";
-import {RealTimeElement} from "../rt/RealTimeElement";
-import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
-import {RealTimeModel} from "../rt/RealTimeModel";
+import {RealTimeElement, RealTimeModel} from "../rt/";
+import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 
 export interface ModelReferenceCallbacks {
   onShare: (reference: LocalModelReference<any, any>) => void;
@@ -16,11 +14,30 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static readonly Events: ModelReferenceEvents = ModelReference.Events;
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _reference: R;
+
+  /**
+   * @internal
+   */
   private _published: boolean;
+
+  /**
+   * @internal
+   */
   private _callbacks: ModelReferenceCallbacks;
 
-  constructor(reference: R, callbacks: ModelReferenceCallbacks) {
+  /**
+   * @param reference
+   * @param callbacks
+   *
+   * @hidden
+   * @internal
+   */
+  protected constructor(reference: R, callbacks: ModelReferenceCallbacks) {
     super();
 
     this._emitFrom(reference.events());
@@ -118,6 +135,10 @@ extends ConvergenceEventEmitter<ConvergenceEvent> {
     this._callbacks = null;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _ensureAttached(): void {
     if (this.type() !== ModelReference.Types.ELEMENT) {
       if (this.reference().source().isDetached()) {

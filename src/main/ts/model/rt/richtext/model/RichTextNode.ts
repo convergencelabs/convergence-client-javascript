@@ -1,11 +1,15 @@
 import {RichTextContent} from "./RichTextContent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export abstract class RichTextNode implements RichTextContent {
   private _parent: RichTextElement;
   private _document: RichTextDocument;
   private _attributes: Map<string, any>;
 
-  constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
+  protected constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
     if (Validation.isNotSet(document)) {
       throw new ConvergenceError("The document must be set.", "rich-text-node-document-not-set");
     }
@@ -158,5 +162,4 @@ import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextContentType} from "./RichTextContentType";
-import {Validation} from "../../../../util/";
-import {ConvergenceError} from "../../../../util/";
+import {ConvergenceError, Validation} from "../../../../util/";

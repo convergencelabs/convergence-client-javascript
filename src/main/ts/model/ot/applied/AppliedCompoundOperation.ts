@@ -3,6 +3,10 @@ import {BatchChange} from "../ops/operationChanges";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedCompoundOperation extends AppliedOperation implements BatchChange {
   constructor(public ops: AppliedDiscreteOperation[]) {
     super(OperationType.COMPOUND);

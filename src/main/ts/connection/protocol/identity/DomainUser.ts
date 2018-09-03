@@ -1,5 +1,9 @@
-import {DomainUser} from "../../../identity/DomainUser";
+import {DomainUser} from "../../../identity/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const DomainUserDeserializer: (user: any) => DomainUser =  (body: any) => {
   return new DomainUser(
     body.t,

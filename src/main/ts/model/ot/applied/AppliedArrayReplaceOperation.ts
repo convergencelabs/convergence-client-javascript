@@ -3,6 +3,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArrayReplace} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArrayReplaceOperation extends AppliedDiscreteOperation implements ArrayReplace {
 
   constructor(id: string, noOp: boolean, public index: number, public value: DataValue, public oldValue: DataValue) {

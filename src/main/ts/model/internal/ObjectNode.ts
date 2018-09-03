@@ -1,23 +1,26 @@
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
-import {ObjectValue, DataValueType} from "../dataValue";
+import {ObjectValue, DataValueType, DataValue} from "../dataValue";
 import {Validation} from "../../util";
-import {DataValue} from "../dataValue";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {ModelNodeFactory} from "./ModelNodeFactory";
-import {ObjectNodeSetEvent} from "./events";
-import {ObjectNodeRemoveEvent} from "./events";
-import {ObjectNodeSetValueEvent} from "./events";
+import {ObjectNodeRemoveEvent, ObjectNodeSetValueEvent, ObjectNodeSetEvent} from "./events";
 import {ContainerNode} from "./ContainerNode";
 import {DataValueFactory} from "../DataValueFactory";
-import {ObjectAddProperty} from "../ot/ops/operationChanges";
-import {ObjectSetProperty} from "../ot/ops/operationChanges";
-import {ObjectRemoveProperty} from "../ot/ops/operationChanges";
-import {ObjectSet} from "../ot/ops/operationChanges";
+import {
+  ObjectAddProperty,
+  ObjectSetProperty,
+  ObjectRemoveProperty,
+  ObjectSet
+} from "../ot/ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
   public static Events: any = {
@@ -45,7 +48,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
     this._children = new Map<string, ModelNode<any>>();
 
     Object.getOwnPropertyNames(data.children).forEach((prop: string) => {
-      let child: DataValue = data.children[prop];
+      const child: DataValue = data.children[prop];
       this._idToPathElement.set(child.id, prop);
       this._children.set(prop, ModelNodeFactory.create(child, this._pathCB(child.id), model,
         this.sessionId, this.username, this.dataValueFactory));
@@ -57,16 +60,16 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   public dataValue(): ObjectValue {
-    let values: { [key: string]: DataValue } = {};
+    const values: { [key: string]: DataValue } = {};
     this._children.forEach((value, key) => {
       values[key] = value.dataValue();
     });
 
-    return <ObjectValue> {
+    return {
       id: this.id(),
       type: DataValueType.OBJECT,
       children: values
-    };
+    } as ObjectValue;
   }
 
   public toJson(): any {
@@ -95,7 +98,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   public keys(): string[] {
-    let keys: string[] = [];
+    const keys: string[] = [];
     this._children.forEach((v, k) => {
       keys.push(k);
     });
@@ -144,11 +147,11 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   protected _setData(data?: { [key: string]: any }): void {
-    let values: { [key: string]: DataValue } = {};
+    const values: { [key: string]: DataValue } = {};
 
-    for (let prop in data) {
+    for (const prop in data) {
       if (data.hasOwnProperty(prop)) {
-        let dataValue: DataValue = this.dataValueFactory.createDataValue(data[prop]);
+        const dataValue: DataValue = this.dataValueFactory.createDataValue(data[prop]);
         values[prop] = dataValue;
       }
     }
@@ -161,7 +164,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
       return this;
     }
 
-    const prop: string = <string> pathArgs[0];
+    const prop: string = pathArgs[0] as string;
     const child: ModelNode<any> = this._children.get(prop);
 
     if (child === undefined) {
@@ -170,7 +173,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
     if (pathArgs.length > 1) {
       if (child.type() === ModelElementType.OBJECT || child.type() === ModelElementType.ARRAY) {
-        return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
+        return (child as ContainerNode<any>).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         return this._createUndefinedNode();
       }
@@ -187,13 +190,12 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   private _pathCB(id: string): (() => Path) {
-    let self: ObjectNode = this;
     return () => {
-      let path: Path = self.path();
-      path.push(self._idToPathElement.get(id));
+      const path: Path = this.path();
+      path.push(this._idToPathElement.get(id));
       return path;
     };
-  };
+  }
 
   private _applySet(key: string, value: DataValue, local: boolean, sessionId: string, username: string): void {
     Validation.assertString(key, "key");
@@ -236,7 +238,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
   private _applySetValue(values: { [key: string]: DataValue },
                          local: boolean, sessionId: string, username: string): void {
-    let oldChildren: Map<string, ModelNode<any>> = this._children;
+    const oldChildren: Map<string, ModelNode<any>> = this._children;
 
     this._detachChildren(local);
 
@@ -244,7 +246,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
     for (const prop in values) {
       if (values.hasOwnProperty(prop)) {
-        let dataValue: DataValue = values[prop];
+        const dataValue: DataValue = values[prop];
         this._idToPathElement.set(dataValue.id, prop);
         this._children.set(prop,
           ModelNodeFactory.create(dataValue, this._pathCB(dataValue.id), this.model(),
@@ -266,22 +268,22 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   /////////////////////////////////////////////////////////////////////////////
 
   private _handleAddPropertyOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ObjectAddProperty = <ObjectAddProperty> operationEvent.operation;
+    const operation: ObjectAddProperty = operationEvent.operation as ObjectAddProperty;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetPropertyOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ObjectSetProperty = <ObjectSetProperty> operationEvent.operation;
+    const operation: ObjectSetProperty = operationEvent.operation as ObjectSetProperty;
     this._applySet(operation.prop, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemovePropertyOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ObjectRemoveProperty = <ObjectRemoveProperty> operationEvent.operation;
+    const operation: ObjectRemoveProperty = operationEvent.operation as ObjectRemoveProperty;
     this._applyRemove(operation.prop, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ObjectSet = <ObjectSet> operationEvent.operation;
+    const operation: ObjectSet = operationEvent.operation as ObjectSet;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 }

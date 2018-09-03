@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {DateSet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DateSetOperation extends DiscreteOperation implements DateSet {
 
   constructor(id: string, noOp: boolean, public value: Date) {

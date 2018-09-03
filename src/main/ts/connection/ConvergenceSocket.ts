@@ -2,6 +2,10 @@ import {debugFlags} from "../Debug";
 import {EventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
 
+/**
+ * @hidden
+ * @internal
+ */
 export default class ConvergenceSocket extends EventEmitter {
 
   public static Events: any = {

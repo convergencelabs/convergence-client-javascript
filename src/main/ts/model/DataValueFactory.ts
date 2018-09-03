@@ -1,13 +1,21 @@
-import {DataValue, DateValue} from "./dataValue";
-import {NullValue} from "./dataValue";
-import {StringValue} from "./dataValue";
-import {ArrayValue} from "./dataValue";
-import {ObjectValue} from "./dataValue";
-import {NumberValue} from "./dataValue";
-import {BooleanValue} from "./dataValue";
+import {
+  DataValue,
+  DateValue,
+  NullValue,
+  StringValue,
+  ArrayValue,
+  ObjectValue,
+  NumberValue,
+  BooleanValue
+} from "./dataValue";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DataValueFactory {
-  constructor(private idGenerator: () => string) {}
+  constructor(private idGenerator: () => string) {
+  }
 
   public createDataValue(data: any): DataValue {
     const id: string = this.idGenerator();
@@ -32,7 +40,7 @@ export class DataValueFactory {
         const convergenceType: string = data["$convergenceType"];
         if (convergenceType === "date") {
           if (data.hasOwnProperty("value")) {
-            const dateValue: DateValue = { id, type: "date", value: new Date(data["value"]) };
+            const dateValue: DateValue = {id, type: "date", value: new Date(data["value"])};
             return dateValue;
           } else {
             throw new Error("Invalid convergence data type: " + type + " value field missing.");
@@ -45,7 +53,7 @@ export class DataValueFactory {
         Object.getOwnPropertyNames(data).forEach((prop: string) => {
           props[prop] = this.createDataValue(data[prop]);
         });
-        const objectValue: ObjectValue = { id, type, children: props };
+        const objectValue: ObjectValue = {id, type, children: props};
         return objectValue;
       }
     } else if (type === "number") {

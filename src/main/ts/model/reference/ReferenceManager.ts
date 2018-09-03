@@ -1,29 +1,38 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
 import {MessageType} from "../../connection/protocol/MessageType";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {RemoteReferencePublished} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {RemoteReferenceSet} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {RemoteReferenceCleared} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {RemoteReferenceUnpublished} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {
+  RemoteReferenceEvent,
+  RemoteReferencePublished,
+  RemoteReferenceSet,
+  RemoteReferenceCleared,
+  RemoteReferenceUnpublished
+} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
-import {RealTimeElement} from "../rt/RealTimeElement";
+import {RealTimeElement, RealTimeModel} from "../rt/";
 import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 import {ElementReference} from "./ElementReference";
-import {RealTimeModel} from "../rt/RealTimeModel";
 import {PropertyReference} from "./PropertyReference";
 import {ReferenceFilter} from "./ReferenceFilter";
 
+/**
+ * @hidden
+ * @internal
+ */
 export type OnRemoteReference = (reference: ModelReference<any>) => void;
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ReferenceManager {
-  private _referenceMap: ReferenceMap;
-  private _localReferences: {[key: string]: LocalModelReference<any, any>};
-  private _validTypes: string[];
-  private _source: any;
-  private _onRemoteReference: OnRemoteReference;
+  private readonly _referenceMap: ReferenceMap;
+  private readonly _localReferences: {[key: string]: LocalModelReference<any, any>};
+  private readonly _validTypes: string[];
+  private readonly _source: any;
+  private readonly _onRemoteReference: OnRemoteReference;
 
   constructor(source: any, validTypes: string[], onRemoteReference: OnRemoteReference) {
     this._referenceMap = new ReferenceMap();
@@ -79,16 +88,16 @@ export class ReferenceManager {
   public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     switch (event.type) {
       case MessageType.REFERENCE_PUBLISHED:
-        this._handleRemoteReferencePublished(<RemoteReferencePublished> event);
+        this._handleRemoteReferencePublished(event as RemoteReferencePublished);
         break;
       case MessageType.REFERENCE_SET:
-        this._handleRemoteReferenceSet(<RemoteReferenceSet> event);
+        this._handleRemoteReferenceSet(event as RemoteReferenceSet);
         break;
       case MessageType.REFERENCE_CLEARED:
-        this._handleRemoteReferenceCleared(<RemoteReferenceCleared> event);
+        this._handleRemoteReferenceCleared(event as RemoteReferenceCleared);
         break;
       case MessageType.REFERENCE_UNPUBLISHED:
-        this._handleRemoteReferenceUnpublished(<RemoteReferenceUnpublished> event);
+        this._handleRemoteReferenceUnpublished(event as RemoteReferenceUnpublished);
         break;
       default:
         throw new Error("Invalid reference event.");
@@ -153,8 +162,8 @@ export class ReferenceManager {
     // Translate vids to RealTimeElements
     if (reference.type() === ModelReference.Types.ELEMENT) {
       const rtvs: Array<RealTimeElement<any>> = [];
-      for (let id of values) {
-        let value: RealTimeElement<any> = (<RealTimeModel> this._source)._getRegisteredValue(id);
+      for (const id of values) {
+        const value: RealTimeElement<any> = (this._source as RealTimeModel)._getRegisteredValue(id);
         if (value !== undefined) {
           rtvs.push(value);
         }

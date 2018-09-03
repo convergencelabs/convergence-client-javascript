@@ -31,14 +31,14 @@ import {
 
 export type ChatPermission =
   "create_chat_channel"
-    | "remove_chat_channel"
-    | "join_chat_channel"
-    | "leave_chat_channel"
-    | "add_chat_user"
-    | "remove_chat_user"
-    | "set_chat_name"
-    | "set_topic"
-    | "manage_chat_permissions";
+  | "remove_chat_channel"
+  | "join_chat_channel"
+  | "leave_chat_channel"
+  | "add_chat_user"
+  | "remove_chat_user"
+  | "set_chat_name"
+  | "set_topic"
+  | "manage_chat_permissions";
 
 const Permissions = {
   CREATE_CHAT: "create_chat_channel",
@@ -54,9 +54,20 @@ const Permissions = {
 
 export class ChatPermissionManager {
 
+  /**
+   * @internal
+   */
   private readonly _channelId: string;
+
+  /**
+   * @internal
+   */
   private readonly _connection: ConvergenceConnection;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(channelId: string, connection: ConvergenceConnection) {
     this._channelId = channelId;
     this._connection = connection;
@@ -129,8 +140,8 @@ export class ChatPermissionManager {
     });
   }
 
-  public addUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public addUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public addUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public addUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -149,14 +160,14 @@ export class ChatPermissionManager {
       id: this._channelId,
       users: map
     };
-    console.log(JSON.stringify(map));
+
     return this._connection.request(request).then(() => {
       return;
     });
   }
 
-  public removeUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public removeUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public removeUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public removeUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -181,8 +192,8 @@ export class ChatPermissionManager {
     });
   }
 
-  public setUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public setUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public setUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public setUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -232,8 +243,8 @@ export class ChatPermissionManager {
     });
   }
 
-  public addGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public addGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public addGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public addGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -258,8 +269,8 @@ export class ChatPermissionManager {
     });
   }
 
-  public removeGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public removeGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public removeGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public removeGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -284,8 +295,8 @@ export class ChatPermissionManager {
     });
   }
 
-  public setGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>
-  public setGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>
+  public setGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
+  public setGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
     let map = new Map<string, ChatPermission[]>();
@@ -334,5 +345,4 @@ export class ChatPermissionManager {
       return response.permissions as ChatPermission[];
     });
   }
-
 }

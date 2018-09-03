@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class Immutable {
 
   public static make(source: any): void {

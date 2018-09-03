@@ -4,6 +4,10 @@ import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
 import {ArraySet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArraySetOperation extends DiscreteOperation implements ArraySet {
 
   constructor(id: string, noOp: boolean, public value: DataValue[]) {

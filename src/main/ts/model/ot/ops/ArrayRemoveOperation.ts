@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {ArrayRemove} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayRemoveOperation extends DiscreteOperation implements ArrayRemove {
 
   constructor(id: string, noOp: boolean, public index: number) {

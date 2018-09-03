@@ -2,17 +2,17 @@ import {RealTimeElement} from "./RealTimeElement";
 import {BooleanNode} from "../internal/BooleanNode";
 import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {BooleanNodeSetValueEvent} from "../internal/events";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {ModelNodeEvent, BooleanNodeSetValueEvent} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {
   ObservableBoolean,
   ObservableBooleanEvents,
-  ObservableBooleanEventConstants} from "../observable/ObservableBoolean";
+  ObservableBooleanEventConstants
+} from "../observable/ObservableBoolean";
 
-export interface RealTimeBooleanEvents extends ObservableBooleanEvents {}
+export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
+}
 
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
@@ -20,6 +20,9 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
 
   /**
    * Constructs a new RealTimeBoolean.
+   *
+   * @hidden
+   * @private
    */
   constructor(_delegate: BooleanNode,
               _callbacks: ModelEventCallbacks,
@@ -36,6 +39,13 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
     });
   }
 
+  /**
+   * @param event
+   *
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }

@@ -5,6 +5,10 @@ import {RichTextFragment} from "../model/RichTextFragement";
 import {RichTextOperation} from "../operations/RichTextOperation";
 import {RichTextInsert} from "../operations/RichTextInsert";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextInsertMutation extends RichTextMutation {
   public static get TYPE() {
     return "insert";

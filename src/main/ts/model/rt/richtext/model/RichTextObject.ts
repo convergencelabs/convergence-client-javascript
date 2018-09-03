@@ -1,5 +1,9 @@
 import {RichTextElement} from "./RichTextElement";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextObject extends RichTextElement {
 
   constructor(document: RichTextDocument, parent: RichTextElement, name: string, attributes?: Map<string, any>) {

@@ -1,4 +1,4 @@
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {Observable, Subscription, BehaviorSubject} from "rxjs/Rx";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
@@ -11,19 +11,44 @@ import {
   PresenceStateRemoved
 } from "../connection/protocol/presence/presenceState";
 import {
-  PresenceStateSetEvent, PresenceStateRemovedEvent, PresenceStateClearedEvent,
-  PresenceAvailabilityChangedEvent
-} from "./events";
+  PresenceAvailabilityChangedEvent,
+  PresenceStateSetEvent,
+  PresenceStateRemovedEvent,
+  PresenceStateClearedEvent
+} from "./events/";
 import {deepClone} from "../util/ObjectUtils";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
+  /**
+   * @internal
+   */
   private _presence: UserPresence;
-  private _subscriptions: UserPresenceSubscription[];
-  private _messageSubscription: Subscription;
-  private _subject: BehaviorSubject<UserPresence>;
-  private _onUnsubscribe: (username: string) => void;
 
+  /**
+   * @internal
+   */
+  private _subscriptions: UserPresenceSubscription[];
+
+  /**
+   * @internal
+   */
+  private readonly _messageSubscription: Subscription;
+
+  /**
+   * @internal
+   */
+  private readonly _subject: BehaviorSubject<UserPresence>;
+
+  /**
+   * @internal
+   */
+  private readonly _onUnsubscribe: (username: string) => void;
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(initialPresence: UserPresence,
               eventStream: Observable<MessageEvent>,
               onUnsubscribe: (username: string) => void) {
@@ -83,7 +108,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
   }
 
   public set(state: Map<string, any>): void {
-    let newState: Map<string, any> = this._presence.state;
+    const newState: Map<string, any> = this._presence.state;
     state.forEach((v, k) => newState.set(k, deepClone(v)));
 
     this._presence = new UserPresence(
@@ -97,7 +122,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
   }
 
   public remove(keys: string[]): void {
-    let newState: Map<string, any> = this._presence.state;
+    const newState: Map<string, any> = this._presence.state;
     keys.forEach(k => newState.delete(k));
 
     this._presence = new UserPresence(
@@ -121,20 +146,24 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     this._subject.next(this._presence);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _handleMessage(messageEvent: MessageEvent): void {
     const message: IncomingProtocolMessage = messageEvent.message;
     switch (message.type) {
       case MessageType.PRESENCE_AVAILABILITY_CHANGED:
-        this.availability((<PresenceAvailabilityChanged> message).available);
+        this.availability((message as PresenceAvailabilityChanged).available);
         break;
       case MessageType.PRESENCE_STATE_SET:
-        this.set((<PresenceStateSet> message).state);
+        this.set((message as PresenceStateSet).state);
         break;
       case MessageType.PRESENCE_STATE_CLEARED:
         this.clear();
         break;
       case MessageType.PRESENCE_STATE_REMOVED:
-        this.remove((<PresenceStateRemoved> message).keys);
+        this.remove((message as PresenceStateRemoved).keys);
         break;
       default:
       // fixme error

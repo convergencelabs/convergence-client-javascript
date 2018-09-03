@@ -2,6 +2,10 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {BooleanSetOperation} from "../../ops/BooleanSetOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const BooleanSetSetOTF: OperationTransformationFunction<BooleanSetOperation, BooleanSetOperation> =
   (s: BooleanSetOperation, c: BooleanSetOperation) => {
     if (s.value === c.value) {

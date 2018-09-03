@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {ArrayMove} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayMoveOperation extends DiscreteOperation implements ArrayMove {
 
   constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {

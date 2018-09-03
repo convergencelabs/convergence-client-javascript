@@ -1,13 +1,16 @@
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/";
 import {
+  ChatChannelNameChanged,
+  ChatEvent,
+  ChatChannelTopicChanged,
   ChatMessageEvent,
+  ChatChannelEvent,
+  UserJoinedEvent,
+  UserLeftEvent,
   UserAddedEvent,
-  UserRemovedEvent,
-  UserJoinedEvent, ChatChannelEvent, UserLeftEvent, ChatChannelNameChanged,
-  ChatChannelTopicChanged
-} from "./events";
+  UserRemovedEvent
+} from "./events/";
 import {ChatChannelType} from "./ChatService";
-import {ChatEvent} from "./events";
 import {Session} from "../Session";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
@@ -20,7 +23,7 @@ import {
   ChatChannelHistoryResponseMessage,
   ChatChannelHistoryRequestMessage
 } from "../connection/protocol/chat/getHistory";
-import {Subscription, Observable} from "rxjs";
+import {Observable} from "rxjs";
 
 export interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
@@ -55,14 +58,27 @@ Object.freeze(Events);
 export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
   public static readonly Events: ChatChannelEvents = Events;
 
+  /**
+   * @internal
+   */
   protected _info: ChatChannelInfo;
+
+  /**
+   * @internal
+   */
   protected _connection: ConvergenceConnection;
 
+  /**
+   * @internal
+   */
   private _joined: boolean;
 
-  constructor(connection: ConvergenceConnection,
-              messageStream: Observable<ChatEvent>,
-              info: ChatChannelInfo) {
+  /**
+   * @internal
+   */
+  protected constructor(connection: ConvergenceConnection,
+                        messageStream: Observable<ChatEvent>,
+                        info: ChatChannelInfo) {
     super();
     this._connection = connection;
     this._info = info;
@@ -81,7 +97,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
   }
 
   public info(): ChatChannelInfo {
-    return Object.assign({}, this._info);
+    return {...this._info};
   }
 
   public isJoined(): boolean {
@@ -90,44 +106,44 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
 
   public send(message: string): Promise<void> {
     this._assertJoined();
-    return this._connection.request(<PublishChatMessage> {
+    return this._connection.request({
       type: MessageType.PUBLISH_CHAT_MESSAGE_REQUEST,
       channelId: this._info.channelId,
       message
-    }).then(() => {
+    } as PublishChatMessage).then(() => {
       return;
     });
   }
 
   public setName(name: string): Promise<void> {
     this._assertJoined();
-    return this._connection.request(<SetChatChannelNameMessage> {
+    return this._connection.request({
       type: MessageType.SET_CHAT_CHANNEL_NAME_REQUEST,
       channelId: this._info.channelId,
       name
-    }).then(() => {
+    } as SetChatChannelNameMessage).then(() => {
       return;
     });
   }
 
   public setTopic(topic: string): Promise<void> {
     this._assertJoined();
-    return this._connection.request(<SetChatChannelTopicMessage> {
+    return this._connection.request({
       type: MessageType.SET_CHAT_CHANNEL_TOPIC_REQUEST,
       channelId: this._info.channelId,
       topic
-    }).then(() => {
+    } as SetChatChannelTopicMessage).then(() => {
       return;
     });
   }
 
   public markSeen(eventNumber: number): Promise<void> {
     this._assertJoined();
-    return this._connection.request(<MarkChatChannelEventsSeenMessage> {
+    return this._connection.request({
       type: MessageType.MARK_CHAT_CHANNEL_EVENTS_SEEN_REQUEST,
       channelId: this._info.channelId,
       eventNumber
-    }).then(() => {
+    } as MarkChatChannelEventsSeenMessage).then(() => {
       return;
     });
   }
@@ -135,29 +151,37 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
   public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
     this._assertJoined();
 
-    return this._connection.request(<ChatChannelHistoryRequestMessage> {
+    return this._connection.request({
       type: MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
       channelId: this._info.channelId,
       startEvent: options.startEvent,
       limit: options.limit,
       forward: options.forward,
       eventFilter: options.eventFilter
-    }).then((message: ChatChannelHistoryResponseMessage) => {
+    } as ChatChannelHistoryRequestMessage).then((message: ChatChannelHistoryResponseMessage) => {
       return message.entries;
     });
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _assertJoined(): void {
     if (!this.isJoined()) {
       throw new Error(`Chat channel not joined: ${this._info.channelId}`);
     }
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _processEvent(event: ChatEvent): void {
     if (event instanceof ChatChannelEvent) {
       const lastEventTime = event.timestamp;
-      const eventCount = event.eventNumber;
-      this._info = Object.assign({}, this._info, {eventCount, lastEventTime});
+      const lastEventNumber = event.eventNumber;
+      this._info = {...this._info, lastEventNumber, lastEventTime};
     }
 
     if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
@@ -167,7 +191,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
         // FIXME this might not be right for rooms
         this._joined = true;
       }
-      this._info = Object.assign({}, this._info, {members});
+      this._info = {...this._info, members};
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
       const removedUsername = event.username;
       if (removedUsername === this.session().username()) {
@@ -175,13 +199,13 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
         this._joined = false;
       }
       const members = this._info.members.filter(username => username !== removedUsername);
-      this._info = Object.assign({}, this._info, {members});
+      this._info = {...this._info, members};
     } else if (event instanceof ChatChannelNameChanged) {
       const name = event.channelName;
-      this._info = Object.assign({}, this._info, {name});
+      this._info = {...this._info, name};
     } else if (event instanceof ChatChannelTopicChanged) {
       const topic = event.topic;
-      this._info = Object.assign({}, this._info, {topic});
+      this._info = {...this._info, topic};
     }
 
     Object.freeze(this._info);

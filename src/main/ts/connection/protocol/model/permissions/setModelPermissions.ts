@@ -3,6 +3,10 @@ import {MessageBodySerializer} from "../../MessageSerializer";
 import {ModelPermissions} from "../../../../model/ModelPermissions";
 import {serializeModelPermissions} from "./modelPermissions";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface SetModelPermissionsRequest extends OutgoingProtocolRequestMessage {
   modelId: string;
   overridesCollection?: boolean;
@@ -11,6 +15,10 @@ export interface SetModelPermissionsRequest extends OutgoingProtocolRequestMessa
   users?: Map<string, ModelPermissions>;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const SetModelPermissionsSerializer: MessageBodySerializer = (request: SetModelPermissionsRequest) => {
   let users: {[key: string]: any};
   if (request.users) {

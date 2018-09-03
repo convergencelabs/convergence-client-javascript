@@ -18,6 +18,10 @@ export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
 
   public static readonly Events: HistoricalObjectEvents = ObservableObjectEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

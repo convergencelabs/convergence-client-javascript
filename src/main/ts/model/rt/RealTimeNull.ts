@@ -23,6 +23,13 @@ export class RealTimeNull extends RealTimeElement<void> implements ObservableNul
     super(_delegate, _callbacks, _wrapperFactory, _model, []);
   }
 
+  /**
+   * @param event
+   *
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Null values do not process references");
   }

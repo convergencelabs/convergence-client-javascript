@@ -20,6 +20,10 @@ import {HistoricalModel} from "./HistoricalModel";
 import {HistoricalDate} from "./HistoricalDate";
 import {DateNode} from "../internal/DateNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalElement<any>> {
 
   constructor(private _model: HistoricalModel) {

@@ -1,5 +1,9 @@
 import {ModelNode} from "./ModelNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export abstract class NodeWrapperFactory<T> {
 
   private _wrappers: Map<string, T>;

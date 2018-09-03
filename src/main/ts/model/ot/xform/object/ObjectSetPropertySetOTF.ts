@@ -3,6 +3,10 @@ import {ObjectSetPropertyOperation} from "../../ops/ObjectSetPropertyOperation";
 import {ObjectSetOperation} from "../../ops/ObjectSetOperation";
 import {OperationPair} from "../OperationPair";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ObjectSetPropertySetOTF: OperationTransformationFunction<ObjectSetPropertyOperation, ObjectSetOperation> =
   (s: ObjectSetPropertyOperation, c: ObjectSetOperation) => {
     // O-TS-1

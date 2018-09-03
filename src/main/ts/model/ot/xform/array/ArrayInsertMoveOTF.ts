@@ -3,9 +3,12 @@ import {OperationPair} from "../OperationPair";
 import {ArrayInsertOperation} from "../../ops/ArrayInsertOperation";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
-import {ArrayMoveHelper} from "./ArrayMoveHelper";
-import {MoveDirection} from "./ArrayMoveHelper";
+import {ArrayMoveHelper, MoveDirection} from "./ArrayMoveHelper";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ArrayInsertMoveOTF: OperationTransformationFunction<ArrayInsertOperation, ArrayMoveOperation> =
   (s: ArrayInsertOperation, c: ArrayMoveOperation) => {
     switch (ArrayMoveHelper.getMoveDirection(c)) {

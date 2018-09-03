@@ -15,6 +15,10 @@ export class HistoricalUndefined extends HistoricalElement<void> implements Obse
 
   public static readonly Events: HistoricalUndefinedEvents = ObservableUndefinedEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(_delegate: UndefinedNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

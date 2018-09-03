@@ -1,4 +1,4 @@
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {ConvergenceEvent} from "../../util/";
 import {ModelNode} from "./ModelNode";
 import {Path} from "../Path";
 import {ArrayNode} from "./ArrayNode";
@@ -8,11 +8,19 @@ import {ObjectNode} from "./ObjectNode";
 import {StringNode} from "./StringNode";
 import {DateNode} from "./DateNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ModelNodeEvent extends ConvergenceEvent {
   src: ModelNode<any>;
   local: boolean;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NodeDetachedEvent implements ModelNodeEvent {
   public static readonly NAME = "detached";
   public name: string = NodeDetachedEvent.NAME;
@@ -21,11 +29,19 @@ export class NodeDetachedEvent implements ModelNodeEvent {
               public readonly local: boolean) {}
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface NodeValueChangedEvent extends ModelNodeEvent {
    sessionId: string;
    username: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NodeChangedEvent implements ModelNodeEvent {
   public static readonly NAME = "node_changed";
   public name: string = NodeChangedEvent.NAME;
@@ -40,6 +56,10 @@ export class NodeChangedEvent implements ModelNodeEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNodeInsertEvent implements NodeValueChangedEvent {
   public static readonly NAME = "insert";
   public name: string = ArrayNodeInsertEvent.NAME;
@@ -54,6 +74,10 @@ export class ArrayNodeInsertEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
   public static readonly NAME = "remove";
   public name: string = ArrayNodeRemoveEvent.NAME;
@@ -68,6 +92,10 @@ export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNodeSetEvent implements NodeValueChangedEvent {
   public static readonly NAME = "set";
   public name: string = ArrayNodeSetEvent.NAME;
@@ -83,6 +111,10 @@ export class ArrayNodeSetEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNodeReorderEvent implements NodeValueChangedEvent {
   public static readonly NAME = "reorder";
   public name: string = ArrayNodeReorderEvent.NAME;
@@ -97,6 +129,10 @@ export class ArrayNodeReorderEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = ArrayNodeSetValueEvent.NAME;
@@ -110,6 +146,10 @@ export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = BooleanNodeSetValueEvent.NAME;
@@ -123,6 +163,10 @@ export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = NumberNodeSetValueEvent.NAME;
@@ -136,6 +180,10 @@ export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class NumberNodeDeltaEvent implements NodeValueChangedEvent {
   public static readonly NAME = "delta";
   public name: string = NumberNodeDeltaEvent.NAME;
@@ -149,6 +197,10 @@ export class NumberNodeDeltaEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectNodeSetEvent implements NodeValueChangedEvent {
   public static readonly NAME = "set";
   public name: string = ObjectNodeSetEvent.NAME;
@@ -164,6 +216,10 @@ export class ObjectNodeSetEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
   public static readonly NAME = "remove";
   public name: string = ObjectNodeRemoveEvent.NAME;
@@ -178,6 +234,10 @@ export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = ObjectNodeSetValueEvent.NAME;
@@ -191,6 +251,10 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringNodeInsertEvent implements NodeValueChangedEvent {
   public static readonly NAME = "insert";
   public name: string = StringNodeInsertEvent.NAME;
@@ -205,6 +269,10 @@ export class StringNodeInsertEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringNodeRemoveEvent implements NodeValueChangedEvent {
   public static readonly NAME = "remove";
   public name: string = StringNodeRemoveEvent.NAME;
@@ -219,6 +287,10 @@ export class StringNodeRemoveEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = StringNodeSetValueEvent.NAME;
@@ -232,6 +304,10 @@ export class StringNodeSetValueEvent implements NodeValueChangedEvent {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DateNodeSetValueEvent implements NodeValueChangedEvent {
   public static readonly NAME = "value";
   public name: string = DateNodeSetValueEvent.NAME;

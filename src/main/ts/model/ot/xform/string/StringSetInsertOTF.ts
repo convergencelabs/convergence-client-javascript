@@ -3,6 +3,10 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {StringSetOperation} from "../../ops/StringSetOperation";
 import {StringInsertOperation} from "../../ops/StringInsertOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const StringSetInsertOTF: OperationTransformationFunction<StringSetOperation, StringInsertOperation> =
   (s: StringSetOperation, c: StringInsertOperation) => {
     // S-SI-1

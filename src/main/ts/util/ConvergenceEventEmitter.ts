@@ -10,6 +10,9 @@ interface EventRegistration<T> {
 
 export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
 
+  /**
+   * @internal
+   */
   private static _resolveEventKey(event: string): string {
     if (typeof event === "string") {
       return event.toLowerCase();
@@ -18,11 +21,25 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     }
   }
 
-  private _listeners: {[key: string]: Array<EventRegistration<T>>};
+  /**
+   * @internal
+   */
+  private readonly _listeners: {[key: string]: Array<EventRegistration<T>>};
 
-  private _defaultSubject: Subject<T>;
-  private _observable: Observable<T>;
+  /**
+   * @internal
+   */
+  private readonly _defaultSubject: Subject<T>;
 
+  /**
+   * @internal
+   */
+  private readonly _observable: Observable<T>;
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor() {
     this._defaultSubject = new Subject<T>();
     this._observable = this._defaultSubject.asObservable().share();
@@ -101,6 +118,10 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
     return this._observable;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _emitFrom(observable: Observable<T>): Subscription {
     return observable.subscribe((value: T) => {
         this._defaultSubject.next(value);
@@ -110,6 +131,10 @@ export class ConvergenceEventEmitter<T extends ConvergenceEvent> {
       });
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _emitEvent(value: T): void {
     this._defaultSubject.next(value);
   }

@@ -9,9 +9,21 @@ import {MessageType} from "../connection/protocol/MessageType";
 
 export class ModelPermissionManager {
 
+  /**
+   * @internal
+   */
   private readonly _modelId: string;
+
+  /**
+   * @internal
+   */
   private readonly _connection: ConvergenceConnection;
 
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(modelId: string, connection: ConvergenceConnection) {
     this._modelId = modelId;
     this._connection = connection;

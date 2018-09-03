@@ -3,6 +3,10 @@ import {OperationPair} from "../OperationPair";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
 import {ArraySetOperation} from "../../ops/ArraySetOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ArrayMoveSetOTF: OperationTransformationFunction<ArrayMoveOperation, ArraySetOperation> =
   (s: ArrayMoveOperation, c: ArraySetOperation) => {
     // A-MS-1

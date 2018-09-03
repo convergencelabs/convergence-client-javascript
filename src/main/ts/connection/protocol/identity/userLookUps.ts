@@ -12,11 +12,19 @@ const userFieldCodes: {[key: string]: number} = {
   email: 5
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UserLookUpRequest extends OutgoingProtocolRequestMessage {
   field: string;
   values: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const UserLookUpRequestSerializer: MessageBodySerializer = (request: UserLookUpRequest) => {
   return {
     f: userFieldCodes[request.field],
@@ -24,6 +32,10 @@ export const UserLookUpRequestSerializer: MessageBodySerializer = (request: User
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UserSearchRequest extends OutgoingProtocolRequestMessage {
   fields: string[];
   value: string;
@@ -33,6 +45,10 @@ export interface UserSearchRequest extends OutgoingProtocolRequestMessage {
   ascending: boolean;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const UserSearchRequestSerializer: MessageBodySerializer = (request: UserSearchRequest) => {
   let sort: number;
 
@@ -52,12 +68,20 @@ export const UserSearchRequestSerializer: MessageBodySerializer = (request: User
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface UserListResponse extends IncomingProtocolResponseMessage {
   users: DomainUser[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const UserListResponseDeserializer: MessageBodyDeserializer<UserListResponse> = (body: any) => {
-  const users: DomainUser[] = (<any[]> body.u).map((u: any) => {
+  const users: DomainUser[] = (body.u as any[]).map((u: any) => {
     return DomainUserDeserializer(u);
   });
 

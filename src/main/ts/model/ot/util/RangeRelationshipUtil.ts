@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class RangeRelationshipUtil {
   public static getRangeIndexRelationship(rStart: number, rEnd: number, index: number): RangeIndexRelationship {
     if (index < rStart) {
@@ -51,6 +55,10 @@ export class RangeRelationshipUtil {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export enum RangeIndexRelationship {
   Before,
   Start,
@@ -59,6 +67,10 @@ export enum RangeIndexRelationship {
   After
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export enum RangeRangeRelationship {
   Precedes,
   PrecededBy,

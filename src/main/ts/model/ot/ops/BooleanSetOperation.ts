@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {BooleanSet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class BooleanSetOperation extends DiscreteOperation implements BooleanSet {
 
   constructor(id: string, noOp: boolean, public value: boolean) {

@@ -3,9 +3,12 @@ import {
   ChatHistoryEntry, MessageChatHistoryEntry, UserLeftChatHistoryEntry,
   UserJoinedChatHistoryEntry, UserAddedChatHistoryEntry, UserRemovedChatHistoryEntry, ChannelCreatedHistoryEntry,
   NameChangedChatHistoryEntry, TopicChangedChatHistoryEntry
-} from "../../../chat/ChatHistoryEntry";
-import {ChatChannelNameChanged} from "../../../chat/events";
+} from "../../../chat/";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolRequestMessage {
   channelId: string;
   startEvent?: number;
@@ -14,6 +17,10 @@ export interface ChatChannelHistoryRequestMessage extends OutgoingProtocolReques
   eventFilter?: string[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function ChatChannelHistoryRequestMessageSerializer(request: ChatChannelHistoryRequestMessage): any {
   return {
     i: request.channelId,
@@ -24,10 +31,18 @@ export function ChatChannelHistoryRequestMessageSerializer(request: ChatChannelH
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ChatChannelHistoryResponseMessage extends IncomingProtocolNormalMessage {
   entries: ChatHistoryEntry[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function ChatChannelHistoryResponseMessageDeserializer(body: any): ChatChannelHistoryResponseMessage {
   const e: any[] = body.e;
   const entries: ChatHistoryEntry[] = e.map(entry => ChatHistoryEntryDeserializer(entry));
@@ -37,6 +52,10 @@ export function ChatChannelHistoryResponseMessageDeserializer(body: any): ChatCh
   return result;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function ChatHistoryEntryDeserializer(body: any): ChatHistoryEntry {
   const type: number = body.e;
   const eventNumber: number = body.n;

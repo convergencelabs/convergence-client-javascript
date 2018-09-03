@@ -1,21 +1,36 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import {MessageBodyDeserializer} from "../MessageSerializer";
-import {MessageBodySerializer} from "../MessageSerializer";
+import {MessageBodyDeserializer, MessageBodySerializer} from "../MessageSerializer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityOpenRequest extends OutgoingProtocolRequestMessage {
   activityId: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityOpenRequestSerializer: MessageBodySerializer = (request: ActivityOpenRequest) => {
   return {
     i: request.activityId
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ActivityOpenResponse extends OutgoingProtocolRequestMessage {
   state: ActivityState;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityOpenResponse> = (body: any) => {
   const result: ActivityOpenResponse = {
     state: body.s
@@ -24,6 +39,10 @@ export const ActivityOpenResponseDeserializer: MessageBodyDeserializer<ActivityO
 };
 
 /**
+ * @hidden
+ * @internal
  * Stored by session id, then key.
  */
-export type ActivityState = {[key: string]: {[key: string]: any}};
+export interface ActivityState {
+  [index: string]: {[key: string]: any};
+}

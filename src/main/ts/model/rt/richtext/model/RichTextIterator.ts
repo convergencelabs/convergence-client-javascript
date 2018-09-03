@@ -1,7 +1,15 @@
 import {RichTextContent} from "./RichTextContent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export type RichTextIteratorDirection = "forward" | "backward";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RichTextIteratorOptions {
   range?: RichTextRange;
   startLocation?: RichTextLocation;
@@ -9,6 +17,10 @@ export interface RichTextIteratorOptions {
   direction?: RichTextIteratorDirection;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextIterator implements IterableIterator<RichTextContent> {
 
   private _direction: RichTextIteratorDirection;
@@ -198,11 +210,10 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
 }
 
 import {RichTextLocation} from "./RichTextLocation";
-import {ConvergenceError} from "../../../../util/ConvergenceError";
+import {ConvergenceError, Validation} from "../../../../util/";
 import {RichTextRange} from "./RichTextRange";
 import {RichTextElement} from "./RichTextElement";
 import {RichTextNode} from "./RichTextNode";
 import {RichTextString} from "./RichTextString";
-import {Validation} from "../../../../util/Validation";
 import {RichTextStringFragment} from "./RichTextStringFragment";
 import {RichTextRootElement} from "./RichTextRootElement";

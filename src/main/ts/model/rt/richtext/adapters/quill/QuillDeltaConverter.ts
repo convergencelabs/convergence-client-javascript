@@ -1,15 +1,21 @@
-import {RichTextDocument} from "../../model/RichTextDocument";
-import {RichTextRootElement} from "../../model/RichTextRootElement";
-import {RichTextString} from "../../model/RichTextString";
-import {RichTextElement} from "../../model/RichTextElement";
+import {
+  RichTextDocument,
+  RichTextRootElement,
+  RichTextString,
+  RichTextElement,
+  RichTextNode
+} from "../../model/";
 import {StringMap} from "../../../../../util";
-import {RichTextNode} from "../../model/RichTextNode";
 import {QuillDelta, QuillDeltaOperation} from "./QuillDelta";
 
 const ROOT_NAME: string = "quill";
 const ROOT_ELEMENT_NAME = "delta";
 const BLOT_VALUE_ATTR: string = "$$ConvergenceQuillBlotValue$$";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class QuillDeltaConverter {
 
   public static getRoot(doc: RichTextDocument): RichTextRootElement {

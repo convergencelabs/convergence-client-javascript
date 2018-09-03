@@ -14,6 +14,10 @@ export interface HistoricalNumberEvents extends ObservableNumberEvents {
 export class HistoricalNumber extends HistoricalElement<number> implements ObservableNumber {
   public static readonly Events: HistoricalNumberEvents = ObservableNumberEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(_delegate: NumberNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

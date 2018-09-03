@@ -15,6 +15,10 @@ export class HistoricalArray
 
   public static readonly Events: HistoricalArrayEvents = ObservableArrayEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(protected _delegate: ArrayNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, wrapperFactory, model);
   }

@@ -3,6 +3,10 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {StringInsertOperation} from "../../ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../ops/StringRemoveOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const StringInsertRemoveOTF: OperationTransformationFunction<StringInsertOperation, StringRemoveOperation> =
   (s: StringInsertOperation, c: StringRemoveOperation) => {
     if (s.index <= c.index) {

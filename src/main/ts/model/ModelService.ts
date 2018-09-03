@@ -1,7 +1,6 @@
 import {Session} from "../Session";
-import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {OpenRealTimeModelRequest} from "../connection/protocol/model/openRealtimeModel";
-import {OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
+import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
+import {OpenRealTimeModelRequest, OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
 import {MessageType} from "../connection/protocol/MessageType";
 import {OperationTransformer} from "./ot/xform/OperationTransformer";
 import {TransformationFunctionRegistry} from "./ot/xform/TransformationFunctionRegistry";
@@ -12,7 +11,6 @@ import {
 } from "../connection/protocol/model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import {Deferred} from "../util/Deferred";
-import {MessageEvent} from "../connection/ConvergenceConnection";
 import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
 import {
   AutoCreateModelConfigRequest,
@@ -22,29 +20,57 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {Validation} from "../util/Validation";
-import {RealTimeModel} from "./rt/RealTimeModel";
-import {HistoricalModel} from "./historical/HistoricalModel";
-import {HistoricalDataRequest} from "../connection/protocol/model/historical/historicalDataRequest";
-import {HistoricalDataResponse} from "../connection/protocol/model/historical/historicalDataRequest";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
-import {ConvergenceEvent} from "../util/ConvergenceEvent";
-import {ModelResult} from "./query/ModelResult";
+import {Validation, ConvergenceEventEmitter, ConvergenceEvent} from "../util/";
+import {RealTimeModel} from "./rt/";
+import {HistoricalModel} from "./historical/";
+import {
+  HistoricalDataRequest,
+  HistoricalDataResponse
+} from "../connection/protocol/model/historical/historicalDataRequest";
+import {ModelResult} from "./query/";
 import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ModelPermissions} from "./ModelPermissions";
 
 export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
 
+  /**
+   * @internal
+   */
   private _openRequestsByModelId: {[key: string]: Deferred<RealTimeModel>} = {};
+
+  /**
+   * @internal
+   */
   private _openModelsByModelId: {[key: string]: RealTimeModel} = {};
+
+  /**
+   * @internal
+   */
   private _openModelsByRid: {[key: string]: RealTimeModel} = {};
+
+  /**
+   * @internal
+   */
   private _autoRequestId: number;
 
+  /**
+   * @internal
+   */
   private _autoCreateRequests: {[key: number]: AutoCreateModelOptions} = {};
 
-  constructor(private _connection: ConvergenceConnection) {
+  /**
+   * @internal
+   */
+  private readonly _connection: ConvergenceConnection;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  constructor(connection: ConvergenceConnection) {
     super();
+    this._connection = connection;
     this._connection.addMultipleMessageListener(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
@@ -108,7 +134,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
     });
-    const dataValue: ObjectValue = <ObjectValue> dataValueFactory.createDataValue(data);
+    const dataValue: ObjectValue = dataValueFactory.createDataValue(data) as ObjectValue;
     const request: CreateRealTimeModelRequest = {
       type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
       collectionId: collection,
@@ -158,6 +184,11 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return new ModelPermissionManager(modelId, this._connection);
   }
 
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
   public _close(resourceId: string): Promise<void> {
     const request: CloseRealTimeModelRequest = {
       type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
@@ -173,12 +204,21 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     });
   }
 
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
   public _dispose(): void {
     Object.getOwnPropertyNames(this._openModelsByModelId).forEach((fqn: string) => {
       this._openModelsByModelId[fqn].close();
     });
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _open(id?: string, options?: AutoCreateModelOptions): Promise<RealTimeModel> {
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
@@ -269,11 +309,15 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     return deferred.promise();
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _handleMessage(messageEvent: MessageEvent): void {
     switch (messageEvent.message.type) {
       case MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST:
         this._handleModelDataRequest(
-          <AutoCreateModelConfigRequest> messageEvent.message,
+          messageEvent.message as AutoCreateModelConfigRequest,
           messageEvent.callback);
         break;
       default:
@@ -286,6 +330,10 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
     }
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _handleModelDataRequest(request: AutoCreateModelConfigRequest, replyCallback: ReplyCallback): void {
     const options: AutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
     if (options === undefined) {
@@ -304,7 +352,7 @@ export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
         const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
           return idGen.id();
         });
-        dataValue = <ObjectValue> dataValueFactory.createDataValue(data);
+        dataValue = dataValueFactory.createDataValue(data) as ObjectValue;
       }
 
       const response: AutoCreateModelConfigResponse = {

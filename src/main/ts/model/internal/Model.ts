@@ -1,14 +1,17 @@
-import { ModelOperationEvent } from "../ModelOperationEvent";
+import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path, PathElement} from "../Path";
-import { ModelNode } from "./ModelNode";
-import { DataValueFactory } from "../DataValueFactory";
-import { ObjectNode } from "./ObjectNode";
-import { ObjectValue } from "../dataValue";
-import { ConvergenceEvent } from "../../util/ConvergenceEvent";
-import { ConvergenceEventEmitter } from "../../util/ConvergenceEventEmitter";
+import {ModelNode} from "./ModelNode";
+import {DataValueFactory} from "../DataValueFactory";
+import {ObjectNode} from "./ObjectNode";
+import {ObjectValue} from "../dataValue";
+import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 
 const _separator: string = ":";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
 
   public static Events: any = {
@@ -16,7 +19,7 @@ export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
     MODIFIED: "modified"
   };
 
-  private _data: ObjectNode;
+  private readonly _data: ObjectNode;
   private _idToValue: Map<string, ModelNode<any>>;
 
   private _vidCounter: number;

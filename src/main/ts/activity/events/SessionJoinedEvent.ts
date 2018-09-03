@@ -7,6 +7,10 @@ export class SessionJoinedEvent implements ActivityEvent {
   public static readonly NAME = ActivityEvents.SESSION_JOINED;
   public readonly name: string = SessionJoinedEvent.NAME;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(public readonly activity: Activity,
               public readonly username: string,
               public readonly sessionId: string,

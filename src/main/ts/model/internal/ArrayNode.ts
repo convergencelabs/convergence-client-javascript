@@ -1,25 +1,32 @@
 import {ModelNode} from "./ModelNode";
-import {ArrayValue, DataValueType} from "../dataValue";
+import {DataValue, ArrayValue, DataValueType} from "../dataValue";
 import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
-import {DataValue} from "../dataValue";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {ModelNodeFactory} from "./ModelNodeFactory";
-import {ArrayNodeInsertEvent} from "./events";
-import {ArrayNodeReorderEvent} from "./events";
-import {ArrayNodeRemoveEvent} from "./events";
-import {ArrayNodeSetEvent} from "./events";
-import {ArrayNodeSetValueEvent} from "./events";
 import {DataValueFactory} from "../DataValueFactory";
-import {ArrayInsert} from "../ot/ops/operationChanges";
-import {ArrayMove} from "../ot/ops/operationChanges";
-import {ArrayRemove} from "../ot/ops/operationChanges";
-import {ArrayReplace} from "../ot/ops/operationChanges";
-import {ArraySet} from "../ot/ops/operationChanges";
+import {
+  ArrayNodeInsertEvent,
+  ArrayNodeReorderEvent,
+  ArrayNodeRemoveEvent,
+  ArrayNodeSetEvent,
+  ArrayNodeSetValueEvent
+} from "./events";
+import {
+  ArrayInsert,
+  ArrayMove,
+  ArrayRemove,
+  ArrayReplace,
+  ArraySet
+} from "../ot/ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayNode extends ContainerNode<any[]> {
 
   public static Events: any = {
@@ -33,7 +40,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   };
 
   private _children: Array<ModelNode<any>>;
-  private _dataValueFactory: DataValueFactory;
+  private readonly _dataValueFactory: DataValueFactory;
 
   /**
    * Constructs a new RealTimeArray.
@@ -50,7 +57,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._dataValueFactory = dataValueFactory;
 
     for (let i: number = 0; i < data.children.length; i++) {
-      let child: DataValue = data.children[i];
+      const child: DataValue = data.children[i];
       this._idToPathElement.set(child.id, i);
       this._children.push(ModelNodeFactory.create(child,
         this._pathCB(child.id), model, sessionId, username, dataValueFactory));
@@ -62,15 +69,15 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   public dataValue(): ArrayValue {
-    let values: DataValue[] = this._children.map((node: ModelNode<any>) => {
+    const values: DataValue[] = this._children.map((node: ModelNode<any>) => {
       return node.dataValue();
     });
 
-    return <ArrayValue> {
+    return {
       id: this.id(),
       type: DataValueType.ARRAY,
       children: values
-    };
+    } as ArrayValue;
   }
 
   public toJson(): any {
@@ -203,7 +210,7 @@ export class ArrayNode extends ContainerNode<any[]> {
       return this;
     }
 
-    const index: number = <number> pathArgs[0];
+    const index: number = pathArgs[0] as number;
     const child: ModelNode<any> = this._children[index];
 
     if (child === undefined) {
@@ -212,7 +219,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
     if (pathArgs.length > 1) {
       if (child.type() === ModelElementType.OBJECT || child.type() === ModelElementType.ARRAY) {
-        return (<ContainerNode<any>> child).valueAt(pathArgs.slice(1, pathArgs.length));
+        return (child as ContainerNode<any>).valueAt(pathArgs.slice(1, pathArgs.length));
       } else {
         return this._createUndefinedNode();
       }
@@ -327,43 +334,42 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ArrayInsert = <ArrayInsert> operationEvent.operation;
+    const operation: ArrayInsert = operationEvent.operation as ArrayInsert;
     this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleReorderOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ArrayMove = <ArrayMove> operationEvent.operation;
+    const operation: ArrayMove = operationEvent.operation as ArrayMove;
     this._applyReorder(operation.fromIndex, operation.toIndex, false,
       operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ArrayRemove = <ArrayRemove> operationEvent.operation;
+    const operation: ArrayRemove = operationEvent.operation as ArrayRemove;
     this._applyRemove(operation.index, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ArrayReplace = <ArrayReplace> operationEvent.operation;
+    const operation: ArrayReplace = operationEvent.operation as ArrayReplace;
     this._applySet(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _handleSetValueOperation(operationEvent: ModelOperationEvent): void {
-    const operation: ArraySet = <ArraySet> operationEvent.operation;
+    const operation: ArraySet = operationEvent.operation as ArraySet;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 
   private _pathCB(id: string): (() => Path) {
-    let self: ArrayNode = this;
     return () => {
-      let path: Path = self.path();
-      path.push(self._idToPathElement.get(id));
+      const path: Path = this.path();
+      path.push(this._idToPathElement.get(id));
       return path;
     };
-  };
+  }
 
   // Private Validation Methods
 
-  private _validateInsert(index: number, value: Object | number | string | boolean): void {
+  private _validateInsert(index: number, value: object | number | string | boolean): void {
     // TODO: Add integer check
     if (this._children.length < index || index < 0) {
       throw new Error("Index out of bounds!");
@@ -388,7 +394,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
-  private _validateReplace(index: number, value: Object | number | string | boolean): void {
+  private _validateReplace(index: number, value: object | number | string | boolean): void {
     // TODO: Add integer check
     if (this._children.length <= index || index < 0) {
       throw new Error("Index out of bounds!");
@@ -399,7 +405,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     }
   }
 
-  private _validateArray(values: Array<Object | number | string | boolean>): void {
+  private _validateArray(values: Array<object | number | string | boolean>): void {
     if (!Array.isArray(values)) {
       throw new Error(`The value must be an Array but was: ${typeof values}`);
     }
@@ -414,7 +420,7 @@ export class ArrayNode extends ContainerNode<any[]> {
    */
   private _updateIdToPathElementMap(start: number): void {
     for (let i: number = start; i < this._children.length; i++) {
-      let child: ModelNode<any> = this._children[i];
+      const child: ModelNode<any> = this._children[i];
       this._idToPathElement.set(child.id(), i);
     }
   }

@@ -1,16 +1,26 @@
-import {OutgoingProtocolRequestMessage} from "./protocol";
-import {IncomingProtocolResponseMessage} from "./protocol";
-import {MessageBodySerializer} from "./MessageSerializer";
-import {MessageBodyDeserializer} from "./MessageSerializer";
+import {OutgoingProtocolRequestMessage, IncomingProtocolResponseMessage} from "./protocol";
+import {MessageBodySerializer, MessageBodyDeserializer} from "./MessageSerializer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AuthRequest extends OutgoingProtocolRequestMessage {
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface PasswordAuthRequest extends AuthRequest {
   username: string;
   password: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const PasswordAuthRequestSerializer: MessageBodySerializer = (request: PasswordAuthRequest) => {
   return {
     u: request.username,
@@ -18,36 +28,64 @@ export const PasswordAuthRequestSerializer: MessageBodySerializer = (request: Pa
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface TokenAuthRequest extends AuthRequest {
   token: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const TokenAuthRequestSerializer: MessageBodySerializer = (request: TokenAuthRequest) => {
   return {
     k: request.token
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ReconnectAuthRequest extends AuthRequest {
   token: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ReconnectAuthRequestSerializer: MessageBodySerializer = (request: ReconnectAuthRequest) => {
   return {
     k: request.token
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AnonymousAuthRequest extends AuthRequest {
   displayName?: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const AnonymousAuthRequestSerializer: MessageBodySerializer = (request: AnonymousAuthRequest) => {
   return {
     d: request.displayName
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AuthenticationResponse extends IncomingProtocolResponseMessage {
   success: boolean;
   username: string;
@@ -56,6 +94,10 @@ export interface AuthenticationResponse extends IncomingProtocolResponseMessage 
   state: {[key: string]: any};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const AuthenticationResponseDeserializer: MessageBodyDeserializer<AuthenticationResponse> = (body: any) => {
   return {
     success: body.s,
@@ -66,6 +108,10 @@ export const AuthenticationResponseDeserializer: MessageBodyDeserializer<Authent
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface InitialUserPresence {
   sessions: string[];
   state: {[key: string]: any};

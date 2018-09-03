@@ -8,6 +8,10 @@ import {Path} from "../Path";
 import {BooleanNodeSetValueEvent} from "./events";
 import {BooleanSet} from "../ot/ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class BooleanNode extends ModelNode<boolean> {
 
   public static Events: any = {
@@ -31,11 +35,11 @@ export class BooleanNode extends ModelNode<boolean> {
   }
 
   public dataValue(): BooleanValue {
-    return <BooleanValue> {
+    return {
       id: this.id(),
       type: DataValueType.BOOLEAN,
       value: this.data()
-    };
+    } as BooleanValue;
   }
 
   public toJson(): any {
@@ -75,7 +79,7 @@ export class BooleanNode extends ModelNode<boolean> {
   // Handlers for incoming operations
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: BooleanSet = <BooleanSet> operationEvent.operation;
+    const operation: BooleanSet = operationEvent.operation as BooleanSet;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

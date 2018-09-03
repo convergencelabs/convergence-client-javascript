@@ -3,6 +3,10 @@ import {Immutable} from "../../../util/Immutable";
 import {OperationType} from "./OperationType";
 import {StringSet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringSetOperation extends DiscreteOperation implements StringSet {
 
   constructor(id: string, noOp: boolean, public value: string) {

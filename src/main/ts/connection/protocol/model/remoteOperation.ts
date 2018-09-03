@@ -3,6 +3,10 @@ import {Operation} from "../../../model/ot/ops/Operation";
 import {OperationDeserializer} from "./operationData";
 import {MessageBodyDeserializer} from "../MessageSerializer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface RemoteOperation extends IncomingProtocolNormalMessage {
   resourceId: string;
   sessionId: string;
@@ -11,6 +15,10 @@ export interface RemoteOperation extends IncomingProtocolNormalMessage {
   operation: Operation;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const RemoteOperationDeserializer: MessageBodyDeserializer<RemoteOperation> =  (body: any) => {
   return {
     resourceId: body.r,

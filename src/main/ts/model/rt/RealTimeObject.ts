@@ -31,6 +31,9 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
 
   /**
    * Constructs a new RealTimeObject.
+   *
+   * @hidden
+   * @private
    */
   constructor(protected _delegate: ObjectNode,
               protected _callbacks: ModelEventCallbacks,
@@ -47,15 +50,11 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
 
   public set(key: string, value: any): RealTimeElement<any> {
     this._assertWritable();
-    let propSet: boolean = this._delegate.hasKey(key);
-    let delegateChild: ModelNode<any> = this._delegate.set(key, value);
-    let operation: DiscreteOperation;
-    if (propSet) {
-      operation = new ObjectSetPropertyOperation(this.id(), false, key, delegateChild.dataValue());
-    } else {
-      operation = new ObjectAddPropertyOperation(this.id(), false, key, delegateChild.dataValue());
-    }
-
+    const propSet: boolean = this._delegate.hasKey(key);
+    const delegateChild: ModelNode<any> = this._delegate.set(key, value);
+    const operation: DiscreteOperation = propSet ?
+      new ObjectSetPropertyOperation(this.id(), false, key, delegateChild.dataValue()) :
+      new ObjectAddPropertyOperation(this.id(), false, key, delegateChild.dataValue());
     this._sendOperation(operation);
     return this._wrapperFactory.wrap(delegateChild);
   }
@@ -85,6 +84,12 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 
+  /**
+   * @param relPath
+   * @private
+   * @hidden
+   * @internal
+   */
   public _removeChild(relPath: PathElement): void {
     if (typeof relPath !== "string") {
       throw new Error("The relative path of a child must be a string: " + (typeof relPath));
@@ -114,6 +119,12 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     }
   }
 
+  /**
+   * @param event
+   *
+   * @hidden
+   * @internal
+   */
   private _handleReferenceEvents(event: ModelNodeEvent): void {
     if (event instanceof ObjectNodeSetValueEvent) {
       if (event.local) {

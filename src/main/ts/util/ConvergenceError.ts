@@ -1,8 +1,19 @@
 export class ConvergenceError extends Error {
 
-  private _code: string;
-  private _details: { [key: string]: any };
+  /**
+   * @internal
+   */
+  private readonly _code: string;
 
+  /**
+   * @internal
+   */
+  private readonly _details: { [key: string]: any };
+
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(message: string, code?: string, details?: { [key: string]: any }) {
     super(message);
 

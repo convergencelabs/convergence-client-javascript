@@ -2,10 +2,14 @@ import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {Session} from "./Session";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class SessionImpl implements Session {
 
-  private _domain: ConvergenceDomain;
-  private _connection: ConvergenceConnection;
+  private readonly _domain: ConvergenceDomain;
+  private readonly _connection: ConvergenceConnection;
   private _sessionId: string;
   private _username: string;
   private _reconnectToken: string;
@@ -28,6 +32,10 @@ export class SessionImpl implements Session {
     return this._domain;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   public _setSessionId(sessionId: string): void {
     this._sessionId = sessionId;
   }

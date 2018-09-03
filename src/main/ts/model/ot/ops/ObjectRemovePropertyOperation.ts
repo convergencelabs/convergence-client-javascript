@@ -3,6 +3,10 @@ import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
 import {ObjectRemoveProperty} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectRemovePropertyOperation extends DiscreteOperation implements ObjectRemoveProperty {
 
   protected _prop: string;

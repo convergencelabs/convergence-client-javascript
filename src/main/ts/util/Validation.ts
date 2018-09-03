@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class Validation {
   public static isSet(value: any): boolean {
     return value !== undefined && value !== null;

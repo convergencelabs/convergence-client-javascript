@@ -125,9 +125,22 @@ import {
   GetAllGroupPermissionsResponseDeserializer
 } from "./permissions/getAllGroupPermissions";
 
+/**
+ * @hidden
+ * @internal
+ */
 export type MessageBodySerializer = (message: OutgoingProtocolMessage) => any;
+
+/**
+ * @hidden
+ * @internal
+ */
 export type MessageBodyDeserializer<T> = (message: any) => T;
 
+/**
+ * @hidden
+ * @internal
+ */
 export class MessageSerializer {
   public static registerMessageBodySerializer(type: MessageType, serializer: MessageBodySerializer): void {
     if (this._serializers[type] !== undefined) {

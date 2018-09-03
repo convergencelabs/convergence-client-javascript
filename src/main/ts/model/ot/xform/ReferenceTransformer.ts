@@ -4,12 +4,20 @@ import {DiscreteOperation} from "../ops/DiscreteOperation";
 import {TransformationFunctionRegistry} from "./TransformationFunctionRegistry";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ModelReferenceData {
   type: string;
   id: string;
   values: any[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ReferenceTransformer {
   private _tfr: TransformationFunctionRegistry;
 

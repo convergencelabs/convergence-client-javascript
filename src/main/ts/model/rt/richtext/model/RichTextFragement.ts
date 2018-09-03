@@ -1,5 +1,9 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextFragment {
-  private _children: RichTextNode[];
+  private readonly _children: RichTextNode[];
 
   constructor(document: RichTextDocument, children: RichTextNode[]) {
     this._children = children;

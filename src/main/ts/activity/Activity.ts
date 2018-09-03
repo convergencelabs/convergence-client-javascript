@@ -25,12 +25,35 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
 
   public static readonly Events = ActivityEvents;
 
+  /**
+   * @internal
+   */
   private readonly _id: string;
+
+  /**
+   * @internal
+   */
   private readonly _leftCB: () => void;
+
+  /**
+   * @internal
+   */
   private _joined: boolean;
+
+  /**
+   * @internal
+   */
   private _connection: ConvergenceConnection;
+
+  /**
+   * @internal
+   */
   private _participants: BehaviorSubject<Map<string, ActivityParticipant>>;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(id: string,
               participants: Map<string, ActivityParticipant>,
               leftCB: () => void,

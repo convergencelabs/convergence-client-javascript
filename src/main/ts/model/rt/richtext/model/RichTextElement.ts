@@ -1,5 +1,9 @@
 import {RichTextNode} from "./RichTextNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextElement extends RichTextNode {
   private _name: string;
   private readonly _children: RichTextNode[];
@@ -112,7 +116,7 @@ export class RichTextElement extends RichTextNode {
         if (child instanceof RichTextElement) {
           [i].concat(child.textOffsetToPath(childOffset));
         } else {
-
+          // fixme
         }
         return [i];
       } else {

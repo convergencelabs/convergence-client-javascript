@@ -1,9 +1,6 @@
 import {MessageType} from "../connection/protocol/MessageType";
 import {
-  ChatMessageEvent, UserJoinedEvent, UserLeftEvent, UserAddedEvent,
-  UserRemovedEvent, ChannelJoinedEvent, ChannelLeftEvent, ChannelRemovedEvent,
-  ChatChannelNameChanged, ChatChannelTopicChanged
-} from "./events";
+  ChannelRemovedEvent} from "./events/ChannelRemovedEvent";
 import {RemoteChatMessage} from "../connection/protocol/chat/chatMessage";
 import {
   UserLeftChatChannelMessage, UserRemovedFromChatChannelMessage
@@ -14,7 +11,20 @@ import {
 import {ChatChannelNameSetMessage} from "../connection/protocol/chat/setName";
 import {ChatChannelTopicSetMessage} from "../connection/protocol/chat/setTopic";
 import {ChatChannelRemovedMessage} from "../connection/protocol/chat/remove";
+import {ChatMessageEvent} from "./events/ChatMessageEvent";
+import {UserJoinedEvent} from "./events/UserJoinedEvent";
+import {UserLeftEvent} from "./events/UserLeftEvent";
+import {UserAddedEvent} from "./events/UserAddedEvent";
+import {UserRemovedEvent} from "./events/UserRemovedEvent";
+import {ChatChannelNameChanged} from "./events/ChatChannelNameChanged";
+import {ChatChannelTopicChanged} from "./events/ChatChannelTopicChanged";
+import {ChannelJoinedEvent} from "./events/ChannelJoinedEvent";
+import {ChannelLeftEvent} from "./events/ChannelLeftEvent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export function processChatMessage(message: any): any {
   switch (message.type) {
     case MessageType.USER_JOINED_CHAT_CHANNEL:

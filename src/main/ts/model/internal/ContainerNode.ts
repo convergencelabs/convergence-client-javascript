@@ -1,11 +1,14 @@
-import {PathElement} from "../Path";
+import {Path, PathElement} from "../Path";
 import {Model} from "./Model";
-import {Path} from "../Path";
 import {ModelNode} from "./ModelNode";
 import {NodeChangedEvent} from "./events";
 import {UndefinedNode} from "./UndefinedNode";
 import {ModelNodeFactory} from "./ModelNodeFactory";
 
+/**
+ * @hidden
+ * @internal
+ */
 export abstract class ContainerNode<T> extends ModelNode<T> {
 
   public static Events: any = {
@@ -17,12 +20,12 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
   /**
    * Constructs a new RealTimeContainer.
    */
-  constructor(modelType: string,
-              id: string,
-              path: () => Path,
-              model: Model,
-              sessionId: string,
-              username: string)  {
+  protected constructor(modelType: string,
+                        id: string,
+                        path: () => Path,
+                        model: Model,
+                        sessionId: string,
+                        username: string) {
     super(modelType, id, path, model, sessionId, username);
 
     this._idToPathElement = new Map<string, PathElement>();
@@ -31,13 +34,9 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
   public valueAt(path: Path): ModelNode<any>;
   public valueAt(...elements: PathElement[]): ModelNode<any>;
   public valueAt(...path: any[]): ModelNode<any> {
-    let resolved: Path;
-
-    if (path.length === 1 && Array.isArray(path[0])) {
-      resolved = path[0] as Path;
-    } else {
-      resolved = path as Path;
-    }
+    const resolved: Path = (path.length === 1 && Array.isArray(path[0])) ?
+      path[0] as Path :
+      path as Path;
 
     if (path.length === 0) {
       return this;

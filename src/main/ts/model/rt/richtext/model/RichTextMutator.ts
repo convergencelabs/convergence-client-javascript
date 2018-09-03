@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextMutator {
   private readonly _document: RichTextDocument;
 

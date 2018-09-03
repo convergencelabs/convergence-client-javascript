@@ -1,5 +1,9 @@
 declare const CONVERGENCE_DEBUG: any;
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface DebugFlags {
   SOCKET_MESSAGES: boolean;
   SOCKET_CONNECTION: boolean;
@@ -26,4 +30,8 @@ if (typeof CONVERGENCE_DEBUG === "object") {
   Object.assign(flags, CONVERGENCE_DEBUG);
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const debugFlags: DebugFlags = flags;

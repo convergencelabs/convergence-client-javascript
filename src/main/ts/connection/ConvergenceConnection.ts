@@ -24,6 +24,10 @@ import {Deferred} from "../util/Deferred";
 import {EventKey, EventEmitter} from "../util/";
 import {Observable, Subject} from "rxjs/Rx";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ConvergenceConnection extends EventEmitter {
 
   public static Events: any = {
@@ -39,8 +43,8 @@ export class ConvergenceConnection extends EventEmitter {
   private readonly _connectionTimeout: number;  // seconds
   private readonly _maxReconnectAttempts: number;
   private _connectionAttempts: number;
-  private _connectionAttemptTask: number;
-  private _connectionTimeoutTask: number;
+  private _connectionAttemptTask: any;
+  private _connectionTimeoutTask: any;
   private readonly _reconnectInterval: number; // seconds
   private readonly _retryOnOpen: boolean;
 
@@ -362,16 +366,28 @@ export class ConvergenceConnection extends EventEmitter {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface MessageEvent {
   message: any; // Model Message??
   request: boolean;
   callback?: ReplyCallback;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface AuthResponse {
   state: { [key: string]: void };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 enum ConnectionState {
   DISCONNECTED, CONNECTING, CONNECTED, INTERRUPTED, DISCONNECTING
 }

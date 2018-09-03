@@ -4,6 +4,10 @@ import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
 import {ArrayReplace} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ArrayReplaceOperation extends DiscreteOperation implements ArrayReplace {
 
   constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {

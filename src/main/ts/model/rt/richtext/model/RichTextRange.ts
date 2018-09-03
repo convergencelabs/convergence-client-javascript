@@ -1,5 +1,9 @@
 import {RichTextContent} from "./RichTextContent";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RichTextRange implements Iterable<RichTextContent> {
   private readonly _start: RichTextLocation;
   private readonly _end: RichTextLocation;

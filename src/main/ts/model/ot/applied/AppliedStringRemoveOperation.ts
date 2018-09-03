@@ -3,6 +3,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {StringRemove} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedStringRemoveOperation extends AppliedDiscreteOperation implements StringRemove {
 
   constructor(id: string, noOp: boolean, public index: number, public length: number, public value: string) {

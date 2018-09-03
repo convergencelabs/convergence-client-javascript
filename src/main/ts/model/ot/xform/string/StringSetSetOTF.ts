@@ -2,6 +2,10 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {StringSetOperation} from "../../ops/StringSetOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const StringSetSetOTF: OperationTransformationFunction<StringSetOperation, StringSetOperation> =
   (s: StringSetOperation, c: StringSetOperation) => {
     if (s.value === c.value) {

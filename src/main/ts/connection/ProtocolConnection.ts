@@ -1,22 +1,25 @@
-import {HeartbeatHelper} from "./HeartbeatHelper";
+import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
 import ConvergenceSocket from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {HandshakeResponse} from "./protocol/handhsake";
-import {HandshakeRequest} from "./protocol/handhsake";
+import {HandshakeResponse, HandshakeRequest} from "./protocol/handhsake";
 import {MessageType} from "./protocol/MessageType";
-import {HeartbeatHandler} from "./HeartbeatHelper";
-import {OutgoingProtocolNormalMessage} from "./protocol/protocol";
 import {MessageSerializer} from "./protocol/MessageSerializer";
-import {MessageEnvelope} from "./protocol/protocol";
-import {IncomingProtocolResponseMessage} from "./protocol/protocol";
-import {OutgoingProtocolRequestMessage} from "./protocol/protocol";
+import {
+  MessageEnvelope,
+  IncomingProtocolResponseMessage,
+  OutgoingProtocolNormalMessage,
+  OutgoingProtocolResponseMessage,
+  OutgoingProtocolRequestMessage
+} from "./protocol/protocol";
 import {ErrorMessage} from "./protocol/ErrorMessage";
-import {OutgoingProtocolResponseMessage} from "./protocol/protocol";
-import {EventEmitter} from "../util/EventEmitter";
+import {EventEmitter, ConvergenceServerError} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
-import {ConvergenceServerError} from "../util/ConvergenceServerError";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ProtocolConnection extends EventEmitter {
 
   public static Events: any = {
@@ -94,7 +97,6 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   public request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
-    const self: ProtocolConnection = this;
     const reqId: number = this._nextRequestId;
     this._nextRequestId++;
 
@@ -103,14 +105,14 @@ export class ProtocolConnection extends EventEmitter {
     const timeout: number = this._protocolConfig.defaultRequestTimeout;
     const timeoutTask: any = setTimeout(
       () => {
-        const req: RequestRecord = self._requests[reqId];
+        const req: RequestRecord = this._requests[reqId];
         if (req) {
           req.replyDeferred.reject(new Error("Response timeout"));
         }
       },
       timeout);
 
-    this._requests[reqId] = <RequestRecord> {reqId, replyDeferred, timeoutTask};
+    this._requests[reqId] = {reqId, replyDeferred, timeoutTask} as RequestRecord;
 
     this.sendMessage(new MessageEnvelope(message, reqId));
 
@@ -231,7 +233,7 @@ export class ProtocolConnection extends EventEmitter {
 
       const type: MessageType = envelope.body.type;
       if (type === MessageType.ERROR) {
-        const errorMessage: ErrorMessage = <ErrorMessage> envelope.body;
+        const errorMessage: ErrorMessage = envelope.body as ErrorMessage;
         record.replyDeferred.reject(
           new ConvergenceServerError(errorMessage.message, errorMessage.code, errorMessage.details));
       } else {
@@ -245,25 +247,37 @@ export class ProtocolConnection extends EventEmitter {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 interface RequestRecord {
   reqId: number;
   replyDeferred: Deferred<IncomingProtocolResponseMessage>;
   timeoutTask: any;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ReplyCallback {
   reply(message: OutgoingProtocolResponseMessage): void;
 
   unknownError(): void;
 
-  unexpectedError(details: String): void;
+  unexpectedError(details: string): void;
 
-  expectedError(code: String, details: String): void;
+  expectedError(code: string, details: string): void;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 class ReplyCallbackImpl implements ReplyCallback {
-  private _reqId: number;
-  private _protocolConnection: ProtocolConnection;
+  private readonly _reqId: number;
+  private readonly _protocolConnection: ProtocolConnection;
 
   constructor(reqId: number, protocolConnection: ProtocolConnection) {
     this._reqId = reqId;

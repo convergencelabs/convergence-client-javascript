@@ -4,10 +4,18 @@ import {MessageBodySerializer} from "../../MessageSerializer";
 import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelResult} from "../../../../model/query/ModelResult";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ModelsQueryRequest extends OutgoingProtocolRequestMessage {
   query: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ModelsQueryRequestSerializer: MessageBodySerializer = (request: ModelsQueryRequest) => {
   const query: any = {
     q: request.query
@@ -16,6 +24,10 @@ export const ModelsQueryRequestSerializer: MessageBodySerializer = (request: Mod
   return query;
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (body: any) => {
   return new ModelResult(
     body.a,
@@ -27,13 +39,21 @@ export const ModelResultDeserializer: MessageBodyDeserializer<ModelResult> = (bo
   );
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ModelsQueryResponse extends IncomingProtocolResponseMessage {
   result: ModelResult[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const ModelsQueryResponseDeserializer: MessageBodyDeserializer<ModelsQueryResponse> = (body: any) => {
-  let modelResults: ModelResult[] = [];
-  for (let r of body.r) {
+  const modelResults: ModelResult[] = [];
+  for (const r of body.r) {
     modelResults.push(ModelResultDeserializer(r));
   }
 

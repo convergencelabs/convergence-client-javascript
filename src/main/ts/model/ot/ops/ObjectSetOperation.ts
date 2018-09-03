@@ -4,6 +4,10 @@ import {OperationType} from "./OperationType";
 import {DataValue} from "../../dataValue";
 import {ObjectSet} from "./operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ObjectSetOperation extends DiscreteOperation implements ObjectSet {
 
   constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue}) {

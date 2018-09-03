@@ -15,6 +15,10 @@ export class HistoricalString extends HistoricalElement<string> implements Obser
 
   public static readonly Events: HistoricalStringEvents = ObservableStringEventConstants;
 
+  /**
+   * @hidden
+   * @internal
+   */
   constructor(protected _delegate: StringNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
     super(_delegate, _wrapperFactory, model);
   }

@@ -2,6 +2,10 @@ import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
 import {DateSetOperation} from "../../ops/DateSetOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export const DateSetSetOTF: OperationTransformationFunction<DateSetOperation, DateSetOperation> =
   (s: DateSetOperation, c: DateSetOperation) => {
     if (s.value.getTime() === c.value.getTime()) {

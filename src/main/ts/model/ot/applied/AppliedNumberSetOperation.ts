@@ -2,6 +2,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {OperationType} from "../ops/OperationType";
 import {NumberSet} from "../ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedNumberSetOperation extends AppliedDiscreteOperation implements NumberSet {
 
   constructor(id: string, noOp: boolean, public value: number, public oldValue: number) {

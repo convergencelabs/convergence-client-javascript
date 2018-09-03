@@ -1,10 +1,14 @@
 import {ModelReference} from "./ModelReference";
 import {ReferenceFilter} from "./ReferenceFilter";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ReferenceMap {
 
   // stored by sessionId first, then key.
-  private _references: {[key: string]: {[key: string]: ModelReference<any>}};
+  private _references: { [key: string]: { [key: string]: ModelReference<any> } };
 
   constructor() {
     this._references = {};
@@ -14,7 +18,7 @@ export class ReferenceMap {
     const sessionId: string = reference.sessionId();
     const key: string = reference.key();
 
-    let sessionModels: {[key: string]: ModelReference<any>} = this._references[sessionId];
+    let sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
     if (sessionModels === undefined) {
       sessionModels = {};
       this._references[sessionId] = sessionModels;
@@ -28,7 +32,7 @@ export class ReferenceMap {
   }
 
   public get(sessionId: string, key: string): ModelReference<any> {
-    const sessionModels: {[key: string]: ModelReference<any>} = this._references[sessionId];
+    const sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
     if (sessionModels !== undefined) {
       return sessionModels[key];
     } else {
@@ -43,15 +47,12 @@ export class ReferenceMap {
 
     const refs: Array<ModelReference<any>> = [];
 
-    let sessionIds: string[];
-    if (filter.sessionId !== undefined && filter.sessionId !== null) {
-      sessionIds = [filter.sessionId];
-    } else {
-      sessionIds = Object.getOwnPropertyNames(this._references);
-    }
+    const sessionIds: string[] = (filter.sessionId !== undefined && filter.sessionId !== null) ?
+      [filter.sessionId] :
+      Object.getOwnPropertyNames(this._references);
 
     sessionIds.forEach((sid: string) => {
-      const sessionRefs: {[key: string]: ModelReference<any>} = this._references[sid];
+      const sessionRefs: { [key: string]: ModelReference<any> } = this._references[sid];
       const keys: string[] = filter.key !== undefined ? [filter.key] : Object.getOwnPropertyNames(sessionRefs);
       keys.forEach((k: string) => {
         const r: ModelReference<any> = sessionRefs[k];
@@ -69,7 +70,7 @@ export class ReferenceMap {
   }
 
   public remove(sessionId: string, key: string): ModelReference<any> {
-    const sessionModels: {[key: string]: ModelReference<any>} = this._references[sessionId];
+    const sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
     if (sessionModels !== undefined) {
       const current: ModelReference<any> = sessionModels[key];
       delete sessionModels[key];

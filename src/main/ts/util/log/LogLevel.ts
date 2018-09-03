@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export enum LogLevel {
   TRACE = "trace",
   DEBUG = "debug",

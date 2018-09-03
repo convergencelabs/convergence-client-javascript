@@ -1,0 +1,13 @@
+{
+  "name": "Convergence JavaScript Client",
+  "target": "ES6",
+
+  "excludeNotExported": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+
+  "mode": "file",
+  "out": "dist/docs",
+  "baseUrl": "src/main/ts",
+  "readme": "src/docs/README.md"
+}

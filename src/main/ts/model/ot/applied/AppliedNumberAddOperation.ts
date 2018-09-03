@@ -2,6 +2,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {NumberAdd} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedNumberAddOperation extends AppliedDiscreteOperation implements NumberAdd {
 
   protected _value: number;

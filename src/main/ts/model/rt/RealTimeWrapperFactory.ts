@@ -20,6 +20,10 @@ import {RealTimeModel} from "./RealTimeModel";
 import {RealTimeDate} from "./RealTimeDate";
 import {DateNode} from "../internal/DateNode";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<any>> {
 
   constructor(private _callbacks: any, private _model: RealTimeModel) {

@@ -1,6 +1,10 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class CodeMap {
-  private _map: {[key: string]: number};
-  private _reverse: {[key: number]: string};
+  private readonly _map: {[key: string]: number};
+  private readonly _reverse: {[key: number]: string};
 
   constructor(map: {[key: string]: number} = {}) {
     this._map = {};

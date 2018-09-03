@@ -8,6 +8,10 @@ import {Path} from "../Path";
 import {DateNodeSetValueEvent} from "./events";
 import {DateSet} from "../ot/ops/operationChanges";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class DateNode extends ModelNode<Date> {
 
   public static Events: any = {
@@ -31,11 +35,11 @@ export class DateNode extends ModelNode<Date> {
   }
 
   public dataValue(): DateValue {
-    return <DateValue> {
+    return {
       id: this.id(),
       type: DataValueType.DATE,
       value: this.data()
-    };
+    } as DateValue;
   }
 
   public toJson(): any {
@@ -78,7 +82,7 @@ export class DateNode extends ModelNode<Date> {
   // Handlers for incoming operations
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
-    const operation: DateSet = <DateSet> operationEvent.operation;
+    const operation: DateSet = operationEvent.operation as DateSet;
     this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
   }
 

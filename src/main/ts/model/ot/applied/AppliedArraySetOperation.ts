@@ -3,6 +3,10 @@ import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArraySet} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class AppliedArraySetOperation extends AppliedDiscreteOperation implements ArraySet {
 
   constructor(id: string, noOp: boolean, public value: DataValue[], public oldValue: DataValue[]) {

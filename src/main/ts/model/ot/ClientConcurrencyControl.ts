@@ -2,27 +2,30 @@ import {ProcessedOperationEvent} from "./ProcessedOperationEvent";
 import {Operation} from "./ops/Operation";
 import {DiscreteOperation} from "./ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "./UnprocessedOperationEvent";
-import {EventEmitter} from "../../util/EventEmitter";
+import {EventEmitter} from "../../util/";
 import {CompoundOperation} from "./ops/CompoundOperation";
 import {OperationTransformer} from "./xform/OperationTransformer";
 import {OperationPair} from "./xform/OperationPair";
-import {ReferenceTransformer} from "./xform/ReferenceTransformer";
-import {ModelReferenceData} from "./xform/ReferenceTransformer";
+import {ReferenceTransformer, ModelReferenceData} from "./xform/ReferenceTransformer";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ClientConcurrencyControl extends EventEmitter {
 
   public static Events: any = {
     COMMIT_STATE_CHANGED: "commitStateChanged"
   };
 
-  private _clientId: string;
+  private readonly _clientId: string;
   private _seqNo: number;
 
   private _compoundOpInProgress: boolean;
   private _pendingCompoundOperation: DiscreteOperation[];
 
-  private _inflightOperations: Operation[];
-  private _unappliedOperations: ProcessedOperationEvent[];
+  private readonly _inflightOperations: Operation[];
+  private readonly _unappliedOperations: ProcessedOperationEvent[];
 
   private _contextVersion: number;
   private _transformer: OperationTransformer;
@@ -237,7 +240,7 @@ export class ClientConcurrencyControl extends EventEmitter {
   private transformIncoming(serverOp: Operation, clientOps: Operation[]): Operation {
     let sPrime: Operation = serverOp;
     for (let i: number = 0; i < clientOps.length; i++) {
-      let opPair: OperationPair = this._transformer.transform(sPrime, clientOps[i]);
+      const opPair: OperationPair = this._transformer.transform(sPrime, clientOps[i]);
       sPrime = opPair.serverOp;
       clientOps[i] = opPair.clientOp;
     }
@@ -247,7 +250,7 @@ export class ClientConcurrencyControl extends EventEmitter {
   private transformOutgoing(serverOps: ProcessedOperationEvent[], clientOp: Operation): DiscreteOperation {
     let cPrime: Operation = clientOp;
     for (let i: number = 0; i < serverOps.length; i++) {
-      let opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
+      const opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
       serverOps[i] = new ProcessedOperationEvent(
         serverOps[i].clientId,
         serverOps[i].seqNo,
@@ -257,6 +260,6 @@ export class ClientConcurrencyControl extends EventEmitter {
       );
       cPrime = opPair.clientOp;
     }
-    return <DiscreteOperation> cPrime;
+    return cPrime as DiscreteOperation;
   }
 }

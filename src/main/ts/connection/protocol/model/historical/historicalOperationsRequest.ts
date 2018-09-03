@@ -5,12 +5,20 @@ import {MessageBodyDeserializer} from "../../MessageSerializer";
 import {ModelOperation} from "../../../../model/ot/applied/ModelOperation";
 import {ModelOperationDeserializer} from "../appliedOperationData";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface HistoricalOperationsRequest extends OutgoingProtocolRequestMessage {
   modelId: string;
   first: number;
   last: number;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const HistoricalOperationsRequestSerializer: MessageBodySerializer = (request: HistoricalOperationsRequest) => {
   return {
     m: request.modelId,
@@ -19,10 +27,18 @@ export const HistoricalOperationsRequestSerializer: MessageBodySerializer = (req
   };
 };
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface HistoricalOperationsResponse extends IncomingProtocolResponseMessage {
   operations: ModelOperation[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const HistoricalOperationsResponseDeserializer: MessageBodyDeserializer<HistoricalOperationsResponse> =
   (body: any) => {
     return {
