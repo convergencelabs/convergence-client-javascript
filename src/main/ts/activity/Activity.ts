@@ -1,19 +1,18 @@
-import { ConvergenceConnection } from "../connection/ConvergenceConnection";
-import { BehaviorSubject } from "rxjs/Rx";
-import { ActivityParticipant } from "./ActivityParticipant";
-import { Observable } from "rxjs/Observable";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {BehaviorSubject} from "rxjs/Rx";
+import {ActivityParticipant} from "./ActivityParticipant";
+import {Observable} from "rxjs/Observable";
 import {
-  ActivityEvent,
-  ActivityEvents,
-  SessionJoinedEvent,
-  SessionLeftEvent,
-  StateSetEvent,
-  StateClearedEvent,
-  StateRemovedEvent
+  IActivityEvent,
+  ActivitySessionJoinedEvent,
+  ActivitySessionLeftEvent,
+  ActivityStateSetEvent,
+  ActivityStateClearedEvent,
+  ActivityStateRemovedEvent
 } from "./events";
-import { Session } from "../Session";
-import { MessageType } from "../connection/protocol/MessageType";
-import { ActivityLeaveRequest } from "../connection/protocol/activity/leaveActivity";
+import {Session} from "../Session";
+import {MessageType} from "../connection/protocol/MessageType";
+import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
 import {
   ActivitySetState,
   ActivityClearState,
@@ -21,9 +20,60 @@ import {
 } from "../connection/protocol/activity/activityState";
 import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 
-export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
+/**
+ * The [[Activity]] class represents a activity that the users of a
+ * collaboration are participating in together. The activity allows
+ * developer to indicate what user are doing within a collaborative
+ * application. The activity has a set of participants that indicate
+ * which users are part of that activity. Each [[ActivityParticipant]]
+ * can share state which indicates what they are doing within the
+ * [[Activity]].
+ */
+export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
-  public static readonly Events = ActivityEvents;
+  /**
+   * Holds the constants for the event names that are fired by the Activity
+   * class.
+   */
+  public static readonly Events = {
+    /**
+     * Fired when a remote session joins the activity. The resulting event will
+     * be an instance of the [[ActivitySessionJoinedEvent]] class.
+     *
+     * @event [ActivitySessionJoinedEvent]{@link ActivitySessionJoinedEvent}
+     */
+    SESSION_JOINED: ActivitySessionJoinedEvent.EVENT_NAME,
+
+    /**
+     * Fired when a remote session leaves the activity. The resulting event will
+     * be an instance of the {@link ActivitySessionLeftEvent} class.
+     *
+     * @event [SessionLeftEvent]{@link ActivitySessionLeftEvent}
+     */
+    SESSION_LEFT: ActivitySessionLeftEvent.EVENT_NAME,
+    /**
+     * Fired when a remote session sets state within the Activity. The resulting
+     * event will be an instance of the {@link ActivityStateSetEvent} class.
+     *
+     * @event [StateSetEvent]{@link ActivityStateSetEvent}
+     */
+    STATE_SET: ActivityStateSetEvent.EVENT_NAME,
+
+    /**
+     * Fired when a remote session clears state within the Activity. The resulting
+     * event will be an instance of the {@link ActivityStateClearedEvent} class.
+     *
+     * @event [StateClearedEvent]{@link ActivityStateClearedEvent}
+     */
+    STATE_CLEARED: ActivityStateClearedEvent.EVENT_NAME,
+    /**
+     * Fired when a remote session clears state within the Activity. The resulting
+     * event will be an instance of the {@link ActivityStateRemovedEvent} class.
+     *
+     * @event [StateClearedEvent]{@link ActivityStateRemovedEvent}
+     */
+    STATE_REMOVED: ActivityStateRemovedEvent.EVENT_NAME
+  };
 
   /**
    * @internal
@@ -57,7 +107,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   constructor(id: string,
               participants: Map<string, ActivityParticipant>,
               leftCB: () => void,
-              eventStream: Observable<ActivityEvent>,
+              eventStream: Observable<IActivityEvent>,
               connection: ConvergenceConnection) {
     super();
     this._emitFrom(eventStream);
@@ -67,45 +117,35 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
     this._joined = true;
     this._connection = connection;
 
-    this.events().subscribe((event: ActivityEvent) => {
+    this.events().subscribe((event: IActivityEvent) => {
       const newMap: Map<string, ActivityParticipant> = this._participants.getValue();
-      switch (event.name) {
-        case Activity.Events.SESSION_JOINED:
-          const joinedEvent: SessionJoinedEvent = event as SessionJoinedEvent;
-          newMap.set(joinedEvent.sessionId, joinedEvent.participant);
-          this._participants.next(newMap);
-          break;
-        case Activity.Events.SESSION_LEFT:
-          const leftEvent: SessionLeftEvent = event as SessionLeftEvent;
-          newMap.delete(leftEvent.sessionId);
-          this._participants.next(newMap);
-          break;
-        case Activity.Events.STATE_SET:
-          const setEvent: StateSetEvent = event as StateSetEvent;
-          const setState: Map<string, any> = newMap.get(setEvent.sessionId).state;
-          setState.set(setEvent.key, setEvent.value);
-          newMap.set(
-            setEvent.sessionId,
-            new ActivityParticipant(setEvent.sessionId, setEvent.username, setState, false));
-          this._participants.next(newMap);
-          break;
-        case Activity.Events.STATE_REMOVED:
-          const removeEvent: StateRemovedEvent = event as StateRemovedEvent;
-          const removeState: Map<string, any> = newMap.get(removeEvent.sessionId).state;
-          removeState.delete(removeEvent.key);
-          newMap.set(removeEvent.sessionId,
-            new ActivityParticipant(removeEvent.sessionId, removeEvent.username, removeState, false));
-          this._participants.next(newMap);
-          break;
-        case Activity.Events.STATE_CLEARED:
-          const clearEvent: StateClearedEvent = event as StateClearedEvent;
-          newMap.set(clearEvent.sessionId,
-            new ActivityParticipant(clearEvent.sessionId, clearEvent.username, new Map<string, any>(), false));
-          this._participants.next(newMap);
-          break;
-        default:
-          // This should be impossible
-          throw new Error("Invalid activity event");
+
+      if (event instanceof ActivitySessionJoinedEvent) {
+        newMap.set(event.sessionId, event.participant);
+        this._participants.next(newMap);
+      } else if (event instanceof ActivitySessionLeftEvent) {
+        newMap.delete(event.sessionId);
+        this._participants.next(newMap);
+      } else if (event instanceof ActivityStateSetEvent) {
+        const setState: Map<string, any> = newMap.get(event.sessionId).state;
+        setState.set(event.key, event.value);
+        newMap.set(
+          event.sessionId,
+          new ActivityParticipant(this, event.sessionId, event.username, false, setState));
+        this._participants.next(newMap);
+      } else if (event instanceof ActivityStateRemovedEvent) {
+        const removeState: Map<string, any> = newMap.get(event.sessionId).state;
+        removeState.delete(event.key);
+        newMap.set(event.sessionId,
+          new ActivityParticipant(this, event.sessionId, event.username, false, removeState));
+        this._participants.next(newMap);
+      } else if (event instanceof ActivityStateClearedEvent) {
+        newMap.set(event.sessionId,
+          new ActivityParticipant(this, event.sessionId, event.username, false, new Map<string, any>()));
+        this._participants.next(newMap);
+      } else {
+        // This should be impossible
+        throw new Error("Invalid activity event");
       }
     });
   }
@@ -143,7 +183,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public setState(key: string, value: any): void;
   public setState(): void {
     if (this.isJoined()) {
-      let state: {[key: string]: any};
+      let state: { [key: string]: any };
       if (arguments.length === 1) {
         state = StringMap.coerceToObject(arguments[0]);
       } else if (arguments.length === 2) {
@@ -159,7 +199,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       this._connection.send(message);
 
       Object.keys(state).forEach((key) => {
-        this._emitEvent(new StateSetEvent (
+        this._emitEvent(new ActivityStateSetEvent(
           this,
           this._connection.session().username(),
           this._connection.session().sessionId(),
@@ -187,7 +227,7 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       this._connection.send(message);
 
       (keys as string[]).forEach((key) => {
-        this._emitEvent(new StateRemovedEvent(
+        this._emitEvent(new ActivityStateRemovedEvent(
           this,
           this._connection.session().username(),
           this._connection.session().sessionId(),
@@ -206,12 +246,12 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
       };
       this._connection.send(message);
 
-      this._emitEvent(new StateClearedEvent(
+      this._emitEvent(new ActivityStateClearedEvent(
         this,
         this._connection.session().username(),
         this._connection.session().sessionId(),
         true
-    ));
+      ));
     }
   }
 
@@ -226,5 +266,16 @@ export class Activity extends ConvergenceEventEmitter<ActivityEvent> {
   public participantsAsObservable(): Observable<ActivityParticipant[]> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }
+
+  /**
+   * @param participants
+   *    The participants to set.
+   * @internal
+   * @hidden
+   */
+  public _setParticipants(participants: Map<string, ActivityParticipant>) {
+    this._participants.next(participants);
+  }
 }
+
 Object.freeze(Activity.Events);

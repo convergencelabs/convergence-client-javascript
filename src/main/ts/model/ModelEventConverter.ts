@@ -1,4 +1,4 @@
-import {ConvergenceEvent} from "../util/";
+import {IConvergenceEvent} from "../util/";
 import {NodeWrapperFactory} from "./internal/NodeWrapperFactory";
 import {ObservableBoolean} from "./observable/ObservableBoolean";
 import {ObservableNumber} from "./observable/ObservableNumber";
@@ -53,8 +53,8 @@ import {ObservableDate} from "./observable/ObservableDate";
  */
 export class ModelEventConverter {
 
-  public static convertEvent(event: ConvergenceEvent,
-                             wrapperFactory: NodeWrapperFactory<ObservableElement<any>>): ConvergenceEvent {
+  public static convertEvent(event: IConvergenceEvent,
+                             wrapperFactory: NodeWrapperFactory<ObservableElement<any>>): IConvergenceEvent {
     if (event instanceof NodeDetachedEvent) {
       return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {

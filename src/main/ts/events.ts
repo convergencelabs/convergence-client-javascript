@@ -1,7 +1,7 @@
-import {ConvergenceEvent} from "./util/ConvergenceEvent";
+import {IConvergenceEvent} from "./util/IConvergenceEvent";
 import {ConvergenceDomain} from "./ConvergenceDomain";
 
-export interface ConvergenceDomainEvent extends ConvergenceEvent {
+export interface ConvergenceDomainEvent extends IConvergenceEvent {
   domain: ConvergenceDomain;
 }
 

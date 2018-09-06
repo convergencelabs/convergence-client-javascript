@@ -1,4 +1,4 @@
-import {ConvergenceEvent} from "../util/";
+import {IConvergenceEvent} from "../util/";
 import {Path} from "./Path";
 import {ModelReference} from "./reference/";
 import {ObservableModel} from "./observable/ObservableModel";
@@ -12,7 +12,7 @@ import {ObservableDate} from "./observable/ObservableDate";
 import {RealTimeModel} from "./rt/";
 import {ModelPermissions} from "./ModelPermissions";
 
-export interface ModelEvent extends ConvergenceEvent {
+export interface ModelEvent extends IConvergenceEvent {
   readonly src: ObservableModel;
 }
 
@@ -25,7 +25,7 @@ export interface VersionChangedEvent extends ModelEvent {
   readonly version: number;
 }
 
-export class RemoteReferenceCreatedEvent implements ConvergenceEvent {
+export class RemoteReferenceCreatedEvent implements IConvergenceEvent {
   public static readonly NAME = "reference";
   public readonly name: string = RemoteReferenceCreatedEvent.NAME;
 
@@ -45,7 +45,7 @@ export class RemoteReferenceCreatedEvent implements ConvergenceEvent {
 }
 
 
-export class ModelPermissionsChangedEvent implements ConvergenceEvent {
+export class ModelPermissionsChangedEvent implements IConvergenceEvent {
   public static readonly NAME = "permissions_changed";
   public readonly name: string = ModelPermissionsChangedEvent.NAME;
 
@@ -64,12 +64,12 @@ export class ModelPermissionsChangedEvent implements ConvergenceEvent {
   }
 }
 
-export interface ConvergenceModelValueEvent extends ConvergenceEvent {
+export interface ConvergenceModelValueEvent extends IConvergenceEvent {
   readonly element: ObservableElement<any>;
   readonly local: boolean;
 }
 
-export class ElementDetachedEvent implements ConvergenceEvent {
+export class ElementDetachedEvent implements IConvergenceEvent {
   public static readonly NAME = "detached";
   public readonly name: string = ElementDetachedEvent.NAME;
 

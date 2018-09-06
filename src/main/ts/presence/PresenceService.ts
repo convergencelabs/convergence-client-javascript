@@ -2,7 +2,7 @@ import {Session} from "../Session";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {
   ConvergenceEventEmitter,
-  ConvergenceEvent,
+  IConvergenceEvent,
   StringMap,
   StringMapLike
 } from "../util/";
@@ -29,7 +29,7 @@ export interface PresenceServiceEvents {
   AVAILABILITY_CHANGED: string;
 }
 
-export class PresenceService extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: PresenceServiceEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,

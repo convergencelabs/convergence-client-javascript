@@ -1,4 +1,4 @@
-import {ConvergenceEvent, ConvergenceEventEmitter} from "../util/";
+import {IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs/Rx";
@@ -16,7 +16,7 @@ export interface UserPresenceSubscriptionEvents {
   AVAILABILITY_CHANGED: string;
 }
 
-export class UserPresenceSubscription extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class UserPresenceSubscription extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: UserPresenceSubscriptionEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,

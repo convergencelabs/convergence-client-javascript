@@ -1,6 +1,6 @@
 import {ModelReference, ModelReferenceEvents} from "./ModelReference";
 import {RealTimeElement, RealTimeModel} from "../rt/";
-import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 
 export interface ModelReferenceCallbacks {
   onShare: (reference: LocalModelReference<any, any>) => void;
@@ -10,7 +10,7 @@ export interface ModelReferenceCallbacks {
 }
 
 export abstract class LocalModelReference<V, R extends ModelReference<V>>
-extends ConvergenceEventEmitter<ConvergenceEvent> {
+extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: ModelReferenceEvents = ModelReference.Events;
 

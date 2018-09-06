@@ -1,10 +1,9 @@
 import {Activity} from "../Activity";
-import {ActivityEvent} from "./ActivityEvent";
-import {ActivityEvents} from "./ActivityEvents";
+import {IActivityEvent} from "./IActivityEvent";
 
-export class StateClearedEvent implements ActivityEvent {
-  public static readonly NAME = ActivityEvents.STATE_CLEARED;
-  public readonly name: string = StateClearedEvent.NAME;
+export class ActivitySessionLeftEvent implements IActivityEvent {
+  public static readonly EVENT_NAME: string = "session_left";
+  public readonly name: string = ActivitySessionLeftEvent.EVENT_NAME;
 
   /**
    * @hidden

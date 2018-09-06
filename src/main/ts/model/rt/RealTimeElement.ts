@@ -1,4 +1,4 @@
-import {ConvergenceEventEmitter, ConvergenceEvent} from "../../util/";
+import {ConvergenceEventEmitter, IConvergenceEvent} from "../../util/";
 import {ModelNode} from "../internal/ModelNode";
 import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
@@ -21,7 +21,7 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
 }
 
 export abstract class RealTimeElement<T>
-  extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+  extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
 
   public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
 
@@ -82,7 +82,7 @@ export abstract class RealTimeElement<T>
       return this._model.emitLocalEvents() || !event.local ||
         event instanceof NodeDetachedEvent;
     }).subscribe(event => {
-      const convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
+      const convertedEvent: IConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
   }

@@ -1,5 +1,5 @@
 import {Path, PathElement} from "../Path";
-import {ConvergenceEvent} from "../../util/ConvergenceEvent";
+import {IConvergenceEvent} from "../../util/IConvergenceEvent";
 import {ConvergenceEventEmitter} from "../../util/ConvergenceEventEmitter";
 import {ObservableModel} from "./ObservableModel";
 import {ObservableContainerElement} from "./ObservableContainerElement";
@@ -19,7 +19,7 @@ export const ObservableElementEventConstants: ObservableElementEvents = {
 };
 Object.freeze(ObservableElementEventConstants);
 
-export interface ObservableElement<T> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export interface ObservableElement<T> extends ConvergenceEventEmitter<IConvergenceEvent> {
   id(): string;
 
   type(): string;

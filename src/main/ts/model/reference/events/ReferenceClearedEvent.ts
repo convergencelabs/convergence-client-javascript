@@ -1,7 +1,7 @@
-import {ConvergenceEvent} from "../../../util";
+import {IConvergenceEvent} from "../../../util";
 import {ModelReference} from "../ModelReference";
 
-export class ReferenceClearedEvent<T> implements ConvergenceEvent {
+export class ReferenceClearedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "cleared";
   public readonly name: string = ReferenceClearedEvent.NAME;
   public readonly oldValue: T;

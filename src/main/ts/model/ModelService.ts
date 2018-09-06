@@ -20,7 +20,7 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {Validation, ConvergenceEventEmitter, ConvergenceEvent} from "../util/";
+import {Validation, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {RealTimeModel} from "./rt/";
 import {HistoricalModel} from "./historical/";
 import {
@@ -32,7 +32,7 @@ import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/mo
 import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ModelPermissions} from "./ModelPermissions";
 
-export class ModelService extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * @internal

@@ -1,6 +1,6 @@
 import {Path, PathElement} from "../Path";
 import {ModelNode} from "../internal/ModelNode";
-import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ModelEventConverter} from "../ModelEventConverter";
 import {
@@ -15,7 +15,7 @@ export interface HistoricalElementEvents extends ObservableElementEvents {
 }
 
 export abstract class HistoricalElement<T>
-  extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableElement<T> {
+  extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
 
   public static readonly Events: HistoricalElementEvents = ObservableElementEventConstants;
 
@@ -39,8 +39,8 @@ export abstract class HistoricalElement<T>
 
     this._model = model;
 
-    this._delegate.events().subscribe((event: ConvergenceEvent) => {
-      const convertedEvent: ConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
+    this._delegate.events().subscribe((event: IConvergenceEvent) => {
+      const convertedEvent: IConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
   }

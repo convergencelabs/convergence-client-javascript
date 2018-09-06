@@ -9,5 +9,8 @@
   "mode": "file",
   "out": "dist/docs",
   "baseUrl": "src/main/ts",
-  "readme": "src/docs/README.md"
+  "readme": "src/docs/README.md",
+
+  "verbose": true,
+  "hideGenerator": true
 }

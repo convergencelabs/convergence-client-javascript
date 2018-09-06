@@ -1,4 +1,4 @@
-import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 import {EqualsUtil} from "../../util/EqualsUtil";
 import {ReferenceManager} from "./ReferenceManager";
 import {
@@ -20,7 +20,7 @@ export interface ModelReferenceEvents {
   readonly DISPOSED: string;
 }
 
-export abstract class ModelReference<V> extends ConvergenceEventEmitter<ConvergenceEvent> {
+export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: ModelReferenceEvents = {
     SET: ReferenceChangedEvent.NAME,
@@ -136,7 +136,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<Converge
     this._disposed = true;
     const event: ReferenceDisposedEvent = new ReferenceDisposedEvent(this);
     this._emitEvent(event);
-    this.removeAllListenersForAllEvents();
+    this.removeAllListeners();
     this._referenceManager._handleReferenceDisposed(this);
   }
 

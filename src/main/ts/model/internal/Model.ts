@@ -4,7 +4,7 @@ import {ModelNode} from "./ModelNode";
 import {DataValueFactory} from "../DataValueFactory";
 import {ObjectNode} from "./ObjectNode";
 import {ObjectValue} from "../dataValue";
-import {ConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 
 const _separator: string = ":";
 
@@ -12,7 +12,7 @@ const _separator: string = ":";
  * @hidden
  * @internal
  */
-export class Model extends ConvergenceEventEmitter<ConvergenceEvent> {
+export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static Events: any = {
     DELETED: "deleted",

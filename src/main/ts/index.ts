@@ -7,9 +7,9 @@ export * from "./ConvergenceDomain";
 export * from "./ConvergenceOptions";
 export * from "./events";
 
-export * from "./activity/";
-export * from "./chat/";
-export * from "./identity/";
-export * from "./model/";
-export * from "./presence/";
-export * from "./util/";
+export * from "./activity";
+export * from "./chat";
+export * from "./identity";
+export * from "./model";
+export * from "./presence";
+export * from "./util";

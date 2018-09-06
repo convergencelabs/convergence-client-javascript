@@ -2,6 +2,10 @@ export type EventKey = string | number;
 
 export type SimpleEventListener = (...args: any[]) => void;
 
+/**
+ * @internal
+ * @hidden
+ */
 export class EventEmitter {
 
   public static defaultMaxListeners: number = 100;

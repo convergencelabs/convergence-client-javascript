@@ -4,28 +4,34 @@ import {Activity} from "./Activity";
 import {MessageType} from "../connection/protocol/MessageType";
 import {Observable, Observer} from "rxjs/Rx";
 import {
-  SessionJoinedEvent,
-  SessionLeftEvent,
-  StateClearedEvent,
-  StateSetEvent,
-  ActivityEvent,
-  StateRemovedEvent
+  IActivityEvent,
+  ActivitySessionJoinedEvent,
+  ActivitySessionLeftEvent,
+  ActivityStateClearedEvent,
+  ActivityStateRemovedEvent,
+  ActivityStateSetEvent
 } from "./events";
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {
-  ActivityRemoteStateSet,
   ActivityRemoteStateCleared,
-  ActivityRemoteStateRemoved
+  ActivityRemoteStateRemoved,
+  ActivityRemoteStateSet
 } from "../connection/protocol/activity/activityState";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {ActivityJoinRequest, ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
-import {ConvergenceEventEmitter, StringMap, StringMapLike} from "../util/";
+import {ConvergenceEventEmitter, StringMap} from "../util/";
 import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
+import {IActivityJoinOptions} from "./IActivityJoinOptions";
 
-export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
+/**
+ * The ActivityService provides the main entry point into working with
+ * Activities in Convergence. Activities provide a mechanism to communicate
+ * `where` users are operating within a system and what they are doing.
+ */
+export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 
   /**
    * @internal
@@ -76,11 +82,12 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           const joinedMsg: ActivitySessionJoined = message as ActivitySessionJoined;
           const username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
           const participant: ActivityParticipant = new ActivityParticipant(
+            activity,
             joinedMsg.sessionId,
             username,
-            joinedMsg.state,
-            false);
-          return [new SessionJoinedEvent(
+            false,
+            joinedMsg.state);
+          return [new ActivitySessionJoinedEvent(
             activity,
             username,
             joinedMsg.sessionId,
@@ -88,7 +95,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
             participant)];
         case MessageType.ACTIVITY_SESSION_LEFT:
           const leftMsg: ActivitySessionLeft = message as ActivitySessionLeft;
-          return [new SessionLeftEvent(
+          return [new ActivitySessionLeftEvent(
             activity,
             SessionIdParser.parseUsername(leftMsg.sessionId),
             leftMsg.sessionId,
@@ -97,7 +104,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         case MessageType.ACTIVITY_REMOTE_STATE_SET:
           const stateSetMsg: ActivityRemoteStateSet = message as ActivityRemoteStateSet;
           return Object.keys(stateSetMsg.state).map(key => {
-            return new StateSetEvent(
+            return new ActivityStateSetEvent(
               activity,
               SessionIdParser.parseUsername(stateSetMsg.sessionId),
               stateSetMsg.sessionId,
@@ -108,7 +115,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
           });
         case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
           const stateClearedMsg: ActivityRemoteStateCleared = message as ActivityRemoteStateCleared;
-          return [new StateClearedEvent(
+          return [new ActivityStateClearedEvent(
             activity,
             SessionIdParser.parseUsername(stateClearedMsg.sessionId),
             stateClearedMsg.sessionId,
@@ -117,7 +124,7 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
         case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
           const stateRemovedMsg: ActivityRemoteStateRemoved = message as ActivityRemoteStateRemoved;
           return stateRemovedMsg.keys.map(key => {
-            return new StateRemovedEvent(
+            return new ActivityStateRemovedEvent(
               activity,
               SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
               stateRemovedMsg.sessionId,
@@ -134,11 +141,28 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     this._emitFrom(eventStream);
   }
 
+  /**
+   * @return
+   *   The current Convergence Session object that represents the connection
+   *   to the Convergence Domain.
+   */
   public session(): Session {
     return this._connection.session();
   }
 
-  public join(id: string, options?: ActivityJoinOptions): Promise<Activity> {
+  /**
+   * Allows the connected user to join the specified activity.
+   *
+   * @param id
+   *   The unique id of the Activity to join.
+   * @param options
+   *   Options for connecting to the specified Activity.
+   *
+   * @return
+   *   A Promise that will be resolved with the successfully joined
+   *   [[Activity]].
+   */
+  public join(id: string, options?: IActivityJoinOptions): Promise<Activity> {
     if (!this.isJoined(id)) {
       options = options || {};
 
@@ -156,27 +180,28 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
 
       this._connection.request(message)
         .then((response: ActivityJoinResponse) => {
-          const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
-
-          Object.keys(response.participants).forEach(sessionId => {
-            const username: string = SessionIdParser.parseUsername(sessionId);
-            const local: boolean = sessionId === this._connection.session().sessionId();
-            const state: { [key: string]: any } = response.participants[sessionId];
-            const stateMap: Map<string, any> = StringMap.objectToMap(state);
-            const participant = new ActivityParticipant(sessionId, username, stateMap, local);
-            participants.set(sessionId, participant);
-          });
-
-          const filteredEvents: Observable<ActivityEvent> = this.events().filter(event => {
+          const filteredEvents: Observable<IActivityEvent> = this.events().filter(event => {
             return event.activity.id() === id;
           });
 
           const activity: Activity = new Activity(
             id,
-            participants,
+            new Map(),
             () => this._onActivityLeave(id),
             filteredEvents,
             this._connection);
+
+          const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
+          Object.keys(response.participants).forEach(sessionId => {
+            const username: string = SessionIdParser.parseUsername(sessionId);
+            const local: boolean = sessionId === this._connection.session().sessionId();
+            const state: { [key: string]: any } = response.participants[sessionId];
+            const stateMap: Map<string, any> = StringMap.objectToMap(state);
+            const participant = new ActivityParticipant(activity, sessionId, username, local, stateMap);
+            participants.set(sessionId, participant);
+          });
+
+          activity._setParticipants(participants);
 
           deferred.resolve(activity);
           this._joinedActivities.set(id, activity);
@@ -189,10 +214,24 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     return this._joinedDeferreds.get(id).promise();
   }
 
+  /**
+   * Provides a map of all currently joined Activities.
+   *
+   * @return
+   *   A Map of Activity Id => Activity.
+   */
   public joined(): Map<string, Activity> {
     return new Map(this._joinedActivities);
   }
 
+  /**
+   * Determines if an Activity with the specified id is already joined.
+   *
+   * @param id
+   *   The id of the Activity to check.
+   * @return
+   *   True if the Activity with the specified id is joined; false otherwise.
+   */
   public isJoined(id: string): boolean {
     return this._joinedDeferreds.has(id);
   }
@@ -205,8 +244,4 @@ export class ActivityService extends ConvergenceEventEmitter<ActivityEvent> {
     this._joinedDeferreds.delete(id);
     this._joinedActivities.delete(id);
   }
-}
-
-export interface ActivityJoinOptions {
-  state?: StringMapLike;
 }

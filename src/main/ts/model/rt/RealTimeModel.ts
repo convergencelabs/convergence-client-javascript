@@ -50,7 +50,7 @@ import {
   RemoteReferenceCreatedEvent,
   ModelPermissionsChangedEvent
 } from "../modelEvents";
-import {ConvergenceEvent} from "../../util/";
+import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
@@ -80,7 +80,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
   },
   ObservableModelEventConstants);
 
-export class RealTimeModel extends ConvergenceEventEmitter<ConvergenceEvent> implements ObservableModel {
+export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
   public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
 

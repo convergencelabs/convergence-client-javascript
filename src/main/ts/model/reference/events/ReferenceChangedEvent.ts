@@ -1,7 +1,7 @@
-import {ConvergenceEvent} from "../../../util";
+import {IConvergenceEvent} from "../../../util";
 import {ModelReference} from "../ModelReference";
 
-export class ReferenceChangedEvent<T> implements ConvergenceEvent {
+export class ReferenceChangedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "set";
   public readonly name: string = ReferenceChangedEvent.NAME;
   public readonly oldValue: T;

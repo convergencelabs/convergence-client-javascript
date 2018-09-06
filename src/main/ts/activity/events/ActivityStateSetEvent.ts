@@ -1,10 +1,9 @@
 import {Activity} from "../Activity";
-import {ActivityEvent} from "./ActivityEvent";
-import {ActivityEvents} from "./ActivityEvents";
+import {IActivityEvent} from "./IActivityEvent";
 
-export class StateSetEvent implements ActivityEvent {
-  public static readonly NAME = ActivityEvents.STATE_SET;
-  public readonly name: string = StateSetEvent.NAME;
+export class ActivityStateSetEvent implements IActivityEvent {
+  public static readonly EVENT_NAME: string = "state_set";
+  public readonly name: string = ActivityStateSetEvent.EVENT_NAME;
 
   /**
    * @hidden

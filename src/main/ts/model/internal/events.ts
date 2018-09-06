@@ -1,4 +1,4 @@
-import {ConvergenceEvent} from "../../util/";
+import {IConvergenceEvent} from "../../util/";
 import {ModelNode} from "./ModelNode";
 import {Path} from "../Path";
 import {ArrayNode} from "./ArrayNode";
@@ -12,7 +12,7 @@ import {DateNode} from "./DateNode";
  * @hidden
  * @internal
  */
-export interface ModelNodeEvent extends ConvergenceEvent {
+export interface ModelNodeEvent extends IConvergenceEvent {
   src: ModelNode<any>;
   local: boolean;
 }

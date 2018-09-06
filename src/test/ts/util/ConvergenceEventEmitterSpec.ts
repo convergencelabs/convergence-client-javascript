@@ -1,5 +1,5 @@
-import {ConvergenceEventEmitter, EventListener} from "../../../main/ts/util/ConvergenceEventEmitter";
-import {ConvergenceEvent} from "../../../main/ts/util/ConvergenceEvent";
+import {ConvergenceEventEmitter, ConvergenceEventListener} from "../../../main/ts/util/ConvergenceEventEmitter";
+import {IConvergenceEvent} from "../../../main/ts/util/IConvergenceEvent";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;
@@ -10,7 +10,7 @@ describe("EventEmitter", () => {
   it("A listener registered for an event should get called when that event is emitted", () => {
     let value: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       value = e.value;
     };
     emitter.on("event", listener);
@@ -22,7 +22,7 @@ describe("EventEmitter", () => {
 
   it("A listener is not notified after it is removed", () => {
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       throw new Error();
     };
     emitter.on("event", listener);
@@ -46,7 +46,7 @@ describe("EventEmitter", () => {
       count++;
     });
 
-    emitter.removeAllListeners("event1");
+    emitter.removeListeners("event1");
 
     emitter.next({src: this, name: "event1", value: 1});
     emitter.next({src: this, name: "event2", value: 1});
@@ -64,7 +64,7 @@ describe("EventEmitter", () => {
       throw new Error();
     });
 
-    emitter.removeAllListenersForAllEvents();
+    emitter.removeAllListeners();
 
     emitter.next({src: this, name: "event1", value: 1});
     emitter.next({src: this, name: "event2", value: 1});
@@ -73,7 +73,7 @@ describe("EventEmitter", () => {
   it("A once listener is only notified once.", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.once("event", listener);
@@ -87,7 +87,7 @@ describe("EventEmitter", () => {
   it("A listener is only notified for events it is register to.", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.once("event", listener);
@@ -100,7 +100,7 @@ describe("EventEmitter", () => {
   it("Event registration is case insensitive", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.on("EVENT", listener);
@@ -117,7 +117,7 @@ describe("EventEmitter", () => {
   it("Listeners can not be added multiple times", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: EventListener<TestEvent> = (e: TestEvent) => {
+    const listener: ConvergenceEventListener<TestEvent> = (e: TestEvent) => {
       count++;
     };
     emitter.on("event", listener);
@@ -141,7 +141,7 @@ class TestEmitter extends ConvergenceEventEmitter<TestEvent> {
   }
 }
 
-interface TestEvent extends ConvergenceEvent {
+interface TestEvent extends IConvergenceEvent {
   src: any;
   value: number;
 }
