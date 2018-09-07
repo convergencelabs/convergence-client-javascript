@@ -1,4 +1,4 @@
-import {Session} from "../../Session";
+import {ConvergenceSession} from "../../ConvergenceSession";
 import {ObservableObject} from "./ObservableObject";
 import {ObservableElement} from "./ObservableElement";
 
@@ -17,7 +17,7 @@ Object.freeze(ObservableModelEventConstants);
 
 export interface ObservableModel {
 
-  session(): Session;
+  session(): ConvergenceSession;
 
   collectionId(): string;
 

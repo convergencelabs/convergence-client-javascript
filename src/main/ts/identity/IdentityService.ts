@@ -1,4 +1,4 @@
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
@@ -53,7 +53,7 @@ export class IdentityService {
     this._connection = connection;
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

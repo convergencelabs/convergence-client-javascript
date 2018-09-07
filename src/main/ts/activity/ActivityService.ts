@@ -1,7 +1,8 @@
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
-import {MessageType} from "../connection/protocol/MessageType";
+import {ActivityParticipant} from "./ActivityParticipant";
+import {IActivityJoinOptions} from "./IActivityJoinOptions";
 import {Observable, Observer} from "rxjs/Rx";
 import {
   IActivityEvent,
@@ -11,6 +12,7 @@ import {
   ActivityStateRemovedEvent,
   ActivityStateSetEvent
 } from "./events";
+import {MessageType} from "../connection/protocol/MessageType";
 import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
 import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
 import {
@@ -18,13 +20,11 @@ import {
   ActivityRemoteStateRemoved,
   ActivityRemoteStateSet
 } from "../connection/protocol/activity/activityState";
+import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
 import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {ActivityParticipant} from "./ActivityParticipant";
 import {ActivityJoinRequest, ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter, StringMap} from "../util/";
-import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
-import {IActivityJoinOptions} from "./IActivityJoinOptions";
 
 /**
  * The ActivityService provides the main entry point into working with
@@ -142,11 +142,11 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * @return
-   *   The current Convergence Session object that represents the connection
+   * @returns
+   *   The current Convergence ConvergenceSession object that represents the connection
    *   to the Convergence Domain.
    */
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

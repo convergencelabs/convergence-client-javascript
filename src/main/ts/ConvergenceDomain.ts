@@ -1,6 +1,6 @@
 import {ConvergenceConnection, AuthResponse} from "./connection/ConvergenceConnection";
-import {ConvergenceOptions} from "./ConvergenceOptions";
-import {Session} from "./Session";
+import {IConvergenceOptions} from "./IConvergenceOptions";
+import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
 import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {ActivityService} from "./activity/";
@@ -34,7 +34,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   /**
    * @internal
    */
-  private static readonly DefaultOptions: ConvergenceOptions = {
+  private static readonly DefaultOptions: IConvergenceOptions = {
     connectionTimeout: 5,
     maxReconnectAttempts: -1,
     reconnectInterval: 5,
@@ -74,7 +74,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   /**
    * @internal
    */
-  private _options: ConvergenceOptions;
+  private _options: IConvergenceOptions;
 
   /**
    * @internal
@@ -92,7 +92,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
    * @param options
    *   Options that configure how the convergence domain is configured.
    */
-  constructor(url: string, options?: ConvergenceOptions) {
+  constructor(url: string, options?: IConvergenceOptions) {
     super();
 
     if (!Validation.nonEmptyString(url)) {
@@ -171,9 +171,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
 
   /**
    * @return
-   *  The Session object for this domain.
+   *  The ConvergenceSession object for this domain.
    */
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 
@@ -296,7 +296,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
    * @private
    */
   private _init(m: AuthResponse): void {
-    const session: Session = this._connection.session();
+    const session: ConvergenceSession = this._connection.session();
     const presenceState: Map<string, any> = StringMap.objectToMap(m.state);
     const initialPresence: UserPresence = new UserPresence(session.username(), true, presenceState);
     this._modelService = new ModelService(this._connection);

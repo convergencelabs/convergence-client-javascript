@@ -1,7 +1,4 @@
-import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {BehaviorSubject} from "rxjs/Rx";
 import {ActivityParticipant} from "./ActivityParticipant";
-import {Observable} from "rxjs/Observable";
 import {
   IActivityEvent,
   ActivitySessionJoinedEvent,
@@ -10,7 +7,11 @@ import {
   ActivityStateClearedEvent,
   ActivityStateRemovedEvent
 } from "./events";
-import {Session} from "../Session";
+import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
+import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {Observable} from "rxjs/Observable";
+import {BehaviorSubject} from "rxjs/Rx";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
 import {
@@ -18,7 +19,6 @@ import {
   ActivityClearState,
   ActivityRemoveState
 } from "../connection/protocol/activity/activityState";
-import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -150,7 +150,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

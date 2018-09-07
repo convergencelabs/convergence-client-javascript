@@ -8,9 +8,8 @@ import {
   OutgoingProtocolMessage,
   OutgoingProtocolRequestMessage
 } from "./protocol/protocol";
-import {SessionImpl} from "../SessionImpl";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
-import {Session} from "../Session";
 import {
   AuthenticationResponse,
   AuthRequest,
@@ -38,7 +37,7 @@ export class ConvergenceConnection extends EventEmitter {
     ERROR: "error"
   };
 
-  private readonly _session: SessionImpl;
+  private readonly _session: ConvergenceSession;
   private _connectionDeferred: Deferred<HandshakeResponse>;
   private readonly _connectionTimeout: number;  // seconds
   private readonly _maxReconnectAttempts: number;
@@ -64,6 +63,7 @@ export class ConvergenceConnection extends EventEmitter {
    * @param maxReconnectAttempts -1 for unlimited
    * @param reconnectInterval in seconds
    * @param retryOnOpen
+   * @param domain
    */
   constructor(url: string,
               connectionTimeout: number,
@@ -82,7 +82,7 @@ export class ConvergenceConnection extends EventEmitter {
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
 
-    // fixme
+    // fixme this should be configurable
     this._protocolConfig = {
       defaultRequestTimeout: 5000,
       heartbeatConfig: {
@@ -96,10 +96,10 @@ export class ConvergenceConnection extends EventEmitter {
     this._messageEmitter = new EventEmitter();
     this._messageSubject = new Subject();
 
-    this._session = new SessionImpl(domain, this, null, null, null);
+    this._session = new ConvergenceSession(domain, this, null, null, null);
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._session;
   }
 
@@ -252,7 +252,7 @@ export class ConvergenceConnection extends EventEmitter {
         this._session._setUsername(response.username);
         this._session._setSessionId(response.sessionId);
         this._session._setReconnectToken(response.reconnectToken);
-        this._session.setAuthenticated(true);
+        this._session._setAuthenticated(true);
         const resp: AuthResponse = {
           state: response.state
         };

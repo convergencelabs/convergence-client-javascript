@@ -31,7 +31,7 @@ import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "../ot/UnprocessedOperationEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
-import {Session} from "../../Session";
+import {ConvergenceSession} from "../../ConvergenceSession";
 import {ForceCloseRealTimeModel} from "../../connection/protocol/model/forceCloseRealtimeModel";
 import {RemoteOperation} from "../../connection/protocol/model/remoteOperation";
 import {OperationAck} from "../../connection/protocol/model/operationAck";
@@ -270,7 +270,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     return new ModelPermissionManager(this._modelId, this._connection);
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 
@@ -395,7 +395,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         return existing as LocalElementReference;
       }
     } else {
-      const session: Session = this.session();
+      const session: ConvergenceSession = this.session();
       const reference: ElementReference = new ElementReference(
         this._referenceManager, key, this, session.username(), session.sessionId(), true);
 

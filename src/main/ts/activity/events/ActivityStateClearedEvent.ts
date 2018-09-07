@@ -9,10 +9,23 @@ export class ActivityStateClearedEvent implements IActivityEvent {
    * @hidden
    * @internal
    */
-  constructor(public readonly activity: Activity,
-              public readonly username: string,
-              public readonly sessionId: string,
-              public readonly local: boolean) {
+  constructor(
+    /**
+     * @inheritdoc
+     */
+    public readonly activity: Activity,
+    /**
+     * @inheritdoc
+     */
+    public readonly username: string,
+    /**
+     * @inheritdoc
+     */
+    public readonly sessionId: string,
+    /**
+     * @inheritdoc
+     */
+    public readonly local: boolean) {
     Object.freeze(this);
   }
 }

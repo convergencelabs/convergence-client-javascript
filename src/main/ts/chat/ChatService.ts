@@ -1,4 +1,4 @@
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
@@ -111,7 +111,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
     this._emitFrom(this._messageStream);
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

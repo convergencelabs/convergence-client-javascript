@@ -9,12 +9,31 @@ export class ActivityStateSetEvent implements IActivityEvent {
    * @hidden
    * @internal
    */
-  constructor(public readonly activity: Activity,
-              public readonly username: string,
-              public readonly sessionId: string,
-              public readonly local: boolean,
-              public readonly key: string,
-              public readonly value: string) {
+  constructor(
+    /**
+     * @inheritdoc
+     */
+    public readonly activity: Activity,
+    /**
+     * @inheritdoc
+     */
+    public readonly username: string,
+    /**
+     * @inheritdoc
+     */
+    public readonly sessionId: string,
+    /**
+     * @inheritdoc
+     */
+    public readonly local: boolean,
+    /**
+     * @param The key of the state value that was set.
+     */
+    public readonly key: string,
+    /**
+     * @param The value that was set
+     */
+    public readonly value: string) {
     Object.freeze(this);
   }
 }

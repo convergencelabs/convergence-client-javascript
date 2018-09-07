@@ -1,8 +1,8 @@
 /**
- * The ConvergenceOptions interface represents that options that can be set
+ * The [[IConvergenceOptions]] interface represents that options that can be set
  * within Convergence when connecting to a domain.
  */
-export interface ConvergenceOptions {
+export interface IConvergenceOptions {
 
   /**
    * The maximum time to wait in ms for a successful connection to be made.

@@ -2,9 +2,9 @@ import {Convergence} from "./Convergence";
 export default Convergence;
 
 export * from "./Convergence";
-export * from "./Session";
+export * from "./ConvergenceSession";
 export * from "./ConvergenceDomain";
-export * from "./ConvergenceOptions";
+export * from "./IConvergenceOptions";
 export * from "./events";
 
 export * from "./activity";

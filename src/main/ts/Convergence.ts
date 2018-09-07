@@ -1,5 +1,5 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
-import {ConvergenceOptions} from "./ConvergenceOptions";
+import {IConvergenceOptions} from "./IConvergenceOptions";
 
 /**
  * The Convergence class is the main entry point into the Convergence Client.
@@ -10,7 +10,7 @@ import {ConvergenceOptions} from "./ConvergenceOptions";
 export class Convergence {
 
   public static connect(url: string, username: string, password: string,
-                        options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+                        options?: IConvergenceOptions): Promise<ConvergenceDomain> {
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithPassword(username, password);
@@ -20,7 +20,7 @@ export class Convergence {
   }
 
   public static connectAnonymously(url: string, displayName?: string,
-                                   options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+                                   options?: IConvergenceOptions): Promise<ConvergenceDomain> {
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateAnonymously(displayName);
@@ -29,7 +29,7 @@ export class Convergence {
     });
   }
 
-  public static connectWithJwt(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  public static connectWithJwt(url: string, token: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithToken(token);
@@ -38,7 +38,7 @@ export class Convergence {
     });
   }
 
-  public static reconnect(url: string, token: string, options?: ConvergenceOptions): Promise<ConvergenceDomain> {
+  public static reconnect(url: string, token: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then((response) => {
       return domain._authenticateWithReconnectToken(token);

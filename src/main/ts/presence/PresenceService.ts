@@ -1,4 +1,4 @@
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {
   ConvergenceEventEmitter,
@@ -99,7 +99,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     this._localPresence = this._localManager.subscribe();
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

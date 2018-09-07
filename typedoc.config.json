@@ -11,6 +11,8 @@
   "baseUrl": "src/main/ts",
   "readme": "src/docs/README.md",
 
+  "theme": "src/docs/theme",
+
   "verbose": true,
   "hideGenerator": true
 }

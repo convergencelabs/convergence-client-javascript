@@ -11,7 +11,7 @@ import {
   UserRemovedEvent
 } from "./events/";
 import {ChatChannelType} from "./ChatService";
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
 import {MessageType} from "../connection/protocol/MessageType";
@@ -92,7 +92,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
     });
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

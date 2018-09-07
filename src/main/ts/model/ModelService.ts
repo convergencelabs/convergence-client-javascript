@@ -1,4 +1,4 @@
-import {Session} from "../Session";
+import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {OpenRealTimeModelRequest, OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
 import {MessageType} from "../connection/protocol/MessageType";
@@ -86,7 +86,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._autoRequestId = 0;
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._connection.session();
   }
 

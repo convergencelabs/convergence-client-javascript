@@ -13,33 +13,34 @@ export class ActivitySessionJoinedEvent implements IActivityEvent {
   public static readonly EVENT_NAME: string = "session_joined";
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   public readonly name: string = ActivitySessionJoinedEvent.EVENT_NAME;
 
   /**
    * @hidden
    * @internal
+   * @inheritDoc
    */
   constructor(
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly activity: Activity,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly username: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly sessionId: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly local: boolean,
     /**
-     * @inheritdoc
+     * The participant that this event relates to.
      */
     public readonly participant: ActivityParticipant) {
     Object.freeze(this);

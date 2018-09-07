@@ -1,4 +1,4 @@
-import {Session} from "../../Session";
+import {ConvergenceSession} from "../../ConvergenceSession";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
 import {Model} from "../internal/Model";
@@ -45,7 +45,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private readonly _session: Session;
+  private readonly _session: ConvergenceSession;
 
   /**
    * @internal
@@ -115,7 +115,7 @@ export class HistoricalModel implements ObservableModel {
               modelId: string,
               collectionId: string,
               connection: ConvergenceConnection,
-              session: Session) {
+              session: ConvergenceSession) {
 
     this._session = session;
     this._connection = connection;
@@ -137,7 +137,7 @@ export class HistoricalModel implements ObservableModel {
     this._opRequests = [];
   }
 
-  public session(): Session {
+  public session(): ConvergenceSession {
     return this._session;
   }
 
