@@ -15,5 +15,19 @@ nodePod { label ->
         sh 'npm publish dist-internal'
       }
     }
+
+    var containerName = "convergence-js-apidocs";
+
+    stage('Docker Build') {
+      container('docker') {
+        dockerBuild(containerName)
+      }
+    }
+
+    stage('Docker Push') {
+      container('docker') {
+        dockerPush(containerName, ["latest", env.GIT_COMMIT])
+      }
+    }
   }
 }
