@@ -1,19 +1,19 @@
 import {MessageType} from "./MessageType";
-import {MessageEnvelope} from "./protocol";
-import {IncomingProtocolMessage} from "./protocol";
-import {OutgoingProtocolMessage} from "./protocol";
-import {HandshakeRequestSerializer} from "./handhsake";
-import {HandshakeResponseDeserializer} from "./handhsake";
+import {MessageEnvelope, IncomingProtocolMessage, OutgoingProtocolMessage} from "./protocol";
+import {HandshakeRequestSerializer, HandshakeResponseDeserializer} from "./handhsake";
 import {
-  PasswordAuthRequestSerializer, AnonymousAuthRequestSerializer, ReconnectAuthRequestSerializer,
+  PasswordAuthRequestSerializer,
+  AnonymousAuthRequestSerializer,
+  ReconnectAuthRequestSerializer,
+  TokenAuthRequestSerializer,
+  AuthenticationResponseDeserializer
 } from "./authentication";
-import {TokenAuthRequestSerializer} from "./authentication";
-import {AuthenticationResponseDeserializer} from "./authentication";
-import {ErrorMessageSerializer} from "./ErrorMessage";
-import {ErrorMessageDeserializer} from "./ErrorMessage";
-import {OpenRealTimeModelRequestSerializer} from "./model/openRealtimeModel";
-import {AutoCreateModelConfigRequestDeserializer} from "./model/autoCreateConfigRequest";
-import {AutoCreateModelConfigResponseSerializer} from "./model/autoCreateConfigRequest";
+import {ErrorMessageSerializer, ErrorMessageDeserializer} from "./ErrorMessage";
+import {OpenRealTimeModelRequestSerializer, OpenRealTimeModelResponseDeserializer} from "./model/openRealtimeModel";
+import {
+  AutoCreateModelConfigRequestDeserializer,
+  AutoCreateModelConfigResponseSerializer
+} from "./model/autoCreateConfigRequest";
 import {OperationSubmissionSerializer} from "./model/operationSubmission";
 import {OperationAckDeserializer} from "./model/operationAck";
 import {RemoteOperationDeserializer} from "./model/remoteOperation";
@@ -24,28 +24,34 @@ import {
   CreateRealTimeModelResponseDeserializer
 } from "./model/createRealtimeModel";
 import {CloseRealTimeModelRequestSerializer} from "./model/closeRealtimeModel";
-import {UserLookUpRequestSerializer} from "./identity/userLookUps";
-import {UserSearchRequestSerializer} from "./identity/userLookUps";
-import {UserListResponseDeserializer} from "./identity/userLookUps";
-import {OpenRealTimeModelResponseDeserializer} from "./model/openRealtimeModel";
-import {SetReferenceSerializer} from "./model/reference/ReferenceEvent";
-import {ClearReferenceMessageSerializer} from "./model/reference/ReferenceEvent";
-import {UnpublishReferenceSerializer} from "./model/reference/ReferenceEvent";
-import {RemoteReferenceSetDeserializer} from "./model/reference/ReferenceEvent";
-import {RemoteReferencePublishedDeserializer} from "./model/reference/ReferenceEvent";
-import {RemoteReferenceClearedDeserializer} from "./model/reference/ReferenceEvent";
-import {RemoteReferenceUnpublishedDeserializer} from "./model/reference/ReferenceEvent";
-import {PublishReferenceSerializer} from "./model/reference/ReferenceEvent";
-import {RemoteClientOpenedModelDeserializer} from "./model/remoteOpenClose";
-import {RemoteClientClosedModelDeserializer} from "./model/remoteOpenClose";
-import {ActivityJoinRequestSerializer} from "./activity/joinActivity";
+import {
+  UserLookUpRequestSerializer,
+  UserSearchRequestSerializer,
+  UserListResponseDeserializer
+} from "./identity/userLookUps";
+import {
+  SetReferenceSerializer,
+  ClearReferenceMessageSerializer,
+  UnpublishReferenceSerializer,
+  RemoteReferenceSetDeserializer,
+  RemoteReferencePublishedDeserializer,
+  RemoteReferenceClearedDeserializer,
+  RemoteReferenceUnpublishedDeserializer,
+  PublishReferenceSerializer
+} from "./model/reference/ReferenceEvent";
+import {RemoteClientOpenedModelDeserializer, RemoteClientClosedModelDeserializer} from "./model/remoteOpenClose";
+import {ActivityJoinRequestSerializer, ActivityJoinResponseDeserializer} from "./activity/joinActivity";
 import {ActivityLeaveRequestSerializer} from "./activity/leaveActivity";
-import {ActivitySetStateSerializer} from "./activity/activityState";
-import {ActivityClearStateSerializer} from "./activity/activityState";
+import {
+  ActivitySetStateSerializer,
+  ActivityClearStateSerializer,
+  ActivityRemoteStateClearedDeserializer,
+  ActivityRemoteStateSetDeserializer,
+  ActivityRemoveStateSerializer,
+  ActivityRemoteStateRemovedDeserializer
+} from "./activity/activityState";
 import {ActivitySessionJoinedDeserializer} from "./activity/sessionJoined";
 import {ActivitySessionLeftDeserializer} from "./activity/sessionLeft";
-import {ActivityRemoteStateSetDeserializer} from "./activity/activityState";
-import {ActivityRemoteStateClearedDeserializer} from "./activity/activityState";
 import {PresenceAvailabilityChangedDeserializer} from "./presence/pressenceAvailability";
 import {
   PresenceStateClearedDeserializer, PresenceStateSetDeserializer,
@@ -58,21 +64,22 @@ import {
   SubscribePresenceResponseDeserializer
 } from "./presence/subscribePresence";
 import {
-  JoinChatChannelRequestMessageSerializer, AddUserToChatChannelMessageSerializer,
-  UserJoinedChatChannelMessageDeserializer, JoinChatChannelResponseMessageDeserializer
+  JoinChatChannelRequestMessageSerializer,
+  AddUserToChatChannelMessageSerializer,
+  UserJoinedChatChannelMessageDeserializer,
+  JoinChatChannelResponseMessageDeserializer
 } from "./chat/joining";
 import {PublishChatMessageSerializer, RemoteChatMessageDeserializer} from "./chat/chatMessage";
-import {ParticipantsResponseDeserializer} from "./activity/participants";
-import {ParticipantsRequestSerializer} from "./activity/participants";
-import {ModelsQueryRequestSerializer} from "./model/query/modelQuery";
-import {ModelsQueryResponseDeserializer} from "./model/query/modelQuery";
-import {HistoricalDataResponseDeserializer} from "./model/historical/historicalDataRequest";
-import {HistoricalOperationsResponseDeserializer} from "./model/historical/historicalOperationsRequest";
-import {HistoricalDataRequestSerializer} from "./model/historical/historicalDataRequest";
-import {HistoricalOperationsRequestSerializer} from "./model/historical/historicalOperationsRequest";
-import {ActivityRemoveStateSerializer} from "./activity/activityState";
-import {ActivityRemoteStateRemovedDeserializer} from "./activity/activityState";
-import {ActivityJoinResponseDeserializer} from "./activity/joinActivity";
+import {ParticipantsResponseDeserializer, ParticipantsRequestSerializer} from "./activity/participants";
+import {ModelsQueryRequestSerializer, ModelsQueryResponseDeserializer} from "./model/query/modelQuery";
+import {
+  HistoricalDataResponseDeserializer,
+  HistoricalDataRequestSerializer
+} from "./model/historical/historicalDataRequest";
+import {
+  HistoricalOperationsResponseDeserializer,
+  HistoricalOperationsRequestSerializer
+} from "./model/historical/historicalOperationsRequest";
 import {
   GetModelPermissionsResponseDeserializer,
   GetModelPermissionsSerializer
@@ -204,8 +211,8 @@ export class MessageSerializer {
     };
   }
 
-  private static _serializers: {[key: number]: MessageBodySerializer} = {};
-  private static _deserializers: {[key: number]: MessageBodyDeserializer<any>} = {};
+  private static _serializers: { [key: number]: MessageBodySerializer } = {};
+  private static _deserializers: { [key: number]: MessageBodyDeserializer<any> } = {};
 
   private static _defaultBodyDeserializer: MessageBodyDeserializer<any> = (message: any) => {
     return {};

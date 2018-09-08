@@ -1,5 +1,4 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
-import {IncomingProtocolNormalMessage} from "../protocol";
+import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
 
 /**
  * @hidden

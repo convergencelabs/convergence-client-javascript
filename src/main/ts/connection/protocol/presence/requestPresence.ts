@@ -1,7 +1,5 @@
-import {OutgoingProtocolRequestMessage} from "../protocol";
-import {MessageBodySerializer} from "../MessageSerializer";
-import {IncomingProtocolNormalMessage} from "../protocol";
-import {MessageBodyDeserializer} from "../MessageSerializer";
+import {IncomingProtocolNormalMessage, OutgoingProtocolRequestMessage} from "../protocol";
+import {MessageBodySerializer, MessageBodyDeserializer} from "../MessageSerializer";
 
 /**
  * @hidden

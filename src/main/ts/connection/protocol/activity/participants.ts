@@ -1,6 +1,5 @@
 import {OutgoingProtocolRequestMessage} from "../protocol";
-import {MessageBodyDeserializer} from "../MessageSerializer";
-import {MessageBodySerializer} from "../MessageSerializer";
+import {MessageBodyDeserializer, MessageBodySerializer} from "../MessageSerializer";
 
 /**
  * @hidden
@@ -25,7 +24,7 @@ export const ParticipantsRequestSerializer: MessageBodySerializer = (request: Pa
  * @internal
  */
 export interface ParticipantsResponse extends OutgoingProtocolRequestMessage {
-  participants: ActivityParticipant;
+  participants: ActivityParticipantData;
 }
 
 /**
@@ -44,4 +43,4 @@ export const ParticipantsResponseDeserializer: MessageBodyDeserializer<Participa
  * @hidden
  * @internal
  */
-export type ActivityParticipant = Map<string, Map<string, any>>;
+export type ActivityParticipantData = Map<string, Map<string, any>>;

@@ -1,5 +1,5 @@
-import { OutgoingProtocolNormalMessage } from "../protocol";
-import { MessageBodySerializer, MessageBodyDeserializer } from "../MessageSerializer";
+import {OutgoingProtocolNormalMessage} from "../protocol";
+import {MessageBodySerializer, MessageBodyDeserializer} from "../MessageSerializer";
 import {IncomingActivityMessage} from "./incomingActivityMessage";
 
 /**
@@ -8,7 +8,7 @@ import {IncomingActivityMessage} from "./incomingActivityMessage";
  */
 export interface ActivitySetState extends OutgoingProtocolNormalMessage {
   activityId: string;
-  state: {[key: string]: any};
+  state: { [key: string]: any };
 }
 
 /**
@@ -66,7 +66,7 @@ export const ActivityClearStateSerializer: MessageBodySerializer = (request: Act
  */
 export interface ActivityRemoteStateSet extends IncomingActivityMessage {
   sessionId: string;
-  state: {[key: string]: any};
+  state: { [key: string]: any };
 }
 
 /**

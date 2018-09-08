@@ -1,7 +1,6 @@
 import {IncomingProtocolResponseMessage, OutgoingProtocolRequestMessage} from "../protocol";
-import {MessageBodySerializer} from "../MessageSerializer";
-import {DomainUser} from "../../../identity/DomainUser";
-import {MessageBodyDeserializer} from "../MessageSerializer";
+import {MessageBodySerializer, MessageBodyDeserializer} from "../MessageSerializer";
+import {DomainUser} from "../../../identity/";
 import {DomainUserDeserializer} from "./DomainUser";
 
 const userFieldCodes: {[key: string]: number} = {

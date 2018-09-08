@@ -1,5 +1,8 @@
-import {IncomingProtocolNormalMessage, IncomingProtocolResponseMessage} from "../protocol";
-import {OutgoingProtocolRequestMessage} from "../protocol";
+import {
+  IncomingProtocolNormalMessage,
+  IncomingProtocolResponseMessage,
+  OutgoingProtocolRequestMessage
+} from "../protocol";
 import {ChatChannelInfoData, ChannelInfoDataDeserializer} from "./info";
 
 /**
