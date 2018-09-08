@@ -1,8 +1,20 @@
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
 
+/**
+ * The ActivityStateSetEvent is fired when a remote session sets one or
+ * elements from its state within the [[Activity]].
+ */
 export class ActivityStateSetEvent implements IActivityEvent {
+
+  /**
+   * The event name that all instances of this class will use.
+   */
   public static readonly EVENT_NAME: string = "state_set";
+
+  /**
+   * @inheritDoc
+   */
   public readonly name: string = ActivityStateSetEvent.EVENT_NAME;
 
   /**
@@ -11,27 +23,27 @@ export class ActivityStateSetEvent implements IActivityEvent {
    */
   constructor(
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly activity: Activity,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly username: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly sessionId: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly local: boolean,
     /**
-     * @param The key of the state value that was set.
+     * The key of the state value that was set.
      */
     public readonly key: string,
     /**
-     * @param The value that was set
+     * The value that was set
      */
     public readonly value: string) {
     Object.freeze(this);

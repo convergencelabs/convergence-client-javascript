@@ -4,7 +4,7 @@ import {IActivityEvent} from "./IActivityEvent";
 
 /**
  * The ActivitySessionJoinedEvent is fired when a remote session joins an
- * Activity.
+ * [[Activity]].
  */
 export class ActivitySessionJoinedEvent implements IActivityEvent {
   /**

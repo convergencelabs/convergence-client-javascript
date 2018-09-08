@@ -1,6 +1,10 @@
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
 
+/**
+ * The ActivitySessionLeftEvent is fired when a remote session leaves an
+ * [[Activity]].
+ */
 export class ActivitySessionLeftEvent implements IActivityEvent {
 
   /**

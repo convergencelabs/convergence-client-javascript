@@ -180,9 +180,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   /**
    * Gets the ModelService, which is used for interacting with Real Time Models
    *
-   * @example
    * ```typescript
-   *
    * const modelService = domain.models();
    * ```
    *
@@ -197,9 +195,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
    * Gets the IdentityService, which is used for obtaining information about
    * domain users.
    *
-   * @example
    * ```typescript
-   *
    * const identityService = domain.identity();
    * ```
    *
@@ -213,9 +209,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
   /**
    * Gets the ActivityService, which is used for interacting with Activities.
    *
-   * @example
    * ```typescript
-   *
    * const activityService = domain.activities();
    * ```
    *
