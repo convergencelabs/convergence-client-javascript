@@ -1,3 +1,6 @@
+import {deepClone} from "../util/ObjectUtils";
+import {Activity} from "./Activity";
+
 /**
  * The ActivityParticipant represents an individual user session that has
  * joined a particular [[Activity]].
@@ -42,6 +45,3 @@ export class ActivityParticipant {
     return deepClone(this._state);
   }
 }
-
-import {deepClone} from "../util/ObjectUtils";
-import {Activity} from "./Activity";

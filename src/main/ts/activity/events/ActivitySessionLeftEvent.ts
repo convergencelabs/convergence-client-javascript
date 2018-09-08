@@ -19,19 +19,19 @@ export class ActivitySessionLeftEvent implements IActivityEvent {
    */
   constructor(
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly activity: Activity,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly username: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly sessionId: string,
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public readonly local: boolean) {
     Object.freeze(this);

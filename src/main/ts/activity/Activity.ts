@@ -150,14 +150,34 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
   }
 
+  /**
+   * Gets the session that this activity is a part of.
+   *
+   * @returns
+   *   The session that this [[Activity]] is a part of.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
+  /**
+   * Gets the unique id of this [[Activity]].
+   *
+   * @returns
+   *   The [[Activity]] id.
+   */
   public id(): string {
     return this._id;
   }
 
+  /**
+   * Causes the local session to leave the [[Activity]]. All other participants
+   * of this activity will be notified that this session has left. The state
+   * associated with this session will be removed from eh [[Activity]]. After
+   * calling leave, the [[Activity]] object becomes non-functional. The local
+   * user can rejoin the activity from the [[ActivityService]] but will
+   * receive a new [[Activity]] object.
+   */
   public leave(): void {
     if (this.isJoined()) {
       this._joined = false;
@@ -169,18 +189,67 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     }
   }
 
+  /**
+   * Determines if the [[Activity]] is still joined.
+   *
+   * @returns
+   *   True if the [[Activity]] is joined, false otherwise.
+   */
   public isJoined(): boolean {
     return this._joined;
   }
 
+  /**
+   * Gets the local session's state within this [[Activity]].
+   *
+   * @returns
+   *   The local sessions state.
+   */
   public state(): Map<string, any> {
     const localParticipant: ActivityParticipant =
       this._participants.getValue().get(this._connection.session().sessionId());
     return localParticipant.state;
   }
 
-  public setState(state: StringMapLike): void;
+  /**
+   * Sets a single key-value pair within this Activity's local state.
+   *
+   * ```typescript
+   * activity.setState("key1", "value");
+   * ```
+   *
+   * @param key
+   *   The key of the value to set.
+   * @param value
+   *   The value to set for the supplied key.
+   */
   public setState(key: string, value: any): void;
+
+  /**
+   * Sets multiple key-value pairs within this Activity's local state. This
+   * method does not replace all state; that is, keys not supplied in the map
+   * will not be altered.
+   *
+   * ```typescript
+   * const state = {
+   *   key1: "v1",
+   *   key2: false
+   * };
+   * activity.setState(state);
+   * ```
+   * or
+   *
+   * ```typescript
+   * const state = new Map();
+   * state.set("key1", "v1");
+   * state.set("key2", false);
+   * activity.setState(state);
+   * ```
+   * @param state
+   *   A map containing the key-value pairs to set.
+   */
+  public setState(state: StringMapLike): void;
+
   public setState(): void {
     if (this.isJoined()) {
       let state: { [key: string]: any };
@@ -211,8 +280,30 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     }
   }
 
+  /**
+   * Removes a single local state entry from the [[Activity]].
+   *
+   * ```typescript
+   * activity.removeState("pointer");
+   * ```
+   *
+   * @param key
+   *   The key of the local state to remove.
+   */
   public removeState(key: string): void;
+
+  /**
+   * Removes one or more local state entries from the [[Activity]].
+   *
+   * ```typescript
+   * activity.removeState(["pointer", "viewport"]);
+   * ```
+   *
+   * @param keys
+   *   The keys of the local state to remove.
+   */
   public removeState(keys: string[]): void;
+
   public removeState(keys: string | string[]): void {
     if (this.isJoined()) {
       if (typeof keys === "string") {
@@ -238,11 +329,14 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     }
   }
 
+  /**
+   * Removes all local state from this [[Activity]].
+   */
   public clearState(): void {
     if (this.isJoined()) {
       const message: ActivityClearState = {
         type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
-        activityId: this._id,
+        activityId: this._id
       };
       this._connection.send(message);
 
@@ -255,14 +349,38 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     }
   }
 
-  public participant(id: string): ActivityParticipant {
-    return this._participants.getValue().get(id);
+  /**
+   * Gets an [[ActivityParticipant]] by their sessionId.
+   *
+   * @param sessionId
+   *   The sessionId of the participant to get.
+   * @returns
+   *   The [[ActivityParticipant]] corresponding to the supplied id, or
+   *   undefined if no such participant exists.
+   */
+  public participant(sessionId: string): ActivityParticipant {
+    return this._participants.getValue().get(sessionId);
   }
 
+  /**
+   * Gets all participants presently joined to this [[Activity]].
+   */
   public participants(): ActivityParticipant[] {
     return Array.from(this._participants.getValue().values());
   }
 
+  /**
+   * Gets the participants as an Observable stream.
+   *
+   * ```typescript
+   * activity
+   *   .participantsAsObservable()
+   *   .subscribe(p => console.log(p));
+   * ```
+   *
+   * @returns
+   *   An Observable array of participants.
+   */
   public participantsAsObservable(): Observable<ActivityParticipant[]> {
     return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
   }

@@ -153,6 +153,17 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * Allows the connected user to join the specified activity.
    *
+   * ```typescript
+   * const activityId = "myActivityId";
+   * activityService
+   *   .join(activityId)
+   *   .then(activity => {
+   *     console.log("Joined!");
+   *     console.log(activity.participants());
+   *   });
+   *   .catch(e => console.error(e));
+   * ```
+   *
    * @param id
    *   The unique id of the Activity to join.
    * @param options
