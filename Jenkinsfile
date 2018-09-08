@@ -16,7 +16,7 @@ nodePod { label ->
       }
     }
 
-    var containerName = "convergence-js-apidocs";
+    def containerName = "convergence-js-apidocs";
 
     stage('Docker Build') {
       container('docker') {
