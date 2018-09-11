@@ -13,17 +13,22 @@ export class RichTextMutator {
     const node: RichTextNode = location.getNode();
     const index: number = location.getSubPath();
 
-    // fixme need to handle if it is a rich text string, but different styels.
-    if (node instanceof RichTextString && (
-      !attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes()))) {
+    if (node instanceof RichTextString) {
+      if (!attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes())) {
+        // Its the same style so we can just insert into the existing node, no
+        // splitting and merging required
+        node.insert(index, text);
+      } else {
+        // We need to split the current rich text string into two nodes within it's
+        // parent and then insert this one between it.
 
-      // Its the same style so we can just insert into the existing node, no
-      // splitting and merging required
-      node.insert(index, text);
+        // fixme need to implement
+        throw new Error("Not implemented");
+      }
     } else if (node instanceof RichTextElement) {
       this.insert(location, new RichTextString(this._document, node, text, attributes));
     } else {
-      // fixme throw error
+      throw new Error("Invalid insert location");
     }
 
     return this;
@@ -58,7 +63,9 @@ export class RichTextMutator {
 
   public removeRange(range: RichTextRange): RichTextMutator {
     const startLocation = range.start();
-    const endLocation: RichTextLocation = null; // need this to be tracked.
+
+    // FIXME need this to be tracked as the subtree is changed.
+    const endLocation: RichTextLocation = range.end();
 
     const fragment = this._extractFromRangeContent(range);
 

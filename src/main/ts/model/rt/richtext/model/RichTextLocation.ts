@@ -159,4 +159,12 @@ export class RichTextLocation {
 
     return RichTextLocation.ofPath(this._root, commonPath);
   }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  public _transform(): RichTextLocation {
+
+  }
 }

@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CKEditor</title>
-  <script src="https://cdn.ckeditor.com/ckeditor5/1.0.0-alpha.2/classic/ckeditor.js"></script>
+  <title>CKEditor 5 – Classic editor</title>
+  <script src="https://cdn.ckeditor.com/ckeditor5/11.0.1/classic/ckeditor.js"></script>
 </head>
 <body>
-<textarea name="content" id="editor">012345
-67890</textarea>
+<h1>Classic editor</h1>
+<textarea name="content" id="editor">
+        &lt;p&gt;This is some sample content.&lt;/p&gt;
+    </textarea>
 <script>
   ClassicEditor
-    .create(document.querySelector('#editor'))
+    .create( document.querySelector( '#editor' ) )
     .then(editor => {
       window.editor = editor;
-      editor.document.on("change", (eventInfo, type, data) => {
+      editor.model.document.on("change", (eventInfo, type, data) => {
         switch (type) {
           case "insert":
             console.log("Insert: ", JSON.stringify(data.range.start.path), getItemsInRange(data.range));
@@ -32,9 +34,9 @@
         }
       });
     })
-    .catch(error => {
-      console.error(error);
-    });
+    .catch( error => {
+      console.error( error );
+    } );
 
   function getItemsInRange(range) {
     let children = [];
