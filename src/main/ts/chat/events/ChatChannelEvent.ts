@@ -1,6 +1,6 @@
-import {ChatEvent} from "./ChatEvent";
+import {IChatEvent} from "./IChatEvent";
 
-export abstract class ChatChannelEvent implements ChatEvent {
+export abstract class ChatChannelEvent implements IChatEvent {
   public abstract readonly name: string;
 
   /**

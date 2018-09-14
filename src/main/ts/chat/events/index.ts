@@ -4,7 +4,7 @@ export * from "./ChannelRemovedEvent";
 export * from "./ChatChannelEvent";
 export * from "./ChatChannelNameChanged";
 export * from "./ChatChannelTopicChanged";
-export * from "./ChatEvent";
+export * from "./IChatEvent";
 export * from "./ChatMessageEvent";
 export * from "./UserAddedEvent";
 export * from "./UserJoinedEvent";

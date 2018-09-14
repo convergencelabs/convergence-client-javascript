@@ -1,7 +1,7 @@
 import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
-import {ChatEvent} from "./events/";
+import {IChatEvent} from "./events/";
 
 export class DirectChatChannel extends ChatChannel {
 
@@ -10,7 +10,7 @@ export class DirectChatChannel extends ChatChannel {
    * @internal
    */
   constructor(connection: ConvergenceConnection,
-              messageStream: Observable<ChatEvent>,
+              messageStream: Observable<IChatEvent>,
               info: ChatChannelInfo) {
     super(connection, messageStream, info);
   }

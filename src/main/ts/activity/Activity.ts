@@ -51,6 +51,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      * @event [SessionLeftEvent]{@link ActivitySessionLeftEvent}
      */
     SESSION_LEFT: ActivitySessionLeftEvent.EVENT_NAME,
+
     /**
      * Fired when a remote session sets state within the Activity. The resulting
      * event will be an instance of the {@link ActivityStateSetEvent} class.
@@ -66,6 +67,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      * @event [StateClearedEvent]{@link ActivityStateClearedEvent}
      */
     STATE_CLEARED: ActivityStateClearedEvent.EVENT_NAME,
+
     /**
      * Fired when a remote session clears state within the Activity. The resulting
      * event will be an instance of the {@link ActivityStateRemovedEvent} class.

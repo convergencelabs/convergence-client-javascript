@@ -9,8 +9,8 @@ import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {DateNode} from "../../../main/ts/model/internal/DateNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/modelEvents";
-import {DateSetValueEvent} from "../../../main/ts/model/modelEvents";
+import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
+import {DateSetValueEvent} from "../../../main/ts/model/events/DateSetValueEvent";
 import * as chai from "chai";
 import * as sinon from "sinon";
 

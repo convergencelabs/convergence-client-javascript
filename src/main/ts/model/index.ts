@@ -1,6 +1,6 @@
 export * from "./ModelService";
 export * from "./ModelElementType";
-export * from "./modelEvents";
+export * from "./events";
 export * from "./Path";
 
 export * from "./historical/index";
@@ -10,3 +10,7 @@ export * from "./reference/index";
 
 export * from "./ModelPermissionManager";
 export * from "./ModelPermissions";
+
+export * from "./ICreateModelOptions";
+export * from "./ModelDataInitializer";
+export * from "./IAutoCreateModelOptions";

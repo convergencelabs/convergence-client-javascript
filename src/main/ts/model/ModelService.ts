@@ -20,7 +20,7 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {Validation, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
+import {ConvergenceEventEmitter, IConvergenceEvent, Validation} from "../util/";
 import {RealTimeModel} from "./rt/";
 import {HistoricalModel} from "./historical/";
 import {
@@ -30,7 +30,9 @@ import {
 import {ModelResult} from "./query/";
 import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 import {ModelPermissionManager} from "./ModelPermissionManager";
-import {ModelPermissions} from "./ModelPermissions";
+import {ICreateModelOptions} from "./ICreateModelOptions";
+import {ModelDataInitializer} from "./ModelDataInitializer";
+import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
@@ -57,7 +59,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private _autoCreateRequests: {[key: number]: AutoCreateModelOptions} = {};
+  private _autoCreateRequests: {[key: number]: IAutoCreateModelOptions} = {};
 
   /**
    * @internal
@@ -114,7 +116,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._open(id);
   }
 
-  public openAutoCreate(options: AutoCreateModelOptions): Promise<RealTimeModel> {
+  public openAutoCreate(options: IAutoCreateModelOptions): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
@@ -122,7 +124,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._open(undefined, options);
   }
 
-  public create(options: CreateModelOptions): Promise<string> {
+  public create(options: ICreateModelOptions): Promise<string> {
     const collection = options.collection;
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
@@ -219,7 +221,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _open(id?: string, options?: AutoCreateModelOptions): Promise<RealTimeModel> {
+  private _open(id?: string, options?: IAutoCreateModelOptions): Promise<RealTimeModel> {
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
     }
@@ -335,7 +337,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _handleModelDataRequest(request: AutoCreateModelConfigRequest, replyCallback: ReplyCallback): void {
-    const options: AutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
+    const options: IAutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
     if (options === undefined) {
       const message = `Received a request for an auto create id that was not expected: ${request.autoCreateId}`;
       console.error(message);
@@ -367,21 +369,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       replyCallback.reply(response);
     }
   }
-}
-
-export type ModelDataInitializer = {[key: string]: any} | (() => {[key: string]: any});
-
-export interface AutoCreateModelOptions extends CreateModelOptions {
-  ephemeral?: boolean;
-}
-
-export interface CreateModelOptions {
-  collection: string;
-  id?: string;
-  data?: ModelDataInitializer;
-  overrideWorld?: boolean;
-  worldPermissions?: ModelPermissions;
-  userPermissions?: {[key: string]: ModelPermissions};
 }
 
 class InitialIdGenerator {

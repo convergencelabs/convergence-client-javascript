@@ -1,6 +1,7 @@
 import {debugFlags} from "../Debug";
 import {EventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
+import {IWebSocketCtor} from "./IWebSocketCtor";
 
 /**
  * @hidden
@@ -14,18 +15,20 @@ export default class ConvergenceSocket extends EventEmitter {
     CLOSE: "close"
   };
 
-  private _url: string;
+  private readonly _url: string;
   private _socket: WebSocket;
   private _openDeferred: Deferred<void>;
   private _closeDeferred: Deferred<void>;
+  private readonly _webSocketCtor: IWebSocketCtor;
 
-  constructor(url: string) {
+  constructor(url: string, webSocketCtor?: IWebSocketCtor) {
     super();
     let tmp: string = url;
     tmp = tmp.replace(/https:/i, "wss:");
     tmp = tmp.replace(/http:/i, "ws:");
     this._url = tmp;
     this._socket = null;
+    this._webSocketCtor = webSocketCtor === undefined ? WebSocket : webSocketCtor;
   }
 
   get url(): string {
@@ -35,14 +38,14 @@ export default class ConvergenceSocket extends EventEmitter {
   public open(): Promise<void> {
     this._openDeferred = new Deferred<void>();
 
-    if (this._socket && this._socket.readyState === WebSocket.CONNECTING) {
+    if (this._socket && this._socket.readyState === this._webSocketCtor.CONNECTING) {
       throw new Error("Connection already in the process of opening.");
-    } else if (this._socket && this._socket.readyState === WebSocket.OPEN) {
+    } else if (this._socket && this._socket.readyState === this._webSocketCtor.OPEN) {
       throw new Error("Can not call connect on a client that is already connected.");
-    } else if (this._socket && this._socket.readyState === WebSocket.CLOSING) {
+    } else if (this._socket && this._socket.readyState === this._webSocketCtor.CLOSING) {
       throw new Error("Can not call connect on a client that is in the process of closing.");
     } else {
-      this._socket = new WebSocket(this._url);
+      this._socket = new this._webSocketCtor(this._url);
       this.attachToSocket(this._socket);
     }
 
@@ -60,17 +63,17 @@ export default class ConvergenceSocket extends EventEmitter {
   public doClose(clean: boolean, reason?: string): Promise<void> {
     const localDeferred: Deferred<void> = new Deferred<void>();
 
-    if (!this._socket || this._socket.readyState === WebSocket.CLOSED) {
+    if (!this._socket || this._socket.readyState === this._webSocketCtor.CLOSED) {
       if (debugFlags.SOCKET_CONNECTION) {
         console.log("Can't close a closed Web Socket.");
       }
       localDeferred.reject(new Error("Can not call disconnect on a client that is not connected."));
-    } else if (this._socket.readyState === WebSocket.CLOSING) {
+    } else if (this._socket.readyState === this._webSocketCtor.CLOSING) {
       if (debugFlags.SOCKET_CONNECTION) {
         console.log("Attempted to close a WebSocket that was already closing.");
       }
       localDeferred.reject(new Error("Connection is already closing."));
-    } else if (this._socket.readyState === WebSocket.CONNECTING) {
+    } else if (this._socket.readyState === this._webSocketCtor.CONNECTING) {
       if (debugFlags.SOCKET_CONNECTION) {
         console.log("Closing a connecting Web Socket.");
       }
@@ -124,15 +127,15 @@ export default class ConvergenceSocket extends EventEmitter {
   }
 
   public isOpen(): boolean {
-    return this._socket !== null && this._socket.readyState === WebSocket.OPEN;
+    return this._socket !== null && this._socket.readyState === this._webSocketCtor.OPEN;
   }
 
   public isConnecting(): boolean {
-    return this._socket === null || this._socket.readyState === WebSocket.CONNECTING;
+    return this._socket === null || this._socket.readyState === this._webSocketCtor.CONNECTING;
   }
 
   public isClosed(): boolean {
-    return this._socket === null || this._socket.readyState === WebSocket.CLOSED;
+    return this._socket === null || this._socket.readyState === this._webSocketCtor.CLOSED;
   }
 
   public send(message: any): void {
@@ -186,7 +189,7 @@ export default class ConvergenceSocket extends EventEmitter {
     };
 
     socket.onerror = (evt: any) => {
-      if (this._socket === undefined || this._socket.readyState === WebSocket.CONNECTING) {
+      if (this._socket === undefined || this._socket.readyState === this._webSocketCtor.CONNECTING) {
         // We don't want to handle errors during connection here, because
         // the close event will give us more information.
         if (debugFlags.SOCKET_CONNECTION) {

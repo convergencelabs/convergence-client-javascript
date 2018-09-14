@@ -25,4 +25,11 @@ export interface IConvergenceOptions {
    * @default true
    */
   retryOnOpen?: boolean;
+
+  /**
+   * Defines the class / constructor that should be used to create WebSocket
+   * objects. This is useful when operating in NodeJS where a library like
+   * ws or isomorphic-ws can be used to provide a client side WebSocket API.
+   */
+  webSocketClass?: any;
 }

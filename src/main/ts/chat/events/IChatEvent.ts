@@ -1,5 +1,5 @@
 import {IConvergenceEvent} from "../../util/";
 
-export interface ChatEvent extends IConvergenceEvent {
+export interface IChatEvent extends IConvergenceEvent {
   readonly channelId: string;
 }

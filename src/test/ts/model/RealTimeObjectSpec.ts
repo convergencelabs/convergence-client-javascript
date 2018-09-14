@@ -14,7 +14,7 @@ import {ObjectNode} from "../../../main/ts/model/internal/ObjectNode";
 import * as chai from "chai";
 import {SinonSpy} from "sinon";
 import * as sinon from "sinon";
-import {ObjectSetValueEvent} from "../../../main/ts/model/modelEvents";
+import {ObjectSetValueEvent} from "../../../main/ts/model/events/ObjectSetValueEvent";
 
 const expect: any = chai.expect;
 

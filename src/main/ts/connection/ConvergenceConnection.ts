@@ -22,6 +22,7 @@ import {MessageType} from "./protocol/MessageType";
 import {Deferred} from "../util/Deferred";
 import {EventKey, EventEmitter} from "../util/";
 import {Observable, Subject} from "rxjs/Rx";
+import {IWebSocketCtor} from "./IWebSocketCtor";
 
 /**
  * @hidden
@@ -55,6 +56,7 @@ export class ConvergenceConnection extends EventEmitter {
   private readonly _url: string;
   private _messageEmitter: EventEmitter;
   private _messageSubject: Subject<MessageEvent>;
+  private readonly _webSocketCtor: IWebSocketCtor | undefined;
 
   /**
    *
@@ -63,6 +65,7 @@ export class ConvergenceConnection extends EventEmitter {
    * @param maxReconnectAttempts -1 for unlimited
    * @param reconnectInterval in seconds
    * @param retryOnOpen
+   * @param webSocketCtor
    * @param domain
    */
   constructor(url: string,
@@ -70,6 +73,7 @@ export class ConvergenceConnection extends EventEmitter {
               maxReconnectAttempts: number,
               reconnectInterval: number,
               retryOnOpen: boolean,
+              webSocketCtor: IWebSocketCtor | undefined,
               domain: ConvergenceDomain) {
     super();
     this._url = url;
@@ -81,6 +85,8 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
+
+    this._webSocketCtor = webSocketCtor;
 
     // fixme this should be configurable
     this._protocolConfig = {
@@ -282,7 +288,7 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
 
-    const socket: ConvergenceSocket = new ConvergenceSocket(this._url);
+    const socket: ConvergenceSocket = new ConvergenceSocket(this._url, this._webSocketCtor);
     this._protocolConnection = new ProtocolConnection(
       socket,
       this._protocolConfig);

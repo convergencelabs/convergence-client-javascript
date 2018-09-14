@@ -165,6 +165,6 @@ export class RichTextLocation {
    * @internal
    */
   public _transform(): RichTextLocation {
-
+    return null;
   }
 }

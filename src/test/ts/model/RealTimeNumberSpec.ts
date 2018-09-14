@@ -10,9 +10,9 @@ import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {NumberNode} from "../../../main/ts/model/internal/NumberNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/modelEvents";
-import {NumberDeltaEvent} from "../../../main/ts/model/modelEvents";
-import {NumberSetValueEvent} from "../../../main/ts/model/modelEvents";
+import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
+import {NumberDeltaEvent} from "../../../main/ts/model/events/NumberDeltaEvent";
+import {NumberSetValueEvent} from "../../../main/ts/model/events/NumberSetValueEvent";
 
 import * as chai from "chai";
 import * as sinon from "sinon";

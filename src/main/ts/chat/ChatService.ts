@@ -3,7 +3,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
 import {
-  ChatEvent,
+  IChatEvent,
   ChannelLeftEvent,
   ChatMessageEvent,
   UserJoinedEvent,
@@ -60,7 +60,7 @@ export const ChatChannelTypes = {
   ROOM: "room"
 };
 
-export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
+export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   public static readonly Events: ChatServiceEvents = Events;
 
@@ -72,7 +72,7 @@ export class ChatService extends ConvergenceEventEmitter<ChatEvent> {
   /**
    * @internal
    */
-  private readonly _messageStream: Observable<ChatEvent>;
+  private readonly _messageStream: Observable<IChatEvent>;
 
   /**
    * @hidden

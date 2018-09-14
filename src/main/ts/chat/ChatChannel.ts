@@ -1,7 +1,7 @@
 import {ConvergenceEventEmitter} from "../util/";
 import {
   ChatChannelNameChanged,
-  ChatEvent,
+  IChatEvent,
   ChatChannelTopicChanged,
   ChatMessageEvent,
   ChatChannelEvent,
@@ -55,7 +55,7 @@ const Events: ChatChannelEvents = {
 };
 Object.freeze(Events);
 
-export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
+export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   public static readonly Events: ChatChannelEvents = Events;
 
   /**
@@ -77,7 +77,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
    * @internal
    */
   protected constructor(connection: ConvergenceConnection,
-                        messageStream: Observable<ChatEvent>,
+                        messageStream: Observable<IChatEvent>,
                         info: ChatChannelInfo) {
     super();
     this._connection = connection;
@@ -177,7 +177,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<ChatEvent> {
    * @hidden
    * @internal
    */
-  private _processEvent(event: ChatEvent): void {
+  private _processEvent(event: IChatEvent): void {
     if (event instanceof ChatChannelEvent) {
       const lastEventTime = event.timestamp;
       const lastEventNumber = event.eventNumber;

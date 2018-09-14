@@ -1,5 +1,5 @@
 import {IConvergenceEvent} from "../../util";
 
-export interface PresenceSubscriptionEvent extends IConvergenceEvent {
+export interface IPresenceEvent extends IConvergenceEvent {
   readonly username: string;
 }
