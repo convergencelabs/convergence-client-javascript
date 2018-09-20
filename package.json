@@ -23,6 +23,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dist": "gulp dist",
+    "dist:docs": "gulp docs",
     "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
