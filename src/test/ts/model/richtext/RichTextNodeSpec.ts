@@ -1,10 +1,10 @@
 import {expect} from "chai";
-import {RichTextElement} from "../../../../main/ts/model/rt/richtext/model/RichTextElement";
 import {RichTextDocument} from "../../../../main/ts/model/rt/richtext/model/RichTextDocument";
 import {RichTextRootElement} from "../../../../main/ts/model/rt/richtext/model/RichTextRootElement";
 import {AttributeUtils} from "../../../../main/ts/model/rt/richtext/model/AttributeUtils";
 import {RichTextNode} from "../../../../main/ts/model/rt/richtext/model/RichTextNode";
 import {RichTextContentType} from "../../../../main/ts/model/rt/richtext/model/RichTextContentType";
+import {RichTextElement} from "../../../../main/ts/model/rt/richtext/model";
 
 describe("RichTextNode", () => {
   describe("constructor", () => {
@@ -19,6 +19,7 @@ describe("RichTextNode", () => {
       expect(node.document()).to.equal(document);
       expect(node.root()).to.equal(root);
       expect(node.parent()).to.equal(root);
+      // tslint:disable-next-line
       expect(AttributeUtils.areAttributesEqual(node.attributes(), attrs)).to.be.true;
     });
 
@@ -43,6 +44,10 @@ describe("RichTextNode", () => {
 });
 
 class TestRichTextNode extends RichTextNode {
+  constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
+    super(document, parent, attributes);
+  }
+
   public textContentLength(): number {
     return 0;
   }

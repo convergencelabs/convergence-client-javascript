@@ -30,6 +30,7 @@ export class Convergence {
                         username: string,
                         password: string,
                         options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then(() => {
@@ -56,6 +57,7 @@ export class Convergence {
   public static connectAnonymously(url: string,
                                    displayName?: string,
                                    options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then(() => {
@@ -81,6 +83,7 @@ export class Convergence {
    *   successful connection.
    */
   public static connectWithJwt(url: string, jwt: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then(() => {
@@ -106,6 +109,7 @@ export class Convergence {
    *   successful connection.
    */
   public static reconnect(url: string, token: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then(() => {
@@ -115,10 +119,10 @@ export class Convergence {
     });
   }
 
-  private static _validateOptions(options?: IConvergenceOptions) {
+  private static _validateOptions(options?: IConvergenceOptions): void {
       let websockets = false;
       try {
-          websockets = "WebSocket" in window && window["WebSocket"].CLOSING === 2;
+        websockets = WebSocket.CLOSING === 2;
       } catch (e) {
         // no-op
       }

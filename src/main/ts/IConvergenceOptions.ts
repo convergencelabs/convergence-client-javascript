@@ -2,6 +2,9 @@
  * The [[IConvergenceOptions]] interface represents that options that can be set
  * within Convergence when connecting to a domain.
  */
+import {WebSocketFactory} from "./connection/WebSocketFactory";
+import {IWebSocketClass} from "./connection/IWebSocketClass";
+
 export interface IConvergenceOptions {
 
   /**
@@ -31,5 +34,7 @@ export interface IConvergenceOptions {
    * objects. This is useful when operating in NodeJS where a library like
    * ws or isomorphic-ws can be used to provide a client side WebSocket API.
    */
-  webSocketClass?: any;
+  webSocketFactory?: WebSocketFactory;
+
+  webSocketClass?: IWebSocketClass;
 }

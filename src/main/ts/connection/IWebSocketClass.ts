@@ -1,4 +1,4 @@
-export interface IWebSocketCtor {
+export interface IWebSocketClass {
   prototype: WebSocket;
   readonly CLOSED: number;
   readonly CLOSING: number;

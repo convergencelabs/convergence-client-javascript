@@ -142,7 +142,12 @@ export class ProtocolConnection extends EventEmitter {
     if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-    return this._socket.close();
+
+    if (this._socket.isOpen()) {
+      return this._socket.close();
+    } else {
+      return Promise.resolve();
+    }
   }
 
   public sendMessage(envelope: MessageEnvelope): void {

@@ -3,8 +3,12 @@
 import Convergence from "../main/ts/";
 import * as WebSocket from "ws";
 
+const url = "wss://convergence.dev.int.convergencelabs.tech/realtime/domain/test/foo";
+// const url = "wss://localhost/realtime/domain/test/example";
+
 Convergence
-  .connect("ws:localhost:8080/domain/test/example", "test1", "password", {
+  .connect(url, "test1", "password", {
+    webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
     webSocketClass: WebSocket,
     retryOnOpen: false
   })

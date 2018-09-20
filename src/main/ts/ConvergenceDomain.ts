@@ -115,6 +115,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       this._options.maxReconnectAttempts,
       this._options.reconnectInterval,
       this._options.retryOnOpen,
+      this._options.webSocketFactory,
       this._options.webSocketClass,
       this
     );
