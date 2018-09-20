@@ -26,26 +26,25 @@ import {
   StringNodeSetValueEvent
 } from "./internal/events";
 import {
-  ElementDetachedEvent,
-  DateSetValueEvent,
-  ModelChangedEvent,
-  ValueChangedEvent,
-  ArrayInsertEvent,
-  ArrayRemoveEvent,
-  ArrayReorderEvent,
-  ArraySetEvent,
-  ArraySetValueEvent,
-  BooleanSetValueEvent,
-  NumberSetValueEvent,
-  NumberDeltaEvent,
-  ObjectSetValueEvent,
-  ObjectRemoveEvent,
-  ObjectSetEvent,
-  StringInsertEvent,
-  StringRemoveEvent,
-  StringSetValueEvent
-} from "./modelEvents";
+  DateSetValueEvent} from "./events/DateSetValueEvent";
 import {ObservableDate} from "./observable/ObservableDate";
+import {ElementDetachedEvent} from "./events/ElementDetachedEvent";
+import {IValueChangedEvent} from "./events/IValueChangedEvent";
+import {ModelChangedEvent} from "./events/ModelChangedEvent";
+import {ArrayInsertEvent} from "./events/ArrayInsertEvent";
+import {ArrayRemoveEvent} from "./events/ArrayRemoveEvent";
+import {ArraySetEvent} from "./events/ArraySetEvent";
+import {ArrayReorderEvent} from "./events/ArrayReorderEvent";
+import {ArraySetValueEvent} from "./events/ArraySetValueEvent";
+import {BooleanSetValueEvent} from "./events/BooleanSetValueEvent";
+import {NumberSetValueEvent} from "./events/NumberSetValueEvent";
+import {NumberDeltaEvent} from "./events/NumberDeltaEvent";
+import {ObjectSetEvent} from "./events/ObjectSetEvent";
+import {ObjectRemoveEvent} from "./events/ObjectRemoveEvent";
+import {ObjectSetValueEvent} from "./events/ObjectSetValueEvent";
+import {StringInsertEvent} from "./events/StringInsertEvent";
+import {StringRemoveEvent} from "./events/StringRemoveEvent";
+import {StringSetValueEvent} from "./events/StringSetValueEvent";
 
 /**
  * @hidden
@@ -59,7 +58,7 @@ export class ModelEventConverter {
       return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
       return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
-        this.convertEvent(event.childEvent, wrapperFactory) as ValueChangedEvent,
+        this.convertEvent(event.childEvent, wrapperFactory) as IValueChangedEvent,
         event.sessionId, event.username, event.local);
     } else if (event instanceof ArrayNodeInsertEvent) {
       return new ArrayInsertEvent(wrapperFactory.wrap(event.src) as ObservableArray, event.index,

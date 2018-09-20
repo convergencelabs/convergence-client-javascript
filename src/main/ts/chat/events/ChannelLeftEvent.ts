@@ -1,6 +1,6 @@
-import {ChatEvent} from "./ChatEvent";
+import {IChatEvent} from "./IChatEvent";
 
-export class ChannelLeftEvent implements ChatEvent {
+export class ChannelLeftEvent implements IChatEvent {
   public static readonly NAME = "left";
   public readonly name: string = ChannelLeftEvent.NAME;
 

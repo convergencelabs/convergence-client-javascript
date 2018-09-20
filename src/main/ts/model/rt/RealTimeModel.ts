@@ -44,12 +44,12 @@ import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {
-  ModelEvent,
+  IModelEvent,
   ModelClosedEvent,
   VersionChangedEvent,
   RemoteReferenceCreatedEvent,
   ModelPermissionsChangedEvent
-} from "../modelEvents";
+} from "../events/";
 import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable} from "rxjs/Observable";
@@ -70,15 +70,15 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly PERMISSIONS_CHANGED: string;
 }
 
-const RealTimeModelEventConstants: RealTimeModelEvents = Object.assign({
-    MODIFIED: "modified",
-    COMMITTED: "committed",
-    COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
-    COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
-    REFERENCE: RemoteReferenceCreatedEvent.NAME,
-    PERMISSIONS_CHANGED: ModelPermissionsChangedEvent.NAME
-  },
-  ObservableModelEventConstants);
+const RealTimeModelEventConstants: RealTimeModelEvents = {
+  ...ObservableModelEventConstants,
+  MODIFIED: "modified",
+  COMMITTED: "committed",
+  COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
+  COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
+  REFERENCE: RemoteReferenceCreatedEvent.NAME,
+  PERMISSIONS_CHANGED: ModelPermissionsChangedEvent.NAME
+};
 
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
@@ -233,7 +233,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
       this._committed = committed;
       const name: string = this._committed ? RealTimeModel.Events.COMMITTED : RealTimeModel.Events.MODIFIED;
-      const evt: ModelEvent = {src: this, name};
+      const evt: IModelEvent = {src: this, name};
       this._emitEvent(evt);
     });
 
@@ -351,11 +351,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
   public close(): Promise<void> {
     return this._modelService._close(this._resourceId).then(() => {
-      const event: ModelClosedEvent = {
-        src: this,
-        name: RealTimeModel.Events.CLOSED,
-        local: true
-      };
+      const event: ModelClosedEvent = new ModelClosedEvent(this, true);
       this._close(event);
     });
   }
@@ -735,11 +731,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _emitVersionChanged(): void {
-    const event: VersionChangedEvent = {
-      name: RealTimeModel.Events.VERSION_CHANGED,
-      src: this,
-      version: this._version
-    };
+    const event = new VersionChangedEvent(this, this._version);
     this._emitEvent(event);
   }
 
@@ -759,7 +751,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _onRemoteReferencePublished(reference: ModelReference<any>): void {
     this._referencesBySession[reference.sessionId()].push(reference);
-    this._emitEvent(new RemoteReferenceCreatedEvent(reference, undefined, this));
+    this._emitEvent(new RemoteReferenceCreatedEvent(reference, this));
   }
 
   /**

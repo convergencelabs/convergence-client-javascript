@@ -22,6 +22,8 @@ import {MessageType} from "./protocol/MessageType";
 import {Deferred} from "../util/Deferred";
 import {EventKey, EventEmitter} from "../util/";
 import {Observable, Subject} from "rxjs/Rx";
+import {IWebSocketClass} from "./IWebSocketClass";
+import {WebSocketFactory} from "./WebSocketFactory";
 
 /**
  * @hidden
@@ -55,6 +57,8 @@ export class ConvergenceConnection extends EventEmitter {
   private readonly _url: string;
   private _messageEmitter: EventEmitter;
   private _messageSubject: Subject<MessageEvent>;
+  private readonly _webSocketFactory: WebSocketFactory | undefined;
+  private readonly _webSocketClass: IWebSocketClass | undefined;
 
   /**
    *
@@ -63,6 +67,8 @@ export class ConvergenceConnection extends EventEmitter {
    * @param maxReconnectAttempts -1 for unlimited
    * @param reconnectInterval in seconds
    * @param retryOnOpen
+   * @param webSocketFactory
+   * @param webSocketClass
    * @param domain
    */
   constructor(url: string,
@@ -70,6 +76,8 @@ export class ConvergenceConnection extends EventEmitter {
               maxReconnectAttempts: number,
               reconnectInterval: number,
               retryOnOpen: boolean,
+              webSocketFactory: WebSocketFactory | undefined,
+              webSocketClass: IWebSocketClass | undefined,
               domain: ConvergenceDomain) {
     super();
     this._url = url;
@@ -81,6 +89,9 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
+
+    this._webSocketFactory = webSocketFactory;
+    this._webSocketClass = webSocketClass;
 
     // fixme this should be configurable
     this._protocolConfig = {
@@ -282,7 +293,10 @@ export class ConvergenceConnection extends EventEmitter {
 
     this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
 
-    const socket: ConvergenceSocket = new ConvergenceSocket(this._url);
+    const socket: ConvergenceSocket = new ConvergenceSocket(
+      this._url,
+      this._webSocketClass,
+      this._webSocketFactory);
     this._protocolConnection = new ProtocolConnection(
       socket,
       this._protocolConfig);
@@ -334,15 +348,15 @@ export class ConvergenceConnection extends EventEmitter {
         }
       }).catch((e: Error) => {
         console.error("Handshake failed: ", e);
-        this._protocolConnection.close();
+        this._protocolConnection
+          .close()
+          .catch((e) => console.error(e));
         this._protocolConnection = null;
-        this._connectionDeferred = null;
         clearTimeout(this._connectionTimeoutTask);
         this._scheduleReconnect(this._reconnectInterval, reconnect);
         this.emit(ConvergenceConnection.Events.DISCONNECTED);
       });
     }).catch((reason: Error) => {
-      console.error("Connection failed: ", reason);
       clearTimeout(this._connectionTimeoutTask);
       if (reconnect || this._retryOnOpen) {
         this._scheduleReconnect(Math.max(this._reconnectInterval, 0), reconnect);

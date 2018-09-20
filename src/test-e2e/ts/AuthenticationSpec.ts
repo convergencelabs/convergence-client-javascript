@@ -3,7 +3,7 @@ import {MockConvergenceServer} from "../mock-server/MockConvergenceServer";
 import {DoneType} from "../mock-server/MockConvergenceServer";
 import {IMockServerOptions} from "../mock-server/MockConvergenceServer";
 import {IReceiveRequestRecord} from "../mock-server/records";
-import {Convergence} from "../../main/ts/Convergence";
+import {Convergence} from "../../main/ts/";
 
 describe("Authentication E2E", () => {
 

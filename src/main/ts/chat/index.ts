@@ -5,7 +5,7 @@ export * from "./DirectChatChannel";
 export * from "./ChatRoomChannel";
 export * from "./ChatHistoryEntry";
 
-export {ChatEvent} from "./events/ChatEvent";
+export {IChatEvent} from "./events/IChatEvent";
 export {ChatChannelEvent} from "./events/ChatChannelEvent";
 export {ChatMessageEvent} from "./events/ChatMessageEvent";
 export {UserJoinedEvent} from "./events/UserJoinedEvent";

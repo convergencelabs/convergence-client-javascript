@@ -9,10 +9,13 @@ import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
 import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
-  ConnectionErrorEvent, ConnectedEvent, ConvergenceDomainEvent, InterruptedEvent,
-  ReconnectedEvent, DisconnectedEvent
-} from "./events";
+  ConnectionErrorEvent} from "./events/ConnectionErrorEvent";
 import {Validation} from "./util";
+import {IConvergenceDomainEvent} from "./events/IConvergenceDomainEvent";
+import {ConnectedEvent} from "./events/ConnectedEvent";
+import {InterruptedEvent} from "./events/InterruptedEvent";
+import {ReconnectedEvent} from "./events/ReconnectedEvent";
+import {DisconnectedEvent} from "./events/DisconnectedEvent";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -21,7 +24,7 @@ import {Validation} from "./util";
  * that provide access to RealTimeModels, Users, Activities, Presence, and
  * Chat.
  */
-export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomainEvent> {
+export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomainEvent> {
 
   public static readonly Events = {
     CONNECTED: ConnectedEvent.NAME,
@@ -112,6 +115,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<ConvergenceDomain
       this._options.maxReconnectAttempts,
       this._options.reconnectInterval,
       this._options.retryOnOpen,
+      this._options.webSocketFactory,
+      this._options.webSocketClass,
       this
     );
 

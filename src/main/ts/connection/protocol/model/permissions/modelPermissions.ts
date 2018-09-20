@@ -1,5 +1,4 @@
-import {ModelPermissionsImpl} from "../../../../model/ModelPermissionsImpl";
-import {ModelPermissions} from "../../../../model/ModelPermissions";
+import {ModelPermissions} from "../../../../model/";
 
 /**
  * @hidden
@@ -10,7 +9,7 @@ export function deserializeModelPermissions(serialized: any): ModelPermissions {
     return null;
   }
 
-  return new ModelPermissionsImpl(
+  return new ModelPermissions(
     serialized.r,
     serialized.w,
     serialized.d,

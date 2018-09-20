@@ -1,8 +1,8 @@
-import {ModelEvent} from "../modelEvents";
+import {IModelEvent} from "../events/IModelEvent";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {RealTimeModel} from "./RealTimeModel";
 
-export class CollaboratorOpenedEvent implements ModelEvent {
+export class CollaboratorOpenedEvent implements IModelEvent {
   public static readonly NAME = "collaborator_opened";
   public readonly name: string = CollaboratorOpenedEvent.NAME;
 
@@ -11,7 +11,7 @@ export class CollaboratorOpenedEvent implements ModelEvent {
   }
 }
 
-export class CollaboratorClosedEvent implements ModelEvent {
+export class CollaboratorClosedEvent implements IModelEvent {
   public static readonly NAME = "collaborator_closed";
   public readonly name: string = CollaboratorClosedEvent.NAME;
 

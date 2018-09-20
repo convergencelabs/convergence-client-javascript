@@ -1,6 +1,6 @@
-import {PresenceSubscriptionEvent} from "./PresenceSubscriptionEvent";
+import {IPresenceEvent} from "./IPresenceEvent";
 
-export class PresenceAvailabilityChangedEvent implements PresenceSubscriptionEvent {
+export class PresenceAvailabilityChangedEvent implements IPresenceEvent {
   public static readonly NAME = "availability_changed";
   public readonly name: string = PresenceAvailabilityChangedEvent.NAME;
 

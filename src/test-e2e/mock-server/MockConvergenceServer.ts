@@ -34,8 +34,8 @@ if (typeof global['WebSocket'] === "undefined") {
  * This is the main mock server class.
  */
 export class MockConvergenceServer {
-  private _url: string;
-  private _doneManager: AbstractDoneManager;
+  private readonly _url: string;
+  private readonly _doneManager: AbstractDoneManager;
 
   private _mockSocketServer: Server;
   private _serverSocket: WebSocket;
@@ -47,13 +47,13 @@ export class MockConvergenceServer {
 
   private _reqId: number;
 
-  private _sendCallback: SendCallback;
-  private _timeoutCallback: TimeoutCallback;
-  private _completeCallback: CompleteCallback;
+  private readonly _sendCallback: SendCallback;
+  private readonly _timeoutCallback: TimeoutCallback;
+  private readonly _completeCallback: CompleteCallback;
 
   private _currentReceiveAction: AbstractReceiveAction;
 
-  private _debugging: boolean = false;
+  private readonly _debugging;
 
   constructor(options: IMockServerOptions) {
     this._url = options.url;

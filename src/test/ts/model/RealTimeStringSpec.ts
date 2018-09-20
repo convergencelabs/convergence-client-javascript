@@ -11,10 +11,10 @@ import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {StringNode} from "../../../main/ts/model/internal/StringNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/modelEvents";
-import {StringSetValueEvent} from "../../../main/ts/model/modelEvents";
-import {StringInsertEvent} from "../../../main/ts/model/modelEvents";
-import {StringRemoveEvent} from "../../../main/ts/model/modelEvents";
+import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
+import {StringSetValueEvent} from "../../../main/ts/model/events/StringSetValueEvent";
+import {StringInsertEvent} from "../../../main/ts/model/events/StringInsertEvent";
+import {StringRemoveEvent} from "../../../main/ts/model/events/StringRemoveEvent";
 
 import * as chai from "chai";
 import * as sinon from "sinon";

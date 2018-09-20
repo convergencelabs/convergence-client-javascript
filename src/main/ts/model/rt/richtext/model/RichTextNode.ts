@@ -6,7 +6,7 @@ import {RichTextContent} from "./RichTextContent";
  */
 export abstract class RichTextNode implements RichTextContent {
   private _parent: RichTextElement;
-  private _document: RichTextDocument;
+  private readonly _document: RichTextDocument;
   private _attributes: Map<string, any>;
 
   protected constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {

@@ -9,8 +9,8 @@ import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {BooleanNode} from "../../../main/ts/model/internal/BooleanNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/modelEvents";
-import {BooleanSetValueEvent} from "../../../main/ts/model/modelEvents";
+import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
+import {BooleanSetValueEvent} from "../../../main/ts/model/events/BooleanSetValueEvent";
 import * as chai from "chai";
 import * as sinon from "sinon";
 

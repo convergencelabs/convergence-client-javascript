@@ -1,6 +1,6 @@
 import {RealTimeModel, RealTimeElement} from "../rt/";
 import {ModelReference} from "./ModelReference";
-import {ElementDetachedEvent} from "../modelEvents";
+import {ElementDetachedEvent} from "../events/ElementDetachedEvent";
 import {ReferenceManager} from "./ReferenceManager";
 
 export class ElementReference extends ModelReference<RealTimeElement<any>> {

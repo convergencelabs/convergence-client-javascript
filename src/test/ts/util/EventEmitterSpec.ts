@@ -1,5 +1,5 @@
 import * as chai from "chai";
-import {EventEmitter} from "../../../main/ts/util/EventEmitter";
+import {EventEmitter, SimpleEventListener} from "../../../main/ts/util/EventEmitter";
 import ExpectStatic = Chai.ExpectStatic;
 
 const expect: ExpectStatic = chai.expect;
@@ -9,7 +9,7 @@ describe("EventEmitter", () => {
   it("A listener registered for an event should get called when that event is emitted", () => {
     let value: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = (v: number) => {
+    const listener: SimpleEventListener = (v: number) => {
       value = v;
     };
     emitter.on("event", listener);
@@ -21,7 +21,7 @@ describe("EventEmitter", () => {
 
   it("A listener is not notified after it is removed", () => {
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = (v: number) => {
+    const listener: SimpleEventListener = (v: number) => {
       throw new Error();
     };
     emitter.on("event", listener);
@@ -72,7 +72,7 @@ describe("EventEmitter", () => {
   it("A once listener is only notified once.", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = (v: number) => {
+    const listener: SimpleEventListener = (v: number) => {
       count++;
     };
     emitter.once("event", listener);
@@ -85,7 +85,7 @@ describe("EventEmitter", () => {
   it("A listener is only notified for events it is register to.", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = (v: number) => {
+    const listener: SimpleEventListener = (v: number) => {
       count++;
     };
     emitter.once("event", listener);
@@ -98,7 +98,7 @@ describe("EventEmitter", () => {
   it("Event registration is case insensitive", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = (v: number) => {
+    const listener: SimpleEventListener = (v: number) => {
       count++;
     };
     emitter.on("EVENT", listener);
@@ -151,7 +151,7 @@ describe("EventEmitter", () => {
   it("Listeners can not be added multiple times", () => {
     let count: number = 0;
     const emitter: TestEmitter = new TestEmitter();
-    const listener: Function = () => {
+    const listener: SimpleEventListener = () => {
       count++;
     };
     emitter.on("event", listener);

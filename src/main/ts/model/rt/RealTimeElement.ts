@@ -6,7 +6,7 @@ import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/Re
 import {ModelReference, ReferenceFilter} from "../reference/";
 import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RemoteReferenceCreatedEvent} from "../modelEvents";
+import {RemoteReferenceCreatedEvent} from "../events/RemoteReferenceCreatedEvent";
 import {ModelEventConverter} from "../ModelEventConverter";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
@@ -206,7 +206,7 @@ export abstract class RealTimeElement<T>
    * @internal
    */
   private _fireReferenceCreated(reference: ModelReference<any>): void {
-    this._emitEvent(new RemoteReferenceCreatedEvent(reference, this));
+    this._emitEvent(new RemoteReferenceCreatedEvent(reference, this.model(), this));
   }
 }
 
