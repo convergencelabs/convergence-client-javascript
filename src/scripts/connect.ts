@@ -1,16 +1,23 @@
-#!/usr/bin/env node --require ts-node/register
-
-import Convergence from "../main/ts/";
+import Convergence, {ConvergenceDomain, IConvergenceOptions} from "../main/ts";
 import * as WebSocket from "ws";
-import {DOMAIN_PASSWORD, DOMAIN_URL, DOMAIN_USERNAME} from "./config";
 
-Convergence
-  .connect(DOMAIN_URL, DOMAIN_USERNAME, DOMAIN_PASSWORD, {
-    webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
-    webSocketClass: WebSocket,
-    retryOnOpen: false
-  })
-  .then(domain => {
-    console.log("connected");
-  })
-  .catch(e => console.error(e));
+const DOMAIN_URL = "ws://localhost:8080/domain/test/example";
+const DOMAIN_USERNAME = "test1";
+const DOMAIN_PASSWORD = "password";
+
+const ANONYMOUS = true;
+const DISPLAY_NAME = "test user";
+
+const OPTIONS: IConvergenceOptions = {
+  webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
+  webSocketClass: WebSocket,
+  retryOnOpen: false
+};
+
+export function connect(): Promise<ConvergenceDomain> {
+  if (ANONYMOUS) {
+    return Convergence.connectAnonymously(DOMAIN_URL, DISPLAY_NAME, OPTIONS);
+  } else {
+    return Convergence.connect(DOMAIN_URL, DOMAIN_USERNAME, DOMAIN_PASSWORD, OPTIONS);
+  }
+}

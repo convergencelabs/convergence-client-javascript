@@ -1,25 +1,24 @@
 #!/usr/bin/env node --require ts-node/register
 
-import Convergence from "../main/ts/";
-import * as WebSocket from "ws";
-import {DOMAIN_PASSWORD, DOMAIN_URL, DOMAIN_USERNAME} from "./config";
+import {connect} from "./connect";
 
-Convergence
-  .connect(DOMAIN_URL, DOMAIN_USERNAME, DOMAIN_PASSWORD, {
-    webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
-    webSocketClass: WebSocket,
-    retryOnOpen: false
-  })
+connect()
   .then(domain => {
     console.log("connected");
     return domain.models().openAutoCreate({
       ephemeral: true,
       collection: "test",
-      data: {}
+      data: {
+        nested: {
+          property: "foo"
+        }
+      }
     });
   })
   .then(model => {
     console.log("Model Open");
     console.log(JSON.stringify(model.root().value()));
+    console.log(model.elementAt("nested", "property").path());
+    return model.close();
   })
   .catch(e => console.error(e));

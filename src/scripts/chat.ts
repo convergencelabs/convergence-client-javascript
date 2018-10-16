@@ -1,18 +1,12 @@
 #!/usr/bin/env node --require ts-node/register
 
-import Convergence, {ChatChannel} from "../main/ts/";
-import * as WebSocket from "ws";
-import {DOMAIN_PASSWORD, DOMAIN_URL, DOMAIN_USERNAME} from "./config";
+import {ChatChannel} from "../main/ts/";
+import {connect} from "./connect";
 
 let domain;
 const chatId = "testId";
 
-Convergence
-  .connect(DOMAIN_URL, DOMAIN_USERNAME, DOMAIN_PASSWORD, {
-    webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
-    webSocketClass: WebSocket,
-    retryOnOpen: false
-  })
+connect()
   .then(d => {
     console.log("connected");
     domain = d;
@@ -20,7 +14,8 @@ Convergence
       id: chatId,
       type: "room",
       membership: "public",
-      ignoreExistsError: true});
+      ignoreExistsError: true
+    });
   })
   .then(channelId => {
     console.log(`Channel Created: ${channelId}`);
