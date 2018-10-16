@@ -12,5 +12,14 @@ Convergence
   })
   .then(domain => {
     console.log("connected");
+    return domain.models().openAutoCreate({
+      ephemeral: true,
+      collection: "test",
+      data: {}
+    });
+  })
+  .then(model => {
+    console.log("Model Open");
+    console.log(JSON.stringify(model.root().value()));
   })
   .catch(e => console.error(e));
