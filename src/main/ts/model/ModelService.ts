@@ -123,7 +123,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @param id
    *   The id of the model to check.
    *
-   * @retuns
+   * @returns
    *   True if the model is open, false otherwise.
    */
   public isOpen(id: string): boolean {
@@ -136,7 +136,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @param id
    *   The id of the model to check.
    *
-   * @retuns
+   * @returns
    *   True if the model is opening, false otherwise.
    */
   public isOpening(id: string): boolean {
