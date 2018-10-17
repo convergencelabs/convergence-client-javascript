@@ -175,7 +175,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   }
 
   /**
-   * @return
+   * @returns
    *  The ConvergenceSession object for this domain.
    */
   public session(): ConvergenceSession {

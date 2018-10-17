@@ -1,11 +1,14 @@
 #!/usr/bin/env node --require ts-node/register
 
 import {connect} from "./connect";
+import {ConvergenceDomain} from "../main/ts";
+let domain: ConvergenceDomain;
 
 connect()
-  .then(domain => {
+  .then(d => {
+    domain = d;
     console.log("connected");
-    return domain.models().openAutoCreate({
+    return d.models().openAutoCreate({
       ephemeral: true,
       collection: "test",
       data: {
@@ -19,6 +22,13 @@ connect()
     console.log("Model Open");
     console.log(JSON.stringify(model.root().value()));
     console.log(model.elementAt("nested", "property").path());
+    console.log("Closing Model");
     return model.close();
   })
+  .then(() => {
+    console.log("Model closed");
+    console.log("Disposing the domain.");
+    return domain.dispose();
+  })
+  .then(() => console.log("Domain Disposed"))
   .catch(e => console.error(e));

@@ -11,7 +11,6 @@ import {
 } from "../connection/protocol/model/createRealtimeModel";
 import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import {Deferred} from "../util/Deferred";
-import {CloseRealTimeModelRequest} from "../connection/protocol/model/closeRealtimeModel";
 import {
   AutoCreateModelConfigRequest,
   AutoCreateModelConfigResponse
@@ -34,22 +33,27 @@ import {ICreateModelOptions} from "./ICreateModelOptions";
 import {ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 
+/**
+ * The [[ModelService]] is the main entry point in Convergence for working with
+ * real time data models. Models can be created, opened, deleted, and managed
+ * from the [[ModelService]].
+ */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * @internal
    */
-  private _openRequestsByModelId: {[key: string]: Deferred<RealTimeModel>} = {};
+  private _openRequestsByModelId: Map<string, Deferred<RealTimeModel>> = new Map();
 
   /**
    * @internal
    */
-  private _openModelsByModelId: {[key: string]: RealTimeModel} = {};
+  private _openModelsByModelId: Map<string, RealTimeModel> = new Map();
 
   /**
    * @internal
    */
-  private _openModelsByRid: {[key: string]: RealTimeModel} = {};
+  private _openModelsByRid: Map<string, RealTimeModel> = new Map();
 
   /**
    * @internal
@@ -59,7 +63,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private _autoCreateRequests: {[key: number]: IAutoCreateModelOptions} = {};
+  private _autoCreateRequests: { [key: number]: IAutoCreateModelOptions } = {};
 
   /**
    * @internal
@@ -88,10 +92,23 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._autoRequestId = 0;
   }
 
+  /**
+   * @returns
+   *  The ConvergenceSession object for this domain.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
+  /**
+   * Searches for models using the Model Query Syntax.
+   *
+   * @param query
+   *   The query string to use to look up the model.
+   *
+   * @returns
+   *   A promise that will be resolved with the query results.
+   */
   public query(query: string): Promise<ModelResult[]> {
     const message: ModelsQueryRequest = {type: MessageType.MODELS_QUERY_REQUEST, query};
 
@@ -100,14 +117,42 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     });
   }
 
+  /**
+   * Determines if a model with the specified id is opened.
+   *
+   * @param id
+   *   The id of the model to check.
+   *
+   * @retuns
+   *   True if the model is open, false otherwise.
+   */
   public isOpen(id: string): boolean {
-    return this._openModelsByModelId[id] !== undefined;
+    return this._openModelsByModelId.has(id);
   }
 
+  /**
+   * Determines if a model with the specified id is being opened.
+   *
+   * @param id
+   *   The id of the model to check.
+   *
+   * @retuns
+   *   True if the model is opening, false otherwise.
+   */
   public isOpening(id: string): boolean {
-    return this._openRequestsByModelId[id] !== undefined;
+    return this._openRequestsByModelId.has(id);
   }
 
+  /**
+   * Opens an existing model with a known model id. A model with the specified
+   * id must already exist in the system.
+   *
+   * @param id
+   *   The id of the model to open.
+   *
+   * @returns
+   *   A promise that is resolved with the specified model, once open.
+   */
   public open(id: string): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(id)) {
       return Promise.reject<RealTimeModel>(new Error("modelId must be a non-null, non empty string."));
@@ -116,6 +161,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._open(id);
   }
 
+  /**
+   * Opens a model, creating it if needed. If the model already exists, it will
+   * be opened. If the model does not exist it will be created first, and then
+   * opened.
+   *
+   * @param options
+   *   The options that define how to open and / or create the model.
+   *
+   * @returns
+   *   A Promise resolved with the RealTimeModel, once opened.
+   */
   public openAutoCreate(options: IAutoCreateModelOptions): Promise<RealTimeModel> {
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
@@ -124,6 +180,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._open(undefined, options);
   }
 
+  /**
+   * Creates a new model according to the options provided.
+   *
+   * @param options
+   *   A options object specifying how the model is to be created.
+   *
+   * @returns
+   *   A Promise that is resolved with the id of the created model.
+   */
   public create(options: ICreateModelOptions): Promise<string> {
     const collection = options.collection;
     if (!Validation.nonEmptyString(options.collection)) {
@@ -152,10 +217,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     });
   }
 
-  public remove(modelId: string): Promise<void> {
+  /**
+   * Removes an existing model by id.
+   *
+   * @param id
+   *   The id of the model to remove.
+   *
+   * @returns
+   *   A Promise that is resolved when the model is successfuly removed.
+   */
+  public remove(id: string): Promise<void> {
     const request: DeleteRealTimeModelRequest = {
       type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
-      modelId
+      modelId: id
     };
 
     return this._connection.request(request).then(() => {
@@ -163,10 +237,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     });
   }
 
-  public history(modelId: string): Promise<HistoricalModel> {
+  /**
+   * Opens an existing model, by id, in history mode.
+   *
+   * @param id
+   *   The id of the model to open in history mode.
+   *
+   * @returns
+   *   A Promise resolved with the HistoricalModel when opened.
+   */
+  public history(id: string): Promise<HistoricalModel> {
     const request: HistoricalDataRequest = {
       type: MessageType.HISTORICAL_DATA_REQUEST,
-      modelId
+      modelId: id
     };
 
     return this._connection.request(request).then((response: HistoricalDataResponse) => {
@@ -175,15 +258,26 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         response.version,
         response.modifiedTime,
         response.createdTime,
-        modelId,
+        id,
         response.collectionId,
         this._connection,
         this.session());
     });
   }
 
-  public permissions(modelId: string): ModelPermissionManager {
-    return new ModelPermissionManager(modelId, this._connection);
+  /**
+   * Gets the permissions manager for a specific model, by id. The permissions
+   * manager will allow the caller to set the model permissions for the
+   * specified model.
+   *
+   * @param id
+   *   The id of an existing model to get the permissions manager for.
+   *
+   * @returns
+   *   A permissions manager for the specified model.
+   */
+  public permissions(id: string): ModelPermissionManager {
+    return new ModelPermissionManager(id, this._connection);
   }
 
   /**
@@ -191,19 +285,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _close(resourceId: string): Promise<void> {
-    const request: CloseRealTimeModelRequest = {
-      type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
-      resourceId
-    };
-
-    const model: RealTimeModel = this._openModelsByRid[resourceId];
-    delete this._openModelsByRid[resourceId];
-    delete this._openModelsByModelId[model.modelId()];
-
-    return this._connection.request(request).then(() => {
-      return; // convert to Promise<void>
-    });
+  public _close(resourceId: string): void {
+    if (this._openModelsByRid.has(resourceId)) {
+      const model: RealTimeModel = this._openModelsByRid.get(resourceId);
+      this._openModelsByRid.delete(resourceId);
+      this._openModelsByModelId.delete(model.modelId());
+    }
   }
 
   /**
@@ -212,9 +299,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _dispose(): void {
-    Object.getOwnPropertyNames(this._openModelsByModelId).forEach((fqn: string) => {
-      this._openModelsByModelId[fqn].close();
-    });
+    this._openModelsByModelId.forEach(model => model
+      .close()
+      .catch(err => console.error(err)));
   }
 
   /**
@@ -232,14 +319,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // Opening by a known model id, and this model is already open.
     // return it.
-    if (id && this._openModelsByModelId[id] !== undefined) {
-      return Promise.resolve(this._openModelsByModelId[id]);
+    if (id && this._openModelsByModelId.has(id)) {
+      return Promise.resolve(this._openModelsByModelId.get(id));
     }
 
     // Opening by a known model id and we are already opening it.
     // return the promise for the open request.
-    if (id && this._openRequestsByModelId[id] !== undefined) {
-      return this._openRequestsByModelId[id].promise();
+    if (id && this._openRequestsByModelId.has(id)) {
+      return this._openRequestsByModelId.get(id).promise();
     }
 
     // At this point we know we don't have the model open, or are not
@@ -263,7 +350,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // If we don't have an id 1) we can't have an initializer, and 2) we couldn't possibly
     // ask for this model again since we don't know what the id is until the promise returns.
     if (id !== undefined) {
-      this._openRequestsByModelId[id] = deferred;
+      this._openRequestsByModelId.set(id, deferred);
     }
 
     this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
@@ -292,11 +379,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         this
       );
 
-      this._openModelsByModelId[id] = model;
-      this._openModelsByRid[response.resourceId] = model;
+      this._openModelsByModelId.set(response.id, model);
+      this._openModelsByRid.set(response.resourceId, model);
 
-      if (this._openRequestsByModelId[id] !== undefined) {
-        delete this._openRequestsByModelId[id];
+      if (this._openRequestsByModelId.has(id)) {
+        this._openRequestsByModelId.delete(id);
       }
 
       if (options !== undefined) {
@@ -323,7 +410,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           messageEvent.callback);
         break;
       default:
-        const model: RealTimeModel = this._openModelsByRid[messageEvent.message.resourceId];
+        const model: RealTimeModel = this._openModelsByRid.get(messageEvent.message.resourceId);
         if (model !== undefined) {
           model._handleMessage(messageEvent);
         } else {
