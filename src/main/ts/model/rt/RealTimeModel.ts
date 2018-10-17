@@ -951,6 +951,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
 Object.freeze(RealTimeModel.Events);
 
+/**
+ * @private
+ * @hidden
+ * @internal
+ */
 export interface ModelEventCallbacks {
   sendOperationCallback: (operation: DiscreteOperation) => void;
   referenceEventCallbacks: ModelReferenceCallbacks;

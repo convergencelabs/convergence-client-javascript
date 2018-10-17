@@ -26,7 +26,9 @@
     "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
-    "test:cover": "mocha --recursive src/**/*Spec.ts --compilers ts:ts-node/register -R spec"
+    "test:cover": "mocha --recursive src/**/*Spec.ts --compilers ts:ts-node/register -R spec",
+    "typings": "gulp typings",
+    "docs": "gulp docs"
   },
   "typings": "typings/index.d.ts",
   "publishConfig": {
