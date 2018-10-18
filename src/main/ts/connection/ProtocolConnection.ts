@@ -130,7 +130,7 @@ export class ProtocolConnection extends EventEmitter {
           // no-op
         })
         .catch((error) => {
-          console.debug("Unable to terminate web socket connection: " + error);
+          console.debug("Unable to terminate web socket connection: " + error.message);
         });
     }
 

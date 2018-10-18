@@ -58,21 +58,45 @@ export default class ConvergenceSocket extends EventEmitter {
   }
 
   public close(): Promise<void> {
-    return this.doClose(true);
+    return this._doClose(true);
   }
 
   public terminate(reason: string): Promise<void> {
-    return this.doClose(false, reason);
+    return this._doClose(false, reason);
   }
 
-  public doClose(clean: boolean, reason?: string): Promise<void> {
+  public isOpen(): boolean {
+    return this._socket !== null && this._socket.readyState === this._webSocketClass.OPEN;
+  }
+
+  public isConnecting(): boolean {
+    return this._socket === null || this._socket.readyState === this._webSocketClass.CONNECTING;
+  }
+
+  public isClosed(): boolean {
+    return this._socket === null || this._socket.readyState === this._webSocketClass.CLOSED;
+  }
+
+  public send(message: any): void {
+    if (!this.isOpen()) {
+      throw new Error("Can't send messages because the WebSocket is not open.");
+    }
+
+    const encodedMessage: string = JSON.stringify(message);
+    if (debugFlags.SOCKET_MESSAGES) {
+      console.log("S: " + encodedMessage);
+    }
+    this._socket.send(encodedMessage);
+  }
+
+  private _doClose(clean: boolean, reason?: string): Promise<void> {
     const localDeferred: Deferred<void> = new Deferred<void>();
 
     if (!this._socket || this._socket.readyState === this._webSocketClass.CLOSED) {
       if (debugFlags.SOCKET_CONNECTION) {
-        console.log("Can't close a closed Web Socket.");
+        console.log("Can't close a closed WebSocket.");
       }
-      localDeferred.reject(new Error("Can not call disconnect on a client that is not connected."));
+      localDeferred.reject(new Error("Can not close on a WebSocket in the CLOSED state."));
     } else if (this._socket.readyState === this._webSocketClass.CLOSING) {
       if (debugFlags.SOCKET_CONNECTION) {
         console.log("Attempted to close a WebSocket that was already closing.");
@@ -129,30 +153,6 @@ export default class ConvergenceSocket extends EventEmitter {
     }
 
     return localDeferred.promise();
-  }
-
-  public isOpen(): boolean {
-    return this._socket !== null && this._socket.readyState === this._webSocketClass.OPEN;
-  }
-
-  public isConnecting(): boolean {
-    return this._socket === null || this._socket.readyState === this._webSocketClass.CONNECTING;
-  }
-
-  public isClosed(): boolean {
-    return this._socket === null || this._socket.readyState === this._webSocketClass.CLOSED;
-  }
-
-  public send(message: any): void {
-    if (!this.isOpen()) {
-      throw new Error("Can't send protocol while socket is not open.");
-    }
-
-    const encodedMessage: string = JSON.stringify(message);
-    if (debugFlags.SOCKET_MESSAGES) {
-      console.log("S: " + encodedMessage);
-    }
-    this._socket.send(encodedMessage);
   }
 
   private _detachFromSocket(socket: WebSocket): void {
