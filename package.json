@@ -24,6 +24,7 @@
   "scripts": {
     "dist": "gulp dist",
     "dist:docs": "gulp docs",
+    "dist:internal": "gulp distInternal",
     "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
