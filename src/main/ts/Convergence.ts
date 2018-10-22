@@ -1,6 +1,6 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
-import {ConvergenceError} from "./util";
+import {ConvergenceError, Validation} from "./util";
 
 /**
  * The Convergence class is the main entry point into the Convergence Client.
@@ -30,6 +30,10 @@ export class Convergence {
                         username: string,
                         password: string,
                         options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    Validation.assertNonEmptyString(url, "url");
+    Validation.assertNonEmptyString(username, "username");
+    Validation.assertNonEmptyString(password, "password");
+
     options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
@@ -57,6 +61,8 @@ export class Convergence {
   public static connectAnonymously(url: string,
                                    displayName?: string,
                                    options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    Validation.assertNonEmptyString(url, "url");
+
     options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
@@ -83,6 +89,9 @@ export class Convergence {
    *   successful connection.
    */
   public static connectWithJwt(url: string, jwt: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    Validation.assertNonEmptyString(url, "url");
+    Validation.assertNonEmptyString(jwt, "jwt");
+
     options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
@@ -109,6 +118,9 @@ export class Convergence {
    *   successful connection.
    */
   public static reconnect(url: string, token: string, options?: IConvergenceOptions): Promise<ConvergenceDomain> {
+    Validation.assertNonEmptyString(url, "url");
+    Validation.assertNonEmptyString(token, "token");
+
     options = options || {};
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
@@ -120,19 +132,19 @@ export class Convergence {
   }
 
   private static _validateOptions(options?: IConvergenceOptions): void {
-      let websockets = false;
-      try {
-        websockets = WebSocket.CLOSING === 2;
-      } catch (e) {
-        // no-op
-      }
+    let websockets = false;
+    try {
+      websockets = WebSocket.CLOSING === 2;
+    } catch (e) {
+      // no-op
+    }
 
-      if (!websockets && !options.webSocketClass) {
-        const message = "Convergence depends on the WebSockets API. " +
-          "If Convergence is not being run in a browser, you must set the " +
-          "'webSocketClass' property in the connection options.";
-        throw new ConvergenceError(message, "websockets_not_supported");
-      }
+    if (!websockets && !options.webSocketClass) {
+      const message = "Convergence depends on the WebSockets API. " +
+        "If Convergence is not being run in a browser, you must set the " +
+        "'webSocketClass' property in the connection options.";
+      throw new ConvergenceError(message, "websockets_not_supported");
+    }
   }
 }
 

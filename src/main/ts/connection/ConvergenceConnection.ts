@@ -315,57 +315,66 @@ export class ConvergenceConnection extends EventEmitter {
       this._messageSubject.next(event);
     });
 
-    this._protocolConnection.connect().then(() => {
-      if (debugFlags.CONNECTION) {
-        console.log("Connection succeeded, handshaking.");
-      }
-
-      this._protocolConnection.handshake(reconnect).then((handshakeResponse: HandshakeResponse) => {
-        clearTimeout(this._connectionTimeoutTask);
-        if (handshakeResponse.success) {
-          this._connectionState = ConnectionState.CONNECTED;
-
-          this._connectionDeferred.resolve(handshakeResponse);
-          this._connectionDeferred = null;
-
-          if (reconnect) {
-            this.emit(ConvergenceConnection.Events.RECONNECTED);
-          } else {
-            this.emit(ConvergenceConnection.Events.CONNECTED);
-          }
-        } else {
-          // todo: Can we reuse this connection???
-          this._protocolConnection.close();
-          if ((reconnect || this._retryOnOpen) && handshakeResponse.retryOk) {
-            // todo if this is a timeout, we would like to shorten
-            // the reconnect interval by the timeout period.
-            this._scheduleReconnect(this._reconnectInterval, reconnect);
-          } else {
-            this.emit(ConvergenceConnection.Events.DISCONNECTED);
-            this._connectionDeferred.reject(new Error("Server rejected handshake request."));
-            this._connectionDeferred = null;
-          }
+    this._protocolConnection
+      .connect()
+      .then(() => {
+        if (debugFlags.CONNECTION) {
+          console.log("Connection succeeded, handshaking.");
         }
-      }).catch((e: Error) => {
-        console.error("Handshake failed: ", e);
+
         this._protocolConnection
-          .close()
-          .catch((e) => console.error(e));
-        this._protocolConnection = null;
+          .handshake(reconnect)
+          .then((handshakeResponse: HandshakeResponse) => {
+            clearTimeout(this._connectionTimeoutTask);
+            if (handshakeResponse.success) {
+              this._connectionState = ConnectionState.CONNECTED;
+
+              this._connectionDeferred.resolve(handshakeResponse);
+              this._connectionDeferred = null;
+
+              if (reconnect) {
+                this.emit(ConvergenceConnection.Events.RECONNECTED);
+              } else {
+                this.emit(ConvergenceConnection.Events.CONNECTED);
+              }
+            } else {
+              // todo: Can we reuse this connection???
+              this._protocolConnection
+                .close()
+                .catch(error => console.error(error));
+
+              if ((reconnect || this._retryOnOpen) && handshakeResponse.retryOk) {
+                // todo if this is a timeout, we would like to shorten
+                // the reconnect interval by the timeout period.
+                this._scheduleReconnect(this._reconnectInterval, reconnect);
+              } else {
+                this.emit(ConvergenceConnection.Events.DISCONNECTED);
+                this._connectionDeferred.reject(new Error("Server rejected handshake request."));
+                this._connectionDeferred = null;
+              }
+            }
+          })
+          .catch((e: Error) => {
+            console.error("Handshake failed: ", e);
+            this._protocolConnection
+              .close()
+              .catch(error => console.error(error));
+            this._protocolConnection = null;
+            clearTimeout(this._connectionTimeoutTask);
+            this._scheduleReconnect(this._reconnectInterval, reconnect);
+            this.emit(ConvergenceConnection.Events.DISCONNECTED);
+          });
+      })
+      .catch((reason: Error) => {
         clearTimeout(this._connectionTimeoutTask);
-        this._scheduleReconnect(this._reconnectInterval, reconnect);
-        this.emit(ConvergenceConnection.Events.DISCONNECTED);
+        if (reconnect || this._retryOnOpen) {
+          this._scheduleReconnect(Math.max(this._reconnectInterval, 0), reconnect);
+        } else {
+          this._connectionDeferred.reject(reason);
+          this._connectionDeferred = null;
+          this.emit(ConvergenceConnection.Events.DISCONNECTED);
+        }
       });
-    }).catch((reason: Error) => {
-      clearTimeout(this._connectionTimeoutTask);
-      if (reconnect || this._retryOnOpen) {
-        this._scheduleReconnect(Math.max(this._reconnectInterval, 0), reconnect);
-      } else {
-        this._connectionDeferred.reject(reason);
-        this._connectionDeferred = null;
-        this.emit(ConvergenceConnection.Events.DISCONNECTED);
-      }
-    });
   }
 
   private _scheduleReconnect(delay: number, reconnect: boolean): void {

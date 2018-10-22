@@ -1,4 +1,4 @@
-import {ConvergenceEventEmitter} from "../../util";
+import {ConvergenceError, ConvergenceEventEmitter} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
@@ -60,6 +60,7 @@ import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
 import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsChanged";
 import {Path, PathElement} from "../Path";
+import {CloseRealTimeModelRequest} from "../../connection/protocol/model/closeRealtimeModel";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -185,6 +186,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
 
   /**
+   * @hidden
+   * @internal
+   *
    * Constructs a new RealTimeModel.
    */
   constructor(resourceId: string,
@@ -350,10 +354,35 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   public close(): Promise<void> {
-    return this._modelService._close(this._resourceId).then(() => {
+    if (this._open) {
+      // We need to cache the connection here because the _close method sets it to null.
+      const connection = this._connection;
+
+      // Close the model and emit the appropriate events.
       const event: ModelClosedEvent = new ModelClosedEvent(this, true);
       this._close(event);
-    });
+
+      // Inform the model service that we are closed.
+      this._modelService._close(this._resourceId);
+
+      // Inform the server that we are closed.
+      const request: CloseRealTimeModelRequest = {
+        type: MessageType.CLOSES_REAL_TIME_MODEL_REQUEST,
+        resourceId: this._resourceId
+      };
+
+      return connection
+        .request(request)
+        .then(() => {
+          return Promise.resolve();
+        })
+        .catch(err => {
+          console.warn(`Unexpected error closing a model: ${this._modelId}`, err);
+          return Promise.resolve();
+        });
+    } else {
+      return Promise.reject(new ConvergenceError(`The model has already been closed: ${this._modelId}`));
+    }
   }
 
   public startBatch(): void {
@@ -922,6 +951,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
 Object.freeze(RealTimeModel.Events);
 
+/**
+ * @private
+ * @hidden
+ * @internal
+ */
 export interface ModelEventCallbacks {
   sendOperationCallback: (operation: DiscreteOperation) => void;
   referenceEventCallbacks: ModelReferenceCallbacks;

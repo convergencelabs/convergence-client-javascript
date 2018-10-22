@@ -155,8 +155,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   }
 
   public state(): Map<string, any> {
-    // The underlying class takes care of returning a single value or the whole
-    // map as well as cloning.
+    // The underlying class takes care of returning a clone
     return this._localPresence.state;
   }
 
