@@ -6,7 +6,7 @@ import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
-import {ClientConcurrencyControl} from "../ot/ClientConcurrencyControl";
+import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
 import {
@@ -234,8 +234,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
     this._referenceManager = new ReferenceManager(this, [ModelReference.Types.ELEMENT], onRemoteReference);
 
-    this._concurrencyControl.on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (committed: boolean) => {
-      this._committed = committed;
+    this._concurrencyControl
+      .on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (event: ICommitStatusChanged) => {
+      this._committed = event.committed;
       const name: string = this._committed ? RealTimeModel.Events.COMMITTED : RealTimeModel.Events.MODIFIED;
       const evt: IModelEvent = {src: this, name};
       this._emitEvent(evt);

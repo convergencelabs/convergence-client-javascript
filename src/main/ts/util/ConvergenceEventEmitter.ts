@@ -1,5 +1,7 @@
 import {Observable, Subscription, Subject} from "rxjs/Rx";
 import {IConvergenceEvent} from "./IConvergenceEvent";
+import {Validation} from "./Validation";
+import {ConvergenceError} from "./ConvergenceError";
 
 /**
  * The ConvergenceEventListener type defines a function which takes a specific
@@ -217,6 +219,9 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
    * @internal
    */
   protected _emitEvent(value: T): void {
+    if (Validation.isNotSet(value.name)) {
+      throw new ConvergenceError("An event must have a name.");
+    }
     this._defaultSubject.next(value);
   }
 }

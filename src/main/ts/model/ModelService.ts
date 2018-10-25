@@ -77,7 +77,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   constructor(connection: ConvergenceConnection) {
     super();
     this._connection = connection;
-    this._connection.addMultipleMessageListener(
+    this._connection.messages(
       [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
         MessageType.REMOTE_OPERATION,
         MessageType.OPERATION_ACKNOWLEDGEMENT,
@@ -87,8 +87,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         MessageType.REFERENCE_PUBLISHED,
         MessageType.REFERENCE_UNPUBLISHED,
         MessageType.REFERENCE_SET,
-        MessageType.REFERENCE_CLEARED],
-      (message: MessageEvent) => this._handleMessage(message));
+        MessageType.REFERENCE_CLEARED])
+      .subscribe(message => this._handleMessage(message));
     this._autoRequestId = 0;
   }
 

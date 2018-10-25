@@ -80,10 +80,12 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     this._managers = new Map<string, UserPresenceManager>();
     this._presenceStreams = new Map<string, Observable<MessageEvent>>();
 
-    this._messageStream = this._connection.messages([
+    this._messageStream = this._connection
+      .messages([
       MessageType.PRESENCE_AVAILABILITY_CHANGED,
       MessageType.PRESENCE_STATE_SET,
-      MessageType.PRESENCE_STATE_CLEARED]);
+      MessageType.PRESENCE_STATE_CLEARED])
+      .share();
 
     const username: string = this.session().username();
 

@@ -1,5 +1,5 @@
 import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
-import ConvergenceSocket from "./ConvergenceSocket";
+import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {HandshakeResponse, HandshakeRequest} from "./protocol/handhsake";
 import {MessageType} from "./protocol/MessageType";
@@ -12,7 +12,7 @@ import {
   OutgoingProtocolRequestMessage
 } from "./protocol/protocol";
 import {ErrorMessage} from "./protocol/ErrorMessage";
-import {EventEmitter, ConvergenceServerError} from "../util/";
+import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
 
@@ -20,7 +20,44 @@ import {debugFlags} from "../Debug";
  * @hidden
  * @internal
  */
-export class ProtocolConnection extends EventEmitter {
+export interface IProtocolConnectionEvent extends IConvergenceEvent {
+
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IProtocolConnectionClosedEvent extends IProtocolConnectionEvent {
+  name: "closed";
+  reason: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IProtocolConnectionErrorEvent extends IProtocolConnectionEvent {
+  name: "error";
+  error: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IProtocolConnectionMessageEvent extends IProtocolConnectionEvent {
+  name: "message";
+  request: boolean;
+  message: any;
+  callback?: ReplyCallback;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnectionEvent> {
 
   public static Events: any = {
     MESSAGE: "message",
@@ -33,7 +70,7 @@ export class ProtocolConnection extends EventEmitter {
   private _socket: ConvergenceSocket;
   private _protocolConfig: ProtocolConfiguration;
   private _nextRequestId: number = 0;
-  private _requests: any;
+  private readonly _requests: any;
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
@@ -41,16 +78,16 @@ export class ProtocolConnection extends EventEmitter {
     this._protocolConfig = protocolConfig;
     this._socket = socket;
 
-    this._socket.on(ConvergenceSocket.Events.MESSAGE, (message: any) => {
-      this.onSocketMessage(message);
+    this._socket.on(ConvergenceSocket.Events.MESSAGE, (event: ISocketMessageEvent) => {
+      this.onSocketMessage(event.message);
     });
 
-    this._socket.on(ConvergenceSocket.Events.ERROR, (error: string) => {
-      this.onSocketError(error);
+    this._socket.on(ConvergenceSocket.Events.ERROR, (event: ISocketErrorEvent) => {
+      this.onSocketError(event.error);
     });
 
-    this._socket.on(ConvergenceSocket.Events.CLOSE, (reason: string) => {
-      this.onSocketClosed(reason);
+    this._socket.on(ConvergenceSocket.Events.CLOSE, (event: ISocketClosedEvent) => {
+      this.onSocketClosed(event.reason);
     });
 
     this._requests = {};
@@ -138,7 +175,7 @@ export class ProtocolConnection extends EventEmitter {
   }
 
   public close(): Promise<void> {
-    this.removeAllListenersForAllEvents();
+    this.removeAllListeners();
     if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -152,8 +189,8 @@ export class ProtocolConnection extends EventEmitter {
 
   public sendMessage(envelope: MessageEnvelope): void {
     if ((debugFlags.PROTOCOL_MESSAGES &&
-        envelope.body.type !== MessageType.PING &&
-        envelope.body.type !== MessageType.PONG) ||
+      envelope.body.type !== MessageType.PING &&
+      envelope.body.type !== MessageType.PONG) ||
       debugFlags.PROTOCOL_PINGS) {
       console.log("S: " + JSON.stringify(envelope));
     }
@@ -171,8 +208,8 @@ export class ProtocolConnection extends EventEmitter {
     const type: MessageType = envelope.body.type;
 
     if ((debugFlags.PROTOCOL_MESSAGES &&
-        type !== MessageType.PING &&
-        type !== MessageType.PONG) ||
+      type !== MessageType.PING &&
+      type !== MessageType.PONG) ||
       debugFlags.PROTOCOL_PINGS) {
       console.log("R: " + JSON.stringify(envelope));
     }
@@ -180,7 +217,7 @@ export class ProtocolConnection extends EventEmitter {
     if (type === MessageType.PING) {
       this.onPing();
     } else if (type === MessageType.PONG) {
-      // TODO: Do we need to do anything here
+      // no-op
     } else if (envelope.requestId !== undefined) {
       this.onRequest(envelope);
     } else if (envelope.responseId !== undefined) {
@@ -194,7 +231,8 @@ export class ProtocolConnection extends EventEmitter {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-    this.emit(ProtocolConnection.Events.CLOSED, reason);
+    const event: IProtocolConnectionClosedEvent = {name: ProtocolConnection.Events.CLOSED, reason};
+    this._emitEvent(event);
   }
 
   private onSocketDropped(): void {
@@ -202,28 +240,33 @@ export class ProtocolConnection extends EventEmitter {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
-    this.emit(ProtocolConnection.Events.DROPPED);
+    this._emitEvent({name: ProtocolConnection.Events.DROPPED});
   }
 
   private onSocketError(error: string): void {
-    this.emit(ProtocolConnection.Events.ERROR, error);
+    const event: IProtocolConnectionErrorEvent = {name: ProtocolConnection.Events.ERROR, error};
+    this._emitEvent(event);
   }
 
   private onNormalMessage(envelope: MessageEnvelope): void {
     setTimeout(() => {
-      this.emit(ProtocolConnection.Events.MESSAGE, {
+      const event: IProtocolConnectionMessageEvent = {
+        name: "message",
         request: false,
         message: envelope.body
-      });
+      };
+      this._emitEvent(event);
     }, 0);
   }
 
   private onRequest(envelope: MessageEnvelope): void {
-    this.emit(ProtocolConnection.Events.MESSAGE, {
+    const event: IProtocolConnectionMessageEvent = {
+      name: "message",
       request: true,
       callback: new ReplyCallbackImpl(envelope.requestId, this),
       message: envelope.body
-    });
+    };
+    this._emitEvent(event);
   }
 
   private onReply(envelope: MessageEnvelope): void {

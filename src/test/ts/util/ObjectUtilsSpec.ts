@@ -1,5 +1,4 @@
 import * as chai from "chai";
-import {EventEmitter} from "../../../main/ts/util/EventEmitter";
 import ExpectStatic = Chai.ExpectStatic;
 import {deepClone} from "../../../main/ts/util/ObjectUtils";
 

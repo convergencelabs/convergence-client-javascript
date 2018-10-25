@@ -1,5 +1,5 @@
 import {debugFlags} from "../Debug";
-import {EventEmitter} from "../util/";
+import {ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
@@ -8,7 +8,42 @@ import {WebSocketFactory} from "./WebSocketFactory";
  * @hidden
  * @internal
  */
-export default class ConvergenceSocket extends EventEmitter {
+export interface IConvergenceSocketEvent extends IConvergenceEvent {
+
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface ISocketClosedEvent extends IConvergenceSocketEvent {
+  name: "closed";
+  reason: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface ISocketErrorEvent extends IConvergenceSocketEvent {
+  name: "error";
+  error: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface ISocketMessageEvent extends IConvergenceSocketEvent {
+  name: "message";
+  message: any;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export default class ConvergenceSocket extends ConvergenceEventEmitter<IConvergenceSocketEvent> {
 
   public static Events: any = {
     MESSAGE: "message",
@@ -170,7 +205,10 @@ export default class ConvergenceSocket extends EventEmitter {
         if (debugFlags.SOCKET_MESSAGES) {
           console.log("R: " + evt.data);
         }
-        this.emit(ConvergenceSocket.Events.MESSAGE, decoded);
+        this._emitEvent({
+          name: ConvergenceSocket.Events.MESSAGE,
+          message: decoded
+        } as ISocketMessageEvent);
       } catch (e) {
         console.error("Error processing Web Socket Message.", e);
       }
@@ -189,8 +227,11 @@ export default class ConvergenceSocket extends EventEmitter {
         this._openDeferred = null;
       } else {
         // TODO what else to do here?
-        this.emit(ConvergenceSocket.Events.ERROR,
-          "Received onOpen event while in state: " + this._socket.readyState);
+        const event: ISocketErrorEvent = {
+          name: ConvergenceSocket.Events.ERROR,
+          error: "Received onOpen event while in state: " + this._socket.readyState
+        };
+        this._emitEvent(event);
       }
     };
 
@@ -203,7 +244,11 @@ export default class ConvergenceSocket extends EventEmitter {
         }
         try {
           // fixme get the error protocol
-          this.emit(ConvergenceSocket.Events.ERROR, evt.data);
+          const event: ISocketErrorEvent = {
+            name: ConvergenceSocket.Events.ERROR,
+            error: evt.data
+          };
+          this._emitEvent(event);
         } catch (e) {
           console.log("Error handling WebSocket error.", e);
         }
@@ -241,7 +286,11 @@ export default class ConvergenceSocket extends EventEmitter {
           if (debugFlags.SOCKET_CONNECTION) {
             console.log("Web Socket connection unexpectedly closed: ", evt);
           }
-          this.emit(ConvergenceSocket.Events.CLOSE, "unexpected Web Socket closure.");
+          const event: ISocketClosedEvent = {
+            name: ConvergenceSocket.Events.CLOSE,
+            reason: "unexpected Web Socket closure."
+          };
+          this._emitEvent(event);
         }
       } catch (e) {
         console.log("Error handling web socket close event.", e);

@@ -1,5 +1,3 @@
-import {EventEmitter} from "../../src/main/ts/util/EventEmitter";
-
 class QuillAdapter {
   constructor(editor, quillDocElement) {
     this._editor = editor;

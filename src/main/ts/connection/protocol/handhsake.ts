@@ -29,7 +29,7 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
   success: boolean;
   reconnectToken: string;
   protocolConfig: any; // todo make interface
-  error?: any;
+  error?: {code: string, details: string};
   retryOk?: boolean;
 }
 
@@ -38,11 +38,15 @@ export interface HandshakeResponse extends IncomingProtocolResponseMessage {
  * @internal
  */
 export const HandshakeResponseDeserializer: MessageBodyDeserializer<HandshakeResponse> = (body: any) => {
+  const error = body.e !== undefined ? {
+    code: body.e.c,
+    details: body.e.d
+  } : undefined;
   return {
     success: body.s,
     reconnectToken: body.k,
     protocolConfig: body.c,
-    error: body.e,
+    error,
     retryOk: body.r
   };
 };

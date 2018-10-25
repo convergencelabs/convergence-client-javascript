@@ -1,4 +1,4 @@
-import {ConvergenceConnection, AuthResponse} from "./connection/ConvergenceConnection";
+import {ConvergenceConnection, AuthResponse, IConnectionErrorEvent} from "./connection/ConvergenceConnection";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
@@ -9,13 +9,14 @@ import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
 import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
-  ConnectionErrorEvent} from "./events/ConnectionErrorEvent";
+  ConnectionErrorEvent,
+  IConvergenceDomainEvent,
+  ConnectedEvent,
+  InterruptedEvent,
+  ReconnectedEvent,
+  DisconnectedEvent
+} from "./events/";
 import {Validation} from "./util";
-import {IConvergenceDomainEvent} from "./events/IConvergenceDomainEvent";
-import {ConnectedEvent} from "./events/ConnectedEvent";
-import {InterruptedEvent} from "./events/InterruptedEvent";
-import {ReconnectedEvent} from "./events/ReconnectedEvent";
-import {DisconnectedEvent} from "./events/DisconnectedEvent";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -103,7 +104,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     }
 
     this._options = options === undefined ?
-      options = ConvergenceDomain.DefaultOptions :
+      ConvergenceDomain.DefaultOptions :
       {...ConvergenceDomain.DefaultOptions, ...options};
 
     this._disposed = false;
@@ -124,8 +125,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () => this._emitEvent(new InterruptedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => this._emitEvent(new DisconnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () => this._emitEvent(new ReconnectedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.ERROR, (error: string) =>
-      this._emitEvent(new ConnectionErrorEvent(this, error))
+    this._connection.on(ConvergenceConnection.Events.ERROR, (evt: IConnectionErrorEvent) =>
+      this._emitEvent(new ConnectionErrorEvent(this, evt.error))
     );
   }
 

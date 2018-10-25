@@ -1,4 +1,3 @@
-import {EventEmitter} from "../../../../../util/";
 import {RichTextDocument, RichTextRootElement, RichTextRange, RichTextLocation} from "../../model/";
 import {QuillDeltaConverter} from "./QuillDeltaConverter";
 import {QuillDelta} from "./QuillDelta";
@@ -7,7 +6,7 @@ import {QuillDelta} from "./QuillDelta";
  * @hidden
  * @internal
  */
-export class RealTimeQuillDocument extends EventEmitter {
+export class RealTimeQuillDocument {
   public static Events = {
     DELTA: "delta"
   };
@@ -16,7 +15,6 @@ export class RealTimeQuillDocument extends EventEmitter {
   private readonly _root: RichTextRootElement;
 
   constructor(document: RichTextDocument) {
-    super();
     this._doc = document;
     this._root = QuillDeltaConverter.getRoot(document);
   }

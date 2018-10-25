@@ -11,6 +11,7 @@ connect()
     return d.models().openAutoCreate({
       ephemeral: true,
       collection: "test",
+      id: "my-test-id",
       data: {
         nested: {
           property: "foo"
@@ -30,5 +31,7 @@ connect()
     console.log("Disposing the domain.");
     return domain.dispose();
   })
-  .then(() => console.log("Domain Disposed"))
+  .then(() => {
+    console.log("Domain Disposed");
+  })
   .catch(e => console.error(e));

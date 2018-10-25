@@ -59,15 +59,14 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
     this._joinedActivities = new Map<string, Activity>();
 
     const messageObs: Observable<MessageEvent> = Observable.create((observer: Observer<MessageEvent>) => {
-      this._connection.addMultipleMessageListener(
-        [MessageType.ACTIVITY_SESSION_JOINED,
-          MessageType.ACTIVITY_SESSION_LEFT,
-          MessageType.ACTIVITY_REMOTE_STATE_SET,
-          MessageType.ACTIVITY_REMOTE_STATE_REMOVED,
-          MessageType.ACTIVITY_REMOTE_STATE_CLEARED],
-        (event) => {
-          observer.next(event);
-        });
+      this._connection
+        .messages(
+          [MessageType.ACTIVITY_SESSION_JOINED,
+            MessageType.ACTIVITY_SESSION_LEFT,
+            MessageType.ACTIVITY_REMOTE_STATE_SET,
+            MessageType.ACTIVITY_REMOTE_STATE_REMOVED,
+            MessageType.ACTIVITY_REMOTE_STATE_CLEARED])
+        .subscribe(event => observer.next(event));
     });
 
     const eventStream: Observable<any> = messageObs.pluck("message").concatMap((message: IncomingActivityMessage) => {
