@@ -1,6 +1,11 @@
 import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ProtocolConnection, ReplyCallback} from "./ProtocolConnection";
+import {
+  IProtocolConnectionErrorEvent,
+  IProtocolConnectionMessageEvent,
+  ProtocolConnection,
+  ReplyCallback
+} from "./ProtocolConnection";
 import {debugFlags} from "../Debug";
 import ConvergenceSocket from "./ConvergenceSocket";
 import {
@@ -20,8 +25,8 @@ import {
 } from "./protocol/authentication";
 import {MessageType} from "./protocol/MessageType";
 import {Deferred} from "../util/Deferred";
-import {EventKey, EventEmitter} from "../util/";
-import {Observable, Subject} from "rxjs/Rx";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
+import {Observable} from "rxjs/Rx";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
 
@@ -29,9 +34,10 @@ import {WebSocketFactory} from "./WebSocketFactory";
  * @hidden
  * @internal
  */
-export class ConvergenceConnection extends EventEmitter {
+export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEvent> {
 
   public static Events: any = {
+    MESSAGE: "message",
     CONNECTED: "connected",
     INTERRUPTED: "interrupted",
     RECONNECTED: "reconnected",
@@ -55,8 +61,6 @@ export class ConvergenceConnection extends EventEmitter {
 
   private _protocolConnection: ProtocolConnection;
   private readonly _url: string;
-  private _messageEmitter: EventEmitter;
-  private _messageSubject: Subject<MessageEvent>;
   private readonly _webSocketFactory: WebSocketFactory | undefined;
   private readonly _webSocketClass: IWebSocketClass | undefined;
 
@@ -102,10 +106,6 @@ export class ConvergenceConnection extends EventEmitter {
         pongTimeout: 10000
       }
     };
-
-    // todo migrate away from this.
-    this._messageEmitter = new EventEmitter();
-    this._messageSubject = new Subject();
 
     this._session = new ConvergenceSession(domain, this, null, null, null);
   }
@@ -156,11 +156,11 @@ export class ConvergenceConnection extends EventEmitter {
     this._protocolConnection
       .close()
       .then(() => {
-        this._connectionState = ConnectionState.DISCONNECTED;
+        this._handleDisconnected();
         deferred.resolve();
       })
       .catch((err: Error) => {
-        this._connectionState = ConnectionState.INTERRUPTED;
+        this._handleInterrupted();
         deferred.reject(err);
       });
 
@@ -212,30 +212,21 @@ export class ConvergenceConnection extends EventEmitter {
     return this._authenticate(authRequest);
   }
 
-  public addMessageListener(type: EventKey, listener: (message: any) => void): void {
-    this._messageEmitter.on(type, listener);
-  }
-
-  public addMultipleMessageListener(types: EventKey[], listener: (message: any) => void): void {
-    types.forEach((type: string) => {
-      this._messageEmitter.on(type, listener);
-    });
-  }
-
-  public removeMessageListener(type: EventKey, listener: (message: any) => void): void {
-    this._messageEmitter.off(type, listener);
-  }
-
   public messages(eventFilter?: MessageType[]): Observable<MessageEvent> {
     if (typeof eventFilter === "undefined") {
-      return this._messageSubject.asObservable();
+      return this
+        .events()
+        .filter(e => e.name === "message") as Observable<MessageEvent>;
     } else {
       const filter: MessageType[] = eventFilter.slice(0);
-      return this._messageSubject.asObservable().filter(m => {
-        return filter.some(t => {
-          return m.message.type === t;
-        });
-      });
+      return this
+        .events()
+        .filter(e => e.name === "message")
+        .filter((m: MessageEvent) => {
+          return filter.some(t => {
+            return m.message.type === t;
+          });
+        }) as Observable<MessageEvent>;
     }
   }
 
@@ -301,19 +292,40 @@ export class ConvergenceConnection extends EventEmitter {
       socket,
       this._protocolConfig);
 
-    this._protocolConnection.on(ProtocolConnection.Events.ERROR, (error: string) =>
-      this.emit(ConvergenceConnection.Events.ERROR, error));
+    this._protocolConnection
+      .events()
+      .subscribe(e => {
+        switch (e.name) {
+          case ProtocolConnection.Events.ERROR: {
+            const errorEvent = e as IProtocolConnectionErrorEvent;
+            const event: IConnectionErrorEvent = {name: ConvergenceConnection.Events.ERROR, error: errorEvent.error};
+            this._emitEvent(event);
+            break;
+          }
 
-    this._protocolConnection.on(ProtocolConnection.Events.DROPPED, () =>
-      this.emit(ConvergenceConnection.Events.INTERRUPTED));
+          case ProtocolConnection.Events.DROPPED: {
+            this._emitEvent({name: ConvergenceConnection.Events.INTERRUPTED});
+            break;
+          }
 
-    this._protocolConnection.on(ProtocolConnection.Events.CLOSED, () =>
-      this.emit(ConvergenceConnection.Events.DISCONNECTED));
+          case ProtocolConnection.Events.CLOSED: {
+            this._handleDisconnected();
+            break;
+          }
 
-    this._protocolConnection.on(ProtocolConnection.Events.MESSAGE, (event: MessageEvent) => {
-      this._messageEmitter.emit(event.message.type, event);
-      this._messageSubject.next(event);
-    });
+          case ProtocolConnection.Events.MESSAGE: {
+            const messageEvent = e as IProtocolConnectionMessageEvent;
+            const event: MessageEvent = {
+              name: ConvergenceConnection.Events.MESSAGE,
+              request: messageEvent.message,
+              callback: messageEvent.callback,
+              message: messageEvent.message
+            };
+            this._emitEvent(event);
+            break;
+          }
+        }
+      });
 
     this._protocolConnection
       .connect()
@@ -333,9 +345,9 @@ export class ConvergenceConnection extends EventEmitter {
               this._connectionDeferred = null;
 
               if (reconnect) {
-                this.emit(ConvergenceConnection.Events.RECONNECTED);
+                this._emitEvent({name: ConvergenceConnection.Events.RECONNECTED});
               } else {
-                this.emit(ConvergenceConnection.Events.CONNECTED);
+                this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
               }
             } else {
               // todo: Can we reuse this connection???
@@ -348,8 +360,9 @@ export class ConvergenceConnection extends EventEmitter {
                 // the reconnect interval by the timeout period.
                 this._scheduleReconnect(this._reconnectInterval, reconnect);
               } else {
-                this.emit(ConvergenceConnection.Events.DISCONNECTED);
-                this._connectionDeferred.reject(new Error("Server rejected handshake request."));
+                this._handleDisconnected();
+                this._connectionDeferred.reject(
+                  new ConvergenceError(handshakeResponse.error.details, handshakeResponse.error.code));
                 this._connectionDeferred = null;
               }
             }
@@ -362,7 +375,7 @@ export class ConvergenceConnection extends EventEmitter {
             this._protocolConnection = null;
             clearTimeout(this._connectionTimeoutTask);
             this._scheduleReconnect(this._reconnectInterval, reconnect);
-            this.emit(ConvergenceConnection.Events.DISCONNECTED);
+            this._handleDisconnected();
           });
       })
       .catch((reason: Error) => {
@@ -372,7 +385,7 @@ export class ConvergenceConnection extends EventEmitter {
         } else {
           this._connectionDeferred.reject(reason);
           this._connectionDeferred = null;
-          this.emit(ConvergenceConnection.Events.DISCONNECTED);
+          this._handleDisconnected();
         }
       });
   }
@@ -387,13 +400,49 @@ export class ConvergenceConnection extends EventEmitter {
       this._connectionDeferred.reject(new Error("Maximum connection attempts exceeded"));
     }
   }
+
+  private _handleDisconnected(): void {
+    this._connectionState = ConnectionState.DISCONNECTED;
+    this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
+  }
+
+  private _handleInterrupted(): void {
+    this._connectionState = ConnectionState.INTERRUPTED;
+    this._emitEvent({name: ConvergenceConnection.Events.INTERRUPTED});
+  }
 }
 
 /**
  * @hidden
  * @internal
  */
-export interface MessageEvent {
+export interface IConnectionEvent extends IConvergenceEvent {
+
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IConnectionClosedEvent extends IConnectionEvent {
+  name: "closed";
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IConnectionErrorEvent extends IConnectionEvent {
+  name: "closed";
+  error: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface MessageEvent extends IConnectionEvent {
+  name: "message";
   message: any; // Model Message??
   request: boolean;
   callback?: ReplyCallback;

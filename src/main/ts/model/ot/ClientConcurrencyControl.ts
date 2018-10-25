@@ -2,17 +2,34 @@ import {ProcessedOperationEvent} from "./ProcessedOperationEvent";
 import {Operation} from "./ops/Operation";
 import {DiscreteOperation} from "./ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "./UnprocessedOperationEvent";
-import {EventEmitter} from "../../util/";
 import {CompoundOperation} from "./ops/CompoundOperation";
 import {OperationTransformer} from "./xform/OperationTransformer";
 import {OperationPair} from "./xform/OperationPair";
 import {ReferenceTransformer, ModelReferenceData} from "./xform/ReferenceTransformer";
+import {ConvergenceEventEmitter, IConvergenceEvent} from "../../util";
 
 /**
  * @hidden
  * @internal
  */
-export class ClientConcurrencyControl extends EventEmitter {
+export interface IClientConcurrencyControlEvent extends IConvergenceEvent {
+  // empty
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface ICommitStatusChanged extends IClientConcurrencyControlEvent {
+  name: "commitStateChanged";
+  committed: boolean;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientConcurrencyControlEvent> {
 
   public static Events: any = {
     COMMIT_STATE_CHANGED: "commitStateChanged"
@@ -151,7 +168,11 @@ export class ClientConcurrencyControl extends EventEmitter {
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had no inflight ops or compound ops before. Now we have one.
       // so now we have uncommitted operations.
-      this.emit(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, false);
+      const evt: ICommitStatusChanged = {
+        name: ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED,
+        committed: false
+      };
+      this._emitEvent(evt);
     }
 
     if (this._compoundOpInProgress) {
@@ -199,7 +220,11 @@ export class ClientConcurrencyControl extends EventEmitter {
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had inflight ops before. Now we have none. So now we have
       // changed commit state.
-      this.emit(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, true);
+      const evt: ICommitStatusChanged = {
+        name: ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED,
+        committed: true
+      };
+      this._emitEvent(evt);
     }
   }
 

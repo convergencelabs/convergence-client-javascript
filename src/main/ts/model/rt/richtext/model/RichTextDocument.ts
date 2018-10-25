@@ -1,16 +1,13 @@
-import {EventEmitter} from "../../../../util/";
-
 /**
  * @hidden
  * @internal
  */
-export class RichTextDocument extends EventEmitter {
+export class RichTextDocument {
   private _attributes: Map<string, any>;
   private _roots: Map<string, RichTextRootElement>;
   private _mutator: RichTextMutator;
 
   constructor() {
-    super();
     this._mutator = new RichTextMutator(this);
     this._roots = new Map<string, RichTextRootElement>();
     this._attributes = new Map<string, any>();

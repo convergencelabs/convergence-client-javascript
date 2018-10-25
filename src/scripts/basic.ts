@@ -2,8 +2,17 @@
 
 import {connect} from "./connect";
 
+let domain;
+
+console.log("connecting...");
 connect()
-  .then(domain => {
+  .then(d => {
+    domain = d;
     console.log("connected");
+    console.log("disconnecting...");
+    return domain.dispose();
+  })
+  .then(() => {
+    console.log("disconnected");
   })
   .catch(e => console.error(e));
