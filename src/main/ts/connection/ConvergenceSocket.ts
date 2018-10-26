@@ -79,11 +79,11 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     this._openDeferred = new Deferred<void>();
 
     if (this._socket && this._socket.readyState === this._webSocketClass.CONNECTING) {
-      throw new Error("Connection already in the process of opening.");
+      throw new Error("Socket already in the process of opening.");
     } else if (this._socket && this._socket.readyState === this._webSocketClass.OPEN) {
-      throw new Error("Can not call connect on a client that is already connected.");
+      throw new Error("Can not call connect on a socket that is already connected.");
     } else if (this._socket && this._socket.readyState === this._webSocketClass.CLOSING) {
-      throw new Error("Can not call connect on a client that is in the process of closing.");
+      throw new Error("Can not call connect on a socket that is in the process of closing.");
     } else {
       this._socket = this._webSocketFactory(this._url);
       this._attachToSocket(this._socket);
