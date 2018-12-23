@@ -36,7 +36,7 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleInsert(index: number, length: number): void {
-    this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length));
+    this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length), true);
   }
 
   /**
@@ -45,7 +45,7 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleRemove(index: number, length: number): void {
-    this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length));
+    this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length), true);
   }
 
   /**
@@ -54,6 +54,6 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleReorder(fromIndex: number, toIndex: number): void {
-    this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex));
+    this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex), true);
   }
 }

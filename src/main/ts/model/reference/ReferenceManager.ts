@@ -158,7 +158,7 @@ export class ReferenceManager {
     this._setReferenceValues(reference, event.values);
   }
 
-  private _setReferenceValues(reference: ModelReference<any> , values: any): void {
+  private _setReferenceValues(reference: ModelReference<any>, values: any): void {
     // Translate vids to RealTimeElements
     if (reference.type() === ModelReference.Types.ELEMENT) {
       const rtvs: Array<RealTimeElement<any>> = [];
@@ -168,9 +168,9 @@ export class ReferenceManager {
           rtvs.push(value);
         }
       }
-      reference._set(rtvs);
+      reference._set(rtvs, false);
     } else {
-      reference._set(values);
+      reference._set(values, false);
     }
   }
 }

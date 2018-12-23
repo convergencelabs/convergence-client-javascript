@@ -34,7 +34,7 @@ export class PropertyReference extends ModelReference<string> {
     if (index > -1) {
       const newElements: string[] = this._values.slice(0);
       newElements.splice(index, 1);
-      this._set(newElements);
+      this._set(newElements, true);
     }
   }
 }

@@ -31,7 +31,7 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleInsert(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleInsert(this._values, index, length));
+    this._setIfChanged(IndexTransformer.handleInsert(this._values, index, length), true);
   }
 
   /**
@@ -40,7 +40,7 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleRemove(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleRemove(this._values, index, length));
+    this._setIfChanged(IndexTransformer.handleRemove(this._values, index, length), true);
   }
 
   /**
@@ -49,6 +49,6 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleReorder(fromIndex: number, toIndex: number): void {
-    this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex));
+    this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex), true);
   }
 }

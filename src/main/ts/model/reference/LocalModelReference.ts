@@ -108,9 +108,9 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._ensureAttached();
 
     if (value instanceof Array) {
-      this._reference._set(value);
+      this._reference._set(value, false);
     } else {
-      this._reference._set([value]);
+      this._reference._set([value], false);
     }
 
     if (this.isShared()) {
