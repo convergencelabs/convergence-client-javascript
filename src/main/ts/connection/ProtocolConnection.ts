@@ -106,10 +106,10 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
     return this.request(request).then((response: HandshakeResponse) => {
       const heartbeatHandler: HeartbeatHandler = {
-        sendPing(): void {
-          this.onPing();
+        sendPing: () => {
+          this.sendMessage(new MessageEnvelope({type: MessageType.PING}));
         },
-        onTimeout(): void {
+        onTimeout: () => {
           this.abort("pong timeout");
         }
       };
@@ -291,7 +291,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onPing(): void {
-    this.sendMessage(new MessageEnvelope({type: MessageType.PING}));
+    this.sendMessage(new MessageEnvelope({type: MessageType.PONG}));
   }
 }
 
