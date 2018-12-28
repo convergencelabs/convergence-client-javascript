@@ -1,6 +1,6 @@
 import {ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
-import {Observable, Subscription, BehaviorSubject} from "rxjs/Rx";
+import {Observable, Subscription, BehaviorSubject} from "rxjs";
 import {IncomingProtocolMessage} from "../connection/protocol/protocol";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {MessageEvent} from "../connection/ConvergenceConnection";

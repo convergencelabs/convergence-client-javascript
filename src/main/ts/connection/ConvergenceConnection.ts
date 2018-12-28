@@ -26,7 +26,8 @@ import {
 import {MessageType} from "./protocol/MessageType";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {filter} from "rxjs/operators";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
 
@@ -216,17 +217,19 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     if (typeof eventFilter === "undefined") {
       return this
         .events()
-        .filter(e => e.name === "message") as Observable<MessageEvent>;
+        .pipe(filter(e => e.name === "message")) as Observable<MessageEvent>;
     } else {
-      const filter: MessageType[] = eventFilter.slice(0);
+      const clonedFilter: MessageType[] = eventFilter.slice(0);
       return this
         .events()
-        .filter(e => e.name === "message")
-        .filter((m: MessageEvent) => {
-          return filter.some(t => {
-            return m.message.type === t;
-          });
-        }) as Observable<MessageEvent>;
+        .pipe(
+          filter(e => e.name === "message"),
+          filter((m: MessageEvent) => {
+            return clonedFilter.some(t => {
+              return m.message.type === t;
+            });
+          })
+        )as Observable<MessageEvent>;
     }
   }
 

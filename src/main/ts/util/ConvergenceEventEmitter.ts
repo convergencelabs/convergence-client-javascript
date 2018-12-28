@@ -1,4 +1,5 @@
-import {Observable, Subscription, Subject} from "rxjs/Rx";
+import {Observable, Subscription, Subject} from "rxjs";
+import {share, filter} from "rxjs/operators";
 import {IConvergenceEvent} from "./IConvergenceEvent";
 import {Validation} from "./Validation";
 import {ConvergenceError} from "./ConvergenceError";
@@ -56,7 +57,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
    */
   protected constructor() {
     this._defaultSubject = new Subject<T>();
-    this._observable = this._defaultSubject.asObservable().share();
+    this._observable = this._defaultSubject.asObservable().pipe(share());
     this._listeners = {};
   }
 
@@ -87,7 +88,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     }
 
     const subscription: Subscription =
-      this._observable.filter((e) => e.name.toLowerCase() === event).subscribe((e: T) => listener(e));
+      this._observable.pipe(filter((e) => e.name.toLowerCase() === event)).subscribe((e: T) => listener(e));
 
     listeners.push({listener, subscription});
 

@@ -7,7 +7,8 @@ import {
   StringMapLike
 } from "../util/";
 import {UserPresence} from "./UserPresence";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs/";
+import {filter, share} from "rxjs/operators";
 import {MessageType} from "../connection/protocol/MessageType";
 import {RequestPresence, RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
 import {PresenceSetState, PresenceRemoveState, PresenceClearState} from "../connection/protocol/presence/presenceState";
@@ -85,7 +86,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
       MessageType.PRESENCE_AVAILABILITY_CHANGED,
       MessageType.PRESENCE_STATE_SET,
       MessageType.PRESENCE_STATE_CLEARED])
-      .share();
+      .pipe(share());
 
     const username: string = this.session().username();
 
@@ -219,7 +220,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _streamForUsername(username: string): Observable<MessageEvent> {
-    return this._messageStream.filter(m => m.message.username === username);
+    return this._messageStream.pipe(filter(m => m.message.username === username));
   }
 
   /**

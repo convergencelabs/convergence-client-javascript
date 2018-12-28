@@ -25,6 +25,7 @@ import {
 } from "../connection/protocol/chat/getChannel";
 import {MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {Observable} from "rxjs";
+import {filter, pluck, share, tap, map} from "rxjs/operators";
 import {ChatChannelInfoData} from "../connection/protocol/chat/info";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
@@ -95,18 +96,19 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
     this._messageStream = this._connection
       .messages(messageTypes)
-      .pluck("message")
-      .map(message => processChatMessage(message))
-      .do(event => {
-        if (event instanceof UserJoinedEvent && event.username === this.session().username()) {
-          const joined = new ChannelJoinedEvent(event.channelId);
-          this._emitEvent(joined);
-        } else if (event instanceof UserLeftEvent && event.username === this.session().username()) {
-          const left = new ChannelLeftEvent(event.channelId);
-          this._emitEvent(left);
-        }
-      })
-      .share();
+      .pipe(
+        pluck("message"),
+        map(message => processChatMessage(message)),
+        tap(event => {
+          if (event instanceof UserJoinedEvent && event.username === this.session().username()) {
+            const joined = new ChannelJoinedEvent(event.channelId);
+            this._emitEvent(joined);
+          } else if (event instanceof UserLeftEvent && event.username === this.session().username()) {
+            const left = new ChannelLeftEvent(event.channelId);
+            this._emitEvent(left);
+          }
+        }),
+        share());
 
     this._emitFrom(this._messageStream);
   }
@@ -290,7 +292,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @internal
    */
   private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
-    const messageStream = this._messageStream.filter(msg => msg.channelId === channelInfo.channelId);
+    const messageStream = this._messageStream.pipe(filter(msg => msg.channelId === channelInfo.channelId));
     switch (channelInfo.channelType) {
       case ChatChannelTypes.DIRECT:
         return new DirectChatChannel(this._connection, messageStream, channelInfo);

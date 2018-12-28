@@ -9,8 +9,8 @@ import {
 } from "./events";
 import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable} from "rxjs/Observable";
-import {BehaviorSubject} from "rxjs/Rx";
+import {Observable, BehaviorSubject} from "rxjs";
+import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {MessageType} from "../connection/protocol/MessageType";
 import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
@@ -384,7 +384,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    *   An Observable array of participants.
    */
   public participantsAsObservable(): Observable<ActivityParticipant[]> {
-    return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
+    return this._participants
+      .asObservable()
+      .pipe(map(mappedValues => Array.from(mappedValues.values())));
   }
 
   /**

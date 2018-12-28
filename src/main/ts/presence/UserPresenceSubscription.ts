@@ -1,7 +1,7 @@
 import {IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {
   PresenceAvailabilityChangedEvent,
   PresenceStateSetEvent,

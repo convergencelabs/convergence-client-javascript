@@ -3,7 +3,8 @@ import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConn
 import {Activity} from "./Activity";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
-import {Observable, Observer} from "rxjs/Rx";
+import {Observable, Observer} from "rxjs";
+import {pluck, concatMap, filter} from "rxjs/operators";
 import {
   IActivityEvent,
   ActivitySessionJoinedEvent,
@@ -69,7 +70,9 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
         .subscribe(event => observer.next(event));
     });
 
-    const eventStream: Observable<any> = messageObs.pluck("message").concatMap((message: IncomingActivityMessage) => {
+    const eventStream: Observable<any> = messageObs.pipe(
+      pluck("message"),
+      concatMap((message: IncomingActivityMessage) => {
       const activity: Activity = this._joinedActivities.get(message.activityId);
       if (activity === undefined) {
         // todo log this as an error?
@@ -135,7 +138,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
           // This should be impossible
           throw new Error("Invalid activity event");
       }
-    });
+    }));
 
     this._emitFrom(eventStream);
   }
@@ -190,9 +193,9 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 
       this._connection.request(message)
         .then((response: ActivityJoinResponse) => {
-          const filteredEvents: Observable<IActivityEvent> = this.events().filter(event => {
+          const filteredEvents: Observable<IActivityEvent> = this.events().pipe(filter(event => {
             return event.activity.id() === id;
-          });
+          }));
 
           const activity: Activity = new Activity(
             id,

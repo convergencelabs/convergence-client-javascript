@@ -52,16 +52,12 @@ function generateRollUpConfig(format) {
     name: "Convergence",
     sourcemap: true,
     external: [
-      "rxjs/Rx",
-      "rxjs/Observable",
-      "rxjs/Subject",
-      "rxjs/BehaviorSubject"
+      "rxjs",
+      "rxjs/operators"
     ],
     globals: {
-      "rxjs/Rx": "Rx",
-      "rxjs/Observable": "Rx",
-      "rxjs/Subject": "Rx",
-      "rxjs/BehaviorSubject": "Rx"
+      "rxjs": "rxjs",
+      "rxjs/operators": "rxjs.operators"
     },
     plugins: [
       rollupTypescript2({
@@ -103,7 +99,7 @@ const distUmd = () => {
 };
 
 const distUmdBundle = () =>
-  src(["node_modules/rxjs/bundles/Rx.js", `${distInternalDir}/umd/convergence.js`])
+  src(["node_modules/rxjs/bundles/rxjs.umd.js", `${distInternalDir}/umd/convergence.js`])
     .pipe(concat("convergence-all.js"))
     .pipe(dest(`${distInternalDir}/umd`));
 
@@ -114,7 +110,7 @@ const distUmdMin = () => {
 };
 
 const distUmdBundleMin = () => {
-  const files = ["node_modules/rxjs/bundles/Rx.min.js", `${distInternalDir}/umd/convergence.min.js`];
+  const files = ["node_modules/rxjs/bundles/rxjs.umd.min.js", `${distInternalDir}/umd/convergence.min.js`];
   return src(files)
     .pipe(concat("convergence-all.min.js"))
     .pipe(dest(`${distInternalDir}/umd`));

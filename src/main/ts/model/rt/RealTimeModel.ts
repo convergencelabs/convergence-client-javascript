@@ -52,8 +52,7 @@ import {
 } from "../events/";
 import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
-import {Observable} from "rxjs/Observable";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {Observable, BehaviorSubject} from "rxjs";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
 import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
