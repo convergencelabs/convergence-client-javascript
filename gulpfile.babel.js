@@ -45,12 +45,12 @@ function minify(source, destination) {
 
 function generateRollUpConfig(format) {
   return {
-    entry: "src/main/ts/index.ts",
+    input: "src/main/ts/index.ts",
     rollup: rollup,
     format: format,
     exports: "named",
-    moduleName: "Convergence",
-    sourceMap: true,
+    name: "Convergence",
+    sourcemap: true,
     external: [
       "rxjs/Rx",
       "rxjs/Observable",
@@ -95,7 +95,7 @@ const distCjs = () => {
 const distUmd = () => {
   const config = generateRollUpConfig("umd");
   return rollupStream(config)
-    .pipe(source(`${distInternalDir}/browser/convergence.js`))
+    .pipe(source(`${distInternalDir}/umd/convergence.js`))
     .pipe(buffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
@@ -103,21 +103,21 @@ const distUmd = () => {
 };
 
 const distUmdBundle = () =>
-  src(["node_modules/rxjs/bundles/Rx.js", `${distInternalDir}/browser/convergence.js`])
+  src(["node_modules/rxjs/bundles/Rx.js", `${distInternalDir}/umd/convergence.js`])
     .pipe(concat("convergence-all.js"))
-    .pipe(dest(`${distInternalDir}/browser`));
+    .pipe(dest(`${distInternalDir}/umd`));
 
 const distUmdMin = () => {
   return minify(
-    `${distInternalDir}/browser/convergence.js`,
-    `${distInternalDir}/browser`);
+    `${distInternalDir}/umd/convergence.js`,
+    `${distInternalDir}/umd`);
 };
 
 const distUmdBundleMin = () => {
-  const files = ["node_modules/rxjs/bundles/Rx.min.js", `${distInternalDir}/browser/convergence.min.js`];
+  const files = ["node_modules/rxjs/bundles/Rx.min.js", `${distInternalDir}/umd/convergence.min.js`];
   return src(files)
     .pipe(concat("convergence-all.min.js"))
-    .pipe(dest(`${distInternalDir}/browser`));
+    .pipe(dest(`${distInternalDir}/umd`));
 };
 
 const lint = () =>
@@ -194,8 +194,7 @@ const test = () =>
       require: ['ts-node/register']
     }));
 
-
-const clean = () => del([distInternalDir, distDir, "build", "coverage", ".nyc_output"]);
+const clean = () => del([distInternalDir, distDir, "coverage", ".nyc_output"]);
 const dist = series(distInternal, distNpmJs, docs);
 
 export {

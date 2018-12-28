@@ -30,7 +30,7 @@ import {ModelResult} from "./query/";
 import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ICreateModelOptions} from "./ICreateModelOptions";
-import {ModelDataInitializer} from "./ModelDataInitializer";
+import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 
 /**
@@ -432,7 +432,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     } else {
       let data: ModelDataInitializer = options.data;
       if (typeof data === "function") {
-        data = data();
+        data = (data as ModelDataCallback)();
       }
 
       let dataValue: ObjectValue;
