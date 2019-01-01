@@ -1,4 +1,4 @@
-import {IModelEvent} from "../events/IModelEvent";
+import {IModelEvent} from "../events/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {RealTimeModel} from "./RealTimeModel";
 

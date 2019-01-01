@@ -1,7 +1,6 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {UndefinedNode} from "../internal/UndefinedNode";
 import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {
   ObservableUndefined,
@@ -10,6 +9,8 @@ import {
 } from "../observable/ObservableUndefined";
 import {Path, PathElement} from "../Path";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -52,7 +53,7 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
    * @internal
    * @private
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     throw new Error("Undefined values do not process references");
   }
 

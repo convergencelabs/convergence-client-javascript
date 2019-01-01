@@ -2,7 +2,6 @@ import {ConvergenceEventEmitter, IConvergenceEvent} from "../../util/";
 import {ModelNode} from "../internal/ModelNode";
 import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference, ReferenceFilter} from "../reference/";
 import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
@@ -17,6 +16,9 @@ import {
 } from "../observable/ObservableElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {filter} from "rxjs/operators";
+import {ReferenceType} from "../reference/ReferenceType";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -65,7 +67,7 @@ export abstract class RealTimeElement<T>
                         callbacks: ModelEventCallbacks,
                         wrapperFactory: RealTimeWrapperFactory,
                         model: RealTimeModel,
-                        referenceTypes: string[]) {
+                        referenceTypes: ReferenceType[]) {
     super();
 
     this._delegate = delegate;
@@ -169,7 +171,7 @@ export abstract class RealTimeElement<T>
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     this._referenceManager.handleRemoteReferenceEvent(event);
   }
 

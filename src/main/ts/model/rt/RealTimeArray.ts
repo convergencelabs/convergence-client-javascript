@@ -8,7 +8,6 @@ import {ArrayInsertOperation} from "../ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
 import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
 import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {
   ModelNodeEvent,
   ArrayNodeInsertEvent,
@@ -19,6 +18,8 @@ import {
 } from "../internal/events";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
 import {Path, PathElement} from "../Path";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -180,7 +181,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * @internal
    * @hidden
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     throw new Error("Arrays to do have references yet.");
   }
 }

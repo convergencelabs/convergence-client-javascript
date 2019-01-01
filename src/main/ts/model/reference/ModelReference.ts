@@ -6,12 +6,14 @@ import {
   ReferenceChangedEvent,
   ReferenceClearedEvent
 } from "./events/";
+import {ReferenceType} from "./ReferenceType";
 
 export interface ModelReferenceTypes {
-  readonly INDEX: string;
-  readonly RANGE: string;
-  readonly PROPERTY: string;
-  readonly ELEMENT: string;
+  [key: string]: ReferenceType;
+  readonly INDEX: ReferenceType;
+  readonly RANGE: ReferenceType;
+  readonly PROPERTY: ReferenceType;
+  readonly ELEMENT: ReferenceType;
 }
 
 export interface ModelReferenceEvents {

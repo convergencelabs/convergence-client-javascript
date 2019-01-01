@@ -33,21 +33,21 @@ export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<a
   protected _createWrapper(node: ModelNode<any>): RealTimeElement<any> {
     switch (node.type()) {
       case ModelElementType.ARRAY:
-        return new RealTimeArray(<ArrayNode> node, this._callbacks, this, this._model);
+        return new RealTimeArray(node as ArrayNode, this._callbacks, this, this._model);
       case ModelElementType.OBJECT:
-        return new RealTimeObject(<ObjectNode> node, this._callbacks, this, this._model);
+        return new RealTimeObject(node as ObjectNode, this._callbacks, this, this._model);
       case ModelElementType.BOOLEAN:
-          return new RealTimeBoolean(<BooleanNode> node, this._callbacks, this, this._model);
+          return new RealTimeBoolean(node as BooleanNode, this._callbacks, this, this._model);
       case ModelElementType.NULL:
-        return new RealTimeNull(<NullNode> node, this._callbacks, this, this._model);
+        return new RealTimeNull(node as NullNode, this._callbacks, this, this._model);
       case ModelElementType.NUMBER:
-        return new RealTimeNumber(<NumberNode> node, this._callbacks, this, this._model);
+        return new RealTimeNumber(node as NumberNode, this._callbacks, this, this._model);
       case ModelElementType.STRING:
-        return new RealTimeString(<StringNode> node, this._callbacks, this, this._model);
+        return new RealTimeString(node as StringNode, this._callbacks, this, this._model);
       case ModelElementType.UNDEFINED:
-        return new RealTimeUndefined(<UndefinedNode> node, this._callbacks, this, this._model);
+        return new RealTimeUndefined(node as UndefinedNode, this._callbacks, this, this._model);
       case ModelElementType.DATE:
-        return new RealTimeDate(<DateNode> node, this._callbacks, this, this._model);
+        return new RealTimeDate(node as DateNode, this._callbacks, this, this._model);
       default:
         return null;
       }

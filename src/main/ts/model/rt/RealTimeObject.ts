@@ -2,22 +2,24 @@ import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {LocalModelReference} from "../reference/LocalModelReference";
-import {ObjectNodeSetValueEvent} from "../internal/events";
-import {ModelReference} from "../reference/ModelReference";
-import {ObjectNodeRemoveEvent} from "../internal/events";
-import {PropertyReference} from "../reference/PropertyReference";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {
+  ModelReference,
+  LocalModelReference,
+  PropertyReference,
+  LocalPropertyReference} from "../reference/";
+import {
+  ModelNodeEvent,
+  ObjectNodeSetValueEvent,
+  ObjectNodeRemoveEvent,
+  ObjectNodeSetEvent
+} from "../internal/events";
 import {ModelNode} from "../internal/ModelNode";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
 import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
-import {LocalPropertyReference} from "../reference/LocalPropertyReference";
 import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
-import {ObjectNodeSetEvent} from "../internal/events";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants} from "../observable/ObservableObject";
 import {Path, PathElement} from "../Path";
 
@@ -104,7 +106,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
       if (existing.reference().type() !== ModelReference.Types.PROPERTY) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
-        return <LocalPropertyReference> existing;
+        return existing as LocalPropertyReference;
       }
     } else {
       const reference: PropertyReference = new PropertyReference(

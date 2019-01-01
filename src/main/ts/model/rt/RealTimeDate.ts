@@ -1,6 +1,5 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {DateNode} from "../internal/DateNode";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {DateSetOperation} from "../ot/ops/DateSetOperation";
 import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {ModelNodeEvent, DateNodeSetValueEvent} from "../internal/events";
@@ -10,6 +9,8 @@ import {
   ObservableDateEvents,
   ObservableDateEventConstants
 } from "../observable/ObservableDate";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeDateEvents extends ObservableDateEvents {
 }
@@ -46,7 +47,7 @@ export class RealTimeDate extends RealTimeElement<Date> implements ObservableDat
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     throw new Error("Date values do not process references");
   }
 }

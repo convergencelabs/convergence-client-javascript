@@ -1,15 +1,13 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {NumberNode} from "../internal/NumberNode";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {NumberNodeSetValueEvent} from "../internal/events";
-import {NumberNodeDeltaEvent} from "../internal/events";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {ModelNodeEvent, NumberNodeSetValueEvent, NumberNodeDeltaEvent} from "../internal/events";
 import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableNumber, ObservableNumberEvents, ObservableNumberEventConstants} from "../observable/ObservableNumber";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeNumberEvents extends ObservableNumberEvents {
 }
@@ -65,7 +63,7 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     throw new Error("Number values do not process references");
   }
 }

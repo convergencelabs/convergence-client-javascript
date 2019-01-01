@@ -1,10 +1,10 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {NullNode} from "../internal/NullNode";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableNull, ObservableNullEvents, ObservableNullEventConstants} from "../observable/ObservableNull";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface RealTimeNullEvents extends ObservableNullEvents {
 }
@@ -30,7 +30,7 @@ export class RealTimeNull extends RealTimeElement<void> implements ObservableNul
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
     throw new Error("Null values do not process references");
   }
 }

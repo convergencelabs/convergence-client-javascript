@@ -5,9 +5,9 @@ import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {ProtocolUtil} from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
 import IDomainUserData = io.convergence.proto.IDomainUserData;
+import {fromOptional, toOptional} from "../connection/ProtocolUtil";
 
 export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 
@@ -35,10 +35,10 @@ function toDomainUser(userData: IDomainUserData): DomainUser {
   return new DomainUser(
     userData.userType,
     userData.username,
-    ProtocolUtil.fromOptional(userData.firstName),
-    ProtocolUtil.fromOptional(userData.lastName),
-    ProtocolUtil.fromOptional(userData.displayName),
-    ProtocolUtil.fromOptional(userData.email));
+    fromOptional(userData.firstName),
+    fromOptional(userData.lastName),
+    fromOptional(userData.displayName),
+    fromOptional(userData.email));
 }
 
 export class IdentityService {
@@ -129,8 +129,8 @@ export class IdentityService {
         userSearchRequest: {
           fields: fieldCodes,
           value: query.term,
-          offset: ProtocolUtil.toOptional(query.offset),
-          limit: ProtocolUtil.toOptional(query.limit),
+          offset: toOptional(query.offset),
+          limit: toOptional(query.limit),
           orderField: toUserFieldCode(orderBy.field || "username"),
           ascending: orderBy.ascending
         }
