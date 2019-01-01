@@ -8,14 +8,14 @@ import {OperationType} from "../ops/OperationType";
  * @internal
  */
 export class AppliedCompoundOperation extends AppliedOperation implements BatchChange {
-  constructor(public ops: AppliedDiscreteOperation[]) {
+  constructor(public readonly ops: AppliedDiscreteOperation[]) {
     super(OperationType.COMPOUND);
     Object.freeze(this);
   }
 
   public inverse(): AppliedCompoundOperation {
     return new AppliedCompoundOperation(this.ops.map((op) => {
-      return <AppliedDiscreteOperation> op.inverse();
+      return op.inverse() as AppliedDiscreteOperation;
     }));
   }
 }

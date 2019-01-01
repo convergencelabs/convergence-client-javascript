@@ -1,6 +1,5 @@
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {MessageType} from "../connection/protocol/MessageType";
 import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
 import {
   IChatEvent,
@@ -15,22 +14,16 @@ import {
 import {processChatMessage} from "./ChatMessageProcessor";
 import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
 import {DirectChatChannel} from "./DirectChatChannel";
-import {JoinChatChannelRequestMessage, JoinChatChannelResponseMessage} from "../connection/protocol/chat/joining";
-import {LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
-import {CreateChatChannelRequestMessage, CreateChatChannelResponseMessage} from "../connection/protocol/chat/create";
-import {
-  GetChatChannelsResponseMessage, GetChatChannelsRequestMessage,
-  GetJoinedChannelsRequestMessage, GetDirectChannelsRequestMessage, SearchChatChannelsRequestMessage,
-  ChatChannelExistsResponseMessage
-} from "../connection/protocol/chat/getChannel";
 import {MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {Observable} from "rxjs";
-import {filter, pluck, share, tap, map} from "rxjs/operators";
-import {ChatChannelInfoData} from "../connection/protocol/chat/info";
+import {filter, share, tap, map} from "rxjs/operators";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
-import {RemoveChatChannelRequestMessage} from "../connection/protocol/chat/remove";
 import {ChatPermissionManager} from "./ChatPermissionManager";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IChatChannelInfoData = io.convergence.proto.IChatChannelInfoData;
+import {timestampToDate, toOptional} from "../connection/ProtocolUtil";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -66,6 +59,25 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   public static readonly Events: ChatServiceEvents = Events;
 
   /**
+   * @hidden
+   * @internal
+   */
+  private static _createChannelInfo(channelData: IChatChannelInfoData): ChatChannelInfo {
+    return {
+      channelId: channelData.id,
+      channelType: channelData.channelType as ChatChannelType,
+      channelMembership: channelData.membership,
+      name: channelData.name,
+      topic: channelData.topic,
+      createdTime: timestampToDate(channelData.createdTime),
+      lastEventTime: timestampToDate(channelData.lastEventTime),
+      lastEventNumber: channelData.lastEventNumber as number,
+      maxSeenEvent: channelData.maxSeenEventNumber as number,
+      members: channelData.members
+    };
+  }
+
+  /**
    * @internal
    */
   private readonly _connection: ConvergenceConnection;
@@ -83,22 +95,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     super();
     this._connection = connection;
 
-    const messageTypes = [
-      MessageType.USER_JOINED_CHAT_CHANNEL,
-      MessageType.USER_LEFT_CHAT_CHANNEL,
-      MessageType.USER_ADDED_TO_CHAT_CHANNEL,
-      MessageType.USER_REMOVED_FROM_CHAT_CHANNEL,
-      MessageType.CHAT_CHANNEL_REMOVED,
-      MessageType.CHAT_CHANNEL_NAME_CHANGED,
-      MessageType.CHAT_CHANNEL_TOPIC_CHANGED,
-      MessageType.REMOTE_CHAT_MESSAGE
-    ];
-
     this._messageStream = this._connection
-      .messages(messageTypes)
+      .messages()
       .pipe(
-        pluck("message"),
-        map(message => processChatMessage(message)),
+        map(message => processChatMessage(message.message)),
         tap(event => {
           if (event instanceof UserJoinedEvent && event.username === this.session().username()) {
             const joined = new ChannelJoinedEvent(event.channelId);
@@ -117,33 +117,37 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     return this._connection.session();
   }
 
-  public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]> {
-    return this._connection.request({
-      type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
-    } as SearchChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-      return message.channels.map(channel => this._createChannelInfo(channel));
-    });
-  }
+  // FIXME implement
+  // public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]> {
+  //   return this._connection.request({
+  //     type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
+  //   } as SearchChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
+  //     return message.channels.map(channel => this._createChannelInfo(channel));
+  //   });
+  // }
 
   public exists(channelId: string): Promise<boolean> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request({
-      type: MessageType.CHAT_CHANNEL_EXISTS_REQUEST,
-      channelIds: [channelId]
-    } as GetChatChannelsRequestMessage).then((message: ChatChannelExistsResponseMessage) => {
-      const exists = message.exists[0];
-      return exists;
+      chatChannelExistsRequest: {
+        channelIds: [channelId]
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {chatChannelExistsResponse} = response;
+      return chatChannelExistsResponse.exists[0];
     });
   }
 
   public get(channelId: string): Promise<ChatChannel> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request({
-      type: MessageType.GET_CHAT_CHANNELS_REQUEST,
-      channelIds: [channelId]
-    } as GetChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-      const channelData = message.channels[0];
-      const channelInfo = this._createChannelInfo(channelData);
+      getChatChannelsRequest: {
+        channelIds: [channelId]
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {getChatChannelsResponse} = response;
+      const channelData = getChatChannelsResponse.chatChannelInfo[0];
+      const channelInfo = ChatService._createChannelInfo(channelData);
       return this._createChannel(channelInfo);
     });
   }
@@ -151,9 +155,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   // Methods that apply to Group Chat Channels.
   public joined(): Promise<ChatChannelInfo[]> {
     return this._connection.request({
-      type: MessageType.CREATE_CHAT_CHANNEL_REQUEST
-    } as GetJoinedChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-      return message.channels.map(channel => this._createChannelInfo(channel));
+      getJoinedChatChannelsRequest: {}
+    }).then((response: IConvergenceMessage) => {
+      const {getJoinedChatChannelsResponse} = response;
+      return getJoinedChatChannelsResponse.chatChannelInfo.map(channel => ChatService._createChannelInfo(channel));
     });
   }
 
@@ -180,10 +185,17 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
     const {id, type: channelType, name, topic, membership, members} = options;
     return this._connection.request({
-      type: MessageType.CREATE_CHAT_CHANNEL_REQUEST,
-      id, channelType, name, topic, membership, members
-    } as CreateChatChannelRequestMessage).then((message: CreateChatChannelResponseMessage) => {
-      return message.channelId;
+      createChatChannelRequest: {
+        channelId: toOptional(id),
+        channelType,
+        channelMembership: membership,
+        name,
+        topic,
+        members
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {createChatChannelResponse} = response;
+      return createChatChannelResponse.channelId;
     }).catch(error => {
       if (error instanceof ConvergenceServerError &&
         error.code === "channel_already_exists" &&
@@ -202,9 +214,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   public remove(channelId: string): Promise<void> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request({
-      type: MessageType.REMOVE_CHAT_CHANNEL_REQUEST,
-      channelId
-    } as RemoveChatChannelRequestMessage).then(() => {
+      removeChatChannelRequest: {
+        channelId
+      }
+    }).then(() => {
       return;
     });
   }
@@ -212,10 +225,12 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   public join(channelId: string): Promise<ChatChannel> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request({
-      type: MessageType.JOIN_CHAT_CHANNEL_REQUEST,
-      channelId
-    } as JoinChatChannelRequestMessage).then((message: JoinChatChannelResponseMessage) => {
-      const channelInfo = this._createChannelInfo(message.channel);
+      joinChatChannelRequest: {
+        channelId
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {joinChatChannelResponse} = response;
+      const channelInfo = ChatService._createChannelInfo(joinChatChannelResponse.channelInfo);
       return this._createChannel(channelInfo);
     });
   }
@@ -223,9 +238,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   public leave(channelId: string): Promise<void> {
     Validation.assertNonEmptyString(channelId, "channelId");
     return this._connection.request({
-      type: MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
-      channelId
-    } as LeaveChatChannelRequestMessage).then(() => {
+      leaveChatChannelRequest: {
+        channelId
+      }
+    }).then(() => {
       return;
     });
   }
@@ -239,11 +255,13 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     }
 
     return this._connection.request({
-      type: MessageType.GET_DIRECT_CHAT_CHANNELS_REQUEST,
-      channelUsernames: [usernames]
-    } as GetDirectChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-      const channelData = message.channels[0];
-      const info = this._createChannelInfo(channelData);
+      getDirectChatChannelsRequest: {
+        usernames
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {getDirectChatChannelsResponse} = response;
+      const channelData = getDirectChatChannelsResponse.chatChannelInfo[0];
+      const info = ChatService._createChannelInfo(channelData);
       const channel = this._createChannel(info);
       return channel as DirectChatChannel;
     });
@@ -251,40 +269,6 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   public permissions(channelId: string): ChatPermissionManager {
     return new ChatPermissionManager(channelId, this._connection);
-  }
-
-  /**
-   * @hidden
-   * @internal
-   */
-  private _createChannelInfo(channelData: ChatChannelInfoData): ChatChannelInfo {
-    if (channelData.channelType === "direct") {
-      return {
-        channelId: channelData.channelId,
-        channelType: channelData.channelType,
-        channelMembership: channelData.channelMembership,
-        name: channelData.name,
-        topic: channelData.topic,
-        createdTime: channelData.createdTime,
-        lastEventTime: channelData.lastEventTime,
-        lastEventNumber: channelData.lastEventNumber,
-        maxSeenEvent: channelData.maxSeenEvent,
-        members: channelData.members
-      };
-    } else {
-      return {
-        channelId: channelData.channelId,
-        channelType: channelData.channelType,
-        channelMembership: channelData.channelMembership,
-        name: channelData.name,
-        topic: channelData.topic,
-        createdTime: channelData.createdTime,
-        lastEventTime: channelData.lastEventTime,
-        lastEventNumber: channelData.maxSeenEvent,
-        maxSeenEvent: channelData.maxSeenEvent,
-        members: channelData.members
-      } as MembershipChatChannelInfo;
-    }
   }
 
   /**
@@ -308,11 +292,12 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   }
 }
 
-export interface ChatSearchCriteria {
-  type?: string;
-  name?: string;
-  topic?: string;
-}
+//
+// export interface ChatSearchCriteria {
+//   type?: string;
+//   name?: string;
+//   topic?: string;
+// }
 
 export interface CreateChatChannelOptions {
   type: string;

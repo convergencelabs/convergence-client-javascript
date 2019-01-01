@@ -1,33 +1,7 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {MessageType} from "../connection/protocol/MessageType";
-import {IdType} from "../connection/protocol/permissions/IdType";
-import {
-  GetClientPermissionsRequest,
-  GetClientPermissionsResponse
-} from "../connection/protocol/permissions/getClientPermissions";
-import {AddPermissionsRequest} from "../connection/protocol/permissions/addPermissions";
-import {RemovePermissionsRequest} from "../connection/protocol/permissions/removePermissions";
-import {SetPermissionsRequest} from "../connection/protocol/permissions/setPermissions";
-import {
-  GetWorldPermissionsRequest,
-  GetWorldPermissionsResponse
-} from "../connection/protocol/permissions/getWorldPermissions";
-import {
-  GetAllUserPermissionsRequest,
-  GetAllUserPermissionsResponse
-} from "../connection/protocol/permissions/getAllUserPermissions";
-import {
-  GetUserPermissionsRequest,
-  GetUserPermissionsResponse
-} from "../connection/protocol/permissions/getUserPermissions";
-import {
-  GetAllGroupPermissionsRequest,
-  GetAllGroupPermissionsResponse
-} from "../connection/protocol/permissions/getAllGroupPermissions";
-import {
-  GetGroupPermissionsRequest,
-  GetGroupPermissionsResponse
-} from "../connection/protocol/permissions/getGroupPermissions";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {StringMap} from "../util";
 
 export type ChatPermission =
   "create_chat_channel"
@@ -40,17 +14,7 @@ export type ChatPermission =
   | "set_topic"
   | "manage_chat_permissions";
 
-const Permissions = {
-  CREATE_CHAT: "create_chat_channel",
-  REMOVE_CHAT: "remove_chat_channel",
-  JOIN_CHAT: "join_chat_channel",
-  LEAVE_CHAT: "leave_chat_channel",
-  ADD_USER: "add_chat_user",
-  REMOVE_USER: "remove_chat_user",
-  SET_NAME: "set_chat_name",
-  SET_TOPIC: "set_topic",
-  MANAGE_PERMISSIONS: "manage_chat_permissions"
-};
+const CHAT = 1;
 
 export class ChatPermissionManager {
 
@@ -78,23 +42,26 @@ export class ChatPermissionManager {
   }
 
   public getPermissions(): Promise<ChatPermission[]> {
-    const request: GetClientPermissionsRequest = {
-      type: MessageType.GET_CLIENT_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId
+    const request: IConvergenceMessage = {
+      getClientPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId
+      }
     };
 
-    return this._connection.request(request).then((response: GetClientPermissionsResponse) => {
-      return response.permissions as ChatPermission[];
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getClientPermissionsResponse} = response;
+      return getClientPermissionsResponse.permissions as ChatPermission[];
     });
   }
 
   public addWorldPermissions(permissions: ChatPermission[]): Promise<void> {
-    const request: AddPermissionsRequest = {
-      type: MessageType.ADD_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      world: permissions
+    const request: IConvergenceMessage = {
+      addPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        world: permissions
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -103,11 +70,12 @@ export class ChatPermissionManager {
   }
 
   public removeWorldPermissions(permissions: ChatPermission[]): Promise<void> {
-    const request: RemovePermissionsRequest = {
-      type: MessageType.REMOVE_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      world: permissions
+    const request: IConvergenceMessage = {
+      removePermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        world: permissions
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -116,11 +84,12 @@ export class ChatPermissionManager {
   }
 
   public setWorldPermissions(permissions: ChatPermission[]): Promise<void> {
-    const request: SetPermissionsRequest = {
-      type: MessageType.SET_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      world: permissions
+    const request: IConvergenceMessage = {
+      setPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        world: permissions
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -129,14 +98,16 @@ export class ChatPermissionManager {
   }
 
   public getWorldPermissions(): Promise<ChatPermission[]> {
-    const request: GetWorldPermissionsRequest = {
-      type: MessageType.GET_WORLD_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId
+    const request: IConvergenceMessage = {
+      getWorldPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId
+      }
     };
 
-    return this._connection.request(request).then((response: GetWorldPermissionsResponse) => {
-      return response.permissions as ChatPermission[];
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getWorldPermissionsResponse} = response;
+      return  getWorldPermissionsResponse.permissions as ChatPermission[];
     });
   }
 
@@ -154,11 +125,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: AddPermissionsRequest = {
-      type: MessageType.ADD_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      users: map
+    const request: IConvergenceMessage = {
+      addPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        user: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -180,11 +152,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: RemovePermissionsRequest = {
-      type: MessageType.REMOVE_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      users: map
+    const request: IConvergenceMessage = {
+      removePermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        user: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -206,11 +179,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: SetPermissionsRequest = {
-      type: MessageType.SET_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      users: map
+    const request: IConvergenceMessage = {
+      setPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        user: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -219,27 +193,31 @@ export class ChatPermissionManager {
   }
 
   public getAllUserPermissions(): Promise<Map<string, ChatPermission[]>> {
-    const request: GetAllUserPermissionsRequest = {
-      type: MessageType.GET_ALL_USER_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId
+    const request: IConvergenceMessage = {
+      getAllUserPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId
+      }
     };
 
-    return this._connection.request(request).then((response: GetAllUserPermissionsResponse) => {
-      return response.users as Map<string, ChatPermission[]>;
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getAllUserPermissionsResponse} = response;
+      return StringMap.objectToMap(getAllUserPermissionsResponse.users);
     });
   }
 
   public getUserPermissions(username: string): Promise<ChatPermission[]> {
-    const request: GetUserPermissionsRequest = {
-      type: MessageType.GET_USER_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      username
+    const request: IConvergenceMessage = {
+      getUserPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        username
+      }
     };
 
-    return this._connection.request(request).then((response: GetUserPermissionsResponse) => {
-      return response.permissions as ChatPermission[];
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getUserPermissionsResponse} = response;
+      return getUserPermissionsResponse.permissions as ChatPermission[];
     });
   }
 
@@ -257,11 +235,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: AddPermissionsRequest = {
-      type: MessageType.ADD_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      groups: map
+    const request: IConvergenceMessage = {
+      addPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        group: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -283,11 +262,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: RemovePermissionsRequest = {
-      type: MessageType.REMOVE_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      groups: map
+    const request: IConvergenceMessage = {
+      removePermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        group: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -309,11 +289,12 @@ export class ChatPermissionManager {
       });
     }
 
-    const request: SetPermissionsRequest = {
-      type: MessageType.SET_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      groups: map
+    const request: IConvergenceMessage = {
+      setPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        group: StringMap.mapToObject(map)
+      }
     };
 
     return this._connection.request(request).then(() => {
@@ -322,27 +303,31 @@ export class ChatPermissionManager {
   }
 
   public getAllGroupPermissions(): Promise<Map<string, ChatPermission[]>> {
-    const request: GetAllGroupPermissionsRequest = {
-      type: MessageType.GET_ALL_GROUP_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId
+    const request: IConvergenceMessage = {
+      getAllGroupPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId
+      }
     };
 
-    return this._connection.request(request).then((response: GetAllGroupPermissionsResponse) => {
-      return response.groups as Map<string, ChatPermission[]>;
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getAllGroupPermissionsResponse} = response;
+      return StringMap.objectToMap(getAllGroupPermissionsResponse.groups);
     });
   }
 
   public getGroupPermissions(groupId: string): Promise<ChatPermission[]> {
-    const request: GetGroupPermissionsRequest = {
-      type: MessageType.GET_GROUP_PERMISSIONS_REQUEST,
-      idType: IdType.CHAT,
-      id: this._channelId,
-      groupId
+    const request: IConvergenceMessage = {
+      getGroupPermissionsRequest: {
+        idType: CHAT,
+        id: this._channelId,
+        groupId
+      }
     };
 
-    return this._connection.request(request).then((response: GetGroupPermissionsResponse) => {
-      return response.permissions as ChatPermission[];
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {getGroupPermissionsResponse} = response;
+      return getGroupPermissionsResponse.permissions as ChatPermission[];
     });
   }
 }

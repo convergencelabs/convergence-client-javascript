@@ -13,7 +13,7 @@ export class ModelOperationEvent {
   constructor(public sessionId: string,
               public username: string,
               public version: number,
-              public timestamp: number,
+              public timestamp: Date,
               public operation: DiscreteChange) {
 
     Object.freeze(this);

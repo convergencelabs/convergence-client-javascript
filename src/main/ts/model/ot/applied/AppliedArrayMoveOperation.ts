@@ -8,7 +8,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedArrayMoveOperation extends AppliedDiscreteOperation implements ArrayMove {
 
-  constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly fromIndex: number,
+              public readonly toIndex: number) {
     super(OperationType.ARRAY_REORDER, id, noOp);
     Object.freeze(this);
   }

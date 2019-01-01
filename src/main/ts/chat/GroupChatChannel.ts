@@ -2,8 +2,6 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {MembershipChatChannel, MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {IChatEvent} from "./events/";
-import {AddUserToChatChannelMessage} from "../connection/protocol/chat/joining";
-import {MessageType} from "../connection/protocol/MessageType";
 
 export class GroupChatChannel extends MembershipChatChannel {
 
@@ -20,10 +18,11 @@ export class GroupChatChannel extends MembershipChatChannel {
   public add(username: string): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.ADD_USER_TO_CHAT_CHANNEL_REQUEST,
-      channelId: this._info.channelId,
-      username
-    } as AddUserToChatChannelMessage).then(() => {
+      addUserToChatChannelRequest: {
+        channelId: this._info.channelId,
+        userToAdd: username
+      }
+    }).then(() => {
       return;
     });
   }

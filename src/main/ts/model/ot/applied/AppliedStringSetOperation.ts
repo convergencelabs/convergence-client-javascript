@@ -8,7 +8,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedStringSetOperation extends AppliedDiscreteOperation implements StringSet {
 
-  constructor(id: string, noOp: boolean, public value: string, public oldValue: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: string,
+              public readonly oldValue: string) {
     super(OperationType.STRING_VALUE, id, noOp);
     Object.freeze(this);
   }

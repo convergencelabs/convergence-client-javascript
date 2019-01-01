@@ -10,7 +10,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedArrayRemoveOperation extends AppliedDiscreteOperation implements ArrayRemove {
 
-  constructor(id: string, noOp: boolean, public index: number, public oldValue: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly oldValue: DataValue) {
     super(OperationType.ARRAY_REMOVE, id, noOp);
     Object.freeze(this);
   }

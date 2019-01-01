@@ -13,17 +13,12 @@ import {
 import {ChatChannelType} from "./ChatService";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {PublishChatMessage} from "../connection/protocol/chat/chatMessage";
-import {MessageType} from "../connection/protocol/MessageType";
-import {SetChatChannelNameMessage} from "../connection/protocol/chat/setName";
-import {SetChatChannelTopicMessage} from "../connection/protocol/chat/setTopic";
-import {MarkChatChannelEventsSeenMessage} from "../connection/protocol/chat/markSeen";
 import {ChatHistoryEntry} from "./ChatHistoryEntry";
-import {
-  ChatChannelHistoryResponseMessage,
-  ChatChannelHistoryRequestMessage
-} from "../connection/protocol/chat/getHistory";
 import {Observable} from "rxjs";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
+import {toOptional} from "../connection/ProtocolUtil";
 
 export interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
@@ -107,10 +102,11 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   public send(message: string): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.PUBLISH_CHAT_MESSAGE_REQUEST,
-      channelId: this._info.channelId,
-      message
-    } as PublishChatMessage).then(() => {
+      publishChatMessageRequest: {
+        channelId: this._info.channelId,
+        message
+      }
+    }).then(() => {
       return;
     });
   }
@@ -118,10 +114,11 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   public setName(name: string): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.SET_CHAT_CHANNEL_NAME_REQUEST,
-      channelId: this._info.channelId,
-      name
-    } as SetChatChannelNameMessage).then(() => {
+      setChatChannelNameRequest: {
+        channelId: this._info.channelId,
+        name
+      }
+    }).then(() => {
       return;
     });
   }
@@ -129,10 +126,11 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   public setTopic(topic: string): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.SET_CHAT_CHANNEL_TOPIC_REQUEST,
-      channelId: this._info.channelId,
-      topic
-    } as SetChatChannelTopicMessage).then(() => {
+      setChatChannelTopicRequest: {
+        channelId: this._info.channelId,
+        topic
+      }
+    }).then(() => {
       return;
     });
   }
@@ -140,26 +138,28 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   public markSeen(eventNumber: number): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.MARK_CHAT_CHANNEL_EVENTS_SEEN_REQUEST,
-      channelId: this._info.channelId,
-      eventNumber
-    } as MarkChatChannelEventsSeenMessage).then(() => {
+      markChatChannelEventsSeenRequest: {
+        channelId: this._info.channelId,
+        eventNumber
+      }
+    }).then(() => {
       return;
     });
   }
 
   public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
     this._assertJoined();
-
     return this._connection.request({
-      type: MessageType.GET_CHAT_CHANNEL_HISTORY_REQUEST,
-      channelId: this._info.channelId,
-      startEvent: options.startEvent,
-      limit: options.limit,
-      forward: options.forward,
-      eventFilter: options.eventFilter
-    } as ChatChannelHistoryRequestMessage).then((message: ChatChannelHistoryResponseMessage) => {
-      return message.entries;
+      getChatChannelHistoryRequest: {
+        channelId: this._info.channelId,
+        startEvent: toOptional(options.startEvent),
+        limit: toOptional(options.limit),
+        forward: toOptional(options.forward),
+        eventFilter: options.eventFilter
+      }
+    }).then((message: IConvergenceMessage) => {
+      const response = message.getChatChannelHistoryResponse;
+      return response.eventData!.map(data => ChatHistoryEventMapper.toChatHistoryEntry(data));
     });
   }
 

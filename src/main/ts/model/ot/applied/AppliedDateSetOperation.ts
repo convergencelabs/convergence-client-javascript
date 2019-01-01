@@ -8,12 +8,15 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedDateSetOperation extends AppliedDiscreteOperation implements DateSet {
 
-  constructor(id: string, noOp: boolean, public value: Date, public oldValue: Date) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: Date,
+              public readonly oldValue: Date) {
     super(OperationType.DATE_VALUE, id, noOp);
     Object.freeze(this);
   }
 
   public inverse(): AppliedDateSetOperation {
-    return new AppliedDateSetOperation(this.id, this.noOp, this.oldValue,  this.value);
+    return new AppliedDateSetOperation(this.id, this.noOp, this.oldValue, this.value);
   }
 }

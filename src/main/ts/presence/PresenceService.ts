@@ -9,11 +9,6 @@ import {
 import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/";
 import {filter, share} from "rxjs/operators";
-import {MessageType} from "../connection/protocol/MessageType";
-import {RequestPresence, RequestPresenceResponse} from "../connection/protocol/presence/requestPresence";
-import {PresenceSetState, PresenceRemoveState, PresenceClearState} from "../connection/protocol/presence/presenceState";
-import {SubscribePresenceRequest, SubscribePresenceResponse} from "../connection/protocol/presence/subscribePresence";
-import {UnsubscribePresence} from "../connection/protocol/presence/unsubscribePresence";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {
@@ -22,6 +17,8 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -82,10 +79,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     this._presenceStreams = new Map<string, Observable<MessageEvent>>();
 
     this._messageStream = this._connection
-      .messages([
-      MessageType.PRESENCE_AVAILABILITY_CHANGED,
-      MessageType.PRESENCE_STATE_SET,
-      MessageType.PRESENCE_STATE_CLEARED])
+      .messages()
       .pipe(share());
 
     const username: string = this.session().username();
@@ -123,10 +117,10 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     this._localManager.set(state);
 
-    const message: PresenceSetState = {
-      type: MessageType.PRESENCE_SET_STATE,
-      state: StringMap.mapToObject(state),
-      all: false
+    const message: IConvergenceMessage = {
+      presenceStateSet: {
+        state: StringMap.mapToObject(state)
+      }
     };
 
     this._connection.send(message);
@@ -139,9 +133,10 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     this._localManager.remove(stateKeys);
 
-    const message: PresenceRemoveState = {
-      type: MessageType.PRESENCE_REMOVE_STATE,
-      keys: stateKeys
+    const message: IConvergenceMessage = {
+      presenceRemoveState: {
+        keys: stateKeys
+      }
     };
 
     this._connection.send(message);
@@ -150,8 +145,8 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   public clearState(): void {
     this._localManager.clear();
 
-    const message: PresenceClearState = {
-      type: MessageType.PRESENCE_CLEAR_STATE
+    const message: IConvergenceMessage = {
+      presenceClearState: {}
     };
 
     this._connection.send(message);
@@ -203,13 +198,15 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _get(usernames: string[]): Promise<UserPresence[]> {
-    const message: RequestPresence = {
-      type: MessageType.PRESENCE_REQUEST,
-      usernames
+    const message: IConvergenceMessage = {
+      presenceRequest: {
+        usernames
+      }
     };
 
-    return this._connection.request(message).then((response: RequestPresenceResponse) => {
-      return response.userPresences.map(p =>
+    return this._connection.request(message).then((response: IConvergenceMessage) => {
+      const {userPresences} = response.presenceResponse;
+      return userPresences.map(p =>
         new UserPresence(p.username, p.available, StringMap.objectToMap(p.state))
       );
     });
@@ -220,7 +217,16 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _streamForUsername(username: string): Observable<MessageEvent> {
-    return this._messageStream.pipe(filter(m => m.message.username === username));
+    return this._messageStream.pipe(filter(e => {
+      const message = e.message;
+      const incomingUsername =
+        (message.presenceAvailabilityChanged && message.presenceStateRemoved.username) ||
+        (message.presenceStateSet && message.presenceStateSet.username) ||
+        (message.presenceStateRemoved && message.presenceStateRemoved.username) ||
+        (message.presenceStateCleared && message.presenceStateCleared.username);
+
+      return incomingUsername === username;
+    }));
   }
 
   /**
@@ -238,13 +244,15 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
         this._presenceStreams.set(username, stream);
       });
 
-      const message: SubscribePresenceRequest = {
-        type: MessageType.PRESENCE_SUBSCRIBE_REQUEST,
-        usernames: notSubscribed
+      const message: IConvergenceMessage = {
+        presenceSubscribeRequest: {
+          usernames: notSubscribed
+        }
       };
 
-      return this._connection.request(message).then((response: SubscribePresenceResponse) => {
-        response.userPresences.forEach(presence => {
+      return this._connection.request(message).then((response: IConvergenceMessage) => {
+        const {userPresences} = response.presenceSubscribeResponse;
+        userPresences.forEach(presence => {
           const manager: UserPresenceManager = new UserPresenceManager(
             new UserPresence(presence.username, presence.available, StringMap.objectToMap(presence.state)),
             this._presenceStreams.get(presence.username),
@@ -263,9 +271,10 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _unsubscribe(username: string): void {
-    const message: UnsubscribePresence = {
-      type: MessageType.PRESENCE_UNSUBSCRIBE,
-      username
+    const message: IConvergenceMessage = {
+      presenceUnsubscribe: {
+        usernames: [username]
+      }
     };
 
     this._connection.send(message);

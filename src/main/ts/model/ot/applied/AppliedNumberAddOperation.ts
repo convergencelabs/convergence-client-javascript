@@ -10,7 +10,9 @@ export class AppliedNumberAddOperation extends AppliedDiscreteOperation implemen
 
   protected _value: number;
 
-  constructor(id: string, noOp: boolean, public value: number) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: number) {
     super(OperationType.NUMBER_ADD, id, noOp);
     Object.freeze(this);
   }

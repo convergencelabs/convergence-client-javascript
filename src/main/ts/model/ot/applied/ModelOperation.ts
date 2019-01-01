@@ -6,8 +6,12 @@ import {AppliedOperation} from "./AppliedOperation";
  */
 export class ModelOperation {
 
-  constructor(public modelId: string, public version: number, public timestamp: number,
-              public username: string, public sessionId: string, public operation: AppliedOperation) {
+  constructor(public readonly modelId: string,
+              public readonly version: number,
+              public readonly timestamp: Date,
+              public readonly username: string,
+              public readonly sessionId: string,
+              public readonly operation: AppliedOperation) {
     Object.freeze(this);
   }
 }

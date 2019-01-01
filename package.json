@@ -35,7 +35,8 @@
     "registry": "https://nexus.dev.int.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
-    "rxjs": "6.3.3"
+    "rxjs": "6.3.3",
+    "protobufjs": "6.8.8"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
@@ -48,6 +49,7 @@
     "@babel/preset-env": "7.2.3",
     "@babel/preset-typescript": "7.1.0",
     "@babel/register": "7.0.0",
+    "@convergence/convergence-proto": "^1.0.0-SNAPSHOT",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.35",
     "@types/quill": "1.3.6",

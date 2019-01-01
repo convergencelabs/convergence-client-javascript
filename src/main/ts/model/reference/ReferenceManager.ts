@@ -1,13 +1,5 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
-import {MessageType} from "../../connection/protocol/MessageType";
-import {
-  RemoteReferenceEvent,
-  RemoteReferencePublished,
-  RemoteReferenceSet,
-  RemoteReferenceCleared,
-  RemoteReferenceUnpublished
-} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeElement, RealTimeModel} from "../rt/";

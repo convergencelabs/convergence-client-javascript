@@ -10,7 +10,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedArrayInsertOperation extends AppliedDiscreteOperation implements ArrayInsert {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: DataValue) {
     super(OperationType.ARRAY_INSERT, id, noOp);
     Object.freeze(this);
   }

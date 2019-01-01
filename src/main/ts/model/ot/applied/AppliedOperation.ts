@@ -5,7 +5,7 @@ import {Change} from "../ops/operationChanges";
  * @internal
  */
 export abstract class AppliedOperation implements Change {
-  protected constructor(public type: string) {
+  protected constructor(public readonly type: string) {
   }
 
   public abstract inverse(): AppliedOperation;

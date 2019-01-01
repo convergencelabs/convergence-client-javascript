@@ -13,6 +13,7 @@
     "no-submodule-imports": false,
     "no-object-literal-type-assertion": false,
     "unified-signatures": false,
-    "no-empty-interface": false
+    "no-empty-interface": false,
+    "no-implicit-dependencies": [true, "dev"]
   }
 }

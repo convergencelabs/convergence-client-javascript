@@ -5,7 +5,7 @@ export interface ICreateModelOptions {
   collection: string;
   id?: string;
   data?: ModelDataInitializer;
-  overrideWorld?: boolean;
+  overrideCollectionWorldPermissions?: boolean;
   worldPermissions?: ModelPermissions;
   userPermissions?: { [key: string]: ModelPermissions };
 }

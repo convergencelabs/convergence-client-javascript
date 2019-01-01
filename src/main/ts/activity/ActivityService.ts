@@ -3,8 +3,8 @@ import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConn
 import {Activity} from "./Activity";
 import {ActivityParticipant} from "./ActivityParticipant";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
-import {Observable, Observer} from "rxjs";
-import {pluck, concatMap, filter} from "rxjs/operators";
+import {Observable} from "rxjs";
+import {concatMap, filter} from "rxjs/operators";
 import {
   IActivityEvent,
   ActivitySessionJoinedEvent,
@@ -13,19 +13,10 @@ import {
   ActivityStateRemovedEvent,
   ActivityStateSetEvent
 } from "./events";
-import {MessageType} from "../connection/protocol/MessageType";
-import {ActivitySessionJoined} from "../connection/protocol/activity/sessionJoined";
-import {ActivitySessionLeft} from "../connection/protocol/activity/sessionLeft";
-import {
-  ActivityRemoteStateCleared,
-  ActivityRemoteStateRemoved,
-  ActivityRemoteStateSet
-} from "../connection/protocol/activity/activityState";
-import {IncomingActivityMessage} from "../connection/protocol/activity/incomingActivityMessage";
-import {SessionIdParser} from "../connection/protocol/SessionIdParser";
-import {ActivityJoinRequest, ActivityJoinResponse} from "../connection/protocol/activity/joinActivity";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter, StringMap} from "../util/";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 /**
  * The ActivityService provides the main entry point into working with
@@ -59,86 +50,82 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
     this._joinedDeferreds = new Map<string, Deferred<Activity>>();
     this._joinedActivities = new Map<string, Activity>();
 
-    const messageObs: Observable<MessageEvent> = Observable.create((observer: Observer<MessageEvent>) => {
-      this._connection
-        .messages(
-          [MessageType.ACTIVITY_SESSION_JOINED,
-            MessageType.ACTIVITY_SESSION_LEFT,
-            MessageType.ACTIVITY_REMOTE_STATE_SET,
-            MessageType.ACTIVITY_REMOTE_STATE_REMOVED,
-            MessageType.ACTIVITY_REMOTE_STATE_CLEARED])
-        .subscribe(event => observer.next(event));
-    });
+    const eventStream = this._connection.messages().pipe(
+      concatMap((event: MessageEvent) => {
+        const message = event.message;
 
-    const eventStream: Observable<any> = messageObs.pipe(
-      pluck("message"),
-      concatMap((message: IncomingActivityMessage) => {
-      const activity: Activity = this._joinedActivities.get(message.activityId);
-      if (activity === undefined) {
-        // todo log this as an error?
-        return [];
-      }
-
-      switch (message.type) {
-        case MessageType.ACTIVITY_SESSION_JOINED:
-          const joinedMsg: ActivitySessionJoined = message as ActivitySessionJoined;
-          const username: string = SessionIdParser.parseUsername(joinedMsg.sessionId);
+        if (message.activitySessionJoined) {
+          const joined = message.activitySessionJoined;
+          const activity: Activity = this._joinedActivities.get(joined.activityId);
+          // FIXME username
+          const username: string = "";
           const participant: ActivityParticipant = new ActivityParticipant(
             activity,
-            joinedMsg.sessionId,
+            joined.sessionId,
             username,
             false,
-            joinedMsg.state);
+            StringMap.objectToMap(joined.state));
           return [new ActivitySessionJoinedEvent(
             activity,
             username,
-            joinedMsg.sessionId,
+            joined.sessionId,
             false,
             participant)];
-        case MessageType.ACTIVITY_SESSION_LEFT:
-          const leftMsg: ActivitySessionLeft = message as ActivitySessionLeft;
+        } else if (message.activitySessionLeft) {
+          const left = message.activitySessionLeft;
+          const activity: Activity = this._joinedActivities.get(left.activityId);
+          // FIXME username
+          const username: string = "";
           return [new ActivitySessionLeftEvent(
             activity,
-            SessionIdParser.parseUsername(leftMsg.sessionId),
-            leftMsg.sessionId,
+            username,
+            left.sessionId,
             false
           )];
-        case MessageType.ACTIVITY_REMOTE_STATE_SET:
-          const stateSetMsg: ActivityRemoteStateSet = message as ActivityRemoteStateSet;
-          return Object.keys(stateSetMsg.state).map(key => {
+        } else if (message.activityRemoteStateSet) {
+          const remoteStateSet = message.activityRemoteStateSet;
+          const activity: Activity = this._joinedActivities.get(remoteStateSet.activityId);
+          // FIXME username
+          const username: string = "";
+          return Object.keys(remoteStateSet.state).map(key => {
             return new ActivityStateSetEvent(
               activity,
-              SessionIdParser.parseUsername(stateSetMsg.sessionId),
-              stateSetMsg.sessionId,
+              username,
+              remoteStateSet.sessionId,
               false,
               key,
-              stateSetMsg.state[key],
+              remoteStateSet.state[key],
             );
           });
-        case MessageType.ACTIVITY_REMOTE_STATE_CLEARED:
-          const stateClearedMsg: ActivityRemoteStateCleared = message as ActivityRemoteStateCleared;
+        } else if (message.activityRemoteStateCleared) {
+          const remoteStateCleared = message.activityRemoteStateCleared;
+          const activity: Activity = this._joinedActivities.get(remoteStateCleared.activityId);
+          // FIXME username
+          const username: string = "";
           return [new ActivityStateClearedEvent(
             activity,
-            SessionIdParser.parseUsername(stateClearedMsg.sessionId),
-            stateClearedMsg.sessionId,
+            username,
+            remoteStateCleared.sessionId,
             false
           )];
-        case MessageType.ACTIVITY_REMOTE_STATE_REMOVED:
-          const stateRemovedMsg: ActivityRemoteStateRemoved = message as ActivityRemoteStateRemoved;
-          return stateRemovedMsg.keys.map(key => {
+        } else if (message.activityRemoteStateRemoved) {
+          const remoteStateRemoved = message.activityRemoteStateRemoved;
+          const activity: Activity = this._joinedActivities.get(remoteStateRemoved.activityId);
+          // FIXME username
+          const username: string = "";
+          return remoteStateRemoved.keys.map(key => {
             return new ActivityStateRemovedEvent(
               activity,
-              SessionIdParser.parseUsername(stateRemovedMsg.sessionId),
-              stateRemovedMsg.sessionId,
+              username,
+              remoteStateRemoved.sessionId,
               false,
               key
             );
           });
-        default:
-          // This should be impossible
+        } else {
           throw new Error("Invalid activity event");
-      }
-    }));
+        }
+      }));
 
     this._emitFrom(eventStream);
   }
@@ -185,14 +172,17 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 
       const deferred: Deferred<Activity> = new Deferred<Activity>();
       this._joinedDeferreds.set(id, deferred);
-      const message: ActivityJoinRequest = {
-        type: MessageType.ACTIVITY_JOIN_REQUEST,
-        activityId: id,
-        state: initialState
+      const message: IConvergenceMessage = {
+        activityJoinRequest: {
+          activityId: id,
+          state: StringMap.mapToObject(initialState)
+        }
       };
 
       this._connection.request(message)
-        .then((response: ActivityJoinResponse) => {
+        .then((response: IConvergenceMessage) => {
+          const joinResponse = response.activityJoinResponse;
+
           const filteredEvents: Observable<IActivityEvent> = this.events().pipe(filter(event => {
             return event.activity.id() === id;
           }));
@@ -205,11 +195,12 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
             this._connection);
 
           const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
-          Object.keys(response.participants).forEach(sessionId => {
-            const username: string = SessionIdParser.parseUsername(sessionId);
+          Object.keys(joinResponse.state).forEach((sessionId) => {
+            const activityState = joinResponse.state[sessionId];
+            // FIXME username
+            const username: string = "";
             const local: boolean = sessionId === this._connection.session().sessionId();
-            const state: { [key: string]: any } = response.participants[sessionId];
-            const stateMap: Map<string, any> = StringMap.objectToMap(state);
+            const stateMap: Map<string, any> = StringMap.objectToMap(activityState.state);
             const participant = new ActivityParticipant(activity, sessionId, username, local, stateMap);
             participants.set(sessionId, participant);
           });

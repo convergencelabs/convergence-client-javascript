@@ -9,7 +9,11 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedArrayReplaceOperation extends AppliedDiscreteOperation implements ArrayReplace {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: DataValue, public oldValue: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: DataValue,
+              public readonly oldValue: DataValue) {
     super(OperationType.ARRAY_SET, id, noOp);
     Object.freeze(this);
   }

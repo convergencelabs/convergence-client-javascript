@@ -2,8 +2,6 @@ import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {IChatEvent} from "./events/";
 import {Observable} from "rxjs";
-import {MessageType} from "../connection/protocol/MessageType";
-import {RemoveUserFromChatChannelMessage, LeaveChatChannelRequestMessage} from "../connection/protocol/chat/leaving";
 
 export class MembershipChatChannel extends ChatChannel {
 
@@ -24,9 +22,10 @@ export class MembershipChatChannel extends ChatChannel {
   public leave(): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.LEAVE_CHAT_CHANNEL_REQUEST,
-      channelId: this._info.channelId
-    } as LeaveChatChannelRequestMessage).then(() => {
+      leaveChatChannelRequest: {
+        channelId: this._info.channelId
+      }
+    }).then(() => {
       return;
     });
   }
@@ -34,10 +33,11 @@ export class MembershipChatChannel extends ChatChannel {
   public remove(username: string): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      type: MessageType.REMOVE_USER_FROM_CHAT_CHANNEL_REQUEST,
-      channelId: this._info.channelId,
-      username
-    } as RemoveUserFromChatChannelMessage).then(() => {
+      removeUserFromChatChannelRequest: {
+        channelId: this._info.channelId,
+        userToRemove: username
+      }
+    }).then(() => {
       return;
     });
   }

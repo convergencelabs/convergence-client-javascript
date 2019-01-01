@@ -5,7 +5,6 @@ import {RealTimeElement} from "./RealTimeElement";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
-import {ReferenceData} from "../../connection/protocol/model/openRealtimeModel";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
@@ -16,33 +15,17 @@ import {
   ElementReference,
   ReferenceFilter
 } from "../reference";
-import {
-  PublishReferenceEvent,
-  UnpublishReferenceEvent,
-  SetReferenceEvent,
-  ClearReferenceEvent,
-  RemoteReferencePublished,
-  RemoteReferenceSet,
-  RemoteReferenceEvent
-} from "../../connection/protocol/model/reference/ReferenceEvent";
-import {MessageType} from "../../connection/protocol/MessageType";
 import {ModelReferenceData} from "../ot/xform/ReferenceTransformer";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "../ot/UnprocessedOperationEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {SessionIdParser} from "../../connection/protocol/SessionIdParser";
 import {ConvergenceSession} from "../../ConvergenceSession";
-import {ForceCloseRealTimeModel} from "../../connection/protocol/model/forceCloseRealtimeModel";
-import {RemoteOperation} from "../../connection/protocol/model/remoteOperation";
-import {OperationAck} from "../../connection/protocol/model/operationAck";
-import {RemoteClientOpenedModel, RemoteClientClosedModel} from "../../connection/protocol/model/remoteOpenClose";
 import {Immutable} from "../../util/Immutable";
 import {ProcessedOperationEvent} from "../ot/ProcessedOperationEvent";
 import {Operation} from "../ot/ops/Operation";
 import {OperationType} from "../ot/ops/OperationType";
 import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
-import {OperationSubmission} from "../../connection/protocol/model/operationSubmission";
 import {
   IModelEvent,
   ModelClosedEvent,
@@ -57,9 +40,9 @@ import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} f
 import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
-import {ModelPermissionsChanged} from "../../connection/protocol/model/permissions/modelPermissionsChanged";
 import {Path, PathElement} from "../Path";
-import {CloseRealTimeModelRequest} from "../../connection/protocol/model/closeRealtimeModel";
+import {io} from "@convergence/convergence-proto";
+import IReferenceData = io.convergence.proto.IReferenceData;
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -194,7 +177,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               valueIdPrefix: string,
               data: ObjectValue,
               sessions: string[],
-              references: ReferenceData[],
+              references: IReferenceData[],
               permissions: ModelPermissions,
               version: number,
               createdTime: Date,
@@ -810,8 +793,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _initializeReferences(references: ReferenceData[]): void {
-    references.forEach((ref: ReferenceData) => {
+  private _initializeReferences(references: IReferenceData[]): void {
+    references.forEach((ref: IReferenceData) => {
       let model: RealTimeElement<any>;
       if (ref.id !== undefined) {
         model = this._wrapperFactory.wrap(this._model._getRegisteredValue(ref.id));

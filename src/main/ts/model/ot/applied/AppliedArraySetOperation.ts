@@ -9,7 +9,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedArraySetOperation extends AppliedDiscreteOperation implements ArraySet {
 
-  constructor(id: string, noOp: boolean, public value: DataValue[], public oldValue: DataValue[]) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: DataValue[],
+              public readonly oldValue: DataValue[]) {
     super(OperationType.ARRAY_VALUE, id, noOp);
     Object.freeze(this);
   }

@@ -5,11 +5,6 @@ import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
-import {
-  HistoricalOperationsRequest,
-  HistoricalOperationsResponse
-} from "../../connection/protocol/model/historical/historicalOperationsRequest";
-import {MessageType} from "../../connection/protocol/MessageType";
 import {ModelOperation} from "../ot/applied/ModelOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -17,6 +12,9 @@ import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
 import {Path, PathElement} from "../Path";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {toModelOperation} from "./ModelOperationMapper";
 
 interface OperationRequest {
   forward: boolean;
@@ -85,7 +83,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _maxVersion: number;
+  private readonly _maxVersion: number;
 
   /**
    * @internal
@@ -95,7 +93,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _modifiedTime: Date;
+  private readonly _modifiedTime: Date;
 
   /**
    * @internal
@@ -222,11 +220,12 @@ export class HistoricalModel implements ObservableModel {
 
     this._targetVersion = version;
 
-    const request: HistoricalOperationsRequest = {
-      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelId: this._modelId,
-      first: firstVersion,
-      last: lastVersion
+    const request: IConvergenceMessage = {
+      historicalOperationsRequest: {
+        modelId: this._modelId,
+        first: firstVersion,
+        last: lastVersion
+      }
     };
 
     const opRequest: OperationRequest = {
@@ -237,9 +236,10 @@ export class HistoricalModel implements ObservableModel {
 
     this._opRequests.push(opRequest);
 
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {historicalOperationsResponse} = response;
       opRequest.completed = true;
-      opRequest.operations = response.operations;
+      opRequest.operations = historicalOperationsResponse.operations.map(toModelOperation);
 
       this._checkAndProcess();
 

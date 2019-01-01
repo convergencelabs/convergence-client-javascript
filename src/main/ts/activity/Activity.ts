@@ -12,13 +12,8 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable, BehaviorSubject} from "rxjs";
 import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
-import {MessageType} from "../connection/protocol/MessageType";
-import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
-import {
-  ActivitySetState,
-  ActivityClearState,
-  ActivityRemoveState
-} from "../connection/protocol/activity/activityState";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -184,9 +179,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     if (this.isJoined()) {
       this._joined = false;
       this._connection.send({
-        type: MessageType.ACTIVITY_LEAVE_REQUEST,
-        activityId: this._id
-      } as ActivityLeaveRequest);
+        activityLeaveRequest: {activityId: this._id}
+      } as IConvergenceMessage);
       this._leftCB();
     }
   }
@@ -262,10 +256,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         state[arguments[0]] = arguments[1];
       }
 
-      const message: ActivitySetState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_SET,
-        activityId: this._id,
-        state
+      const message: IConvergenceMessage = {
+        activityLocalStateSet: {
+          activityId: this._id,
+          state
+        }
       };
       this._connection.send(message);
 
@@ -312,10 +307,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         keys = [keys as string];
       }
 
-      const message: ActivityRemoveState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_REMOVED,
-        activityId: this._id,
-        keys: keys as string[]
+      const message: IConvergenceMessage = {
+        activityLocalStateRemoved: {
+          activityId: this._id,
+          keys: keys as string[]
+        }
       };
       this._connection.send(message);
 
@@ -336,9 +332,10 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public clearState(): void {
     if (this.isJoined()) {
-      const message: ActivityClearState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
-        activityId: this._id
+      const message: IConvergenceMessage = {
+        activityLocalStateCleared: {
+          activityId: this._id
+        }
       };
       this._connection.send(message);
 

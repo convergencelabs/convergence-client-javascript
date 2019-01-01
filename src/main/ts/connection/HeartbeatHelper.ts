@@ -16,7 +16,7 @@ export class HeartbeatHelper {
   private _pingFuture: any;
   private _timeoutFuture: any;
 
-  private _handler: HeartbeatHandler;
+  private readonly _handler: HeartbeatHandler;
   private _pingInterval: number;
   private _pongTimeout: number;
   private _started: boolean;

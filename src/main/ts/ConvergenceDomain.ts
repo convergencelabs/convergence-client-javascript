@@ -2,7 +2,6 @@ import {ConvergenceConnection, AuthResponse, IConnectionErrorEvent} from "./conn
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
-import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {ActivityService} from "./activity/";
 import {IdentityService} from "./identity/";
 import {PresenceService, UserPresence} from "./presence/";
@@ -17,6 +16,8 @@ import {
   DisconnectedEvent
 } from "./events/";
 import {Validation} from "./util";
+import {io} from "@convergence/convergence-proto";
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -126,7 +127,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => this._emitEvent(new DisconnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () => this._emitEvent(new ReconnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.ERROR, (evt: IConnectionErrorEvent) =>
-      this._emitEvent(new ConnectionErrorEvent(this, evt.error))
+      this._emitEvent(new ConnectionErrorEvent(this, evt.error.message))
     );
   }
 
@@ -144,8 +145,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _authenticateWithToken(token: string): Promise<void> {
-    return this._connection.authenticateWithToken(token).then(m => this._init(m));
+  public _authenticateWithJwt(jwt: string): Promise<void> {
+    return this._connection.authenticateWithJwt(jwt).then(m => this._init(m));
   }
 
   /**
@@ -171,7 +172,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _connect(): Promise<HandshakeResponse> {
+  public _connect(): Promise<IHandshakeResponseMessage> {
     return this._connection.connect();
   }
 

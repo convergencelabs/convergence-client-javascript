@@ -9,7 +9,11 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedObjectSetPropertyOperation extends AppliedDiscreteOperation implements ObjectSetProperty {
 
-  constructor(id: string, noOp: boolean, public prop: string, public value: DataValue, public oldValue: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly prop: string,
+              public readonly value: DataValue,
+              public readonly oldValue: DataValue) {
     super(OperationType.OBJECT_SET, id, noOp);
     Object.freeze(this);
   }

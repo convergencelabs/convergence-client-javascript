@@ -9,8 +9,10 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedObjectSetOperation extends AppliedDiscreteOperation implements ObjectSet {
 
-  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue},
-              public oldValue: {[key: string]: DataValue}) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: {[key: string]: DataValue},
+              public readonly oldValue: {[key: string]: DataValue}) {
     super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }
