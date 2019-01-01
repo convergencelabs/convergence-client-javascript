@@ -9,7 +9,7 @@ export class UnprocessedOperationEvent {
     public clientId: string,
     public seqNo: number,
     public contextVersion: number,
-    public timestamp: number,
+    public timestamp: Date,
     public operation: Operation) {
     Object.freeze(this);
   }

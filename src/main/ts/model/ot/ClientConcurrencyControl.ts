@@ -143,7 +143,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       this._clientId,
       this._seqNo++,
       this._contextVersion,
-      new Date().getTime(),
+      new Date(),
       compoundOp);
 
     return event;
@@ -187,7 +187,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
         this._clientId,
         this._seqNo++,
         this._contextVersion,
-        new Date().getTime(),
+        new Date(),
         outgoingOperation);
     }
   }
