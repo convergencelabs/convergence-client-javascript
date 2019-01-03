@@ -3,7 +3,6 @@ import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
 import {mapObjectValues} from "../util/ObjectUtils";
 
-
 export function toOptional<T>(value?: T): { value: T | null } | null {
   if (value === undefined) {
     return null;

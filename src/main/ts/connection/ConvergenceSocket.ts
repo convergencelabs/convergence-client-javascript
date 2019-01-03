@@ -117,12 +117,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     if (!this.isOpen()) {
       throw new Error("Can't send messages because the WebSocket is not open.");
     }
-
-    const encodedMessage: string = JSON.stringify(message);
-    if (debugFlags.SOCKET_MESSAGES) {
-      console.log("S: " + encodedMessage);
-    }
-    this._socket.send(encodedMessage);
+    this._socket.send(message);
   }
 
   private _doClose(clean: boolean, reason?: string): Promise<void> {

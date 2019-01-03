@@ -298,7 +298,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   private _init(m: AuthResponse): void {
     const session: ConvergenceSession = this._connection.session();
-    const presenceState: Map<string, any> = StringMap.objectToMap(m.state);
+    const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
     const initialPresence: UserPresence = new UserPresence(session.username(), true, presenceState);
     this._modelService = new ModelService(this._connection);
     this._identityService = new IdentityService(this._connection);

@@ -8,6 +8,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "downlevelIteration": true,
+    "resolveJsonModule": true,
     "stripInternal": true,
     "removeComments": true,
     "importHelpers": true,

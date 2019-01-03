@@ -184,10 +184,10 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
   public sendMessage(message: IConvergenceMessage): void {
     if ((debugFlags.PROTOCOL_MESSAGES && message.ping && message.pong) || debugFlags.PROTOCOL_PINGS) {
-      console.log("S: " + JSON.stringify(message));
+      console.log("SND: " + JSON.stringify(message));
     }
     const bytes = ConvergenceMessageIO.encode(message);
-    this._socket.send(bytes.buffer);
+    this._socket.send(bytes);
   }
 
   private onSocketMessage(data: Uint8Array): void {
@@ -201,16 +201,16 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       !convergenceMessage.ping &&
       !convergenceMessage.pong) ||
       debugFlags.PROTOCOL_PINGS) {
-      console.log("R: " + JSON.stringify(convergenceMessage));
+      console.log("RCV: " + JSON.stringify(convergenceMessage));
     }
 
     if (convergenceMessage.ping) {
       this.onPing();
     } else if (convergenceMessage.pong) {
       // no-op
-    } else if (convergenceMessage.requestId !== null) {
+    } else if (convergenceMessage.requestId !== undefined) {
       this.onRequest(convergenceMessage);
-    } else if (convergenceMessage.responseId !== null) {
+    } else if (convergenceMessage.responseId !== undefined) {
       this.onReply(convergenceMessage);
     } else {
       this.onNormalMessage(convergenceMessage);
@@ -250,10 +250,11 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onRequest(message: IConvergenceMessage): void {
+    const requestId = message.requestId!.value || 0;
     const event: IProtocolConnectionMessageEvent = {
       name: "message",
       request: true,
-      callback: new ReplyCallbackImpl(message.requestId!.value, this),
+      callback: new ReplyCallbackImpl(requestId, this),
       message
     };
     this._emitEvent(event);
@@ -261,7 +262,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
   private onReply(message: IConvergenceMessage): void {
 
-    const requestId: number = message.responseId!.value;
+    const requestId: number = message.responseId!.value || 0;
 
     const record: RequestRecord = this._requests[requestId];
     delete this._requests[requestId];
