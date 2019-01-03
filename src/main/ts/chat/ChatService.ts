@@ -12,7 +12,7 @@ import {
   ChannelJoinedEvent
 } from "./events/";
 import {processChatMessage} from "./ChatMessageProcessor";
-import {ChatChannel, ChatChannelInfo} from "./ChatChannel";
+import {ChatChannel, ChatChannelInfo, ChatChannelMember} from "./ChatChannel";
 import {DirectChatChannel} from "./DirectChatChannel";
 import {MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {Observable} from "rxjs";
@@ -57,25 +57,6 @@ export const ChatChannelTypes = {
 export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   public static readonly Events: ChatServiceEvents = Events;
-
-  /**
-   * @hidden
-   * @internal
-   */
-  private static _createChannelInfo(channelData: IChatChannelInfoData): ChatChannelInfo {
-    return {
-      channelId: channelData.id,
-      channelType: channelData.channelType as ChatChannelType,
-      channelMembership: channelData.membership,
-      name: channelData.name,
-      topic: channelData.topic,
-      createdTime: timestampToDate(channelData.createdTime),
-      lastEventTime: timestampToDate(channelData.lastEventTime),
-      lastEventNumber: channelData.lastEventNumber as number,
-      maxSeenEvent: channelData.maxSeenEventNumber as number,
-      members: channelData.members
-    };
-  }
 
   /**
    * @internal
@@ -147,7 +128,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     }).then((response: IConvergenceMessage) => {
       const {getChatChannelsResponse} = response;
       const channelData = getChatChannelsResponse.chatChannelInfo[0];
-      const channelInfo = ChatService._createChannelInfo(channelData);
+      const channelInfo = this._createChannelInfo(channelData);
       return this._createChannel(channelInfo);
     });
   }
@@ -158,7 +139,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       getJoinedChatChannelsRequest: {}
     }).then((response: IConvergenceMessage) => {
       const {getJoinedChatChannelsResponse} = response;
-      return getJoinedChatChannelsResponse.chatChannelInfo.map(channel => ChatService._createChannelInfo(channel));
+      return getJoinedChatChannelsResponse.chatChannelInfo.map(channel => this._createChannelInfo(channel));
     });
   }
 
@@ -230,7 +211,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((response: IConvergenceMessage) => {
       const {joinChatChannelResponse} = response;
-      const channelInfo = ChatService._createChannelInfo(joinChatChannelResponse.channelInfo);
+      const channelInfo = this._createChannelInfo(joinChatChannelResponse.channelInfo);
       return this._createChannel(channelInfo);
     });
   }
@@ -256,12 +237,12 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
     return this._connection.request({
       getDirectChatChannelsRequest: {
-        usernames
+        usernameLists: [{values: usernames}]
       }
     }).then((response: IConvergenceMessage) => {
       const {getDirectChatChannelsResponse} = response;
       const channelData = getDirectChatChannelsResponse.chatChannelInfo[0];
-      const info = ChatService._createChannelInfo(channelData);
+      const info = this._createChannelInfo(channelData);
       const channel = this._createChannel(info);
       return channel as DirectChatChannel;
     });
@@ -289,6 +270,33 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       default:
         throw new Error(`Invalid chat channel type: ${channelInfo.channelType}`);
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _createChannelInfo(channelData: IChatChannelInfoData): ChatChannelInfo {
+    let maxEvent = -1;
+    const members: ChatChannelMember[] = [];
+    channelData.members.forEach(member => {
+      members.push({username: member.username, maxSeenEventNumber: member.maxSeenEventNumber as number});
+      if (member.username === this._connection.session().username()) {
+        maxEvent = member.maxSeenEventNumber as number;
+      }
+    });
+    return {
+      channelId: channelData.id,
+      channelType: channelData.channelType as ChatChannelType,
+      channelMembership: channelData.membership,
+      name: channelData.name,
+      topic: channelData.topic,
+      createdTime: timestampToDate(channelData.createdTime),
+      lastEventTime: timestampToDate(channelData.lastEventTime),
+      lastEventNumber: channelData.lastEventNumber as number,
+      maxSeenEventNumber: maxEvent,
+      members
+    };
   }
 }
 

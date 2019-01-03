@@ -9,8 +9,7 @@ import {
   ObservableBooleanEvents,
   ObservableBooleanEventConstants
 } from "../observable/ObservableBoolean";
-import {io} from "@convergence/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
@@ -47,7 +46,7 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Boolean values do not process references");
   }
 }

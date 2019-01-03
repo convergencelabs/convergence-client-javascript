@@ -18,8 +18,7 @@ import {
 } from "../internal/events";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
 import {Path, PathElement} from "../Path";
-import {io} from "@convergence/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -181,7 +180,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * @internal
    * @hidden
    */
-  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Arrays to do have references yet.");
   }
 }

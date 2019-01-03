@@ -1,4 +1,4 @@
-import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
+import {ChatChannelInfo, ChatChannel, ChatChannelMember} from "./ChatChannel";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {IChatEvent} from "./events/";
@@ -17,11 +17,12 @@ export class DirectChatChannel extends ChatChannel {
 
   public info(): DirectChatChannelInfo {
     const info = super.info();
-    const otherUsers = info.members.filter(username => username !== this.session().username());
+    const localUsername = this.session().username();
+    const otherUsers = info.members.filter(member => member.username !== localUsername);
     return {...info, otherUsers};
   }
 }
 
 export interface DirectChatChannelInfo extends ChatChannelInfo {
-  readonly otherUsers: string[];
+  readonly otherUsers: ChatChannelMember[];
 }

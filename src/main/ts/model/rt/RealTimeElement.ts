@@ -19,6 +19,7 @@ import {filter} from "rxjs/operators";
 import {ReferenceType} from "../reference/ReferenceType";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -171,7 +172,7 @@ export abstract class RealTimeElement<T>
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: IConvergenceMessage): void {
+  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(event);
   }
 

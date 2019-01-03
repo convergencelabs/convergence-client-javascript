@@ -47,13 +47,20 @@ import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsC
 import {toModelPermissions} from "../ModelMessageConverter";
 import IRemoteClientOpenedMessage = io.convergence.proto.IRemoteClientOpenedMessage;
 import IRemoteClientClosedMessage = io.convergence.proto.IRemoteClientClosedMessage;
-import {timestampToDate, toOptional} from "../../connection/ProtocolUtil";
-import {getReferenceType, getReferenceValueId, getReferenceValues} from "../reference/ReferenceMessageUtils";
+import {fromOptional, timestampToDate, toOptional} from "../../connection/ProtocolUtil";
 import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import {toIOperationData, toOperation} from "../OperationMapper";
 import IReferenceData = io.convergence.proto.OpenRealtimeModelResponseMessage.IReferenceData;
+import {
+  RemoteReferenceCleared,
+  RemoteReferenceEvent, RemoteReferenceSet,
+  RemoteReferenceShared,
+  RemoteReferenceUnshared
+} from "../reference/RemoteReferenceEvent";
+import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
+import {ReferenceType} from "../reference/ReferenceType";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -459,10 +466,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const {
       forceCloseRealTimeModel,
       remoteOperation,
-      referencePublished,
+      referenceShared,
       referenceSet,
       referenceCleared,
-      referenceUnpublished,
+      referenceUnshared,
       operationAck,
       remoteClientOpenedModel,
       remoteClientClosedModel,
@@ -477,8 +484,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     } else if (operationAck) {
       this._handelOperationAck(operationAck);
       this._emitVersionChanged();
-    } else if (referencePublished || referenceSet || referenceCleared || referenceUnpublished) {
-      this._handleRemoteReferenceEvent(event.message);
+    } else if (referenceShared || referenceSet || referenceCleared || referenceUnshared) {
+      const remoteRefEvent = toRemoteReferenceEvent(event.message);
+      this._handleRemoteReferenceEvent(remoteRefEvent);
     } else if (remoteClientOpenedModel) {
       this._handleClientOpen(remoteClientOpenedModel);
     } else if (remoteClientClosedModel) {
@@ -568,73 +576,67 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _handleRemoteReferenceEvent(message: IConvergenceMessage): void {
-
-
-    const valueId = getReferenceValueId(message);
-
-    if (valueId === null) {
-      this._modelReferenceEvent(message);
+  private _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+    if (event.valueId === null) {
+      this._modelReferenceEvent(event);
     } else {
-      const value: RealTimeElement<any> = this._getRegisteredValue(valueId);
+      const value: RealTimeElement<any> = this._getRegisteredValue(event.valueId);
       if (!value) {
         return;
       }
 
-      if (message.referencePublished) {
-        processedEvent = Immutable.copy(event, {
-          path: value.path()
-        });
-
-        const values = getReferenceValues(message.referencePublished.references);
-        if (values.length > 0) {
+      if (event instanceof RemoteReferenceShared) {
+        if (event.values) {
           let data: ModelReferenceData = {
-            type: getReferenceType(message.referencePublished.references),
-            id: valueId,
-            values
+            type: event.referenceType,
+            valueId: event.valueId,
+            values: event.values
           };
           data = this._concurrencyControl.processRemoteReferenceSet(data);
-          processedEvent = Immutable.copy(processedEvent, {
-            values: data.values
-          });
+          event = new RemoteReferenceShared(
+            event.sessionId,
+            event.resourceId,
+            event.valueId,
+            event.key,
+            event.referenceType,
+            data.values
+          );
         }
-      } else if (message.referenceCleared || message.referenceUnpublished) {
-        processedEvent = Immutable.copy(event, {
-          path: value.path()
-        });
-      } else if (message.referenceSet) {
-        const setEvent =;
-
+      } else if (event instanceof RemoteReferenceSet) {
+        // todo validate that the reference exists.
+        const type = this.reference(event.sessionId, event.valueId).type();
         let data: ModelReferenceData = {
-          type: getReferenceType(message.referenceSet.references),
-          id: valueId,
-          values: getReferenceValues(message.referenceSet.references)
+          type,
+          valueId: event.valueId,
+          values: event.values
         };
-
         data = this._concurrencyControl.processRemoteReferenceSet(data);
-        processedEvent = Immutable.copy(event, {
-          path: value.path(),
-          values: data.values
-        });
+        event = new RemoteReferenceSet(
+          event.sessionId,
+          event.resourceId,
+          event.valueId,
+          event.key,
+          data.values
+        );
       }
 
       let r: ModelReference<any>;
 
-      if (message.referenceUnpublished) {
-        r = value.reference(processedEvent.sessionId, processedEvent.key);
-        const index: number = this._referencesBySession[processedEvent.sessionId].indexOf(r);
-        this._referencesBySession[processedEvent.sessionId].splice(index, 1);
+      if (event instanceof RemoteReferenceUnshared) {
+        r = value.reference(event.sessionId, event.key);
+        const index: number = this._referencesBySession[event.sessionId].indexOf(r);
+        this._referencesBySession[event.sessionId].splice(index, 1);
       }
 
       // TODO if we wind up being able to pause the processing of incoming
       // operations, then we would put this in a queue.  We would also need
       // to somehow wrap this in an object that stores the currentContext
       // version right now, so we know when to distribute this event.
-      value._handleRemoteReferenceEvent(processedEvent);
+      value._handleRemoteReferenceEvent(event);
 
-      if (processedEvent.type === MessageType.REFERENCE_PUBLISHED) {
-        r = value.reference(processedEvent.sessionId, processedEvent.key);
-        this._referencesBySession[processedEvent.sessionId].push(r);
+      if (event instanceof RemoteReferenceShared) {
+        r = value.reference(event.sessionId, event.key);
+        this._referencesBySession[event.sessionId].push(r);
       }
     }
   }
@@ -703,7 +705,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const operation: Operation = processed.operation;
     const clientId: string = processed.clientId;
     const contextVersion: number = processed.version;
-    const timestamp: number = processed.timestamp;
+    const timestamp: Date = processed.timestamp;
 
     // fixme username
     const username = "";
@@ -770,7 +772,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _modelReferenceEvent(message: IConvergenceMessage): void {
+  private _modelReferenceEvent(message: RemoteReferenceEvent): void {
     this._referenceManager.handleRemoteReferenceEvent(message);
   }
 
@@ -789,74 +791,52 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _getMessageValues(ref: ModelReferenceData): string[] {
-    switch (ref.type) {
-      case ModelReference.Types.INDEX:
-      case ModelReference.Types.PROPERTY:
-      case ModelReference.Types.RANGE:
-        return ref.values;
-      case ModelReference.Types.ELEMENT:
-        const elementIds: string[] = [];
-        for (const element of ref.values) {
-          elementIds.push((element as RealTimeElement<any>).id());
-        }
-        return elementIds;
-      default:
-        throw new Error("Invalid reference type");
-    }
-  }
-
-  /**
-   * @private
-   * @hidden
-   * @internal
-   */
   private _initializeReferences(references: IReferenceData[]): void {
     references.forEach((ref: IReferenceData) => {
-      let model: RealTimeElement<any>;
-      if (ref.id !== undefined) {
-        model = this._wrapperFactory.wrap(this._model._getRegisteredValue(ref.id));
+      let element: RealTimeElement<any>;
+      const valueId = fromOptional(ref.valueId);
+      if (valueId !== null) {
+        element = this._wrapperFactory.wrap(this._model._getRegisteredValue(valueId));
       }
 
-      // fixme username
-      const username = "";
-      const published: IConvergenceMessage = {
-        referencePublished: {
-          sessionId: ref.sessionId,
-          resourceId: this._resourceId,
-          key: ref.key,
-          valueId: ref.id,
-          referenceType: ref.referenceType,
-          values: ref.values
-        }
-      };
+      const {referenceType, values} = extractValueAndType(ref.reference);
+      const published = new RemoteReferenceShared(
+        ref.sessionId,
+        this._resourceId,
+        valueId,
+        ref.key,
+        referenceType,
+        values
+      );
 
-      if (model !== undefined) {
-        model._handleRemoteReferenceEvent(published);
-        const r: ModelReference<any> = model.reference(ref.sessionId, ref.key);
+      if (element !== undefined) {
+        element._handleRemoteReferenceEvent(published);
+        const r: ModelReference<any> = element.reference(ref.sessionId, ref.key);
         this._referencesBySession[ref.sessionId].push(r);
       } else {
         this._modelReferenceEvent(published);
       }
 
-      if (ref.values) {
-        const set: IConvergenceMessage = {
-          referenceSet: {
-            sessionId: ref.sessionId,
-            resourceId: this._resourceId,
-            key: ref.key,
-            valueId: ref.id,
-            referenceType: ref.referenceType,
-            values: ref.values
-          }
-        };
-
-        if (model !== undefined) {
-          model._handleRemoteReferenceEvent(set);
-        } else {
-          this._modelReferenceEvent(set);
-        }
-      }
+      // Fixme we used to do this, but the publish can contain the values, so
+      // why would we need to do this also?
+      // if (ref.values) {
+      //   const set: IConvergenceMessage = {
+      //     referenceSet: {
+      //       sessionId: ref.sessionId,
+      //       resourceId: this._resourceId,
+      //       key: ref.key,
+      //       valueId: ref.id,
+      //       referenceType: ref.referenceType,
+      //       values: ref.values
+      //     }
+      //   };
+      //
+      //   if (model !== undefined) {
+      //     model._handleRemoteReferenceEvent(set);
+      //   } else {
+      //     this._modelReferenceEvent(set);
+      //   }
+      // }
     });
   }
 
@@ -869,13 +849,23 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const source: any = reference.reference().source();
     const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
+    let refData: ModelReferenceData = {
+      type: reference.reference().type(),
+      valueId: vid,
+      values: reference.reference().values()
+    };
+
+    // Only transform those that target a RealTimeElement
+    if (vid !== undefined) {
+      refData = this._concurrencyControl.processOutgoingSetReference(refData);
+    }
+
     const event: IConvergenceMessage = {
-      publishReference: {
+      shareReference: {
         resourceId: this._resourceId,
         key: reference.reference().key(),
         valueId: toOptional(vid),
-        referenceType: reference.reference().type(),
-        values: reference.values(),
+        references: toIReferenceValues(reference.reference().type(), refData.values),
         version: this._concurrencyControl.contextVersion()
       }
     };
@@ -892,10 +882,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const vid: string = (source instanceof RealTimeElement) ? source.id() : null;
 
     const event: IConvergenceMessage = {
-      unpublishReference: {
+      unshareReference: {
         resourceId: this._resourceId,
+        valueId: toOptional(vid),
         key: reference.reference().key(),
-        valueId: toOptional(vid)
       }
     };
     this._connection.send(event);
@@ -912,7 +902,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     let refData: ModelReferenceData = {
       type: reference.reference().type(),
-      id: vid,
+      valueId: vid,
       values: reference.reference().values()
     };
 
@@ -926,9 +916,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         setReference: {
           resourceId: this._resourceId,
           key: reference.reference().key(),
-          valueId: toOptional(refData.id),
-          referenceType: reference.reference().type(),
-          values: this._getMessageValues(refData),
+          valueId: toOptional(refData.valueId),
+          references: toIReferenceValues(reference.reference().type(), refData.values),
           version: this._concurrencyControl.contextVersion()
         }
       };

@@ -8,6 +8,9 @@ import tsLint from "gulp-tslint";
 import mocha from "gulp-mocha";
 import rollup from "rollup";
 import rollupTypescript2 from "rollup-plugin-typescript2";
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import json from 'rollup-plugin-json';
 import sourceMaps from "gulp-sourcemaps";
 import uglify from "gulp-uglify";
 import fs from "fs";
@@ -53,21 +56,31 @@ function generateRollUpConfig(format) {
     sourcemap: true,
     external: [
       "rxjs",
-      "rxjs/operators"
+      "rxjs/operators",
+      "protobufjs/light"
     ],
     globals: {
       "rxjs": "rxjs",
-      "rxjs/operators": "rxjs.operators"
+      "rxjs/operators": "rxjs.operators",
+      "protobufjs/light": "protobuf"
     },
     plugins: [
       rollupTypescript2({
         typescript: typescript,
+        rollupCommonJSResolveHack: true,
         tsconfigOverride: {
           compilerOptions: {
+            resolveJsonModule: false,
             module: "ES2015"
           }
         }
-      })
+      }),
+      resolve({
+        jsnext: true,
+        main: true
+      }),
+      commonjs({ include: 'node_modules/**' }),
+      json()
     ]
   };
 }
@@ -99,7 +112,10 @@ const distUmd = () => {
 };
 
 const distUmdBundle = () =>
-  src(["node_modules/rxjs/bundles/rxjs.umd.js", `${distInternalDir}/umd/convergence.js`])
+  src([
+    "node_modules/rxjs/bundles/rxjs.umd.js",
+    "node_modules/protobufjs/dist/light/protobuf.js",
+    `${distInternalDir}/umd/convergence.js`])
     .pipe(concat("convergence-all.js"))
     .pipe(dest(`${distInternalDir}/umd`));
 
@@ -110,7 +126,10 @@ const distUmdMin = () => {
 };
 
 const distUmdBundleMin = () => {
-  const files = ["node_modules/rxjs/bundles/rxjs.umd.min.js", `${distInternalDir}/umd/convergence.min.js`];
+  const files = [
+    "node_modules/rxjs/bundles/rxjs.umd.min.js",
+    "node_modules/protobufjs/dist/light/protobuf.min.js",
+    `${distInternalDir}/umd/convergence.min.js`];
   return src(files)
     .pipe(concat("convergence-all.min.js"))
     .pipe(dest(`${distInternalDir}/umd`));

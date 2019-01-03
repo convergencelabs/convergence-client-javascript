@@ -404,8 +404,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       (message.operationAck && message.operationAck.resourceId) ||
       (message.remoteClientOpenedModel && message.remoteClientOpenedModel.resourceId) ||
       (message.remoteClientClosedModel && message.remoteClientClosedModel.resourceId) ||
-      (message.referencePublished && message.referencePublished.resourceId) ||
-      (message.referenceUnpublished && message.referenceUnpublished.resourceId) ||
+      (message.referenceShared && message.referenceShared.resourceId) ||
+      (message.referenceUnshared && message.referenceUnshared.resourceId) ||
       (message.referenceSet && message.referenceSet.resourceId) ||
       (message.referenceCleared && message.referenceCleared.resourceId);
 

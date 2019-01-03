@@ -56,7 +56,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   /**
    * @internal
    */
-  private readonly _type: string;
+  private readonly _type: ReferenceType;
 
   /**
    * @internal
@@ -84,7 +84,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   private readonly _local: boolean;
 
   protected constructor(referenceManager: ReferenceManager,
-                        type: string,
+                        type: ReferenceType,
                         key: string,
                         source: any,
                         username: string,
@@ -102,7 +102,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     this._local = local;
   }
 
-  public type(): string {
+  public type(): ReferenceType {
     return this._type;
   }
 

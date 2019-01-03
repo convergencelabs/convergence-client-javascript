@@ -29,8 +29,13 @@ export interface ChatChannelInfo {
   readonly createdTime: Date;
   readonly lastEventTime: Date;
   readonly lastEventNumber: number;
-  readonly maxSeenEvent: number;
-  readonly members: string[];
+  readonly maxSeenEventNumber: number;
+  readonly members: ChatChannelMember[];
+}
+
+export interface ChatChannelMember {
+  readonly username: string;
+  readonly maxSeenEventNumber: number;
 }
 
 export interface ChatChannelEvents {
@@ -79,7 +84,9 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
     this._info = info;
 
     // TODO this might not make sense for rooms
-    this._joined = info.members.includes(this.session().username());
+    this._joined = info.members
+      .map(m => m.username)
+      .includes(this.session().username());
 
     messageStream.subscribe(event => {
       this._processEvent(event);
@@ -186,7 +193,8 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
 
     if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
       const members = this._info.members.slice(0);
-      members.push(event.username);
+      // TODO should we allow a seen number to come along?
+      members.push({username: event.username, maxSeenEventNumber: -1});
       if (event.username === this.session().username()) {
         // FIXME this might not be right for rooms
         this._joined = true;
@@ -198,7 +206,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
         // FIXME this might not be right for rooms
         this._joined = false;
       }
-      const members = this._info.members.filter(username => username !== removedUsername);
+      const members = this._info.members.filter(member => member.username !== removedUsername);
       this._info = {...this._info, members};
     } else if (event instanceof ChatChannelNameChanged) {
       const name = event.channelName;
