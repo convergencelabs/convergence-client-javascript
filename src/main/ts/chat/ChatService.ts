@@ -24,6 +24,7 @@ import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatChannelInfoData = io.convergence.proto.IChatChannelInfoData;
 import {timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {IdentityCache} from "../identity/IdentityCache";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -69,22 +70,28 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   private readonly _messageStream: Observable<IChatEvent>;
 
   /**
+   * @internal
+   */
+  private _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection) {
+  constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
     this._connection = connection;
+    this._identityCache = identityCache;
 
     this._messageStream = this._connection
       .messages()
       .pipe(
-        map(message => processChatMessage(message.message)),
+        map(message => processChatMessage(message.message, this._identityCache)),
         tap(event => {
-          if (event instanceof UserJoinedEvent && event.username === this.session().username()) {
+          if (event instanceof UserJoinedEvent && event.user.username === this.session().username()) {
             const joined = new ChannelJoinedEvent(event.channelId);
             this._emitEvent(joined);
-          } else if (event instanceof UserLeftEvent && event.username === this.session().username()) {
+          } else if (event instanceof UserLeftEvent && event.user.username === this.session().username()) {
             const left = new ChannelLeftEvent(event.channelId);
             this._emitEvent(left);
           }
@@ -127,7 +134,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((response: IConvergenceMessage) => {
       const {getChatChannelsResponse} = response;
-      const channelData = getChatChannelsResponse.chatChannelInfo[0];
+      const channelData = getChatChannelsResponse.channelInfo[0];
       const channelInfo = this._createChannelInfo(channelData);
       return this._createChannel(channelInfo);
     });
@@ -139,7 +146,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       getJoinedChatChannelsRequest: {}
     }).then((response: IConvergenceMessage) => {
       const {getJoinedChatChannelsResponse} = response;
-      return getJoinedChatChannelsResponse.chatChannelInfo.map(channel => this._createChannelInfo(channel));
+      return getJoinedChatChannelsResponse.channelInfo.map(channel => this._createChannelInfo(channel));
     });
   }
 
@@ -241,7 +248,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((response: IConvergenceMessage) => {
       const {getDirectChatChannelsResponse} = response;
-      const channelData = getDirectChatChannelsResponse.chatChannelInfo[0];
+      const channelData = getDirectChatChannelsResponse.channelInfo[0];
       const info = this._createChannelInfo(channelData);
       const channel = this._createChannel(info);
       return channel as DirectChatChannel;

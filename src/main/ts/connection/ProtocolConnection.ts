@@ -183,7 +183,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   public sendMessage(message: IConvergenceMessage): void {
-    if ((debugFlags.PROTOCOL_MESSAGES && message.ping && message.pong) || debugFlags.PROTOCOL_PINGS) {
+    if (true || (debugFlags.PROTOCOL_MESSAGES && message.ping && message.pong) || debugFlags.PROTOCOL_PINGS) {
       console.log("SND: " + JSON.stringify(message));
     }
     const bytes = ConvergenceMessageIO.encode(message);
@@ -197,7 +197,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._heartbeatHelper.messageReceived();
     }
 
-    if ((debugFlags.PROTOCOL_MESSAGES &&
+    if (true || (debugFlags.PROTOCOL_MESSAGES &&
       !convergenceMessage.ping &&
       !convergenceMessage.pong) ||
       debugFlags.PROTOCOL_PINGS) {

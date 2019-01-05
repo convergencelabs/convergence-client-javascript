@@ -20,6 +20,17 @@ export function mapObjectValues<F, T>(obj: {[key: string]: F}, mapFunc: MapFunct
  * @hidden
  * @internal
  */
+export function objectForEach<T>(obj: {[key: string]: T}, callback: (key: string, val: T) => void): void {
+  "use strict";
+  return Object.keys(obj).forEach(key => {
+    callback(key, obj[key]);
+  });
+}
+
+/**
+ * @hidden
+ * @internal
+ */
 export function deepClone(from: any): any {
   const type: string = typeof from;
 

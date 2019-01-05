@@ -24,7 +24,13 @@ import {NumberAddOperation} from "./ot/ops/NumberAddOperation";
 import {NumberSetOperation} from "./ot/ops/NumberSetOperation";
 import {BooleanSetOperation} from "./ot/ops/BooleanSetOperation";
 import {DateSetOperation} from "./ot/ops/DateSetOperation";
-import {dateToTimestamp, timestampToDate} from "../connection/ProtocolUtil";
+import {
+  dateToTimestamp, getOrDefaultArray,
+  getOrDefaultBoolean,
+  getOrDefaultNumber,
+  getOrDefaultString,
+  timestampToDate
+} from "../connection/ProtocolUtil";
 
 export function toOperation(operationData: IOperationData): Operation {
   if (operationData.compoundOperation) {
@@ -37,59 +43,114 @@ export function toOperation(operationData: IOperationData): Operation {
 }
 
 function toCompoundOperation(compoundOperationData: ICompoundOperationData): CompoundOperation {
-  const discreteOps = compoundOperationData.operations.map(toDiscreteOperation);
+  const discreteOps = getOrDefaultArray(compoundOperationData.operations).map(toDiscreteOperation);
   return new CompoundOperation(discreteOps);
 }
 
 function toDiscreteOperation(discreteOperationData: IDiscreteOperationData): DiscreteOperation {
   if (discreteOperationData.arrayInsertOperation) {
     const {id, noOp, index, value} = discreteOperationData.arrayInsertOperation;
-    return new ArrayInsertOperation(id, noOp, index, toDataValue(value));
+    return new ArrayInsertOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(index),
+      toDataValue(value));
   } else if (discreteOperationData.arrayRemoveOperation) {
     const {id, noOp, index} = discreteOperationData.arrayRemoveOperation;
-    return new ArrayRemoveOperation(id, noOp, index);
+    return new ArrayRemoveOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(index));
   } else if (discreteOperationData.arrayMoveOperation) {
     const {id, noOp, fromIndex, toIndex} = discreteOperationData.arrayMoveOperation;
-    return new ArrayMoveOperation(id, noOp, fromIndex, toIndex);
+    return new ArrayMoveOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(fromIndex),
+      getOrDefaultNumber(toIndex));
   } else if (discreteOperationData.arrayReplaceOperation) {
     const {id, noOp, index, value} = discreteOperationData.arrayReplaceOperation;
-    return new ArrayReplaceOperation(id, noOp, index, toDataValue(value));
+    return new ArrayReplaceOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(index),
+      toDataValue(value));
   } else if (discreteOperationData.arraySetOperation) {
     const {id, noOp, values} = discreteOperationData.arraySetOperation;
-    return new ArraySetOperation(id, noOp, values.map(toDataValue));
+    return new ArraySetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultArray(values).map(toDataValue));
   } else if (discreteOperationData.objectAddPropertyOperation) {
     const {id, noOp, key, value} = discreteOperationData.objectAddPropertyOperation;
-    return new ObjectAddPropertyOperation(id, noOp, key, toDataValue(value));
+    return new ObjectAddPropertyOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultString(key),
+      toDataValue(value));
   } else if (discreteOperationData.objectSetPropertyOperation) {
     const {id, noOp, key, value} = discreteOperationData.objectSetPropertyOperation;
-    return new ObjectSetPropertyOperation(id, noOp, key, toDataValue(value));
+    return new ObjectSetPropertyOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultString(key),
+      toDataValue(value));
   } else if (discreteOperationData.objectRemovePropertyOperation) {
     const {id, noOp, key} = discreteOperationData.objectSetPropertyOperation;
-    return new ObjectRemovePropertyOperation(id, noOp, key);
+    return new ObjectRemovePropertyOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultString(key));
   } else if (discreteOperationData.objectSetOperation) {
     const {id, noOp, values} = discreteOperationData.objectSetOperation;
-    return new ObjectSetOperation(id, noOp, mapObjectValues(values, toDataValue));
+    return new ObjectSetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      mapObjectValues(values, toDataValue));
   } else if (discreteOperationData.stringInsertOperation) {
     const {id, noOp, index, value} = discreteOperationData.stringInsertOperation;
-    return new StringInsertOperation(id, noOp, index, value);
+    return new StringInsertOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(index),
+      getOrDefaultString(value));
   } else if (discreteOperationData.stringRemoveOperation) {
     const {id, noOp, index, value} = discreteOperationData.stringRemoveOperation;
-    return new StringRemoveOperation(id, noOp, index, value);
+    return new StringRemoveOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(index),
+      getOrDefaultString(value));
   } else if (discreteOperationData.stringSetOperation) {
     const {id, noOp, value} = discreteOperationData.stringSetOperation;
-    return new StringSetOperation(id, noOp, value);
+    return new StringSetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultString(value));
   } else if (discreteOperationData.numberDeltaOperation) {
     const {id, noOp, value} = discreteOperationData.numberDeltaOperation;
-    return new NumberAddOperation(id, noOp, value);
+    return new NumberAddOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(value));
   } else if (discreteOperationData.numberSetOperation) {
     const {id, noOp, value} = discreteOperationData.numberSetOperation;
-    return new NumberSetOperation(id, noOp, value);
+    return new NumberSetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultNumber(value));
   } else if (discreteOperationData.booleanSetOperation) {
     const {id, noOp, value} = discreteOperationData.booleanSetOperation;
-    return new BooleanSetOperation(id, noOp, value);
+    return new BooleanSetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      getOrDefaultBoolean(value));
   } else if (discreteOperationData.dateSetOperation) {
     const {id, noOp, value} = discreteOperationData.dateSetOperation;
-    return new DateSetOperation(id, noOp, timestampToDate(value));
+    return new DateSetOperation(
+      id,
+      getOrDefaultBoolean(noOp),
+      timestampToDate(value));
   }
 }
 

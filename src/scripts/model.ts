@@ -7,7 +7,7 @@ let domain: ConvergenceDomain;
 connect()
   .then(d => {
     domain = d;
-    console.log("connected");
+    console.log("connected: ", d.session().sessionId());
     return d.models().openAutoCreate({
       ephemeral: true,
       collection: "test",

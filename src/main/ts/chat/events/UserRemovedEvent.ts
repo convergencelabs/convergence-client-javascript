@@ -1,4 +1,5 @@
 import {ChatChannelEvent} from "./ChatChannelEvent";
+import {DomainUser} from "../../identity";
 
 export class UserRemovedEvent extends ChatChannelEvent {
   public static readonly NAME = "user_removed";
@@ -11,9 +12,9 @@ export class UserRemovedEvent extends ChatChannelEvent {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              public readonly username: string,
-              public readonly removedBy: string) {
-    super(channelId, eventNumber, timestamp);
+              user: DomainUser,
+              public readonly removedUser: DomainUser) {
+    super(channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }

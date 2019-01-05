@@ -18,6 +18,7 @@ import {
 import {Validation} from "./util";
 import {io} from "@convergence/convergence-proto";
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import {IdentityCache} from "./identity/IdentityCache";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -70,6 +71,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    */
   private _chatService: ChatService;
+
+  /**
+   * @internal
+   */
+  private _identityCache: IdentityCache;
 
   /**
    * @internal
@@ -300,12 +306,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     const session: ConvergenceSession = this._connection.session();
     const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
     const initialPresence: UserPresence = new UserPresence(session.username(), true, presenceState);
+    this._identityCache = new IdentityCache(this._connection);
     this._modelService = new ModelService(this._connection);
     this._identityService = new IdentityService(this._connection);
     this._activityService = new ActivityService(this._connection);
     this._presenceService = new PresenceService(this._connection, initialPresence);
-    this._chatService = new ChatService(this._connection);
+    this._chatService = new ChatService(this._connection, this._identityCache);
   }
 }
-
 Object.freeze(ConvergenceDomain.Events);

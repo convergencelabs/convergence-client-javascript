@@ -20,7 +20,6 @@ import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {UnprocessedOperationEvent} from "../ot/UnprocessedOperationEvent";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ConvergenceSession} from "../../ConvergenceSession";
-import {Immutable} from "../../util/Immutable";
 import {ProcessedOperationEvent} from "../ot/ProcessedOperationEvent";
 import {Operation} from "../ot/ops/Operation";
 import {OperationType} from "../ot/ops/OperationType";
@@ -54,13 +53,12 @@ import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import {toIOperationData, toOperation} from "../OperationMapper";
 import IReferenceData = io.convergence.proto.OpenRealtimeModelResponseMessage.IReferenceData;
 import {
-  RemoteReferenceCleared,
-  RemoteReferenceEvent, RemoteReferenceSet,
+  RemoteReferenceEvent,
+  RemoteReferenceSet,
   RemoteReferenceShared,
   RemoteReferenceUnshared
 } from "../reference/RemoteReferenceEvent";
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
-import {ReferenceType} from "../reference/ReferenceType";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;

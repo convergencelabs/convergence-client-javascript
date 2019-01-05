@@ -20,7 +20,7 @@ import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {toIObjectValue, toModelPermissions, toModelResult, toObjectValue} from "./ModelMessageConverter";
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
-import {timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {getOrDefaultArray, getOrDefaultNumber, timestampToDate, toOptional} from "../connection/ProtocolUtil";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -354,15 +354,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         openRealTimeModelResponse.version as number,
         transformer,
         referenceTransformer);
-
+      const data = toObjectValue(openRealTimeModelResponse.data);
       const model: RealTimeModel = new RealTimeModel(
-        openRealTimeModelResponse.resourceId,
+        openRealTimeModelResponse.resourceId ,
         openRealTimeModelResponse.valueIdPrefix,
-        toObjectValue(openRealTimeModelResponse.data),
-        openRealTimeModelResponse.connectedClients,
-        openRealTimeModelResponse.references,
+        data,
+        getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+        getOrDefaultArray(openRealTimeModelResponse.references),
         toModelPermissions(openRealTimeModelResponse.permissions),
-        openRealTimeModelResponse.version as number,
+        getOrDefaultNumber(openRealTimeModelResponse.version),
         timestampToDate(openRealTimeModelResponse.createdTime),
         timestampToDate(openRealTimeModelResponse.modifiedTime),
         openRealTimeModelResponse.modelId,
@@ -428,9 +428,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _handleModelDataRequest(request: IAutoCreateModelConfigRequestMessage, replyCallback: ReplyCallback): void {
-    const options: IAutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
+    const autoCreateId = request.autoCreateId || 0;
+    const options: IAutoCreateModelOptions = this._autoCreateRequests[autoCreateId];
     if (options === undefined) {
-      const message = `Received a request for an auto create id that was not expected: ${request.autoCreateId}`;
+      const message = `Received a request for an auto create id that was not expected: ${autoCreateId}`;
       console.error(message);
       replyCallback.expectedError("unknown_model", message);
     } else {

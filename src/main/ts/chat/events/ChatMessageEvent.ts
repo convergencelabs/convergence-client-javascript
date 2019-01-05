@@ -1,4 +1,5 @@
 import {ChatChannelEvent} from "./ChatChannelEvent";
+import {DomainUser} from "../../identity";
 
 export class ChatMessageEvent extends ChatChannelEvent {
   public static readonly NAME = "message";
@@ -11,10 +12,10 @@ export class ChatMessageEvent extends ChatChannelEvent {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              public readonly username: string,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
               public readonly message: string) {
-    super(channelId, eventNumber, timestamp);
+    super(channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }

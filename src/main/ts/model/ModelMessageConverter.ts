@@ -10,7 +10,13 @@ import {
   ObjectValue,
   StringValue,
 } from "./dataValue";
-import {dateToTimestamp, protoValueToJson, timestampToDate} from "../connection/ProtocolUtil";
+import {
+  dateToTimestamp,
+  getOrDefaultArray,
+  getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultObject, getOrDefaultString,
+  protoValueToJson,
+  timestampToDate
+} from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
 import {mapObjectValues} from "../util/ObjectUtils";
 import IObjectValue = io.convergence.proto.IObjectValue;
@@ -23,27 +29,24 @@ export function toDataValue(val: IDataValue): DataValue {
   if (val.arrayValue) {
     const {id, children} = val.arrayValue;
     return {
+      type: "array",
       id,
-      children: children.map(toDataValue)
+      children: getOrDefaultArray(children).map(toDataValue)
     } as ArrayValue;
   } else if (val.objectValue) {
-    const {id, children} = val.objectValue;
-    return {
-      id,
-      children: mapObjectValues(children, toDataValue)
-    } as ObjectValue;
+    return toObjectValue(val.objectValue);
   } else if (val.booleanValue) {
     const {id, value} = val.booleanValue;
-    return {type: "boolean", id, value} as BooleanValue;
+    return {type: "boolean", id, value: getOrDefaultBoolean(value)} as BooleanValue;
   } else if (val.dateValue) {
     const {id, value} = val.dateValue;
     return {type: "date", id, value: timestampToDate(value)} as DateValue;
   } else if (val.doubleValue) {
     const {id, value} = val.doubleValue;
-    return {type: "number", id, value} as NumberValue;
+    return {type: "number", id, value: getOrDefaultNumber(value)} as NumberValue;
   } else if (val.stringValue) {
     const {id, value} = val.stringValue;
-    return {type: "string", id, value} as StringValue;
+    return {type: "string", id, value: getOrDefaultString(value)} as StringValue;
   } else if (val.nullValue) {
     const {id} = val.nullValue;
     return {type: "null", id, value: null} as NullValue;
@@ -74,7 +77,7 @@ export function toIDataValue(val: DataValue): IDataValue {
   } else if (val.type === "string") {
     const {id, value} = val as StringValue;
     return {stringValue: {id, value}};
-  }  else {
+  } else {
     throw new ConvergenceError("Invalid data value type: " + JSON.stringify(val));
   }
 }
@@ -90,14 +93,18 @@ export function toObjectValue(objectValue: IObjectValue): ObjectValue {
   return {
     type: "object",
     id: objectValue.id,
-    children: mapObjectValues(objectValue.children, toDataValue)
+    children: mapObjectValues(getOrDefaultObject(objectValue.children), toDataValue)
   };
 }
 
 export function toModelPermissions(permissionsData: IModelPermissionsData): ModelPermissions | undefined {
   return permissionsData === undefined ?
     undefined :
-    new ModelPermissions(permissionsData.read, permissionsData.write, permissionsData.remove, permissionsData.manage);
+    new ModelPermissions(
+      getOrDefaultBoolean(permissionsData.read),
+      getOrDefaultBoolean(permissionsData.write),
+      getOrDefaultBoolean(permissionsData.remove),
+      getOrDefaultBoolean(permissionsData.manage));
 }
 
 export function toModelResult(result: IModelResult): ModelResult {
@@ -107,6 +114,6 @@ export function toModelResult(result: IModelResult): ModelResult {
     result.modelId,
     timestampToDate(result.createdTime),
     timestampToDate(result.modifiedTime),
-    result.version as number
+    getOrDefaultNumber(result.version)
   );
 }

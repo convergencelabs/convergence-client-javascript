@@ -3,6 +3,26 @@ import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
 import {mapObjectValues} from "../util/ObjectUtils";
 
+export function getOrDefaultNumber(val?: number | Long): number {
+  return (val as number) || 0;
+}
+
+export function getOrDefaultBoolean(val?: boolean): boolean {
+  return val || false;
+}
+
+export function getOrDefaultString(val?: string): string {
+  return val || "";
+}
+
+export function getOrDefaultArray<T>(val?: T[]): T[] {
+  return val || [];
+}
+
+export function getOrDefaultObject<T>(val: {[key: string]: T}): {[key: string]: T} {
+  return val || {};
+}
+
 export function toOptional<T>(value?: T): { value: T | null } | null {
   if (value === undefined) {
     return null;

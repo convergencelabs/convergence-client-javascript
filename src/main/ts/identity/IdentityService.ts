@@ -5,41 +5,13 @@ import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {ConvergenceError} from "../util";
-import IDomainUserData = io.convergence.proto.IDomainUserData;
-import {fromOptional, toOptional} from "../connection/ProtocolUtil";
+import {toOptional} from "../connection/ProtocolUtil";
+import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";
 
 export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 
 const validLookUpFields: UserField[] = ["username", "email"];
 const validSearchFields: UserField[] = ["username", "email", "firstName", "lastName", "displayName"];
-
-function toUserFieldCode(field: UserField): number {
-  switch (field) {
-    case "username":
-      return 1;
-    case "email":
-      return 2;
-    case "firstName":
-      return 3;
-    case "lastName":
-      return 4;
-    case "displayName":
-      return 5;
-    default:
-      throw new ConvergenceError("Invalid user field: " + field);
-  }
-}
-
-function toDomainUser(userData: IDomainUserData): DomainUser {
-  return new DomainUser(
-    userData.userType,
-    userData.username,
-    fromOptional(userData.firstName),
-    fromOptional(userData.lastName),
-    fromOptional(userData.displayName),
-    fromOptional(userData.email));
-}
 
 export class IdentityService {
 

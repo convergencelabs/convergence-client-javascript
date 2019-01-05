@@ -19,6 +19,7 @@ import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
 import {toOptional} from "../connection/ProtocolUtil";
+import {IdentityCache} from "../identity/IdentityCache";
 
 export interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
@@ -186,22 +187,20 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
    */
   private _processEvent(event: IChatEvent): void {
     if (event instanceof ChatChannelEvent) {
-      const lastEventTime = event.timestamp;
-      const lastEventNumber = event.eventNumber;
-      this._info = {...this._info, lastEventNumber, lastEventTime};
+      this._info = {...this._info, lastEventNumber: event.eventNumber, lastEventTime: event.timestamp};
     }
 
     if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
       const members = this._info.members.slice(0);
       // TODO should we allow a seen number to come along?
-      members.push({username: event.username, maxSeenEventNumber: -1});
-      if (event.username === this.session().username()) {
+      members.push({username: event.user.username, maxSeenEventNumber: -1});
+      if (event.user.username === this.session().username()) {
         // FIXME this might not be right for rooms
         this._joined = true;
       }
       this._info = {...this._info, members};
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
-      const removedUsername = event.username;
+      const removedUsername = event.user.username;
       if (removedUsername === this.session().username()) {
         // FIXME this might not be right for rooms
         this._joined = false;
@@ -209,11 +208,9 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
       const members = this._info.members.filter(member => member.username !== removedUsername);
       this._info = {...this._info, members};
     } else if (event instanceof ChatChannelNameChanged) {
-      const name = event.channelName;
-      this._info = {...this._info, name};
+      this._info = {...this._info, name: event.channelName};
     } else if (event instanceof ChatChannelTopicChanged) {
-      const topic = event.topic;
-      this._info = {...this._info, topic};
+      this._info = {...this._info, topic: event.topic};
     }
 
     Object.freeze(this._info);
