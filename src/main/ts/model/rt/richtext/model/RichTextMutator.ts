@@ -85,7 +85,7 @@ export class RichTextMutator {
     let item: IteratorResult<RichTextContent> = iterator.next();
 
     while (!item.done) {
-      // get the value of the current ELEMENT.
+      // get the delta of the current ELEMENT.
       const itemValue = item.value.getAttribute(key);
 
       if (currentRangeStart === null) {
@@ -94,11 +94,11 @@ export class RichTextMutator {
       }
 
       if (currentRangeValue !== itemValue || item.done) {
-        // We are at the contiguous range, either because the value has changed
+        // We are at the contiguous range, either because the delta has changed
         // or because we are at the end of iteration.
 
         if (currentRangeValue !== value) {
-          // The current range value is not the same as what we are trying to
+          // The current range delta is not the same as what we are trying to
           // set to, so we need a mutation.
           // fixme add the mutation.
         }

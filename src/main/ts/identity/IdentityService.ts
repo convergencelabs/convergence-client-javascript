@@ -33,7 +33,7 @@ export class IdentityService {
   }
 
   public profile(): Promise<DomainUser> {
-    return this.user(this._connection.session().username());
+    return this.user(this._connection.session().user().username);
   }
 
   public user(username: string): Promise<DomainUser> {
@@ -89,7 +89,7 @@ export class IdentityService {
       (Array.isArray(query.fields) && (query.fields as string[]).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (query.term === undefined || query.term === null) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify a search delta"));
     } else {
       const fields: UserField[] = Array.isArray(query.fields) ? query.fields : [query.fields];
       const orderBy: any = query.orderBy || {
@@ -169,7 +169,7 @@ export class IdentityService {
       return Promise.reject<DomainUser[]>(new Error("invalid lookup field"));
     } else if (values === undefined || values === null ||
       (Array.isArray(values) && (values as string[]).length === 0)) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify at least one value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify at least one delta"));
     } else {
       if (!Array.isArray(values)) {
         values = [values as string];

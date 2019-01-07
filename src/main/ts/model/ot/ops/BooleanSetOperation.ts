@@ -9,7 +9,9 @@ import {BooleanSet} from "./operationChanges";
  */
 export class BooleanSetOperation extends DiscreteOperation implements BooleanSet {
 
-  constructor(id: string, noOp: boolean, public value: boolean) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: boolean) {
     super(OperationType.BOOLEAN_VALUE, id, noOp);
     Object.freeze(this);
   }

@@ -87,7 +87,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
     // TODO this might not make sense for rooms
     this._joined = info.members
       .map(m => m.username)
-      .includes(this.session().username());
+      .includes(this.session().user().username);
 
     messageStream.subscribe(event => {
       this._processEvent(event);
@@ -194,14 +194,14 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
       const members = this._info.members.slice(0);
       // TODO should we allow a seen number to come along?
       members.push({username: event.user.username, maxSeenEventNumber: -1});
-      if (event.user.username === this.session().username()) {
+      if (event.user.username === this.session().user().username) {
         // FIXME this might not be right for rooms
         this._joined = true;
       }
       this._info = {...this._info, members};
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
       const removedUsername = event.user.username;
-      if (removedUsername === this.session().username()) {
+      if (removedUsername === this.session().user().username) {
         // FIXME this might not be right for rooms
         this._joined = false;
       }

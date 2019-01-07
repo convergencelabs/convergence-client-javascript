@@ -15,6 +15,7 @@ import {Path, PathElement} from "../Path";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {toModelOperation} from "./ModelOperationMapper";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 interface OperationRequest {
   forward: boolean;
@@ -100,7 +101,15 @@ export class HistoricalModel implements ObservableModel {
    */
   private _currentTime: Date;
 
+  /**
+   * @internal
+   */
   private _opRequests: OperationRequest[];
+
+  /**
+   * @internal
+   */
+  private _identityCache: IdentityCache;
 
   /**
    * @hidden
@@ -113,14 +122,16 @@ export class HistoricalModel implements ObservableModel {
               modelId: string,
               collectionId: string,
               connection: ConvergenceConnection,
-              session: ConvergenceSession) {
+              session: ConvergenceSession,
+              identityCache: IdentityCache) {
 
     this._session = session;
     this._connection = connection;
+    this._identityCache = identityCache;
 
     this._modelId = modelId;
     this._collectionId = collectionId;
-    this._model = new Model(this.session().sessionId(), this.session().username(), null, data);
+    this._model = new Model(this.session(), null, data);
     this._wrapperFactory = new HistoricalWrapperFactory(this);
 
     this._version = version;
@@ -239,7 +250,8 @@ export class HistoricalModel implements ObservableModel {
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {historicalOperationsResponse} = response;
       opRequest.completed = true;
-      opRequest.operations = historicalOperationsResponse.operations.map(toModelOperation);
+      opRequest.operations = historicalOperationsResponse.operations.map(
+        op => toModelOperation(op, this._identityCache));
 
       this._checkAndProcess();
 
@@ -323,9 +335,8 @@ export class HistoricalModel implements ObservableModel {
       const dOp: AppliedDiscreteOperation = inverse ?
         discreteOp.inverse() as AppliedDiscreteOperation :
         discreteOp;
-
       this._model.handleModelOperationEvent(
-        new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, dOp));
+        new ModelOperationEvent(op.sessionId, op.user, op.version, op.timestamp, dOp));
     }
 
     // tslint:disable-next-line

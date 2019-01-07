@@ -82,7 +82,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
       .messages()
       .pipe(share());
 
-    const username: string = this.session().username();
+    const username: string = this.session().user().username;
 
     const localStream: Observable<MessageEvent> = this._streamForUsername(username);
     this._presenceStreams.set(username, localStream);

@@ -12,7 +12,7 @@ import {ObjectSetPropertyOperation} from "../../../../../main/ts/model/ot/ops/Ob
 import {ObjectRemovePropertyOperation} from "../../../../../main/ts/model/ot/ops/ObjectRemovePropertyOperation";
 import {ObjectSetOperation} from "../../../../../main/ts/model/ot/ops/ObjectSetOperation";
 import {BooleanSetOperation} from "../../../../../main/ts/model/ot/ops/BooleanSetOperation";
-import {NumberAddOperation} from "../../../../../main/ts/model/ot/ops/NumberAddOperation";
+import {NumberDeltaOperation} from "../../../../../main/ts/model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../../../../main/ts/model/ot/ops/NumberSetOperation";
 import {DiscreteOperation} from "../../../../../main/ts/model/ot/ops/DiscreteOperation";
 import {OperationPair} from "../../../../../main/ts/model/ot/xform/OperationPair";
@@ -99,8 +99,8 @@ function json2Operation(opData: any): DiscreteOperation {
     case "BooleanSet":
       return new BooleanSetOperation(commonId, opData.noOp, opData.value);
 
-    case "NumberAdd":
-      return new NumberAddOperation(commonId, opData.noOp, opData.value);
+    case "NumberDelta":
+      return new NumberDeltaOperation(commonId, opData.noOp, opData.value);
     case "NumberSet":
       return new NumberSetOperation(commonId, opData.noOp, opData.value);
 

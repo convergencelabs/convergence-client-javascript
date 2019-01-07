@@ -17,7 +17,7 @@ export class DirectChatChannel extends ChatChannel {
 
   public info(): DirectChatChannelInfo {
     const info = super.info();
-    const localUsername = this.session().username();
+    const localUsername = this.session().user().username;
     const otherUsers = info.members.filter(member => member.username !== localUsername);
     return {...info, otherUsers};
   }

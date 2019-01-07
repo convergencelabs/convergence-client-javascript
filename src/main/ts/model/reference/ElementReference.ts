@@ -2,6 +2,7 @@ import {RealTimeModel, RealTimeElement} from "../rt/";
 import {ModelReference} from "./ModelReference";
 import {ElementDetachedEvent} from "../events/ElementDetachedEvent";
 import {ReferenceManager} from "./ReferenceManager";
+import {DomainUser} from "../../identity";
 
 export class ElementReference extends ModelReference<RealTimeElement<any>> {
 
@@ -9,7 +10,7 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
    * @param referenceManager
    * @param key
    * @param source
-   * @param username
+   * @param user
    * @param sessionId
    * @param local
    *
@@ -19,10 +20,10 @@ export class ElementReference extends ModelReference<RealTimeElement<any>> {
   constructor(referenceManager: ReferenceManager,
               key: string,
               source: RealTimeModel,
-              username: string,
+              user: DomainUser,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ModelReference.Types.ELEMENT, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.ELEMENT, key, source, user, sessionId, local);
   }
 
   /**

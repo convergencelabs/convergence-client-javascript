@@ -24,6 +24,7 @@ import {
   ObservableStringEvents,
   ObservableStringEventConstants
 } from "../observable/ObservableString";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeStringEvents extends ObservableStringEvents {
 }
@@ -38,27 +39,29 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * @hidden
    * @private
    */
-  constructor(protected _delegate: StringNode,
-              protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, [ModelReference.Types.INDEX, ModelReference.Types.RANGE]);
+  constructor(delegate: StringNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model,
+      [ModelReference.Types.INDEX, ModelReference.Types.RANGE], identityCache);
 
-    this._delegate.events().subscribe(e => this._handleReferenceModelEvents(e));
+    (this._delegate as StringNode).events().subscribe(e => this._handleReferenceModelEvents(e));
   }
 
   public insert(index: number, value: string): void {
     this._assertWritable();
-    this._delegate.insert(index, value);
+    (this._delegate as StringNode).insert(index, value);
   }
 
   public remove(index: number, length: number): void {
     this._assertWritable();
-    this._delegate.remove(index, length);
+    ((this._delegate as StringNode) as StringNode).remove(index, length);
   }
 
   public length(): number {
-    return this._delegate.length();
+    return (this._delegate as StringNode).length();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -76,7 +79,8 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       }
     } else {
       const reference: IndexReference = new IndexReference(
-        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+        this._referenceManager, key, this,
+        (this._delegate as StringNode).session().user(), (this._delegate as StringNode).session().sessionId(), true);
       const local: LocalIndexReference = new LocalIndexReference(
         reference,
         this._callbacks.referenceEventCallbacks
@@ -96,7 +100,8 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       }
     } else {
       const reference: RangeReference = new RangeReference(
-        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+        this._referenceManager, key, this,
+        (this._delegate as StringNode).session().user(), (this._delegate as StringNode).session().sessionId(), true);
       const local: LocalRangeReference = new LocalRangeReference(
         reference,
         this._callbacks.referenceEventCallbacks

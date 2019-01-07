@@ -3,6 +3,7 @@ import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path} from "../Path";
 import {DataValue} from "../dataValue";
+import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
  * @hidden
@@ -19,9 +20,8 @@ export class UndefinedNode extends ModelNode<void> {
    */
   constructor(id: string,
               path: () => Path,
-              sessionId: string,
-              username: string) {
-    super(ModelElementType.UNDEFINED, id, path, undefined, sessionId, username);
+              session: ConvergenceSession) {
+    super(ModelElementType.UNDEFINED, id, path, undefined, session);
   }
 
   public dataValue(): DataValue {
@@ -41,6 +41,6 @@ export class UndefinedNode extends ModelNode<void> {
   }
 
   protected _setData(data: any): void {
-    throw new Error("Can not set the value on a Undefined type.");
+    throw new Error("Can not set the delta on a Undefined type.");
   }
 }

@@ -7,6 +7,9 @@ import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
 import {BooleanNodeSetValueEvent} from "./events";
 import {BooleanSet} from "../ot/ops/operationChanges";
+import {ConvergenceSession} from "../../ConvergenceSession";
+import {DomainUser} from "../../identity";
+import {Validation} from "../../util";
 
 /**
  * @hidden
@@ -28,9 +31,8 @@ export class BooleanNode extends ModelNode<boolean> {
   constructor(data: BooleanValue,
               path: () => Path,
               model: Model,
-              sessionId: string,
-              username: string) {
-    super(ModelElementType.BOOLEAN, data.id, path, model, sessionId, username);
+              session: ConvergenceSession) {
+    super(ModelElementType.BOOLEAN, data.id, path, model, session);
     this._data = data.value;
   }
 
@@ -60,19 +62,17 @@ export class BooleanNode extends ModelNode<boolean> {
   //
 
   protected _setData(value: boolean): void {
-    this._applySetValue(value, true, this.sessionId, this.username);
+    this._applySetValue(value, true, this._session.sessionId(), this._session.user());
   }
 
   protected _getData(): boolean {
     return this._data;
   }
 
-  private _applySetValue(value: boolean, local: boolean, sessionId: string, username: string): void {
-    this._validateBooleanValue(value);
+  private _applySetValue(value: boolean, local: boolean, sessionId: string, user: DomainUser): void {
+    Validation.assertBoolean(value);
     this._data = value;
-
-    const event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, username);
-
+    const event: BooleanNodeSetValueEvent = new BooleanNodeSetValueEvent(this, local, value, sessionId, user);
     this._emitValueEvent(event);
   }
 
@@ -80,13 +80,6 @@ export class BooleanNode extends ModelNode<boolean> {
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     const operation: BooleanSet = operationEvent.operation as BooleanSet;
-    this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
-  }
-
-  private _validateBooleanValue(value: boolean): void {
-    if (typeof value !== "boolean") {
-      throw new Error(`The value must be a boolean but was: ${typeof value}`);
-
-    }
+    this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.user);
   }
 }

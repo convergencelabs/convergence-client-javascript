@@ -9,7 +9,9 @@ import {ArrayRemove} from "./operationChanges";
  */
 export class ArrayRemoveOperation extends DiscreteOperation implements ArrayRemove {
 
-  constructor(id: string, noOp: boolean, public index: number) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number) {
     super(OperationType.ARRAY_REMOVE, id, noOp);
     Object.freeze(this);
   }

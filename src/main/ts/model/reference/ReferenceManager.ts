@@ -17,6 +17,7 @@ import {
   RemoteReferenceUnshared
 } from "./RemoteReferenceEvent";
 import {ConvergenceError} from "../../util";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
  * @hidden
@@ -34,13 +35,18 @@ export class ReferenceManager {
   private readonly _validTypes: ReferenceType[];
   private readonly _source: any;
   private readonly _onRemoteReference: OnRemoteReference;
+  private readonly _identityCache: IdentityCache;
 
-  constructor(source: any, validTypes: ReferenceType[], onRemoteReference: OnRemoteReference) {
+  constructor(source: any,
+              validTypes: ReferenceType[],
+              onRemoteReference: OnRemoteReference,
+              identityCache: IdentityCache) {
     this._referenceMap = new ReferenceMap();
     this._localReferences = {};
     this._validTypes = validTypes;
     this._source = source;
     this._onRemoteReference = onRemoteReference;
+    this._identityCache = identityCache;
   }
 
   public get(sessionId: string, key: string): ModelReference<any> {
@@ -108,21 +114,20 @@ export class ReferenceManager {
   }
 
   private _handleRemoteReferenceShared(event: RemoteReferenceShared): void {
-    // fixme username
-    const username = "";
+    const user = this._identityCache.getUserForSession(event.sessionId);
     let reference: ModelReference<any>;
 
     const values = event.values;
     this._assertValidType(event.referenceType);
 
     if (event.referenceType === "index") {
-      reference = new IndexReference(this, event.key, this._source, username, event.sessionId, false);
+      reference = new IndexReference(this, event.key, this._source, user, event.sessionId, false);
     } else if (event.referenceType === "range") {
-      reference = new RangeReference(this, event.key, this._source, username, event.sessionId, false);
+      reference = new RangeReference(this, event.key, this._source, user, event.sessionId, false);
     } else if (event.referenceType === "element") {
-      reference = new ElementReference(this, event.key, this._source, username, event.sessionId, false);
+      reference = new ElementReference(this, event.key, this._source, user, event.sessionId, false);
     } else if (event.referenceType === "property") {
-      reference = new PropertyReference(this, event.key, this._source, username, event.sessionId, false);
+      reference = new PropertyReference(this, event.key, this._source, user, event.sessionId, false);
     } else {
       throw new ConvergenceError("Invalid reference message: " + event);
     }

@@ -1,5 +1,6 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableBoolean} from "../observable/ObservableBoolean";
+import {DomainUser} from "../../identity";
 
 export class BooleanSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";
@@ -8,15 +9,15 @@ export class BooleanSetValueEvent implements IValueChangedEvent {
   /**
    * @param element
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableBoolean,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
               public readonly local: boolean) {
     Object.freeze(this);
   }

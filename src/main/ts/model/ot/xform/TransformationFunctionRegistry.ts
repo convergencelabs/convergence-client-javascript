@@ -145,10 +145,10 @@ export class TransformationFunctionRegistry {
     this.registerOtf(OperationType.ARRAY_VALUE, OperationType.ARRAY_VALUE, ArraySetSetOTF);
 
     // number Functions
-    this.registerOtf(OperationType.NUMBER_ADD, OperationType.NUMBER_ADD, NumberAddAddOTF);
-    this.registerOtf(OperationType.NUMBER_ADD, OperationType.NUMBER_VALUE, NumberAddSetOTF);
+    this.registerOtf(OperationType.NUMBER_DELTA, OperationType.NUMBER_DELTA, NumberAddAddOTF);
+    this.registerOtf(OperationType.NUMBER_DELTA, OperationType.NUMBER_VALUE, NumberAddSetOTF);
 
-    this.registerOtf(OperationType.NUMBER_VALUE, OperationType.NUMBER_ADD, NumberSetAddOTF);
+    this.registerOtf(OperationType.NUMBER_VALUE, OperationType.NUMBER_DELTA, NumberSetAddOTF);
     this.registerOtf(OperationType.NUMBER_VALUE, OperationType.NUMBER_VALUE, NumberSetSetOTF);
 
     // boolean Functions

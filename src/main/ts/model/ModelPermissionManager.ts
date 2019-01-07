@@ -41,7 +41,7 @@ export class ModelPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getModelPermissionsResponse} = response;
-      const permissionsData = getModelPermissionsResponse.userPermissions[this._connection.session().username()];
+      const permissionsData = getModelPermissionsResponse.userPermissions[this._connection.session().user().username];
       return toModelPermissions(permissionsData);
     });
   }

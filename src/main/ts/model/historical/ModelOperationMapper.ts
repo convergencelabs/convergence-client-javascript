@@ -20,7 +20,7 @@ import {mapObjectValues} from "../../util/ObjectUtils";
 import {AppliedStringInsertOperation} from "../ot/applied/AppliedStringInsertOperation";
 import {AppliedStringRemoveOperation} from "../ot/applied/AppliedStringRemoveOperation";
 import {AppliedStringSetOperation} from "../ot/applied/AppliedStringSetOperation";
-import {AppliedNumberAddOperation} from "../ot/applied/AppliedNumberAddOperation";
+import {AppliedNumberDeltaOperation} from "../ot/applied/AppliedNumberDeltaOperation";
 import {AppliedNumberSetOperation} from "../ot/applied/AppliedNumberSetOperation";
 import {AppliedBooleanSetOperation} from "../ot/applied/AppliedBooleanSetOperation";
 import {AppliedDateSetOperation} from "../ot/applied/AppliedDateSetOperation";
@@ -32,8 +32,9 @@ import {
   getOrDefaultString,
   timestampToDate
 } from "../../connection/ProtocolUtil";
+import {IdentityCache} from "../../identity/IdentityCache";
 
-export function toModelOperation(operationData: IModelOperationData): ModelOperation {
+export function toModelOperation(operationData: IModelOperationData, identityCache: IdentityCache): ModelOperation {
   let appliedOp: AppliedOperation;
   if (operationData.operation.compoundOperation) {
     appliedOp = toCompoundOperation(operationData.operation.compoundOperation);
@@ -43,13 +44,11 @@ export function toModelOperation(operationData: IModelOperationData): ModelOpera
     throw new ConvergenceError("Invalid model operation: " + JSON.stringify(operationData));
   }
 
-  // FIXME username
-  const username = "";
   return new ModelOperation(
     operationData.modelId,
     getOrDefaultNumber(operationData.version),
     timestampToDate(operationData.timestamp),
-    username,
+    identityCache.getUserForSession(operationData.sessionId),
     operationData.sessionId,
     appliedOp
   );
@@ -147,11 +146,11 @@ function toDiscreteOperation(discreteOperationData: IAppliedDiscreteOperationDat
       getOrDefaultString(value),
       getOrDefaultString(oldValue));
   } else if (discreteOperationData.numberDeltaOperation) {
-    const {id, noOp, value} = discreteOperationData.numberDeltaOperation;
-    return new AppliedNumberAddOperation(
+    const {id, noOp, delta} = discreteOperationData.numberDeltaOperation;
+    return new AppliedNumberDeltaOperation(
       id,
       getOrDefaultBoolean(noOp),
-      getOrDefaultNumber(value));
+      getOrDefaultNumber(delta));
   } else if (discreteOperationData.numberSetOperation) {
     const {id, noOp, value, oldValue} = discreteOperationData.numberSetOperation;
     return new AppliedNumberSetOperation(

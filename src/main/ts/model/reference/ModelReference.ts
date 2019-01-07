@@ -7,6 +7,7 @@ import {
   ReferenceClearedEvent
 } from "./events/";
 import {ReferenceType} from "./ReferenceType";
+import {DomainUser} from "../../identity";
 
 export interface ModelReferenceTypes {
   [key: string]: ReferenceType;
@@ -71,7 +72,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   /**
    * @internal
    */
-  private readonly _username: string;
+  private readonly _user: DomainUser;
 
   /**
    * @internal
@@ -87,7 +88,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
                         type: ReferenceType,
                         key: string,
                         source: any,
-                        username: string,
+                        user: DomainUser,
                         sessionId: string,
                         local: boolean) {
     super();
@@ -97,7 +98,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     this._type = type;
     this._key = key;
     this._source = source;
-    this._username = username;
+    this._user = user;
     this._sessionId = sessionId;
     this._local = local;
   }
@@ -118,8 +119,8 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     return this._local;
   }
 
-  public username(): string {
-    return this._username;
+  public user(): DomainUser {
+    return this._user;
   }
 
   public sessionId(): string {

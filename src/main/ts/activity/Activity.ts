@@ -128,17 +128,17 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         setState.set(event.key, event.value);
         newMap.set(
           event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, setState));
+          new ActivityParticipant(this, event.user, event.sessionId, false, setState));
         this._participants.next(newMap);
       } else if (event instanceof ActivityStateRemovedEvent) {
         const removeState: Map<string, any> = newMap.get(event.sessionId).state;
         removeState.delete(event.key);
         newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, removeState));
+          new ActivityParticipant(this, event.user, event.sessionId, false, removeState));
         this._participants.next(newMap);
       } else if (event instanceof ActivityStateClearedEvent) {
         newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, new Map<string, any>()));
+          new ActivityParticipant(this, event.user, event.sessionId, false, new Map<string, any>()));
         this._participants.next(newMap);
       } else {
         // This should be impossible
@@ -208,21 +208,21 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Sets a single key-value pair within this Activity's local state.
+   * Sets a single key-delta pair within this Activity's local state.
    *
    * ```typescript
-   * activity.setState("key1", "value");
+   * activity.setState("key1", "delta");
    * ```
    *
    * @param key
-   *   The key of the value to set.
+   *   The key of the delta to set.
    * @param value
-   *   The value to set for the supplied key.
+   *   The delta to set for the supplied key.
    */
   public setState(key: string, value: any): void;
 
   /**
-   * Sets multiple key-value pairs within this Activity's local state. This
+   * Sets multiple key-delta pairs within this Activity's local state. This
    * method does not replace all state; that is, keys not supplied in the map
    * will not be altered.
    *
@@ -242,7 +242,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * activity.setState(state);
    * ```
    * @param state
-   *   A map containing the key-value pairs to set.
+   *   A map containing the key-delta pairs to set.
    */
   public setState(state: StringMapLike): void;
 
@@ -267,7 +267,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       Object.keys(state).forEach((key) => {
         this._emitEvent(new ActivityStateSetEvent(
           this,
-          this._connection.session().username(),
+          this._connection.session().user(),
           this._connection.session().sessionId(),
           true,
           key,
@@ -318,7 +318,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       (keys as string[]).forEach((key) => {
         this._emitEvent(new ActivityStateRemovedEvent(
           this,
-          this._connection.session().username(),
+          this._connection.session().user(),
           this._connection.session().sessionId(),
           true,
           key
@@ -341,7 +341,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
       this._emitEvent(new ActivityStateClearedEvent(
         this,
-        this._connection.session().username(),
+        this._connection.session().user(),
         this._connection.session().sessionId(),
         true
       ));

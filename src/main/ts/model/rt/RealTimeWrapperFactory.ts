@@ -19,6 +19,7 @@ import {RealTimeUndefined} from "./RealTimeUndefined";
 import {RealTimeModel} from "./RealTimeModel";
 import {RealTimeDate} from "./RealTimeDate";
 import {DateNode} from "../internal/DateNode";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
  * @hidden
@@ -26,28 +27,28 @@ import {DateNode} from "../internal/DateNode";
  */
 export class RealTimeWrapperFactory extends NodeWrapperFactory<RealTimeElement<any>> {
 
-  constructor(private _callbacks: any, private _model: RealTimeModel) {
+  constructor(private _callbacks: any, private _model: RealTimeModel, private _identityCache: IdentityCache) {
     super();
   }
 
   protected _createWrapper(node: ModelNode<any>): RealTimeElement<any> {
     switch (node.type()) {
       case ModelElementType.ARRAY:
-        return new RealTimeArray(node as ArrayNode, this._callbacks, this, this._model);
+        return new RealTimeArray(node as ArrayNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.OBJECT:
-        return new RealTimeObject(node as ObjectNode, this._callbacks, this, this._model);
+        return new RealTimeObject(node as ObjectNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.BOOLEAN:
-          return new RealTimeBoolean(node as BooleanNode, this._callbacks, this, this._model);
+          return new RealTimeBoolean(node as BooleanNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.NULL:
-        return new RealTimeNull(node as NullNode, this._callbacks, this, this._model);
+        return new RealTimeNull(node as NullNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.NUMBER:
-        return new RealTimeNumber(node as NumberNode, this._callbacks, this, this._model);
+        return new RealTimeNumber(node as NumberNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.STRING:
-        return new RealTimeString(node as StringNode, this._callbacks, this, this._model);
+        return new RealTimeString(node as StringNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.UNDEFINED:
-        return new RealTimeUndefined(node as UndefinedNode, this._callbacks, this, this._model);
+        return new RealTimeUndefined(node as UndefinedNode, this._callbacks, this, this._model, this._identityCache);
       case ModelElementType.DATE:
-        return new RealTimeDate(node as DateNode, this._callbacks, this, this._model);
+        return new RealTimeDate(node as DateNode, this._callbacks, this, this._model, this._identityCache);
       default:
         return null;
       }

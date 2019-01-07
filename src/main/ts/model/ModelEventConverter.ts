@@ -6,6 +6,7 @@ import {ObservableObject} from "./observable/ObservableObject";
 import {ObservableString} from "./observable/ObservableString";
 import {ObservableElement} from "./observable/ObservableElement";
 import {ObservableArray} from "./observable/ObservableArray";
+import {ObservableDate} from "./observable/ObservableDate";
 import {
   ArrayNodeInsertEvent,
   ArrayNodeRemoveEvent,
@@ -26,25 +27,25 @@ import {
   StringNodeSetValueEvent
 } from "./internal/events";
 import {
-  DateSetValueEvent} from "./events/DateSetValueEvent";
-import {ObservableDate} from "./observable/ObservableDate";
-import {ElementDetachedEvent} from "./events/ElementDetachedEvent";
-import {IValueChangedEvent} from "./events/IValueChangedEvent";
-import {ModelChangedEvent} from "./events/ModelChangedEvent";
-import {ArrayInsertEvent} from "./events/ArrayInsertEvent";
-import {ArrayRemoveEvent} from "./events/ArrayRemoveEvent";
-import {ArraySetEvent} from "./events/ArraySetEvent";
-import {ArrayReorderEvent} from "./events/ArrayReorderEvent";
-import {ArraySetValueEvent} from "./events/ArraySetValueEvent";
-import {BooleanSetValueEvent} from "./events/BooleanSetValueEvent";
-import {NumberSetValueEvent} from "./events/NumberSetValueEvent";
-import {NumberDeltaEvent} from "./events/NumberDeltaEvent";
-import {ObjectSetEvent} from "./events/ObjectSetEvent";
-import {ObjectRemoveEvent} from "./events/ObjectRemoveEvent";
-import {ObjectSetValueEvent} from "./events/ObjectSetValueEvent";
-import {StringInsertEvent} from "./events/StringInsertEvent";
-import {StringRemoveEvent} from "./events/StringRemoveEvent";
-import {StringSetValueEvent} from "./events/StringSetValueEvent";
+  IValueChangedEvent,
+  ModelChangedEvent,
+  ArrayInsertEvent,
+  ArrayRemoveEvent,
+  ArraySetEvent,
+  ArrayReorderEvent,
+  ArraySetValueEvent,
+  BooleanSetValueEvent,
+  DateSetValueEvent,
+  NumberSetValueEvent,
+  NumberDeltaEvent,
+  ObjectSetEvent,
+  ObjectRemoveEvent,
+  ObjectSetValueEvent,
+  StringInsertEvent,
+  StringRemoveEvent,
+  StringSetValueEvent,
+  ElementDetachedEvent
+} from "./events/";
 
 /**
  * @hidden
@@ -57,71 +58,85 @@ export class ModelEventConverter {
     if (event instanceof NodeDetachedEvent) {
       return new ElementDetachedEvent(wrapperFactory.wrap(event.src));
     } else if (event instanceof NodeChangedEvent) {
-      return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.relativePath,
-        this.convertEvent(event.childEvent, wrapperFactory) as IValueChangedEvent,
-        event.sessionId, event.username, event.local);
+      return new ModelChangedEvent(wrapperFactory.wrap(event.src), event.user, event.sessionId, event.local,
+        event.relativePath, this.convertEvent(event.childEvent, wrapperFactory) as IValueChangedEvent);
     } else if (event instanceof ArrayNodeInsertEvent) {
-      return new ArrayInsertEvent(wrapperFactory.wrap(event.src) as ObservableArray, event.index,
-        wrapperFactory.wrap(event.value), event.sessionId, event.username, event.local);
+      return new ArrayInsertEvent(
+        wrapperFactory.wrap(event.src) as ObservableArray,
+        event.user, event.sessionId, event.local,
+        event.index,
+        wrapperFactory.wrap(event.value));
     } else if (event instanceof ArrayNodeRemoveEvent) {
       return new ArrayRemoveEvent(
         wrapperFactory.wrap(event.src) as ObservableArray,
+        event.user, event.sessionId, event.local,
         event.index,
-        wrapperFactory.wrap(event.oldValue),
-        event.sessionId, event.username, event.local);
+        wrapperFactory.wrap(event.oldValue));
     } else if (event instanceof ArrayNodeReorderEvent) {
-      return new ArrayReorderEvent(wrapperFactory.wrap(event.src) as ObservableArray, event.fromIndex, event.toIndex,
-        event.sessionId, event.username, event.local);
+      return new ArrayReorderEvent(
+        wrapperFactory.wrap(event.src) as ObservableArray,
+        event.user, event.sessionId, event.local,
+        event.fromIndex, event.toIndex);
     } else if (event instanceof ArrayNodeSetEvent) {
       return new ArraySetEvent(
         wrapperFactory.wrap(event.src) as ObservableArray,
+        event.user, event.sessionId, event.local,
         event.index,
         wrapperFactory.wrap(event.value),
-        wrapperFactory.wrap(event.oldValue),
-        event.sessionId,
-        event.username,
-        event.local);
+        wrapperFactory.wrap(event.oldValue));
     } else if (event instanceof ArrayNodeSetValueEvent) {
-      return new ArraySetValueEvent(wrapperFactory.wrap(event.src) as ObservableArray,
-        event.sessionId, event.username, event.local);
+      return new ArraySetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableArray,
+        event.user, event.sessionId, event.local);
     } else if (event instanceof BooleanNodeSetValueEvent) {
-      return new BooleanSetValueEvent(wrapperFactory.wrap(event.src) as ObservableBoolean,
-        event.sessionId, event.username, event.local);
+      return new BooleanSetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableBoolean,
+        event.user, event.sessionId, event.local);
     } else if (event instanceof NumberNodeSetValueEvent) {
-      return new NumberSetValueEvent(wrapperFactory.wrap(event.src) as ObservableNumber,
-        event.sessionId, event.username, event.local);
+      return new NumberSetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableNumber,
+        event.user, event.sessionId, event.local);
     } else if (event instanceof NumberNodeDeltaEvent) {
-      return new NumberDeltaEvent(wrapperFactory.wrap(event.src) as ObservableNumber, event.value,
-        event.sessionId, event.username, event.local);
+      return new NumberDeltaEvent(
+        wrapperFactory.wrap(event.src) as ObservableNumber,
+        event.user, event.sessionId, event.local,
+        event.value);
     } else if (event instanceof ObjectNodeSetValueEvent) {
-      return new ObjectSetValueEvent(wrapperFactory.wrap(event.src) as ObservableObject,
-        event.sessionId, event.username, event.local);
+      return new ObjectSetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableObject,
+        event.user, event.sessionId, event.local);
     } else if (event instanceof ObjectNodeRemoveEvent) {
       return new ObjectRemoveEvent(
         wrapperFactory.wrap(event.src) as ObservableObject,
+        event.user, event.sessionId, event.local,
         event.key,
-        wrapperFactory.wrap(event.oldValue),
-        event.sessionId, event.username, event.local);
+        wrapperFactory.wrap(event.oldValue));
     } else if (event instanceof ObjectNodeSetEvent) {
       return new ObjectSetEvent(
         wrapperFactory.wrap(event.src) as ObservableObject,
+        event.user, event.sessionId, event.local,
         event.key,
         wrapperFactory.wrap(event.value),
-        wrapperFactory.wrap(event.oldValue),
-        event.sessionId,
-        event.username, event.local);
+        wrapperFactory.wrap(event.oldValue));
     } else if (event instanceof StringNodeInsertEvent) {
-      return new StringInsertEvent(wrapperFactory.wrap(event.src) as ObservableString, event.index, event.value,
-        event.sessionId, event.username, event.local);
+      return new StringInsertEvent(
+        wrapperFactory.wrap(event.src) as ObservableString,
+        event.user, event.sessionId, event.local,
+        event.index,
+        event.value);
     } else if (event instanceof StringNodeRemoveEvent) {
-      return new StringRemoveEvent(wrapperFactory.wrap(event.src) as ObservableString, event.index, event.value,
-        event.sessionId, event.username, event.local);
+      return new StringRemoveEvent(
+        wrapperFactory.wrap(event.src) as ObservableString,
+        event.user, event.sessionId, event.local,
+        event.index, event.value);
     } else if (event instanceof StringNodeSetValueEvent) {
-      return new StringSetValueEvent(wrapperFactory.wrap(event.src) as ObservableString,
-        event.sessionId, event.username, event.local);
+      return new StringSetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableString,
+        event.user, event.sessionId, event.local);
     } else if (event instanceof DateNodeSetValueEvent) {
-      return new DateSetValueEvent(wrapperFactory.wrap(event.src) as ObservableDate,
-        event.sessionId, event.username, event.local);
+      return new DateSetValueEvent(
+        wrapperFactory.wrap(event.src) as ObservableDate,
+        event.user, event.sessionId, event.local);
     } else {
       throw new Error("Unable to convert event: " + event.name);
     }

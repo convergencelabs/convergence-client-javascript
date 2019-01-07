@@ -10,7 +10,9 @@ import {ArraySet} from "./operationChanges";
  */
 export class ArraySetOperation extends DiscreteOperation implements ArraySet {
 
-  constructor(id: string, noOp: boolean, public value: DataValue[]) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: DataValue[]) {
     super(OperationType.ARRAY_VALUE, id, noOp);
     Object.freeze(this);
   }

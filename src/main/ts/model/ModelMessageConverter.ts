@@ -51,7 +51,7 @@ export function toDataValue(val: IDataValue): DataValue {
     const {id} = val.nullValue;
     return {type: "null", id, value: null} as NullValue;
   } else {
-    throw new ConvergenceError("Invalid data value type: " + JSON.stringify(val));
+    throw new ConvergenceError("Invalid data delta type: " + JSON.stringify(val));
   }
 }
 
@@ -78,7 +78,7 @@ export function toIDataValue(val: DataValue): IDataValue {
     const {id, value} = val as StringValue;
     return {stringValue: {id, value}};
   } else {
-    throw new ConvergenceError("Invalid data value type: " + JSON.stringify(val));
+    throw new ConvergenceError("Invalid data delta type: " + JSON.stringify(val));
   }
 }
 

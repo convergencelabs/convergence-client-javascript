@@ -8,12 +8,12 @@ export interface ObservableArrayEvents extends ObservableElementEvents {
   readonly REORDER: string;
 }
 
-export const ObservableArrayEventConstants: ObservableArrayEvents = Object.assign({
+export const ObservableArrayEventConstants: ObservableArrayEvents = {
+  ...ObservableElementEventConstants,
   INSERT: "insert",
   REMOVE: "remove",
   SET: "set",
-  REORDER: "reorder"},
-  ObservableElementEventConstants);
+  REORDER: "reorder"};
 Object.freeze(ObservableArrayEventConstants);
 
 export interface ObservableArray extends ObservableContainerElement<any[]> {

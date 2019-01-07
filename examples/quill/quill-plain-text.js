@@ -10,7 +10,7 @@ const quillEditor = new Quill('#quill-editor', {
 ///////////////////////////////////////////////////////////////////////////////
 Convergence.connectAnonymously(DOMAIN_URL).then(function (domain) {
   return domain.models().open("example", "quill-plain-text", function (collectionId, modelId) {
-    return {"text": "test value"};
+    return {"text": "test delta"};
   });
 }).then((model));
 

@@ -17,6 +17,7 @@ import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter, StringMap} from "../util/";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {IdentityCache} from "../identity/IdentityCache";
 
 /**
  * The ActivityService provides the main entry point into working with
@@ -41,12 +42,18 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   private readonly _joinedActivities: Map<string, Activity>;
 
   /**
+   * @internal
+   */
+  private readonly _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection) {
+  constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
     this._connection = connection;
+    this._identityCache = identityCache;
     this._joinedDeferreds = new Map<string, Deferred<Activity>>();
     this._joinedActivities = new Map<string, Activity>();
 
@@ -57,40 +64,37 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
         if (message.activitySessionJoined) {
           const joined = message.activitySessionJoined;
           const activity: Activity = this._joinedActivities.get(joined.activityId);
-          // FIXME username
-          const username: string = "";
+          const user = this._identityCache.getUserForSession(joined.sessionId);
           const participant: ActivityParticipant = new ActivityParticipant(
             activity,
+            user,
             joined.sessionId,
-            username,
             false,
             StringMap.objectToMap(joined.state));
           return [new ActivitySessionJoinedEvent(
             activity,
-            username,
+            user,
             joined.sessionId,
             false,
             participant)];
         } else if (message.activitySessionLeft) {
           const left = message.activitySessionLeft;
           const activity: Activity = this._joinedActivities.get(left.activityId);
-          // FIXME username
-          const username: string = "";
+          const user = this._identityCache.getUserForSession(left.sessionId);
           return [new ActivitySessionLeftEvent(
             activity,
-            username,
+            user,
             left.sessionId,
             false
           )];
         } else if (message.activityRemoteStateSet) {
           const remoteStateSet = message.activityRemoteStateSet;
           const activity: Activity = this._joinedActivities.get(remoteStateSet.activityId);
-          // FIXME username
-          const username: string = "";
+          const user = this._identityCache.getUserForSession(remoteStateSet.sessionId);
           return Object.keys(remoteStateSet.state).map(key => {
             return new ActivityStateSetEvent(
               activity,
-              username,
+              user,
               remoteStateSet.sessionId,
               false,
               key,
@@ -100,23 +104,21 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
         } else if (message.activityRemoteStateCleared) {
           const remoteStateCleared = message.activityRemoteStateCleared;
           const activity: Activity = this._joinedActivities.get(remoteStateCleared.activityId);
-          // FIXME username
-          const username: string = "";
+          const user = this._identityCache.getUserForSession(remoteStateCleared.sessionId);
           return [new ActivityStateClearedEvent(
             activity,
-            username,
+            user,
             remoteStateCleared.sessionId,
             false
           )];
         } else if (message.activityRemoteStateRemoved) {
           const remoteStateRemoved = message.activityRemoteStateRemoved;
           const activity: Activity = this._joinedActivities.get(remoteStateRemoved.activityId);
-          // FIXME username
-          const username: string = "";
+          const user = this._identityCache.getUserForSession(remoteStateRemoved.sessionId);
           return remoteStateRemoved.keys.map(key => {
             return new ActivityStateRemovedEvent(
               activity,
-              username,
+              user,
               remoteStateRemoved.sessionId,
               false,
               key
@@ -197,11 +199,10 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
           const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
           Object.keys(joinResponse.state).forEach((sessionId) => {
             const activityState = joinResponse.state[sessionId];
-            // FIXME username
-            const username: string = "";
+            const user = this._identityCache.getUserForSession(sessionId);
             const local: boolean = sessionId === this._connection.session().sessionId();
             const stateMap: Map<string, any> = StringMap.objectToMap(activityState.state);
-            const participant = new ActivityParticipant(activity, sessionId, username, local, stateMap);
+            const participant = new ActivityParticipant(activity, user, sessionId, local, stateMap);
             participants.set(sessionId, participant);
           });
 

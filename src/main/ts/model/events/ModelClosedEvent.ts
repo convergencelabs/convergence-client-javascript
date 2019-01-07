@@ -19,8 +19,7 @@ export class ModelClosedEvent implements IModelEvent {
    */
   constructor(public readonly src: ObservableModel,
               public readonly local: boolean,
-              public readonly reason?: string
-              ) {
+              public readonly reason?: string) {
     Object.freeze(this);
   }
 }

@@ -10,6 +10,7 @@ import {
 import {Path, PathElement} from "../Path";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -24,11 +25,12 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
    * @hidden
    * @internal
    */
-  constructor(_delegate: UndefinedNode,
-              _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: UndefinedNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
   }
 
   public path(): Path {
@@ -52,7 +54,7 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
    * @internal
    * @private
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Undefined values do not process references");
   }
 
@@ -62,7 +64,7 @@ export class RealTimeUndefined extends RealTimeElement<void> implements Observab
    * @hidden
    * @internal
    */
-  protected _setData(data: any): void {
-    throw new Error("Can not set the value on a Undefined type.");
+  protected setData(data: any): void {
+    throw new Error("Can not set the delta on a Undefined type.");
   }
 }

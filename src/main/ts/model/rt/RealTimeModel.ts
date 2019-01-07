@@ -59,6 +59,7 @@ import {
   RemoteReferenceUnshared
 } from "../reference/RemoteReferenceEvent";
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
@@ -184,6 +185,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
 
   /**
+   * @internal
+   */
+  private readonly _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    *
@@ -202,6 +208,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               collectionId: string,
               concurrencyControl: ClientConcurrencyControl,
               connection: ConvergenceConnection,
+              identityCache: IdentityCache,
               modelService: ModelService) {
     super();
 
@@ -215,8 +222,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._connection = connection;
     this._modelService = modelService;
     this._permissions = permissions;
+    this._identityCache = identityCache;
 
-    this._model = new Model(this.session().sessionId(), this.session().username(), valueIdPrefix, data);
+    this._model = new Model(this.session(), valueIdPrefix, data);
 
     // we keep a map of all references by session so we can easily dispose of them
     // when a session disconnects.  It might be possible to do this by walking the
@@ -230,7 +238,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
     const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
-    this._referenceManager = new ReferenceManager(this, [ModelReference.Types.ELEMENT], onRemoteReference);
+    this._referenceManager = new ReferenceManager(
+      this, [ModelReference.Types.ELEMENT], onRemoteReference, this._identityCache);
 
     this._concurrencyControl
       .on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (event: ICommitStatusChanged) => {
@@ -257,7 +266,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       referenceEventCallbacks: referenceCallbacks
     };
 
-    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks, this);
+    this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks, this, this._identityCache);
 
     this._open = true;
     this._committed = true;
@@ -291,9 +300,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
   public collaborators(): ModelCollaborator[] {
     return this._sessions.map((sessionId: string) => {
-      // fixme username
+      const user = this._identityCache.getUserForSession(sessionId);
       return new ModelCollaborator(
-        "",
+        user,
         sessionId
       );
     });
@@ -423,7 +432,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     } else {
       const session: ConvergenceSession = this.session();
       const reference: ElementReference = new ElementReference(
-        this._referenceManager, key, this, session.username(), session.sessionId(), true);
+        this._referenceManager, key, this, session.user(), session.sessionId(), true);
 
       const local: LocalElementReference = new LocalElementReference(
         reference,
@@ -535,10 +544,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._sessions.push(message.sessionId);
     this._referencesBySession[message.sessionId] = [];
 
-    // fixme username
-    const username = "";
+    const user = this._identityCache.getUserForSession(message.sessionId);
     const event: CollaboratorOpenedEvent = new CollaboratorOpenedEvent(
-      this, new ModelCollaborator(username, message.sessionId));
+      this, new ModelCollaborator(user, message.sessionId));
     this._emitEvent(event);
     this._collaboratorsSubject.next(this.collaborators());
   }
@@ -558,10 +566,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       ref._dispose();
     });
 
-    // fixme username
-    const username = "";
+    const user = this._identityCache.getUserForSession(message.sessionId);
     const event: CollaboratorClosedEvent = new CollaboratorClosedEvent(
-      this, new ModelCollaborator(username, message.sessionId)
+      this, new ModelCollaborator(user, message.sessionId)
     );
     this._emitEvent(event);
 
@@ -601,8 +608,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           );
         }
       } else if (event instanceof RemoteReferenceSet) {
-        // todo validate that the reference exists.
-        const type = this.reference(event.sessionId, event.valueId).type();
+        const reference = this.reference(event.sessionId, event.valueId);
+        if (!reference) {
+          console.warn("received an update for a non-existent reference.");
+          return;
+        }
+        const type = reference.type();
         let data: ModelReferenceData = {
           type,
           valueId: event.valueId,
@@ -674,7 +685,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
-    // todo in theory we could pass the operation in to verify it as well.
     const version = message.version as number;
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, version);
     this._version = version + 1;
@@ -705,8 +715,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const contextVersion: number = processed.version;
     const timestamp: Date = processed.timestamp;
 
-    // fixme username
-    const username = "";
+    const user = this._identityCache.getUserForSession(message.sessionId);
     this._version = contextVersion + 1;
     this._time = new Date(timestamp);
 
@@ -715,7 +724,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       compoundOp.ops.forEach((op: DiscreteOperation) => {
         if (!op.noOp) {
           const modelEvent: ModelOperationEvent =
-            new ModelOperationEvent(clientId, username, contextVersion, timestamp, op);
+            new ModelOperationEvent(clientId, user, contextVersion, timestamp, op);
           this._deliverToChild(modelEvent);
         }
       });
@@ -723,7 +732,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const discreteOp: DiscreteOperation = operation as DiscreteOperation;
       if (!discreteOp.noOp) {
         const modelEvent: ModelOperationEvent =
-          new ModelOperationEvent(clientId, username, contextVersion, timestamp, discreteOp);
+          new ModelOperationEvent(clientId, user, contextVersion, timestamp, discreteOp);
         this._deliverToChild(modelEvent);
       }
     }

@@ -1,6 +1,7 @@
 import {ModelReference, ModelReferenceEvents} from "./ModelReference";
 import {RealTimeElement, RealTimeModel} from "../rt/";
 import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {DomainUser} from "../../identity";
 
 export interface ModelReferenceCallbacks {
   onShare: (reference: LocalModelReference<any, any>) => void;
@@ -62,8 +63,8 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
     return true;
   }
 
-  public username(): string {
-    return this._reference.username();
+  public user(): DomainUser {
+    return this._reference.user();
   }
 
   public sessionId(): string {

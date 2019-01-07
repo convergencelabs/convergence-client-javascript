@@ -21,6 +21,7 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {toIObjectValue, toModelPermissions, toModelResult, toObjectValue} from "./ModelMessageConverter";
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
 import {getOrDefaultArray, getOrDefaultNumber, timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {IdentityCache} from "../identity/IdentityCache";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -60,12 +61,18 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _connection: ConvergenceConnection;
 
   /**
+   * @internal
+   */
+  private readonly _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection) {
+  constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
     this._connection = connection;
+    this._identityCache = identityCache;
     this._connection
       .messages()
       .subscribe(message => this._handleMessage(message));
@@ -251,7 +258,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         id,
         historicalDataResponse.collectionId,
         this._connection,
-        this.session());
+        this.session(),
+        this._identityCache);
     });
   }
 
@@ -356,7 +364,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         referenceTransformer);
       const data = toObjectValue(openRealTimeModelResponse.data);
       const model: RealTimeModel = new RealTimeModel(
-        openRealTimeModelResponse.resourceId ,
+        openRealTimeModelResponse.resourceId,
         openRealTimeModelResponse.valueIdPrefix,
         data,
         getOrDefaultArray(openRealTimeModelResponse.connectedClients),
@@ -369,6 +377,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         openRealTimeModelResponse.collection,
         clientConcurrencyControl,
         this._connection,
+        this._identityCache,
         this
       );
 

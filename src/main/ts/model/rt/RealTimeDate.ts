@@ -10,6 +10,7 @@ import {
   ObservableDateEventConstants
 } from "../observable/ObservableDate";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeDateEvents extends ObservableDateEvents {
 }
@@ -24,11 +25,12 @@ export class RealTimeDate extends RealTimeElement<Date> implements ObservableDat
    * @hidden
    * @private
    */
-  constructor(_delegate: DateNode,
-              _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: DateNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {

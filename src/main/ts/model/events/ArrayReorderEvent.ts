@@ -1,5 +1,6 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableArray} from "../observable/ObservableArray";
+import {DomainUser} from "../../identity";
 
 export class ArrayReorderEvent implements IValueChangedEvent {
   public static readonly NAME = "reorder";
@@ -10,18 +11,18 @@ export class ArrayReorderEvent implements IValueChangedEvent {
    * @param fromIndex
    * @param toIndex
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableArray,
-              public readonly fromIndex: number,
-              public readonly toIndex: number,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
-              public readonly local: boolean) {
+              public readonly local: boolean,
+              public readonly fromIndex: number,
+              public readonly toIndex: number) {
     Object.freeze(this);
   }
 }

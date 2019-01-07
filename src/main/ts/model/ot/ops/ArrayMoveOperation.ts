@@ -9,7 +9,11 @@ import {ArrayMove} from "./operationChanges";
  */
 export class ArrayMoveOperation extends DiscreteOperation implements ArrayMove {
 
-  constructor(id: string, noOp: boolean, public fromIndex: number, public toIndex: number) {
+  constructor(
+    id: string,
+    noOp: boolean,
+    public readonly fromIndex: number,
+    public readonly toIndex: number) {
     super(OperationType.ARRAY_REORDER, id, noOp);
     Object.freeze(this);
   }

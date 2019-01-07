@@ -10,7 +10,7 @@ import ConvergenceSocket from "./ConvergenceSocket";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Deferred} from "../util/Deferred";
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent, StringMap} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
 import {IWebSocketClass} from "./IWebSocketClass";
@@ -25,6 +25,7 @@ import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenA
 import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
 import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
 import {toOptional} from "./ProtocolUtil";
+import {toDomainUser} from "../identity/IdentityMessageUtils";
 
 /**
  * @hidden
@@ -229,7 +230,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       const authResponse: IAuthenticationResponseMessage = response.authenticationResponse;
       if (authResponse.success) {
         const success = authResponse.success;
-        this._session._setUsername(success.username);
+        this._session._setUser(toDomainUser(success.user));
         this._session._setSessionId(success.sessionId);
         this._session._setReconnectToken(success.reconnectToken);
         this._session._setAuthenticated(true);

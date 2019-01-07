@@ -17,9 +17,8 @@ import {
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {filter} from "rxjs/operators";
 import {ReferenceType} from "../reference/ReferenceType";
-import {io} from "@convergence/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -68,7 +67,8 @@ export abstract class RealTimeElement<T>
                         callbacks: ModelEventCallbacks,
                         wrapperFactory: RealTimeWrapperFactory,
                         model: RealTimeModel,
-                        referenceTypes: ReferenceType[]) {
+                        referenceTypes: ReferenceType[],
+                        identityCache: IdentityCache) {
     super();
 
     this._delegate = delegate;
@@ -80,7 +80,7 @@ export abstract class RealTimeElement<T>
       this._fireReferenceCreated(ref);
     };
 
-    this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference);
+    this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference, identityCache);
 
     this._delegate.events().pipe(filter(event => {
       return this._model.emitLocalEvents() || !event.local ||

@@ -8,7 +8,7 @@ export abstract class NodeWrapperFactory<T> {
 
   private _wrappers: Map<string, T>;
 
-  constructor() {
+  protected constructor() {
     this._wrappers = new Map<string, T>();
   }
 

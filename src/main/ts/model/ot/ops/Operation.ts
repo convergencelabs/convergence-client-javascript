@@ -5,7 +5,7 @@ import {Change} from "./operationChanges";
  * @internal
  */
 export abstract class Operation implements Change {
-  protected constructor(public type: string) {
+  protected constructor(public readonly type: string) {
   }
 
   public abstract copy(properties: any): Operation;

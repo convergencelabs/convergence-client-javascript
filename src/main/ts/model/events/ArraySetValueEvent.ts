@@ -1,5 +1,6 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableArray} from "../observable/ObservableArray";
+import {DomainUser} from "../../identity";
 
 export class ArraySetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";
@@ -8,15 +9,15 @@ export class ArraySetValueEvent implements IValueChangedEvent {
   /**
    * @param element
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableArray,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
               public readonly local: boolean) {
     Object.freeze(this);
   }

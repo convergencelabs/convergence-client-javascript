@@ -1,14 +1,14 @@
 import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
-import {NumberAddOperation} from "../../ops/NumberAddOperation";
+import {NumberDeltaOperation} from "../../ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../ops/NumberSetOperation";
 
 /**
  * @hidden
  * @internal
  */
-export const NumberAddSetOTF: OperationTransformationFunction<NumberAddOperation, NumberSetOperation> =
-  (s: NumberAddOperation, c: NumberSetOperation) => {
+export const NumberAddSetOTF: OperationTransformationFunction<NumberDeltaOperation, NumberSetOperation> =
+  (s: NumberDeltaOperation, c: NumberSetOperation) => {
     // N-AS-1
     return new OperationPair(s.copy({noOp: true}), c);
   };

@@ -10,6 +10,7 @@ import {
   ObservableBooleanEventConstants
 } from "../observable/ObservableBoolean";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
@@ -24,11 +25,12 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
    * @hidden
    * @private
    */
-  constructor(_delegate: BooleanNode,
-              _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: BooleanNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {

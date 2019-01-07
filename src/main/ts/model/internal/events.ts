@@ -7,6 +7,7 @@ import {NumberNode} from "./NumberNode";
 import {ObjectNode} from "./ObjectNode";
 import {StringNode} from "./StringNode";
 import {DateNode} from "./DateNode";
+import {DomainUser} from "../../identity";
 
 /**
  * @hidden
@@ -35,7 +36,7 @@ export class NodeDetachedEvent implements ModelNodeEvent {
  */
 export interface NodeValueChangedEvent extends ModelNodeEvent {
    sessionId: string;
-   username: string;
+   user: DomainUser;
 }
 
 /**
@@ -51,7 +52,7 @@ export class NodeChangedEvent implements ModelNodeEvent {
               public readonly relativePath: Path,
               public readonly childEvent: NodeValueChangedEvent,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -69,7 +70,7 @@ export class ArrayNodeInsertEvent implements NodeValueChangedEvent {
               public readonly index: number,
               public readonly value: ModelNode<any>,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -87,7 +88,7 @@ export class ArrayNodeRemoveEvent implements NodeValueChangedEvent {
               public readonly index: number,
               public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -106,7 +107,7 @@ export class ArrayNodeSetEvent implements NodeValueChangedEvent {
               public readonly value: ModelNode<any>,
               public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -124,7 +125,7 @@ export class ArrayNodeReorderEvent implements NodeValueChangedEvent {
               public readonly fromIndex: number,
               public readonly toIndex: number,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -141,7 +142,7 @@ export class ArrayNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: any[],
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -158,7 +159,7 @@ export class BooleanNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: boolean,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -175,7 +176,7 @@ export class NumberNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: number,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -192,7 +193,7 @@ export class NumberNodeDeltaEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: number,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -211,7 +212,7 @@ export class ObjectNodeSetEvent implements NodeValueChangedEvent {
               public readonly value: ModelNode<any>,
               public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -229,7 +230,7 @@ export class ObjectNodeRemoveEvent implements NodeValueChangedEvent {
               public readonly key: string,
               public readonly oldValue: ModelNode<any>,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -246,7 +247,7 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: { [key: string]: any; },
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -264,7 +265,7 @@ export class StringNodeInsertEvent implements NodeValueChangedEvent {
               public readonly index: number,
               public readonly value: string,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -282,7 +283,7 @@ export class StringNodeRemoveEvent implements NodeValueChangedEvent {
               public readonly index: number,
               public readonly value: string,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -299,7 +300,7 @@ export class StringNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: string,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }
@@ -316,7 +317,7 @@ export class DateNodeSetValueEvent implements NodeValueChangedEvent {
               public readonly local: boolean,
               public readonly value: Date,
               public readonly sessionId: string,
-              public readonly username: string) {
+              public readonly user: DomainUser) {
     Object.freeze(this);
   }
 }

@@ -20,7 +20,7 @@ import {mapObjectValues} from "../util/ObjectUtils";
 import {StringInsertOperation} from "./ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "./ot/ops/StringRemoveOperation";
 import {StringSetOperation} from "./ot/ops/StringSetOperation";
-import {NumberAddOperation} from "./ot/ops/NumberAddOperation";
+import {NumberDeltaOperation} from "./ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "./ot/ops/NumberSetOperation";
 import {BooleanSetOperation} from "./ot/ops/BooleanSetOperation";
 import {DateSetOperation} from "./ot/ops/DateSetOperation";
@@ -128,11 +128,11 @@ function toDiscreteOperation(discreteOperationData: IDiscreteOperationData): Dis
       getOrDefaultBoolean(noOp),
       getOrDefaultString(value));
   } else if (discreteOperationData.numberDeltaOperation) {
-    const {id, noOp, value} = discreteOperationData.numberDeltaOperation;
-    return new NumberAddOperation(
+    const {id, noOp, delta} = discreteOperationData.numberDeltaOperation;
+    return new NumberDeltaOperation(
       id,
       getOrDefaultBoolean(noOp),
-      getOrDefaultNumber(value));
+      getOrDefaultNumber(delta));
   } else if (discreteOperationData.numberSetOperation) {
     const {id, noOp, value} = discreteOperationData.numberSetOperation;
     return new NumberSetOperation(
@@ -206,9 +206,9 @@ function toIDiscreteOperationData(op: DiscreteOperation): IDiscreteOperationData
   } else if (op instanceof StringSetOperation) {
     const {id, noOp, value} = op;
     return {stringSetOperation: {id, noOp, value}};
-  } else if (op instanceof NumberAddOperation) {
-    const {id, noOp, value} = op;
-    return {numberDeltaOperation: {id, noOp, value}};
+  } else if (op instanceof NumberDeltaOperation) {
+    const {id, noOp, delta} = op;
+    return {numberDeltaOperation: {id, noOp, delta}};
   } else if (op instanceof NumberSetOperation) {
     const {id, noOp, value} = op;
     return {numberSetOperation: {id, noOp, value}};

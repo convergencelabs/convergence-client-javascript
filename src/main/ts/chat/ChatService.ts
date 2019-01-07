@@ -72,7 +72,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
-  private _identityCache: IdentityCache;
+  private readonly _identityCache: IdentityCache;
 
   /**
    * @hidden
@@ -88,10 +88,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       .pipe(
         map(message => processChatMessage(message.message, this._identityCache)),
         tap(event => {
-          if (event instanceof UserJoinedEvent && event.user.username === this.session().username()) {
+          if (event instanceof UserJoinedEvent && event.user.username === this.session().user().username) {
             const joined = new ChannelJoinedEvent(event.channelId);
             this._emitEvent(joined);
-          } else if (event instanceof UserLeftEvent && event.user.username === this.session().username()) {
+          } else if (event instanceof UserLeftEvent && event.user.username === this.session().user().username) {
             const left = new ChannelLeftEvent(event.channelId);
             this._emitEvent(left);
           }
@@ -288,7 +288,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     const members: ChatChannelMember[] = [];
     channelData.members.forEach(member => {
       members.push({username: member.username, maxSeenEventNumber: member.maxSeenEventNumber as number});
-      if (member.username === this._connection.session().username()) {
+      if (member.username === this._connection.session().user().username) {
         maxEvent = member.maxSeenEventNumber as number;
       }
     });

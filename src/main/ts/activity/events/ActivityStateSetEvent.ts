@@ -1,5 +1,6 @@
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
+import {DomainUser} from "../../identity";
 
 /**
  * The ActivityStateSetEvent is fired when a remote session sets one or
@@ -29,7 +30,7 @@ export class ActivityStateSetEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly username: string,
+    public readonly user: DomainUser,
     /**
      * @inheritDoc
      */
@@ -39,11 +40,11 @@ export class ActivityStateSetEvent implements IActivityEvent {
      */
     public readonly local: boolean,
     /**
-     * The key of the state value that was set.
+     * The key of the state delta that was set.
      */
     public readonly key: string,
     /**
-     * The value that was set
+     * The delta that was set
      */
     public readonly value: string) {
     Object.freeze(this);

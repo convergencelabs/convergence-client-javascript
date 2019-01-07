@@ -9,7 +9,10 @@ import {StringRemove} from "./operationChanges";
  */
 export class StringRemoveOperation extends DiscreteOperation implements StringRemove {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: string) {
     super(OperationType.STRING_REMOVE, id, noOp);
     Object.freeze(this);
   }
