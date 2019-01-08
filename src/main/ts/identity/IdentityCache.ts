@@ -32,13 +32,11 @@ export class IdentityCache {
     getOrDefaultArray(message.users).forEach(userData => {
       const domainUser = toDomainUser(userData);
       this._users.set(domainUser.username, domainUser);
-      console.log("user added: " + domainUser);
     });
 
     objectForEach(getOrDefaultObject(message.sessions), (sessionId, username) => {
       const domainUser = this._users.get(username);
       this._sessions.set(sessionId, domainUser);
-      console.log("session added: ", sessionId, domainUser);
     });
   }
 }

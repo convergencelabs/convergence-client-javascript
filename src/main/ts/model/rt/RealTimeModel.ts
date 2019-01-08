@@ -608,7 +608,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           );
         }
       } else if (event instanceof RemoteReferenceSet) {
-        const reference = this.reference(event.sessionId, event.valueId);
+        const reference = value.reference(event.sessionId, event.key);
         if (!reference) {
           console.warn("received an update for a non-existent reference.");
           return;
@@ -629,10 +629,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         );
       }
 
-      let r: ModelReference<any>;
-
       if (event instanceof RemoteReferenceUnshared) {
-        r = value.reference(event.sessionId, event.key);
+        const r: ModelReference<any> = value.reference(event.sessionId, event.key);
         const index: number = this._referencesBySession[event.sessionId].indexOf(r);
         this._referencesBySession[event.sessionId].splice(index, 1);
       }
@@ -644,7 +642,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       value._handleRemoteReferenceEvent(event);
 
       if (event instanceof RemoteReferenceShared) {
-        r = value.reference(event.sessionId, event.key);
+        const r: ModelReference<any> = value.reference(event.sessionId, event.key);
         this._referencesBySession[event.sessionId].push(r);
       }
     }

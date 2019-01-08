@@ -36,8 +36,8 @@ export function toRemoteReferenceEvent(message: IConvergenceMessage): RemoteRefe
     return new RemoteReferenceSet(
       sessionId,
       resourceId,
-      key,
       fromOptional(valueId),
+      key,
       values
     );
   } else if (message.referenceCleared) {
@@ -45,16 +45,16 @@ export function toRemoteReferenceEvent(message: IConvergenceMessage): RemoteRefe
     return new RemoteReferenceCleared(
       sessionId,
       resourceId,
-      key,
-      fromOptional(valueId)
+      fromOptional(valueId),
+      key
     );
   } else if (message.referenceUnshared) {
     const {sessionId, key, valueId, resourceId} = message.referenceUnshared;
     return new RemoteReferenceUnshared(
       sessionId,
       resourceId,
-      key,
-      fromOptional(valueId)
+      fromOptional(valueId),
+      key
     );
   }
 }

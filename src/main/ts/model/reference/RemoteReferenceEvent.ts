@@ -8,8 +8,7 @@ export class RemoteReferenceEvent {
   constructor(public readonly sessionId: string,
               public readonly resourceId: string,
               public readonly valueId: string | null,
-              public readonly key: string
-  ) {
+              public readonly key: string) {
   }
 }
 
@@ -20,7 +19,7 @@ export class RemoteReferenceEvent {
 export class RemoteReferenceShared extends RemoteReferenceEvent {
   constructor(sessionId: string,
               resourceId: string,
-              valueId: string,
+              valueId: string | null,
               key: string,
               public readonly referenceType: ReferenceType,
               public readonly values?: any[]) {
@@ -35,7 +34,7 @@ export class RemoteReferenceShared extends RemoteReferenceEvent {
 export class RemoteReferenceUnshared extends RemoteReferenceEvent {
   constructor(sessionId: string,
               resourceId: string,
-              valueId: string,
+              valueId: string | null,
               key: string) {
     super(sessionId, resourceId, valueId, key);
   }
@@ -48,7 +47,7 @@ export class RemoteReferenceUnshared extends RemoteReferenceEvent {
 export class RemoteReferenceSet extends RemoteReferenceEvent {
   constructor(sessionId: string,
               resourceId: string,
-              valueId: string,
+              valueId: string | null,
               key: string,
               public readonly values: any[]) {
     super(sessionId, resourceId, valueId, key);
