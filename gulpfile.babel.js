@@ -6,11 +6,6 @@ import rename from "gulp-rename";
 import ts from "gulp-typescript";
 import tsLint from "gulp-tslint";
 import mocha from "gulp-mocha";
-import rollup from "rollup";
-import rollupTypescript2 from "rollup-plugin-typescript2";
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import json from 'rollup-plugin-json';
 import sourceMaps from "gulp-sourcemaps";
 import uglify from "gulp-uglify";
 import fs from "fs";
@@ -23,6 +18,7 @@ import shell from "gulp-shell";
 import filter from 'gulp-filter-each';
 import trim from "trim";
 import insert from "gulp-insert";
+import rollupConfig from "./rollup.config.js";
 
 const npmPackageJson = JSON.parse(fs.readFileSync("./npmjs/package.json"));
 
@@ -35,7 +31,7 @@ function minify(source, destination) {
     .pipe(sourceMaps.init())
     .pipe(uglify({
       mangleProperties: {
-        regex: /(^_.*|.*Operation.*|.*transform.*|serverOp|clientOp)/
+        regex: /(^_.*|.*transform.*|serverOp|clientOp)/
       }
     }))
     .pipe(header(headerTxt, {package: npmPackageJson}))
@@ -46,53 +42,14 @@ function minify(source, destination) {
     .pipe(dest(destination));
 }
 
-function generateRollUpConfig(format) {
-  return {
-    input: "src/main/ts/index.ts",
-    rollup: rollup,
-    format: format,
-    exports: "named",
-    name: "Convergence",
-    sourcemap: true,
-    external: [
-      "rxjs",
-      "rxjs/operators",
-      "protobufjs/light"
-    ],
-    globals: {
-      "rxjs": "rxjs",
-      "rxjs/operators": "rxjs.operators",
-      "protobufjs/light": "protobuf"
-    },
-    plugins: [
-      rollupTypescript2({
-        typescript: typescript,
-        rollupCommonJSResolveHack: true,
-        tsconfigOverride: {
-          compilerOptions: {
-            resolveJsonModule: false,
-            module: "ES2015"
-          }
-        }
-      }),
-      resolve({
-        jsnext: true,
-        main: true
-      }),
-      commonjs({ include: 'node_modules/**' }),
-      json()
-    ]
-  };
-}
-
 const distCjsMin = () => {
   return minify(`${distInternalDir}/convergence.js`, `${distInternalDir}`);
 };
 
 const distCjs = () => {
-  const config = generateRollUpConfig("cjs");
+  const config = {...rollupConfig, rollup: require("rollup")};
+  config.output = {...config.output, format: "cjs"};
 
-  // The sourcemaps below are mapping back to the typescript files.
   return rollupStream(config)
     .pipe(source(`${distInternalDir}/convergence.js`))
     .pipe(buffer())
@@ -102,13 +59,13 @@ const distCjs = () => {
 };
 
 const distUmd = () => {
-  const config = generateRollUpConfig("umd");
+  const config = {...rollupConfig, rollup: require("rollup")};
   return rollupStream(config)
     .pipe(source(`${distInternalDir}/umd/convergence.js`))
     .pipe(buffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
-    .pipe(dest("./"));
+    .pipe(dest("."));
 };
 
 const distUmdBundle = () =>
@@ -129,7 +86,8 @@ const distUmdBundleMin = () => {
   const files = [
     "node_modules/rxjs/bundles/rxjs.umd.min.js",
     "node_modules/protobufjs/dist/light/protobuf.min.js",
-    `${distInternalDir}/umd/convergence.min.js`];
+    `${distInternalDir}/umd/convergence.min.js`
+  ];
   return src(files)
     .pipe(concat("convergence-all.min.js"))
     .pipe(dest(`${distInternalDir}/umd`));

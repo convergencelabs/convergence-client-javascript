@@ -186,8 +186,13 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     if ((debugFlags.PROTOCOL_MESSAGES && message.ping && message.pong) || debugFlags.PROTOCOL_PINGS) {
       console.log("SND: " + JSON.stringify(message));
     }
-    const bytes = ConvergenceMessageIO.encode(message);
-    this._socket.send(bytes);
+
+    try {
+      const bytes = ConvergenceMessageIO.encode(message);
+      this._socket.send(bytes);
+    } catch (e) {
+      this.onSocketError(e);
+    }
   }
 
   private onSocketMessage(data: Uint8Array): void {
@@ -226,7 +231,6 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onSocketDropped(): void {
-    // logger.debug("Socket dropped");
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -239,14 +243,14 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onNormalMessage(message: IConvergenceMessage): void {
-    setTimeout(() => {
+    Promise.resolve().then(() => {
       const event: IProtocolConnectionMessageEvent = {
         name: "message",
         request: false,
         message
       };
       this._emitEvent(event);
-    }, 0);
+    });
   }
 
   private onRequest(message: IConvergenceMessage): void {
