@@ -18,6 +18,8 @@ import {ConvergenceEventEmitter, StringMap} from "../util/";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {IdentityCache} from "../identity/IdentityCache";
+import {getOrDefaultObject, protoValueToJson} from "../connection/ProtocolUtil";
+import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 
 /**
  * The ActivityService provides the main entry point into working with
@@ -65,12 +67,13 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
           const joined = message.activitySessionJoined;
           const activity: Activity = this._joinedActivities.get(joined.activityId);
           const user = this._identityCache.getUserForSession(joined.sessionId);
+          const state = mapObjectValues(getOrDefaultObject(joined.state), protoValueToJson);
           const participant: ActivityParticipant = new ActivityParticipant(
             activity,
             user,
             joined.sessionId,
             false,
-            StringMap.objectToMap(joined.state));
+            StringMap.objectToMap(state));
           return [new ActivitySessionJoinedEvent(
             activity,
             user,
@@ -91,14 +94,16 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
           const remoteStateSet = message.activityRemoteStateSet;
           const activity: Activity = this._joinedActivities.get(remoteStateSet.activityId);
           const user = this._identityCache.getUserForSession(remoteStateSet.sessionId);
-          return Object.keys(remoteStateSet.state).map(key => {
+          const stateSet = getOrDefaultObject(remoteStateSet.state);
+          return Object.keys(stateSet).map(key => {
+            const value = protoValueToJson(stateSet[key]);
             return new ActivityStateSetEvent(
               activity,
               user,
               remoteStateSet.sessionId,
               false,
               key,
-              remoteStateSet.state[key],
+              value
             );
           });
         } else if (message.activityRemoteStateCleared) {
@@ -125,7 +130,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
             );
           });
         } else {
-          throw new Error("Invalid activity event");
+          return [];
         }
       }));
 
@@ -184,7 +189,6 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
       this._connection.request(message)
         .then((response: IConvergenceMessage) => {
           const joinResponse = response.activityJoinResponse;
-
           const filteredEvents: Observable<IActivityEvent> = this.events().pipe(filter(event => {
             return event.activity.id() === id;
           }));
@@ -197,11 +201,12 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
             this._connection);
 
           const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
-          Object.keys(joinResponse.state).forEach((sessionId) => {
+          const responseState = getOrDefaultObject(joinResponse.state);
+          objectForEach(responseState, (sessionId) => {
             const activityState = joinResponse.state[sessionId];
             const user = this._identityCache.getUserForSession(sessionId);
             const local: boolean = sessionId === this._connection.session().sessionId();
-            const stateMap: Map<string, any> = StringMap.objectToMap(activityState.state);
+            const stateMap: Map<string, any> = StringMap.objectToMap(getOrDefaultObject(activityState.state));
             const participant = new ActivityParticipant(activity, user, sessionId, local, stateMap);
             participants.set(sessionId, participant);
           });

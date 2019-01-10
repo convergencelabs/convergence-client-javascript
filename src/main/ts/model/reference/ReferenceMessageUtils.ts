@@ -1,6 +1,6 @@
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {fromOptional} from "../../connection/ProtocolUtil";
+import {fromOptional, getOrDefaultArray, getOrDefaultNumber, getOrDefaultString} from "../../connection/ProtocolUtil";
 import IReferenceValues = io.convergence.proto.IReferenceValues;
 import {ReferenceType} from "./ReferenceType";
 import {
@@ -66,16 +66,20 @@ interface ValueAndType {
 
 export function extractValueAndType(values: IReferenceValues): ValueAndType {
   if (values.indices) {
-    return {referenceType: "index", values: values.indices.values};
+    const vals = getOrDefaultArray(values.indices.values);
+    return {referenceType: "index", values: vals.map(getOrDefaultNumber)};
   } else if (values.ranges) {
-    const val = values.ranges.values.map(({startIndex, endIndex}) => {
-      return {start: startIndex, end: endIndex};
+    const ranges = getOrDefaultArray(values.ranges.values);
+    const val = ranges.map(({startIndex, endIndex}) => {
+      return {start: getOrDefaultNumber(startIndex), end: getOrDefaultNumber(endIndex)};
     });
     return {referenceType: "range", values: val};
   } else if (values.properties) {
-    return {referenceType: "property", values: values.properties.values};
+    const vals = getOrDefaultArray(values.properties.values);
+    return {referenceType: "property", values: vals.map(getOrDefaultString)};
   } else if (values.elements) {
-    return {referenceType: "element", values: values.elements.values};
+    const vals = getOrDefaultArray(values.elements.values);
+    return {referenceType: "element", values: vals.map(getOrDefaultString)};
   }
 }
 

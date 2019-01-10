@@ -58,15 +58,33 @@ export function protoValueToJson(value: IValue): any {
   if (value.nullValue) {
     return null;
   } else if (value.boolValue) {
-    return value.boolValue;
+    return getOrDefaultBoolean(value.boolValue);
   } else if (value.stringValue) {
-    return value.stringValue;
+    return getOrDefaultString(value.stringValue);
   } else if (value.numberValue) {
-    return value.numberValue;
+    return getOrDefaultNumber(value.numberValue);
   } else if (value.structValue) {
-    return mapObjectValues(value.structValue.fields, protoValueToJson);
+    return mapObjectValues(getOrDefaultObject(value.structValue.fields), protoValueToJson);
   } else if (value.listValue) {
-    return value.listValue.values.map(protoValueToJson);
+    return getOrDefaultArray(value.listValue.values).map(protoValueToJson);
+  } else {
+    return;
+  }
+}
+
+export function jsonToProtoValue(value: any): IValue {
+  if (value === null) {
+    return {nullValue: null};
+  } else if (typeof value === "boolean") {
+    return {boolValue: value};
+  } else if (typeof value === "string") {
+    return {stringValue: value};
+  } else if (typeof value === "number") {
+    return {numberValue: value};
+  } else if (Array.isArray(value)) {
+    return {listValue: {values: value.map(jsonToProtoValue)}};
+  } else if (value.constructor === Object) {
+    return {structValue: {fields: mapObjectValues(value, jsonToProtoValue)}};
   } else {
     return;
   }

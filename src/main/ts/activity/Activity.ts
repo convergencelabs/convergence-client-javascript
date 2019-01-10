@@ -14,6 +14,8 @@ import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {mapObjectValues} from "../util/ObjectUtils";
+import {jsonToProtoValue} from "../connection/ProtocolUtil";
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -259,7 +261,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       const message: IConvergenceMessage = {
         activityLocalStateSet: {
           activityId: this._id,
-          state
+          state: mapObjectValues(state, jsonToProtoValue)
         }
       };
       this._connection.send(message);

@@ -44,9 +44,9 @@ export class ActivityStateSetEvent implements IActivityEvent {
      */
     public readonly key: string,
     /**
-     * The delta that was set
+     * The data that was set
      */
-    public readonly value: string) {
+    public readonly value: any) {
     Object.freeze(this);
   }
 }

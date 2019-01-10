@@ -12,6 +12,22 @@ import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
+import {ConvergenceError} from "../util";
+
+/**
+ * @hidden
+ * @internal
+ */
+export function isChatMessage(message: IConvergenceMessage): boolean {
+  return !!message.remoteChatMessage ||
+    !!message.userJoinedChatChannel ||
+    !!message.userLeftChatChannel ||
+    !!message.userAddedToChatChannel ||
+    !!message.userRemovedFromChatChannel ||
+    !!message.chatChannelRemoved ||
+    !!message.chatChannelNameChanged ||
+    !!message.chatChannelTopicChanged;
+}
 
 /**
  * @hidden
@@ -83,5 +99,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       chatMsg.sessionId,
       getOrDefaultString(chatMsg.message)
     );
+  } else {
+    throw new ConvergenceError("Invalid chat event");
   }
 }

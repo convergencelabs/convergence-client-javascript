@@ -183,7 +183,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   public sendMessage(message: IConvergenceMessage): void {
-    if ((debugFlags.PROTOCOL_MESSAGES && message.ping && message.pong) || debugFlags.PROTOCOL_PINGS) {
+    if ((debugFlags.PROTOCOL_MESSAGES && !message.ping && !message.pong) || debugFlags.PROTOCOL_PINGS) {
       console.log("SND: " + JSON.stringify(message));
     }
 

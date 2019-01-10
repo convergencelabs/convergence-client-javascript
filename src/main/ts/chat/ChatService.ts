@@ -11,7 +11,7 @@ import {
   UserRemovedEvent,
   ChannelJoinedEvent
 } from "./events/";
-import {processChatMessage} from "./ChatMessageProcessor";
+import {isChatMessage, processChatMessage} from "./ChatMessageProcessor";
 import {ChatChannel, ChatChannelInfo, ChatChannelMember} from "./ChatChannel";
 import {DirectChatChannel} from "./DirectChatChannel";
 import {MembershipChatChannelInfo} from "./MembershipChatChannel";
@@ -86,6 +86,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     this._messageStream = this._connection
       .messages()
       .pipe(
+        filter(message => isChatMessage(message.message)),
         map(message => processChatMessage(message.message, this._identityCache)),
         tap(event => {
           if (event instanceof UserJoinedEvent && event.user.username === this.session().user().username) {
@@ -264,7 +265,9 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @internal
    */
   private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
-    const messageStream = this._messageStream.pipe(filter(msg => msg.channelId === channelInfo.channelId));
+    const messageStream = this._messageStream.pipe(
+      filter(msg => msg.channelId === channelInfo.channelId)
+    );
     switch (channelInfo.channelType) {
       case ChatChannelTypes.DIRECT:
         return new DirectChatChannel(this._connection, messageStream, channelInfo);

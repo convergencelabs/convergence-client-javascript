@@ -33,8 +33,8 @@ export class Validation {
     }
   }
 
-  public static assertValidStringIndex(index: number, str: string, name?: string): void {
-    Validation.assertValidIndex(index, 0, str.length, name);
+  public static assertValidStringIndex(index: number, str: string, inclusiveEnd: boolean, name?: string): void {
+    Validation.assertValidIndex(index, 0, inclusiveEnd ? str.length + 1 : str.length, name);
   }
 
   public static assertNumber(value: number, name?: string): void {

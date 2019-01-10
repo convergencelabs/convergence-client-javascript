@@ -18,7 +18,7 @@ import {Observable} from "rxjs";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
-import {toOptional} from "../connection/ProtocolUtil";
+import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 
 export interface ChatChannelInfo {
@@ -167,7 +167,7 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((message: IConvergenceMessage) => {
       const response = message.getChatChannelHistoryResponse;
-      return response.eventData!.map(data => ChatHistoryEventMapper.toChatHistoryEntry(data));
+      return getOrDefaultArray(response.eventData).map(data => ChatHistoryEventMapper.toChatHistoryEntry(data));
     });
   }
 

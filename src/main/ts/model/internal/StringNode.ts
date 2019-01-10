@@ -91,15 +91,15 @@ export class StringNode extends ModelNode<string> {
   }
 
   private _applyInsert(index: number, value: string, local: boolean, sessionId: string, user: DomainUser): void {
-    Validation.assertValidStringIndex(index, this._data);
+    Validation.assertValidStringIndex(index, this._data, true, "index");
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
     const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, user);
     this._emitValueEvent(event);
   }
 
   private _applyRemove(index: number, length: number, local: boolean, sessionId: string, user: DomainUser): void {
-    Validation.assertValidStringIndex(index, this._data);
-    Validation.assertValidStringIndex(index + length - 1, this._data);
+    Validation.assertValidStringIndex(index, this._data, false, "index");
+    Validation.assertValidStringIndex(index + length, this._data, true);
 
     const removedVal: string = this._data.slice(index, index + length);
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
