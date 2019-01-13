@@ -19,7 +19,7 @@ export class HistoricalUndefined extends HistoricalElement<void> implements Obse
    * @hidden
    * @internal
    */
-  constructor(_delegate: UndefinedNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: UndefinedNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 }

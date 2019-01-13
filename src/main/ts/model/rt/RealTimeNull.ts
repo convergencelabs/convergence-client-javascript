@@ -15,6 +15,9 @@ export class RealTimeNull extends RealTimeElement<void> implements ObservableNul
 
   /**
    * Constructs a new RealTimeNull.
+   *
+   * @hidden
+   * @internal
    */
   constructor(delegate: NullNode,
               callbacks: ModelEventCallbacks,

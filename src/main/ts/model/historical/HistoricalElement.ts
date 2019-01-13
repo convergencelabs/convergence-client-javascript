@@ -20,6 +20,18 @@ export abstract class HistoricalElement<T>
   public static readonly Events: HistoricalElementEvents = ObservableElementEventConstants;
 
   /**
+   * @hidden
+   * @internal
+   */
+  protected _delegate: ModelNode<T>;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  protected _wrapperFactory: HistoricalWrapperFactory;
+
+  /**
    * @internal
    */
   private readonly _model: HistoricalModel;
@@ -32,11 +44,13 @@ export abstract class HistoricalElement<T>
    * @hidden
    * @internal
    */
-  protected constructor(protected _delegate: ModelNode<T>,
-                        protected _wrapperFactory: HistoricalWrapperFactory,
+  protected constructor(delegate: ModelNode<T>,
+                        wrapperFactory: HistoricalWrapperFactory,
                         model: HistoricalModel) {
     super();
 
+    this._delegate = delegate;
+    this._wrapperFactory = wrapperFactory;
     this._model = model;
 
     this._delegate.events().subscribe((event: IConvergenceEvent) => {

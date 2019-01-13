@@ -23,7 +23,7 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
    * Constructs a new RealTimeBoolean.
    *
    * @hidden
-   * @private
+   * @internal
    */
   constructor(delegate: BooleanNode,
               callbacks: ModelEventCallbacks,

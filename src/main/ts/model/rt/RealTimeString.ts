@@ -37,7 +37,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * Constructs a new RealTimeString.
    *
    * @hidden
-   * @private
+   * @internal
    */
   constructor(delegate: StringNode,
               callbacks: ModelEventCallbacks,
@@ -111,6 +111,11 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     }
   }
 
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleReferenceModelEvents(event: ModelNodeEvent): void {
     if (event instanceof StringNodeInsertEvent) {
       if (event.local) {

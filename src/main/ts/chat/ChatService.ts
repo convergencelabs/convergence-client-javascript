@@ -270,13 +270,13 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     );
     switch (channelInfo.channelType) {
       case ChatChannelTypes.DIRECT:
-        return new DirectChatChannel(this._connection, messageStream, channelInfo);
+        return new DirectChatChannel(this._connection, this._identityCache, messageStream, channelInfo);
       case ChatChannelTypes.GROUP:
         const groupInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
-        return new GroupChatChannel(this._connection, messageStream, groupInfo);
+        return new GroupChatChannel(this._connection, this._identityCache, messageStream, groupInfo);
       case ChatChannelTypes.ROOM:
         const roomInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
-        return new ChatRoomChannel(this._connection, messageStream, roomInfo);
+        return new ChatRoomChannel(this._connection, this._identityCache, messageStream, roomInfo);
       default:
         throw new Error(`Invalid chat channel type: ${channelInfo.channelType}`);
     }

@@ -36,7 +36,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    * Constructs a new RealTimeObject.
    *
    * @hidden
-   * @private
+   * @internal
    */
   constructor(delegate: ObjectNode,
               callbacks: ModelEventCallbacks,

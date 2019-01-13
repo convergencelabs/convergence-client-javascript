@@ -72,16 +72,23 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
+  private _identityCache: IdentityCache;
+
+  /**
+   * @internal
+   */
   private _joined: boolean;
 
   /**
    * @internal
    */
   protected constructor(connection: ConvergenceConnection,
+                        identityCache: IdentityCache,
                         messageStream: Observable<IChatEvent>,
                         info: ChatChannelInfo) {
     super();
     this._connection = connection;
+    this._identityCache = identityCache;
     this._info = info;
 
     // TODO this might not make sense for rooms
@@ -167,7 +174,8 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((message: IConvergenceMessage) => {
       const response = message.getChatChannelHistoryResponse;
-      return getOrDefaultArray(response.eventData).map(data => ChatHistoryEventMapper.toChatHistoryEntry(data));
+      return getOrDefaultArray(response.eventData)
+        .map(data => ChatHistoryEventMapper.toChatHistoryEntry(data, this._identityCache));
     });
   }
 

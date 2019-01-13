@@ -18,6 +18,9 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
 
   /**
    * Constructs a new RealTimeNumber.
+   *
+   * @hidden
+   * @internal
    */
   constructor(delegate: NumberNode,
               callbacks: ModelEventCallbacks,

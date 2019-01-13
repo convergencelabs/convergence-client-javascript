@@ -1,3 +1,5 @@
+import {DomainUser} from "../identity";
+
 export interface ChatHistoryEntryTypes {
   CREATED: string;
   MESSAGE: string;
@@ -26,11 +28,11 @@ export abstract class ChatHistoryEntry {
    * @hidden
    * @internal
    */
-  protected constructor(public type: string,
-                        public channelId: string,
-                        public eventNumber: number,
-                        public timestamp: Date,
-                        public username: string) {
+  protected constructor(public readonly type: string,
+                        public readonly channelId: string,
+                        public readonly eventNumber: number,
+                        public readonly timestamp: Date,
+                        public readonly user: DomainUser) {
   }
 }
 
@@ -46,11 +48,11 @@ export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public name: string,
-              public topic: string,
-              public members: string[]) {
-    super(ChannelCreatedHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly name: string,
+              public readonly topic: string,
+              public readonly members: string[]) {
+    super(ChannelCreatedHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -65,9 +67,9 @@ export class MessageChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public message: string) {
-    super(MessageChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly message: string) {
+    super(MessageChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -82,8 +84,8 @@ export class UserJoinedChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string) {
-    super(UserJoinedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser) {
+    super(UserJoinedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -98,8 +100,8 @@ export class UserLeftChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string) {
-    super(UserLeftChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser) {
+    super(UserLeftChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -114,9 +116,9 @@ export class UserAddedChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public addedBy: string) {
-    super(UserAddedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly addedUser: DomainUser) {
+    super(UserAddedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -131,9 +133,9 @@ export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public removedBy: string) {
-    super(UserRemovedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly removedUser: DomainUser) {
+    super(UserRemovedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -148,9 +150,9 @@ export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public channelName: string) {
-    super(NameChangedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly name: string) {
+    super(NameChangedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }
@@ -165,9 +167,9 @@ export class TopicChangedChatHistoryEntry extends ChatHistoryEntry {
   constructor(channelId: string,
               eventNumber: number,
               timestamp: Date,
-              username: string,
-              public channelTopic: string) {
-    super(TopicChangedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, username);
+              user: DomainUser,
+              public readonly topic: string) {
+    super(TopicChangedChatHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }
 }

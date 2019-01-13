@@ -84,6 +84,10 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
    */
   private readonly _local: boolean;
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected constructor(referenceManager: ReferenceManager,
                         type: ReferenceType,
                         key: string,

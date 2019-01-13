@@ -22,24 +22,24 @@ export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
    * @hidden
    * @internal
    */
-  constructor(protected _delegate: ObjectNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: ObjectNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 
   public get(key: string): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.get(key));
+    return this._wrapperFactory.wrap((this._delegate as ObjectNode).get(key));
   }
 
   public keys(): string[] {
-    return this._delegate.keys();
+    return (this._delegate as ObjectNode).keys();
   }
 
   public hasKey(key: string): boolean {
-    return this._delegate.hasKey(key);
+    return (this._delegate as ObjectNode).hasKey(key);
   }
 
   public forEach(callback: (model: HistoricalElement<any>, key?: string) => void): void {
-    this._delegate.forEach((modelNode, key) => {
+    (this._delegate as ObjectNode).forEach((modelNode, key) => {
       callback(this._wrapperFactory.wrap(modelNode), key);
     });
   }
@@ -47,6 +47,6 @@ export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
   public elementAt(path: Path): HistoricalElement<any>;
   public elementAt(...elements: PathElement[]): HistoricalElement<any>;
   public elementAt(...path: any[]): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
+    return this._wrapperFactory.wrap((this._delegate as ObjectNode).valueAt(...path));
   }
 }

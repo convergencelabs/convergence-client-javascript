@@ -13,16 +13,17 @@ import {
 } from "./ChatHistoryEntry";
 import {getOrDefaultArray, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
+import {IdentityCache} from "../identity/IdentityCache";
 
 export class ChatHistoryEventMapper {
-  public static toChatHistoryEntry(data: IChatChannelEventData): ChatHistoryEntry {
+  public static toChatHistoryEntry(data: IChatChannelEventData, identityCache: IdentityCache): ChatHistoryEntry {
     if (data.created) {
       const {channel, eventNumber, timestamp, username, name, topic, members} = data.created;
       return new ChannelCreatedHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
+        identityCache.getUser(username),
         name,
         topic,
         getOrDefaultArray(members)
@@ -33,7 +34,7 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
+        identityCache.getUser(username),
         message
       );
     } else if (data.userAdded) {
@@ -42,8 +43,8 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
-        addedUser
+        identityCache.getUser(username),
+        identityCache.getUser(addedUser)
       );
     } else if (data.userRemoved) {
       const {channel, eventNumber, timestamp, username, removedUser} = data.userRemoved;
@@ -51,8 +52,8 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
-        removedUser
+        identityCache.getUser(username),
+        identityCache.getUser(removedUser)
       );
     } else if (data.userJoined) {
       const {channel, eventNumber, timestamp, username} = data.userJoined;
@@ -60,7 +61,7 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username
+        identityCache.getUser(username)
       );
     } else if (data.userLeft) {
       const {channel, eventNumber, timestamp, username} = data.userLeft;
@@ -68,7 +69,7 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username
+        identityCache.getUser(username)
       );
     } else if (data.topicChanged) {
       const {channel, eventNumber, timestamp, username, topic} = data.topicChanged;
@@ -76,7 +77,7 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
+        identityCache.getUser(username),
         getOrDefaultString(topic)
       );
     } else if (data.nameChanged) {
@@ -85,7 +86,7 @@ export class ChatHistoryEventMapper {
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        username,
+        identityCache.getUser(username),
         getOrDefaultString(name)
       );
     } else {

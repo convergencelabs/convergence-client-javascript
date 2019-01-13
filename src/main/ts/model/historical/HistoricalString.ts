@@ -19,11 +19,11 @@ export class HistoricalString extends HistoricalElement<string> implements Obser
    * @hidden
    * @internal
    */
-  constructor(protected _delegate: StringNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: StringNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 
   public length(): number {
-    return this._delegate.length();
+    return (this._delegate as StringNode).length();
   }
 }

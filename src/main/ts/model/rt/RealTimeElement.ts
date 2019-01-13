@@ -60,6 +60,7 @@ export abstract class RealTimeElement<T>
 
   /**
    * Constructs a new RealTimeElement.
+   *
    * @hidden
    * @internal
    */

@@ -23,7 +23,7 @@ export class RealTimeDate extends RealTimeElement<Date> implements ObservableDat
    * Constructs a new RealTimeDate.
    *
    * @hidden
-   * @private
+   * @internal
    */
   constructor(delegate: DateNode,
               callbacks: ModelEventCallbacks,

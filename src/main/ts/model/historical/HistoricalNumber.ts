@@ -18,7 +18,7 @@ export class HistoricalNumber extends HistoricalElement<number> implements Obser
    * @hidden
    * @internal
    */
-  constructor(_delegate: NumberNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: NumberNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 }

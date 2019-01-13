@@ -2,6 +2,7 @@ import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {IChatEvent} from "./events/";
 import {Observable} from "rxjs";
+import {IdentityCache} from "../identity/IdentityCache";
 
 export class MembershipChatChannel extends ChatChannel {
 
@@ -10,9 +11,10 @@ export class MembershipChatChannel extends ChatChannel {
    * @internal
    */
   constructor(connection: ConvergenceConnection,
+              identityCache: IdentityCache,
               messageStream: Observable<IChatEvent>,
               info: MembershipChatChannelInfo) {
-    super(connection, messageStream, info);
+    super(connection, identityCache, messageStream, info);
   }
 
   public info(): MembershipChatChannelInfo {
