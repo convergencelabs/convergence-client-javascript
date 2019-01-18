@@ -6,6 +6,10 @@ import {getOrDefaultArray, getOrDefaultObject} from "../connection/ProtocolUtil"
 import {toDomainUser} from "./IdentityMessageUtils";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdentityCache {
   private readonly _users: Map<string, DomainUser>;
   private readonly _sessions: Map<string, DomainUser>;

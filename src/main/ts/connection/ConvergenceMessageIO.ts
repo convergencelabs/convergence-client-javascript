@@ -7,6 +7,10 @@ const CONVERGENCE_MESSAGE_PATH = "io.convergence.proto.ConvergenceMessage";
 
 type IConvergenceMessage = convergenceProto.io.convergence.proto.IConvergenceMessage;
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ConvergenceMessageIO {
   public static decode(bytes: Uint8Array): IConvergenceMessage {
     const protocolMessage: protobuf.Message<IConvergenceMessage> =

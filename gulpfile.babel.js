@@ -122,7 +122,7 @@ const tsDeclarations = () => {
     typescript: typescript
   });
 
-  return src("src/main/ts/**/*.ts")
+  return src(["src/main/ts/**/*.ts", "!src/main/ts/model/rt/richtext/**/*"])
     .pipe(tsProject())
     .dts
     .pipe(filter(content => trim(content) !== exportFilter))
