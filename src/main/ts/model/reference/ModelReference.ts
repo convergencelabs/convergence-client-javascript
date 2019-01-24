@@ -6,12 +6,15 @@ import {
   ReferenceChangedEvent,
   ReferenceClearedEvent
 } from "./events/";
+import {ReferenceType} from "./ReferenceType";
+import {DomainUser} from "../../identity";
 
 export interface ModelReferenceTypes {
-  readonly INDEX: string;
-  readonly RANGE: string;
-  readonly PROPERTY: string;
-  readonly ELEMENT: string;
+  [key: string]: ReferenceType;
+  readonly INDEX: ReferenceType;
+  readonly RANGE: ReferenceType;
+  readonly PROPERTY: ReferenceType;
+  readonly ELEMENT: ReferenceType;
 }
 
 export interface ModelReferenceEvents {
@@ -54,7 +57,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   /**
    * @internal
    */
-  private readonly _type: string;
+  private readonly _type: ReferenceType;
 
   /**
    * @internal
@@ -69,7 +72,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   /**
    * @internal
    */
-  private readonly _username: string;
+  private readonly _user: DomainUser;
 
   /**
    * @internal
@@ -81,11 +84,15 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
    */
   private readonly _local: boolean;
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected constructor(referenceManager: ReferenceManager,
-                        type: string,
+                        type: ReferenceType,
                         key: string,
                         source: any,
-                        username: string,
+                        user: DomainUser,
                         sessionId: string,
                         local: boolean) {
     super();
@@ -95,12 +102,12 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     this._type = type;
     this._key = key;
     this._source = source;
-    this._username = username;
+    this._user = user;
     this._sessionId = sessionId;
     this._local = local;
   }
 
-  public type(): string {
+  public type(): ReferenceType {
     return this._type;
   }
 
@@ -116,8 +123,8 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     return this._local;
   }
 
-  public username(): string {
-    return this._username;
+  public user(): DomainUser {
+    return this._user;
   }
 
   public sessionId(): string {
@@ -156,14 +163,14 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
    * @hidden
    * @internal
    */
-  public _set(values: V[]): void {
+  public _set(values: V[], synthetic: boolean): void {
     const oldValues: V[] = this._values;
     this._values = values;
 
     const added = this._values.filter(v => !oldValues.includes(v));
     const removed = oldValues.filter(v => !this._values.includes(v));
 
-    const event: ReferenceChangedEvent<V> = new ReferenceChangedEvent(this, oldValues, added, removed);
+    const event: ReferenceChangedEvent<V> = new ReferenceChangedEvent(this, oldValues, added, removed, synthetic);
     this._emitEvent(event);
   }
 
@@ -182,9 +189,9 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
    * @hidden
    * @internal
    */
-  protected _setIfChanged(values: V[]): void {
+  protected _setIfChanged(values: V[], synthetic: boolean): void {
     if (!EqualsUtil.deepEquals(this._values, values)) {
-      this._set(values);
+      this._set(values, synthetic);
     }
   }
 }

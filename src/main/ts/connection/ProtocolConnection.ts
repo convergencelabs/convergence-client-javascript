@@ -1,20 +1,15 @@
 import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
 import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {HandshakeResponse, HandshakeRequest} from "./protocol/handhsake";
-import {MessageType} from "./protocol/MessageType";
-import {MessageSerializer} from "./protocol/MessageSerializer";
-import {
-  MessageEnvelope,
-  IncomingProtocolResponseMessage,
-  OutgoingProtocolNormalMessage,
-  OutgoingProtocolResponseMessage,
-  OutgoingProtocolRequestMessage
-} from "./protocol/protocol";
-import {ErrorMessage} from "./protocol/ErrorMessage";
 import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
+import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IErrorMessage = io.convergence.proto.IErrorMessage;
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import IHandshakeRequestMessage = io.convergence.proto.IHandshakeRequestMessage;
 
 /**
  * @hidden
@@ -39,7 +34,7 @@ export interface IProtocolConnectionClosedEvent extends IProtocolConnectionEvent
  */
 export interface IProtocolConnectionErrorEvent extends IProtocolConnectionEvent {
   name: "error";
-  error: string;
+  error: Error;
 }
 
 /**
@@ -49,7 +44,7 @@ export interface IProtocolConnectionErrorEvent extends IProtocolConnectionEvent 
 export interface IProtocolConnectionMessageEvent extends IProtocolConnectionEvent {
   name: "message";
   request: boolean;
-  message: any;
+  message: IConvergenceMessage;
   callback?: ReplyCallback;
 }
 
@@ -97,19 +92,20 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     return this._socket.open();
   }
 
-  public handshake(reconnect: boolean, reconnectToken?: string): Promise<HandshakeResponse> {
-    const request: HandshakeRequest = {
-      type: MessageType.HANDSHAKE_REQUEST,
+  public handshake(reconnect: boolean, reconnectToken?: string): Promise<IHandshakeResponseMessage> {
+    const handshakeRequest: IHandshakeRequestMessage = {
       reconnect,
-      reconnectToken
+      reconnectToken: reconnectToken !== undefined ? {value: reconnectToken} : null
     };
 
-    return this.request(request).then((response: HandshakeResponse) => {
+    return this.request({handshakeRequest}).then((response: IConvergenceMessage) => {
+      const message = response.handshakeResponse;
+
       const heartbeatHandler: HeartbeatHandler = {
-        sendPing(): void {
-          this.onPing();
+        sendPing: () => {
+          this.sendMessage({ping: {}});
         },
-        onTimeout(): void {
+        onTimeout: () => {
           this.abort("pong timeout");
         }
       };
@@ -124,20 +120,19 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
         this._heartbeatHelper.start();
       }
 
-      return response;
+      return message;
     });
   }
 
-  public send(message: OutgoingProtocolNormalMessage): void {
-    const envelope: MessageEnvelope = new MessageEnvelope(message);
-    this.sendMessage(envelope);
+  public send(message: IConvergenceMessage): void {
+    this.sendMessage(message);
   }
 
-  public request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
+  public request(message: IConvergenceMessage): Promise<IConvergenceMessage> {
     const reqId: number = this._nextRequestId;
     this._nextRequestId++;
 
-    const replyDeferred: Deferred<IncomingProtocolResponseMessage> = new Deferred<IncomingProtocolResponseMessage>();
+    const replyDeferred: Deferred<IConvergenceMessage> = new Deferred<IConvergenceMessage>();
 
     const timeout: number = this._protocolConfig.defaultRequestTimeout;
     const timeoutTask: any = setTimeout(
@@ -151,7 +146,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
     this._requests[reqId] = {reqId, replyDeferred, timeoutTask} as RequestRecord;
 
-    this.sendMessage(new MessageEnvelope(message, reqId));
+    this.sendMessage({...message, requestId: {value: reqId}});
 
     return replyDeferred.promise();
   }
@@ -187,43 +182,43 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     }
   }
 
-  public sendMessage(envelope: MessageEnvelope): void {
-    if ((debugFlags.PROTOCOL_MESSAGES &&
-      envelope.body.type !== MessageType.PING &&
-      envelope.body.type !== MessageType.PONG) ||
-      debugFlags.PROTOCOL_PINGS) {
-      console.log("S: " + JSON.stringify(envelope));
+  public sendMessage(message: IConvergenceMessage): void {
+    if ((debugFlags.PROTOCOL_MESSAGES && !message.ping && !message.pong) || debugFlags.PROTOCOL_PINGS) {
+      console.log("SND: " + JSON.stringify(message));
     }
-    const message: any = MessageSerializer.serialize(envelope);
-    this._socket.send(message);
+
+    try {
+      const bytes = ConvergenceMessageIO.encode(message);
+      this._socket.send(bytes);
+    } catch (e) {
+      this.onSocketError(e);
+    }
   }
 
-  private onSocketMessage(message: any): void {
-    const envelope: MessageEnvelope = MessageSerializer.deserialize(message);
+  private onSocketMessage(data: Uint8Array): void {
+    const convergenceMessage: IConvergenceMessage = ConvergenceMessageIO.decode(data);
 
     if (this._protocolConfig.heartbeatConfig.enabled && this._heartbeatHelper) {
       this._heartbeatHelper.messageReceived();
     }
 
-    const type: MessageType = envelope.body.type;
-
     if ((debugFlags.PROTOCOL_MESSAGES &&
-      type !== MessageType.PING &&
-      type !== MessageType.PONG) ||
+      !convergenceMessage.ping &&
+      !convergenceMessage.pong) ||
       debugFlags.PROTOCOL_PINGS) {
-      console.log("R: " + JSON.stringify(envelope));
+      console.log("RCV: " + JSON.stringify(convergenceMessage));
     }
 
-    if (type === MessageType.PING) {
+    if (convergenceMessage.ping) {
       this.onPing();
-    } else if (type === MessageType.PONG) {
+    } else if (convergenceMessage.pong) {
       // no-op
-    } else if (envelope.requestId !== undefined) {
-      this.onRequest(envelope);
-    } else if (envelope.responseId !== undefined) {
-      this.onReply(envelope);
+    } else if (convergenceMessage.requestId !== undefined) {
+      this.onRequest(convergenceMessage);
+    } else if (convergenceMessage.responseId !== undefined) {
+      this.onReply(convergenceMessage);
     } else {
-      this.onNormalMessage(envelope);
+      this.onNormalMessage(convergenceMessage);
     }
   }
 
@@ -236,62 +231,60 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onSocketDropped(): void {
-    // logger.debug("Socket dropped");
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
     this._emitEvent({name: ProtocolConnection.Events.DROPPED});
   }
 
-  private onSocketError(error: string): void {
+  private onSocketError(error: Error): void {
     const event: IProtocolConnectionErrorEvent = {name: ProtocolConnection.Events.ERROR, error};
     this._emitEvent(event);
   }
 
-  private onNormalMessage(envelope: MessageEnvelope): void {
-    setTimeout(() => {
+  private onNormalMessage(message: IConvergenceMessage): void {
+    Promise.resolve().then(() => {
       const event: IProtocolConnectionMessageEvent = {
         name: "message",
         request: false,
-        message: envelope.body
+        message
       };
       this._emitEvent(event);
-    }, 0);
+    });
   }
 
-  private onRequest(envelope: MessageEnvelope): void {
+  private onRequest(message: IConvergenceMessage): void {
+    const requestId = message.requestId!.value || 0;
     const event: IProtocolConnectionMessageEvent = {
       name: "message",
       request: true,
-      callback: new ReplyCallbackImpl(envelope.requestId, this),
-      message: envelope.body
+      callback: new ReplyCallbackImpl(requestId, this),
+      message
     };
     this._emitEvent(event);
   }
 
-  private onReply(envelope: MessageEnvelope): void {
+  private onReply(message: IConvergenceMessage): void {
 
-    const requestId: number = envelope.responseId;
+    const requestId: number = message.responseId!.value || 0;
 
     const record: RequestRecord = this._requests[requestId];
     delete this._requests[requestId];
 
     if (record) {
       clearTimeout(record.timeoutTask);
-
-      const type: MessageType = envelope.body.type;
-      if (type === MessageType.ERROR) {
-        const errorMessage: ErrorMessage = envelope.body as ErrorMessage;
+      if (message.error) {
+        const errorMessage: IErrorMessage = message.error;
         record.replyDeferred.reject(
           new ConvergenceServerError(errorMessage.message, errorMessage.code, errorMessage.details));
       } else {
-        record.replyDeferred.resolve(envelope.body);
+        record.replyDeferred.resolve(message);
       }
     }
   }
 
   private onPing(): void {
-    this.sendMessage(new MessageEnvelope({type: MessageType.PING}));
+    this.sendMessage({pong: {}});
   }
 }
 
@@ -301,7 +294,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
  */
 interface RequestRecord {
   reqId: number;
-  replyDeferred: Deferred<IncomingProtocolResponseMessage>;
+  replyDeferred: Deferred<IConvergenceMessage>;
   timeoutTask: any;
 }
 
@@ -310,7 +303,7 @@ interface RequestRecord {
  * @internal
  */
 export interface ReplyCallback {
-  reply(message: OutgoingProtocolResponseMessage): void;
+  reply(message: IConvergenceMessage): void;
 
   unknownError(): void;
 
@@ -332,9 +325,8 @@ class ReplyCallbackImpl implements ReplyCallback {
     this._protocolConnection = protocolConnection;
   }
 
-  public reply(message: OutgoingProtocolResponseMessage): void {
-    const envelope: MessageEnvelope = new MessageEnvelope(message, undefined, this._reqId);
-    this._protocolConnection.sendMessage(envelope);
+  public reply(message: IConvergenceMessage): void {
+    this._protocolConnection.sendMessage({...message, responseId: {value: this._reqId}});
   }
 
   public unknownError(): void {
@@ -347,15 +339,12 @@ class ReplyCallbackImpl implements ReplyCallback {
 
   public expectedError(code: string, message: string, details?: { [key: string]: any }): void {
     details = details || {};
-    const errorMessage: ErrorMessage = {
-      type: MessageType.ERROR,
+    const error: IErrorMessage = {
       code,
       message,
       details
     };
 
-    const envelope: MessageEnvelope = new MessageEnvelope(errorMessage, undefined, this._reqId);
-
-    this._protocolConnection.sendMessage(envelope);
+    this._protocolConnection.sendMessage({error, responseId: {value: this._reqId}});
   }
 }

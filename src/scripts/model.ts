@@ -1,13 +1,13 @@
 #!/usr/bin/env node --require ts-node/register
 
 import {connect} from "./connect";
-import {ConvergenceDomain} from "../main/ts";
+import {ConvergenceDomain, RealTimeObject} from "../main/ts";
 let domain: ConvergenceDomain;
 
 connect()
   .then(d => {
     domain = d;
-    console.log("connected");
+    console.log("connected: ", d.session().sessionId());
     return d.models().openAutoCreate({
       ephemeral: true,
       collection: "test",
@@ -23,6 +23,8 @@ connect()
     console.log("Model Open");
     console.log(JSON.stringify(model.root().value()));
     console.log(model.elementAt("nested", "property").path());
+    const obj = model.elementAt("nested") as RealTimeObject;
+    obj.remove("property");
     console.log("Closing Model");
     return model.close();
   })

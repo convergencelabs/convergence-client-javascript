@@ -1,5 +1,6 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableString} from "../observable/ObservableString";
+import {DomainUser} from "../../identity";
 
 export class StringRemoveEvent implements IValueChangedEvent {
   public static readonly NAME = "remove";
@@ -10,18 +11,18 @@ export class StringRemoveEvent implements IValueChangedEvent {
    * @param index
    * @param value
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableString,
-              public readonly index: number,
-              public readonly value: string,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
-              public readonly local: boolean) {
+              public readonly local: boolean,
+              public readonly index: number,
+              public readonly value: string) {
     Object.freeze(this);
   }
 }

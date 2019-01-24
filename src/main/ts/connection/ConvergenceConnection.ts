@@ -1,4 +1,3 @@
-import {HandshakeResponse} from "./protocol/handhsake";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {
   IProtocolConnectionErrorEvent,
@@ -8,27 +7,25 @@ import {
 } from "./ProtocolConnection";
 import {debugFlags} from "../Debug";
 import ConvergenceSocket from "./ConvergenceSocket";
-import {
-  IncomingProtocolResponseMessage,
-  OutgoingProtocolMessage,
-  OutgoingProtocolRequestMessage
-} from "./protocol/protocol";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
-import {
-  AuthenticationResponse,
-  AuthRequest,
-  AnonymousAuthRequest,
-  ReconnectAuthRequest,
-  PasswordAuthRequest,
-  TokenAuthRequest
-} from "./protocol/authentication";
-import {MessageType} from "./protocol/MessageType";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {filter} from "rxjs/operators";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;
+import IAuthenticationRequestMessage = io.convergence.proto.IAuthenticationRequestMessage;
+import IJwtAuthRequestMessage = io.convergence.proto.IJwtAuthRequestMessage;
+import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenAuthRequestMessage;
+import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
+import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
+import {toOptional} from "./ProtocolUtil";
+import {toDomainUser} from "../identity/IdentityMessageUtils";
 
 /**
  * @hidden
@@ -46,7 +43,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   };
 
   private readonly _session: ConvergenceSession;
-  private _connectionDeferred: Deferred<HandshakeResponse>;
+  private _connectionDeferred: Deferred<IHandshakeResponseMessage>;
   private readonly _connectionTimeout: number;  // seconds
   private readonly _maxReconnectAttempts: number;
   private _connectionAttempts: number;
@@ -114,13 +111,13 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._session;
   }
 
-  public connect(): Promise<HandshakeResponse> {
+  public connect(): Promise<IHandshakeResponseMessage> {
     if (this._connectionState !== ConnectionState.DISCONNECTED) {
       throw new Error("Can only call connect on a disconnected connection.");
     }
 
     this._connectionAttempts = 0;
-    this._connectionDeferred = new Deferred<HandshakeResponse>();
+    this._connectionDeferred = new Deferred<IHandshakeResponseMessage>();
     this._connectionState = ConnectionState.CONNECTING;
 
     this._attemptConnection(false);
@@ -171,66 +168,46 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._connectionState === ConnectionState.CONNECTED;
   }
 
-  public send(message: OutgoingProtocolMessage): void {
+  public send(message: IConvergenceMessage): void {
     this._protocolConnection.send(message);
   }
 
-  public request(message: OutgoingProtocolRequestMessage): Promise<IncomingProtocolResponseMessage> {
+  public request(message: IConvergenceMessage): Promise<IConvergenceMessage> {
     return this._protocolConnection.request(message);
   }
 
   public authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
-    const authRequest: PasswordAuthRequest = {
-      type: MessageType.PASSWORD_AUTH_REQUEST,
+    const message: IPasswordAuthRequestMessage = {
       username,
       password
     };
-    return this._authenticate(authRequest);
+    return this._authenticate({password: message});
   }
 
-  public authenticateWithToken(token: string): Promise<AuthResponse> {
-    const authRequest: TokenAuthRequest = {
-      type: MessageType.TOKEN_AUTH_REQUEST,
-      token
-    };
-    return this._authenticate(authRequest);
+  public authenticateWithJwt(jwt: string): Promise<AuthResponse> {
+    const message: IJwtAuthRequestMessage = {jwt};
+    return this._authenticate({jwt: message});
   }
 
   public authenticateWithReconnectToken(token: string): Promise<AuthResponse> {
-    const authRequest: ReconnectAuthRequest = {
-      type: MessageType.RECONNECT_AUTH_REQUEST,
-      token
-    };
-    return this._authenticate(authRequest);
+    const message: IReconnectTokenAuthRequestMessage = {token};
+    return this._authenticate({reconnect: message});
   }
 
   public authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
-    const authRequest: AnonymousAuthRequest = {
-      type: MessageType.ANONYMOUS_AUTH_REQUEST,
-      displayName
+    const message: IAnonymousAuthRequestMessage = {
+      displayName: toOptional(displayName)
     };
-    return this._authenticate(authRequest);
+    return this._authenticate({anonymous: message});
   }
 
-  public messages(eventFilter?: MessageType[]): Observable<MessageEvent> {
-    if (typeof eventFilter === "undefined") {
-      return this
-        .events()
-        .filter(e => e.name === "message") as Observable<MessageEvent>;
-    } else {
-      const filter: MessageType[] = eventFilter.slice(0);
-      return this
-        .events()
-        .filter(e => e.name === "message")
-        .filter((m: MessageEvent) => {
-          return filter.some(t => {
-            return m.message.type === t;
-          });
-        }) as Observable<MessageEvent>;
-    }
+  public messages(): Observable<MessageEvent> {
+    return this
+      .events()
+      .pipe(filter(e => e.name === "message")) as Observable<MessageEvent>;
   }
 
-  private _authenticate(authRequest: AuthRequest): Promise<AuthResponse> {
+  private _authenticate(authRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
       return Promise.reject<AuthResponse>(new Error("User already authenticated."));
@@ -248,19 +225,21 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     }
   }
 
-  private _sendAuthRequest(authRequest: AuthRequest): Promise<AuthResponse> {
-    return this.request(authRequest).then((response: AuthenticationResponse) => {
-      if (response.success === true) {
-        this._session._setUsername(response.username);
-        this._session._setSessionId(response.sessionId);
-        this._session._setReconnectToken(response.reconnectToken);
+  private _sendAuthRequest(authenticationRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
+    return this.request({authenticationRequest}).then((response: IConvergenceMessage) => {
+      const authResponse: IAuthenticationResponseMessage = response.authenticationResponse;
+      if (authResponse.success) {
+        const success = authResponse.success;
+        this._session._setUser(toDomainUser(success.user));
+        this._session._setSessionId(success.sessionId);
+        this._session._setReconnectToken(success.reconnectToken);
         this._session._setAuthenticated(true);
         const resp: AuthResponse = {
-          state: response.state
+          state: success.presenceState
         };
         return resp;
       } else {
-        throw new Error("Authentication failed");
+        throw new Error("Authentication failed: " + authResponse.failure.message);
       }
     });
   }
@@ -317,7 +296,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             const messageEvent = e as IProtocolConnectionMessageEvent;
             const event: MessageEvent = {
               name: ConvergenceConnection.Events.MESSAGE,
-              request: messageEvent.message,
+              request: messageEvent.request,
               callback: messageEvent.callback,
               message: messageEvent.message
             };
@@ -336,7 +315,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
         this._protocolConnection
           .handshake(reconnect)
-          .then((handshakeResponse: HandshakeResponse) => {
+          .then((handshakeResponse: IHandshakeResponseMessage) => {
             clearTimeout(this._connectionTimeoutTask);
             if (handshakeResponse.success) {
               this._connectionState = ConnectionState.CONNECTED;
@@ -434,7 +413,7 @@ export interface IConnectionClosedEvent extends IConnectionEvent {
  */
 export interface IConnectionErrorEvent extends IConnectionEvent {
   name: "closed";
-  error: string;
+  error: Error;
 }
 
 /**
@@ -443,7 +422,7 @@ export interface IConnectionErrorEvent extends IConnectionEvent {
  */
 export interface MessageEvent extends IConnectionEvent {
   name: "message";
-  message: any; // Model Message??
+  message: IConvergenceMessage; // Model Message??
   request: boolean;
   callback?: ReplyCallback;
 }
@@ -453,7 +432,7 @@ export interface MessageEvent extends IConnectionEvent {
  * @internal
  */
 export interface AuthResponse {
-  state: { [key: string]: void };
+  state: { [key: string]: any };
 }
 
 /**

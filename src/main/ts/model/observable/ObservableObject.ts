@@ -8,14 +8,14 @@ export interface ObservableObjectEvents extends ObservableElementEvents {
   readonly REMOVE: string;
 }
 
-export const ObservableObjectEventConstants: ObservableObjectEvents = Object.assign({
-    SET: "set",
-    REMOVE: "remove"
-  },
-  ObservableElementEventConstants);
+export const ObservableObjectEventConstants: ObservableObjectEvents = {
+  SET: "set",
+  REMOVE: "remove",
+  ...ObservableElementEventConstants
+};
 Object.freeze(ObservableObjectEventConstants);
 
-export interface ObservableObject extends ObservableContainerElement<{[key: string]: any}> {
+export interface ObservableObject extends ObservableContainerElement<{ [key: string]: any }> {
 
   get(key: string): ObservableElement<any>;
 

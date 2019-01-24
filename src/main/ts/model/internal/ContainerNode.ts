@@ -4,6 +4,7 @@ import {ModelNode} from "./ModelNode";
 import {NodeChangedEvent} from "./events";
 import {UndefinedNode} from "./UndefinedNode";
 import {ModelNodeFactory} from "./ModelNodeFactory";
+import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
  * @hidden
@@ -24,9 +25,8 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
                         id: string,
                         path: () => Path,
                         model: Model,
-                        sessionId: string,
-                        username: string) {
-    super(modelType, id, path, model, sessionId, username);
+                        session: ConvergenceSession) {
+    super(modelType, id, path, model, session);
 
     this._idToPathElement = new Map<string, PathElement>();
   }
@@ -58,8 +58,8 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
     const newPath: Path = event.relativePath.slice(0);
     newPath.unshift(this._idToPathElement.get(event.src.id()));
 
-    const newEvent: NodeChangedEvent =
-      new NodeChangedEvent(this, event.local, newPath, event.childEvent, this.sessionId, this.username);
+    const newEvent: NodeChangedEvent = new NodeChangedEvent(
+      this, event.local, newPath, event.childEvent, this._session.sessionId(), this._session.user());
 
     this._emitEvent(newEvent);
   }
@@ -69,7 +69,6 @@ export abstract class ContainerNode<T> extends ModelNode<T> {
       undefined,
       () => null,
       undefined,
-      this.sessionId,
-      this.username) as UndefinedNode;
+      this._session) as UndefinedNode;
   }
 }

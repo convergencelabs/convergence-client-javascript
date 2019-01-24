@@ -1,6 +1,5 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {BooleanNode} from "../internal/BooleanNode";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
 import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {ModelNodeEvent, BooleanNodeSetValueEvent} from "../internal/events";
@@ -10,6 +9,8 @@ import {
   ObservableBooleanEvents,
   ObservableBooleanEventConstants
 } from "../observable/ObservableBoolean";
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
@@ -22,13 +23,14 @@ export class RealTimeBoolean extends RealTimeElement<boolean> implements Observa
    * Constructs a new RealTimeBoolean.
    *
    * @hidden
-   * @private
+   * @internal
    */
-  constructor(_delegate: BooleanNode,
-              _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: BooleanNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {

@@ -1,15 +1,8 @@
-import {ConvergenceEventEmitter} from "../util/";
+import {ConvergenceEventEmitter, StringMap} from "../util/";
 import {UserPresence} from "./UserPresence";
-import {Observable, Subscription, BehaviorSubject} from "rxjs/Rx";
-import {IncomingProtocolMessage} from "../connection/protocol/protocol";
+import {Observable, Subscription, BehaviorSubject} from "rxjs";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";
 import {MessageEvent} from "../connection/ConvergenceConnection";
-import {MessageType} from "../connection/protocol/MessageType";
-import {PresenceAvailabilityChanged} from "../connection/protocol/presence/pressenceAvailability";
-import {
-  PresenceStateSet,
-  PresenceStateRemoved
-} from "../connection/protocol/presence/presenceState";
 import {
   PresenceAvailabilityChangedEvent,
   PresenceStateSetEvent,
@@ -151,22 +144,18 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
    * @internal
    */
   private _handleMessage(messageEvent: MessageEvent): void {
-    const message: IncomingProtocolMessage = messageEvent.message;
-    switch (message.type) {
-      case MessageType.PRESENCE_AVAILABILITY_CHANGED:
-        this.availability((message as PresenceAvailabilityChanged).available);
-        break;
-      case MessageType.PRESENCE_STATE_SET:
-        this.set((message as PresenceStateSet).state);
-        break;
-      case MessageType.PRESENCE_STATE_CLEARED:
-        this.clear();
-        break;
-      case MessageType.PRESENCE_STATE_REMOVED:
-        this.remove((message as PresenceStateRemoved).keys);
-        break;
-      default:
-      // fixme error
+    const message = messageEvent.message;
+    if (message.presenceAvailabilityChanged) {
+      const {available} = message.presenceAvailabilityChanged;
+      this.availability(available);
+    } else if (message.presenceStateSet) {
+      const {state} = message.presenceStateSet;
+      this.set(StringMap.objectToMap(state));
+    } else if (message.presenceStateCleared) {
+      this.clear();
+    } else if (message.presenceStateRemoved) {
+      const {keys} = message.presenceStateRemoved;
+      this.remove(keys);
     }
   }
 }

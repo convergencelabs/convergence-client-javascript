@@ -9,7 +9,9 @@ import {DateSet} from "./operationChanges";
  */
 export class DateSetOperation extends DiscreteOperation implements DateSet {
 
-  constructor(id: string, noOp: boolean, public value: Date) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: Date) {
     super(OperationType.DATE_VALUE, id, noOp);
     Object.freeze(this);
   }

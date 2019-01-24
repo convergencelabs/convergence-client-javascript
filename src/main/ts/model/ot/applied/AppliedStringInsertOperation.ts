@@ -9,12 +9,15 @@ import {OperationType} from "../ops/OperationType";
  */
 export class AppliedStringInsertOperation extends AppliedDiscreteOperation implements StringInsert {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: string) {
     super(OperationType.STRING_INSERT, id, noOp);
     Object.freeze(this);
   }
 
   public inverse(): AppliedStringRemoveOperation {
-    return new AppliedStringRemoveOperation(this.id, this.noOp, this.index, this.value.length, this.value);
+    return new AppliedStringRemoveOperation(this.id, this.noOp, this.index, this.value);
   }
 }

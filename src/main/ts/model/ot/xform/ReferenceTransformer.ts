@@ -3,14 +3,15 @@ import {CompoundOperation} from "../ops/CompoundOperation";
 import {DiscreteOperation} from "../ops/DiscreteOperation";
 import {TransformationFunctionRegistry} from "./TransformationFunctionRegistry";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
+import {ReferenceType} from "../../reference/ReferenceType";
 
 /**
  * @hidden
  * @internal
  */
 export interface ModelReferenceData {
-  type: string;
-  id: string;
+  type: ReferenceType;
+  valueId: string;
   values: any[];
 }
 
@@ -44,7 +45,7 @@ export class ReferenceTransformer {
   private transformDiscreteOperation(s: DiscreteOperation, r: ModelReferenceData): ModelReferenceData {
     if (s.noOp) {
       return r;
-    } else if (s.id === r.id) {
+    } else if (s.id === r.valueId) {
       return this.transformWithIdenticalPathOperation(s, r);
     } else {
       return r;

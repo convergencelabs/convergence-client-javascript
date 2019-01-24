@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Convergence - Console</title>
-  <script src="../connection.js"></script>
-  <script src="../../node_modules/rxjs/bundles/Rx.js"></script>
-  <script src="../../dist-internal/browser/convergence.js"></script>
+  <script src="../config.js"></script>
+  <script>const CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true, CONNECTION: true};</script>
+  <script src="../../node_modules/rxjs/bundles/rxjs.umd.js"></script>
+  <script src="../../node_modules/protobufjs/dist/light/protobuf.js"></script>
+  <script src="../../dist-internal/umd/convergence.min.js"></script>
   <script src="../common/binding-helpers.js"></script>
 </head>
 <body>
 <h2>Console Setup</h2>
 <div>Open the console to work with the domain.</div>
+<button onclick="connect()">Connect</button>
 <script src="index.js"></script>
 </body>
 </html>

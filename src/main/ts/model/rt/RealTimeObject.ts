@@ -2,24 +2,27 @@ import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {LocalModelReference} from "../reference/LocalModelReference";
-import {ObjectNodeSetValueEvent} from "../internal/events";
-import {ModelReference} from "../reference/ModelReference";
-import {ObjectNodeRemoveEvent} from "../internal/events";
-import {PropertyReference} from "../reference/PropertyReference";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {
+  ModelReference,
+  LocalModelReference,
+  PropertyReference,
+  LocalPropertyReference} from "../reference/";
+import {
+  ModelNodeEvent,
+  ObjectNodeSetValueEvent,
+  ObjectNodeRemoveEvent,
+  ObjectNodeSetEvent
+} from "../internal/events";
 import {ModelNode} from "../internal/ModelNode";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
 import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../ot/ops/ObjectRemovePropertyOperation";
-import {LocalPropertyReference} from "../reference/LocalPropertyReference";
 import {ObjectSetOperation} from "../ot/ops/ObjectSetOperation";
-import {ObjectNodeSetEvent} from "../internal/events";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants} from "../observable/ObservableObject";
 import {Path, PathElement} from "../Path";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
@@ -33,25 +36,26 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    * Constructs a new RealTimeObject.
    *
    * @hidden
-   * @private
+   * @internal
    */
-  constructor(protected _delegate: ObjectNode,
-              protected _callbacks: ModelEventCallbacks,
-              protected _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, [ModelReference.Types.PROPERTY]);
+  constructor(delegate: ObjectNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [ModelReference.Types.PROPERTY], identityCache);
 
     this._delegate.events().subscribe(event => this._handleReferenceEvents(event));
   }
 
   public get(key: string): RealTimeElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.get(key));
+    return this._wrapperFactory.wrap((this._delegate as ObjectNode).get(key));
   }
 
   public set(key: string, value: any): RealTimeElement<any> {
     this._assertWritable();
-    const propSet: boolean = this._delegate.hasKey(key);
-    const delegateChild: ModelNode<any> = this._delegate.set(key, value);
+    const propSet: boolean = (this._delegate as ObjectNode).hasKey(key);
+    const delegateChild: ModelNode<any> = (this._delegate as ObjectNode).set(key, value);
     const operation: DiscreteOperation = propSet ?
       new ObjectSetPropertyOperation(this.id(), false, key, delegateChild.dataValue()) :
       new ObjectAddPropertyOperation(this.id(), false, key, delegateChild.dataValue());
@@ -61,19 +65,19 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
 
   public remove(key: string): RealTimeElement<any> {
     this._assertWritable();
-    return this._wrapperFactory.wrap(this._delegate.remove(key));
+    return this._wrapperFactory.wrap((this._delegate as ObjectNode).remove(key));
   }
 
   public keys(): string[] {
-    return this._delegate.keys();
+    return (this._delegate as ObjectNode).keys();
   }
 
   public hasKey(key: string): boolean {
-    return this._delegate.hasKey(key);
+    return (this._delegate as ObjectNode).hasKey(key);
   }
 
   public forEach(callback: (model: RealTimeElement<any>, key?: string) => void): void {
-    this._delegate.forEach((modelNode, key) => {
+    (this._delegate as ObjectNode).forEach((modelNode, key) => {
       callback(this._wrapperFactory.wrap(modelNode), key);
     });
   }
@@ -81,7 +85,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   public elementAt(path: Path): RealTimeElement<any>;
   public elementAt(...elements: PathElement[]): RealTimeElement<any>;
   public elementAt(...path: any[]): RealTimeElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
+    return this._wrapperFactory.wrap((this._delegate as ObjectNode).valueAt(...path));
   }
 
   /**
@@ -104,11 +108,12 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
       if (existing.reference().type() !== ModelReference.Types.PROPERTY) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
-        return <LocalPropertyReference> existing;
+        return existing as LocalPropertyReference;
       }
     } else {
       const reference: PropertyReference = new PropertyReference(
-        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+        this._referenceManager, key, this, this._delegate.session().user(),
+        this._delegate.session().sessionId(), true);
 
       const local: LocalPropertyReference = new LocalPropertyReference(
         reference,
@@ -128,7 +133,8 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   private _handleReferenceEvents(event: ModelNodeEvent): void {
     if (event instanceof ObjectNodeSetValueEvent) {
       if (event.local) {
-        this._sendOperation(new ObjectSetOperation(this.id(), false, this._delegate.dataValue().children));
+        this._sendOperation(new ObjectSetOperation(
+          this.id(), false, (this._delegate as ObjectNode).dataValue().children));
       }
 
       this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
@@ -148,7 +154,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     } else if (event instanceof ObjectNodeSetEvent) {
       if (event.local) {
         // Operation Handled Bellow
-        // Fixme: Refactor event so we can tell if value replaced or added
+        // Fixme: Refactor event so we can tell if delta replaced or added
       }
       this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
         if (ref instanceof PropertyReference) {

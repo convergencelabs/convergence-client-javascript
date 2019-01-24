@@ -40,10 +40,10 @@ export class DataValueFactory {
         const convergenceType: string = data["$convergenceType"];
         if (convergenceType === "date") {
           if (data.hasOwnProperty("value")) {
-            const dateValue: DateValue = {id, type: "date", value: new Date(data["value"])};
+            const dateValue: DateValue = {id, type: "date", value: new Date(data["delta"])};
             return dateValue;
           } else {
-            throw new Error("Invalid convergence data type: " + type + " value field missing.");
+            throw new Error("Invalid convergence data type: " + type + " delta field missing.");
           }
         } else {
           throw new Error("Invalid convergence data type: " + type + " supported types are [date].");

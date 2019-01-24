@@ -2,11 +2,10 @@ import {ConvergenceEventEmitter, IConvergenceEvent} from "../../util/";
 import {ModelNode} from "../internal/ModelNode";
 import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference, ReferenceFilter} from "../reference/";
 import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RemoteReferenceCreatedEvent} from "../events/RemoteReferenceCreatedEvent";
+import {RemoteReferenceCreatedEvent} from "../events/";
 import {ModelEventConverter} from "../ModelEventConverter";
 import {NodeDetachedEvent} from "../internal/events";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
@@ -16,6 +15,10 @@ import {
   ObservableElementEventConstants
 } from "../observable/ObservableElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
+import {filter} from "rxjs/operators";
+import {ReferenceType} from "../reference/ReferenceType";
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -57,6 +60,7 @@ export abstract class RealTimeElement<T>
 
   /**
    * Constructs a new RealTimeElement.
+   *
    * @hidden
    * @internal
    */
@@ -64,7 +68,8 @@ export abstract class RealTimeElement<T>
                         callbacks: ModelEventCallbacks,
                         wrapperFactory: RealTimeWrapperFactory,
                         model: RealTimeModel,
-                        referenceTypes: string[]) {
+                        referenceTypes: ReferenceType[],
+                        identityCache: IdentityCache) {
     super();
 
     this._delegate = delegate;
@@ -76,12 +81,12 @@ export abstract class RealTimeElement<T>
       this._fireReferenceCreated(ref);
     };
 
-    this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference);
+    this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference, identityCache);
 
-    this._delegate.events().filter(event => {
+    this._delegate.events().pipe(filter(event => {
       return this._model.emitLocalEvents() || !event.local ||
         event instanceof NodeDetachedEvent;
-    }).subscribe(event => {
+    })).subscribe(event => {
       const convertedEvent: IConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
@@ -160,8 +165,8 @@ export abstract class RealTimeElement<T>
     return this._referenceManager.get(sessionId, key);
   }
 
-  public references(filter?: ReferenceFilter): Array<ModelReference<any>> {
-    return this._referenceManager.getAll(filter);
+  public references(referenceFilter?: ReferenceFilter): Array<ModelReference<any>> {
+    return this._referenceManager.getAll(referenceFilter);
   }
 
   /**

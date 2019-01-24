@@ -2,6 +2,7 @@ import {IConvergenceModelValueEvent} from "./IConvergenceModelValueEvent";
 import {ObservableElement} from "../observable/ObservableElement";
 import {Path} from "../Path";
 import {IValueChangedEvent} from "./IValueChangedEvent";
+import {DomainUser} from "../../identity";
 
 /**
  * The [[ModelChangedEvent]] is fired by a [[ObservableElement]] when a child
@@ -16,18 +17,18 @@ export class ModelChangedEvent implements IConvergenceModelValueEvent {
    * @param relativePath
    * @param childEvent
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableElement<any>,
-              public readonly relativePath: Path,
-              public readonly childEvent: IValueChangedEvent,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
-              public readonly local: boolean) {
+              public readonly local: boolean,
+              public readonly relativePath: Path,
+              public readonly childEvent: IValueChangedEvent) {
     Object.freeze(this);
   }
 }

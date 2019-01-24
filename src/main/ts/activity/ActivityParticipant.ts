@@ -1,5 +1,6 @@
 import {deepClone} from "../util/ObjectUtils";
 import {Activity} from "./Activity";
+import {DomainUser} from "../identity";
 
 /**
  * The ActivityParticipant represents an individual user session that has
@@ -29,8 +30,8 @@ export class ActivityParticipant {
    * @internal
    */
   constructor(public readonly activity: Activity,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
               public readonly local: boolean,
               state: Map<string, any>) {
     this._state = deepClone(state);

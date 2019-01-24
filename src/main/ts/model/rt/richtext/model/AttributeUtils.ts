@@ -8,7 +8,7 @@ export class AttributeUtils {
       return false;
     } else {
       let equal = true;
-      for (let v of a) {
+      for (const v of a) {
         if (b.get(v[0]) !== v[1]) {
           equal = false;
           break;

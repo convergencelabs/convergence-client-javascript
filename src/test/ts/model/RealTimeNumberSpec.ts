@@ -1,5 +1,5 @@
 import {RealTimeNumber} from "../../../main/ts/model/rt/RealTimeNumber";
-import {NumberAddOperation} from "../../../main/ts/model/ot/ops/NumberAddOperation";
+import {NumberDeltaOperation} from "../../../main/ts/model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../../main/ts/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
 import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
@@ -105,7 +105,7 @@ describe("RealTimeNumber", () => {
 
     const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
     expect(opSpy.called).to.be.true;
-    const expectedOp: NumberAddOperation = new NumberAddOperation(myNumber.id(), false, 5);
+    const expectedOp: NumberDeltaOperation = new NumberDeltaOperation(myNumber.id(), false, 5);
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
@@ -117,7 +117,7 @@ describe("RealTimeNumber", () => {
 
     const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
     expect(opSpy.called).to.be.true;
-    const expectedOp: NumberAddOperation = new NumberAddOperation(myNumber.id(), false, -5);
+    const expectedOp: NumberDeltaOperation = new NumberDeltaOperation(myNumber.id(), false, -5);
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
@@ -133,12 +133,12 @@ describe("RealTimeNumber", () => {
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
-  it("Value is correct after NumberAddOperation", () => {
+  it("Value is correct after NumberDeltaOperation", () => {
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
     const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
 
-    const incomingOp: NumberAddOperation = new NumberAddOperation(initialValue.id, false, 5);
+    const incomingOp: NumberDeltaOperation = new NumberDeltaOperation(initialValue.id, false, 5);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
@@ -160,14 +160,14 @@ describe("RealTimeNumber", () => {
     expect(myNumber.value()).to.equal(20);
   });
 
-  it("Correct Event is fired after NumberAddOperation", () => {
+  it("Correct Event is fired after NumberDeltaOperation", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
     const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
     const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
     myNumber.on(RealTimeNumber.Events.DELTA, lastEventCallback);
 
-    const incomingOp: NumberAddOperation = new NumberAddOperation(initialValue.id, false, 5);
+    const incomingOp: NumberDeltaOperation = new NumberDeltaOperation(initialValue.id, false, 5);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);

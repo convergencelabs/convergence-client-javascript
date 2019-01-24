@@ -1,5 +1,6 @@
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
+import {DomainUser} from "../../identity";
 
 /**
  * The ActivityStateClearedEvent is fired when a remote session clears all an
@@ -29,7 +30,7 @@ export class ActivityStateClearedEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly username: string,
+    public readonly user: DomainUser,
     /**
      * @inheritDoc
      */

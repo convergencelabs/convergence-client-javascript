@@ -19,7 +19,7 @@ export class HistoricalDate extends HistoricalElement<Date> implements Observabl
    * @hidden
    * @internal
    */
-  constructor(_delegate: DateNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: DateNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 }

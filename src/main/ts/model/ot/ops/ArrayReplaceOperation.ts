@@ -10,7 +10,10 @@ import {ArrayReplace} from "./operationChanges";
  */
 export class ArrayReplaceOperation extends DiscreteOperation implements ArrayReplace {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: DataValue) {
     super(OperationType.ARRAY_SET, id, noOp);
     Object.freeze(this);
   }

@@ -8,7 +8,6 @@ import {ArrayInsertOperation} from "../ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../ot/ops/ArrayRemoveOperation";
 import {ArrayMoveOperation} from "../ot/ops/ArrayMoveOperation";
 import {ArraySetOperation} from "../ot/ops/ArraySetOperation";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {
   ModelNodeEvent,
   ArrayNodeInsertEvent,
@@ -19,6 +18,8 @@ import {
 } from "../internal/events";
 import {ObservableArray, ObservableArrayEvents, ObservableArrayEventConstants} from "../observable/ObservableArray";
 import {Path, PathElement} from "../Path";
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -47,9 +48,10 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    */
   constructor(delegate: ArrayNode,
               callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(delegate, callbacks, _wrapperFactory, _model, []);
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {

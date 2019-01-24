@@ -9,6 +9,9 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
 import {StringNodeInsertEvent, StringNodeRemoveEvent, StringNodeSetValueEvent} from "./events";
+import {ConvergenceSession} from "../../ConvergenceSession";
+import {DomainUser} from "../../identity";
+import {Validation} from "../../util";
 
 /**
  * @hidden
@@ -32,9 +35,8 @@ export class StringNode extends ModelNode<string> {
   constructor(data: StringValue,
               path: () => Path,
               model: Model,
-              sessionId: string,
-              username: string) {
-    super(ModelElementType.STRING, data.id, path, model, sessionId, username);
+              session: ConvergenceSession) {
+    super(ModelElementType.STRING, data.id, path, model, session);
 
     this._data = data.value;
   }
@@ -52,11 +54,11 @@ export class StringNode extends ModelNode<string> {
   }
 
   public insert(index: number, value: string): void {
-    this._applyInsert(index, value, true, this.sessionId, this.username);
+    this._applyInsert(index, value, true, this._session.sessionId(), this._session.user());
   }
 
   public remove(index: number, length: number): void {
-    this._applyRemove(index, length, true, this.sessionId, this.username);
+    this._applyRemove(index, length, true, this._session.sessionId(), this._session.user());
   }
 
   public length(): number {
@@ -81,37 +83,36 @@ export class StringNode extends ModelNode<string> {
   /////////////////////////////////////////////////////////////////////////////
 
   protected _setData(data: string): void {
-    this._applySetValue(data, true, this.sessionId, this.username);
+    this._applySetValue(data, true, this._session.sessionId(), this._session.user());
   }
 
   protected _getData(): string {
     return this._data;
   }
 
-  private _applyInsert(index: number, value: string, local: boolean, sessionId: string, username: string): void {
-    this._validateInsert(index, value);
-
+  private _applyInsert(index: number, value: string, local: boolean, sessionId: string, user: DomainUser): void {
+    Validation.assertValidStringIndex(index, this._data, true, "index");
     this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
-
-    const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, username);
+    const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, user);
     this._emitValueEvent(event);
   }
 
-  private _applyRemove(index: number, length: number, local: boolean, sessionId: string, username: string): void {
-    this._validateRemove(index, length);
+  private _applyRemove(index: number, length: number, local: boolean, sessionId: string, user: DomainUser): void {
+    Validation.assertValidStringIndex(index, this._data, false, "index");
+    Validation.assertValidStringIndex(index + length, this._data, true);
 
     const removedVal: string = this._data.slice(index, index + length);
     this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
 
-    const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, username);
+    const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, user);
     this._emitValueEvent(event);
   }
 
-  private _applySetValue(value: string, local: boolean, sessionId: string, username: string): void {
-    this._validateStringValue(value);
+  private _applySetValue(value: string, local: boolean, sessionId: string, user: DomainUser): void {
+    Validation.assertString(value);
     this._data = value;
 
-    const event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, username);
+    const event: StringNodeSetValueEvent = new StringNodeSetValueEvent(this, local, value, sessionId, user);
     this._emitValueEvent(event);
   }
 
@@ -121,40 +122,17 @@ export class StringNode extends ModelNode<string> {
 
   private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
     const operation: StringInsertOperation = operationEvent.operation as StringInsertOperation;
-    this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.username);
+    this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.user);
   }
 
   private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
     const operation: StringRemoveOperation = operationEvent.operation as StringRemoveOperation;
     this._applyRemove(operation.index, operation.value.length, false,
-      operationEvent.sessionId, operationEvent.username);
+      operationEvent.sessionId, operationEvent.user);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     const operation: StringSetOperation = operationEvent.operation as StringSetOperation;
-    this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.username);
-  }
-
-  private _validateInsert(index: number, value: string): void {
-    // TODO: Add integer check
-    if (this._data.length < index || index < 0) {
-      throw new Error("Index out of bounds: " + index);
-    }
-
-    this._validateStringValue(value);
-  }
-
-  private _validateRemove(index: number, length: number): void {
-    // TODO: Add integer check
-    if (this._data.length < index + length || index < 0) {
-      throw new Error("Index out of bounds!");
-    }
-  }
-
-  private _validateStringValue(value: string): void {
-    if (typeof value !== "string") {
-      throw new Error(`The value must be a string but was: ${typeof value}`);
-
-    }
+    this._applySetValue(operation.value, false, operationEvent.sessionId, operationEvent.user);
   }
 }

@@ -9,7 +9,8 @@ export class ReferenceChangedEvent<T> implements IConvergenceEvent {
   constructor(public readonly src: ModelReference<any>,
               public readonly oldValues: T[],
               public readonly addedValues: T[],
-              public readonly removedValues: T[]) {
+              public readonly removedValues: T[],
+              public readonly synthetic: boolean) {
     if (oldValues.length > 0) {
       this.oldValue = oldValues[0];
     }

@@ -18,7 +18,7 @@ export class HistoricalNull extends HistoricalElement<void> implements Observabl
    * @hidden
    * @internal
    */
-  constructor(_delegate: NullNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: NullNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 }

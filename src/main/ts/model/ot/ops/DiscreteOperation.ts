@@ -6,7 +6,9 @@ import {DiscreteChange} from "./operationChanges";
  * @internal
  */
 export abstract class DiscreteOperation extends Operation implements DiscreteChange {
-  protected constructor(type: string, public id: string, public noOp: boolean) {
+  protected constructor(type: string,
+                        public readonly id: string,
+                        public readonly noOp: boolean) {
     super(type);
   }
 }

@@ -1,6 +1,7 @@
 import {ActivityParticipant} from "../ActivityParticipant";
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
+import {DomainUser} from "../../identity";
 
 /**
  * The ActivitySessionJoinedEvent is fired when a remote session joins an
@@ -30,7 +31,7 @@ export class ActivitySessionJoinedEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly username: string,
+    public readonly user: DomainUser,
     /**
      * @inheritDoc
      */

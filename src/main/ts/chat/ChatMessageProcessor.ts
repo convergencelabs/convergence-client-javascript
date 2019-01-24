@@ -1,66 +1,105 @@
-import {MessageType} from "../connection/protocol/MessageType";
 import {
-  ChannelRemovedEvent} from "./events/ChannelRemovedEvent";
-import {RemoteChatMessage} from "../connection/protocol/chat/chatMessage";
-import {
-  UserLeftChatChannelMessage, UserRemovedFromChatChannelMessage
-} from "../connection/protocol/chat/leaving";
-import {
-  UserJoinedChatChannelMessage, UserAddedToChatChannelMessage
-} from "../connection/protocol/chat/joining";
-import {ChatChannelNameSetMessage} from "../connection/protocol/chat/setName";
-import {ChatChannelTopicSetMessage} from "../connection/protocol/chat/setTopic";
-import {ChatChannelRemovedMessage} from "../connection/protocol/chat/remove";
-import {ChatMessageEvent} from "./events/ChatMessageEvent";
-import {UserJoinedEvent} from "./events/UserJoinedEvent";
-import {UserLeftEvent} from "./events/UserLeftEvent";
-import {UserAddedEvent} from "./events/UserAddedEvent";
-import {UserRemovedEvent} from "./events/UserRemovedEvent";
-import {ChatChannelNameChanged} from "./events/ChatChannelNameChanged";
-import {ChatChannelTopicChanged} from "./events/ChatChannelTopicChanged";
-import {ChannelJoinedEvent} from "./events/ChannelJoinedEvent";
-import {ChannelLeftEvent} from "./events/ChannelLeftEvent";
+  ChannelRemovedEvent,
+  ChatMessageEvent,
+  UserJoinedEvent,
+  UserLeftEvent,
+  UserAddedEvent,
+  UserRemovedEvent,
+  ChatChannelNameChanged,
+  ChatChannelTopicChanged, IChatEvent
+} from "./events/";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
+import {IdentityCache} from "../identity/IdentityCache";
+import {ConvergenceError} from "../util";
 
 /**
  * @hidden
  * @internal
  */
-export function processChatMessage(message: any): any {
-  switch (message.type) {
-    case MessageType.USER_JOINED_CHAT_CHANNEL:
-      const userJoined: UserJoinedChatChannelMessage = <UserJoinedChatChannelMessage> message;
-      return new UserJoinedEvent(
-        userJoined.channelId, userJoined.eventNumber, userJoined.timestamp, userJoined.username);
-    case MessageType.USER_LEFT_CHAT_CHANNEL:
-      const userLeft: UserLeftChatChannelMessage = <UserLeftChatChannelMessage> message;
-      return new UserLeftEvent(
-        userLeft.channelId, userLeft.eventNumber, userLeft.timestamp, userLeft.username);
-    case MessageType.USER_ADDED_TO_CHAT_CHANNEL:
-      const userAdded: UserAddedToChatChannelMessage = <UserAddedToChatChannelMessage> message;
-      return new UserAddedEvent(
-        userAdded.channelId, userAdded.eventNumber, userAdded.timestamp, userAdded.username, userAdded.addedBy);
-    case MessageType.USER_REMOVED_FROM_CHAT_CHANNEL:
-      const userRemoved: UserRemovedFromChatChannelMessage = <UserRemovedFromChatChannelMessage> message;
-      return new UserRemovedEvent(
-        userRemoved.channelId, userRemoved.eventNumber, userRemoved.timestamp,
-        userRemoved.username, userRemoved.removedBy);
-    case MessageType.CHAT_CHANNEL_REMOVED:
-      const leftMsg: ChatChannelRemovedMessage = <ChatChannelRemovedMessage> message;
-      return new ChannelRemovedEvent(leftMsg.channelId);
-    case MessageType.CHAT_CHANNEL_NAME_CHANGED:
-      const nameSet: ChatChannelNameSetMessage = <ChatChannelNameSetMessage> message;
-      return new ChatChannelNameChanged(nameSet.channelId, nameSet.eventNumber,
-        nameSet.timestamp, nameSet.name, nameSet.changedBy);
-    case MessageType.CHAT_CHANNEL_TOPIC_CHANGED:
-      const topicSet: ChatChannelTopicSetMessage = message as ChatChannelTopicSetMessage;
-      return new ChatChannelTopicChanged(topicSet.channelId, topicSet.eventNumber,
-        topicSet.timestamp, topicSet.topic, topicSet.changedBy);
-    case MessageType.REMOTE_CHAT_MESSAGE:
-      const chatMsg: RemoteChatMessage = message as RemoteChatMessage;
-      return new ChatMessageEvent(
-        chatMsg.channelId, chatMsg.eventNumber, chatMsg.timestamp,
-        chatMsg.username, chatMsg.sessionId, chatMsg.message);
-    default:
-    // This should be impossible
+export function isChatMessage(message: IConvergenceMessage): boolean {
+  return !!message.remoteChatMessage ||
+    !!message.userJoinedChatChannel ||
+    !!message.userLeftChatChannel ||
+    !!message.userAddedToChatChannel ||
+    !!message.userRemovedFromChatChannel ||
+    !!message.chatChannelRemoved ||
+    !!message.chatChannelNameChanged ||
+    !!message.chatChannelTopicChanged;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export function processChatMessage(message: IConvergenceMessage, identityCache: IdentityCache): IChatEvent {
+  if (message.userJoinedChatChannel) {
+    const userJoined = message.userJoinedChatChannel;
+    return new UserJoinedEvent(
+      userJoined.channelId,
+      getOrDefaultNumber(userJoined.eventNumber),
+      timestampToDate(userJoined.timestamp),
+      identityCache.getUser(userJoined.username)
+    );
+  } else if (message.userLeftChatChannel) {
+    const userLeft = message.userLeftChatChannel;
+    return new UserLeftEvent(
+      userLeft.channelId,
+      getOrDefaultNumber(userLeft.eventNumber),
+      timestampToDate(userLeft.timestamp),
+      identityCache.getUser(userLeft.username)
+    );
+  } else if (message.userAddedToChatChannel) {
+    const userAdded = message.userAddedToChatChannel;
+    return new UserAddedEvent(
+      userAdded.channelId,
+      getOrDefaultNumber(userAdded.eventNumber),
+      timestampToDate(userAdded.timestamp),
+      identityCache.getUser(userAdded.username),
+      identityCache.getUser(userAdded.addedUser)
+    );
+  } else if (message.userRemovedFromChatChannel) {
+    const userRemoved = message.userRemovedFromChatChannel;
+    return new UserRemovedEvent(
+      userRemoved.channelId,
+      getOrDefaultNumber(userRemoved.eventNumber),
+      timestampToDate(userRemoved.timestamp),
+      identityCache.getUser(userRemoved.username),
+      identityCache.getUser(userRemoved.removedUser)
+    );
+  } else if (message.chatChannelRemoved) {
+    const removedMsg = message.chatChannelRemoved;
+    return new ChannelRemovedEvent(removedMsg.channelId);
+  } else if (message.chatChannelNameChanged) {
+    const nameSet = message.chatChannelNameChanged;
+    return new ChatChannelNameChanged(
+      nameSet.channelId,
+      getOrDefaultNumber(nameSet.eventNumber),
+      timestampToDate(nameSet.timestamp),
+      identityCache.getUser(nameSet.username),
+      getOrDefaultString(nameSet.name),
+    );
+  } else if (message.chatChannelTopicChanged) {
+    const topicSet = message.chatChannelTopicChanged;
+    return new ChatChannelTopicChanged(
+      topicSet.channelId,
+      getOrDefaultNumber(topicSet.eventNumber),
+      timestampToDate(topicSet.timestamp),
+      identityCache.getUser(topicSet.username),
+      getOrDefaultString(topicSet.topic)
+    );
+  } else if (message.remoteChatMessage) {
+    const chatMsg = message.remoteChatMessage;
+    return new ChatMessageEvent(
+      chatMsg.channelId,
+      getOrDefaultNumber(chatMsg.eventNumber),
+      timestampToDate(chatMsg.timestamp),
+      identityCache.getUserForSession(chatMsg.sessionId),
+      chatMsg.sessionId,
+      getOrDefaultString(chatMsg.message)
+    );
+  } else {
+    throw new ConvergenceError("Invalid chat event");
   }
 }

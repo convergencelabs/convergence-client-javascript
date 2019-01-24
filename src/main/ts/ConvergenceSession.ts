@@ -1,5 +1,6 @@
 import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import {ConvergenceDomain} from "./ConvergenceDomain";
+import {DomainUser} from "./identity";
 
 /**
  * The [[ConvergenceSession]] represents connection state information for a
@@ -29,7 +30,7 @@ export class ConvergenceSession {
    * @hidden
    * @internal
    */
-  private _username: string;
+  private _user: DomainUser;
 
   /**
    * @hidden
@@ -49,12 +50,12 @@ export class ConvergenceSession {
    */
   constructor(domain: ConvergenceDomain,
               connection: ConvergenceConnection,
+              user: DomainUser,
               sessionId: string,
-              username: string,
               reconnectToken: string) {
     this._domain = domain;
     this._sessionId = sessionId;
-    this._username = username;
+    this._user = user;
     this._reconnectToken = reconnectToken;
     this._connection = connection;
     this._authenticated = false;
@@ -77,8 +78,8 @@ export class ConvergenceSession {
   /**
    * @returns The username of the authenticated client or null if not authenticated
    */
-  public username(): string {
-    return this._username;
+  public user(): DomainUser {
+    return this._user;
   }
 
   /**
@@ -122,8 +123,8 @@ export class ConvergenceSession {
    * @hidden
    * @internal
    */
-  public _setUsername(username: string): void {
-    this._username = username;
+  public _setUser(user: DomainUser): void {
+    this._user = user;
   }
 
   /**

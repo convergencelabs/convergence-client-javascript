@@ -1,4 +1,5 @@
 import {DiscreteChange} from "./ot/ops/operationChanges";
+import {DomainUser} from "../identity";
 
 /**
  * @hidden
@@ -11,9 +12,9 @@ export class ModelOperationEvent {
    * @internal
    */
   constructor(public sessionId: string,
-              public username: string,
+              public user: DomainUser,
               public version: number,
-              public timestamp: number,
+              public timestamp: Date,
               public operation: DiscreteChange) {
 
     Object.freeze(this);

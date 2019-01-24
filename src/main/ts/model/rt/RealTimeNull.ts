@@ -1,10 +1,10 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {NullNode} from "../internal/NullNode";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableNull, ObservableNullEvents, ObservableNullEventConstants} from "../observable/ObservableNull";
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeNullEvents extends ObservableNullEvents {
 }
@@ -15,12 +15,16 @@ export class RealTimeNull extends RealTimeElement<void> implements ObservableNul
 
   /**
    * Constructs a new RealTimeNull.
+   *
+   * @hidden
+   * @internal
    */
-  constructor(_delegate: NullNode,
-              _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: NullNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
   }
 
   /**
@@ -30,7 +34,7 @@ export class RealTimeNull extends RealTimeElement<void> implements ObservableNul
    * @hidden
    * @internal
    */
-  public _handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
+  public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
     throw new Error("Null values do not process references");
   }
 }

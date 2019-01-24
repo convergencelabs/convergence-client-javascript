@@ -1,42 +1,17 @@
 import {ConvergenceSession} from "../ConvergenceSession";
 import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {MessageType} from "../connection/protocol/MessageType";
-import {UserLookUpRequest, UserListResponse, UserSearchRequest} from "../connection/protocol/identity/userLookUps";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
-import {
-  UserGroupsResponse,
-  UserGroupsForUsersRequest, UserGroupsRequest, UserGroupsForUsersResponse
-} from "../connection/protocol/identity/userGroups";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {toOptional} from "../connection/ProtocolUtil";
+import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";
 
-export interface UserField {
-  USERNAME: string;
-  EMAIL: string;
-  FIRST_NAME: string;
-  LAST_NAME: string;
-  DISPLAY_NAME: string;
-}
+export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 
-export const UserFields: UserField = {
-  USERNAME: "username",
-  EMAIL: "email",
-  FIRST_NAME: "firstName",
-  LAST_NAME: "lastName",
-  DISPLAY_NAME: "displayName"
-};
-Object.freeze(UserFields);
-
-const validLookUpFields: string[] = [
-  UserFields.USERNAME, UserFields.EMAIL
-];
-
-const validSearchFields: string[] = [
-  UserFields.USERNAME,
-  UserFields.EMAIL,
-  UserFields.FIRST_NAME,
-  UserFields.LAST_NAME,
-  UserFields.DISPLAY_NAME];
+const validLookUpFields: UserField[] = ["username", "email"];
+const validSearchFields: UserField[] = ["username", "email", "firstName", "lastName", "displayName"];
 
 export class IdentityService {
 
@@ -58,7 +33,7 @@ export class IdentityService {
   }
 
   public profile(): Promise<DomainUser> {
-    return this.user(this._connection.session().username());
+    return this.user(this._connection.session().user().username);
   }
 
   public user(username: string): Promise<DomainUser> {
@@ -89,7 +64,7 @@ export class IdentityService {
 
   public users(usernames: string[]): Promise<{ [key: string]: DomainUser }> {
     const unique: string[] = Array.from(new Set(usernames));
-    return this._users(unique, UserFields.USERNAME).then(users => {
+    return this._users(unique, "username").then(users => {
       const mapped: { [key: string]: DomainUser } = {};
       users.forEach(user => {
         mapped[user.username] = user;
@@ -100,7 +75,7 @@ export class IdentityService {
 
   public usersByEmail(emails: string[]): Promise<{ [key: string]: DomainUser }> {
     const unique: string[] = Array.from(new Set(emails));
-    return this._users(unique, UserFields.EMAIL).then(users => {
+    return this._users(unique, "email").then(users => {
       const mapped: { [key: string]: DomainUser } = {};
       users.forEach(user => {
         mapped[user.email] = user;
@@ -114,28 +89,28 @@ export class IdentityService {
       (Array.isArray(query.fields) && (query.fields as string[]).length === 0)) {
       return Promise.reject<DomainUser[]>(new Error("Must specify at least one field to search"));
     } else if (query.term === undefined || query.term === null) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify a search value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify a search delta"));
     } else {
-      let fields: string[] | string = query.fields;
-      if (!Array.isArray(query.fields)) {
-        fields = [query.fields];
-      }
-
-      const orderBy: any = query.orderBy || {};
-
-      const sanitized: string[] = this._sanitizeSearchFields(fields as string[]);
-      const message: UserSearchRequest = {
-        type: MessageType.USER_SEARCH_REQUEST,
-        fields: sanitized,
-        value: query.term,
-        offset: query.offset,
-        limit: query.limit,
-        orderBy: orderBy.field,
-        ascending: orderBy.ascending
+      const fields: UserField[] = Array.isArray(query.fields) ? query.fields : [query.fields];
+      const orderBy: any = query.orderBy || {
+        field: "username",
+        ascending: true
+      };
+      const fieldCodes: number[] = this._processSearchFields(fields);
+      const message: IConvergenceMessage = {
+        userSearchRequest: {
+          fields: fieldCodes,
+          value: query.term,
+          offset: toOptional(query.offset),
+          limit: toOptional(query.limit),
+          orderField: toUserFieldCode(orderBy.field || "username"),
+          ascending: orderBy.ascending
+        }
       };
 
-      return this._connection.request(message).then((response: UserListResponse) => {
-        return response.users as DomainUser[];
+      return this._connection.request(message).then((response: IConvergenceMessage) => {
+        const {userListResponse} = response;
+        return userListResponse.userData.map(d => toDomainUser(d));
       });
     }
   }
@@ -143,13 +118,15 @@ export class IdentityService {
   public groups(): Promise<UserGroup[]>;
   public groups(ids: string[]): Promise<UserGroup[]>;
   public groups(ids?: string[]): Promise<UserGroup[]> {
-    const message: UserGroupsRequest = {
-      type: MessageType.USER_GROUPS_REQUEST,
-      ids
+    const message: IConvergenceMessage = {
+      userGroupsRequest: {
+        ids
+      }
     };
 
-    return this._connection.request(message).then((response: UserGroupsResponse) => {
-      return response.groups as UserGroup[];
+    return this._connection.request(message).then((response: IConvergenceMessage) => {
+      const {userGroupsResponse} = response;
+      return userGroupsResponse.groupData as UserGroup[];
     });
   }
 
@@ -163,13 +140,20 @@ export class IdentityService {
   }
 
   public groupsForUsers(usernames: string[]): Promise<{ [key: string]: string[] }> {
-    const message: UserGroupsForUsersRequest = {
-      type: MessageType.USER_GROUPS_FOR_USERS_REQUEST,
-      usernames
+    const message: IConvergenceMessage = {
+      userGroupsForUsersRequest: {
+        usernames
+      }
     };
 
-    return this._connection.request(message).then((response: UserGroupsForUsersResponse) => {
-      return response.groupsByUser as { [key: string]: string[] };
+    return this._connection.request(message).then((response: IConvergenceMessage) => {
+      const {userGroupsForUsersResponse} = response;
+      const groupData = userGroupsForUsersResponse.groups;
+      const groupsForUsers = {};
+      Object.keys(groupData).forEach(username => {
+        groupsForUsers[username] = groupData[username].values;
+      });
+      return groupsForUsers;
     });
   }
 
@@ -177,7 +161,7 @@ export class IdentityService {
    * @internal
    * @hidden
    */
-  private _users(values: string | string[], field: string = UserFields.USERNAME): Promise<DomainUser[]> {
+  private _users(values: string | string[], field: UserField = "username"): Promise<DomainUser[]> {
     // TODO It is only valid to look up by email / username.
     if (field === undefined || field === null) {
       return Promise.reject<DomainUser[]>(new Error("Must specify a lookup field"));
@@ -185,20 +169,22 @@ export class IdentityService {
       return Promise.reject<DomainUser[]>(new Error("invalid lookup field"));
     } else if (values === undefined || values === null ||
       (Array.isArray(values) && (values as string[]).length === 0)) {
-      return Promise.reject<DomainUser[]>(new Error("Must specify at least one value"));
+      return Promise.reject<DomainUser[]>(new Error("Must specify at least one delta"));
     } else {
       if (!Array.isArray(values)) {
         values = [values as string];
       }
 
-      const message: UserLookUpRequest = {
-        type: MessageType.USER_LOOKUP_REQUEST,
-        field,
-        values: values as string[]
+      const message: IConvergenceMessage = {
+        userLookUpRequest: {
+          field: toUserFieldCode(field),
+          values: values as string[]
+        }
       };
 
-      return this._connection.request(message).then((response: UserListResponse) => {
-        return response.users as DomainUser[];
+      return this._connection.request(message).then((response: IConvergenceMessage) => {
+        const {userListResponse} = response;
+        return userListResponse.userData.map(d => toDomainUser(d));
       });
     }
   }
@@ -207,14 +193,15 @@ export class IdentityService {
    * @internal
    * @hidden
    */
-  private _sanitizeSearchFields(fields: string[]): string[] {
-    const result: string[] = [];
-    fields.forEach((field: string) => {
+  private _processSearchFields(fields: UserField[]): number[] {
+    const result: number[] = [];
+    fields.forEach((field: UserField) => {
       if (validSearchFields.indexOf(field) < 0) {
         throw new Error("Invalid user search field: " + field);
       }
-      if (result.indexOf(field) < 0) {
-        result.push(field);
+      const fieldCode = toUserFieldCode(field);
+      if (result.indexOf(fieldCode) < 0) {
+        result.push(fieldCode);
       }
     });
     return result;

@@ -9,7 +9,9 @@ import {NumberSet} from "./operationChanges";
  */
 export class NumberSetOperation extends DiscreteOperation implements NumberSet {
 
-  constructor(id: string, noOp: boolean, public value: number) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: number) {
     super(OperationType.NUMBER_VALUE, id, noOp);
     Object.freeze(this);
   }

@@ -2,6 +2,7 @@ import {ModelReference} from "./ModelReference";
 import {IndexTransformer} from "../ot/xform/reference/IndexTransformer";
 import {RealTimeElement} from "../rt/";
 import {ReferenceManager} from "./ReferenceManager";
+import {DomainUser} from "../../identity";
 
 export class IndexReference extends ModelReference<number> {
 
@@ -9,7 +10,7 @@ export class IndexReference extends ModelReference<number> {
    * @param referenceManager
    * @param key
    * @param source
-   * @param username
+   * @param user
    * @param sessionId
    * @param local
    *
@@ -19,10 +20,10 @@ export class IndexReference extends ModelReference<number> {
   constructor(referenceManager: ReferenceManager,
               key: string,
               source: RealTimeElement<any>,
-              username: string,
+              user: DomainUser,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ModelReference.Types.INDEX, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.INDEX, key, source, user, sessionId, local);
   }
 
   /**
@@ -31,7 +32,7 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleInsert(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleInsert(this._values, index, length));
+    this._setIfChanged(IndexTransformer.handleInsert(this._values, index, length), true);
   }
 
   /**
@@ -40,7 +41,7 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleRemove(index: number, length: number): void {
-    this._setIfChanged(IndexTransformer.handleRemove(this._values, index, length));
+    this._setIfChanged(IndexTransformer.handleRemove(this._values, index, length), true);
   }
 
   /**
@@ -49,6 +50,6 @@ export class IndexReference extends ModelReference<number> {
    * @internal
    */
   public _handleReorder(fromIndex: number, toIndex: number): void {
-    this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex));
+    this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex), true);
   }
 }

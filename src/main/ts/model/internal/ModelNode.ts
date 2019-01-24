@@ -9,6 +9,7 @@ import {
 } from "./events";
 import {DataValue} from "../dataValue";
 import {ConvergenceEventEmitter} from "../../util/";
+import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
  * @hidden
@@ -27,6 +28,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
 
   private readonly _id: string;
   private readonly _modelType: string;
+  protected readonly _session: ConvergenceSession;
 
   /**
    * Constructs a new RealTimeElement.
@@ -35,10 +37,10 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
                         id: string,
                         path: () => Path,
                         model: Model,
-                        public sessionId: string,
-                        public username: string) {
+                        session: ConvergenceSession) {
     super();
     this._id = id;
+    this._session = session;
     this._modelType = modelType;
     this._model = model;
     this._path = path;
@@ -46,6 +48,10 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     if (this._model) {
       this._model._registerValue(this);
     }
+  }
+
+  public session(): ConvergenceSession {
+    return this._session;
   }
 
   public id(): string {
@@ -95,7 +101,8 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
 
   protected _emitValueEvent(event: NodeValueChangedEvent): void {
     this._emitEvent(event);
-    this._emitEvent(new NodeChangedEvent(this, event.local, [], event, this.sessionId, this.username));
+    this._emitEvent(
+      new NodeChangedEvent(this, event.local, [], event, this._session.sessionId(), this._session.user()));
   }
 
   protected _exceptionIfDetached(): void {

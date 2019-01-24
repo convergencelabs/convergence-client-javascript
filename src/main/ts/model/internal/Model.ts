@@ -5,8 +5,9 @@ import {DataValueFactory} from "../DataValueFactory";
 import {ObjectNode} from "./ObjectNode";
 import {ObjectValue} from "../dataValue";
 import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
+import {ConvergenceSession} from "../../ConvergenceSession";
 
-const _separator: string = ":";
+const VALUE_SEPARATOR: string = ":";
 
 /**
  * @hidden
@@ -27,8 +28,7 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * Constructs a new RealTimeModel.
    */
-  constructor(private sessionId: string,
-              private username: string,
+  constructor(private session: ConvergenceSession,
               private valueIdPrefix: string,
               data: ObjectValue) {
     super();
@@ -37,12 +37,12 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._vidCounter = 0;
 
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return this.valueIdPrefix + _separator + this._vidCounter++;
+      return this.valueIdPrefix + VALUE_SEPARATOR + this._vidCounter++;
     });
 
     this._data = new ObjectNode(data, () => {
       return [];
-    }, this, sessionId, username, dataValueFactory);
+    }, this, session, dataValueFactory);
   }
 
   public root(): ObjectNode {

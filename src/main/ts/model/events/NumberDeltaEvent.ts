@@ -1,5 +1,6 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableNumber} from "../observable/ObservableNumber";
+import {DomainUser} from "../../identity";
 
 export class NumberDeltaEvent implements IValueChangedEvent {
   public static readonly NAME = "delta";
@@ -9,17 +10,17 @@ export class NumberDeltaEvent implements IValueChangedEvent {
    * @param element
    * @param value
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableNumber,
-              public readonly value: number,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
-              public readonly local: boolean) {
+              public readonly local: boolean,
+              public readonly value: number) {
     Object.freeze(this);
   }
 }

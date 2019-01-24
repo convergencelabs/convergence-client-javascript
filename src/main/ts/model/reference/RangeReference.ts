@@ -2,6 +2,7 @@ import {RealTimeElement} from "../rt/RealTimeElement";
 import {ModelReference} from "./ModelReference";
 import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
 import {ReferenceManager} from "./ReferenceManager";
+import {DomainUser} from "../../identity";
 
 export interface IndexRange {
   start: number;
@@ -14,7 +15,7 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @param referenceManager
    * @param key
    * @param source
-   * @param username
+   * @param user
    * @param sessionId
    * @param local
    *
@@ -24,10 +25,10 @@ export class RangeReference extends ModelReference<IndexRange> {
   constructor(referenceManager: ReferenceManager,
               key: string,
               source: RealTimeElement<any>,
-              username: string,
+              user: DomainUser,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ModelReference.Types.RANGE, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.RANGE, key, source, user, sessionId, local);
   }
 
   /**
@@ -36,7 +37,7 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleInsert(index: number, length: number): void {
-    this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length));
+    this._setIfChanged(RangeTransformer.handleInsert(this._values, index, length), true);
   }
 
   /**
@@ -45,7 +46,7 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleRemove(index: number, length: number): void {
-    this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length));
+    this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length), true);
   }
 
   /**
@@ -54,6 +55,6 @@ export class RangeReference extends ModelReference<IndexRange> {
    * @internal
    */
   public _handleReorder(fromIndex: number, toIndex: number): void {
-    this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex));
+    this._setIfChanged(RangeTransformer.handleReorder(this._values, fromIndex, toIndex), true);
   }
 }

@@ -143,7 +143,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       this._clientId,
       this._seqNo++,
       this._contextVersion,
-      new Date().getTime(),
+      new Date(),
       compoundOp);
 
     return event;
@@ -187,7 +187,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
         this._clientId,
         this._seqNo++,
         this._contextVersion,
-        new Date().getTime(),
+        new Date(),
         outgoingOperation);
     }
   }
@@ -230,7 +230,8 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
 
   public processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
     if (incomingOperation.contextVersion > this._contextVersion) {
-      throw new Error("Invalid context version.");
+      throw new Error(
+        `Invalid context version of ${incomingOperation.contextVersion}, expected ${this._contextVersion}.`);
     }
 
     let remoteOperation: Operation = incomingOperation.operation;

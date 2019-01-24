@@ -1,22 +1,30 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {StringNode} from "../internal/StringNode";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {LocalModelReference} from "../reference/LocalModelReference";
-import {ModelReference} from "../reference/ModelReference";
-import {IndexReference} from "../reference/IndexReference";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {
+  LocalModelReference,
+  ModelReference,
+  IndexReference,
+  LocalRangeReference,
+  RangeReference
+} from "../reference/";
 import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {LocalIndexReference} from "../reference/LocalIndexReference";
-import {LocalRangeReference} from "../reference/LocalRangeReference";
-import {RangeReference} from "../reference/RangeReference";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
-import {StringNodeInsertEvent} from "../internal/events";
-import {StringNodeRemoveEvent} from "../internal/events";
-import {StringNodeSetValueEvent} from "../internal/events";
+import {
+  StringNodeInsertEvent,
+  StringNodeRemoveEvent,
+  StringNodeSetValueEvent,
+  ModelNodeEvent
+} from "../internal/events";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
-import {ObservableString, ObservableStringEvents, ObservableStringEventConstants} from "../observable/ObservableString";
+import {
+  ObservableString,
+  ObservableStringEvents,
+  ObservableStringEventConstants
+} from "../observable/ObservableString";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeStringEvents extends ObservableStringEvents {
 }
@@ -29,29 +37,31 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * Constructs a new RealTimeString.
    *
    * @hidden
-   * @private
+   * @internal
    */
-  constructor(protected _delegate: StringNode,
-              protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, [ModelReference.Types.INDEX, ModelReference.Types.RANGE]);
+  constructor(delegate: StringNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model,
+      [ModelReference.Types.INDEX, ModelReference.Types.RANGE], identityCache);
 
-    this._delegate.events().subscribe(e => this._handleReferenceModelEvents(e) );
+    (this._delegate as StringNode).events().subscribe(e => this._handleReferenceModelEvents(e));
   }
 
   public insert(index: number, value: string): void {
     this._assertWritable();
-    this._delegate.insert(index, value);
+    (this._delegate as StringNode).insert(index, value);
   }
 
   public remove(index: number, length: number): void {
     this._assertWritable();
-    this._delegate.remove(index, length);
+    ((this._delegate as StringNode) as StringNode).remove(index, length);
   }
 
   public length(): number {
-    return this._delegate.length();
+    return (this._delegate as StringNode).length();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -65,11 +75,12 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       if (existing.reference().type() !== ModelReference.Types.INDEX) {
         throw new Error("A reference with this key already exists, but is not an index reference");
       } else {
-        return <LocalIndexReference> existing;
+        return existing as LocalIndexReference;
       }
     } else {
       const reference: IndexReference = new IndexReference(
-        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+        this._referenceManager, key, this,
+        (this._delegate as StringNode).session().user(), (this._delegate as StringNode).session().sessionId(), true);
       const local: LocalIndexReference = new LocalIndexReference(
         reference,
         this._callbacks.referenceEventCallbacks
@@ -85,11 +96,12 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       if (existing.reference().type() !== ModelReference.Types.RANGE) {
         throw new Error("A reference with this key already exists, but is not a range reference");
       } else {
-        return <LocalRangeReference> existing;
+        return existing as LocalRangeReference;
       }
     } else {
       const reference: RangeReference = new RangeReference(
-        this._referenceManager, key, this, this._delegate.username, this._delegate.sessionId, true);
+        this._referenceManager, key, this,
+        (this._delegate as StringNode).session().user(), (this._delegate as StringNode).session().sessionId(), true);
       const local: LocalRangeReference = new LocalRangeReference(
         reference,
         this._callbacks.referenceEventCallbacks
@@ -99,6 +111,11 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     }
   }
 
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleReferenceModelEvents(event: ModelNodeEvent): void {
     if (event instanceof StringNodeInsertEvent) {
       if (event.local) {
@@ -133,4 +150,5 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     }
   }
 }
+
 Object.freeze(RealTimeString.Events);

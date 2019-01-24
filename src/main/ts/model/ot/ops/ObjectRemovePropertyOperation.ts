@@ -11,7 +11,9 @@ export class ObjectRemovePropertyOperation extends DiscreteOperation implements 
 
   protected _prop: string;
 
-  constructor(id: string, noOp: boolean, public prop: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly prop: string) {
     super(OperationType.OBJECT_REMOVE, id, noOp);
     Object.freeze(this);
   }

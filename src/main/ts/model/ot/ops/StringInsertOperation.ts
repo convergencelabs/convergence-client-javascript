@@ -9,7 +9,10 @@ import {StringInsert} from "./operationChanges";
  */
 export class StringInsertOperation extends DiscreteOperation implements StringInsert {
 
-  constructor(id: string, noOp: boolean, public index: number, public value: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly index: number,
+              public readonly value: string) {
     super(OperationType.STRING_INSERT, id, noOp);
     Object.freeze(this);
   }

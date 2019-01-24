@@ -19,20 +19,23 @@ export class HistoricalArray
    * @hidden
    * @internal
    */
-  constructor(protected _delegate: ArrayNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, wrapperFactory, model);
+  constructor(
+    delegate: ArrayNode,
+    wrapperFactory: HistoricalWrapperFactory,
+    model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 
   public get(index: number): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.get(index));
+    return this._wrapperFactory.wrap((this._delegate as ArrayNode).get(index));
   }
 
   public length(): number {
-    return this._delegate.length();
+    return (this._delegate as ArrayNode).length();
   }
 
   public forEach(callback: (value: HistoricalElement<any>, index?: number) => void): void {
-    this._delegate.forEach((modelNode, index) => {
+    (this._delegate as ArrayNode).forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
@@ -40,6 +43,6 @@ export class HistoricalArray
   public elementAt(path: Path): HistoricalElement<any>;
   public elementAt(...elements: PathElement[]): HistoricalElement<any>;
   public elementAt(...path: any[]): HistoricalElement<any> {
-    return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
+    return this._wrapperFactory.wrap((this._delegate as ArrayNode).valueAt(...path));
   }
 }

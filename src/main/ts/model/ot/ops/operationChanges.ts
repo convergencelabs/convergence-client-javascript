@@ -79,8 +79,8 @@ export interface BooleanSet extends DiscreteChange {
  * @hidden
  * @internal
  */
-export interface NumberAdd extends DiscreteChange {
-  value: number;
+export interface NumberDelta extends DiscreteChange {
+  delta: number;
 }
 
 /**

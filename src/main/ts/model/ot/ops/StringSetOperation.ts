@@ -9,7 +9,9 @@ import {StringSet} from "./operationChanges";
  */
 export class StringSetOperation extends DiscreteOperation implements StringSet {
 
-  constructor(id: string, noOp: boolean, public value: string) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: string) {
     super(OperationType.STRING_VALUE, id, noOp);
     Object.freeze(this);
   }

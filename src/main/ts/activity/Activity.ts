@@ -9,16 +9,13 @@ import {
 } from "./events";
 import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable} from "rxjs/Observable";
-import {BehaviorSubject} from "rxjs/Rx";
+import {Observable, BehaviorSubject} from "rxjs";
+import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
-import {MessageType} from "../connection/protocol/MessageType";
-import {ActivityLeaveRequest} from "../connection/protocol/activity/leaveActivity";
-import {
-  ActivitySetState,
-  ActivityClearState,
-  ActivityRemoveState
-} from "../connection/protocol/activity/activityState";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {mapObjectValues} from "../util/ObjectUtils";
+import {jsonToProtoValue} from "../connection/ProtocolUtil";
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -133,17 +130,17 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         setState.set(event.key, event.value);
         newMap.set(
           event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, setState));
+          new ActivityParticipant(this, event.user, event.sessionId, false, setState));
         this._participants.next(newMap);
       } else if (event instanceof ActivityStateRemovedEvent) {
         const removeState: Map<string, any> = newMap.get(event.sessionId).state;
         removeState.delete(event.key);
         newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, removeState));
+          new ActivityParticipant(this, event.user, event.sessionId, false, removeState));
         this._participants.next(newMap);
       } else if (event instanceof ActivityStateClearedEvent) {
         newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.sessionId, event.username, false, new Map<string, any>()));
+          new ActivityParticipant(this, event.user, event.sessionId, false, new Map<string, any>()));
         this._participants.next(newMap);
       } else {
         // This should be impossible
@@ -184,9 +181,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     if (this.isJoined()) {
       this._joined = false;
       this._connection.send({
-        type: MessageType.ACTIVITY_LEAVE_REQUEST,
-        activityId: this._id
-      } as ActivityLeaveRequest);
+        activityLeaveRequest: {activityId: this._id}
+      } as IConvergenceMessage);
       this._leftCB();
     }
   }
@@ -214,21 +210,21 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Sets a single key-value pair within this Activity's local state.
+   * Sets a single key-delta pair within this Activity's local state.
    *
    * ```typescript
-   * activity.setState("key1", "value");
+   * activity.setState("key1", "delta");
    * ```
    *
    * @param key
-   *   The key of the value to set.
+   *   The key of the delta to set.
    * @param value
-   *   The value to set for the supplied key.
+   *   The delta to set for the supplied key.
    */
   public setState(key: string, value: any): void;
 
   /**
-   * Sets multiple key-value pairs within this Activity's local state. This
+   * Sets multiple key-delta pairs within this Activity's local state. This
    * method does not replace all state; that is, keys not supplied in the map
    * will not be altered.
    *
@@ -248,7 +244,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * activity.setState(state);
    * ```
    * @param state
-   *   A map containing the key-value pairs to set.
+   *   A map containing the key-delta pairs to set.
    */
   public setState(state: StringMapLike): void;
 
@@ -262,17 +258,18 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         state[arguments[0]] = arguments[1];
       }
 
-      const message: ActivitySetState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_SET,
-        activityId: this._id,
-        state
+      const message: IConvergenceMessage = {
+        activityLocalStateSet: {
+          activityId: this._id,
+          state: mapObjectValues(state, jsonToProtoValue)
+        }
       };
       this._connection.send(message);
 
       Object.keys(state).forEach((key) => {
         this._emitEvent(new ActivityStateSetEvent(
           this,
-          this._connection.session().username(),
+          this._connection.session().user(),
           this._connection.session().sessionId(),
           true,
           key,
@@ -312,17 +309,18 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         keys = [keys as string];
       }
 
-      const message: ActivityRemoveState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_REMOVED,
-        activityId: this._id,
-        keys: keys as string[]
+      const message: IConvergenceMessage = {
+        activityLocalStateRemoved: {
+          activityId: this._id,
+          keys: keys as string[]
+        }
       };
       this._connection.send(message);
 
       (keys as string[]).forEach((key) => {
         this._emitEvent(new ActivityStateRemovedEvent(
           this,
-          this._connection.session().username(),
+          this._connection.session().user(),
           this._connection.session().sessionId(),
           true,
           key
@@ -336,15 +334,16 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public clearState(): void {
     if (this.isJoined()) {
-      const message: ActivityClearState = {
-        type: MessageType.ACTIVITY_LOCAL_STATE_CLEARED,
-        activityId: this._id
+      const message: IConvergenceMessage = {
+        activityLocalStateCleared: {
+          activityId: this._id
+        }
       };
       this._connection.send(message);
 
       this._emitEvent(new ActivityStateClearedEvent(
         this,
-        this._connection.session().username(),
+        this._connection.session().user(),
         this._connection.session().sessionId(),
         true
       ));
@@ -384,7 +383,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    *   An Observable array of participants.
    */
   public participantsAsObservable(): Observable<ActivityParticipant[]> {
-    return this._participants.asObservable().map(mappedValues => Array.from(mappedValues.values()));
+    return this._participants
+      .asObservable()
+      .pipe(map(mappedValues => Array.from(mappedValues.values())));
   }
 
   /**

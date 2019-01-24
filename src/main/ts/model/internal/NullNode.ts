@@ -4,6 +4,7 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Model} from "./Model";
 import {Path} from "../Path";
 import {NullValue, DataValueType} from "../dataValue";
+import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
  * @hidden
@@ -21,9 +22,8 @@ export class NullNode extends ModelNode<void> {
   constructor(id: string,
               path: () => Path,
               model: Model,
-              sessionId: string,
-              username: string) {
-    super(ModelElementType.NULL, id, path, model, sessionId, username);
+              session: ConvergenceSession) {
+    super(ModelElementType.NULL, id, path, model, session);
   }
 
   public dataValue(): NullValue {
@@ -47,6 +47,6 @@ export class NullNode extends ModelNode<void> {
   }
 
   protected _setData(data: any): void {
-    throw new Error("Can not set the value on a Null type.");
+    throw new Error("Can not set the delta on a Null type.");
   }
 }

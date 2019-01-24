@@ -5,11 +5,6 @@ import {Model} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
-import {
-  HistoricalOperationsRequest,
-  HistoricalOperationsResponse
-} from "../../connection/protocol/model/historical/historicalOperationsRequest";
-import {MessageType} from "../../connection/protocol/MessageType";
 import {ModelOperation} from "../ot/applied/ModelOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
@@ -17,6 +12,10 @@ import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
 import {Path, PathElement} from "../Path";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {toModelOperation} from "./ModelOperationMapper";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 interface OperationRequest {
   forward: boolean;
@@ -85,7 +84,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _maxVersion: number;
+  private readonly _maxVersion: number;
 
   /**
    * @internal
@@ -95,14 +94,22 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _modifiedTime: Date;
+  private readonly _modifiedTime: Date;
 
   /**
    * @internal
    */
   private _currentTime: Date;
 
+  /**
+   * @internal
+   */
   private _opRequests: OperationRequest[];
+
+  /**
+   * @internal
+   */
+  private _identityCache: IdentityCache;
 
   /**
    * @hidden
@@ -115,14 +122,16 @@ export class HistoricalModel implements ObservableModel {
               modelId: string,
               collectionId: string,
               connection: ConvergenceConnection,
-              session: ConvergenceSession) {
+              session: ConvergenceSession,
+              identityCache: IdentityCache) {
 
     this._session = session;
     this._connection = connection;
+    this._identityCache = identityCache;
 
     this._modelId = modelId;
     this._collectionId = collectionId;
-    this._model = new Model(this.session().sessionId(), this.session().username(), null, data);
+    this._model = new Model(this.session(), null, data);
     this._wrapperFactory = new HistoricalWrapperFactory(this);
 
     this._version = version;
@@ -222,11 +231,12 @@ export class HistoricalModel implements ObservableModel {
 
     this._targetVersion = version;
 
-    const request: HistoricalOperationsRequest = {
-      type: MessageType.HISTORICAL_OPERATIONS_REQUEST,
-      modelId: this._modelId,
-      first: firstVersion,
-      last: lastVersion
+    const request: IConvergenceMessage = {
+      historicalOperationsRequest: {
+        modelId: this._modelId,
+        first: firstVersion,
+        last: lastVersion
+      }
     };
 
     const opRequest: OperationRequest = {
@@ -237,9 +247,11 @@ export class HistoricalModel implements ObservableModel {
 
     this._opRequests.push(opRequest);
 
-    return this._connection.request(request).then((response: HistoricalOperationsResponse) => {
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {historicalOperationsResponse} = response;
       opRequest.completed = true;
-      opRequest.operations = response.operations;
+      opRequest.operations = historicalOperationsResponse.operations.map(
+        op => toModelOperation(op, this._identityCache));
 
       this._checkAndProcess();
 
@@ -323,9 +335,8 @@ export class HistoricalModel implements ObservableModel {
       const dOp: AppliedDiscreteOperation = inverse ?
         discreteOp.inverse() as AppliedDiscreteOperation :
         discreteOp;
-
       this._model.handleModelOperationEvent(
-        new ModelOperationEvent(op.sessionId, op.username, op.version, op.timestamp, dOp));
+        new ModelOperationEvent(op.sessionId, op.user, op.version, op.timestamp, dOp));
     }
 
     // tslint:disable-next-line

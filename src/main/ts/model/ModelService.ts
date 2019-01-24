@@ -1,20 +1,9 @@
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
-import {OpenRealTimeModelRequest, OpenRealTimeModelResponse} from "../connection/protocol/model/openRealtimeModel";
-import {MessageType} from "../connection/protocol/MessageType";
 import {OperationTransformer} from "./ot/xform/OperationTransformer";
 import {TransformationFunctionRegistry} from "./ot/xform/TransformationFunctionRegistry";
 import {ClientConcurrencyControl} from "./ot/ClientConcurrencyControl";
-import {
-  CreateRealTimeModelRequest,
-  CreateRealTimeModelResponse
-} from "../connection/protocol/model/createRealtimeModel";
-import {DeleteRealTimeModelRequest} from "../connection/protocol/model/deleteRealtimeModel";
 import {Deferred} from "../util/Deferred";
-import {
-  AutoCreateModelConfigRequest,
-  AutoCreateModelConfigResponse
-} from "../connection/protocol/model/autoCreateConfigRequest";
 import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
@@ -22,16 +11,17 @@ import {DataValueFactory} from "./DataValueFactory";
 import {ConvergenceEventEmitter, IConvergenceEvent, Validation} from "../util/";
 import {RealTimeModel} from "./rt/";
 import {HistoricalModel} from "./historical/";
-import {
-  HistoricalDataRequest,
-  HistoricalDataResponse
-} from "../connection/protocol/model/historical/historicalDataRequest";
 import {ModelResult} from "./query/";
-import {ModelsQueryRequest, ModelsQueryResponse} from "../connection/protocol/model/query/modelQuery";
 import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ICreateModelOptions} from "./ICreateModelOptions";
-import {ModelDataInitializer} from "./ModelDataInitializer";
+import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
+import {io} from "@convergence/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {toIObjectValue, toModelPermissions, toModelResult, toObjectValue} from "./ModelMessageConverter";
+import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
+import {getOrDefaultArray, getOrDefaultNumber, timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {IdentityCache} from "../identity/IdentityCache";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -71,23 +61,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _connection: ConvergenceConnection;
 
   /**
+   * @internal
+   */
+  private readonly _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection) {
+  constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
     this._connection = connection;
-    this._connection.messages(
-      [MessageType.FORCE_CLOSE_REAL_TIME_MODEL,
-        MessageType.REMOTE_OPERATION,
-        MessageType.OPERATION_ACKNOWLEDGEMENT,
-        MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST,
-        MessageType.REMOTE_CLIENT_OPENED,
-        MessageType.REMOTE_CLIENT_CLOSED,
-        MessageType.REFERENCE_PUBLISHED,
-        MessageType.REFERENCE_UNPUBLISHED,
-        MessageType.REFERENCE_SET,
-        MessageType.REFERENCE_CLEARED])
+    this._identityCache = identityCache;
+    this._connection
+      .messages()
       .subscribe(message => this._handleMessage(message));
     this._autoRequestId = 0;
   }
@@ -110,10 +97,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A promise that will be resolved with the query results.
    */
   public query(query: string): Promise<ModelResult[]> {
-    const message: ModelsQueryRequest = {type: MessageType.MODELS_QUERY_REQUEST, query};
+    const request: IConvergenceMessage = {
+      modelsQueryRequest: {
+        query
+      }
+    };
 
-    return this._connection.request(message).then((response: ModelsQueryResponse) => {
-      return response.result;
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {modelsQueryResponse} = response;
+      return modelsQueryResponse.models.map(toModelResult);
     });
   }
 
@@ -202,18 +194,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return idGen.id();
     });
     const dataValue: ObjectValue = dataValueFactory.createDataValue(data) as ObjectValue;
-    const request: CreateRealTimeModelRequest = {
-      type: MessageType.CREATE_REAL_TIME_MODEL_REQUEST,
-      collectionId: collection,
-      modelId: options.id,
-      data: dataValue,
-      overrideWorld: options.overrideWorld,
-      worldPermissions: options.worldPermissions,
-      userPermissions: options.userPermissions
+    const request: IConvergenceMessage = {
+      createRealTimeModelRequest: {
+        collectionId: collection,
+        modelId: toOptional(options.id),
+        data: toIObjectValue(dataValue),
+        overrideWorldPermissions: options.overrideCollectionWorldPermissions,
+        worldPermissions: options.worldPermissions,
+        userPermissions: options.userPermissions
+      }
     };
 
-    return this._connection.request(request).then((response: CreateRealTimeModelResponse) => {
-      return response.modelId;
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {createRealTimeModelResponse} = response;
+      return createRealTimeModelResponse.modelId;
     });
   }
 
@@ -227,13 +221,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise that is resolved when the model is successfuly removed.
    */
   public remove(id: string): Promise<void> {
-    const request: DeleteRealTimeModelRequest = {
-      type: MessageType.DELETE_REAL_TIME_MODEL_REQUEST,
-      modelId: id
+    const request: IConvergenceMessage = {
+      deleteRealtimeModelRequest: {
+        modelId: id
+      }
     };
 
     return this._connection.request(request).then(() => {
-      return; // convert to Promise<void>
+      return;
     });
   }
 
@@ -247,21 +242,24 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise resolved with the HistoricalModel when opened.
    */
   public history(id: string): Promise<HistoricalModel> {
-    const request: HistoricalDataRequest = {
-      type: MessageType.HISTORICAL_DATA_REQUEST,
-      modelId: id
+    const request: IConvergenceMessage = {
+      historicalDataRequest: {
+        modelId: id
+      }
     };
 
-    return this._connection.request(request).then((response: HistoricalDataResponse) => {
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {historicalDataResponse} = response;
       return new HistoricalModel(
-        response.data,
-        response.version,
-        response.modifiedTime,
-        response.createdTime,
+        toObjectValue(historicalDataResponse.data),
+        historicalDataResponse.version as number,
+        timestampToDate(historicalDataResponse.modifiedTime),
+        timestampToDate(historicalDataResponse.createdTime),
         id,
-        response.collectionId,
+        historicalDataResponse.collectionId,
         this._connection,
-        this.session());
+        this.session(),
+        this._identityCache);
     });
   }
 
@@ -335,10 +333,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     const autoRequestId: number = options ? this._autoRequestId++ : undefined;
 
-    const request: OpenRealTimeModelRequest = {
-      type: MessageType.OPEN_REAL_TIME_MODEL_REQUEST,
-      id,
-      autoCreateId: autoRequestId
+    const request: IConvergenceMessage = {
+      openRealTimeModelRequest: {
+        modelId: toOptional(id),
+        autoCreateId: toOptional(autoRequestId)
+      }
     };
 
     if (options !== undefined) {
@@ -353,34 +352,37 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openRequestsByModelId.set(id, deferred);
     }
 
-    this._connection.request(request).then((response: OpenRealTimeModelResponse) => {
+    this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {openRealTimeModelResponse} = response;
+
       const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
       const referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
       const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
         this._connection.session().sessionId(),
-        response.version,
+        openRealTimeModelResponse.version as number,
         transformer,
         referenceTransformer);
-
+      const data = toObjectValue(openRealTimeModelResponse.data);
       const model: RealTimeModel = new RealTimeModel(
-        response.resourceId,
-        response.valueIdPrefix,
-        response.data,
-        response.connectedClients,
-        response.references,
-        response.permissions,
-        response.version,
-        new Date(response.createdTime),
-        new Date(response.modifiedTime),
-        response.id,
-        response.collection,
+        openRealTimeModelResponse.resourceId,
+        openRealTimeModelResponse.valueIdPrefix,
+        data,
+        getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+        getOrDefaultArray(openRealTimeModelResponse.references),
+        toModelPermissions(openRealTimeModelResponse.permissions),
+        getOrDefaultNumber(openRealTimeModelResponse.version),
+        timestampToDate(openRealTimeModelResponse.createdTime),
+        timestampToDate(openRealTimeModelResponse.modifiedTime),
+        openRealTimeModelResponse.modelId,
+        openRealTimeModelResponse.collection,
         clientConcurrencyControl,
         this._connection,
+        this._identityCache,
         this
       );
 
-      this._openModelsByModelId.set(response.id, model);
-      this._openModelsByRid.set(response.resourceId, model);
+      this._openModelsByModelId.set(openRealTimeModelResponse.modelId, model);
+      this._openModelsByRid.set(openRealTimeModelResponse.resourceId, model);
 
       if (this._openRequestsByModelId.has(id)) {
         this._openRequestsByModelId.delete(id);
@@ -403,19 +405,30 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _handleMessage(messageEvent: MessageEvent): void {
-    switch (messageEvent.message.type) {
-      case MessageType.MODEL_AUTO_CREATE_CONFIG_REQUEST:
-        this._handleModelDataRequest(
-          messageEvent.message as AutoCreateModelConfigRequest,
-          messageEvent.callback);
-        break;
-      default:
-        const model: RealTimeModel = this._openModelsByRid.get(messageEvent.message.resourceId);
-        if (model !== undefined) {
-          model._handleMessage(messageEvent);
-        } else {
-          // todo error.
-        }
+    const message = messageEvent.message;
+
+    // todo this is a bit long winded, is there a more concise way?
+    const resourceId: string =
+      (message.remoteOperation && message.remoteOperation.resourceId) ||
+      (message.operationAck && message.operationAck.resourceId) ||
+      (message.remoteClientOpenedModel && message.remoteClientOpenedModel.resourceId) ||
+      (message.remoteClientClosedModel && message.remoteClientClosedModel.resourceId) ||
+      (message.referenceShared && message.referenceShared.resourceId) ||
+      (message.referenceUnshared && message.referenceUnshared.resourceId) ||
+      (message.referenceSet && message.referenceSet.resourceId) ||
+      (message.referenceCleared && message.referenceCleared.resourceId);
+
+    if (resourceId) {
+      const model: RealTimeModel = this._openModelsByRid.get(resourceId);
+      if (model !== undefined) {
+        model._handleMessage(messageEvent);
+      } else {
+        // todo error.
+      }
+    } else if (message.modelAutoCreateConfigRequest) {
+      this._handleModelDataRequest(
+        message.modelAutoCreateConfigRequest,
+        messageEvent.callback);
     }
   }
 
@@ -423,16 +436,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _handleModelDataRequest(request: AutoCreateModelConfigRequest, replyCallback: ReplyCallback): void {
-    const options: IAutoCreateModelOptions = this._autoCreateRequests[request.autoCreateId];
+  private _handleModelDataRequest(request: IAutoCreateModelConfigRequestMessage, replyCallback: ReplyCallback): void {
+    const autoCreateId = request.autoCreateId || 0;
+    const options: IAutoCreateModelOptions = this._autoCreateRequests[autoCreateId];
     if (options === undefined) {
-      const message = `Received a request for an auto create id that was not expected: ${request.autoCreateId}`;
+      const message = `Received a request for an auto create id that was not expected: ${autoCreateId}`;
       console.error(message);
       replyCallback.expectedError("unknown_model", message);
     } else {
       let data: ModelDataInitializer = options.data;
       if (typeof data === "function") {
-        data = data();
+        data = (data as ModelDataCallback)();
       }
 
       let dataValue: ObjectValue;
@@ -444,14 +458,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         dataValue = dataValueFactory.createDataValue(data) as ObjectValue;
       }
 
-      const response: AutoCreateModelConfigResponse = {
-        type: MessageType.MODEL_AUTO_CREATE_CONFIG_RESPONSE,
-        data: dataValue,
-        ephemeral: options.ephemeral,
-        collection: options.collection,
-        overrideWorld: options.overrideWorld,
-        worldPermissions: options.worldPermissions,
-        userPermissions: options.userPermissions,
+      const response: IConvergenceMessage = {
+        modelAutoCreateConfigResponse: {
+          data: toIObjectValue(dataValue),
+          ephemeral: options.ephemeral,
+          collection: options.collection,
+          overridePermissions: options.overrideCollectionWorldPermissions,
+          worldPermissions: options.worldPermissions,
+          userPermissions: options.userPermissions
+        }
       };
       replyCallback.reply(response);
     }

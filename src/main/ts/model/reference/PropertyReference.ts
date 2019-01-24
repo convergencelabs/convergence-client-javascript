@@ -1,6 +1,7 @@
 import {RealTimeElement} from "../rt/";
 import {ModelReference} from "./ModelReference";
 import {ReferenceManager} from "./ReferenceManager";
+import {DomainUser} from "../../identity";
 
 export class PropertyReference extends ModelReference<string> {
 
@@ -8,7 +9,7 @@ export class PropertyReference extends ModelReference<string> {
    * @param referenceManager
    * @param key
    * @param source
-   * @param username
+   * @param user
    * @param sessionId
    * @param local
    *
@@ -18,10 +19,10 @@ export class PropertyReference extends ModelReference<string> {
   constructor(referenceManager: ReferenceManager,
               key: string,
               source: RealTimeElement<any>,
-              username: string,
+              user: DomainUser,
               sessionId: string,
               local: boolean) {
-    super(referenceManager, ModelReference.Types.PROPERTY, key, source, username, sessionId, local);
+    super(referenceManager, ModelReference.Types.PROPERTY, key, source, user, sessionId, local);
   }
 
   /**
@@ -34,7 +35,7 @@ export class PropertyReference extends ModelReference<string> {
     if (index > -1) {
       const newElements: string[] = this._values.slice(0);
       newElements.splice(index, 1);
-      this._set(newElements);
+      this._set(newElements, true);
     }
   }
 }

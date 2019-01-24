@@ -99,7 +99,7 @@ export class QuillDeltaConverter {
           blotName,
           StringMap.toStringMap(attributes));
       default:
-        throw new Error("Invalid insert value: " + JSON.stringify(op));
+        throw new Error("Invalid insert delta: " + JSON.stringify(op));
     }
   }
 }

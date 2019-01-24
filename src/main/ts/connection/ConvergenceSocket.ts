@@ -1,5 +1,5 @@
 import {debugFlags} from "../Debug";
-import {ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
@@ -27,7 +27,7 @@ export interface ISocketClosedEvent extends IConvergenceSocketEvent {
  */
 export interface ISocketErrorEvent extends IConvergenceSocketEvent {
   name: "error";
-  error: string;
+  error: Error;
 }
 
 /**
@@ -36,7 +36,7 @@ export interface ISocketErrorEvent extends IConvergenceSocketEvent {
  */
 export interface ISocketMessageEvent extends IConvergenceSocketEvent {
   name: "message";
-  message: any;
+  message: Uint8Array;
 }
 
 /**
@@ -79,13 +79,14 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     this._openDeferred = new Deferred<void>();
 
     if (this._socket && this._socket.readyState === this._webSocketClass.CONNECTING) {
-      throw new Error("Connection already in the process of opening.");
+      throw new Error("Socket already in the process of opening.");
     } else if (this._socket && this._socket.readyState === this._webSocketClass.OPEN) {
-      throw new Error("Can not call connect on a client that is already connected.");
+      throw new Error("Can not call connect on a socket that is already connected.");
     } else if (this._socket && this._socket.readyState === this._webSocketClass.CLOSING) {
-      throw new Error("Can not call connect on a client that is in the process of closing.");
+      throw new Error("Can not call connect on a socket that is in the process of closing.");
     } else {
       this._socket = this._webSocketFactory(this._url);
+      this._socket.binaryType = "arraybuffer";
       this._attachToSocket(this._socket);
     }
 
@@ -116,12 +117,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     if (!this.isOpen()) {
       throw new Error("Can't send messages because the WebSocket is not open.");
     }
-
-    const encodedMessage: string = JSON.stringify(message);
-    if (debugFlags.SOCKET_MESSAGES) {
-      console.log("S: " + encodedMessage);
-    }
-    this._socket.send(encodedMessage);
+    this._socket.send(message);
   }
 
   private _doClose(clean: boolean, reason?: string): Promise<void> {
@@ -200,17 +196,21 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
   private _attachToSocket(socket: WebSocket): void {
     socket.onmessage = (evt: MessageEvent) => {
       try {
-
-        const decoded: any = JSON.parse(evt.data);
-        if (debugFlags.SOCKET_MESSAGES) {
-          console.log("R: " + evt.data);
+        if (evt.data instanceof ArrayBuffer) {
+          const buffer = new Uint8Array(evt.data);
+          this._emitEvent({
+            name: ConvergenceSocket.Events.MESSAGE,
+            message: buffer
+          } as ISocketMessageEvent);
+        } else {
+          throw new ConvergenceError("Convergence protocol does not accept text frames: " + evt.data);
         }
-        this._emitEvent({
-          name: ConvergenceSocket.Events.MESSAGE,
-          message: decoded
-        } as ISocketMessageEvent);
       } catch (e) {
-        console.error("Error processing Web Socket Message.", e);
+        this._emitEvent({
+          name: ConvergenceSocket.Events.ERROR,
+          error: e
+        } as ISocketErrorEvent);
+        console.error(e);
       }
     };
 
@@ -229,13 +229,13 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
         // TODO what else to do here?
         const event: ISocketErrorEvent = {
           name: ConvergenceSocket.Events.ERROR,
-          error: "Received onOpen event while in state: " + this._socket.readyState
+          error: new ConvergenceError("Received onOpen event while in state: " + this._socket.readyState)
         };
         this._emitEvent(event);
       }
     };
 
-    socket.onerror = (evt: any) => {
+    socket.onerror = (evt: Event) => {
       if (this._socket === undefined || this._socket.readyState === this._webSocketClass.CONNECTING) {
         // We don't want to handle errors during connection here, because
         // the close event will give us more information.
@@ -243,14 +243,13 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           console.log("Web Socket error.", evt);
         }
         try {
-          // fixme get the error protocol
           const event: ISocketErrorEvent = {
             name: ConvergenceSocket.Events.ERROR,
-            error: evt.data
+            error: new ConvergenceError("Unknown web socket error")
           };
           this._emitEvent(event);
         } catch (e) {
-          console.log("Error handling WebSocket error.", e);
+          console.error("Error handling WebSocket error.", e);
         }
       }
     };

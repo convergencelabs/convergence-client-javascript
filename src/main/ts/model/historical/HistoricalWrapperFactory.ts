@@ -33,21 +33,21 @@ export class HistoricalWrapperFactory extends NodeWrapperFactory<HistoricalEleme
   protected _createWrapper(node: ModelNode<any>): HistoricalElement<any> {
     switch (node.type()) {
       case ModelElementType.ARRAY:
-        return new HistoricalArray(<ArrayNode> node, this, this._model);
+        return new HistoricalArray(node as ArrayNode, this, this._model);
       case ModelElementType.OBJECT:
-        return new HistoricalObject(<ObjectNode> node, this, this._model);
+        return new HistoricalObject(node as ObjectNode, this, this._model);
       case ModelElementType.BOOLEAN:
-          return new HistoricalBoolean(<BooleanNode> node, this, this._model);
+          return new HistoricalBoolean(node as BooleanNode, this, this._model);
       case ModelElementType.NULL:
-        return new HistoricalNull(<NullNode> node, this, this._model);
+        return new HistoricalNull(node as NullNode, this, this._model);
       case ModelElementType.NUMBER:
-        return new HistoricalNumber(<NumberNode> node, this, this._model);
+        return new HistoricalNumber(node as NumberNode, this, this._model);
       case ModelElementType.STRING:
-        return new HistoricalString(<StringNode> node, this, this._model);
+        return new HistoricalString(node as StringNode, this, this._model);
       case ModelElementType.UNDEFINED:
-        return new HistoricalUndefined(<UndefinedNode> node, this, this._model);
+        return new HistoricalUndefined(node as UndefinedNode, this, this._model);
       case ModelElementType.DATE:
-        return new HistoricalDate(<DateNode> node, this, this._model);
+        return new HistoricalDate(node as DateNode, this, this._model);
       default:
         return null;
       }

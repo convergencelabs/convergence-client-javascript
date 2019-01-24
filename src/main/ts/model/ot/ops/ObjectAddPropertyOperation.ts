@@ -10,7 +10,10 @@ import {ObjectAddProperty} from "./operationChanges";
  */
 export class ObjectAddPropertyOperation extends DiscreteOperation implements ObjectAddProperty {
 
-  constructor(id: string, noOp: boolean, public prop: string, public value: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly prop: string,
+              public readonly value: DataValue) {
     super(OperationType.OBJECT_ADD, id, noOp);
     Object.freeze(this);
   }

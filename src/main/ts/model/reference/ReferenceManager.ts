@@ -1,13 +1,5 @@
 import {ReferenceMap} from "./ReferenceMap";
 import {LocalModelReference} from "./LocalModelReference";
-import {MessageType} from "../../connection/protocol/MessageType";
-import {
-  RemoteReferenceEvent,
-  RemoteReferencePublished,
-  RemoteReferenceSet,
-  RemoteReferenceCleared,
-  RemoteReferenceUnpublished
-} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {ModelReference} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeElement, RealTimeModel} from "../rt/";
@@ -16,6 +8,16 @@ import {RangeReference} from "./RangeReference";
 import {ElementReference} from "./ElementReference";
 import {PropertyReference} from "./PropertyReference";
 import {ReferenceFilter} from "./ReferenceFilter";
+import {ReferenceType} from "./ReferenceType";
+import {
+  RemoteReferenceCleared,
+  RemoteReferenceEvent,
+  RemoteReferenceSet,
+  RemoteReferenceShared,
+  RemoteReferenceUnshared
+} from "./RemoteReferenceEvent";
+import {ConvergenceError} from "../../util";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
  * @hidden
@@ -29,17 +31,22 @@ export type OnRemoteReference = (reference: ModelReference<any>) => void;
  */
 export class ReferenceManager {
   private readonly _referenceMap: ReferenceMap;
-  private readonly _localReferences: {[key: string]: LocalModelReference<any, any>};
-  private readonly _validTypes: string[];
+  private readonly _localReferences: { [key: string]: LocalModelReference<any, any> };
+  private readonly _validTypes: ReferenceType[];
   private readonly _source: any;
   private readonly _onRemoteReference: OnRemoteReference;
+  private readonly _identityCache: IdentityCache;
 
-  constructor(source: any, validTypes: string[], onRemoteReference: OnRemoteReference) {
+  constructor(source: any,
+              validTypes: ReferenceType[],
+              onRemoteReference: OnRemoteReference,
+              identityCache: IdentityCache) {
     this._referenceMap = new ReferenceMap();
     this._localReferences = {};
     this._validTypes = validTypes;
     this._source = source;
     this._onRemoteReference = onRemoteReference;
+    this._identityCache = identityCache;
   }
 
   public get(sessionId: string, key: string): ModelReference<any> {
@@ -81,26 +88,21 @@ export class ReferenceManager {
     return this._localReferences[key];
   }
 
-  public localReferences(): {[key: string]: LocalModelReference<any, any>} {
+  public localReferences(): { [key: string]: LocalModelReference<any, any> } {
     return Immutable.copy(this._localReferences);
   }
 
   public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
-    switch (event.type) {
-      case MessageType.REFERENCE_PUBLISHED:
-        this._handleRemoteReferencePublished(event as RemoteReferencePublished);
-        break;
-      case MessageType.REFERENCE_SET:
-        this._handleRemoteReferenceSet(event as RemoteReferenceSet);
-        break;
-      case MessageType.REFERENCE_CLEARED:
-        this._handleRemoteReferenceCleared(event as RemoteReferenceCleared);
-        break;
-      case MessageType.REFERENCE_UNPUBLISHED:
-        this._handleRemoteReferenceUnpublished(event as RemoteReferenceUnpublished);
-        break;
-      default:
-        throw new Error("Invalid reference event.");
+    if (event instanceof RemoteReferenceShared) {
+      this._handleRemoteReferenceShared(event);
+    } else if (event instanceof RemoteReferenceSet) {
+      this._handleRemoteReferenceSet(event);
+    } else if (event instanceof RemoteReferenceCleared) {
+      this._handleRemoteReferenceCleared(event);
+    } else if (event instanceof RemoteReferenceUnshared) {
+      this._handleRemoteReferenceUnshared(event);
+    } else {
+      throw new Error("Invalid reference event.");
     }
   }
 
@@ -111,39 +113,40 @@ export class ReferenceManager {
     }
   }
 
-  private _handleRemoteReferencePublished(event: RemoteReferencePublished): void {
-    if (this._validTypes.indexOf(event.referenceType) < 0) {
-      throw new Error(`Invalid reference type: ${event.referenceType}`);
-    }
-
-    const username: string = event.username;
+  private _handleRemoteReferenceShared(event: RemoteReferenceShared): void {
+    const user = this._identityCache.getUserForSession(event.sessionId);
     let reference: ModelReference<any>;
-    switch (event.referenceType) {
-      case ModelReference.Types.INDEX:
-        reference = new IndexReference(this, event.key, this._source, username, event.sessionId, false);
-        break;
-      case ModelReference.Types.RANGE:
-        reference = new RangeReference(this, event.key, this._source, username, event.sessionId, false);
-        break;
-      case ModelReference.Types.ELEMENT:
-        reference = new ElementReference(this, event.key, this._source, username, event.sessionId, false);
-        break;
-      case ModelReference.Types.PROPERTY:
-        reference = new PropertyReference(this, event.key, this._source, username, event.sessionId, false);
-        break;
-      default:
-        throw new Error("Unknown reference type: " + event.referenceType);
+
+    const values = event.values;
+    this._assertValidType(event.referenceType);
+
+    if (event.referenceType === "index") {
+      reference = new IndexReference(this, event.key, this._source, user, event.sessionId, false);
+    } else if (event.referenceType === "range") {
+      reference = new RangeReference(this, event.key, this._source, user, event.sessionId, false);
+    } else if (event.referenceType === "element") {
+      reference = new ElementReference(this, event.key, this._source, user, event.sessionId, false);
+    } else if (event.referenceType === "property") {
+      reference = new PropertyReference(this, event.key, this._source, user, event.sessionId, false);
+    } else {
+      throw new ConvergenceError("Invalid reference message: " + event);
     }
 
-    if (event.values !== undefined) {
-      this._setReferenceValues(reference, event.values);
+    if (values !== null) {
+      this._setReferenceValues(reference, values);
     }
 
     this._referenceMap.put(reference);
     this._onRemoteReference(reference);
   }
 
-  private _handleRemoteReferenceUnpublished(event: RemoteReferenceUnpublished): void {
+  private _assertValidType(referenceType: ReferenceType): void {
+    if (!this._validTypes.includes(referenceType)) {
+      throw new Error(`Invalid reference type: ${referenceType}`);
+    }
+  }
+
+  private _handleRemoteReferenceUnshared(event: RemoteReferenceUnshared): void {
     const reference: ModelReference<any> = this._referenceMap.remove(event.sessionId, event.key);
     reference._dispose();
   }
@@ -158,7 +161,7 @@ export class ReferenceManager {
     this._setReferenceValues(reference, event.values);
   }
 
-  private _setReferenceValues(reference: ModelReference<any> , values: any): void {
+  private _setReferenceValues(reference: ModelReference<any>, values: any): void {
     // Translate vids to RealTimeElements
     if (reference.type() === ModelReference.Types.ELEMENT) {
       const rtvs: Array<RealTimeElement<any>> = [];
@@ -168,9 +171,9 @@ export class ReferenceManager {
           rtvs.push(value);
         }
       }
-      reference._set(rtvs);
+      reference._set(rtvs, false);
     } else {
-      reference._set(values);
+      reference._set(values, false);
     }
   }
 }

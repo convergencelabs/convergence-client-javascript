@@ -1,5 +1,6 @@
 import {Activity} from "../Activity";
 import {IActivityEvent} from "./IActivityEvent";
+import {DomainUser} from "../../identity";
 
 /**
  * The ActivitySessionLeftEvent is fired when a remote session leaves an
@@ -29,7 +30,7 @@ export class ActivitySessionLeftEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly username: string,
+    public readonly user: DomainUser,
     /**
      * @inheritDoc
      */

@@ -10,7 +10,9 @@ import {ObjectSet} from "./operationChanges";
  */
 export class ObjectSetOperation extends DiscreteOperation implements ObjectSet {
 
-  constructor(id: string, noOp: boolean, public value: {[key: string]: DataValue}) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly value: { [key: string]: DataValue }) {
     super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }

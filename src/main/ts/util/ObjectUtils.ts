@@ -2,18 +2,29 @@
  * @hidden
  * @internal
  */
-export type MapFunction = (val: any) => any;
+export type MapFunction<F, T> = (val: F) => T;
 
 /**
  * @hidden
  * @internal
  */
-export function mapObject(obj: any, mapFunc: MapFunction): any {
+export function mapObjectValues<F, T>(obj: {[key: string]: F}, mapFunc: MapFunction<F, T>): {[key: string]: T} {
   "use strict";
   return Object.keys(obj).reduce((newObj: any, value: any) => {
     newObj[value] = mapFunc(obj[value]);
     return newObj;
   }, {});
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export function objectForEach<T>(obj: {[key: string]: T}, callback: (key: string, val: T) => void): void {
+  "use strict";
+  return Object.keys(obj).forEach(key => {
+    callback(key, obj[key]);
+  });
 }
 
 /**

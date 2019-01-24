@@ -2,7 +2,6 @@ import {ConvergenceConnection, AuthResponse, IConnectionErrorEvent} from "./conn
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
-import {HandshakeResponse} from "./connection/protocol/handhsake";
 import {ActivityService} from "./activity/";
 import {IdentityService} from "./identity/";
 import {PresenceService, UserPresence} from "./presence/";
@@ -17,6 +16,9 @@ import {
   DisconnectedEvent
 } from "./events/";
 import {Validation} from "./util";
+import {io} from "@convergence/convergence-proto";
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import {IdentityCache} from "./identity/IdentityCache";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -69,6 +71,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    */
   private _chatService: ChatService;
+
+  /**
+   * @internal
+   */
+  private _identityCache: IdentityCache;
 
   /**
    * @internal
@@ -126,7 +133,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => this._emitEvent(new DisconnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.RECONNECTED, () => this._emitEvent(new ReconnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.ERROR, (evt: IConnectionErrorEvent) =>
-      this._emitEvent(new ConnectionErrorEvent(this, evt.error))
+      this._emitEvent(new ConnectionErrorEvent(this, evt.error.message))
     );
   }
 
@@ -144,8 +151,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _authenticateWithToken(token: string): Promise<void> {
-    return this._connection.authenticateWithToken(token).then(m => this._init(m));
+  public _authenticateWithJwt(jwt: string): Promise<void> {
+    return this._connection.authenticateWithJwt(jwt).then(m => this._init(m));
   }
 
   /**
@@ -171,7 +178,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _connect(): Promise<HandshakeResponse> {
+  public _connect(): Promise<IHandshakeResponseMessage> {
     return this._connection.connect();
   }
 
@@ -297,13 +304,14 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   private _init(m: AuthResponse): void {
     const session: ConvergenceSession = this._connection.session();
-    const presenceState: Map<string, any> = StringMap.objectToMap(m.state);
-    const initialPresence: UserPresence = new UserPresence(session.username(), true, presenceState);
-    this._modelService = new ModelService(this._connection);
+    const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
+    const initialPresence: UserPresence = new UserPresence(session.user().username, true, presenceState);
+    this._identityCache = new IdentityCache(this._connection);
+    this._modelService = new ModelService(this._connection, this._identityCache);
     this._identityService = new IdentityService(this._connection);
-    this._activityService = new ActivityService(this._connection);
+    this._activityService = new ActivityService(this._connection, this._identityCache);
     this._presenceService = new PresenceService(this._connection, initialPresence);
-    this._chatService = new ChatService(this._connection);
+    this._chatService = new ChatService(this._connection, this._identityCache);
   }
 }
 

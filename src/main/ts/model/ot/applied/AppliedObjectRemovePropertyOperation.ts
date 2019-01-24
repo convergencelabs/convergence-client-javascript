@@ -12,7 +12,10 @@ export class AppliedObjectRemovePropertyOperation extends AppliedDiscreteOperati
 
   protected _prop: string;
 
-  constructor(id: string, noOp: boolean, public prop: string, public oldValue: DataValue) {
+  constructor(id: string,
+              noOp: boolean,
+              public readonly prop: string,
+              public readonly oldValue: DataValue) {
     super(OperationType.OBJECT_REMOVE, id, noOp);
     Object.freeze(this);
   }

@@ -1,15 +1,13 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {NumberNode} from "../internal/NumberNode";
-import {RemoteReferenceEvent} from "../../connection/protocol/model/reference/ReferenceEvent";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
-import {ModelEventCallbacks} from "./RealTimeModel";
-import {NumberNodeSetValueEvent} from "../internal/events";
-import {NumberNodeDeltaEvent} from "../internal/events";
-import {NumberAddOperation} from "../ot/ops/NumberAddOperation";
+import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {ModelNodeEvent, NumberNodeSetValueEvent, NumberNodeDeltaEvent} from "../internal/events";
+import {NumberDeltaOperation} from "../ot/ops/NumberDeltaOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {ModelNodeEvent} from "../internal/events";
-import {RealTimeModel} from "./RealTimeModel";
 import {ObservableNumber, ObservableNumberEvents, ObservableNumberEventConstants} from "../observable/ObservableNumber";
+import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
+import {IdentityCache} from "../../identity/IdentityCache";
 
 export interface RealTimeNumberEvents extends ObservableNumberEvents {
 }
@@ -20,19 +18,23 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
 
   /**
    * Constructs a new RealTimeNumber.
+   *
+   * @hidden
+   * @internal
    */
-  constructor(protected _delegate: NumberNode,
-              protected _callbacks: ModelEventCallbacks,
-              _wrapperFactory: RealTimeWrapperFactory,
-              _model: RealTimeModel) {
-    super(_delegate, _callbacks, _wrapperFactory, _model, []);
+  constructor(delegate: NumberNode,
+              callbacks: ModelEventCallbacks,
+              wrapperFactory: RealTimeWrapperFactory,
+              model: RealTimeModel,
+              identityCache: IdentityCache) {
+    super(delegate, callbacks, wrapperFactory, model, [], identityCache);
 
     this._delegate.events().subscribe((event: ModelNodeEvent) => {
       if (event.local) {
         if (event instanceof NumberNodeSetValueEvent) {
           this._sendOperation(new NumberSetOperation(this.id(), false, event.value));
         } else if (event instanceof NumberNodeDeltaEvent) {
-          this._sendOperation(new NumberAddOperation(this.id(), false, event.value));
+          this._sendOperation(new NumberDeltaOperation(this.id(), false, event.value));
         }
       }
     });
@@ -40,22 +42,22 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
 
   public add(value: number): void {
     this._assertWritable();
-    this._delegate.add(value);
+    (this._delegate as NumberNode).add(value);
   }
 
   public subtract(value: number): void {
     this._assertWritable();
-    this._delegate.subtract(value);
+    (this._delegate as NumberNode).subtract(value);
   }
 
   public increment(): void {
     this._assertWritable();
-    this._delegate.increment();
+    (this._delegate as NumberNode).increment();
   }
 
   public decrement(): void {
     this._assertWritable();
-    this._delegate.decrement();
+    (this._delegate as NumberNode).decrement();
   }
 
   /**

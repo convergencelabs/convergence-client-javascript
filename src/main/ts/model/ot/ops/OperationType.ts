@@ -6,7 +6,7 @@ const types: {[key: string]: string}  = {
   ARRAY_SET: "ArraySet",
   ARRAY_VALUE: "ArrayValue",
   BOOLEAN_VALUE: "BooleanValue",
-  NUMBER_ADD: "NumberAdd",
+  NUMBER_DELTA: "NumberDelta",
   NUMBER_VALUE: "NumberValue",
   OBJECT_ADD: "ObjectAdd",
   OBJECT_REMOVE: "ObjectRemove",

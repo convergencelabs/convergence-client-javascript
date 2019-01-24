@@ -6,7 +6,9 @@ import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
 import {NumberNodeDeltaEvent, NumberNodeSetValueEvent} from "./events";
-import {NumberAdd, NumberSet} from "../ot/ops/operationChanges";
+import {NumberDelta, NumberSet} from "../ot/ops/operationChanges";
+import {ConvergenceSession} from "../../ConvergenceSession";
+import {DomainUser} from "../../identity";
 
 /**
  * @hidden
@@ -29,9 +31,8 @@ export class NumberNode extends ModelNode<number> {
   constructor(data: NumberValue,
               path: () => Path,
               model: Model,
-              sessionId: string,
-              username: string) {
-    super(ModelElementType.NUMBER, data.id, path, model, sessionId, username);
+              session: ConvergenceSession) {
+    super(ModelElementType.NUMBER, data.id, path, model, session);
 
     this._data = data.value;
   }
@@ -49,7 +50,7 @@ export class NumberNode extends ModelNode<number> {
   }
 
   public add(value: number): void {
-    this._applyAdd(value, true);
+    this._applyDelta(value, true, this._session.sessionId(), this._session.user());
   }
 
   public subtract(value: number): void {
@@ -66,7 +67,7 @@ export class NumberNode extends ModelNode<number> {
 
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     const type: string = operationEvent.operation.type;
-    if (type === OperationType.NUMBER_ADD) {
+    if (type === OperationType.NUMBER_DELTA) {
       this._handleAddOperation(operationEvent);
     } else if (type === OperationType.NUMBER_VALUE) {
       this._handleSetOperation(operationEvent);
@@ -76,42 +77,41 @@ export class NumberNode extends ModelNode<number> {
   }
 
   protected _setData(data: number): void {
-    this._applySet(data, true, this.sessionId, this.username);
+    this._applySet(data, true, this._session.sessionId(), this._session.user());
   }
 
   protected _getData(): number {
     return this._data;
   }
 
-  private _applyAdd(value: number, local: boolean): void {
-    this._validateNumber(value);
+  private _applyDelta(delta: number, local: boolean, sessionId: string, user: DomainUser): void {
+    this._validateNumber(delta);
 
-    if (value !== 0) {
-      this._data += value;
+    if (delta !== 0) {
+      this._data += delta;
 
-      const event: NumberNodeDeltaEvent = new NumberNodeDeltaEvent(this, local, value, this.sessionId, this.username);
+      const event: NumberNodeDeltaEvent = new NumberNodeDeltaEvent(this, local, delta, sessionId, user);
       this._emitValueEvent(event);
     }
   }
 
-  private _applySet(value: number, local: boolean, sessionId: string, username: string): void {
+  private _applySet(value: number, local: boolean, sessionId: string, user: DomainUser): void {
     this._validateNumber(value);
     this._data = value;
 
-    const event: NumberNodeSetValueEvent =
-      new NumberNodeSetValueEvent(this, local, value, this.sessionId, this.username);
+    const event: NumberNodeSetValueEvent = new NumberNodeSetValueEvent(this, local, value, sessionId, user);
     this._emitValueEvent(event);
   }
 
   // Handlers for incoming operations
   private _handleAddOperation(operationEvent: ModelOperationEvent): void {
-    const operation: NumberAdd = operationEvent.operation as NumberAdd;
-    this._applyAdd(operation.value, false);
+    const operation: NumberDelta = operationEvent.operation as NumberDelta;
+    this._applyDelta(operation.delta, false, operationEvent.sessionId, operationEvent.user);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {
     const operation: NumberSet = operationEvent.operation as NumberSet;
-    this._applySet(operation.value, false, operationEvent.sessionId, operationEvent.username);
+    this._applySet(operation.value, false, operationEvent.sessionId, operationEvent.user);
   }
 
   private _validateNumber(value: number): void {
@@ -120,7 +120,7 @@ export class NumberNode extends ModelNode<number> {
     }
 
     if (isNaN(value)) {
-      throw new Error("The value must not be NaN");
+      throw new Error("The delta must not be NaN");
     }
   }
 }

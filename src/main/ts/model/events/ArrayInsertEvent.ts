@@ -1,6 +1,7 @@
 import {IValueChangedEvent} from "./IValueChangedEvent";
 import {ObservableArray} from "../observable/ObservableArray";
 import {ObservableElement} from "../observable/ObservableElement";
+import {DomainUser} from "../../identity";
 
 export class ArrayInsertEvent implements IValueChangedEvent {
   public static readonly NAME = "insert";
@@ -11,18 +12,18 @@ export class ArrayInsertEvent implements IValueChangedEvent {
    * @param index
    * @param value
    * @param sessionId
-   * @param username
+   * @param user
    * @param local
    *
    * @hidden
    * @internal
    */
   constructor(public readonly element: ObservableArray,
-              public readonly index: number,
-              public readonly value: ObservableElement<any>,
+              public readonly user: DomainUser,
               public readonly sessionId: string,
-              public readonly username: string,
-              public readonly local: boolean) {
+              public readonly local: boolean,
+              public readonly index: number,
+              public readonly value: ObservableElement<any>) {
     Object.freeze(this);
   }
 }

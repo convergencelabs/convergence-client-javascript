@@ -19,7 +19,7 @@ export class HistoricalBoolean extends HistoricalElement<boolean> implements Obs
    * @hidden
    * @internal
    */
-  constructor(_delegate: BooleanNode, _wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
-    super(_delegate, _wrapperFactory, model);
+  constructor(delegate: BooleanNode, wrapperFactory: HistoricalWrapperFactory, model: HistoricalModel) {
+    super(delegate, wrapperFactory, model);
   }
 }

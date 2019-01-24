@@ -96,7 +96,7 @@ export class Convergence {
     Convergence._validateOptions(options);
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     return domain._connect().then(() => {
-      return domain._authenticateWithToken(jwt);
+      return domain._authenticateWithJwt(jwt);
     }).then(() => {
       return domain;
     });

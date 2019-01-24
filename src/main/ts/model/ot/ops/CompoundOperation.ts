@@ -9,7 +9,7 @@ import {BatchChange} from "./operationChanges";
  * @internal
  */
 export class CompoundOperation extends Operation implements BatchChange {
-  constructor(public ops: DiscreteOperation[]) {
+  constructor(public readonly ops: DiscreteOperation[]) {
     super(OperationType.COMPOUND);
     Object.freeze(this);
   }

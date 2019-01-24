@@ -20,7 +20,7 @@ Convergence.connectAnonymously(DOMAIN_URL).then(d => {
     collection: "test",
     id: modelId,
     data: {
-      "string": "test value",
+      "string": "test delta",
       "number": 10,
       "boolean": true,
       "array": [
@@ -178,7 +178,7 @@ function bindSelectList(selectInput, arrayModel) {
 
   arrayModel.on("set", function (evt) {
     selectInput.options[evt.index].textContent = evt.value;
-    selectInput.options[evt.index].value = evt.value;
+    selectInput.options[evt.index].delta = evt.value;
   });
 
   arrayModel.on("reorder", function (evt) {
