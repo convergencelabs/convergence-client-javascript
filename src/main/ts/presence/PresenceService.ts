@@ -19,6 +19,8 @@ import {
 } from "./events/";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import {mapObjectValues} from "../util/ObjectUtils";
+import {jsonToProtoValue, protoValueToJson} from "../connection/ProtocolUtil";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -33,7 +35,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     STATE_SET: PresenceStateSetEvent.NAME,
     STATE_REMOVED: PresenceStateRemovedEvent.NAME,
     STATE_CLEARED: PresenceStateClearedEvent.NAME,
-    AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME,
+    AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME
   };
 
   /**
@@ -119,7 +121,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     const message: IConvergenceMessage = {
       presenceStateSet: {
-        state: StringMap.mapToObject(state)
+        state: mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue)
       }
     };
 
@@ -207,7 +209,11 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     return this._connection.request(message).then((response: IConvergenceMessage) => {
       const {userPresences} = response.presenceResponse;
       return userPresences.map(p =>
-        new UserPresence(p.username, p.available, StringMap.objectToMap(p.state))
+        new UserPresence(
+          p.username,
+          p.available,
+          StringMap.objectToMap(mapObjectValues(p.state, protoValueToJson))
+        )
       );
     });
   }
@@ -254,7 +260,11 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
         const {userPresences} = response.presenceSubscribeResponse;
         userPresences.forEach(presence => {
           const manager: UserPresenceManager = new UserPresenceManager(
-            new UserPresence(presence.username, presence.available, StringMap.objectToMap(presence.state)),
+            new UserPresence(
+              presence.username,
+              presence.available,
+              StringMap.objectToMap(mapObjectValues(presence.state, protoValueToJson))
+            ),
             this._presenceStreams.get(presence.username),
             (username) => this._unsubscribe(username)
           );

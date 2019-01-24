@@ -18,7 +18,7 @@ import {ConvergenceEventEmitter, StringMap} from "../util/";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {IdentityCache} from "../identity/IdentityCache";
-import {getOrDefaultObject, protoValueToJson} from "../connection/ProtocolUtil";
+import {getOrDefaultObject, jsonToProtoValue, protoValueToJson} from "../connection/ProtocolUtil";
 import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 
 /**
@@ -179,10 +179,11 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 
       const deferred: Deferred<Activity> = new Deferred<Activity>();
       this._joinedDeferreds.set(id, deferred);
+      const mappedState = mapObjectValues(StringMap.mapToObject(initialState), jsonToProtoValue);
       const message: IConvergenceMessage = {
         activityJoinRequest: {
           activityId: id,
-          state: StringMap.mapToObject(initialState)
+          state: mappedState
         }
       };
 
@@ -206,7 +207,9 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
             const activityState = joinResponse.state[sessionId];
             const user = this._identityCache.getUserForSession(sessionId);
             const local: boolean = sessionId === this._connection.session().sessionId();
-            const stateMap: Map<string, any> = StringMap.objectToMap(getOrDefaultObject(activityState.state));
+            const rawState = getOrDefaultObject(activityState.state);
+            const jsonState = mapObjectValues(rawState, protoValueToJson);
+            const stateMap: Map<string, any> = StringMap.objectToMap(jsonState);
             const participant = new ActivityParticipant(activity, user, sessionId, local, stateMap);
             participants.set(sessionId, participant);
           });
