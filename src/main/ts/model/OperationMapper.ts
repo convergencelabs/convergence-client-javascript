@@ -96,7 +96,7 @@ function toDiscreteOperation(discreteOperationData: IDiscreteOperationData): Dis
       getOrDefaultString(key),
       toDataValue(value));
   } else if (discreteOperationData.objectRemovePropertyOperation) {
-    const {id, noOp, key} = discreteOperationData.objectSetPropertyOperation;
+    const {id, noOp, key} = discreteOperationData.objectRemovePropertyOperation;
     return new ObjectRemovePropertyOperation(
       id,
       getOrDefaultBoolean(noOp),

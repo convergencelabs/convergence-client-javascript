@@ -58,15 +58,15 @@ The full compliment of Convergence documentation can be found here:
 https://convergence.io/learn/
 
 # Hot-Linking in the Browser
-Convergence requires RxJS 5.x.  This dependency is taken care of when using the npm module.  If including via a script tag, you have two options.
+Convergence requires RxJS 6.x.  This dependency is taken care of when using the npm module.  If including via a script tag, you have two options.
 
 1) Include Convergence With RxJS Bundled
   ```html
-  <script src="node_modules/@convergence/convergence/browser/convergence-all.js"></script>
+  <script src="node_modules/@convergence/convergence/umd/convergence-all.js"></script>
   ```
 
 2) With Convergence without RxJS Bundled
   ```html
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.0.1/Rx.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.3.3/rxjs.umd.min.js"></script>
   <script src="node_modules/@convergence/convergence/browser/convergence.js"></script>
   ```

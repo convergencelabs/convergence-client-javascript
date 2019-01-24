@@ -10,27 +10,8 @@ export class RichTextMutator {
   }
 
   public insertText(location: RichTextLocation, text: string, attributes?: Map<string, any>): RichTextMutator {
-    const node: RichTextNode = location.getNode();
-    const index: number = location.getSubPath();
-
-    if (node instanceof RichTextString) {
-      if (!attributes || AttributeUtils.areAttributesEqual(attributes, node.attributes())) {
-        // Its the same style so we can just insert into the existing node, no
-        // splitting and merging required
-        node.insert(index, text);
-      } else {
-        // We need to split the current rich text string into two nodes within it's
-        // parent and then insert this one between it.
-
-        // fixme need to implement
-        throw new Error("Not implemented");
-      }
-    } else if (node instanceof RichTextElement) {
-      this.insert(location, new RichTextString(this._document, node, text, attributes));
-    } else {
-      throw new Error("Invalid insert location");
-    }
-
+    const str = new RichTextString(this._document, null, text, attributes);
+    this.insert(location, str);
     return this;
   }
 
@@ -56,6 +37,8 @@ export class RichTextMutator {
       }
     } else if (node instanceof RichTextElement) {
       node.insertChild(index, content);
+    } else {
+      throw new Error("Invalid insert location");
     }
 
     return this;
