@@ -2,6 +2,7 @@ import {google} from "@convergence/convergence-proto";
 import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
 import {mapObjectValues} from "../util/ObjectUtils";
+import {ConvergenceError} from "../util";
 
 /**
  * @hidden
@@ -39,7 +40,7 @@ export function getOrDefaultArray<T>(val?: T[]): T[] {
  * @hidden
  * @internal
  */
-export function getOrDefaultObject<T>(val: {[key: string]: T}): {[key: string]: T} {
+export function getOrDefaultObject<T>(val: { [key: string]: T }): { [key: string]: T } {
   return val || {};
 }
 
@@ -108,7 +109,7 @@ export function protoValueToJson(value: IValue): any {
   } else if (value.listValue) {
     return getOrDefaultArray(value.listValue.values).map(protoValueToJson);
   } else {
-    return;
+    throw new ConvergenceError("Can not deserialize unknown data type: " + value);
   }
 }
 
@@ -127,9 +128,9 @@ export function jsonToProtoValue(value: any): IValue {
     return {numberValue: value};
   } else if (Array.isArray(value)) {
     return {listValue: {values: value.map(jsonToProtoValue)}};
-  } else if (value.constructor === Object) {
+  } else if (value !== undefined && value.constructor === Object) {
     return {structValue: {fields: mapObjectValues(value, jsonToProtoValue)}};
   } else {
-    return;
+    throw new ConvergenceError("Can not serialize unknown data type: " + value);
   }
 }

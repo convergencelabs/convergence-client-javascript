@@ -1,7 +1,7 @@
 import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
 import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
+import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter, ConvergenceError} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
@@ -184,7 +184,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
   public sendMessage(message: IConvergenceMessage): void {
     if ((debugFlags.PROTOCOL_MESSAGES && !message.ping && !message.pong) || debugFlags.PROTOCOL_PINGS) {
-      console.log("SND: " + JSON.stringify(message));
+      console.debug("SND: " + JSON.stringify(message));
     }
 
     try {
@@ -192,6 +192,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._socket.send(bytes);
     } catch (e) {
       this.onSocketError(e);
+      throw e;
     }
   }
 
@@ -206,7 +207,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       !convergenceMessage.ping &&
       !convergenceMessage.pong) ||
       debugFlags.PROTOCOL_PINGS) {
-      console.log("RCV: " + JSON.stringify(convergenceMessage));
+      console.debug("RCV: " + JSON.stringify(convergenceMessage));
     }
 
     if (convergenceMessage.ping) {
