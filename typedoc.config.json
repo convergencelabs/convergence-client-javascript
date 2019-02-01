@@ -1,5 +1,5 @@
 {
-  "name": "Convergence JavaScript Client",
+  "name": "Convergence JavaScript Client API",
   "target": "ES6",
 
   "excludeNotExported": true,
@@ -12,6 +12,8 @@
   "readme": "src/docs/README.md",
 
   "theme": "src/docs/theme",
+
+  "gaId": "UA-84372428-3",
 
   "verbose": true,
   "hideGenerator": true
