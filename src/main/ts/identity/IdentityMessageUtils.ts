@@ -1,6 +1,6 @@
 import {ConvergenceError} from "../util";
 import {DomainUser} from "./DomainUser";
-import {fromOptional} from "../connection/ProtocolUtil";
+import {fromOptional, protoToDomainUserType} from "../connection/ProtocolUtil";
 import {UserField} from "./IdentityService";
 import {io} from "@convergence/convergence-proto";
 import IDomainUserData = io.convergence.proto.IDomainUserData;
@@ -24,8 +24,8 @@ export function toUserFieldCode(field: UserField): number {
 
 export function toDomainUser(userData: IDomainUserData): DomainUser {
   return new DomainUser(
-    userData.userType,
-    userData.username,
+    protoToDomainUserType(userData.userId.userType),
+    userData.userId.username,
     fromOptional(userData.firstName),
     fromOptional(userData.lastName),
     fromOptional(userData.displayName),

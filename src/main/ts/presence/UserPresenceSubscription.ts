@@ -8,6 +8,7 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
+import {DomainUser} from "../identity";
 
 export interface UserPresenceSubscriptionEvents {
   STATE_SET: string;
@@ -40,8 +41,8 @@ export class UserPresenceSubscription extends ConvergenceEventEmitter<IConvergen
     this._emitFrom(delegate.events());
   }
 
-  public get username(): string {
-    return this._manager.username();
+  public get user(): DomainUser {
+    return this._manager.user();
   }
 
   public get available(): boolean {

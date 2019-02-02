@@ -3,6 +3,9 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {IChatEvent} from "./events/";
 import {Observable} from "rxjs";
 import {IdentityCache} from "../identity/IdentityCache";
+import {domainUserIdToProto} from "../connection/ProtocolUtil";
+import {DomainUserId} from "../identity/DomainUserId";
+import {DomainUserIdentifier} from "../identity";
 
 export class MembershipChatChannel extends ChatChannel {
 
@@ -32,12 +35,12 @@ export class MembershipChatChannel extends ChatChannel {
     });
   }
 
-  public remove(username: string): Promise<void> {
+  public remove(user: DomainUserIdentifier): Promise<void> {
     this._assertJoined();
     return this._connection.request({
       removeUserFromChatChannelRequest: {
         channelId: this._info.channelId,
-        userToRemove: username
+        userToRemove: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
     }).then(() => {
       return;

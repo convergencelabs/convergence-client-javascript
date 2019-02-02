@@ -11,82 +11,89 @@ import {
   UserLeftChatHistoryEntry,
   UserRemovedChatHistoryEntry
 } from "./ChatHistoryEntry";
-import {getOrDefaultArray, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
+import {
+  getOrDefaultArray,
+  getOrDefaultNumber,
+  getOrDefaultString,
+  protoToDomainUserId,
+  timestampToDate
+} from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
 import {IdentityCache} from "../identity/IdentityCache";
 
 export class ChatHistoryEventMapper {
   public static toChatHistoryEntry(data: IChatChannelEventData, identityCache: IdentityCache): ChatHistoryEntry {
     if (data.created) {
-      const {channel, eventNumber, timestamp, username, name, topic, members} = data.created;
+      const {channel, eventNumber, timestamp, user, name, topic, members} = data.created;
+      const memberUsers = getOrDefaultArray(members).map(userId => identityCache.getUser(protoToDomainUserId(userId)));
       return new ChannelCreatedHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
+        identityCache.getUser(protoToDomainUserId(user)),
         name,
         topic,
-        getOrDefaultArray(members)
+        memberUsers
       );
     } else if (data.message) {
-      const {channel, eventNumber, timestamp, username, message} = data.message;
+      const {channel, eventNumber, timestamp, user, message} = data.message;
       return new MessageChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
+        identityCache.getUser(protoToDomainUserId(user)),
         message
       );
     } else if (data.userAdded) {
-      const {channel, eventNumber, timestamp, username, addedUser} = data.userAdded;
+      const {channel, eventNumber, timestamp, user, addedUser} = data.userAdded;
       return new UserAddedChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
-        identityCache.getUser(addedUser)
+        identityCache.getUser(protoToDomainUserId(user)),
+        identityCache.getUser(protoToDomainUserId(addedUser))
       );
     } else if (data.userRemoved) {
-      const {channel, eventNumber, timestamp, username, removedUser} = data.userRemoved;
+      const {channel, eventNumber, timestamp, user, removedUser} = data.userRemoved;
       return new UserRemovedChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
-        identityCache.getUser(removedUser)
+        identityCache.getUser(protoToDomainUserId(user)),
+        identityCache.getUser(protoToDomainUserId(removedUser))
       );
     } else if (data.userJoined) {
-      const {channel, eventNumber, timestamp, username} = data.userJoined;
+      const {channel, eventNumber, timestamp, user} = data.userJoined;
       return new UserJoinedChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username)
+        identityCache.getUser(protoToDomainUserId(user))
       );
     } else if (data.userLeft) {
-      const {channel, eventNumber, timestamp, username} = data.userLeft;
+      const {channel, eventNumber, timestamp, user} = data.userLeft;
       return new UserLeftChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username)
+        identityCache.getUser(protoToDomainUserId(user))
       );
     } else if (data.topicChanged) {
-      const {channel, eventNumber, timestamp, username, topic} = data.topicChanged;
+      const {channel, eventNumber, timestamp, user, topic} = data.topicChanged;
       return new TopicChangedChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
+        identityCache.getUser(protoToDomainUserId(user)),
         getOrDefaultString(topic)
       );
     } else if (data.nameChanged) {
-      const {channel, eventNumber, timestamp, username, name} = data.nameChanged;
+      const {channel, eventNumber, timestamp, user, name} = data.nameChanged;
       return new NameChangedChatHistoryEntry(
         channel,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),
-        identityCache.getUser(username),
+        identityCache.getUser(protoToDomainUserId(user)),
         getOrDefaultString(name)
       );
     } else {

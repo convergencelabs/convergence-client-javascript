@@ -20,7 +20,10 @@ import {
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {mapObjectValues} from "../util/ObjectUtils";
-import {jsonToProtoValue, protoValueToJson} from "../connection/ProtocolUtil";
+import {domainUserIdToProto, jsonToProtoValue, protoToDomainUserId, protoValueToJson} from "../connection/ProtocolUtil";
+import {DomainUserId} from "../identity/DomainUserId";
+import {IdentityCache} from "../identity/IdentityCache";
+import {DomainUserIdentifier} from "../identity";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -69,13 +72,19 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   private readonly _presenceStreams: Map<string, Observable<MessageEvent>>;
 
   /**
+   * @internal
+   */
+  private readonly _identityCache: IdentityCache;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection, presence: UserPresence) {
+  constructor(connection: ConvergenceConnection, presence: UserPresence, identityCache: IdentityCache) {
     super();
 
     this._connection = connection;
+    this._identityCache = identityCache;
 
     this._managers = new Map<string, UserPresenceManager>();
     this._presenceStreams = new Map<string, Observable<MessageEvent>>();
@@ -84,16 +93,16 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
       .messages()
       .pipe(share());
 
-    const username: string = this.session().user().username;
+    const localUser = this.session().user();
 
-    const localStream: Observable<MessageEvent> = this._streamForUsername(username);
-    this._presenceStreams.set(username, localStream);
+    const localStream: Observable<MessageEvent> = this._streamForUsername(localUser.userId);
+    this._presenceStreams.set(localUser.userId.toGuid(), localStream);
 
     this._localManager = new UserPresenceManager(presence, localStream, () => {
       // TODO: do we need to do something on unsubscribe
     });
 
-    this._managers.set(username, this._localManager);
+    this._managers.set(localUser.userId.toGuid(), this._localManager);
 
     this._localPresence = this._localManager.subscribe();
   }
@@ -159,31 +168,32 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     return this._localPresence.state;
   }
 
-  public presence(username: string): Promise<UserPresence>;
-  public presence(usernames: string[]): Promise<UserPresence[]>;
-  public presence(usernames: string | string[]): Promise<UserPresence> | Promise<UserPresence[]> {
-    if (typeof usernames === "string") {
-      return this._get([usernames]).then(result => {
+  public presence(user: DomainUserIdentifier): Promise<UserPresence>;
+  public presence(users: DomainUserIdentifier[]): Promise<UserPresence[]>;
+  public presence(
+    users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence> | Promise<UserPresence[]> {
+    if (!Array.isArray(users)) {
+      return this._get([DomainUserId.toDomainUserId(users)]).then(result => {
         return result[0] as UserPresence;
       });
     } else {
-      return this._get(usernames as string[]);
+      return this._get(users.map(DomainUserId.toDomainUserId));
     }
   }
 
-  public subscribe(username: string): Promise<UserPresenceSubscription>;
-  public subscribe(usernames: string[]): Promise<UserPresenceSubscription[]>;
-  public subscribe(usernames: string | string[]):
+  public subscribe(user: DomainUserIdentifier): Promise<UserPresenceSubscription>;
+  public subscribe(users: DomainUserIdentifier[]): Promise<UserPresenceSubscription[]>;
+  public subscribe(users: DomainUserIdentifier | DomainUserIdentifier[]):
     Promise<UserPresenceSubscription | UserPresenceSubscription[]> {
-    const requested: string[] = typeof usernames === "string" ?
-      [usernames as string] :
-      usernames;
+    const requested: DomainUserId[] = Array.isArray(users) ?
+      users.map(DomainUserId.toDomainUserId) :
+      [DomainUserId.toDomainUserId(users)];
 
     return this._subscribe(requested).then(() => {
       const subscriptions: UserPresenceSubscription[] =
-        requested.map(username => this._managers.get(username).subscribe());
+        requested.map(userId => this._managers.get(userId.toGuid()).subscribe());
 
-      if (typeof usernames === "string") {
+      if (!Array.isArray(users)) {
         return subscriptions[0];
       } else {
         return subscriptions;
@@ -199,21 +209,24 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @internal
    * @hidden
    */
-  private _get(usernames: string[]): Promise<UserPresence[]> {
+  private _get(userIds: DomainUserId[]): Promise<UserPresence[]> {
+    const users = userIds.map(domainUserIdToProto);
     const message: IConvergenceMessage = {
       presenceRequest: {
-        usernames
+        users
       }
     };
 
     return this._connection.request(message).then((response: IConvergenceMessage) => {
       const {userPresences} = response.presenceResponse;
-      return userPresences.map(p =>
-        new UserPresence(
-          p.username,
-          p.available,
-          StringMap.objectToMap(mapObjectValues(p.state, protoValueToJson))
-        )
+      return userPresences.map(p => {
+          const user = this._identityCache.getUser(protoToDomainUserId(p.user));
+          return new UserPresence(
+            user,
+            p.available,
+            StringMap.objectToMap(mapObjectValues(p.state, protoValueToJson))
+          );
+        }
       );
     });
   }
@@ -222,16 +235,15 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @internal
    * @hidden
    */
-  private _streamForUsername(username: string): Observable<MessageEvent> {
+  private _streamForUsername(user: DomainUserId): Observable<MessageEvent> {
     return this._messageStream.pipe(filter(e => {
       const message = e.message;
-      const incomingUsername =
-        (message.presenceAvailabilityChanged && message.presenceStateRemoved.username) ||
-        (message.presenceStateSet && message.presenceStateSet.username) ||
-        (message.presenceStateRemoved && message.presenceStateRemoved.username) ||
-        (message.presenceStateCleared && message.presenceStateCleared.username);
-
-      return incomingUsername === username;
+      const incomingUserIdData =
+        (message.presenceAvailabilityChanged && message.presenceStateRemoved.user) ||
+        (message.presenceStateSet && message.presenceStateSet.user) ||
+        (message.presenceStateRemoved && message.presenceStateRemoved.user) ||
+        (message.presenceStateCleared && message.presenceStateCleared.user);
+      return incomingUserIdData && protoToDomainUserId(incomingUserIdData).equals(user);
     }));
   }
 
@@ -239,36 +251,37 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @internal
    * @hidden
    */
-  private _subscribe(usernames: string[]): Promise<void> {
-    const notSubscribed: string[] = usernames.filter(username => {
-      return this._presenceStreams.get(username) === undefined;
+  private _subscribe(users: DomainUserId[]): Promise<void> {
+    const notSubscribed: DomainUserId[] = users.filter(userId => {
+      return this._presenceStreams.get(userId.toGuid()) === undefined;
     });
 
     if (notSubscribed.length > 0) {
-      notSubscribed.forEach(username => {
-        const stream: Observable<MessageEvent> = this._streamForUsername(username);
-        this._presenceStreams.set(username, stream);
+      notSubscribed.forEach(userId => {
+        const stream: Observable<MessageEvent> = this._streamForUsername(userId);
+        this._presenceStreams.set(userId.toGuid(), stream);
       });
 
       const message: IConvergenceMessage = {
         presenceSubscribeRequest: {
-          usernames: notSubscribed
+          users: notSubscribed.map(domainUserIdToProto)
         }
       };
 
       return this._connection.request(message).then((response: IConvergenceMessage) => {
         const {userPresences} = response.presenceSubscribeResponse;
         userPresences.forEach(presence => {
+          const user = this._identityCache.getUser(protoToDomainUserId(presence.user));
           const manager: UserPresenceManager = new UserPresenceManager(
             new UserPresence(
-              presence.username,
+              user,
               presence.available,
               StringMap.objectToMap(mapObjectValues(presence.state, protoValueToJson))
             ),
-            this._presenceStreams.get(presence.username),
-            (username) => this._unsubscribe(username)
+            this._presenceStreams.get(user.userId.toGuid()),
+            (userId) => this._unsubscribe(userId)
           );
-          this._managers.set(presence.username, manager);
+          this._managers.set(user.userId.toGuid(), manager);
         });
       });
     } else {
@@ -280,16 +293,17 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @internal
    * @hidden
    */
-  private _unsubscribe(username: string): void {
+  private _unsubscribe(userId: DomainUserId): void {
     const message: IConvergenceMessage = {
       presenceUnsubscribe: {
-        usernames: [username]
+        users: [domainUserIdToProto(userId)]
       }
     };
 
     this._connection.send(message);
 
-    this._managers.delete(username);
-    this._presenceStreams.delete(username);
+    const guid = userId.toGuid();
+    this._managers.delete(guid);
+    this._presenceStreams.delete(guid);
   }
 }

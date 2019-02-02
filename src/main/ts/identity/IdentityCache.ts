@@ -1,10 +1,16 @@
 import {DomainUser} from "./DomainUser";
 import {io} from "@convergence/convergence-proto";
-import IIdentityCacheUpdateMessage = io.convergence.proto.IIdentityCacheUpdateMessage;
 import {objectForEach} from "../util/ObjectUtils";
-import {getOrDefaultArray, getOrDefaultObject} from "../connection/ProtocolUtil";
+import {
+  getOrDefaultArray,
+  getOrDefaultObject,
+  getOrDefaultString,
+  protoToDomainUserType
+} from "../connection/ProtocolUtil";
 import {toDomainUser} from "./IdentityMessageUtils";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {DomainUserId} from "./DomainUserId";
+import IIdentityCacheUpdateMessage = io.convergence.proto.IIdentityCacheUpdateMessage;
 
 /**
  * @hidden
@@ -28,18 +34,20 @@ export class IdentityCache {
     return this._sessions.get(sessionId);
   }
 
-  public getUser(username: string): DomainUser | undefined {
-    return this._users.get(username);
+  public getUser(userId: DomainUserId): DomainUser | undefined {
+    return this._users.get(userId.toGuid());
   }
 
   public _processIdentityUpdate(message: IIdentityCacheUpdateMessage): void {
     getOrDefaultArray(message.users).forEach(userData => {
       const domainUser = toDomainUser(userData);
-      this._users.set(domainUser.username, domainUser);
+      this._users.set(domainUser.userId.toGuid(), domainUser);
     });
 
-    objectForEach(getOrDefaultObject(message.sessions), (sessionId, username) => {
-      const domainUser = this._users.get(username);
+    objectForEach(getOrDefaultObject(message.sessions), (sessionId, user) => {
+      const userType = protoToDomainUserType(user.userType);
+      const username = getOrDefaultString(user.username);
+      const domainUser = this._users.get(DomainUserId.guid(userType, username));
       this._sessions.set(sessionId, domainUser);
     });
   }

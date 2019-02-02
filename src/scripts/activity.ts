@@ -5,7 +5,7 @@ import {connect} from "./connect";
 connect()
   .then(domain => {
     console.log("connected");
-    return domain.activities().join("foo", {state: {foo: "bar", bar: undefined}});
+    return domain.activities().join("foo", {state: {foo: "bar"}});
   })
   .then(activity => {
     console.log("Activity Joined");

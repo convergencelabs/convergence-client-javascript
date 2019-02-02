@@ -51,7 +51,7 @@ export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly name: string,
               public readonly topic: string,
-              public readonly members: string[]) {
+              public readonly members: DomainUser[]) {
     super(ChannelCreatedHistoryEntry.TYPE, channelId, eventNumber, timestamp, user);
     Object.freeze(this);
   }

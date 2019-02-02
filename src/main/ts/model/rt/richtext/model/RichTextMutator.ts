@@ -2,6 +2,8 @@
  * @hidden
  * @internal
  */
+import {RichTextLocationTransformer} from "./RichTextLocationTransformer";
+
 export class RichTextMutator {
   private readonly _document: RichTextDocument;
 
@@ -50,9 +52,11 @@ export class RichTextMutator {
     // FIXME need this to be tracked as the subtree is changed.
     const endLocation: RichTextLocation = range.end();
 
+    const xFormedRange = RichTextLocationTransformer.transformRemove(endLocation, range);
+
     const fragment = this._extractFromRangeContent(range);
 
-    this._mergeSubtrees(startLocation, endLocation);
+    this._mergeSubtrees(startLocation, xFormedRange);
 
     return this;
   }

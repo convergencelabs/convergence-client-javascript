@@ -1,4 +1,5 @@
 import {deepClone} from "../util/ObjectUtils";
+import {DomainUser} from "../identity";
 
 export class UserPresence {
 
@@ -15,7 +16,7 @@ export class UserPresence {
    * @hidden
    * @internal
    */
-  constructor(public readonly username: string,
+  constructor(public readonly user: DomainUser,
               public readonly available: boolean,
               state: Map<string, any>) {
     this._state = deepClone(state);

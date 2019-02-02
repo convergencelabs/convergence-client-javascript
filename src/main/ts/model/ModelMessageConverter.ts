@@ -11,19 +11,21 @@ import {
   StringValue,
 } from "./dataValue";
 import {
-  dateToTimestamp,
+  dateToTimestamp, domainUserIdToProto,
   getOrDefaultArray,
   getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultObject, getOrDefaultString,
   protoValueToJson,
   timestampToDate
 } from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
-import {mapObjectValues} from "../util/ObjectUtils";
+import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 import IObjectValue = io.convergence.proto.IObjectValue;
 import {ModelPermissions} from "./ModelPermissions";
 import IModelPermissionsData = io.convergence.proto.IModelPermissionsData;
 import {ModelResult} from "./query";
 import IModelResult = io.convergence.proto.IModelResult;
+import {DomainUserId} from "../identity/DomainUserId";
+import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
 
 export function toDataValue(val: IDataValue): DataValue {
   if (val.arrayValue) {
@@ -116,4 +118,30 @@ export function toModelResult(result: IModelResult): ModelResult {
     timestampToDate(result.modifiedTime),
     getOrDefaultNumber(result.version)
   );
+}
+
+export function modelUserPermissionMapToProto(
+  perms: { [key: string]: ModelPermissions } | undefined): IUserModelPermissionsEntry[] {
+  if (perms === undefined || perms === null) {
+    return [];
+  } else {
+    const mapped: IUserModelPermissionsEntry[] = [];
+    objectForEach(perms, (username, permissions) => {
+      mapped.push({
+        user: domainUserIdToProto(DomainUserId.normal(username)),
+        permissions
+      });
+    });
+    return mapped;
+  }
+}
+
+export function protoToModelUserPermissionMap(perms: IUserModelPermissionsEntry[]): Map<string, ModelPermissions> {
+  const map = new Map();
+  if (perms !== undefined || perms !== null) {
+    perms.forEach(entry => {
+      map.set(entry.user.username, toModelPermissions(entry.permissions));
+    });
+  }
+  return map;
 }

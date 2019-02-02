@@ -1,8 +1,13 @@
-import {google} from "@convergence/convergence-proto";
+import {google, io} from "@convergence/convergence-proto";
 import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
-import {mapObjectValues} from "../util/ObjectUtils";
+import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 import {ConvergenceError} from "../util";
+import IDomainUserIdData = io.convergence.proto.IDomainUserIdData;
+import {DomainUserId, DomainUserType} from "../identity/DomainUserId";
+import DomainUserTypeData = io.convergence.proto.DomainUserTypeData;
+import {ModelPermissions} from "../model";
+import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
 
 /**
  * @hidden
@@ -132,5 +137,36 @@ export function jsonToProtoValue(value: any): IValue {
     return {structValue: {fields: mapObjectValues(value, jsonToProtoValue)}};
   } else {
     throw new ConvergenceError("Can not serialize unknown data type: " + value);
+  }
+}
+
+export function protoToDomainUserId(data: IDomainUserIdData): DomainUserId {
+  return new DomainUserId(protoToDomainUserType(data.userType), getOrDefaultString(data.username));
+}
+
+export function domainUserIdToProto(domainUserId: DomainUserId): IDomainUserIdData {
+  return {userType: domainUserTypeToProto(domainUserId.userType), username: domainUserId.username};
+}
+
+export function protoToDomainUserType(data: DomainUserTypeData): DomainUserType {
+  switch (data) {
+    case 0:
+    case undefined:
+      return DomainUserType.NORMAL;
+    case 1:
+      return DomainUserType.CONVERGENCE;
+    case 2:
+      return DomainUserType.ANONYMOUS;
+  }
+}
+
+export function domainUserTypeToProto(type: DomainUserType): DomainUserTypeData {
+  switch (type) {
+    case DomainUserType.NORMAL:
+      return 0;
+    case DomainUserType.CONVERGENCE:
+      return 1;
+    case DomainUserType.ANONYMOUS:
+      return 2;
   }
 }

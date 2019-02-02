@@ -2,10 +2,15 @@ import {ModelPermissions} from "./ModelPermissions";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import IModelPermissionsData = io.convergence.proto.IModelPermissionsData;
-import {mapObjectValues} from "../util/ObjectUtils";
 import {StringMap} from "../util";
-import {toModelPermissions} from "./ModelMessageConverter";
+import {
+  modelUserPermissionMapToProto,
+  protoToModelUserPermissionMap,
+  toModelPermissions
+} from "./ModelMessageConverter";
+import {DomainUserIdentifier} from "../identity";
+import {DomainUserId} from "../identity/DomainUserId";
+import {domainUserIdToProto} from "../connection/ProtocolUtil";
 
 export class ModelPermissionManager {
 
@@ -52,7 +57,7 @@ export class ModelPermissionManager {
         modelId: this._modelId,
         overridesCollection: overrideCollection,
         removeAllUserPermissionsBeforeSet: false,
-        setUserPermissions: {},
+        setUserPermissions: [],
         removedUserPermissions: []
       }
     };
@@ -94,7 +99,7 @@ export class ModelPermissionManager {
         modelId: this._modelId,
         worldPermissions,
         removeAllUserPermissionsBeforeSet: false,
-        setUserPermissions: {},
+        setUserPermissions: [],
         removedUserPermissions: []
       }
     };
@@ -113,7 +118,7 @@ export class ModelPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getModelPermissionsResponse} = response;
-      return StringMap.objectToMap(mapObjectValues(getModelPermissionsResponse.userPermissions, toModelPermissions));
+      return protoToModelUserPermissionMap(getModelPermissionsResponse.userPermissions);
     });
   }
 
@@ -133,7 +138,7 @@ export class ModelPermissionManager {
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
-        setUserPermissions: StringMap.mapToObject(permissions),
+        setUserPermissions: modelUserPermissionMapToProto(StringMap.mapToObject(permissions)),
         removeAllUserPermissionsBeforeSet: true
       }
     };
@@ -156,13 +161,14 @@ export class ModelPermissionManager {
     });
   }
 
-  public setUserPermissions(username: string, permissions: ModelPermissions): Promise<void> {
+  public setUserPermissions(user: DomainUserIdentifier, permissions: ModelPermissions): Promise<void> {
+    const userId = DomainUserId.toDomainUserId(user);
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
         overridesCollection: false,
         worldPermissions: null,
-        setUserPermissions: {username: permissions},
+        setUserPermissions: [{user: domainUserIdToProto(userId), permissions}],
         removeAllUserPermissionsBeforeSet: false,
         removedUserPermissions: []
       }
@@ -173,12 +179,13 @@ export class ModelPermissionManager {
     });
   }
 
-  public removeUserPermissions(username: string): Promise<void> {
+  public removeUserPermissions(user: DomainUserIdentifier): Promise<void> {
+    const userId = DomainUserId.toDomainUserId(user);
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
         removeAllUserPermissionsBeforeSet: false,
-        removedUserPermissions: [username]
+        removedUserPermissions: [domainUserIdToProto(userId)]
       }
     };
 

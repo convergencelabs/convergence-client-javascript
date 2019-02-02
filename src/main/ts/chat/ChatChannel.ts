@@ -18,8 +18,9 @@ import {Observable} from "rxjs";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
-import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
+import {getOrDefaultArray, protoToDomainUserId, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
+import {DomainUser} from "../identity";
 
 export interface ChatChannelInfo {
   readonly channelType: ChatChannelType;
@@ -35,7 +36,7 @@ export interface ChatChannelInfo {
 }
 
 export interface ChatChannelMember {
-  readonly username: string;
+  readonly user: DomainUser;
   readonly maxSeenEventNumber: number;
 }
 
@@ -93,8 +94,8 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
 
     // TODO this might not make sense for rooms
     this._joined = info.members
-      .map(m => m.username)
-      .includes(this.session().user().username);
+      .map(m => m.user.userId)
+      .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
 
     messageStream.subscribe(event => {
       this._processEvent(event);
@@ -199,21 +200,23 @@ export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
     }
 
     if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
-      const members = this._info.members.slice(0);
       // TODO should we allow a seen number to come along?
-      members.push({username: event.user.username, maxSeenEventNumber: -1});
+      const user = (event instanceof UserJoinedEvent) ? event.user : event.addedUser;
+      const members = this._info.members.slice(0);
+      const member = {user: event.user, maxSeenEventNumber: -1};
+      members.push(member);
       if (event.user.username === this.session().user().username) {
         // FIXME this might not be right for rooms
         this._joined = true;
       }
       this._info = {...this._info, members};
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
-      const removedUsername = event.user.username;
-      if (removedUsername === this.session().user().username) {
+      const removedUser = (event instanceof UserLeftEvent) ? event.user : event.removedUser;
+      if (this.session().user().userId.equals(removedUser.userId)) {
         // FIXME this might not be right for rooms
         this._joined = false;
       }
-      const members = this._info.members.filter(member => member.username !== removedUsername);
+      const members = this._info.members.filter(member => !member.user.userId.equals(removedUser.userId));
       this._info = {...this._info, members};
     } else if (event instanceof ChatChannelNameChanged) {
       this._info = {...this._info, name: event.channelName};

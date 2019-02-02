@@ -18,10 +18,25 @@ import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {toIObjectValue, toModelPermissions, toModelResult, toObjectValue} from "./ModelMessageConverter";
+import {
+  modelUserPermissionMapToProto,
+  toIObjectValue,
+  toModelPermissions,
+  toModelResult,
+  toObjectValue
+} from "./ModelMessageConverter";
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
-import {getOrDefaultArray, getOrDefaultNumber, timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {
+  getOrDefaultArray,
+  getOrDefaultNumber,
+  timestampToDate,
+  toOptional
+} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
+import {ModelPermissions} from "./ModelPermissions";
+import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
+import {objectForEach} from "../util/ObjectUtils";
+import {DomainUserId} from "../identity/DomainUserId";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -194,6 +209,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return idGen.id();
     });
     const dataValue: ObjectValue = dataValueFactory.createDataValue(data) as ObjectValue;
+
+    const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
     const request: IConvergenceMessage = {
       createRealTimeModelRequest: {
         collectionId: collection,
@@ -201,7 +218,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         data: toIObjectValue(dataValue),
         overrideWorldPermissions: options.overrideCollectionWorldPermissions,
         worldPermissions: options.worldPermissions,
-        userPermissions: options.userPermissions
+        userPermissions
       }
     };
 
@@ -458,6 +475,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         dataValue = dataValueFactory.createDataValue(data) as ObjectValue;
       }
 
+      const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
       const response: IConvergenceMessage = {
         modelAutoCreateConfigResponse: {
           data: toIObjectValue(dataValue),
@@ -465,7 +483,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           collection: options.collection,
           overridePermissions: options.overrideCollectionWorldPermissions,
           worldPermissions: options.worldPermissions,
-          userPermissions: options.userPermissions
+          userPermissions
         }
       };
       replyCallback.reply(response);

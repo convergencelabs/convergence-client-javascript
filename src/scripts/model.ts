@@ -1,5 +1,7 @@
 #!/usr/bin/env node --require ts-node/register
 
+(global as any).CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true};
+
 import {connect} from "./connect";
 import {ConvergenceDomain, RealTimeObject} from "../main/ts";
 let domain: ConvergenceDomain;

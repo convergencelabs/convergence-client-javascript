@@ -10,6 +10,8 @@ import {
   PresenceStateClearedEvent
 } from "./events/";
 import {deepClone} from "../util/ObjectUtils";
+import {DomainUserId} from "../identity/DomainUserId";
+import {DomainUser} from "../identity";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
@@ -36,7 +38,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
   /**
    * @internal
    */
-  private readonly _onUnsubscribe: (username: string) => void;
+  private readonly _onUnsubscribe: (user: DomainUserId) => void;
 
   /**
    * @hidden
@@ -44,11 +46,11 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
    */
   constructor(initialPresence: UserPresence,
               eventStream: Observable<MessageEvent>,
-              onUnsubscribe: (username: string) => void) {
+              onUnsubscribe: (userId: DomainUserId) => void) {
     super();
 
     this._presence = new UserPresence(
-      initialPresence.username,
+      initialPresence.user,
       initialPresence.available,
       initialPresence.state
     );
@@ -59,8 +61,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     this._subject = new BehaviorSubject(this._presence);
   }
 
-  public username(): string {
-    return this._presence.username;
+  public user(): DomainUser {
+    return this._presence.user;
   }
 
   public isAvailable(): boolean {
@@ -86,16 +88,16 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     if (this._subscriptions.length === 0) {
       this._messageSubscription.unsubscribe();
       this._subject.complete();
-      this._onUnsubscribe(this.username());
+      this._onUnsubscribe(this.user().userId);
     }
   }
 
   public availability(availability: boolean): void {
     this._presence =
-      new UserPresence(this._presence.username, availability, this._presence.state);
+      new UserPresence(this._presence.user, availability, this._presence.state);
 
     const event: PresenceAvailabilityChangedEvent =
-      new PresenceAvailabilityChangedEvent(this._presence.username, availability);
+      new PresenceAvailabilityChangedEvent(this._presence.user, availability);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
@@ -105,11 +107,11 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     state.forEach((v, k) => newState.set(k, deepClone(v)));
 
     this._presence = new UserPresence(
-      this._presence.username,
+      this._presence.user,
       this._presence.available,
       newState);
 
-    const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.username, newState);
+    const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.user, newState);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
@@ -119,22 +121,22 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     keys.forEach(k => newState.delete(k));
 
     this._presence = new UserPresence(
-      this._presence.username,
+      this._presence.user,
       this._presence.available,
       newState);
 
-    const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.username, keys);
+    const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.user, keys);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }
 
   public clear(): void {
     this._presence = new UserPresence(
-      this._presence.username,
+      this._presence.user,
       this._presence.available,
       new Map<string, any>());
 
-    const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.username);
+    const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.user);
     this._emitEvent(event);
     this._subject.next(this._presence);
   }

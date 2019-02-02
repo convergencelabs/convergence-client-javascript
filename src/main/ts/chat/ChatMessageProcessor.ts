@@ -10,7 +10,7 @@ import {
 } from "./events/";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
+import {getOrDefaultNumber, getOrDefaultString, protoToDomainUserId, timestampToDate} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {ConvergenceError} from "../util";
 
@@ -40,7 +40,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       userJoined.channelId,
       getOrDefaultNumber(userJoined.eventNumber),
       timestampToDate(userJoined.timestamp),
-      identityCache.getUser(userJoined.username)
+      identityCache.getUser(protoToDomainUserId(userJoined.user))
     );
   } else if (message.userLeftChatChannel) {
     const userLeft = message.userLeftChatChannel;
@@ -48,7 +48,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       userLeft.channelId,
       getOrDefaultNumber(userLeft.eventNumber),
       timestampToDate(userLeft.timestamp),
-      identityCache.getUser(userLeft.username)
+      identityCache.getUser(protoToDomainUserId(userLeft.user))
     );
   } else if (message.userAddedToChatChannel) {
     const userAdded = message.userAddedToChatChannel;
@@ -56,8 +56,8 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       userAdded.channelId,
       getOrDefaultNumber(userAdded.eventNumber),
       timestampToDate(userAdded.timestamp),
-      identityCache.getUser(userAdded.username),
-      identityCache.getUser(userAdded.addedUser)
+      identityCache.getUser(protoToDomainUserId(userAdded.user)),
+      identityCache.getUser(protoToDomainUserId(userAdded.addedUser))
     );
   } else if (message.userRemovedFromChatChannel) {
     const userRemoved = message.userRemovedFromChatChannel;
@@ -65,8 +65,8 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       userRemoved.channelId,
       getOrDefaultNumber(userRemoved.eventNumber),
       timestampToDate(userRemoved.timestamp),
-      identityCache.getUser(userRemoved.username),
-      identityCache.getUser(userRemoved.removedUser)
+      identityCache.getUser(protoToDomainUserId(userRemoved.user)),
+      identityCache.getUser(protoToDomainUserId(userRemoved.removedUser))
     );
   } else if (message.chatChannelRemoved) {
     const removedMsg = message.chatChannelRemoved;
@@ -77,7 +77,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       nameSet.channelId,
       getOrDefaultNumber(nameSet.eventNumber),
       timestampToDate(nameSet.timestamp),
-      identityCache.getUser(nameSet.username),
+      identityCache.getUser(protoToDomainUserId(nameSet.user)),
       getOrDefaultString(nameSet.name),
     );
   } else if (message.chatChannelTopicChanged) {
@@ -86,7 +86,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       topicSet.channelId,
       getOrDefaultNumber(topicSet.eventNumber),
       timestampToDate(topicSet.timestamp),
-      identityCache.getUser(topicSet.username),
+      identityCache.getUser(protoToDomainUserId(topicSet.user)),
       getOrDefaultString(topicSet.topic)
     );
   } else if (message.remoteChatMessage) {

@@ -1,5 +1,7 @@
 #!/usr/bin/env node --require ts-node/register
 
+(global as any).CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true};
+
 import {ChatChannel} from "../main/ts/";
 import {connect} from "./connect";
 

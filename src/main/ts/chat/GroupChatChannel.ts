@@ -3,6 +3,9 @@ import {Observable} from "rxjs";
 import {MembershipChatChannel, MembershipChatChannelInfo} from "./MembershipChatChannel";
 import {IChatEvent} from "./events/";
 import {IdentityCache} from "../identity/IdentityCache";
+import {DomainUserIdentifier} from "../identity";
+import {DomainUserId} from "../identity/DomainUserId";
+import {domainUserIdToProto} from "../connection/ProtocolUtil";
 
 export class GroupChatChannel extends MembershipChatChannel {
 
@@ -17,12 +20,12 @@ export class GroupChatChannel extends MembershipChatChannel {
     super(connection, identityCache, messageStream, info);
   }
 
-  public add(username: string): Promise<void> {
+  public add(user: DomainUserIdentifier): Promise<void> {
     this._assertJoined();
     return this._connection.request({
       addUserToChatChannelRequest: {
         channelId: this._info.channelId,
-        userToAdd: username
+        userToAdd: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
     }).then(() => {
       return;

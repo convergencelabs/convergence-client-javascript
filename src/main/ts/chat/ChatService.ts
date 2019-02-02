@@ -23,8 +23,10 @@ import {ChatPermissionManager} from "./ChatPermissionManager";
 import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatChannelInfoData = io.convergence.proto.IChatChannelInfoData;
-import {timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {domainUserIdToProto, protoToDomainUserId, timestampToDate, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
+import {DomainUserId} from "../identity/DomainUserId";
+import {DomainUserIdentifier} from "../identity";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -173,6 +175,14 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     }
 
     const {id, type: channelType, name, topic, membership, members} = options;
+    const memberIds = (members || []).map(member => {
+      if (member instanceof DomainUserId) {
+        return domainUserIdToProto(member);
+      } else {
+        return domainUserIdToProto(DomainUserId.normal(member));
+      }
+    });
+
     return this._connection.request({
       createChatChannelRequest: {
         channelId: toOptional(id),
@@ -180,7 +190,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
         channelMembership: membership,
         name,
         topic,
-        members
+        members: memberIds
       }
     }).then((response: IConvergenceMessage) => {
       const {createChatChannelResponse} = response;
@@ -236,16 +246,23 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   }
 
   // Methods that apply to Single User Chat Channels.
-  public direct(username: string): Promise<DirectChatChannel>;
-  public direct(usernames: string[]): Promise<DirectChatChannel>;
-  public direct(usernames: string | string[]): Promise<DirectChatChannel> {
-    if (typeof usernames === "string") {
-      usernames = [usernames];
+  public direct(user: string | DomainUserId): Promise<DirectChatChannel>;
+  public direct(users: Array<string | DomainUserId>): Promise<DirectChatChannel>;
+  public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChatChannel> {
+    if (typeof users === "string" || users instanceof DomainUserId) {
+      users = [users];
     }
 
+    const userIds = users.map(user => {
+      if (user instanceof DomainUserId) {
+        return domainUserIdToProto(user);
+      } else {
+        return domainUserIdToProto(DomainUserId.normal(user));
+      }
+    });
     return this._connection.request({
       getDirectChatChannelsRequest: {
-        usernameLists: [{values: usernames}]
+        userLists: [{values: userIds}]
       }
     }).then((response: IConvergenceMessage) => {
       const {getDirectChatChannelsResponse} = response;
@@ -288,12 +305,16 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    */
   private _createChannelInfo(channelData: IChatChannelInfoData): ChatChannelInfo {
     let maxEvent = -1;
-    const members: ChatChannelMember[] = [];
-    channelData.members.forEach(member => {
-      members.push({username: member.username, maxSeenEventNumber: member.maxSeenEventNumber as number});
-      if (member.username === this._connection.session().user().username) {
+    const localUserId = this._connection.session().user().userId;
+    const members = channelData.members.map(member => {
+      const userId = protoToDomainUserId(member.user);
+      if (userId.equals(localUserId)) {
         maxEvent = member.maxSeenEventNumber as number;
       }
+
+      const user = this._identityCache.getUser(userId);
+
+      return {user, maxSeenEventNumber: member.maxSeenEventNumber as number};
     });
     return {
       channelId: channelData.id,
@@ -323,6 +344,6 @@ export interface CreateChatChannelOptions {
   id?: string;
   name?: string;
   topic?: string;
-  members?: string[];
+  members?: DomainUserIdentifier[];
   ignoreExistsError?: boolean;
 }
