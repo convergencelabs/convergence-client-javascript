@@ -1,0 +1,34 @@
+@font-face {
+  font-family: "Century Gothic";
+  src: url('fonts/CenturyGothic.ttf');
+}
+
+a.header-brand {
+  display: flex;
+  white-space: normal;
+  padding-right: 35px;
+  transition: opacity 0.3s;
+}
+.header-brand img {
+  height: 24px; 
+  position: relative; 
+  top: 6px; 
+  margin-right: 10px;
+}
+.brand-title {
+  font-family: "Century Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  color: #11599c;
+  display: inline-block;
+  line-height: 2.3em;
+}
+
+#tsd-search.has-focus .header-brand {
+  opacity: 0.07;
+}
+
+@media screen and (max-width: 500px) {
+  .brand-title {
+    line-height: 1.2em;
+  }
+}
