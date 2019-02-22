@@ -1,3 +1,7 @@
+/**
+ * @internal
+ * @hidden
+ */
 export class TypeChecker {
   public static isArray(value: any): value is any[] {
     return Array.isArray(value);

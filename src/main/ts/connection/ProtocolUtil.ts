@@ -1,4 +1,4 @@
-import {google, io} from "@convergence/convergence-proto";
+import {google, io} from "@convergence-internal/convergence-proto";
 import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
 import {mapObjectValues, objectForEach} from "../util/ObjectUtils";

@@ -16,9 +16,9 @@ import {
   DisconnectedEvent
 } from "./events/";
 import {Validation} from "./util";
-import {io} from "@convergence/convergence-proto";
-import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import {io} from "@convergence-internal/convergence-proto";
 import {IdentityCache} from "./identity/IdentityCache";
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -93,6 +93,16 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   private _disposed: boolean;
 
   /**
+   * @internal
+   */
+  private _id: string;
+
+  /**
+   * @internal
+   */
+  private _namespace: string;
+
+  /**
    * Constructs a new ConvergenceDomain using the default options.
    *
    * @hidden
@@ -138,48 +148,19 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   }
 
   /**
-   * @hidden
-   * @internal
-   * @private
+   * @returns
+   *  The ConvergenceSession object for this domain.
    */
-  public _authenticateWithPassword(username: string, password: string): Promise<void> {
-    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
+  public namespace(): string {
+    return this._namespace;
   }
 
   /**
-   * @hidden
-   * @internal
-   * @private
+   * @returns
+   *  The ConvergenceSession object for this domain.
    */
-  public _authenticateWithJwt(jwt: string): Promise<void> {
-    return this._connection.authenticateWithJwt(jwt).then(m => this._init(m));
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _authenticateWithReconnectToken(token: string): Promise<void> {
-    return this._connection.authenticateWithReconnectToken(token).then(m => this._init(m));
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _authenticateAnonymously(displayName?: string): Promise<void> {
-    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _connect(): Promise<IHandshakeResponseMessage> {
-    return this._connection.connect();
+  public id(): string {
+    return this._id;
   }
 
   /**
@@ -295,6 +276,56 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public isDisposed(): boolean {
     return this._disposed;
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _authenticateWithPassword(username: string, password: string): Promise<void> {
+    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _authenticateWithJwt(jwt: string): Promise<void> {
+    return this._connection.authenticateWithJwt(jwt).then(m => this._init(m));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _authenticateWithReconnectToken(token: string): Promise<void> {
+    return this._connection.authenticateWithReconnectToken(token).then(m => this._init(m));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _authenticateAnonymously(displayName?: string): Promise<void> {
+    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _connect(): Promise<void> {
+    return this._connection.connect()
+      .then((response: IHandshakeResponseMessage) => {
+        this._namespace = response.namespace;
+        this._id = response.id;
+        return;
+      });
   }
 
   /**

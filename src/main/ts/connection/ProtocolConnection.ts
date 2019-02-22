@@ -5,7 +5,7 @@ import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter, Conv
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IErrorMessage = io.convergence.proto.IErrorMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;

@@ -12,7 +12,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable, BehaviorSubject} from "rxjs";
 import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {mapObjectValues} from "../util/ObjectUtils";
 import {jsonToProtoValue} from "../connection/ProtocolUtil";

@@ -17,7 +17,7 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {mapObjectValues} from "../util/ObjectUtils";
 import {domainUserIdToProto, jsonToProtoValue, protoToDomainUserId, protoValueToJson} from "../connection/ProtocolUtil";

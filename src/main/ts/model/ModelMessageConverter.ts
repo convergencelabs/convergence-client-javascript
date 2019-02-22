@@ -1,4 +1,4 @@
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IDataValue = io.convergence.proto.IDataValue;
 import {
   ArrayValue,
@@ -27,6 +27,10 @@ import IModelResult = io.convergence.proto.IModelResult;
 import {DomainUserId} from "../identity/DomainUserId";
 import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toDataValue(val: IDataValue): DataValue {
   if (val.arrayValue) {
     const {id, children} = val.arrayValue;
@@ -57,6 +61,10 @@ export function toDataValue(val: IDataValue): DataValue {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toIDataValue(val: DataValue): IDataValue {
   if (val.type === "array") {
     const {id, children} = val as ArrayValue;
@@ -84,6 +92,10 @@ export function toIDataValue(val: DataValue): IDataValue {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toIObjectValue(objectValue: ObjectValue): IObjectValue {
   return {
     id: objectValue.id,
@@ -91,6 +103,10 @@ export function toIObjectValue(objectValue: ObjectValue): IObjectValue {
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toObjectValue(objectValue: IObjectValue): ObjectValue {
   return {
     type: "object",
@@ -99,6 +115,10 @@ export function toObjectValue(objectValue: IObjectValue): ObjectValue {
   };
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toModelPermissions(permissionsData: IModelPermissionsData): ModelPermissions | undefined {
   return permissionsData === undefined ?
     undefined :
@@ -109,6 +129,10 @@ export function toModelPermissions(permissionsData: IModelPermissionsData): Mode
       getOrDefaultBoolean(permissionsData.manage));
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toModelResult(result: IModelResult): ModelResult {
   return new ModelResult(
     mapObjectValues(result.data.fields, protoValueToJson),
@@ -120,6 +144,10 @@ export function toModelResult(result: IModelResult): ModelResult {
   );
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function modelUserPermissionMapToProto(
   perms: { [key: string]: ModelPermissions } | undefined): IUserModelPermissionsEntry[] {
   if (perms === undefined || perms === null) {
@@ -136,6 +164,10 @@ export function modelUserPermissionMapToProto(
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function protoToModelUserPermissionMap(perms: IUserModelPermissionsEntry[]): Map<string, ModelPermissions> {
   const map = new Map();
   if (perms !== undefined || perms !== null) {

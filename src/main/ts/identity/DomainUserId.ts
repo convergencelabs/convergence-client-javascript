@@ -6,7 +6,6 @@ export enum DomainUserType {
   ANONYMOUS = "anonymous"
 }
 
-
 export class DomainUserId {
   public static normal(username: string): DomainUserId {
     return new DomainUserId(DomainUserType.NORMAL, username);

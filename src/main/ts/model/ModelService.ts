@@ -16,7 +16,7 @@ import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ICreateModelOptions} from "./ICreateModelOptions";
 import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {
   modelUserPermissionMapToProto,

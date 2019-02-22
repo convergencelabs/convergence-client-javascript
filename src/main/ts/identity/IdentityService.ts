@@ -3,7 +3,7 @@ import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
 import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";

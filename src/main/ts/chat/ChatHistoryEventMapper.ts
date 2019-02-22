@@ -1,4 +1,4 @@
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IChatChannelEventData = io.convergence.proto.IChatChannelEventData;
 import {
   ChannelCreatedHistoryEntry,

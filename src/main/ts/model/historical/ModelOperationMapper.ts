@@ -1,4 +1,4 @@
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IModelOperationData = io.convergence.proto.IModelOperationData;
 import {ModelOperation} from "../ot/applied/ModelOperation";
 import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";

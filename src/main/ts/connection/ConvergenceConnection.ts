@@ -15,7 +15,7 @@ import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;

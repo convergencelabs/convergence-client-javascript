@@ -8,7 +8,7 @@ import {
   ChatChannelNameChanged,
   ChatChannelTopicChanged, IChatEvent
 } from "./events/";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {getOrDefaultNumber, getOrDefaultString, protoToDomainUserId, timestampToDate} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";

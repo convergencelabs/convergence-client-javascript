@@ -1,4 +1,4 @@
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IOperationData = io.convergence.proto.IOperationData;
 import {Operation} from "./ot/ops/Operation";
 import {ConvergenceError} from "../util";

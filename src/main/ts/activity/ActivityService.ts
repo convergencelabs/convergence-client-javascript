@@ -15,7 +15,7 @@ import {
 } from "./events";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceEventEmitter, StringMap} from "../util/";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {IdentityCache} from "../identity/IdentityCache";
 import {getOrDefaultObject, jsonToProtoValue, protoValueToJson} from "../connection/ProtocolUtil";

@@ -20,7 +20,7 @@ import {filter, share, tap, map} from "rxjs/operators";
 import {GroupChatChannel} from "./GroupChatChannel";
 import {ChatRoomChannel} from "./ChatRoomChannel";
 import {ChatPermissionManager} from "./ChatPermissionManager";
-import {io} from "@convergence/convergence-proto";
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatChannelInfoData = io.convergence.proto.IChatChannelInfoData;
 import {domainUserIdToProto, protoToDomainUserId, timestampToDate, toOptional} from "../connection/ProtocolUtil";
