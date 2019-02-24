@@ -18,14 +18,16 @@ import shell from "gulp-shell";
 import filter from 'gulp-filter-each';
 import trim from "trim";
 import insert from "gulp-insert";
+import replace from "gulp-replace";
 import rollupConfig from "./rollup.config.js";
-
-const npmPackageJson = JSON.parse(fs.readFileSync("./npmjs/package.json"));
 
 const distInternalDir = "./dist-internal";
 const distDir = "./dist";
 
+const CONVERGENCE_CLIENT_VERSION = "$CONVERGENCE_CLIENT_VERSION";
+
 function minify(source, destination) {
+  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
   const headerTxt = fs.readFileSync("./copyright-header.txt");
   return src(source)
     .pipe(sourceMaps.init())
@@ -34,7 +36,7 @@ function minify(source, destination) {
         regex: /(^_.*|.*transform.*|serverOp|clientOp)/
       }
     }))
-    .pipe(header(headerTxt, {package: npmPackageJson}))
+    .pipe(header(headerTxt, {package: distInternalPackage}))
     .pipe(rename({
       extname: ".min.js"
     }))
@@ -49,9 +51,11 @@ const distCjsMin = () => {
 const distCjs = () => {
   const config = {...rollupConfig, rollup: require("rollup")};
   config.output = {...config.output, format: "cjs"};
+  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
 
   return rollupStream(config)
     .pipe(source(`${distInternalDir}/convergence.js`))
+    .pipe(replace(CONVERGENCE_CLIENT_VERSION, distInternalPackage.version))
     .pipe(buffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
@@ -60,8 +64,10 @@ const distCjs = () => {
 
 const distUmd = () => {
   const config = {...rollupConfig, rollup: require("rollup")};
+  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
   return rollupStream(config)
     .pipe(source(`${distInternalDir}/umd/convergence.js`))
+    .pipe(replace(CONVERGENCE_CLIENT_VERSION, distInternalPackage.version))
     .pipe(buffer())
     .pipe(sourceMaps.init({loadMaps: true}))
     .pipe(sourceMaps.write("."))
@@ -99,7 +105,7 @@ const lint = () =>
     .pipe(tsLint.report());
 
 const copyPackage = () => src("./package.json").pipe(dest(distInternalDir));
-const bumpPacakgeVersion = (cb) => {
+const bumpPackageVersion = (cb) => {
   const packageJson = JSON.parse(fs.readFileSync("./package.json"));
   if (packageJson.version.endsWith("SNAPSHOT")) {
     return src(`${distInternalDir}/package.json`)
@@ -137,18 +143,25 @@ const declarationsNamedExport = () =>
 const typings = series(tsDeclarations, declarationsNamedExport);
 
 const distInternal = series(
+  copyPackage,
+  bumpPackageVersion,
   typings,
   distCjs,
   distCjsMin,
   distUmd,
   distUmdMin,
   distUmdBundle,
-  distUmdBundleMin,
-  copyPackage,
-  bumpPacakgeVersion
+  distUmdBundleMin
 );
 
 const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));
+const bumpNpmJs = () => {
+  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
+  return src(["./dist/package.json"])
+    .pipe(bump({version: distInternalPackage.version}))
+    .pipe(dest(distDir));
+}
+
 const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`])
   .pipe(rename(path => {
     if (path.basename.endsWith(".min")) {
@@ -158,7 +171,7 @@ const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`])
   .pipe(dest(`${distDir}`));
 const copyTypes = () => src([`${distInternalDir}/typings/**/*`]).pipe(dest(`${distDir}/typings`));
 
-const distNpmJs = series(copyNpmJs, distCopyMin, copyTypes);
+const distNpmJs = series(copyNpmJs, bumpNpmJs, distCopyMin, copyTypes);
 
 const test = () =>
   src("src/test*/**/*Spec.ts")
