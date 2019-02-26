@@ -1,4 +1,4 @@
-import {ChatChannelInfo, ChatChannel} from "./ChatChannel";
+import {ChatInfo, Chat} from "./Chat";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {IChatEvent} from "./events/";
 import {Observable} from "rxjs";
@@ -7,7 +7,7 @@ import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {DomainUserId} from "../identity/DomainUserId";
 import {DomainUserIdentifier} from "../identity";
 
-export class MembershipChatChannel extends ChatChannel {
+export class MembershipChat extends Chat {
 
   /**
    * @hidden
@@ -16,19 +16,19 @@ export class MembershipChatChannel extends ChatChannel {
   constructor(connection: ConvergenceConnection,
               identityCache: IdentityCache,
               messageStream: Observable<IChatEvent>,
-              info: MembershipChatChannelInfo) {
+              info: MembershipChatInfo) {
     super(connection, identityCache, messageStream, info);
   }
 
-  public info(): MembershipChatChannelInfo {
-    return super.info() as MembershipChatChannelInfo;
+  public info(): MembershipChatInfo {
+    return super.info() as MembershipChatInfo;
   }
 
   public leave(): Promise<void> {
     this._assertJoined();
     return this._connection.request({
-      leaveChatChannelRequest: {
-        channelId: this._info.channelId
+      leaveChatRequest: {
+        chatId: this._info.chatId
       }
     }).then(() => {
       return;
@@ -39,7 +39,7 @@ export class MembershipChatChannel extends ChatChannel {
     this._assertJoined();
     return this._connection.request({
       removeUserFromChatChannelRequest: {
-        channelId: this._info.channelId,
+        chatId: this._info.chatId,
         userToRemove: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
     }).then(() => {
@@ -48,8 +48,8 @@ export class MembershipChatChannel extends ChatChannel {
   }
 }
 
-export type ChatChannelMembership = "public" | "private";
+export type ChatMembership = "public" | "private";
 
-export interface MembershipChatChannelInfo extends ChatChannelInfo {
-  readonly channelMembership: ChatChannelMembership;
+export interface MembershipChatInfo extends ChatInfo {
+  readonly membership: ChatMembership;
 }

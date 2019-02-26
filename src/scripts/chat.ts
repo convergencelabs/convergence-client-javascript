@@ -2,7 +2,7 @@
 
 (global as any).CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true};
 
-import {ChatChannel} from "../main/ts/";
+import {Chat} from "../main/ts/";
 import {connect} from "./connect";
 
 let domain;
@@ -23,9 +23,10 @@ connect()
     console.log(`Channel Created: ${channelId}`);
     return domain.chat().join(chatId);
   })
-  .then((channel: ChatChannel) => {
+  .then((channel: Chat) => {
     console.log("Channel Joined");
     channel.send("Hello");
+    channel.setName("Test Room");
     return domain.chat().get(chatId);
   })
   .then(channel => {

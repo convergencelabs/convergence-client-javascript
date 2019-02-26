@@ -3,26 +3,26 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
 import {
   IChatEvent,
-  ChannelLeftEvent,
+  ChatLeftEvent,
   ChatMessageEvent,
   UserJoinedEvent,
   UserLeftEvent,
   UserAddedEvent,
   UserRemovedEvent,
-  ChannelJoinedEvent
+  ChatJoinedEvent
 } from "./events/";
 import {isChatMessage, processChatMessage} from "./ChatMessageProcessor";
-import {ChatChannel, ChatChannelInfo, ChatChannelMember} from "./ChatChannel";
-import {DirectChatChannel} from "./DirectChatChannel";
-import {MembershipChatChannelInfo} from "./MembershipChatChannel";
+import {Chat, ChatInfo} from "./Chat";
+import {DirectChat} from "./DirectChat";
+import {ChatMembership, MembershipChatInfo} from "./MembershipChat";
 import {Observable} from "rxjs";
 import {filter, share, tap, map} from "rxjs/operators";
-import {GroupChatChannel} from "./GroupChatChannel";
-import {ChatRoomChannel} from "./ChatRoomChannel";
+import {ChatChannel} from "./ChatChannel";
+import {ChatRoom} from "./ChatRoom";
 import {ChatPermissionManager} from "./ChatPermissionManager";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import IChatChannelInfoData = io.convergence.proto.IChatChannelInfoData;
+import IChatInfoData = io.convergence.proto.IChatInfoData;
 import {domainUserIdToProto, protoToDomainUserId, timestampToDate, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUserId} from "../identity/DomainUserId";
@@ -44,16 +44,16 @@ const Events: ChatServiceEvents = {
   USER_LEFT: UserLeftEvent.NAME,
   USER_ADDED: UserAddedEvent.NAME,
   USER_REMOVED: UserRemovedEvent.NAME,
-  CHANNEL_JOINED: ChannelJoinedEvent.NAME,
-  CHANNEL_LEFT: ChannelLeftEvent.NAME
+  CHANNEL_JOINED: ChatJoinedEvent.NAME,
+  CHANNEL_LEFT: ChatLeftEvent.NAME
 };
 Object.freeze(Events);
 
-export type ChatChannelType = "direct" | "group" | "room";
+export type ChatType = "direct" | "channel" | "room";
 
-export const ChatChannelTypes = {
+export const ChatTypes = {
   DIRECT: "direct",
-  GROUP: "group",
+  CHANNEL: "group",
   ROOM: "room"
 };
 
@@ -92,10 +92,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
         map(message => processChatMessage(message.message, this._identityCache)),
         tap(event => {
           if (event instanceof UserJoinedEvent && event.user.username === this.session().user().username) {
-            const joined = new ChannelJoinedEvent(event.channelId);
+            const joined = new ChatJoinedEvent(event.chatId);
             this._emitEvent(joined);
           } else if (event instanceof UserLeftEvent && event.user.username === this.session().user().username) {
-            const left = new ChannelLeftEvent(event.channelId);
+            const left = new ChatLeftEvent(event.chatId);
             this._emitEvent(left);
           }
         }),
@@ -109,47 +109,47 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   }
 
   // FIXME implement
-  // public search(criteria: ChatSearchCriteria): Promise<ChatChannelInfo[]> {
+  // public search(criteria: ChatSearchCriteria): Promise<ChatInfo[]> {
   //   return this._connection.request({
   //     type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
   //   } as SearchChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-  //     return message.channels.map(channel => this._createChannelInfo(channel));
+  //     return message.channels.map(channel => this._createChatInfo(channel));
   //   });
   // }
 
   public exists(channelId: string): Promise<boolean> {
-    Validation.assertNonEmptyString(channelId, "channelId");
+    Validation.assertNonEmptyString(channelId, "chatId");
     return this._connection.request({
-      chatChannelExistsRequest: {
-        channelIds: [channelId]
+      chatsExistRequest: {
+        chatIds: [channelId]
       }
     }).then((response: IConvergenceMessage) => {
-      const {chatChannelExistsResponse} = response;
-      return chatChannelExistsResponse.exists[0];
+      const {chatsExistResponse} = response;
+      return chatsExistResponse.exists[0];
     });
   }
 
-  public get(channelId: string): Promise<ChatChannel> {
-    Validation.assertNonEmptyString(channelId, "channelId");
+  public get(channelId: string): Promise<Chat> {
+    Validation.assertNonEmptyString(channelId, "chatId");
     return this._connection.request({
-      getChatChannelsRequest: {
-        channelIds: [channelId]
+      getChatsRequest: {
+        chatIds: [channelId]
       }
     }).then((response: IConvergenceMessage) => {
-      const {getChatChannelsResponse} = response;
-      const channelData = getChatChannelsResponse.channelInfo[0];
-      const channelInfo = this._createChannelInfo(channelData);
-      return this._createChannel(channelInfo);
+      const {getChatsResponse} = response;
+      const channelData = getChatsResponse.chatInfo[0];
+      const chatInfo = this._createChatInfo(channelData);
+      return this._createChannel(chatInfo);
     });
   }
 
   // Methods that apply to Group Chat Channels.
-  public joined(): Promise<ChatChannelInfo[]> {
+  public joined(): Promise<ChatInfo[]> {
     return this._connection.request({
-      getJoinedChatChannelsRequest: {}
+      getJoinedChatsRequest: {}
     }).then((response: IConvergenceMessage) => {
-      const {getJoinedChatChannelsResponse} = response;
-      return getJoinedChatChannelsResponse.channelInfo.map(channel => this._createChannelInfo(channel));
+      const {getJoinedChatsResponse} = response;
+      return getJoinedChatsResponse.chatInfo.map(channel => this._createChatInfo(channel));
     });
   }
 
@@ -174,7 +174,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       Validation.assertNonEmptyString(options.id, "id");
     }
 
-    const {id, type: channelType, name, topic, membership, members} = options;
+    const {id, type: chatType, name, topic, membership, members} = options;
     const memberIds = (members || []).map(member => {
       if (member instanceof DomainUserId) {
         return domainUserIdToProto(member);
@@ -184,17 +184,17 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
 
     return this._connection.request({
-      createChatChannelRequest: {
-        channelId: toOptional(id),
-        channelType,
-        channelMembership: membership,
+      createChatRequest: {
+        chatId: toOptional(id),
+        chatType,
+        membership,
         name,
         topic,
         members: memberIds
       }
     }).then((response: IConvergenceMessage) => {
-      const {createChatChannelResponse} = response;
-      return createChatChannelResponse.channelId;
+      const {createChatResponse} = response;
+      return createChatResponse.chatId;
     }).catch(error => {
       if (error instanceof ConvergenceServerError &&
         error.code === "channel_already_exists" &&
@@ -210,35 +210,35 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
-  public remove(channelId: string): Promise<void> {
-    Validation.assertNonEmptyString(channelId, "channelId");
+  public remove(chatId: string): Promise<void> {
+    Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
-      removeChatChannelRequest: {
-        channelId
+      removeChatRequest: {
+        chatId
       }
     }).then(() => {
       return;
     });
   }
 
-  public join(channelId: string): Promise<ChatChannel> {
-    Validation.assertNonEmptyString(channelId, "channelId");
+  public join(chatId: string): Promise<Chat> {
+    Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
-      joinChatChannelRequest: {
-        channelId
+      joinChatRequest: {
+        chatId
       }
     }).then((response: IConvergenceMessage) => {
-      const {joinChatChannelResponse} = response;
-      const channelInfo = this._createChannelInfo(joinChatChannelResponse.channelInfo);
-      return this._createChannel(channelInfo);
+      const {joinChatResponse} = response;
+      const chatInfo = this._createChatInfo(joinChatResponse.chatInfo);
+      return this._createChannel(chatInfo);
     });
   }
 
-  public leave(channelId: string): Promise<void> {
-    Validation.assertNonEmptyString(channelId, "channelId");
+  public leave(chatId: string): Promise<void> {
+    Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
-      leaveChatChannelRequest: {
-        channelId
+      leaveChatRequest: {
+        chatId
       }
     }).then(() => {
       return;
@@ -246,9 +246,9 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   }
 
   // Methods that apply to Single User Chat Channels.
-  public direct(user: string | DomainUserId): Promise<DirectChatChannel>;
-  public direct(users: Array<string | DomainUserId>): Promise<DirectChatChannel>;
-  public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChatChannel> {
+  public direct(user: string | DomainUserId): Promise<DirectChat>;
+  public direct(users: Array<string | DomainUserId>): Promise<DirectChat>;
+  public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChat> {
     if (typeof users === "string" || users instanceof DomainUserId) {
       users = [users];
     }
@@ -261,15 +261,15 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     });
     return this._connection.request({
-      getDirectChatChannelsRequest: {
+      getDirectChatsRequest: {
         userLists: [{values: userIds}]
       }
     }).then((response: IConvergenceMessage) => {
-      const {getDirectChatChannelsResponse} = response;
-      const channelData = getDirectChatChannelsResponse.channelInfo[0];
-      const info = this._createChannelInfo(channelData);
+      const {getDirectChatsResponse} = response;
+      const channelData = getDirectChatsResponse.chatInfo[0];
+      const info = this._createChatInfo(channelData);
       const channel = this._createChannel(info);
-      return channel as DirectChatChannel;
+      return channel as DirectChat;
     });
   }
 
@@ -281,21 +281,21 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @hidden
    * @internal
    */
-  private _createChannel(channelInfo: ChatChannelInfo): ChatChannel {
+  private _createChannel(chatInfo: ChatInfo): Chat {
     const messageStream = this._messageStream.pipe(
-      filter(msg => msg.channelId === channelInfo.channelId)
+      filter(msg => msg.chatId === chatInfo.chatId)
     );
-    switch (channelInfo.channelType) {
-      case ChatChannelTypes.DIRECT:
-        return new DirectChatChannel(this._connection, this._identityCache, messageStream, channelInfo);
-      case ChatChannelTypes.GROUP:
-        const groupInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
-        return new GroupChatChannel(this._connection, this._identityCache, messageStream, groupInfo);
-      case ChatChannelTypes.ROOM:
-        const roomInfo: MembershipChatChannelInfo = channelInfo as MembershipChatChannelInfo;
-        return new ChatRoomChannel(this._connection, this._identityCache, messageStream, roomInfo);
+    switch (chatInfo.chatType) {
+      case ChatTypes.DIRECT:
+        return new DirectChat(this._connection, this._identityCache, messageStream, chatInfo);
+      case ChatTypes.CHANNEL:
+        const groupInfo: MembershipChatInfo = chatInfo as MembershipChatInfo;
+        return new ChatChannel(this._connection, this._identityCache, messageStream, groupInfo);
+      case ChatTypes.ROOM:
+        const roomInfo: MembershipChatInfo = chatInfo as MembershipChatInfo;
+        return new ChatRoom(this._connection, this._identityCache, messageStream, roomInfo);
       default:
-        throw new Error(`Invalid chat channel type: ${channelInfo.channelType}`);
+        throw new Error(`Invalid chat channel type: ${chatInfo.chatType}`);
     }
   }
 
@@ -303,7 +303,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @hidden
    * @internal
    */
-  private _createChannelInfo(channelData: IChatChannelInfoData): ChatChannelInfo {
+  private _createChatInfo(channelData: IChatInfoData): ChatInfo {
     let maxEvent = -1;
     const localUserId = this._connection.session().user().userId;
     const members = channelData.members.map(member => {
@@ -317,9 +317,9 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       return {user, maxSeenEventNumber: member.maxSeenEventNumber as number};
     });
     return {
-      channelId: channelData.id,
-      channelType: channelData.channelType as ChatChannelType,
-      channelMembership: channelData.membership,
+      chatId: channelData.id,
+      chatType: channelData.chatType as ChatType,
+      membership: channelData.membership as ChatMembership,
       name: channelData.name,
       topic: channelData.topic,
       createdTime: timestampToDate(channelData.createdTime),

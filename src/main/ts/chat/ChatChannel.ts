@@ -1,236 +1,34 @@
-import {ConvergenceEventEmitter} from "../util/";
-import {
-  ChatChannelNameChanged,
-  IChatEvent,
-  ChatChannelTopicChanged,
-  ChatMessageEvent,
-  ChatChannelEvent,
-  UserJoinedEvent,
-  UserLeftEvent,
-  UserAddedEvent,
-  UserRemovedEvent
-} from "./events/";
-import {ChatChannelType} from "./ChatService";
-import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ChatHistoryEntry} from "./ChatHistoryEntry";
 import {Observable} from "rxjs";
-import {io} from "@convergence-internal/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
-import {getOrDefaultArray, protoToDomainUserId, toOptional} from "../connection/ProtocolUtil";
+import {MembershipChat, MembershipChatInfo} from "./MembershipChat";
+import {IChatEvent} from "./events/";
 import {IdentityCache} from "../identity/IdentityCache";
-import {DomainUser} from "../identity";
+import {DomainUserIdentifier} from "../identity";
+import {DomainUserId} from "../identity/DomainUserId";
+import {domainUserIdToProto} from "../connection/ProtocolUtil";
 
-export interface ChatChannelInfo {
-  readonly channelType: ChatChannelType;
-  readonly channelId: string;
-  readonly channelMembership: string;
-  readonly name: string;
-  readonly topic: string;
-  readonly createdTime: Date;
-  readonly lastEventTime: Date;
-  readonly lastEventNumber: number;
-  readonly maxSeenEventNumber: number;
-  readonly members: ChatChannelMember[];
-}
-
-export interface ChatChannelMember {
-  readonly user: DomainUser;
-  readonly maxSeenEventNumber: number;
-}
-
-export interface ChatChannelEvents {
-  readonly MESSAGE: string;
-  readonly USER_JOINED: string;
-  readonly USER_LEFT: string;
-  readonly USER_ADDED: string;
-  readonly USER_REMOVED: string;
-}
-
-const Events: ChatChannelEvents = {
-  MESSAGE: ChatMessageEvent.NAME,
-  USER_JOINED: UserJoinedEvent.NAME,
-  USER_LEFT: UserLeftEvent.NAME,
-  USER_ADDED: UserAddedEvent.NAME,
-  USER_REMOVED: UserRemovedEvent.NAME,
-};
-Object.freeze(Events);
-
-export abstract class ChatChannel extends ConvergenceEventEmitter<IChatEvent> {
-  public static readonly Events: ChatChannelEvents = Events;
-
-  /**
-   * @internal
-   */
-  protected _info: ChatChannelInfo;
-
-  /**
-   * @internal
-   */
-  protected _connection: ConvergenceConnection;
-
-  /**
-   * @internal
-   */
-  private _identityCache: IdentityCache;
-
-  /**
-   * @internal
-   */
-  private _joined: boolean;
-
-  /**
-   * @internal
-   */
-  protected constructor(connection: ConvergenceConnection,
-                        identityCache: IdentityCache,
-                        messageStream: Observable<IChatEvent>,
-                        info: ChatChannelInfo) {
-    super();
-    this._connection = connection;
-    this._identityCache = identityCache;
-    this._info = info;
-
-    // TODO this might not make sense for rooms
-    this._joined = info.members
-      .map(m => m.user.userId)
-      .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
-
-    messageStream.subscribe(event => {
-      this._processEvent(event);
-      this._emitEvent(event);
-    });
-  }
-
-  public session(): ConvergenceSession {
-    return this._connection.session();
-  }
-
-  public info(): ChatChannelInfo {
-    return {...this._info};
-  }
-
-  public isJoined(): boolean {
-    return this._joined;
-  }
-
-  public send(message: string): Promise<void> {
-    this._assertJoined();
-    return this._connection.request({
-      publishChatMessageRequest: {
-        channelId: this._info.channelId,
-        message
-      }
-    }).then(() => {
-      return;
-    });
-  }
-
-  public setName(name: string): Promise<void> {
-    this._assertJoined();
-    return this._connection.request({
-      setChatChannelNameRequest: {
-        channelId: this._info.channelId,
-        name
-      }
-    }).then(() => {
-      return;
-    });
-  }
-
-  public setTopic(topic: string): Promise<void> {
-    this._assertJoined();
-    return this._connection.request({
-      setChatChannelTopicRequest: {
-        channelId: this._info.channelId,
-        topic
-      }
-    }).then(() => {
-      return;
-    });
-  }
-
-  public markSeen(eventNumber: number): Promise<void> {
-    this._assertJoined();
-    return this._connection.request({
-      markChatChannelEventsSeenRequest: {
-        channelId: this._info.channelId,
-        eventNumber
-      }
-    }).then(() => {
-      return;
-    });
-  }
-
-  public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
-    this._assertJoined();
-    return this._connection.request({
-      getChatChannelHistoryRequest: {
-        channelId: this._info.channelId,
-        startEvent: toOptional(options.startEvent),
-        limit: toOptional(options.limit),
-        forward: toOptional(options.forward),
-        eventFilter: options.eventFilter
-      }
-    }).then((message: IConvergenceMessage) => {
-      const response = message.getChatChannelHistoryResponse;
-      return getOrDefaultArray(response.eventData)
-        .map(data => ChatHistoryEventMapper.toChatHistoryEntry(data, this._identityCache));
-    });
-  }
+export class ChatChannel extends MembershipChat {
 
   /**
    * @hidden
    * @internal
    */
-  protected _assertJoined(): void {
-    if (!this.isJoined()) {
-      throw new Error(`Chat channel not joined: ${this._info.channelId}`);
-    }
+  constructor(connection: ConvergenceConnection,
+              identityCache: IdentityCache,
+              messageStream: Observable<IChatEvent>,
+              info: MembershipChatInfo) {
+    super(connection, identityCache, messageStream, info);
   }
 
-  /**
-   * @hidden
-   * @internal
-   */
-  private _processEvent(event: IChatEvent): void {
-    if (event instanceof ChatChannelEvent) {
-      this._info = {...this._info, lastEventNumber: event.eventNumber, lastEventTime: event.timestamp};
-    }
-
-    if (event instanceof UserJoinedEvent || event instanceof UserAddedEvent) {
-      // TODO should we allow a seen number to come along?
-      const user = (event instanceof UserJoinedEvent) ? event.user : event.addedUser;
-      const members = this._info.members.slice(0);
-      const member = {user: event.user, maxSeenEventNumber: -1};
-      members.push(member);
-      if (event.user.username === this.session().user().username) {
-        // FIXME this might not be right for rooms
-        this._joined = true;
+  public add(user: DomainUserIdentifier): Promise<void> {
+    this._assertJoined();
+    return this._connection.request({
+      addUserToChatChannelRequest: {
+        chatId: this._info.chatId,
+        userToAdd: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
-      this._info = {...this._info, members};
-    } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
-      const removedUser = (event instanceof UserLeftEvent) ? event.user : event.removedUser;
-      if (this.session().user().userId.equals(removedUser.userId)) {
-        // FIXME this might not be right for rooms
-        this._joined = false;
-      }
-      const members = this._info.members.filter(member => !member.user.userId.equals(removedUser.userId));
-      this._info = {...this._info, members};
-    } else if (event instanceof ChatChannelNameChanged) {
-      this._info = {...this._info, name: event.channelName};
-    } else if (event instanceof ChatChannelTopicChanged) {
-      this._info = {...this._info, topic: event.topic};
-    }
-
-    Object.freeze(this._info);
+    }).then(() => {
+      return;
+    });
   }
-}
-
-export interface ChatHistorySearchOptions {
-  startEvent?: number;
-  limit?: number;
-  forward?: boolean;
-  eventFilter?: string[];
 }

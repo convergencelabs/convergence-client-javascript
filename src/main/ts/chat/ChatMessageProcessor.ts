@@ -1,12 +1,12 @@
 import {
-  ChannelRemovedEvent,
+  ChatRemovedEvent,
   ChatMessageEvent,
   UserJoinedEvent,
   UserLeftEvent,
   UserAddedEvent,
   UserRemovedEvent,
-  ChatChannelNameChanged,
-  ChatChannelTopicChanged, IChatEvent
+  ChatNameChanged,
+  ChatTopicChanged, IChatEvent
 } from "./events/";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
@@ -20,13 +20,13 @@ import {ConvergenceError} from "../util";
  */
 export function isChatMessage(message: IConvergenceMessage): boolean {
   return !!message.remoteChatMessage ||
-    !!message.userJoinedChatChannel ||
-    !!message.userLeftChatChannel ||
+    !!message.userJoinedChat ||
+    !!message.userLeftChat ||
     !!message.userAddedToChatChannel ||
     !!message.userRemovedFromChatChannel ||
-    !!message.chatChannelRemoved ||
-    !!message.chatChannelNameChanged ||
-    !!message.chatChannelTopicChanged;
+    !!message.chatRemoved ||
+    !!message.chatNameChanged ||
+    !!message.chatTopicChanged;
 }
 
 /**
@@ -34,18 +34,18 @@ export function isChatMessage(message: IConvergenceMessage): boolean {
  * @internal
  */
 export function processChatMessage(message: IConvergenceMessage, identityCache: IdentityCache): IChatEvent {
-  if (message.userJoinedChatChannel) {
-    const userJoined = message.userJoinedChatChannel;
+  if (message.userJoinedChat) {
+    const userJoined = message.userJoinedChat;
     return new UserJoinedEvent(
-      userJoined.channelId,
+      userJoined.chatId,
       getOrDefaultNumber(userJoined.eventNumber),
       timestampToDate(userJoined.timestamp),
       identityCache.getUser(protoToDomainUserId(userJoined.user))
     );
-  } else if (message.userLeftChatChannel) {
-    const userLeft = message.userLeftChatChannel;
+  } else if (message.userLeftChat) {
+    const userLeft = message.userLeftChat;
     return new UserLeftEvent(
-      userLeft.channelId,
+      userLeft.chatId,
       getOrDefaultNumber(userLeft.eventNumber),
       timestampToDate(userLeft.timestamp),
       identityCache.getUser(protoToDomainUserId(userLeft.user))
@@ -53,7 +53,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
   } else if (message.userAddedToChatChannel) {
     const userAdded = message.userAddedToChatChannel;
     return new UserAddedEvent(
-      userAdded.channelId,
+      userAdded.chatId,
       getOrDefaultNumber(userAdded.eventNumber),
       timestampToDate(userAdded.timestamp),
       identityCache.getUser(protoToDomainUserId(userAdded.user)),
@@ -62,28 +62,28 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
   } else if (message.userRemovedFromChatChannel) {
     const userRemoved = message.userRemovedFromChatChannel;
     return new UserRemovedEvent(
-      userRemoved.channelId,
+      userRemoved.chatId,
       getOrDefaultNumber(userRemoved.eventNumber),
       timestampToDate(userRemoved.timestamp),
       identityCache.getUser(protoToDomainUserId(userRemoved.user)),
       identityCache.getUser(protoToDomainUserId(userRemoved.removedUser))
     );
-  } else if (message.chatChannelRemoved) {
-    const removedMsg = message.chatChannelRemoved;
-    return new ChannelRemovedEvent(removedMsg.channelId);
-  } else if (message.chatChannelNameChanged) {
-    const nameSet = message.chatChannelNameChanged;
-    return new ChatChannelNameChanged(
-      nameSet.channelId,
+  } else if (message.chatRemoved) {
+    const removedMsg = message.chatRemoved;
+    return new ChatRemovedEvent(removedMsg.chatId);
+  } else if (message.chatNameChanged) {
+    const nameSet = message.chatNameChanged;
+    return new ChatNameChanged(
+      nameSet.chatId,
       getOrDefaultNumber(nameSet.eventNumber),
       timestampToDate(nameSet.timestamp),
       identityCache.getUser(protoToDomainUserId(nameSet.user)),
       getOrDefaultString(nameSet.name),
     );
-  } else if (message.chatChannelTopicChanged) {
-    const topicSet = message.chatChannelTopicChanged;
-    return new ChatChannelTopicChanged(
-      topicSet.channelId,
+  } else if (message.chatTopicChanged) {
+    const topicSet = message.chatTopicChanged;
+    return new ChatTopicChanged(
+      topicSet.chatId,
       getOrDefaultNumber(topicSet.eventNumber),
       timestampToDate(topicSet.timestamp),
       identityCache.getUser(protoToDomainUserId(topicSet.user)),
@@ -92,7 +92,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
   } else if (message.remoteChatMessage) {
     const chatMsg = message.remoteChatMessage;
     return new ChatMessageEvent(
-      chatMsg.channelId,
+      chatMsg.chatId,
       getOrDefaultNumber(chatMsg.eventNumber),
       timestampToDate(chatMsg.timestamp),
       identityCache.getUserForSession(chatMsg.sessionId),
