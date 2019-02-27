@@ -173,6 +173,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * be opened. If the model does not exist it will be created first, and then
    * opened.
    *
+   * [See here](https://docs.convergence.io/guide/models/model-service.html#note-about-race-conditions)
+   * for more context about race conditions this alleviates.
+   *
    * @param options
    *   The options that define how to open and / or create the model.
    *
