@@ -117,11 +117,11 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   //   });
   // }
 
-  public exists(channelId: string): Promise<boolean> {
-    Validation.assertNonEmptyString(channelId, "chatId");
+  public exists(chatId: string): Promise<boolean> {
+    Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
       chatsExistRequest: {
-        chatIds: [channelId]
+        chatIds: [chatId]
       }
     }).then((response: IConvergenceMessage) => {
       const {chatsExistResponse} = response;
@@ -129,17 +129,17 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
-  public get(channelId: string): Promise<Chat> {
-    Validation.assertNonEmptyString(channelId, "chatId");
+  public get(chatId: string): Promise<Chat> {
+    Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
       getChatsRequest: {
-        chatIds: [channelId]
+        chatIds: [chatId]
       }
     }).then((response: IConvergenceMessage) => {
       const {getChatsResponse} = response;
-      const channelData = getChatsResponse.chatInfo[0];
-      const chatInfo = this._createChatInfo(channelData);
-      return this._createChannel(chatInfo);
+      const chatData = getChatsResponse.chatInfo[0];
+      const chatInfo = this._createChatInfo(chatData);
+      return this._createChat(chatInfo);
     });
   }
 
@@ -149,7 +149,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       getJoinedChatsRequest: {}
     }).then((response: IConvergenceMessage) => {
       const {getJoinedChatsResponse} = response;
-      return getJoinedChatsResponse.chatInfo.map(channel => this._createChatInfo(channel));
+      return getJoinedChatsResponse.chatInfo.map(chatInfo => this._createChatInfo(chatInfo));
     });
   }
 
@@ -197,7 +197,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       return createChatResponse.chatId;
     }).catch(error => {
       if (error instanceof ConvergenceServerError &&
-        error.code === "channel_already_exists" &&
+        error.code === "chat_already_exists" &&
         options.ignoreExistsError) {
         // The channel already exists, this can only happen if the user specified the id.
         // they have indicated that they want to ignore the situation where the channel already
@@ -230,7 +230,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     }).then((response: IConvergenceMessage) => {
       const {joinChatResponse} = response;
       const chatInfo = this._createChatInfo(joinChatResponse.chatInfo);
-      return this._createChannel(chatInfo);
+      return this._createChat(chatInfo);
     });
   }
 
@@ -245,7 +245,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
-  // Methods that apply to Single User Chat Channels.
+  // Methods that apply to Direct  Chats.
   public direct(user: string | DomainUserId): Promise<DirectChat>;
   public direct(users: Array<string | DomainUserId>): Promise<DirectChat>;
   public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChat> {
@@ -266,22 +266,22 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((response: IConvergenceMessage) => {
       const {getDirectChatsResponse} = response;
-      const channelData = getDirectChatsResponse.chatInfo[0];
-      const info = this._createChatInfo(channelData);
-      const channel = this._createChannel(info);
-      return channel as DirectChat;
+      const chatData = getDirectChatsResponse.chatInfo[0];
+      const info = this._createChatInfo(chatData);
+      const chat = this._createChat(info);
+      return chat as DirectChat;
     });
   }
 
-  public permissions(channelId: string): ChatPermissionManager {
-    return new ChatPermissionManager(channelId, this._connection);
+  public permissions(chatId: string): ChatPermissionManager {
+    return new ChatPermissionManager(chatId, this._connection);
   }
 
   /**
    * @hidden
    * @internal
    */
-  private _createChannel(chatInfo: ChatInfo): Chat {
+  private _createChat(chatInfo: ChatInfo): Chat {
     const messageStream = this._messageStream.pipe(
       filter(msg => msg.chatId === chatInfo.chatId)
     );
@@ -295,7 +295,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
         const roomInfo: MembershipChatInfo = chatInfo as MembershipChatInfo;
         return new ChatRoom(this._connection, this._identityCache, messageStream, roomInfo);
       default:
-        throw new Error(`Invalid chat channel type: ${chatInfo.chatType}`);
+        throw new Error(`Invalid chat chat type: ${chatInfo.chatType}`);
     }
   }
 
@@ -303,10 +303,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @hidden
    * @internal
    */
-  private _createChatInfo(channelData: IChatInfoData): ChatInfo {
+  private _createChatInfo(chatData: IChatInfoData): ChatInfo {
     let maxEvent = -1;
     const localUserId = this._connection.session().user().userId;
-    const members = channelData.members.map(member => {
+    const members = chatData.members.map(member => {
       const userId = protoToDomainUserId(member.user);
       if (userId.equals(localUserId)) {
         maxEvent = member.maxSeenEventNumber as number;
@@ -317,14 +317,14 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       return {user, maxSeenEventNumber: member.maxSeenEventNumber as number};
     });
     return {
-      chatId: channelData.id,
-      chatType: channelData.chatType as ChatType,
-      membership: channelData.membership as ChatMembership,
-      name: channelData.name,
-      topic: channelData.topic,
-      createdTime: timestampToDate(channelData.createdTime),
-      lastEventTime: timestampToDate(channelData.lastEventTime),
-      lastEventNumber: channelData.lastEventNumber as number,
+      chatId: chatData.id,
+      chatType: chatData.chatType as ChatType,
+      membership: chatData.membership as ChatMembership,
+      name: chatData.name,
+      topic: chatData.topic,
+      createdTime: timestampToDate(chatData.createdTime),
+      lastEventTime: timestampToDate(chatData.lastEventTime),
+      lastEventNumber: chatData.lastEventNumber as number,
       maxSeenEventNumber: maxEvent,
       members
     };

@@ -120,7 +120,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {modelsQueryResponse} = response;
-      return modelsQueryResponse.models.map(toModelResult);
+      return getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
     });
   }
 

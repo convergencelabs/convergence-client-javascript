@@ -7,10 +7,10 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = io.convergence.proto.IUserPermissionsEntry;
 
 export type ChatPermission =
-  "create_chat_channel"
-  | "remove_chat_channel"
-  | "join_chat_channel"
-  | "leave_chat_channel"
+  "create_chat"
+  | "remove_chat"
+  | "join_chat"
+  | "leave_chat"
   | "add_chat_user"
   | "remove_chat_user"
   | "set_chat_name"
@@ -37,7 +37,7 @@ export class ChatPermissionManager {
   /**
    * @internal
    */
-  private readonly _channelId: string;
+  private readonly _chatId: string;
 
   /**
    * @internal
@@ -48,20 +48,20 @@ export class ChatPermissionManager {
    * @hidden
    * @internal
    */
-  constructor(channelId: string, connection: ConvergenceConnection) {
-    this._channelId = channelId;
+  constructor(chatId: string, connection: ConvergenceConnection) {
+    this._chatId = chatId;
     this._connection = connection;
   }
 
-  get channelId() {
-    return this._channelId;
+  get chatId() {
+    return this._chatId;
   }
 
   public getPermissions(): Promise<ChatPermission[]> {
     const request: IConvergenceMessage = {
       getClientPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId
+        id: this._chatId
       }
     };
 
@@ -75,7 +75,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         world: permissions
       }
     };
@@ -89,7 +89,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         world: permissions
       }
     };
@@ -103,7 +103,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         world: permissions
       }
     };
@@ -117,7 +117,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       getWorldPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId
+        id: this._chatId
       }
     };
 
@@ -145,7 +145,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         user: userPermissions
       }
     };
@@ -173,7 +173,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         user: userPermissions
       }
     };
@@ -201,7 +201,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         user: userPermissions
       }
     };
@@ -215,7 +215,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       getAllUserPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId
+        id: this._chatId
       }
     };
 
@@ -229,7 +229,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       getUserPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         user: domainUserIdToProto(DomainUserId.normal(username))
       }
     };
@@ -257,7 +257,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         group: StringMap.mapToObject(map)
       }
     };
@@ -284,7 +284,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         group: StringMap.mapToObject(map)
       }
     };
@@ -311,7 +311,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         group: StringMap.mapToObject(map)
       }
     };
@@ -325,7 +325,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       getAllGroupPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId
+        id: this._chatId
       }
     };
 
@@ -339,7 +339,7 @@ export class ChatPermissionManager {
     const request: IConvergenceMessage = {
       getGroupPermissionsRequest: {
         idType: CHAT,
-        id: this._channelId,
+        id: this._chatId,
         groupId
       }
     };
