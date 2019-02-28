@@ -8,7 +8,7 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {ConvergenceEventEmitter, IConvergenceEvent, Validation} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent, Validation} from "../util/";
 import {RealTimeModel} from "./rt/";
 import {HistoricalModel} from "./historical/";
 import {ModelResult} from "./query/";
@@ -37,6 +37,7 @@ import {ModelPermissions} from "./ModelPermissions";
 import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
 import {objectForEach} from "../util/ObjectUtils";
 import {DomainUserId} from "../identity/DomainUserId";
+import {TypeChecker} from "../util/TypeChecker";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -112,6 +113,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A promise that will be resolved with the query results.
    */
   public query(query: string): Promise<ModelResult[]> {
+    Validation.assertNonEmptyString(query, "query");
     const request: IConvergenceMessage = {
       modelsQueryRequest: {
         query
@@ -134,6 +136,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   True if the model is open, false otherwise.
    */
   public isOpen(id: string): boolean {
+    Validation.assertNonEmptyString(id, "id");
     return this._openModelsByModelId.has(id);
   }
 
@@ -147,6 +150,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   True if the model is opening, false otherwise.
    */
   public isOpening(id: string): boolean {
+    Validation.assertNonEmptyString(id, "id");
     return this._openRequestsByModelId.has(id);
   }
 
@@ -161,10 +165,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A promise that is resolved with the specified model, once open.
    */
   public open(id: string): Promise<RealTimeModel> {
-    if (!Validation.nonEmptyString(id)) {
-      return Promise.reject<RealTimeModel>(new Error("modelId must be a non-null, non empty string."));
-    }
-
+    Validation.assertNonEmptyString(id, "id");
     return this._open(id);
   }
 
@@ -183,6 +184,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise resolved with the RealTimeModel, once opened.
    */
   public openAutoCreate(options: IAutoCreateModelOptions): Promise<RealTimeModel> {
+    if (!Validation.isSet(options)) {
+      throw new ConvergenceError("'options' is a required parameter");
+    }
+
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
@@ -200,12 +205,18 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise that is resolved with the id of the created model.
    */
   public create(options: ICreateModelOptions): Promise<string> {
+    if (!Validation.isSet(options)) {
+      throw new ConvergenceError("'options' is a required parameter");
+    }
+
     const collection = options.collection;
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
     }
 
-    const data = options.data || {};
+    const data = (TypeChecker.isNull(options.data) || TypeChecker.isUndefined(options.data)) ?
+      {} :
+      {...options.data};
 
     const idGen: InitialIdGenerator = new InitialIdGenerator();
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
@@ -241,6 +252,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise that is resolved when the model is successfuly removed.
    */
   public remove(id: string): Promise<void> {
+    Validation.assertNonEmptyString(id, "id");
+
     const request: IConvergenceMessage = {
       deleteRealtimeModelRequest: {
         modelId: id
@@ -262,6 +275,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise resolved with the HistoricalModel when opened.
    */
   public history(id: string): Promise<HistoricalModel> {
+    Validation.assertNonEmptyString(id, "id");
+
     const request: IConvergenceMessage = {
       historicalDataRequest: {
         modelId: id
@@ -295,6 +310,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A permissions manager for the specified model.
    */
   public permissions(id: string): ModelPermissionManager {
+    Validation.assertNonEmptyString(id, "id");
     return new ModelPermissionManager(id, this._connection);
   }
 
@@ -330,6 +346,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
     }
+
+    // todo validate options, sepcicially the model initializer.
 
     if (id === undefined) {
       id = options.id;
@@ -464,10 +482,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       console.error(message);
       replyCallback.expectedError("unknown_model", message);
     } else {
+      delete this._autoCreateRequests[autoCreateId];
+
       let data: ModelDataInitializer = options.data;
-      if (typeof data === "function") {
+      if (TypeChecker.isFunction(data)) {
         data = (data as ModelDataCallback)();
+      } else if (TypeChecker.isUndefined(data) || TypeChecker.isNull(data)) {
+        data = {};
       }
+
+      // This makes sure that what we have is actually an object now.
+      data = {...data};
 
       let dataValue: ObjectValue;
       if (data !== undefined) {

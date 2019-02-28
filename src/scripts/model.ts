@@ -13,7 +13,7 @@ connect()
     return d.models().openAutoCreate({
       ephemeral: true,
       collection: "test",
-      id: "my-test-id2",
+      id: "my-test-id",
       data: {
         nested: {
           property: "foo"
