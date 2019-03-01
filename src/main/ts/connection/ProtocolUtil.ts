@@ -1,20 +1,25 @@
 import {google, io} from "@convergence-internal/convergence-proto";
 import ITimestamp = google.protobuf.ITimestamp;
 import IValue = google.protobuf.IValue;
-import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
+import {mapObjectValues} from "../util/ObjectUtils";
 import {ConvergenceError} from "../util";
 import IDomainUserIdData = io.convergence.proto.IDomainUserIdData;
 import {DomainUserId, DomainUserType} from "../identity/DomainUserId";
 import DomainUserTypeData = io.convergence.proto.DomainUserTypeData;
-import {ModelPermissions} from "../model";
-import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
+import * as Long from "long";
 
 /**
  * @hidden
  * @internal
  */
 export function getOrDefaultNumber(val?: number | Long): number {
-  return (val as number) || 0;
+  if (val === null || val === undefined) {
+    return 0;
+  } else if (typeof val === "number") {
+    return val;
+  } else {
+    return val.toNumber();
+  }
 }
 
 /**
@@ -78,8 +83,8 @@ export function fromOptional<T>(optional?: { value?: T | null } | null): T | nul
  * @internal
  */
 export function timestampToDate(timestamp: ITimestamp): Date {
-  const seconds = timestamp.seconds as number;
-  const nanos = timestamp.nanos as number;
+  const seconds = getOrDefaultNumber(timestamp.seconds);
+  const nanos = getOrDefaultNumber(timestamp.nanos);
   const nanosAsMillis = Math.round(nanos / 1000000);
   const millis = (seconds * 1000) + nanosAsMillis;
   return new Date(millis);

@@ -287,7 +287,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const {historicalDataResponse} = response;
       return new HistoricalModel(
         toObjectValue(historicalDataResponse.data),
-        historicalDataResponse.version as number,
+        getOrDefaultNumber(historicalDataResponse.version),
         timestampToDate(historicalDataResponse.modifiedTime),
         timestampToDate(historicalDataResponse.createdTime),
         id,
@@ -397,7 +397,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
       const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
         this._connection.session().sessionId(),
-        openRealTimeModelResponse.version as number,
+        getOrDefaultNumber(openRealTimeModelResponse.version),
         transformer,
         referenceTransformer);
       const data = toObjectValue(openRealTimeModelResponse.data);

@@ -46,7 +46,7 @@ import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsC
 import {toModelPermissions} from "../ModelMessageConverter";
 import IRemoteClientOpenedMessage = io.convergence.proto.IRemoteClientOpenedMessage;
 import IRemoteClientClosedMessage = io.convergence.proto.IRemoteClientClosedMessage;
-import {fromOptional, timestampToDate, toOptional} from "../../connection/ProtocolUtil";
+import {fromOptional, getOrDefaultNumber, timestampToDate, toOptional} from "../../connection/ProtocolUtil";
 import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
@@ -683,7 +683,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
-    const version = message.version as number;
+    const version = getOrDefaultNumber(message.version);
     this._concurrencyControl.processAcknowledgementOperation(message.seqNo, version);
     this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
@@ -700,7 +700,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       message.sessionId,
       -1, // fixme not needed, this is only needed when going to the server.  Perhaps
       // this should probably go in the op submission message.
-      message.contextVersion as number,
+      getOrDefaultNumber(message.contextVersion),
       timestampToDate(message.timestamp),
       toOperation(message.operation)
     );

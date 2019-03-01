@@ -23,7 +23,13 @@ import {ChatPermissionManager} from "./ChatPermissionManager";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatInfoData = io.convergence.proto.IChatInfoData;
-import {domainUserIdToProto, protoToDomainUserId, timestampToDate, toOptional} from "../connection/ProtocolUtil";
+import {
+  domainUserIdToProto,
+  getOrDefaultNumber,
+  protoToDomainUserId,
+  timestampToDate,
+  toOptional
+} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUserId} from "../identity/DomainUserId";
 import {DomainUserIdentifier} from "../identity";
@@ -309,12 +315,12 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     const members = chatData.members.map(member => {
       const userId = protoToDomainUserId(member.user);
       if (userId.equals(localUserId)) {
-        maxEvent = member.maxSeenEventNumber as number;
+        maxEvent = getOrDefaultNumber(member.maxSeenEventNumber);
       }
 
       const user = this._identityCache.getUser(userId);
 
-      return {user, maxSeenEventNumber: member.maxSeenEventNumber as number};
+      return {user, maxSeenEventNumber: getOrDefaultNumber(member.maxSeenEventNumber)};
     });
     return {
       chatId: chatData.id,
@@ -324,7 +330,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       topic: chatData.topic,
       createdTime: timestampToDate(chatData.createdTime),
       lastEventTime: timestampToDate(chatData.lastEventTime),
-      lastEventNumber: chatData.lastEventNumber as number,
+      lastEventNumber: getOrDefaultNumber(chatData.lastEventNumber),
       maxSeenEventNumber: maxEvent,
       members
     };

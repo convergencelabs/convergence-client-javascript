@@ -15,13 +15,15 @@ export default {
     globals: {
       "rxjs": "rxjs",
       "rxjs/operators": "rxjs.operators",
-      "protobufjs/light": "protobuf"
+      "protobufjs/light": "protobuf",
+      "long": "long"
     },
   },
   external: [
     "rxjs",
     "rxjs/operators",
-    "protobufjs/light"
+    "protobufjs/light",
+    "long"
   ],
   plugins: [
     rollupTypescript2({
