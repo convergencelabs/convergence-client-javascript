@@ -77,6 +77,7 @@ const distUmd = () => {
 const distUmdBundle = () =>
   src([
     "node_modules/rxjs/bundles/rxjs.umd.js",
+    "node_modules/long/dist/long.js",
     "node_modules/protobufjs/dist/light/protobuf.js",
     `${distInternalDir}/umd/convergence.js`])
     .pipe(concat("convergence-all.js"))
@@ -91,6 +92,7 @@ const distUmdMin = () => {
 const distUmdBundleMin = () => {
   const files = [
     "node_modules/rxjs/bundles/rxjs.umd.min.js",
+    "node_modules/long/dist/long.js",
     "node_modules/protobufjs/dist/light/protobuf.min.js",
     `${distInternalDir}/umd/convergence.min.js`
   ];
