@@ -20,6 +20,7 @@ export class ConvergenceError extends Error {
     this._code = code;
     this._details = details || {};
 
+    this.name = "ConvergenceError";
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, ConvergenceError.prototype);
   }

@@ -210,7 +210,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _authenticate(authRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Promise.reject<AuthResponse>(new Error("User already authenticated."));
+      return Promise.reject<AuthResponse>(new ConvergenceError("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
@@ -221,7 +221,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject<AuthResponse>(new Error("Must be connected or connecting to authenticate."));
+      return Promise.reject<AuthResponse>(new ConvergenceError("Must be connected or connecting to authenticate."));
     }
   }
 
@@ -239,7 +239,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
         };
         return resp;
       } else {
-        throw new Error("Authentication failed: " + authResponse.failure.message);
+        throw new ConvergenceError("Authentication failed");
       }
     });
   }
