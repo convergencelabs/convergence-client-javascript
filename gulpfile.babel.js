@@ -7,24 +7,18 @@ import ts from "gulp-typescript";
 import tsLint from "gulp-tslint";
 import mocha from "gulp-mocha";
 import sourceMaps from "gulp-sourcemaps";
-import uglify from "gulp-uglify";
+import uglify from 'gulp-uglify-es';
 import fs from "fs";
 import typescript from "typescript";
-import rollupStream from "rollup-stream";
-import source from "vinyl-source-stream";
-import buffer from "vinyl-buffer";
 import header from 'gulp-header';
 import shell from "gulp-shell";
 import filter from 'gulp-filter-each';
 import trim from "trim";
 import insert from "gulp-insert";
-import replace from "gulp-replace";
-import rollupConfig from "./rollup.config.js";
+
 
 const distInternalDir = "./dist-internal";
 const distDir = "./dist";
-
-const CONVERGENCE_CLIENT_VERSION = "$CONVERGENCE_CLIENT_VERSION";
 
 function minify(source, destination) {
   const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
@@ -32,47 +26,19 @@ function minify(source, destination) {
   return src(source)
     .pipe(sourceMaps.init())
     .pipe(uglify({
-      mangleProperties: {
-        regex: /(^_.*|.*transform.*|serverOp|clientOp)/
+      mangle: {
+        properties: {
+          regex: /(^_.*|.*transform.*|serverOp|clientOp)/
+        }
       }
     }))
     .pipe(header(headerTxt, {package: distInternalPackage}))
     .pipe(rename({
-      extname: ".min.js"
+      suffix: ".min"
     }))
     .pipe(sourceMaps.write("."))
     .pipe(dest(destination));
 }
-
-const distCjsMin = () => {
-  return minify(`${distInternalDir}/convergence.js`, `${distInternalDir}`);
-};
-
-const distCjs = () => {
-  const config = {...rollupConfig, rollup: require("rollup")};
-  config.output = {...config.output, format: "cjs"};
-  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
-
-  return rollupStream(config)
-    .pipe(source(`${distInternalDir}/convergence.js`))
-    .pipe(replace(CONVERGENCE_CLIENT_VERSION, distInternalPackage.version))
-    .pipe(buffer())
-    .pipe(sourceMaps.init({loadMaps: true}))
-    .pipe(sourceMaps.write("."))
-    .pipe(dest("./"));
-};
-
-const distUmd = () => {
-  const config = {...rollupConfig, rollup: require("rollup")};
-  const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
-  return rollupStream(config)
-    .pipe(source(`${distInternalDir}/umd/convergence.js`))
-    .pipe(replace(CONVERGENCE_CLIENT_VERSION, distInternalPackage.version))
-    .pipe(buffer())
-    .pipe(sourceMaps.init({loadMaps: true}))
-    .pipe(sourceMaps.write("."))
-    .pipe(dest("."));
-};
 
 const distUmdBundle = () =>
   src([
@@ -83,10 +49,34 @@ const distUmdBundle = () =>
     .pipe(concat("convergence-all.js"))
     .pipe(dest(`${distInternalDir}/umd`));
 
-const distUmdMin = () => {
+const minifyUmd = () => {
   return minify(
-    `${distInternalDir}/umd/convergence.js`,
-    `${distInternalDir}/umd`);
+    `${distInternalDir}/bundles/convergence.umd.js`,
+    `${distInternalDir}/bundles`);
+};
+
+const minifyAmd = () => {
+  return minify(
+    `${distInternalDir}/bundles/convergence.amd.js`,
+    `${distInternalDir}/bundles`);
+};
+
+const minifyGlobal = () => {
+  return minify(
+    `${distInternalDir}/bundles/convergence.global.js`,
+    `${distInternalDir}/bundles`);
+};
+
+const minifyCommonJs = () => {
+  return minify(
+    `${distInternalDir}/convergence.js`,
+    `${distInternalDir}/`);
+};
+
+const minifyEsModule = () => {
+  return minify(
+    `${distInternalDir}/convergence.mjs`,
+    `${distInternalDir}/`);
 };
 
 const distUmdBundleMin = () => {
@@ -123,6 +113,11 @@ const docs =
     'typedoc --options typedoc.config.json src/main/ts',
   ]);
 
+const compile =
+  shell.task([
+    'rollup -c',
+  ]);
+
 const tsDeclarations = () => {
   const exportFilter = "export {};";
   const tsProject = ts.createProject("tsconfig.json", {
@@ -148,12 +143,12 @@ const distInternal = series(
   copyPackage,
   bumpPackageVersion,
   typings,
-  distCjs,
-  distCjsMin,
-  distUmd,
-  distUmdMin,
-  distUmdBundle,
-  distUmdBundleMin
+  compile,
+  minifyUmd,
+  minifyAmd,
+  minifyGlobal,
+  minifyCommonJs,
+  minifyEsModule
 );
 
 const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));
@@ -164,7 +159,7 @@ const bumpNpmJs = () => {
     .pipe(dest(distDir));
 }
 
-const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`])
+const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`, `${distInternalDir}/**/*.min.mjs`])
   .pipe(rename(path => {
     if (path.basename.endsWith(".min")) {
       path.basename = path.basename.substring(0, path.basename.length - 4);

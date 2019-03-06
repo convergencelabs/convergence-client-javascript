@@ -1,5 +1,5 @@
-import {ConvergenceEventEmitter, ConvergenceEventListener} from "../../../main/ts/util/ConvergenceEventEmitter";
-import {IConvergenceEvent} from "../../../main/ts/util/IConvergenceEvent";
+import {ConvergenceEventEmitter, ConvergenceEventListener} from "../../../main/ts/util/";
+import {IConvergenceEvent} from "../../../main/ts/util/";
 
 import * as chai from "chai";
 import ExpectStatic = Chai.ExpectStatic;

@@ -97,7 +97,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       reconnect,
       reconnectToken: reconnectToken !== undefined ? {value: reconnectToken} : null,
       client: "JavaScript",
-      clientVersion: "$CONVERGENCE_CLIENT_VERSION"
+      clientVersion: "CONVERGENCE_CLIENT_VERSION"
     };
 
     return this.request({handshakeRequest}).then((response: IConvergenceMessage) => {
