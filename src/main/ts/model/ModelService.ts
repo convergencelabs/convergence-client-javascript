@@ -28,7 +28,7 @@ import {
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
 import {
   getOrDefaultArray,
-  getOrDefaultNumber,
+  getOrDefaultNumber, getOrDefaultString,
   timestampToDate,
   toOptional
 } from "../connection/ProtocolUtil";
@@ -347,7 +347,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       throw new Error("Internal error, id or options must be defined.");
     }
 
-    // todo validate options, sepcicially the model initializer.
+    // todo validate options, specifically the model initializer.
 
     if (id === undefined) {
       id = options.id;
@@ -370,14 +370,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // an new id.
 
     const autoRequestId: number = options ? this._autoRequestId++ : undefined;
-
-    const request: IConvergenceMessage = {
-      openRealTimeModelRequest: {
-        modelId: toOptional(id),
-        autoCreateId: toOptional(autoRequestId)
-      }
-    };
-
     if (options !== undefined) {
       this._autoCreateRequests[autoRequestId] = options;
     }
@@ -390,50 +382,70 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openRequestsByModelId.set(id, deferred);
     }
 
-    this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {openRealTimeModelResponse} = response;
-
-      const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
-      const referenceTransformer: ReferenceTransformer = new ReferenceTransformer(new TransformationFunctionRegistry());
-      const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
-        this._connection.session().sessionId(),
-        getOrDefaultNumber(openRealTimeModelResponse.version),
-        transformer,
-        referenceTransformer);
-      const data = toObjectValue(openRealTimeModelResponse.data);
-      const model: RealTimeModel = new RealTimeModel(
-        openRealTimeModelResponse.resourceId,
-        openRealTimeModelResponse.valueIdPrefix,
-        data,
-        getOrDefaultArray(openRealTimeModelResponse.connectedClients),
-        getOrDefaultArray(openRealTimeModelResponse.references),
-        toModelPermissions(openRealTimeModelResponse.permissions),
-        getOrDefaultNumber(openRealTimeModelResponse.version),
-        timestampToDate(openRealTimeModelResponse.createdTime),
-        timestampToDate(openRealTimeModelResponse.modifiedTime),
-        openRealTimeModelResponse.modelId,
-        openRealTimeModelResponse.collection,
-        clientConcurrencyControl,
-        this._connection,
-        this._identityCache,
-        this
-      );
-
-      this._openModelsByModelId.set(openRealTimeModelResponse.modelId, model);
-      this._openModelsByRid.set(openRealTimeModelResponse.resourceId, model);
-
-      if (this._openRequestsByModelId.has(id)) {
-        this._openRequestsByModelId.delete(id);
+    const request: IConvergenceMessage = {
+      openRealTimeModelRequest: {
+        modelId: toOptional(id),
+        autoCreateId: toOptional(autoRequestId)
       }
+    };
 
-      if (options !== undefined) {
-        delete this._autoCreateRequests[autoRequestId];
-      }
+    this._connection.request(request)
+      .then((response: IConvergenceMessage) => {
+        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+          this._openRequestsByModelId.delete(id);
+        }
 
-      deferred.resolve(model);
-    }).catch((error: Error) => {
-      deferred.reject(error);
-    });
+        if (autoRequestId !== undefined) {
+          delete this._autoCreateRequests[autoRequestId];
+        }
+
+        const {openRealTimeModelResponse} = response;
+
+        const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
+        const referenceTransformer: ReferenceTransformer =
+          new ReferenceTransformer(new TransformationFunctionRegistry());
+        const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
+          this._connection.session().sessionId(),
+          getOrDefaultNumber(openRealTimeModelResponse.version),
+          transformer,
+          referenceTransformer);
+        const data = toObjectValue(openRealTimeModelResponse.data);
+        const model: RealTimeModel = new RealTimeModel(
+          openRealTimeModelResponse.resourceId,
+          getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
+          data,
+          getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+          getOrDefaultArray(openRealTimeModelResponse.references),
+          toModelPermissions(openRealTimeModelResponse.permissions),
+          getOrDefaultNumber(openRealTimeModelResponse.version),
+          timestampToDate(openRealTimeModelResponse.createdTime),
+          timestampToDate(openRealTimeModelResponse.modifiedTime),
+          openRealTimeModelResponse.modelId,
+          openRealTimeModelResponse.collection,
+          clientConcurrencyControl,
+          this._connection,
+          this._identityCache,
+          this
+        );
+
+        this._openModelsByModelId.set(openRealTimeModelResponse.modelId, model);
+        this._openModelsByRid.set(openRealTimeModelResponse.resourceId, model);
+
+        deferred.resolve(model);
+        return;
+      })
+      .catch((error: Error) => {
+        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+          this._openRequestsByModelId.delete(id);
+        }
+
+        if (autoRequestId !== undefined) {
+          delete this._autoCreateRequests[autoRequestId];
+        }
+
+        deferred.reject(error);
+        return;
+      });
 
     return deferred.promise();
   }
