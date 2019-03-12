@@ -15,6 +15,7 @@ import shell from "gulp-shell";
 import filter from 'gulp-filter-each';
 import trim from "trim";
 import insert from "gulp-insert";
+import merge from "merge2";
 
 
 const distInternalDir = "./dist-internal";
@@ -40,14 +41,19 @@ function minify(source, destination) {
     .pipe(dest(destination));
 }
 
-const distUmdBundle = () =>
-  src([
-    "node_modules/rxjs/bundles/rxjs.umd.js",
-    "node_modules/long/dist/long.js",
-    "node_modules/protobufjs/dist/light/protobuf.js",
-    `${distInternalDir}/umd/convergence.js`])
-    .pipe(concat("convergence-all.js"))
-    .pipe(dest(`${distInternalDir}/umd`));
+const dependencies = [
+  "node_modules/long/dist/long.js",
+  "node_modules/protobufjs/dist/light/protobuf.js"
+];
+
+function concatDependencies(file, outputDir) {
+  const all = [...dependencies];
+  all.push(file);
+  return src(all)
+    .pipe(concat(file))
+    .pipe(dest("."));
+
+}
 
 const minifyUmd = () => {
   return minify(
@@ -75,20 +81,8 @@ const minifyCommonJs = () => {
 
 const minifyEsModule = () => {
   return minify(
-    `${distInternalDir}/convergence.mjs`,
+    `${distInternalDir}/convergence.esm.js`,
     `${distInternalDir}/`);
-};
-
-const distUmdBundleMin = () => {
-  const files = [
-    "node_modules/rxjs/bundles/rxjs.umd.min.js",
-    "node_modules/long/dist/long.js",
-    "node_modules/protobufjs/dist/light/protobuf.min.js",
-    `${distInternalDir}/umd/convergence.min.js`
-  ];
-  return src(files)
-    .pipe(concat("convergence-all.min.js"))
-    .pipe(dest(`${distInternalDir}/umd`));
 };
 
 const lint = () =>
@@ -118,6 +112,16 @@ const compile =
     'rollup -c',
   ]);
 
+const conat = () => {
+  return merge(
+    concatDependencies(`${distInternalDir}/bundles/convergence.umd.js`),
+    concatDependencies(`${distInternalDir}/bundles/convergence.amd.js`),
+    concatDependencies(`${distInternalDir}/bundles/convergence.global.js`),
+    concatDependencies(`${distInternalDir}/convergence.esm.js`),
+    concatDependencies(`${distInternalDir}/convergence.js`)
+  )
+}
+
 const tsDeclarations = () => {
   const exportFilter = "export {};";
   const tsProject = ts.createProject("tsconfig.json", {
@@ -144,6 +148,7 @@ const distInternal = series(
   bumpPackageVersion,
   typings,
   compile,
+  conat,
   minifyUmd,
   minifyAmd,
   minifyGlobal,
@@ -157,15 +162,16 @@ const bumpNpmJs = () => {
   return src(["./dist/package.json"])
     .pipe(bump({version: distInternalPackage.version}))
     .pipe(dest(distDir));
-}
+};
 
-const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`, `${distInternalDir}/**/*.min.mjs`])
+const distCopyMin = () => src([`${distInternalDir}/**/*.min.js`])
   .pipe(rename(path => {
     if (path.basename.endsWith(".min")) {
       path.basename = path.basename.substring(0, path.basename.length - 4);
     }
   }))
   .pipe(dest(`${distDir}`));
+
 const copyTypes = () => src([`${distInternalDir}/typings/**/*`]).pipe(dest(`${distDir}/typings`));
 
 const distNpmJs = series(copyNpmJs, bumpNpmJs, distCopyMin, copyTypes);
@@ -182,6 +188,7 @@ const dist = series(distInternal, distNpmJs, docs);
 
 export {
   typings,
+  compile,
   test,
   lint,
   clean,

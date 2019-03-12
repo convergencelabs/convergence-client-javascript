@@ -1,27 +1,28 @@
-import {RealTimeBoolean} from "../../../main/ts/model/rt/RealTimeBoolean";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
 import {BooleanSetOperation} from "../../../main/ts/model/ot/ops/BooleanSetOperation";
-import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
+import {RealTimeModel, ModelEventCallbacks, RealTimeBoolean} from "../../../main/ts/model/rt/";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {BooleanValue} from "../../../main/ts/model/dataValue";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {BooleanNode} from "../../../main/ts/model/internal/BooleanNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
-import {BooleanSetValueEvent} from "../../../main/ts/model/events/BooleanSetValueEvent";
-import * as chai from "chai";
-import * as sinon from "sinon";
+import {ModelChangedEvent, BooleanSetValueEvent} from "../../../main/ts/model/events/";
+import {DomainUser} from "../../../main/ts/identity";
+import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
+import {ConvergenceSession} from "../../../main/ts";
 
-let expect: any = chai.expect;
+import {expect} from "chai";
+import {SinonSpy, spy, createStubInstance} from "sinon";
 
 describe("RealTimeBoolean", () => {
 
   const sessionId: string = "mySession";
   const username: string = "myUser";
+  const user = new DomainUser(DomainUserType.NORMAL, username, "", "", "", "");
   const version: number = 1;
-  const timestamp: number = 100;
+  const timestamp = new Date();
 
   const gen: TestIdGenerator = new TestIdGenerator();
 
@@ -29,8 +30,10 @@ describe("RealTimeBoolean", () => {
     return gen.id();
   });
 
-  const model: Model = <Model> <any> sinon.createStubInstance(Model);
-  const rtModel: RealTimeModel = <RealTimeModel> <any> sinon.createStubInstance(RealTimeModel);
+  const identityCache: IdentityCache = createStubInstance(IdentityCache);
+  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
+  const model: Model = createStubInstance(Model);
+  const rtModel: RealTimeModel = createStubInstance(RealTimeModel);
   rtModel.emitLocalEvents = () => {
     return false;
   };
@@ -43,61 +46,60 @@ describe("RealTimeBoolean", () => {
     };
   };
 
-  const initialValue: BooleanValue =
-    <BooleanValue> dataValueFactory.createDataValue(true);
+  const initialValue: BooleanValue = dataValueFactory.createDataValue(true) as BooleanValue;
 
   let callbacks: ModelEventCallbacks;
 
   beforeEach(() => {
     callbacks = {
-      sendOperationCallback: sinon.spy(),
+      sendOperationCallback: spy(),
       referenceEventCallbacks: {
-        onShare: sinon.spy(),
-        onUnshare: sinon.spy(),
-        onSet: sinon.spy(),
-        onClear: sinon.spy()
+        onShare: spy(),
+        onUnshare: spy(),
+        onSet: spy(),
+        onClear: spy()
       }
     };
   });
 
   let lastEvent: ModelChangedEvent = null;
-  let lastEventCallback: (event: ModelChangedEvent) => void = (event: ModelChangedEvent) => {
+  const lastEventCallback: (event: ModelChangedEvent) => void = (event: ModelChangedEvent) => {
     lastEvent = event;
   };
 
   it("Value is correct after creation", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, session);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     expect(myBoolean.value()).to.equal(true);
   });
 
   it("Value is correct after set", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, session);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.value(false);
     expect(myBoolean.value()).to.equal(false);
   });
 
   it("Correct operation is sent after set", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, session);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.value(false);
 
     const expectedOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
-    expect((<any> callbacks.sendOperationCallback).lastCall.args[0]).to.deep.equal(expectedOp);
+    expect((callbacks.sendOperationCallback as SinonSpy).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
   it("Value is correct after BooleanSetOperation", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, session);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
 
     const incomingOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
     expect(myBoolean.value()).to.equal(false);
@@ -105,17 +107,17 @@ describe("RealTimeBoolean", () => {
 
   it("Correct Event is fired after BooleanSetOperation", () => {
     lastEvent = null;
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, sessionId, username);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: BooleanNode = new BooleanNode(initialValue, () => [], model, session);
     const myBoolean: RealTimeBoolean = wrapperFactory.wrap(delegate);
     myBoolean.on(RealTimeBoolean.Events.VALUE, lastEventCallback);
 
     const incomingOp: BooleanSetOperation = new BooleanSetOperation(initialValue.id, false, false);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    const expectedEvent: BooleanSetValueEvent = new BooleanSetValueEvent(myBoolean, sessionId, username, false);
+    const expectedEvent: BooleanSetValueEvent = new BooleanSetValueEvent(myBoolean, user, sessionId, false);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 });

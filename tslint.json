@@ -14,6 +14,7 @@
     "no-object-literal-type-assertion": false,
     "unified-signatures": false,
     "no-empty-interface": false,
-    "no-implicit-dependencies": [true, "dev"]
+    "no-implicit-dependencies": [true, "dev"],
+    "no-unused-expression": false
   }
 }

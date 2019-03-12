@@ -1,29 +1,29 @@
-import {RealTimeNumber} from "../../../main/ts/model/rt/RealTimeNumber";
+import {RealTimeNumber, RealTimeModel, ModelEventCallbacks} from "../../../main/ts/model/rt/";
 import {NumberDeltaOperation} from "../../../main/ts/model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../../main/ts/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../../main/ts/model/ModelOperationEvent";
-import {ModelEventCallbacks} from "../../../main/ts/model/rt/RealTimeModel";
 import {NumberValue} from "../../../main/ts/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../../main/ts/model/DataValueFactory";
-import {RealTimeModel} from "../../../main/ts/model/rt/RealTimeModel";
 import {Model} from "../../../main/ts/model/internal/Model";
 import {NumberNode} from "../../../main/ts/model/internal/NumberNode";
 import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent} from "../../../main/ts/model/events/ModelChangedEvent";
-import {NumberDeltaEvent} from "../../../main/ts/model/events/NumberDeltaEvent";
-import {NumberSetValueEvent} from "../../../main/ts/model/events/NumberSetValueEvent";
+import {ModelChangedEvent, NumberDeltaEvent, NumberSetValueEvent} from "../../../main/ts/model/events/";
+import {DomainUser} from "../../../main/ts/identity";
+import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
+import {ConvergenceSession} from "../../../main/ts";
 
-import * as chai from "chai";
-import * as sinon from "sinon";
-const expect: any = chai.expect;
+import {expect} from "chai";
+import {SinonSpy, spy, createStubInstance} from "sinon";
 
 describe("RealTimeNumber", () => {
 
   const sessionId: string = "mySession";
   const username: string = "myUser";
+  const user = new DomainUser(DomainUserType.NORMAL, username, "", "", "", "");
   const version: number = 1;
-  const timestamp: number = 100;
+  const timestamp = new Date();
 
   const gen: TestIdGenerator = new TestIdGenerator();
 
@@ -31,13 +31,15 @@ describe("RealTimeNumber", () => {
     return gen.id();
   });
 
-  const model: Model = <Model> <any> sinon.createStubInstance(Model);
-  const rtModel: RealTimeModel = <RealTimeModel> <any> sinon.createStubInstance(RealTimeModel);
+  const identityCache: IdentityCache = createStubInstance(IdentityCache);
+  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
+  const model: Model = createStubInstance(Model);
+  const rtModel: RealTimeModel = createStubInstance(RealTimeModel);
   rtModel.emitLocalEvents = () => {
     return false;
   };
   rtModel.permissions = () => {
-    return  {
+    return {
       read: true,
       write: true,
       remove: true,
@@ -45,18 +47,17 @@ describe("RealTimeNumber", () => {
     };
   };
 
-  const initialValue: NumberValue =
-    <NumberValue> dataValueFactory.createDataValue(10);
+  const initialValue: NumberValue = dataValueFactory.createDataValue(10) as NumberValue;
 
   let callbacks: ModelEventCallbacks;
-  beforeEach( () => {
+  beforeEach(() => {
     callbacks = {
-      sendOperationCallback: sinon.spy(),
+      sendOperationCallback: spy(),
       referenceEventCallbacks: {
-        onShare: sinon.spy(),
-        onUnshare: sinon.spy(),
-        onSet: sinon.spy(),
-        onClear: sinon.spy()
+        onShare: spy(),
+        onUnshare: spy(),
+        onSet: spy(),
+        onClear: spy()
       }
     };
   });
@@ -67,93 +68,93 @@ describe("RealTimeNumber", () => {
   };
 
   it("Value is correct after creation", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     expect(myNumber.value()).to.equal(10);
   });
 
   it("Value is correct after add", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.add(5);
     expect(myNumber.value()).to.equal(15);
   });
 
   it("Value is correct after subtract", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.subtract(5);
     expect(myNumber.value()).to.equal(5);
   });
 
   it("Returned value is correct after set", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.value(20);
     expect(myNumber.value()).to.equal(20);
   });
 
   it("Correct operation is sent after add", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.add(5);
 
-    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    const opSpy: SinonSpy = callbacks.sendOperationCallback as SinonSpy;
     expect(opSpy.called).to.be.true;
     const expectedOp: NumberDeltaOperation = new NumberDeltaOperation(myNumber.id(), false, 5);
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after subtract", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.subtract(5);
 
-    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    const opSpy = callbacks.sendOperationCallback as SinonSpy;
     expect(opSpy.called).to.be.true;
     const expectedOp: NumberDeltaOperation = new NumberDeltaOperation(myNumber.id(), false, -5);
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Correct operation is sent after set", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.value(20);
 
-    const opSpy: sinon.SinonSpy = (<sinon.SinonSpy> callbacks.sendOperationCallback);
+    const opSpy = callbacks.sendOperationCallback as SinonSpy;
     expect(opSpy.called).to.be.true;
     const expectedOp: NumberSetOperation = new NumberSetOperation(myNumber.id(), false, 20);
     expect(opSpy.args[0][0]).to.deep.equal(expectedOp);
   });
 
   it("Value is correct after NumberDeltaOperation", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
 
     const incomingOp: NumberDeltaOperation = new NumberDeltaOperation(initialValue.id, false, 5);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
     expect(myNumber.value()).to.equal(15);
   });
 
   it("Value is correct after NumberSetOperation", () => {
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
 
     const incomingOp: NumberSetOperation = new NumberSetOperation(initialValue.id, false, 20);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
 
     delegate._handleModelOperationEvent(incomingEvent);
 
@@ -162,34 +163,34 @@ describe("RealTimeNumber", () => {
 
   it("Correct Event is fired after NumberDeltaOperation", () => {
     lastEvent = null;
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.on(RealTimeNumber.Events.DELTA, lastEventCallback);
 
     const incomingOp: NumberDeltaOperation = new NumberDeltaOperation(initialValue.id, false, 5);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
-    const expectedEvent: NumberDeltaEvent = new NumberDeltaEvent(myNumber, 5, sessionId, username, false);
+    const expectedEvent: NumberDeltaEvent = new NumberDeltaEvent(myNumber, user, sessionId, false, 5);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
   it("Correct Event is fired after NumberSetOperation", () => {
     lastEvent = null;
-    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel);
-    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, sessionId, username);
-    const myNumber: RealTimeNumber = <RealTimeNumber> wrapperFactory.wrap(delegate);
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: NumberNode = new NumberNode(initialValue, () => [], model, session);
+    const myNumber: RealTimeNumber = wrapperFactory.wrap(delegate) as RealTimeNumber;
     myNumber.on(RealTimeNumber.Events.VALUE, lastEventCallback);
 
     const incomingOp: NumberSetOperation = new NumberSetOperation(initialValue.id, false, 20);
     const incomingEvent: ModelOperationEvent =
-      new ModelOperationEvent(sessionId, username, version, timestamp, incomingOp);
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
     const expectedEvent: NumberSetValueEvent =
-      new NumberSetValueEvent(myNumber, sessionId, username, false);
+      new NumberSetValueEvent(myNumber, user, sessionId, false);
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 

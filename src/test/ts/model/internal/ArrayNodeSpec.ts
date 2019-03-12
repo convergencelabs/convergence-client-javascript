@@ -1,12 +1,11 @@
-import * as chai from "chai";
-import * as sinon from "sinon";
+import {expect} from "chai";
+import {createStubInstance} from "sinon";
 import {TestIdGenerator} from "../TestIdGenerator";
 import {DataValueFactory} from "../../../../main/ts/model/DataValueFactory";
 import {ArrayValue} from "../../../../main/ts/model/dataValue";
 import {ArrayNode} from "../../../../main/ts/model/internal/ArrayNode";
 import {Model} from "../../../../main/ts/model/internal/Model";
-
-const expect: any = chai.expect;
+import {ConvergenceSession} from "../../../../main/ts";
 
 describe("ArrayNode", () => {
 
@@ -21,10 +20,11 @@ describe("ArrayNode", () => {
     return gen.id();
   });
 
-  const model: Model = <Model> <any> sinon.createStubInstance(Model);
+  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
+  const model: Model = createStubInstance(Model);
   const primitiveValue: any[] = ["A", "B", "C"];
 
-  const arrayValue: ArrayValue = <ArrayValue> dataValueFactory.createDataValue(primitiveValue);
+  const arrayValue: ArrayValue = dataValueFactory.createDataValue(primitiveValue) as ArrayValue;
 
   it("data() is correct after creation", () => {
     const arrayNode: ArrayNode = createArrayNode(arrayValue);
@@ -130,7 +130,7 @@ describe("ArrayNode", () => {
   });
 
   function createArrayNode(value: ArrayValue): ArrayNode {
-    const arrayNode: ArrayNode = new ArrayNode(arrayValue, () => [], model, sessionId, username, dataValueFactory);
+    const arrayNode: ArrayNode = new ArrayNode(arrayValue, () => [], model, session, dataValueFactory);
     return arrayNode;
   }
 });

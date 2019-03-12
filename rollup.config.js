@@ -4,6 +4,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import replace from 'rollup-plugin-replace';
 import typescript from "typescript";
 import json from "rollup-plugin-json";
+import virtual from "rollup-plugin-virtual";
 
 const packageJson = require("./dist-internal/package.json");
 const replacePlugin = replace({
@@ -16,37 +17,26 @@ const commonPlugins = [
     jsnext: true,
     main: true
   }),
-  commonjs({include: 'node_modules/**'}),
-  json()
+  // cjsEs({ nested: true, include: ['node_modules/**/*'], exclude: ["node_modules/**/*.json"]}),
+  commonjs({include: ['node_modules/**'], exclude: ['node_modules/protobufjs/**/*', "*.json"]}),
+  json(),
 ];
 
 const input = "src/main/ts/index.ts";
 
 export default [
   {
+    treeshake: false,
     input: input,
     output: [
       {
-        file: "dist-internal/bundles/convergence.umd.js",
-        format: 'umd',
-        amd: {
-          id: 'convergence'
-        },
-        name: "Convergence",
-        exports: "named",
-        sourcemap: true,
-        globals: {
-          "rxjs": "rxjs",
-          "rxjs/operators": "rxjs.operators"
-        }
-      }, {
         file: "dist-internal/bundles/convergence.global.js",
         format: 'iife',
         name: "Convergence",
         sourcemap: true,
+        exports: "named",
         globals: {
-          "rxjs": "rxjs",
-          "rxjs/operators": "rxjs.operators"
+          "rxjs": "rxjs"
         }
       }, {
         file: "dist-internal/bundles/convergence.amd.js",
@@ -55,16 +45,24 @@ export default [
           id: 'convergence'
         },
         name: "Convergence",
+        exports: "named",
         sourcemap: true,
+      }, {
+        file: "dist-internal/bundles/convergence.umd.js",
+        format: 'umd',
+        amd: {
+          id: 'convergence'
+        },
+        name: "Convergence",
+        sourcemap: true,
+        exports: "named",
         globals: {
-          "rxjs": "rxjs",
-          "rxjs/operators": "rxjs.operators"
+          "rxjs": "rxjs"
         }
       }
     ],
     external: [
-      "rxjs",
-      "rxjs/operators"
+      "rxjs"
     ],
     plugins: [
       replacePlugin,
@@ -77,6 +75,15 @@ export default [
             module: "ES2015"
           }
         }
+      }),
+      virtual({
+        'rxjs/operators': `
+            import rxjs from 'rxjs'; 
+            export const {filter, map, concatMap, tap, share} = rxjs.operators;
+        `,
+        'protobufjs/light': `
+            export const {Root} = protobuf;
+        `
       }),
       ...commonPlugins
     ]
@@ -110,7 +117,7 @@ export default [
   {
     input: input,
     output: [
-      {file: "dist-internal/convergence.mjs", format: 'es', sourcemap: true, exports: "named"}
+      {file: "dist-internal/convergence.esm.js", format: 'es', sourcemap: true, exports: "named"}
     ],
     external: [
       "rxjs",
