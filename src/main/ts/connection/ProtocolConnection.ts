@@ -1,7 +1,7 @@
 import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
 import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter, ConvergenceError} from "../util/";
+import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {debugFlags} from "../Debug";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
