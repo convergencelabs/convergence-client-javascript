@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "es6",
     "noImplicitAny": false,
     "preserveConstEnums": true,
     "outDir": "build",
@@ -11,7 +11,6 @@
     "resolveJsonModule": true,
     "stripInternal": true,
     "removeComments": true,
-    "importHelpers": true,
     "lib": ["es2015", "dom", "es7"]
   },
   "exclude": [

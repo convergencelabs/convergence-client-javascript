@@ -22,13 +22,13 @@ import webpack from "webpack-stream";
 const distInternalDir = "./dist-internal";
 const distDir = "./dist";
 
-function minify(source, destination) {
-  return src(source)
+function minify() {
+  return src([`${distInternalDir}/*.js`, `!${distInternalDir}/*.min.js`])
     .pipe(sourceMaps.init())
     .pipe(uglify({
       mangle: {
         properties: {
-          regex: /(^_.*|.*transform.*|serverOp|clientOp)/
+          regex: /^_/
         }
       }
     }))
@@ -36,20 +36,8 @@ function minify(source, destination) {
       suffix: ".min"
     }))
     .pipe(sourceMaps.write("."))
-    .pipe(dest(destination));
+    .pipe(dest(distInternalDir));
 }
-
-const minifyCommonJs = () => {
-  return minify(
-    `${distInternalDir}/convergence.js`,
-    `${distInternalDir}/`);
-};
-
-const minifyEsModule = () => {
-  return minify(
-    `${distInternalDir}/convergence.esm.js`,
-    `${distInternalDir}/`);
-};
 
 const lint = () =>
   src(["src/**/*.ts"])
@@ -76,13 +64,7 @@ const webpackBundle = () => {
       .pipe(webpack(require('./webpack/webpack.amd.config')))
       .pipe(dest(`${distInternalDir}`)),
     src('src/main/ts/index.ts')
-      .pipe(webpack(require('./webpack/webpack.amd.min.config')))
-      .pipe(dest(`${distInternalDir}`)),
-    src('src/main/ts/index.ts')
       .pipe(webpack(require('./webpack/webpack.global.config')))
-      .pipe(dest(`${distInternalDir}`)),
-    src('src/main/ts/index.ts')
-      .pipe(webpack(require('./webpack/webpack.global.min.config')))
       .pipe(dest(`${distInternalDir}`))
   )
 };
@@ -124,8 +106,7 @@ const distInternal = series(
   bumpPackageVersion,
   typings,
   compile,
-  minifyCommonJs,
-  minifyEsModule
+  minify
 );
 
 const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));

@@ -145,14 +145,26 @@ export function jsonToProtoValue(value: any): IValue {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function protoToDomainUserId(data: IDomainUserIdData): DomainUserId {
   return new DomainUserId(protoToDomainUserType(data.userType), getOrDefaultString(data.username));
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function domainUserIdToProto(domainUserId: DomainUserId): IDomainUserIdData {
   return {userType: domainUserTypeToProto(domainUserId.userType), username: domainUserId.username};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function protoToDomainUserType(data: DomainUserTypeData): DomainUserType {
   switch (data) {
     case 0:
@@ -165,6 +177,10 @@ export function protoToDomainUserType(data: DomainUserTypeData): DomainUserType 
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function domainUserTypeToProto(type: DomainUserType): DomainUserTypeData {
   switch (type) {
     case DomainUserType.NORMAL:
