@@ -8,6 +8,7 @@ import tsLint from "gulp-tslint";
 import mocha from "gulp-mocha";
 import sourceMaps from "gulp-sourcemaps";
 import uglify from 'gulp-uglify-es';
+import rmLines from "gulp-rm-lines";
 import fs from "fs";
 import typescript from "typescript";
 import header from 'gulp-header';
@@ -121,6 +122,11 @@ const distCopyMin = () => {
   const headerTxt = fs.readFileSync("./copyright-header.txt");
   const distInternalPackage = JSON.parse(fs.readFileSync("./dist-internal/package.json"));
   return src([`${distInternalDir}/**/*.min.js`])
+    .pipe(rmLines({
+      'filters': [
+        /\/\/# sourceMappingURL=.*/
+      ]
+    }))
     .pipe(header(headerTxt, {package: distInternalPackage}))
     .pipe(rename(path => {
       if (path.basename.endsWith(".min")) {
