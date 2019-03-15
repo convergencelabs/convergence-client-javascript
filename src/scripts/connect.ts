@@ -1,7 +1,7 @@
 import Convergence, {ConvergenceDomain, IConvergenceOptions} from "../main/ts";
 import * as WebSocket from "ws";
 
-const DOMAIN_URL = "ws://localhost:8000/api/realtime/~admin/test";
+const DOMAIN_URL = "ws://localhost:8080/convergence/default";
 const DOMAIN_USERNAME = "test1";
 const DOMAIN_PASSWORD = "password";
 

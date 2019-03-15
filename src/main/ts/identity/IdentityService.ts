@@ -33,36 +33,35 @@ export class IdentityService {
   }
 
   public profile(): Promise<DomainUser> {
-    return this.user(this._connection.session().user().username);
+    return this.user(this._connection.session().user().userId);
   }
 
-  public user(username: string): Promise<DomainUser> {
-    if (typeof username !== "string") {
-      return Promise.reject<DomainUser>("Must specify a username.");
+  public user(userId: DomainUserId): Promise<DomainUser> {
+    if (Validation.isNotSet(userId)) {
+      return Promise.reject<DomainUser>("Must specify a user id.");
     }
 
-    return this.users([username]).then((users: { [key: string]: DomainUser }) => {
-      const keys: string[] = Object.keys(users);
-      if (keys.length === 0 || keys.length === 1) {
-        return Promise.resolve(users[username]);
+    return this.users([userId]).then((users: DomainUser[]) => {
+      if (users.length === 0) {
+        return Promise.resolve(undefined);
+      } else if (users.length === 1) {
+        return Promise.resolve(users[0]);
       } else {
         return Promise.reject<DomainUser>(new Error("Error getting user."));
       }
     });
   }
 
-  public users(usernames: string[]): Promise<{ [key: string]: DomainUser }> {
-    Validation.assertArray(usernames, "usernames");
-    if (usernames.length === 0) {
-      return Promise.resolve({});
+  public users(users: DomainUserId[]): Promise<DomainUser[]> {
+    Validation.assertArray(users, "users");
+    if (users.length === 0) {
+      return Promise.resolve([]);
     }
 
-    const unique: string[] = Array.from(new Set(usernames));
+    const unique: DomainUserId[] = Array.from(new Set(users));
     const message: IConvergenceMessage = {
       usersGetRequest: {
-        userIds: unique.map(username => {
-          return {username};
-        })
+        userIds: unique.map(domainUserIdToProto)
       }
     };
 
@@ -71,12 +70,6 @@ export class IdentityService {
       .then((response: IConvergenceMessage) => {
         const {userListResponse} = response;
         return userListResponse.userData.map(d => toDomainUser(d));
-      }).then(users => {
-        const mapped: { [key: string]: DomainUser } = {};
-        users.forEach(user => {
-          mapped[user.username] = user;
-        });
-        return mapped;
       });
   }
 

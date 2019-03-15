@@ -18,7 +18,7 @@ export class ActivityParticipant {
    *   The [[Activity]] this participant belongs too.
    * @param sessionId
    *   The session id of the participant.
-   * @param username
+   * @param user
    *   The username of the participant.
    * @param local
    *   A flag indicating if the participant represents the local user /
