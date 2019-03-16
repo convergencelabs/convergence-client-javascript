@@ -16,6 +16,7 @@ import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {toModelOperation} from "./ModelOperationMapper";
 import {IdentityCache} from "../../identity/IdentityCache";
+import {getOrDefaultArray} from "../../connection/ProtocolUtil";
 
 interface OperationRequest {
   forward: boolean;
@@ -250,7 +251,7 @@ export class HistoricalModel implements ObservableModel {
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {historicalOperationsResponse} = response;
       opRequest.completed = true;
-      opRequest.operations = historicalOperationsResponse.operations.map(
+      opRequest.operations = getOrDefaultArray(historicalOperationsResponse.operations).map(
         op => toModelOperation(op, this._identityCache));
 
       this._checkAndProcess();
