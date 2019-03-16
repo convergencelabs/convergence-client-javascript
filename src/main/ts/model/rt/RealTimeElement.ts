@@ -23,7 +23,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
 
-export abstract class RealTimeElement<T>
+export abstract class RealTimeElement<T = any>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
 
   public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
