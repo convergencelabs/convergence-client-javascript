@@ -1,6 +1,6 @@
 {
   "name": "@convergence-internal/convergence",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0-rc.1",
   "description": "Convergence JavaScript client library.",
   "keywords": [
     "Convergence",
@@ -52,7 +52,7 @@
     "@babel/preset-env": "7.2.3",
     "@babel/preset-typescript": "7.1.0",
     "@babel/register": "7.0.0",
-    "@convergence-internal/convergence-proto": "1.0.0-SNAPSHOT.1551165286314",
+    "@convergence-internal/convergence-proto": "1.0.0-rc.1",
     "@types/chai": "3.4.34",
     "@types/long": "4.0.0",
     "@types/mocha": "2.2.35",
