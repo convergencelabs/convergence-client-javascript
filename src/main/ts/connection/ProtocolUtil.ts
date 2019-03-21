@@ -106,20 +106,20 @@ export function dateToTimestamp(date: Date): ITimestamp {
  * @internal
  */
 export function protoValueToJson(value: IValue): any {
-  if (value.nullValue) {
+  if (typeof value.nullValue !== "undefined") {
     return null;
-  } else if (value.boolValue) {
+  } else if (typeof value.boolValue !== "undefined") {
     return getOrDefaultBoolean(value.boolValue);
-  } else if (value.stringValue) {
+  } else if (typeof value.stringValue !== "undefined") {
     return getOrDefaultString(value.stringValue);
-  } else if (value.numberValue) {
+  } else if (typeof value.numberValue !== "undefined") {
     return getOrDefaultNumber(value.numberValue);
-  } else if (value.structValue) {
+  } else if (typeof value.structValue !== "undefined") {
     return mapObjectValues(getOrDefaultObject(value.structValue.fields), protoValueToJson);
-  } else if (value.listValue) {
+  } else if (typeof value.listValue !== "undefined") {
     return getOrDefaultArray(value.listValue.values).map(protoValueToJson);
   } else {
-    throw new ConvergenceError("Can not deserialize unknown data type: " + value);
+    throw new ConvergenceError("Could not deserialize json value: " + JSON.stringify(value));
   }
 }
 
