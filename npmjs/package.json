@@ -30,7 +30,7 @@
     "rxjs": "^6.3.3",
     "protobufjs": "^6.8.8"
   },
-  "license": "SEE LICENSE IN https://convergence.io/terms",
+  "license": "See LICENSE.txt",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
