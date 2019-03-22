@@ -1,5 +1,5 @@
 # Overview
-This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](https://convergence.io host platform.
+This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](https://convergence.io) platform.
 
 Convergence is a hosted platform for rapidly developing real-time collaborative applications. At the heart of Convergence is its collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
 

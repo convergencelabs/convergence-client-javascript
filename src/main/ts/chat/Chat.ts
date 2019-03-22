@@ -74,7 +74,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
-  private _identityCache: IdentityCache;
+  private readonly _identityCache: IdentityCache;
 
   /**
    * @internal
@@ -204,7 +204,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       // TODO should we allow a seen number to come along?
       const user = (event instanceof UserJoinedEvent) ? event.user : event.addedUser;
       const members = this._info.members.slice(0);
-      const member = {user: event.user, maxSeenEventNumber: -1};
+      const member = {user, maxSeenEventNumber: -1};
       members.push(member);
       if (event.user.username === this.session().user().username) {
         // FIXME this might not be right for rooms
