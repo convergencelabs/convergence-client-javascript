@@ -225,6 +225,10 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     }
     this._defaultSubject.next(value);
   }
+
+  protected _completeEventStream(): void {
+    this._defaultSubject.complete();
+  }
 }
 
 interface EventRegistration<T extends IConvergenceEvent> {
