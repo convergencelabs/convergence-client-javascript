@@ -226,6 +226,10 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     this._defaultSubject.next(value);
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected _completeEventStream(): void {
     this._defaultSubject.complete();
   }
