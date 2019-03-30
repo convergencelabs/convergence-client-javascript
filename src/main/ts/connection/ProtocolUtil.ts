@@ -129,7 +129,7 @@ export function protoValueToJson(value: IValue): any {
  */
 export function jsonToProtoValue(value: any): IValue {
   if (value === null) {
-    return {nullValue: null};
+    return {nullValue: 0};
   } else if (typeof value === "boolean") {
     return {boolValue: value};
   } else if (typeof value === "string") {
