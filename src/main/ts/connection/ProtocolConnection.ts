@@ -268,9 +268,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   private onReply(message: IConvergenceMessage): void {
-
     const requestId: number = message.responseId!.value || 0;
-
     const record: RequestRecord = this._requests[requestId];
     delete this._requests[requestId];
 

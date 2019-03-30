@@ -137,26 +137,30 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   public get(chatId: string): Promise<Chat> {
     Validation.assertNonEmptyString(chatId, "chatId");
-    return this._connection.request({
-      getChatsRequest: {
-        chatIds: [chatId]
-      }
-    }).then((response: IConvergenceMessage) => {
-      const {getChatsResponse} = response;
-      const chatData = getChatsResponse.chatInfo[0];
-      const chatInfo = this._createChatInfo(chatData);
-      return this._createChat(chatInfo);
-    });
+    return this._connection
+      .request({
+        getChatsRequest: {
+          chatIds: [chatId]
+        }
+      })
+      .then((response: IConvergenceMessage) => {
+        const {getChatsResponse} = response;
+        const chatData = getChatsResponse.chatInfo[0];
+        const chatInfo = this._createChatInfo(chatData);
+        return this._createChat(chatInfo);
+      });
   }
 
   // Methods that apply to Group Chat Channels.
   public joined(): Promise<ChatInfo[]> {
-    return this._connection.request({
-      getJoinedChatsRequest: {}
-    }).then((response: IConvergenceMessage) => {
-      const {getJoinedChatsResponse} = response;
-      return getJoinedChatsResponse.chatInfo.map(chatInfo => this._createChatInfo(chatInfo));
-    });
+    return this._connection
+      .request({
+        getJoinedChatsRequest: {}
+      })
+      .then((response: IConvergenceMessage) => {
+        const {getJoinedChatsResponse} = response;
+        return getJoinedChatsResponse.chatInfo.map(chatInfo => this._createChatInfo(chatInfo));
+      });
   }
 
   public create(options: CreateChatChannelOptions): Promise<string> {
@@ -189,31 +193,34 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     });
 
-    return this._connection.request({
-      createChatRequest: {
-        chatId: toOptional(id),
-        chatType,
-        membership,
-        name,
-        topic,
-        members: memberIds
-      }
-    }).then((response: IConvergenceMessage) => {
-      const {createChatResponse} = response;
-      return createChatResponse.chatId;
-    }).catch(error => {
-      if (error instanceof ConvergenceServerError &&
-        error.code === "chat_already_exists" &&
-        options.ignoreExistsError) {
-        // The channel already exists, this can only happen if the user specified the id.
-        // they have indicated that they want to ignore the situation where the channel already
-        // exists, so we just resolve with the id they passed in.
-        return Promise.resolve(id);
-      } else {
-        // This is an unexpected error, pass it along.
-        return Promise.reject(error);
-      }
-    });
+    return this._connection
+      .request({
+        createChatRequest: {
+          chatId: toOptional(id),
+          chatType,
+          membership,
+          name,
+          topic,
+          members: memberIds
+        }
+      })
+      .then((response: IConvergenceMessage) => {
+        const {createChatResponse} = response;
+        return createChatResponse.chatId;
+      })
+      .catch(error => {
+        if (error instanceof ConvergenceServerError &&
+          error.code === "chat_already_exists" &&
+          options.ignoreExistsError) {
+          // The channel already exists, this can only happen if the user specified the id.
+          // they have indicated that they want to ignore the situation where the channel already
+          // exists, so we just resolve with the id they passed in.
+          return Promise.resolve(id);
+        } else {
+          // This is an unexpected error, pass it along.
+          return Promise.reject(error);
+        }
+      });
   }
 
   public remove(chatId: string): Promise<void> {
