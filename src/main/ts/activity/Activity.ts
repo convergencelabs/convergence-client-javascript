@@ -9,7 +9,7 @@ import {
 } from "./events";
 import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {Observable, BehaviorSubject} from "rxjs";
+import {Observable, BehaviorSubject, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {io} from "@convergence-internal/convergence-proto";
@@ -100,6 +100,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   private _participants: BehaviorSubject<Map<string, ActivityParticipant>>;
 
   /**
+   * @internal
+   */
+  private _eventSubscription: Subscription;
+
+  /**
    * @hidden
    * @internal
    */
@@ -109,7 +114,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
               eventStream: Observable<IActivityEvent>,
               connection: ConvergenceConnection) {
     super();
-    this._emitFrom(eventStream);
+    this._eventSubscription = this._emitFrom(eventStream);
     this._id = id;
     this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(participants);
     this._leftCB = leftCB;
@@ -117,35 +122,30 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._connection = connection;
 
     this.events().subscribe((event: IActivityEvent) => {
-      const newMap: Map<string, ActivityParticipant> = this._participants.getValue();
+      const nextParticipants: Map<string, ActivityParticipant> = this._participants.getValue();
 
       if (event instanceof ActivitySessionJoinedEvent) {
-        newMap.set(event.sessionId, event.participant);
-        this._participants.next(newMap);
+        nextParticipants.set(event.sessionId, event.participant);
       } else if (event instanceof ActivitySessionLeftEvent) {
-        newMap.delete(event.sessionId);
-        this._participants.next(newMap);
+        nextParticipants.delete(event.sessionId);
       } else if (event instanceof ActivityStateSetEvent) {
-        const setState: Map<string, any> = newMap.get(event.sessionId).state;
-        setState.set(event.key, event.value);
-        newMap.set(
-          event.sessionId,
-          new ActivityParticipant(this, event.user, event.sessionId, false, setState));
-        this._participants.next(newMap);
+        const existing = nextParticipants.get(event.sessionId);
+        const newState: Map<string, any> = nextParticipants.get(event.sessionId).state;
+        newState.set(event.key, event.value);
+        nextParticipants.set(event.sessionId, existing.clone({state: newState}));
       } else if (event instanceof ActivityStateRemovedEvent) {
-        const removeState: Map<string, any> = newMap.get(event.sessionId).state;
-        removeState.delete(event.key);
-        newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.user, event.sessionId, false, removeState));
-        this._participants.next(newMap);
+        const existing = nextParticipants.get(event.sessionId);
+        const newState: Map<string, any> = nextParticipants.get(event.sessionId).state;
+        newState.delete(event.key);
+        nextParticipants.set(event.sessionId, existing.clone({state: newState}));
       } else if (event instanceof ActivityStateClearedEvent) {
-        newMap.set(event.sessionId,
-          new ActivityParticipant(this, event.user, event.sessionId, false, new Map<string, any>()));
-        this._participants.next(newMap);
+        const existing = nextParticipants.get(event.sessionId);
+        nextParticipants.set(event.sessionId, existing.clone({state: new Map()}));
       } else {
-        // This should be impossible
-        throw new Error("Invalid activity event");
+        throw new Error("Unexpected activity event: " + JSON.stringify(event));
       }
+
+      this._participants.next(nextParticipants);
     });
   }
 
@@ -183,6 +183,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       this._connection.send({
         activityLeaveRequest: {activityId: this._id}
       } as IConvergenceMessage);
+      this._eventSubscription.unsubscribe();
+      this._completeEventStream();
       this._leftCB();
     }
   }

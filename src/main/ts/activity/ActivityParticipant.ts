@@ -45,4 +45,26 @@ export class ActivityParticipant {
   public get state(): Map<string, any> {
     return deepClone(this._state);
   }
+
+  /**
+   * Clones this ActivityParticipant, optionally making changes while cloning.
+   *
+   * @param modifications
+   *   Optional overrides to the properties of the ActivityParticipant.
+   */
+  public clone(modifications: {
+    activity?: Activity,
+    user?: DomainUser,
+    sessionId?: string,
+    local?: boolean,
+    state?: Map<string, any>
+  } = {}): ActivityParticipant {
+    return new ActivityParticipant(
+      modifications.activity !== undefined ? modifications.activity : this.activity,
+      modifications.user !== undefined ? modifications.user : this.user,
+      modifications.sessionId !== undefined ? modifications.sessionId : this.sessionId,
+      modifications.local !== undefined ? modifications.local : this.local,
+      modifications.state !== undefined ? modifications.state : this.state
+    );
+  }
 }
