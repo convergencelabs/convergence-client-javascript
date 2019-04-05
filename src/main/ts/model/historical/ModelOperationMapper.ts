@@ -29,6 +29,7 @@ import {
   getOrDefaultArray,
   getOrDefaultBoolean,
   getOrDefaultNumber,
+  getOrDefaultObject,
   getOrDefaultString,
   timestampToDate
 } from "../../connection/ProtocolUtil";
@@ -123,8 +124,8 @@ function toDiscreteOperation(discreteOperationData: IAppliedDiscreteOperationDat
     return new AppliedObjectSetOperation(
       id,
       getOrDefaultBoolean(noOp),
-      mapObjectValues(values, toDataValue),
-      mapObjectValues(oldValues, toDataValue));
+      mapObjectValues(getOrDefaultObject(values), toDataValue),
+      mapObjectValues(getOrDefaultObject(oldValues), toDataValue));
   } else if (discreteOperationData.stringInsertOperation) {
     const {id, noOp, index, value} = discreteOperationData.stringInsertOperation;
     return new AppliedStringInsertOperation(
