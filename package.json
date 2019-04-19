@@ -16,11 +16,11 @@
   "homepage": "https://convergence.io",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
+    "url": "https://gitlab.dev.convergencelabs.tech/client-libs/convergence-client-javascript.git"
   },
   "main": "convergence.js",
   "module": "convergence.esm.js",
-  "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
+  "bugs": "https://gitlab.dev.convergencelabs.tech/company/convergence/issues",
   "license": "UNLICENSED",
   "scripts": {
     "dist": "gulp dist",
@@ -35,7 +35,7 @@
   },
   "typings": "typings/index.d.ts",
   "publishConfig": {
-    "registry": "https://nexus.dev.int.convergencelabs.tech/repository/npm-convergence/"
+    "registry": "https://nexus.dev.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
     "protobufjs": "6.8.8",
