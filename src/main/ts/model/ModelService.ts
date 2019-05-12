@@ -38,6 +38,8 @@ import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEn
 import {objectForEach} from "../util/ObjectUtils";
 import {DomainUserId} from "../identity/DomainUserId";
 import {TypeChecker} from "../util/TypeChecker";
+import {PagedData} from "../util/PagedData";
+import {of} from "rxjs";
 
 /**
  * The [[ModelService]] is the main entry point in Convergence for working with
@@ -112,7 +114,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @returns
    *   A promise that will be resolved with the query results.
    */
-  public query(query: string): Promise<ModelResult[]> {
+  public query(query: string): Promise<PagedData<ModelResult>> {
     Validation.assertNonEmptyString(query, "query");
     const request: IConvergenceMessage = {
       modelsQueryRequest: {
@@ -120,10 +122,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     };
 
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {modelsQueryResponse} = response;
-      return getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
-    });
+    return this._connection
+      .request(request)
+      .then((response: IConvergenceMessage) => {
+        const {modelsQueryResponse} = response;
+        const data = getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
+        const offset = getOrDefaultNumber(modelsQueryResponse.offset);
+        const totalResults = getOrDefaultNumber(modelsQueryResponse.totalResults);
+        return new PagedData(data, offset, totalResults);
+      });
   }
 
   /**
