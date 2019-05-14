@@ -106,7 +106,7 @@
     "typedoc": "0.13.0",
     "typedoc-clarity-theme": "1.1.0",
     "typedoc-plugin-as-member-of": "1.0.2",
-    "typescript": "3.2.2",
+    "typescript": "3.4.5",
     "uglify-es": "3.3.9",
     "uglify-js": "3.4.9",
     "vinyl-buffer": "1.0.1",

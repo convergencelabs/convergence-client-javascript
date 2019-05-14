@@ -129,7 +129,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         const data = getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
         const offset = getOrDefaultNumber(modelsQueryResponse.offset);
         const totalResults = getOrDefaultNumber(modelsQueryResponse.totalResults);
-        return new PagedData(data, offset, totalResults);
+        return new PagedData<ModelResult>(data, offset, totalResults);
       });
   }
 
