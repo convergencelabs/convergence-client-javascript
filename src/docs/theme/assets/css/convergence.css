@@ -3,6 +3,15 @@
   src: url('fonts/CenturyGothic.ttf');
 }
 
+.tsd-page-toolbar {
+  top: 41px;
+  position: fixed;
+}
+
+.convergence-header {
+  top: 0;
+}
+
 a.header-brand {
   display: flex;
   white-space: normal;
@@ -16,18 +25,80 @@ a.header-brand {
   margin-right: 10px;
 }
 .brand-title {
+  display: inline-block;
+  line-height: 2.3em;
+}
+.brand-copy, .brand-copy a {
   font-family: "Century Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: normal;
   color: #11599c;
+}
+
+.convergence-header .flex-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.convergence-header .links {
+  display: flex;
+  align-items: center;
+}
+.convergence-header .links .link {
   display: inline-block;
-  line-height: 2.3em;
+  padding: 0 10px;
+  font-size: 14px;
+}
+.convergence-header .links a:hover {
+  text-decoration: underline;
+}
+@media screen and (max-width: 600px) {
+  a.header-brand {
+    padding-right: 0;
+  }
+  .convergence-header .links {
+    display: none;
+  }
+  .convergence-header .links.visible {
+    position: absolute;
+    z-index: 10;
+    top: 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(0, 0, 0, .07);
+  } 
+  .convergence-header .links .link {
+    padding: 5px 15px 0;
+    align-self: flex-start;
+  }
 }
 
 #tsd-search.has-focus .header-brand {
   opacity: 0.07;
 }
 
-@media screen and (max-width: 500px) {
+.tsd-page-title {
+  padding-top: 110px;
+}
+.tsd-page-toolbar .table-wrap {
+  margin-left: -10px;
+}
+#tsd-search {
+  padding-left: 30px;
+}
+#tsd-search .field {
+  right: 0;
+  left: 30px;
+}
+#tsd-search .field label {
+  right: auto;
+  left: -30px;
+}
+
+@media screen and (max-width: 350px) {
   .brand-title {
     line-height: 1.2em;
   }
