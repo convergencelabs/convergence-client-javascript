@@ -1,6 +1,6 @@
 {
   "name": "@convergence-internal/convergence",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-SNAPSHOT",
   "description": "Convergence JavaScript client library.",
   "keywords": [
     "Convergence",
@@ -16,11 +16,11 @@
   "homepage": "https://convergence.io",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript.git"
+    "url": "https://gitlab.dev.convergencelabs.tech/client-libs/convergence-client-javascript.git"
   },
   "main": "convergence.js",
   "module": "convergence.esm.js",
-  "bugs": "https://gitlab.convergencelabs.tech/clients/convergence-client-javascript/issues",
+  "bugs": "https://gitlab.dev.convergencelabs.tech/company/convergence/issues",
   "license": "UNLICENSED",
   "scripts": {
     "dist": "gulp dist",
@@ -35,7 +35,7 @@
   },
   "typings": "typings/index.d.ts",
   "publishConfig": {
-    "registry": "https://nexus.dev.int.convergencelabs.tech/repository/npm-convergence/"
+    "registry": "https://nexus.dev.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
     "protobufjs": "6.8.8",
@@ -52,7 +52,7 @@
     "@babel/preset-env": "7.2.3",
     "@babel/preset-typescript": "7.1.0",
     "@babel/register": "7.0.0",
-    "@convergence-internal/convergence-proto": "1.0.0-rc.1",
+    "@convergence-internal/convergence-proto": "^1.0.0-SNAPSHOT",
     "@types/chai": "3.4.34",
     "@types/long": "4.0.0",
     "@types/mocha": "2.2.35",
@@ -106,7 +106,7 @@
     "typedoc": "0.14.2",
     "typedoc-clarity-theme": "1.1.0",
     "typedoc-plugin-as-member-of": "1.0.2",
-    "typescript": "3.2.2",
+    "typescript": "3.4.5",
     "uglify-es": "3.3.9",
     "uglify-js": "3.4.9",
     "vinyl-buffer": "1.0.1",

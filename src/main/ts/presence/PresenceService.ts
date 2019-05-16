@@ -171,7 +171,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   public presence(user: DomainUserIdentifier): Promise<UserPresence>;
   public presence(users: DomainUserIdentifier[]): Promise<UserPresence[]>;
   public presence(
-    users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence> | Promise<UserPresence[]> {
+    users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence | UserPresence[]> {
     if (!Array.isArray(users)) {
       return this._get([DomainUserId.toDomainUserId(users)]).then(result => {
         return result[0] as UserPresence;
