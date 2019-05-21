@@ -241,7 +241,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     return this._messageStream.pipe(filter(e => {
       const message = e.message;
       const incomingUserIdData =
-        (message.presenceAvailabilityChanged && message.presenceStateRemoved.user) ||
+        (message.presenceAvailabilityChanged && message.presenceAvailabilityChanged.user) ||
         (message.presenceStateSet && message.presenceStateSet.user) ||
         (message.presenceStateRemoved && message.presenceStateRemoved.user) ||
         (message.presenceStateCleared && message.presenceStateCleared.user);
