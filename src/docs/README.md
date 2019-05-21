@@ -7,7 +7,7 @@ The example below shows the basics for connecting to the Convergence Service.
 ```Typescript
 import Convergence from "@convergence/convergence";
 
-const url = "https://realtime.convergence.io/domain/test/example";
+const url = "ws://localhost:8000/api/realtime/convergence/default";
 Convergence
   .connect(url, "username", "password")
   .then(domain => {
