@@ -9,7 +9,7 @@ export class UserPresence {
   private readonly _state: Map<string, any>;
 
   /**
-   * @param username
+   * @param user
    * @param available
    * @param state
    *

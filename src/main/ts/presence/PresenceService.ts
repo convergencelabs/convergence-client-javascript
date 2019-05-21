@@ -20,10 +20,17 @@ import {
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {mapObjectValues} from "../util/ObjectUtils";
-import {domainUserIdToProto, jsonToProtoValue, protoToDomainUserId, protoValueToJson} from "../connection/ProtocolUtil";
+import {
+  domainUserIdToProto, getOrDefaultArray,
+  getOrDefaultBoolean, getOrDefaultObject,
+  jsonToProtoValue,
+  protoToDomainUserId,
+  protoValueToJson
+} from "../connection/ProtocolUtil";
 import {DomainUserId} from "../identity/DomainUserId";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUserIdentifier} from "../identity";
+import IUserPresence = io.convergence.proto.IUserPresence;
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
@@ -219,13 +226,8 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     return this._connection.request(message).then((response: IConvergenceMessage) => {
       const {userPresences} = response.presenceResponse;
-      return userPresences.map(p => {
-          const user = this._identityCache.getUser(protoToDomainUserId(p.user));
-          return new UserPresence(
-            user,
-            p.available,
-            StringMap.objectToMap(mapObjectValues(p.state, protoValueToJson))
-          );
+      return getOrDefaultArray(userPresences).map(p => {
+          return this._mapUserPresence(p);
         }
       );
     });
@@ -271,17 +273,14 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
       return this._connection.request(message).then((response: IConvergenceMessage) => {
         const {userPresences} = response.presenceSubscribeResponse;
         userPresences.forEach(presence => {
-          const user = this._identityCache.getUser(protoToDomainUserId(presence.user));
+          const userPresence = this._mapUserPresence(presence);
+          const guid = userPresence.user.userId.toGuid();
           const manager: UserPresenceManager = new UserPresenceManager(
-            new UserPresence(
-              user,
-              presence.available,
-              StringMap.objectToMap(mapObjectValues(presence.state, protoValueToJson))
-            ),
-            this._presenceStreams.get(user.userId.toGuid()),
+            userPresence,
+            this._presenceStreams.get(guid),
             (userId) => this._unsubscribe(userId)
           );
-          this._managers.set(user.userId.toGuid(), manager);
+          this._managers.set(guid, manager);
         });
       });
     } else {
@@ -305,5 +304,12 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     const guid = userId.toGuid();
     this._managers.delete(guid);
     this._presenceStreams.delete(guid);
+  }
+
+  private _mapUserPresence(p: IUserPresence): UserPresence {
+    const user = this._identityCache.getUser(protoToDomainUserId(p.user));
+    const available = getOrDefaultBoolean(p.available);
+    const state = StringMap.objectToMap(mapObjectValues(getOrDefaultObject(p.state), protoValueToJson));
+    return new UserPresence(user, available, state);
   }
 }
