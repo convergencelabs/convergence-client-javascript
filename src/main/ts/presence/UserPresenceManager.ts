@@ -9,10 +9,10 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
-import {deepClone} from "../util/ObjectUtils";
+import {deepClone, mapObjectValues} from "../util/ObjectUtils";
 import {DomainUserId} from "../identity/DomainUserId";
 import {DomainUser} from "../identity";
-import {getOrDefaultArray, getOrDefaultBoolean, getOrDefaultObject} from "../connection/ProtocolUtil";
+import {getOrDefaultArray, getOrDefaultBoolean, getOrDefaultObject, protoValueToJson} from "../connection/ProtocolUtil";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
@@ -153,7 +153,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
       this.availability(getOrDefaultBoolean(available));
     } else if (message.presenceStateSet) {
       const {state} = message.presenceStateSet;
-      this.set(StringMap.objectToMap(getOrDefaultObject(state)));
+      const jsonState = StringMap.objectToMap(mapObjectValues(getOrDefaultObject(state), protoValueToJson));
+      this.set(jsonState);
     } else if (message.presenceStateCleared) {
       this.clear();
     } else if (message.presenceStateRemoved) {
