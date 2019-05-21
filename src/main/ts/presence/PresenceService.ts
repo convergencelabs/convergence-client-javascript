@@ -136,7 +136,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     this._localManager.set(state);
 
     const message: IConvergenceMessage = {
-      presenceStateSet: {
+      presenceSetState: {
         state: mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue)
       }
     };
