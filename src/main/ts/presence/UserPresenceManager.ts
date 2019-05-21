@@ -12,6 +12,7 @@ import {
 import {deepClone} from "../util/ObjectUtils";
 import {DomainUserId} from "../identity/DomainUserId";
 import {DomainUser} from "../identity";
+import {getOrDefaultArray, getOrDefaultBoolean, getOrDefaultObject} from "../connection/ProtocolUtil";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
@@ -149,15 +150,15 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     const message = messageEvent.message;
     if (message.presenceAvailabilityChanged) {
       const {available} = message.presenceAvailabilityChanged;
-      this.availability(available);
+      this.availability(getOrDefaultBoolean(available));
     } else if (message.presenceStateSet) {
       const {state} = message.presenceStateSet;
-      this.set(StringMap.objectToMap(state));
+      this.set(StringMap.objectToMap(getOrDefaultObject(state)));
     } else if (message.presenceStateCleared) {
       this.clear();
     } else if (message.presenceStateRemoved) {
       const {keys} = message.presenceStateRemoved;
-      this.remove(keys);
+      this.remove(getOrDefaultArray(keys));
     }
   }
 }
