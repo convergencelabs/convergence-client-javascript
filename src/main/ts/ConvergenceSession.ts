@@ -42,12 +42,6 @@ export class ConvergenceSession {
    * @hidden
    * @internal
    */
-  private _authenticated: boolean;
-
-  /**
-   * @hidden
-   * @internal
-   */
   constructor(domain: ConvergenceDomain,
               connection: ConvergenceConnection,
               user: DomainUser,
@@ -58,7 +52,6 @@ export class ConvergenceSession {
     this._user = user;
     this._reconnectToken = reconnectToken;
     this._connection = connection;
-    this._authenticated = false;
   }
 
   /**
@@ -93,7 +86,7 @@ export class ConvergenceSession {
    * @returns True if the client is authenticated
    */
   public isAuthenticated(): boolean {
-    return this._authenticated;
+    return this._connection.isAuthenticated();
   }
 
   /**
@@ -101,14 +94,6 @@ export class ConvergenceSession {
    */
   public isConnected(): boolean {
     return this._connection.isConnected();
-  }
-
-  /**
-   * @hidden
-   * @internal
-   */
-  public _setAuthenticated(authenticated: boolean): void {
-    this._authenticated = authenticated;
   }
 
   /**

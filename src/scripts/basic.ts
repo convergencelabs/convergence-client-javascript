@@ -9,10 +9,13 @@ connect()
   .then(d => {
     domain = d;
     console.log("connected");
-    console.log("disconnecting...");
+
+    domain.events().subscribe(e => {
+        console.log(e.name);
+    });
+
     return domain.dispose();
   })
-  .then(() => {
-    console.log("disconnected");
-  })
   .catch(e => console.error(e));
+
+// process.stdin.resume();

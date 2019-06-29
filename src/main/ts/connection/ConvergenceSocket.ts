@@ -59,16 +59,16 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
   private readonly _webSocketClass: IWebSocketClass;
 
   constructor(url: string,
-              webSocketClass?: IWebSocketClass,
-              webSocketFactory?: WebSocketFactory) {
+              webSocketClass?: IWebSocketClass | null,
+              webSocketFactory?: WebSocketFactory | null) {
     super();
     let tmp: string = url;
     tmp = tmp.replace(/https:/i, "wss:");
     tmp = tmp.replace(/http:/i, "ws:");
     this._url = tmp;
     this._socket = null;
-    this._webSocketClass = webSocketClass !== undefined ? webSocketClass : WebSocket;
-    this._webSocketFactory = webSocketFactory !== undefined ? webSocketFactory : (u) => new this._webSocketClass(u);
+    this._webSocketClass = webSocketClass !== null ? webSocketClass : WebSocket;
+    this._webSocketFactory = webSocketFactory !== null ? webSocketFactory : (u) => new this._webSocketClass(u);
   }
 
   get url(): string {

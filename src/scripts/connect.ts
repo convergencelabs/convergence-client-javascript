@@ -9,9 +9,13 @@ const ANONYMOUS = true;
 const DISPLAY_NAME = "test user";
 
 const OPTIONS: IConvergenceOptions = {
-  webSocketFactory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
-  webSocketClass: WebSocket,
-  retryOnOpen: false
+  webSocket: {
+    factory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
+    constructor: WebSocket
+  },
+  reconnect: {
+    autoReconnect: true
+  }
 };
 
 export function connect(): Promise<ConvergenceDomain> {

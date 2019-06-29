@@ -1,4 +1,9 @@
-import {ConvergenceConnection, AuthResponse, IConnectionErrorEvent} from "./connection/ConvergenceConnection";
+import {
+  ConvergenceConnection,
+  AuthResponse,
+  IConnectionErrorEvent,
+  IConnectionScheduledEvent, IAuthenticatingEvent, IAuthenticationFailedEvent
+} from "./connection/ConvergenceConnection";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
@@ -8,17 +13,23 @@ import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
 import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
-  ConnectionErrorEvent,
+  ErrorEvent,
   IConvergenceDomainEvent,
   ConnectedEvent,
+  ConnectionScheduledEvent,
+  ConnectingEvent,
+  ConnectionFailedEvent,
+  AuthenticatingEvent,
+  AuthenticatedEvent,
+  AuthenticationFailedEvent,
   InterruptedEvent,
-  ReconnectedEvent,
   DisconnectedEvent
 } from "./events/";
 import {Validation} from "./util";
 import {io} from "@convergence-internal/convergence-proto";
 import {IdentityCache} from "./identity/IdentityCache";
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import {ConvergenceOptions} from "./ConvergenceOptions";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -30,21 +41,19 @@ import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessag
 export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomainEvent> {
 
   public static readonly Events = {
+    CONNECTION_SCHEDULED: ConnectionScheduledEvent.NAME,
+    CONNECTING: ConnectingEvent.NAME,
     CONNECTED: ConnectedEvent.NAME,
-    INTERRUPTED: InterruptedEvent.NAME,
-    RECONNECTED: ReconnectedEvent.NAME,
-    DISCONNECTED: DisconnectedEvent.NAME,
-    ERROR: ConnectionErrorEvent.NAME
-  };
+    CONNECTION_FAILED: ConnectionFailedEvent.NAME,
 
-  /**
-   * @internal
-   */
-  private static readonly DefaultOptions: IConvergenceOptions = {
-    connectionTimeout: 5,
-    maxReconnectAttempts: -1,
-    reconnectInterval: 5,
-    retryOnOpen: true
+    AUTHENTICATING: AuthenticatingEvent.NAME,
+    AUTHENTICATED: AuthenticatedEvent.NAME,
+    AUTHENTICATION_FAILED: AuthenticationFailedEvent.NAME,
+
+    INTERRUPTED: InterruptedEvent.NAME,
+    DISCONNECTED: DisconnectedEvent.NAME,
+
+    ERROR: ErrorEvent.NAME
   };
 
   /**
@@ -85,7 +94,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * @internal
    */
-  private _options: IConvergenceOptions;
+  private _options: ConvergenceOptions;
 
   /**
    * @internal
@@ -120,31 +129,52 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       throw new Error("The Convergence connection url must be provided.");
     }
 
-    this._options = options === undefined ?
-      ConvergenceDomain.DefaultOptions :
-      {...ConvergenceDomain.DefaultOptions, ...options};
+    this._options = new ConvergenceOptions(options || {});
 
     this._disposed = false;
 
-    // todo make this optional params
-    this._connection = new ConvergenceConnection(
-      url,
-      this._options.connectionTimeout,
-      this._options.maxReconnectAttempts,
-      this._options.reconnectInterval,
-      this._options.retryOnOpen,
-      this._options.webSocketFactory,
-      this._options.webSocketClass,
-      this
-    );
+    this._connection = new ConvergenceConnection(url, this);
 
-    this._connection.on(ConvergenceConnection.Events.CONNECTED, () => this._emitEvent(new ConnectedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () => this._emitEvent(new InterruptedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => this._emitEvent(new DisconnectedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.RECONNECTED, () => this._emitEvent(new ReconnectedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.ERROR, (evt: IConnectionErrorEvent) =>
-      this._emitEvent(new ConnectionErrorEvent(this, evt.error.message))
+    this._connection.on(ConvergenceConnection.Events.CONNECTED,
+      () => this._emitEvent(new ConnectedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTING,
+      () => this._emitEvent(new ConnectingEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTION_SCHEDULED,
+      (e: IConnectionScheduledEvent) => this._emitEvent(new ConnectionScheduledEvent(this, e.delay)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTION_FAILED,
+      () => this._emitEvent(new ConnectionFailedEvent(this)));
+
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATING,
+      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
+      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatedEvent(this, e.method)));
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
+      (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
+
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED,
+      () => this._emitEvent(new InterruptedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED,
+      () => this._emitEvent(new DisconnectedEvent(this)));
+
+    this._connection.on(ConvergenceConnection.Events.ERROR,
+      (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
     );
+  }
+
+  /**
+   * @returns
+   *   The url of the domain.
+   */
+  public url(): string {
+    return this._connection.url();
+  }
+
+  /**
+   * @returns
+   *  The resolved options for this domain.
+   */
+  public options(): ConvergenceOptions {
+    return this._options;
   }
 
   /**
@@ -321,11 +351,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public _connect(): Promise<void> {
     return this._connection.connect()
-      .then((response: IHandshakeResponseMessage) => {
-        this._namespace = response.namespace;
-        this._id = response.id;
-        return;
-      });
+    .then((response: IHandshakeResponseMessage) => {
+      this._namespace = response.namespace;
+      this._id = response.id;
+      return;
+    });
   }
 
   /**

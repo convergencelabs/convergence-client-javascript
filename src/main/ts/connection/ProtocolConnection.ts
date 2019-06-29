@@ -65,7 +65,8 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private _socket: ConvergenceSocket;
   private _protocolConfig: ProtocolConfiguration;
   private _nextRequestId: number = 0;
-  private readonly _requests: any;
+  private readonly _requests: Map<number, any>;
+  private _closeRequested: boolean = false;
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
@@ -82,19 +83,22 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     });
 
     this._socket.on(ConvergenceSocket.Events.CLOSE, (event: ISocketClosedEvent) => {
-      this.onSocketClosed(event.reason);
+      if (this._closeRequested) {
+        this.onSocketClosed(event.reason);
+      } else {
+        this.onSocketDropped();
+      }
     });
 
-    this._requests = {};
+    this._requests = new Map();
   }
 
   public connect(): Promise<void> {
     return this._socket.open();
   }
 
-  public handshake(reconnect: boolean, reconnectToken?: string): Promise<IHandshakeResponseMessage> {
+  public handshake(reconnectToken?: string): Promise<IHandshakeResponseMessage> {
     const handshakeRequest: IHandshakeRequestMessage = {
-      reconnect,
       reconnectToken: reconnectToken !== undefined ? {value: reconnectToken} : null,
       client: "JavaScript",
       clientVersion: "CONVERGENCE_CLIENT_VERSION"
@@ -130,23 +134,31 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     this.sendMessage(message);
   }
 
-  public request(message: IConvergenceMessage): Promise<IConvergenceMessage> {
+  /**
+   * Sends a request message to the server and promises a response.
+   *
+   * @param message
+   *   The request message to send.
+   * @param timeout
+   *   A timeout in seconds to wait for a response.
+   */
+  public request(message: IConvergenceMessage, timeout?: number): Promise<IConvergenceMessage> {
     const reqId: number = this._nextRequestId;
     this._nextRequestId++;
 
     const replyDeferred: Deferred<IConvergenceMessage> = new Deferred<IConvergenceMessage>();
 
-    const timeout: number = this._protocolConfig.defaultRequestTimeout;
+    const requestTimeout = (timeout !== undefined ? timeout : this._protocolConfig.defaultRequestTimeout) * 1000;
     const timeoutTask: any = setTimeout(
       () => {
-        const req: RequestRecord = this._requests[reqId];
+        const req: RequestRecord = this._requests.get(reqId);
         if (req) {
           req.replyDeferred.reject(new Error("Response timeout"));
         }
       },
-      timeout);
+      requestTimeout);
 
-    this._requests[reqId] = {reqId, replyDeferred, timeoutTask} as RequestRecord;
+    this._requests.set(reqId, {reqId, replyDeferred, timeoutTask} as RequestRecord);
 
     this.sendMessage({...message, requestId: {value: reqId}});
 
@@ -172,6 +184,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   public close(): Promise<void> {
+    this._closeRequested = true;
     this.removeAllListeners();
     if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
@@ -269,8 +282,8 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
   private onReply(message: IConvergenceMessage): void {
     const requestId: number = message.responseId!.value || 0;
-    const record: RequestRecord = this._requests[requestId];
-    delete this._requests[requestId];
+    const record: RequestRecord = this._requests.get(requestId);
+    this._requests.delete(requestId);
 
     if (record) {
       clearTimeout(record.timeoutTask);

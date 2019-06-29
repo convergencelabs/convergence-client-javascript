@@ -139,7 +139,7 @@ export class Convergence {
       // no-op
     }
 
-    if (!websockets && !options.webSocketClass) {
+    if (!websockets && !options.webSocket && !options.webSocket.constructor) {
       const message = "Convergence depends on the WebSockets API. " +
         "If Convergence is not being run in a browser, you must set the " +
         "'webSocketClass' property in the connection options.";

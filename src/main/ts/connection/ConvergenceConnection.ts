@@ -1,4 +1,3 @@
-import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {
   IProtocolConnectionErrorEvent,
   IProtocolConnectionMessageEvent,
@@ -13,8 +12,6 @@ import {Deferred} from "../util/Deferred";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
-import {IWebSocketClass} from "./IWebSocketClass";
-import {WebSocketFactory} from "./WebSocketFactory";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
@@ -26,6 +23,7 @@ import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequest
 import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
 import {toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
+import {ConvergenceOptions} from "../ConvergenceOptions";
 
 /**
  * @hidden
@@ -35,76 +33,52 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   public static Events: any = {
     MESSAGE: "message",
+
+    CONNECTION_SCHEDULED: "connection_scheduled",
+    CONNECTING: "connecting",
     CONNECTED: "connected",
+    CONNECTION_FAILED: "connection_failed",
+
+    AUTHENTICATING: "authenticating",
+    AUTHENTICATED: "authenticated",
+    AUTHENTICATION_FAILED: "authentication_failed",
+
     INTERRUPTED: "interrupted",
-    RECONNECTED: "reconnected",
     DISCONNECTED: "disconnected",
     ERROR: "error"
   };
 
   private readonly _session: ConvergenceSession;
+  private _authenticated: boolean;
   private _connectionDeferred: Deferred<IHandshakeResponseMessage>;
-  private readonly _connectionTimeout: number;  // seconds
-  private readonly _maxReconnectAttempts: number;
   private _connectionAttempts: number;
   private _connectionAttemptTask: any;
   private _connectionTimeoutTask: any;
-  private readonly _reconnectInterval: number; // seconds
-  private readonly _retryOnOpen: boolean;
-
-  private readonly _protocolConfig: ProtocolConfiguration;
-
   private _connectionState: ConnectionState;
-
   private _protocolConnection: ProtocolConnection;
   private readonly _url: string;
-  private readonly _webSocketFactory: WebSocketFactory | undefined;
-  private readonly _webSocketClass: IWebSocketClass | undefined;
+  private _options: ConvergenceOptions;
 
   /**
    *
    * @param url
-   * @param connectionTimeout in seconds
-   * @param maxReconnectAttempts -1 for unlimited
-   * @param reconnectInterval in seconds
-   * @param retryOnOpen
-   * @param webSocketFactory
-   * @param webSocketClass
    * @param domain
    */
-  constructor(url: string,
-              connectionTimeout: number,
-              maxReconnectAttempts: number,
-              reconnectInterval: number,
-              retryOnOpen: boolean,
-              webSocketFactory: WebSocketFactory | undefined,
-              webSocketClass: IWebSocketClass | undefined,
-              domain: ConvergenceDomain) {
+  constructor(url: string, domain: ConvergenceDomain) {
     super();
     this._url = url;
+    this._options = domain.options();
 
-    this._connectionTimeout = connectionTimeout;
-    this._maxReconnectAttempts = maxReconnectAttempts;
-    this._reconnectInterval = reconnectInterval;
-    this._retryOnOpen = retryOnOpen;
+    this._authenticated = false;
 
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
 
-    this._webSocketFactory = webSocketFactory;
-    this._webSocketClass = webSocketClass;
-
-    // fixme this should be configurable
-    this._protocolConfig = {
-      defaultRequestTimeout: 5000,
-      heartbeatConfig: {
-        enabled: true,
-        pingInterval: 5000,
-        pongTimeout: 10000
-      }
-    };
-
     this._session = new ConvergenceSession(domain, this, null, null, null);
+  }
+
+  public url(): string {
+    return this._url;
   }
 
   public session(): ConvergenceSession {
@@ -112,15 +86,16 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   public connect(): Promise<IHandshakeResponseMessage> {
-    if (this._connectionState !== ConnectionState.DISCONNECTED) {
-      throw new Error("Can only call connect on a disconnected connection.");
+    if (this._connectionState !== ConnectionState.DISCONNECTED &&
+      this._connectionState !== ConnectionState.INTERRUPTED) {
+      throw new Error("Can only call connect on a disconnected or interrupted connection.");
     }
 
     this._connectionAttempts = 0;
     this._connectionDeferred = new Deferred<IHandshakeResponseMessage>();
     this._connectionState = ConnectionState.CONNECTING;
 
-    this._attemptConnection(false);
+    this._attemptConnection();
 
     return this._connectionDeferred.promise();
   }
@@ -164,16 +139,39 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return deferred.promise();
   }
 
+  public reconnect(): Promise<void> {
+    if (this._connectionState !== ConnectionState.INTERRUPTED) {
+      throw new Error("Can only call reconnect on an interrupted connection.");
+    }
+
+    return this
+      .connect()
+      .then(() => this.authenticateWithReconnectToken(this._session.reconnectToken()))
+      .then(() => {
+        return;
+      });
+  }
+
+  public connectNow(): void {
+    if (this._connectionState !== ConnectionState.CONNECTING) {
+      throw new Error("Can only call connectNow on an connecting connection.");
+    }
+  }
+
   public isConnected(): boolean {
     return this._connectionState === ConnectionState.CONNECTED;
+  }
+
+  public isAuthenticated(): boolean {
+    return this._authenticated;
   }
 
   public send(message: IConvergenceMessage): void {
     this._protocolConnection.send(message);
   }
 
-  public request(message: IConvergenceMessage): Promise<IConvergenceMessage> {
-    return this._protocolConnection.request(message);
+  public request(message: IConvergenceMessage, timeout?: number): Promise<IConvergenceMessage> {
+    return this._protocolConnection.request(message, timeout);
   }
 
   public authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
@@ -221,55 +219,83 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject<AuthResponse>(new ConvergenceError("Must be connected or connecting to authenticate."));
+      return Promise.reject<AuthResponse>(
+        new ConvergenceError("Must be connected or connecting to authenticate."));
     }
   }
 
   private _sendAuthRequest(authenticationRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
-    return this.request({authenticationRequest}).then((response: IConvergenceMessage) => {
-      const authResponse: IAuthenticationResponseMessage = response.authenticationResponse;
-      if (authResponse.success) {
-        const success = authResponse.success;
-        this._session._setUser(toDomainUser(success.user));
-        this._session._setSessionId(success.sessionId);
-        this._session._setReconnectToken(success.reconnectToken);
-        this._session._setAuthenticated(true);
-        const resp: AuthResponse = {
-          state: success.presenceState
-        };
-        return resp;
-      } else {
-        throw new ConvergenceError("Authentication failed");
-      }
-    });
+    let method = null;
+    if (authenticationRequest.anonymous) {
+      method = "anonymous";
+    } else if (authenticationRequest.password) {
+      method = "password";
+    } else if (authenticationRequest.jwt) {
+      method = "jwt";
+    } else if (authenticationRequest.reconnect) {
+      method = "reconnect";
+    }
+
+    const authenticatingEvent: IAuthenticatingEvent = {name: ConvergenceConnection.Events.AUTHENTICATING, method};
+    this._emitEvent(authenticatingEvent);
+
+    return this
+      .request({authenticationRequest})
+      .then((response: IConvergenceMessage) => {
+        const authResponse: IAuthenticationResponseMessage = response.authenticationResponse;
+        if (authResponse.success) {
+          const authenticatedEvent: IAuthenticatedEvent = {name: ConvergenceConnection.Events.AUTHENTICATED, method};
+          this._emitEvent(authenticatedEvent);
+
+          const success = authResponse.success;
+          this._session._setUser(toDomainUser(success.user));
+          this._session._setSessionId(success.sessionId);
+          this._session._setReconnectToken(success.reconnectToken);
+          this._authenticated = true;
+          const resp: AuthResponse = {
+            state: success.presenceState
+          };
+          return Promise.resolve(resp);
+        } else {
+          const authenticationFailedEvent: IAuthenticationFailedEvent = {
+            name: ConvergenceConnection.Events.AUTHENTICATION_FAILED,
+            method
+          };
+          this._emitEvent(authenticationFailedEvent);
+          return Promise.reject(new ConvergenceError("Authentication failed"));
+        }
+      });
   }
 
-  private _attemptConnection(reconnect: boolean): void {
+  private _attemptConnection(): void {
     this._connectionAttempts++;
-
-    if (reconnect) {
-      if (debugFlags.CONNECTION) {
-        console.log("Attempting reconnection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
-      }
-    } else {
-      if (debugFlags.CONNECTION) {
-        console.log("Attempting connection %d of %d.", this._connectionAttempts, this._maxReconnectAttempts);
-      }
+    if (debugFlags.CONNECTION) {
+      console.log("Attempting web socket connection.");
     }
 
     const timeoutTask = () => {
       this._protocolConnection.abort("connection timeout exceeded");
     };
 
-    this._connectionTimeoutTask = setTimeout(timeoutTask, this._connectionTimeout * 1000);
+    const timeout = this._options.connectionTimeout * 1000;
+    this._connectionTimeoutTask = setTimeout(timeoutTask, timeout);
+
+    this._emitEvent({name: ConvergenceConnection.Events.CONNECTING});
 
     const socket: ConvergenceSocket = new ConvergenceSocket(
       this._url,
-      this._webSocketClass,
-      this._webSocketFactory);
+      this._options.webSocketConstructor,
+      this._options.webSocketFactory);
     this._protocolConnection = new ProtocolConnection(
       socket,
-      this._protocolConfig);
+      {
+        defaultRequestTimeout: this._options.defaultRequestTimeout,
+        heartbeatConfig: {
+          enabled: this._options.heartbeatEnabled,
+          pingInterval: this._options.pingInterval,
+          pongTimeout: this._options.pongTimeout
+        }
+      });
 
     this._protocolConnection
       .events()
@@ -283,7 +309,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           }
 
           case ProtocolConnection.Events.DROPPED: {
-            this._emitEvent({name: ConvergenceConnection.Events.INTERRUPTED});
+            this._handleInterrupted();
             break;
           }
 
@@ -313,31 +339,29 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           console.log("Connection succeeded, handshaking.");
         }
 
-        this._protocolConnection
-          .handshake(reconnect)
+        return this._protocolConnection
+          .handshake()
           .then((handshakeResponse: IHandshakeResponseMessage) => {
+            // We got a response so clear the timeout.
             clearTimeout(this._connectionTimeoutTask);
-            if (handshakeResponse.success) {
-              this._connectionState = ConnectionState.CONNECTED;
 
+            if (handshakeResponse.success) {
+              // We reset the connection attempts to 0, so that when we get dropped
+              // we will start with the first interval.
+              this._connectionAttempts = 0;
+
+              this._connectionState = ConnectionState.CONNECTED;
               this._connectionDeferred.resolve(handshakeResponse);
               this._connectionDeferred = null;
-
-              if (reconnect) {
-                this._emitEvent({name: ConvergenceConnection.Events.RECONNECTED});
-              } else {
-                this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
-              }
+              this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
             } else {
-              // todo: Can we reuse this connection???
+              this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
               this._protocolConnection
                 .close()
                 .catch(error => console.error(error));
 
-              if ((reconnect || this._retryOnOpen) && handshakeResponse.retryOk) {
-                // todo if this is a timeout, we would like to shorten
-                // the reconnect interval by the timeout period.
-                this._scheduleReconnect(this._reconnectInterval, reconnect);
+              if (handshakeResponse.retryOk) {
+                this._scheduleConnection();
               } else {
                 this._handleDisconnected();
                 this._connectionDeferred.reject(
@@ -352,42 +376,43 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
               .close()
               .catch(error => console.error(error));
             this._protocolConnection = null;
-            clearTimeout(this._connectionTimeoutTask);
-            this._scheduleReconnect(this._reconnectInterval, reconnect);
-            this._handleDisconnected();
+            // This will cause the code to fall into the next catch.
+            return Promise.reject(e);
           });
       })
       .catch((reason: Error) => {
         clearTimeout(this._connectionTimeoutTask);
-        if (reconnect || this._retryOnOpen) {
-          this._scheduleReconnect(Math.max(this._reconnectInterval, 0), reconnect);
-        } else {
-          this._connectionDeferred.reject(reason);
-          this._connectionDeferred = null;
-          this._handleDisconnected();
-        }
+        this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
+        this._scheduleConnection();
       });
   }
 
-  private _scheduleReconnect(delay: number, reconnect: boolean): void {
-    if (this._connectionAttempts < this._maxReconnectAttempts || this._maxReconnectAttempts < 0) {
-      const reconnectTask = () => {
-        this._attemptConnection(reconnect);
-      };
-      this._connectionAttemptTask = setTimeout(reconnectTask, delay * 1000);
-    } else {
-      this._connectionDeferred.reject(new Error("Maximum connection attempts exceeded"));
+  private _scheduleConnection(): void {
+    const idx = Math.min(this._connectionAttempts, this._options.reconnectIntervals.length - 1);
+    const delay = this._options.reconnectIntervals[idx];
+    if (debugFlags.CONNECTION) {
+      console.log(`Scheduling web socket connection in ${delay} seconds.`);
     }
+    const event: IConnectionScheduledEvent = {name: ConvergenceConnection.Events.CONNECTION_SCHEDULED, delay};
+    this._emitEvent(event);
+    this._connectionAttemptTask = setTimeout(() => this._attemptConnection(), delay * 1000);
   }
 
   private _handleDisconnected(): void {
+    this._authenticated = false;
     this._connectionState = ConnectionState.DISCONNECTED;
     this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
   }
 
   private _handleInterrupted(): void {
+    this._authenticated = false;
     this._connectionState = ConnectionState.INTERRUPTED;
     this._emitEvent({name: ConvergenceConnection.Events.INTERRUPTED});
+    if (this._options.autoReconnect && this._session.reconnectToken()) {
+      this
+        .reconnect()
+        .catch(e => console.log(e));
+    }
   }
 }
 
@@ -403,17 +428,45 @@ export interface IConnectionEvent extends IConvergenceEvent {
  * @hidden
  * @internal
  */
-export interface IConnectionClosedEvent extends IConnectionEvent {
-  name: "closed";
+export interface IConnectionErrorEvent extends IConnectionEvent {
+  name: "error";
+  error: Error;
 }
 
 /**
  * @hidden
  * @internal
  */
-export interface IConnectionErrorEvent extends IConnectionEvent {
-  name: "closed";
-  error: Error;
+export interface IAuthenticatingEvent extends IConnectionEvent {
+  name: "authenticating";
+  method: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IAuthenticatedEvent extends IConnectionEvent {
+  name: "authenticated";
+  method: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IAuthenticationFailedEvent extends IConnectionEvent {
+  name: "authenticationFailed";
+  method: string;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface IConnectionScheduledEvent extends IConnectionEvent {
+  name: "connection_scheduled";
+  delay: number;
 }
 
 /**

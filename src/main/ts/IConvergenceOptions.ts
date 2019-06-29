@@ -1,40 +1,120 @@
-/**
- * The [[IConvergenceOptions]] interface represents that options that can be set
- * within Convergence when connecting to a domain.
- */
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
 
+/**
+ * The [[IConvergenceOptions]] interface represents that options that can be
+ * set within Convergence when connecting to a domain.
+ */
 export interface IConvergenceOptions {
 
   /**
-   * The maximum time to wait in ms for a successful connection to be made.
+   * Options that configure the connection strategy.
    */
-  connectionTimeout?: number;
+  connection?: {
+    /**
+     * The maximum time in seconds to wait for a successful web socket
+     * connection to be made.
+     */
+    timeout?: number;
+
+    /**
+     * The maximum time in seconds to wait for a successful handshake to be
+     * made after the web socket connection is successful.
+     */
+    handshakeTimeout?: number;
+  };
 
   /**
-   * The maximum number of times to reconnect, after which the connection will
-   * fail.
+   * Configures the behavior of the messaging protocol subsystem.
    */
-  maxReconnectAttempts?: number;
+  protocol?: {
+    /**
+     * The default timeout for a request to the server.
+     */
+    defaultRequestTimeout: number;
+
+    /**
+     * Configures the keep-alive heartbeat.
+     */
+    heartbeat?: {
+      /**
+       * Determines if the heartbeat is enabled.
+       */
+      enabled: boolean;
+
+      /**
+       * Configures how long the client will wait, in seconds after the last
+       * message is received from the server before a ping will be sent.
+       */
+      pingInterval: number;
+
+      /**
+       * Specifies the time in seconds the client will wait for a response
+       * from the server to a ping before considering the connection dead.
+       */
+      pongTimeout: number;
+    };
+  };
 
   /**
-   * The time to wait between connection attempts.
+   * Options that configure how Convergence will reconnect when a connection is
+   * lost.
    */
-  reconnectInterval?: number;
+  reconnect?: {
+    /**
+     * Whether to automatically reconnect.  Default is true.
+     */
+    autoReconnect?: boolean;
+
+    /**
+     * The intervals to use between reconnects. This array will be sorted from
+     * smallest to largest. When the largest interval is reached it will simply
+     * be repeated.
+     */
+    reconnectIntervals?: number[];
+
+    /**
+     * The fallback authentication method to use when a reconnect token is
+     * rejected. Only one of the following properties should be specified.
+     */
+    fallbackAuth?: {
+      /**
+       * Indicates the the fallback authentication should use password
+       * authentication. The specified callback will be used to get the
+       * password for password authentication when the reconnect token
+       * is rejected.
+       */
+      password?: () => Promise<string>;
+
+      /**
+       * Indicates the the fallback authentication should use JWT
+       * authentication. The specified callback will be used to get the
+       * JWT for JWT authentication when the reconnect token is
+       * rejected.
+       */
+      jwt?: () => Promise<string>;
+    }
+  };
 
   /**
-   * Whether to attempt to reconnect when first connecting.
-   * @default true
+   * Options that configure how Convergence will use WebSockets.
    */
-  retryOnOpen?: boolean;
+  webSocket?: {
+    /**
+     * Defines the class / constructor that should be used to create WebSocket
+     * objects. This is useful when operating in NodeJS where a library like
+     * ws or isomorphic-ws can be used to provide a client side WebSocket API.
+     */
+    factory?: WebSocketFactory;
 
-  /**
-   * Defines the class / constructor that should be used to create WebSocket
-   * objects. This is useful when operating in NodeJS where a library like
-   * ws or isomorphic-ws can be used to provide a client side WebSocket API.
-   */
-  webSocketFactory?: WebSocketFactory;
+    /**
+     * The constructor to use when creating a web socket. Essentially this is
+     * class that should be used to represent the web socket.
+     */
+    constructor?: IWebSocketClass;
+  };
 
-  webSocketClass?: IWebSocketClass;
+  debug?: {
+    connection: boolean;
+  };
 }
