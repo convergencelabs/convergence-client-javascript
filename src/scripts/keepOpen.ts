@@ -7,6 +7,8 @@ let domain;
 connect()
   .then(d => {
     domain = d;
-    return domain.dispose();
+    return;
   })
   .catch(e => console.error(e));
+
+process.stdin.resume();

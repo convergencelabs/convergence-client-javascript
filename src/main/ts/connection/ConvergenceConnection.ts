@@ -101,20 +101,19 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   public disconnect(): Promise<void> {
-    // todo we might not need this.  refactor.
     const deferred: Deferred<void> = new Deferred<void>();
 
-    if (this._connectionTimeoutTask != null) {
+    if (this._connectionTimeoutTask !== null) {
       clearTimeout(this._connectionTimeoutTask);
       this._connectionTimeoutTask = null;
     }
 
-    if (this._connectionAttemptTask != null) {
+    if (this._connectionAttemptTask !== null) {
       clearTimeout(this._connectionAttemptTask);
       this._connectionAttemptTask = null;
     }
 
-    if (this._connectionDeferred != null) {
+    if (this._connectionDeferred !== null) {
       this._connectionDeferred.reject(new Error("Connection canceled by user"));
       this._connectionDeferred = null;
     }
@@ -268,6 +267,11 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _attemptConnection(): void {
+    if (this._connectionAttemptTask !== null) {
+      clearTimeout(this._connectionAttemptTask);
+      this._connectionAttemptTask = null;
+    }
+
     this._connectionAttempts++;
     if (debugFlags.CONNECTION) {
       console.log("Attempting web socket connection.");
@@ -345,15 +349,26 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             // We got a response so clear the timeout.
             clearTimeout(this._connectionTimeoutTask);
 
-            if (handshakeResponse.success) {
-              // We reset the connection attempts to 0, so that when we get dropped
-              // we will start with the first interval.
-              this._connectionAttempts = 0;
+            // If the connection deferred is null, then it means the connection
+            // was disconnected.
+            if (this._connectionDeferred === null) {
+              return;
+            }
 
+            if (handshakeResponse.success) {
               this._connectionState = ConnectionState.CONNECTED;
               this._connectionDeferred.resolve(handshakeResponse);
               this._connectionDeferred = null;
-              this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
+
+              // We need to do this to make sure the connection deferred is
+              // resolved before we emit this event.
+              Promise.resolve().then(() => {
+                this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
+              });
+
+              // We reset the connection attempts to 0, so that when we get dropped
+              // we will start with the first interval.
+              this._connectionAttempts = 0;
             } else {
               this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
               this._protocolConnection
@@ -388,14 +403,17 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _scheduleConnection(): void {
-    const idx = Math.min(this._connectionAttempts, this._options.reconnectIntervals.length - 1);
-    const delay = this._options.reconnectIntervals[idx];
-    if (debugFlags.CONNECTION) {
-      console.log(`Scheduling web socket connection in ${delay} seconds.`);
+    if (this._connectionState === ConnectionState.CONNECTING) {
+      const idx = Math.min(this._connectionAttempts, this._options.reconnectIntervals.length - 1);
+      const delay = this._options.reconnectIntervals[idx];
+      if (debugFlags.CONNECTION) {
+        console.log(`Scheduling web socket connection in ${delay} seconds.`);
+      }
+      const event: IConnectionScheduledEvent = {name: ConvergenceConnection.Events.CONNECTION_SCHEDULED, delay};
+      this._emitEvent(event);
+
+      this._connectionAttemptTask = setTimeout(() => this._attemptConnection(), delay * 1000);
     }
-    const event: IConnectionScheduledEvent = {name: ConvergenceConnection.Events.CONNECTION_SCHEDULED, delay};
-    this._emitEvent(event);
-    this._connectionAttemptTask = setTimeout(() => this._attemptConnection(), delay * 1000);
   }
 
   private _handleDisconnected(): void {

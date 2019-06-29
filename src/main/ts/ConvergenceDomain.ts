@@ -11,7 +11,7 @@ import {ActivityService} from "./activity/";
 import {IdentityService} from "./identity/";
 import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
-import {ConvergenceEventEmitter, StringMap} from "./util/";
+import {ConvergenceError, ConvergenceEventEmitter, StringMap} from "./util/";
 import {
   ErrorEvent,
   IConvergenceDomainEvent,
@@ -94,7 +94,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * @internal
    */
-  private _options: ConvergenceOptions;
+  private readonly _options: ConvergenceOptions;
 
   /**
    * @internal
@@ -113,9 +113,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Constructs a new ConvergenceDomain using the default options.
-   *
-   * @hidden
-   * @internal
    *
    * @param url
    *   The url of the convergence domain to connect to.
@@ -294,7 +291,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public dispose(): Promise<void> {
     this._disposed = true;
-    this._modelService._dispose();
+    if (this._modelService !== undefined) {
+      this._modelService._dispose();
+    }
     return this._connection.disconnect();
   }
 
@@ -306,6 +305,67 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public isDisposed(): boolean {
     return this._disposed;
+  }
+
+  /**
+   * Connects to a Convergence Domain using username / password authentication.
+   *
+   * @param username
+   *   The username of the Convergence Domain User to connect as.
+   * @param password
+   *   The password for the corresponding Convergence Domain User.
+   *
+   * @returns
+   *   A Promise which will be resolved upon successful connection and authentication.
+   */
+  public connectWithPassword(username: string, password: string): Promise<void> {
+    Validation.assertNonEmptyString(username, "username");
+    Validation.assertNonEmptyString(password, "password");
+    return this._connect().then(() => this._authenticateWithPassword(username, password));
+  }
+
+  /**
+   * Connects to a Convergence Domain using anonymous authentication.
+   *
+   * @param displayName
+   *   The optional display name to use for the anonymous user.
+   *
+   * @returns
+   *   A Promise which will be resolved upon successful connection and authentication.
+   */
+  public connectAnonymously(displayName?: string): Promise<void> {
+    return this._connect().then(() => this._authenticateAnonymously(displayName));
+  }
+
+  /**
+   * Connects to a Convergence Domain using a JSON Web Token (JWT) for
+   * authentication.
+   *
+   * @param jwt
+   *   A valid JSON Web Token (JWT) indicating the Domain User to connect as.
+   *
+   * @returns
+   *   A Promise which will be resolved upon successful connection and authentication.
+   */
+  public connectWithJwt(jwt: string): Promise<void> {
+    Validation.assertNonEmptyString(jwt, "jwt");
+    return this._connect().then(() => this._authenticateWithJwt(jwt));
+  }
+
+  /**
+   * Reconnects to the specified domain using a previously generated reconnect
+   * token.
+   *
+   * @param token
+   *   The reconnect token to use for authentication.
+   * @param options
+   *
+   * @returns
+   *   A Promise which will be resolved upon successful connection and authentication.
+   */
+  public reconnect(token: string): Promise<void> {
+    Validation.assertNonEmptyString(token, "token");
+    return this._connect().then(() => this._authenticateWithReconnectToken(token));
   }
 
   /**
@@ -351,11 +411,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public _connect(): Promise<void> {
     return this._connection.connect()
-    .then((response: IHandshakeResponseMessage) => {
-      this._namespace = response.namespace;
-      this._id = response.id;
-      return;
-    });
+      .then((response: IHandshakeResponseMessage) => {
+        this._namespace = response.namespace;
+        this._id = response.id;
+        return;
+      });
   }
 
   /**

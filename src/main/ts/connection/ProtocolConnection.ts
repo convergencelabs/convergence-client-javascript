@@ -190,11 +190,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._heartbeatHelper.stop();
     }
 
-    if (this._socket.isOpen()) {
-      return this._socket.close();
-    } else {
-      return Promise.resolve();
-    }
+    return this._socket.close();
   }
 
   public sendMessage(message: IConvergenceMessage): void {

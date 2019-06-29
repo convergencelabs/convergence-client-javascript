@@ -145,16 +145,21 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
 
       // TODO refactor these three lines which are duplicated in the onclose method.
       this._detachFromSocket(this._socket);
-      this._socket.close();
+      try {
+        this._socket.close();
+      } catch (e) {
+        // no-op
+      }
       this._socket = null;
 
       if (this._openDeferred !== null) {
         const tmp: Deferred<void> = this._openDeferred;
         this._openDeferred = null;
-        tmp.reject(new Error("Web Socket connection aborted while opening"));
+        tmp.reject(new Error("Web Socket connection closed while opening."));
       }
 
-      localDeferred.resolve(null);
+      this._closeDeferred = localDeferred;
+      // localDeferred.resolve(null);
     } else {
       // The socket was open.  This is a normal request to close.
       // The deferred will be created here, but when we call socket.close()
@@ -264,7 +269,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           // have been in the process of connecting.  Therefore
           // we reject the promise, and then set it to null.
           if (debugFlags.SOCKET_CONNECTION) {
-            console.log("Web Socket connection failed: ", evt);
+            console.log(`Web Socket connection failed: {code: ${ evt.code}, reason: "${evt.reason}"}`);
           }
 
           this._openDeferred.reject(new Error(
@@ -275,7 +280,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           // have been in the process of closing.  Therefore
           // we resolve the promise.
           if (debugFlags.SOCKET_CONNECTION) {
-            console.log("Web Socket onClose received while closing: ", evt);
+            console.log(`Web Socket onClose received while closing: {code: ${ evt.code}, reason: "${evt.reason}"}`);
           }
           this._closeDeferred.resolve();
           this._closeDeferred = null;

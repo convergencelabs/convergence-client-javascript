@@ -1,9 +1,9 @@
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
+import {ConvergenceError} from "./util";
 
 export class ConvergenceOptions {
-
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
   public static DEFAULT_HANDSHAKE_TIMEOUT = 5;
 
@@ -17,6 +17,22 @@ export class ConvergenceOptions {
 
   public static DEFAULT_WEBSOCKET_FACTORY = null;
   public static DEFAULT_WEBSOCKET_CONSTRUCTOR = null;
+
+  public static validate(options?: IConvergenceOptions): void {
+    let webSockets = false;
+    try {
+      webSockets = WebSocket.CLOSING === 2;
+    } catch (e) {
+      // no-op
+    }
+
+    if (!webSockets && !options.webSocket && !options.webSocket.constructor) {
+      const message = "Convergence depends on the WebSockets API. " +
+        "If Convergence is not being run in a browser, you must set the " +
+        "'webSocketClass' property in the connection options.";
+      throw new ConvergenceError(message, "websockets_not_supported");
+    }
+  }
 
   public readonly connectionTimeout: number;
   public readonly handshakeTimeout: number;
@@ -37,6 +53,8 @@ export class ConvergenceOptions {
   public readonly webSocketConstructor: IWebSocketClass | null;
 
   constructor(options: IConvergenceOptions) {
+    ConvergenceOptions.validate(options);
+
     const defaultConnectionOptions = {
       timeout: ConvergenceOptions.DEFAULT_CONNECTION_TIMEOUT,
       handshakeTimeout: ConvergenceOptions.DEFAULT_HANDSHAKE_TIMEOUT
