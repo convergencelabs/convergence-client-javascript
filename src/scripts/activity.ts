@@ -4,7 +4,6 @@ import {connect} from "./connect";
 
 connect()
   .then(domain => {
-    console.log("connected");
     return domain.activities().join("foo", {state: {foo: "bar"}});
   })
   .then(activity => {

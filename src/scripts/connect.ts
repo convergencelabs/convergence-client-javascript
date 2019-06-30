@@ -1,19 +1,30 @@
 import {
-  ConvergenceDomain,
-  IConvergenceOptions,
-  CancellationToken,
-  ConnectionScheduledEvent,
-  ConnectingEvent,
-  ConnectionFailedEvent,
+  AuthenticatedEvent,
   AuthenticatingEvent,
   AuthenticationFailedEvent,
-  AuthenticatedEvent,
+  CancellationToken,
+  ConnectedEvent,
+  ConnectingEvent,
+  ConnectionFailedEvent,
+  ConnectionScheduledEvent,
+  Convergence,
+  ConvergenceDomain,
   DisconnectedEvent,
-  InterruptedEvent,
   ErrorEvent,
-  ConnectedEvent
+  IConvergenceOptions,
+  InterruptedEvent
 } from "../main/ts";
 import * as WebSocket from "ws";
+import {LogLevel} from "../main/ts/util/log/LogLevel";
+import {TypeChecker} from "../main/ts/util/TypeChecker";
+
+Convergence.logging.configure({
+  root: {
+    level: LogLevel.TRACE
+  },
+  loggers: {
+  }
+});
 
 const DOMAIN_URL = "ws://localhost:8080/convergence/default";
 const DOMAIN_USERNAME = "test1";
@@ -36,28 +47,29 @@ const OPTIONS: IConvergenceOptions = {
 };
 
 export function createDomain(): ConvergenceDomain {
+  const log = Convergence.logging.root();
   const domain = new ConvergenceDomain(DOMAIN_URL, OPTIONS);
   domain.events().subscribe((event) => {
       if (event instanceof ConnectionScheduledEvent) {
-        console.log(`Connection scheduled in ${event.delay} seconds`);
+        log.info(`Connection scheduled in ${event.delay} seconds`);
       } else if (event instanceof ConnectingEvent) {
-        console.log(`Connecting to: ${domain.url()}`);
+        log.info(`Connecting to: ${domain.url()}`);
       } else if (event instanceof ConnectionFailedEvent) {
-        console.log(`Connection failed`);
+        log.info(`Connection failed`);
       } else if (event instanceof ConnectedEvent) {
-        console.log(`Connected to ${event.domain.namespace()}/${event.domain.id()}`);
+        log.info(`Connected to ${event.domain.namespace()}/${event.domain.id()}`);
       } else if (event instanceof AuthenticatingEvent) {
-        console.log(`Authenticating {method: "${event.method}"}`);
+        log.info(`Authenticating {method: "${event.method}"}`);
       } else if (event instanceof AuthenticationFailedEvent) {
-        console.log(`Authentication failed {method: "${event.method}"}`);
+        log.info(`Authentication failed {method: "${event.method}"}`);
       } else if (event instanceof AuthenticatedEvent) {
-        console.log(`Authenticated {method: "${event.method}"}`);
+        log.info(`Authenticated {method: "${event.method}"}`);
       } else if (event instanceof DisconnectedEvent) {
-        console.log(`Disconnected`);
+        log.info(`Disconnected`);
       } else if (event instanceof InterruptedEvent) {
-        console.log(`Interrupted`);
+        log.info(`Interrupted`);
       } else if (event instanceof ErrorEvent) {
-        console.log(`Error: ${event.error}`);
+        log.info(`Error: ${event.error}`);
       }
     }
   );
@@ -68,9 +80,11 @@ export function createDomain(): ConvergenceDomain {
 export function connect(cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
   const domain = createDomain();
 
-  cancellationToken._bind(() => {
-    domain.disconnect().catch((e) => console.error(e));
-  });
+  if (TypeChecker.isSet(cancellationToken)) {
+    cancellationToken._bind(() => {
+      domain.disconnect().catch((e) => console.error(e));
+    });
+  }
 
   if (ANONYMOUS) {
     return domain.connectAnonymously(() => Promise.resolve(DISPLAY_NAME)).then(() => domain);

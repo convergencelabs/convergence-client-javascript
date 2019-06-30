@@ -1,4 +1,5 @@
 import {LogLevel} from "./LogLevel";
+import {Immutable} from "../Immutable";
 
 /**
  * @hidden
@@ -6,9 +7,10 @@ import {LogLevel} from "./LogLevel";
  */
 export class LogEvent {
   constructor(public timestamp: Date,
-              public loggerName: string,
+              public logger: string,
               public level: LogLevel,
-              public log: any[]) {
-
+              public message: string,
+              public error?: Error) {
+    Immutable.make(this);
   }
 }

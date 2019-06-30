@@ -10,7 +10,6 @@ const chatId = "testId";
 
 connect()
   .then(d => {
-    console.log("connected");
     domain = d;
     return domain.chat().create({
       id: chatId,

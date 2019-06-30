@@ -1,8 +1,8 @@
-import {debugFlags} from "../Debug";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
+import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -57,6 +57,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
   private _closeDeferred: Deferred<void>;
   private readonly _webSocketFactory: WebSocketFactory;
   private readonly _webSocketClass: IWebSocketClass;
+  private readonly _logger = ConvergenceLogging.logger("socket");
 
   constructor(url: string,
               webSocketClass?: IWebSocketClass | null,
@@ -124,19 +125,13 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     const localDeferred: Deferred<void> = new Deferred<void>();
 
     if (!this._socket || this._socket.readyState === this._webSocketClass.CLOSED) {
-      if (debugFlags.SOCKET_CONNECTION) {
-        console.log("Can't close a closed WebSocket.");
-      }
+      this._logger.debug("Can't close a closed WebSocket.");
       localDeferred.reject(new Error("Can not close on a WebSocket in the CLOSED state."));
     } else if (this._socket.readyState === this._webSocketClass.CLOSING) {
-      if (debugFlags.SOCKET_CONNECTION) {
-        console.log("Attempted to close a WebSocket that was already closing.");
-      }
+      this._logger.debug("Attempted to close a WebSocket that was already closing.");
       localDeferred.reject(new Error("Connection is already closing."));
     } else if (this._socket.readyState === this._webSocketClass.CONNECTING) {
-      if (debugFlags.SOCKET_CONNECTION) {
-        console.log("Closing a connecting Web Socket.");
-      }
+      this._logger.debug("Closing a connecting Web Socket.");
 
       // Here we want to essentially abort the connection attempt.  We detach from
       // the socket first so that we won't get any more events and then close it.
@@ -168,14 +163,10 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
       this._closeDeferred = localDeferred;
       try {
         if (clean) {
-          if (debugFlags.SOCKET_CONNECTION) {
-            console.log("Closing Web Socket normally.");
-          }
+          this._logger.debug("Closing Web Socket normally.");
           this._socket.close(1000);
         } else {
-          if (debugFlags.SOCKET_CONNECTION) {
-            console.log("Closing Web Socket abnormally.");
-          }
+          this._logger.debug("Closing Web Socket abnormally.");
           this._socket.close(4006, reason);
         }
       } catch (e) {
@@ -221,13 +212,11 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
 
     socket.onopen = (evt: Event) => {
       if (this._openDeferred) {
-        if (debugFlags.SOCKET_CONNECTION) {
-          console.log("Web Socket connection opened");
-        }
+        this._logger.debug("Web Socket connection opened");
         try {
           this._openDeferred.resolve();
         } catch (e) {
-          console.log("Error resolving WebSocket Open Promise.");
+          this._logger.error("Error resolving WebSocket Open Promise.", e);
         }
         this._openDeferred = null;
       } else {
@@ -244,9 +233,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
       if (this._socket === undefined || this._socket.readyState === this._webSocketClass.CONNECTING) {
         // We don't want to handle errors during connection here, because
         // the close event will give us more information.
-        if (debugFlags.SOCKET_CONNECTION) {
-          console.log("Web Socket error.", evt);
-        }
+        this._logger.debug("Web Socket error.");
         try {
           const event: ISocketErrorEvent = {
             name: ConvergenceSocket.Events.ERROR,
@@ -254,7 +241,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           };
           this._emitEvent(event);
         } catch (e) {
-          console.error("Error handling WebSocket error.", e);
+          this._logger.error("Error handling WebSocket error.", e);
         }
       }
     };
@@ -268,10 +255,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           // if the connection deferred is no null, we MUST
           // have been in the process of connecting.  Therefore
           // we reject the promise, and then set it to null.
-          if (debugFlags.SOCKET_CONNECTION) {
-            console.log(`Web Socket connection failed: {code: ${ evt.code}, reason: "${evt.reason}"}`);
-          }
-
+          this._logger.debug(() => `Web Socket connection failed: {code: ${ evt.code}, reason: "${evt.reason}"}`);
           this._openDeferred.reject(new Error(
             `Could not connect. The WebSocket closed while connecting: {code: ${evt.code}, reason: "${evt.reason}"}`));
           this._openDeferred = null;
@@ -279,17 +263,15 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           // if the connection deferred is no null, we MUST
           // have been in the process of closing.  Therefore
           // we resolve the promise.
-          if (debugFlags.SOCKET_CONNECTION) {
-            console.log(`Web Socket onClose received while closing: {code: ${ evt.code}, reason: "${evt.reason}"}`);
-          }
+          this._logger.debug(
+            () => `Web Socket onClose received while closing: {code: ${ evt.code}, reason: "${evt.reason}"}`);
           this._closeDeferred.resolve();
           this._closeDeferred = null;
         } else {
           // We were just open, which means that we did not request this closure.
           // This means the other end terminated the connection.
-          if (debugFlags.SOCKET_CONNECTION) {
-            console.log("Web Socket connection unexpectedly closed: ", evt);
-          }
+          this._logger.debug(
+            () => `Web Socket connection unexpectedly closed: {code: ${ evt.code}, reason: "${evt.reason}"}`);
           const event: ISocketClosedEvent = {
             name: ConvergenceSocket.Events.CLOSE,
             reason: "unexpected Web Socket closure."
@@ -297,7 +279,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           this._emitEvent(event);
         }
       } catch (e) {
-        console.log("Error handling web socket close event.", e);
+        this._logger.error("Error handling web socket close event.", e);
       }
     };
   }

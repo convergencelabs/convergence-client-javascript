@@ -9,7 +9,6 @@ const ct = CancellationToken.create();
 connect(ct)
   .then(d => {
     domain = d;
-    console.log("connected");
 
     domain.events().subscribe(e => {
         console.log(e.name);
@@ -20,5 +19,3 @@ connect(ct)
   .catch(e => console.error(e));
 
 ct.cancel();
-
-// process.stdin.resume();

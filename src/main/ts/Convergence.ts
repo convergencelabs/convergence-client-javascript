@@ -2,6 +2,7 @@ import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {CancellationToken} from "./util";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
+import {ConvergenceLogging, Logging} from "./util/log/Logging";
 
 /**
  * The Convergence class is the main entry point into the Convergence Client.
@@ -10,6 +11,10 @@ import {IUsernameAndPassword} from "./IUsernameAndPassword";
  * work with a the Convergence Domain at the specified url.
  */
 export class Convergence {
+
+  public static get logging(): Logging {
+    return ConvergenceLogging;
+  }
 
   /**
    * Connects to a Convergence Domain using username / password authentication.

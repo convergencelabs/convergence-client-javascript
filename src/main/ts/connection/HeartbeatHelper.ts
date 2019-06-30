@@ -1,9 +1,13 @@
+import {Logger} from "../util/log/Logger";
+import {ConvergenceLogging} from "../util/log/Logging";
+
 /**
  * @hidden
  * @internal
  */
 export interface HeartbeatHandler {
   sendPing(): void;
+
   onTimeout(): void;
 }
 
@@ -20,14 +24,14 @@ export class HeartbeatHelper {
   private _pingInterval: number;
   private _pongTimeout: number;
   private _started: boolean;
-  private _debugFlags: any;
+  private readonly _logger: Logger;
 
   constructor(handler: HeartbeatHandler, pingInterval: number, pongTimeout: number) {
     this._handler = handler;
     this._pingInterval = pingInterval;
     this._pongTimeout = pongTimeout;
-    this._debugFlags = {}; // fixme
     this._started = false;
+    this._logger = ConvergenceLogging.logger("heartbeat");
   }
 
   public setPingInterval(pingInterval: number): void {
@@ -58,11 +62,9 @@ export class HeartbeatHelper {
       throw new Error("Can't start the HeartbeatManager unless the callback is set.");
     }
 
-    if (this._debugFlags.heartbeatHelper) {
-      console.log(
-        "HeartbeatHelper started with Ping Interval " + this._pingInterval +
-        " and Pong Timeout " + this._pongTimeout);
-    }
+    this._logger.debug(() =>
+      "HeartbeatHelper started with Ping Interval " + this._pingInterval +
+      " and Pong Timeout " + this._pongTimeout);
 
     this._started = true;
     this.messageReceived();
@@ -73,9 +75,7 @@ export class HeartbeatHelper {
     this.stopPingTimer();
     this.cancelPongTimeout();
 
-    if (this._debugFlags.heartbeatHelper) {
-      console.log("HeartbeatHelper stopped.");
-    }
+    this._logger.debug(() => "HeartbeatHelper stopped.");
   }
 
   get started(): boolean {

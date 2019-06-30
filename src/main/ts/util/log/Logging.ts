@@ -1,43 +1,46 @@
-import {LogLevel} from "./LogLevel";
 import {Logger} from "./Logger";
-import {LogWriter} from "./LogWriter";
-import {ILoggingConfigData, LoggingConfig} from "./LoggingConfig";
+import {LoggingConfig} from "./LoggingConfig";
+import {ConsoleLogWriter} from "./ConsoleLogWriter";
+import {LogLevel} from "./LogLevel";
+import {ILoggingConfigData} from "./ILoggingConfigData";
 
-/**
- * @hidden
- * @internal
- */
 export class Logging {
 
-  private readonly _config: LoggingConfig;
+  private _config: LoggingConfig;
+  private _loggers: Map<string, Logger>;
+  private readonly _writer: ConsoleLogWriter;
 
-  private readonly _loggers: Map<string, Logger>;
-  private readonly _writers: Map<string, LogWriter>;
-
-  constructor(config: ILoggingConfigData) {
-    this._config = new LoggingConfig(config);
-    this._loggers = new Map<string, Logger>();
-    this._writers = new Map<string, LogWriter>();
-
-    const writerConfig = this._config.getWriters();
-    writerConfig.forEach((cfg, id) => {
-
+  constructor(config?: ILoggingConfigData) {
+    this.configure(config || {
+      root: {
+        level: LogLevel.WARN
+      }
     });
+
+    this._writer = new ConsoleLogWriter("");
   }
 
-  public getLogger(id?: string): Logger {
+  public configure(config: ILoggingConfigData): void {
+    this._config = new LoggingConfig(config);
+    this._loggers = new Map<string, Logger>();
+  }
+
+  public root(): Logger {
+    return this.logger();
+  }
+
+  public logger(id?: string): Logger {
     if (id === null || id === undefined) {
       id = "";
     }
 
     if (!this._loggers.has(id)) {
-      // this._loggers.set(id, new Logger(id, Logging.DEFAULT_LOG_LEVEL, []));
+      const config = this._config.resolveLoggerConfig(id);
+      this._loggers.set(id, new Logger(id, config.level, [this._writer]));
     }
 
     return this._loggers.get(id);
   }
-
-  public setDefaultLogLevel(logLevel: LogLevel): void {
-    // this._rootLogger.setLevel(logLevel);
-  }
 }
+
+export const ConvergenceLogging = new Logging();

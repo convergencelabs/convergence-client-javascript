@@ -1,68 +1,45 @@
-import {LogLevel} from "./LogLevel";
+import {TypeChecker} from "../TypeChecker";
+import {objectForEach} from "../ObjectUtils";
+import {Validation} from "../Validation";
+import {ILoggerConfig} from "./ILoggerConfig";
+import {ILoggingConfigData} from "./ILoggingConfigData";
 
 /**
  * @hidden
  * @internal
  */
 export class LoggingConfig {
-  private readonly _logWriters: Map<string, ILogWriterConfig>;
+
   private readonly _loggers: Map<string, ILoggerConfig>;
-  private readonly _rootLogger: ILoggerConfig;
 
   constructor(config: ILoggingConfigData) {
-    this._logWriters = new Map();
     this._loggers = new Map();
-    this._rootLogger = config.rootLogger;
-  }
 
-  public rootLoggerConfig(): ILoggerConfig {
-    return this._rootLogger;
+    if (TypeChecker.isSet(config.loggers)) {
+      objectForEach(config.loggers, (id, loggerConfig) => {
+        if (!Validation.nonEmptyString(id)) {
+          throw new Error("A logger's id must be a non-empty string");
+        }
+
+        this._loggers.set(id, loggerConfig);
+      });
+    }
+
+    this._loggers.set("", config.root);
   }
 
   public resolveLoggerConfig(loggerId: string): ILoggerConfig {
     let id = loggerId;
-    let logger = this._loggers[id];
+    let logger = this._loggers.get(id);
 
     while (logger === undefined && id !== "") {
       const dot = id.lastIndexOf(".");
       id = id.substring(0, dot);
-      logger = this._loggers[id];
+      logger = this._loggers.get(id);
     }
 
     return logger !== undefined ?
       logger :
-      this._rootLogger;
+      this._loggers.get("");
   }
-
-  public getWriters(): Map<string, ILogWriterConfig> {
-    return this._logWriters;
-  }
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface ILoggingConfigData {
-  writers: { [key: string]: ILogWriterConfig };
-  rootLogger: ILoggerConfig;
-  loggers: { [key: string]: ILoggerConfig };
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface ILogWriterConfig {
-  type: string;
-  options: any;
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface ILoggerConfig {
-  level: LogLevel;
-  writer: string;
 }

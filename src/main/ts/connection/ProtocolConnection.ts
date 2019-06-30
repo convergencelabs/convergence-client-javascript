@@ -3,13 +3,13 @@ import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessage
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
 import {Deferred} from "../util/Deferred";
-import {debugFlags} from "../Debug";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IErrorMessage = io.convergence.proto.IErrorMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IHandshakeRequestMessage = io.convergence.proto.IHandshakeRequestMessage;
+import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -67,6 +67,9 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private _nextRequestId: number = 0;
   private readonly _requests: Map<number, any>;
   private _closeRequested: boolean = false;
+
+  private _messageLogger = ConvergenceLogging.logger("protocol.messages");
+  private _pingLogger = ConvergenceLogging.logger("protocol.ping");
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
@@ -194,9 +197,8 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   public sendMessage(message: IConvergenceMessage): void {
-    if ((debugFlags.PROTOCOL_MESSAGES && !message.ping && !message.pong) || debugFlags.PROTOCOL_PINGS) {
-      console.debug("SND: " + JSON.stringify(message));
-    }
+    const logger = !message.ping && !message.pong ? this._messageLogger : this._pingLogger;
+    logger.debug(() => "SND: " + JSON.stringify(message));
 
     try {
       const bytes = ConvergenceMessageIO.encode(message);
@@ -214,12 +216,8 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._heartbeatHelper.messageReceived();
     }
 
-    if ((debugFlags.PROTOCOL_MESSAGES &&
-      !convergenceMessage.ping &&
-      !convergenceMessage.pong) ||
-      debugFlags.PROTOCOL_PINGS) {
-      console.debug("RCV: " + JSON.stringify(convergenceMessage));
-    }
+    const logger = !convergenceMessage.ping && !convergenceMessage.pong ? this._messageLogger : this._pingLogger;
+    logger.debug(() => "RCV: " + JSON.stringify(convergenceMessage));
 
     if (convergenceMessage.ping) {
       this.onPing();

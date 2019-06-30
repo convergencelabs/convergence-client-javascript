@@ -4,7 +4,6 @@ import {
   ProtocolConnection,
   ReplyCallback
 } from "./ProtocolConnection";
-import {debugFlags} from "../Debug";
 import ConvergenceSocket from "./ConvergenceSocket";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
@@ -27,6 +26,7 @@ import {ConvergenceOptions} from "../ConvergenceOptions";
 import {IUsernameAndPassword} from "../IUsernameAndPassword";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {TypeChecker} from "../util/TypeChecker";
+import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -61,6 +61,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _protocolConnection: ProtocolConnection;
   private readonly _url: string;
   private _options: ConvergenceOptions;
+  private _logger = ConvergenceLogging.logger("connection");
 
   /**
    *
@@ -299,9 +300,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     }
 
     this._connectionAttempts++;
-    if (debugFlags.CONNECTION) {
-      console.log("Attempting web socket connection.");
-    }
+    this._logger.debug(() => `Attempting to open web socket connection to: ${this._url}`);
 
     const timeoutTask = () => {
       this._protocolConnection.abort("connection timeout exceeded");
@@ -365,9 +364,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._protocolConnection
       .connect()
       .then(() => {
-        if (debugFlags.CONNECTION) {
-          console.log("Connection succeeded, handshaking.");
-        }
+        this._logger.debug("Connection succeeded, handshaking.");
 
         return this._protocolConnection
           .handshake()
@@ -432,9 +429,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     if (this._connectionState === ConnectionState.CONNECTING) {
       const idx = Math.min(this._connectionAttempts, this._options.reconnectIntervals.length - 1);
       const delay = this._options.reconnectIntervals[idx];
-      if (debugFlags.CONNECTION) {
-        console.log(`Scheduling web socket connection in ${delay} seconds.`);
-      }
+      this._logger.debug(() => `Scheduling web socket connection in ${delay} seconds.`);
       const event: IConnectionScheduledEvent = {name: ConvergenceConnection.Events.CONNECTION_SCHEDULED, delay};
       this._emitEvent(event);
 
@@ -455,7 +450,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     if (this._options.autoReconnect && this._session.reconnectToken()) {
       this
         .reconnect()
-        .catch(e => console.log(e));
+        .catch(e => this._logger.error("Unexpected error reconnecting", e));
     }
   }
 }
