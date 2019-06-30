@@ -1,7 +1,12 @@
 import {HeartbeatHelper, HeartbeatHandler} from "./HeartbeatHelper";
 import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ConvergenceServerError, IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
+import {
+  ConvergenceServerError,
+  IConvergenceEvent,
+  ConvergenceEventEmitter,
+  ConvergenceLogging
+} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
 import {io} from "@convergence-internal/convergence-proto";
@@ -9,7 +14,6 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IErrorMessage = io.convergence.proto.IErrorMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IHandshakeRequestMessage = io.convergence.proto.IHandshakeRequestMessage;
-import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -68,6 +72,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private readonly _requests: Map<number, any>;
   private _closeRequested: boolean = false;
 
+  private _logger = ConvergenceLogging.logger("protocol");
   private _messageLogger = ConvergenceLogging.logger("protocol.messages");
   private _pingLogger = ConvergenceLogging.logger("protocol.ping");
 
@@ -179,7 +184,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
           // no-op
         })
         .catch((error) => {
-          console.debug("Unable to terminate web socket connection: " + error.message);
+          this._logger.warn("Unable to terminate web socket connection: " + error.message);
         });
     }
 

@@ -8,7 +8,12 @@ import ConvergenceSocket from "./ConvergenceSocket";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Deferred} from "../util/Deferred";
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
+import {
+  ConvergenceError,
+  ConvergenceEventEmitter,
+  IConvergenceEvent,
+  ConvergenceLogging
+} from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
 import {io} from "@convergence-internal/convergence-proto";
@@ -20,13 +25,12 @@ import IJwtAuthRequestMessage = io.convergence.proto.IJwtAuthRequestMessage;
 import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenAuthRequestMessage;
 import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
 import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
-import {toOptional} from "./ProtocolUtil";
+import {getOrDefaultString, toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
 import {ConvergenceOptions} from "../ConvergenceOptions";
 import {IUsernameAndPassword} from "../IUsernameAndPassword";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {TypeChecker} from "../util/TypeChecker";
-import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -51,17 +55,20 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     ERROR: "error"
   };
 
+  private readonly _options: ConvergenceOptions;
   private readonly _session: ConvergenceSession;
+  private readonly _logger = ConvergenceLogging.logger("connection");
+
   private _authenticated: boolean;
-  private _connectionDeferred: Deferred<IHandshakeResponseMessage>;
+  private _connectionDeferred: Deferred<void>;
   private _connectionAttempts: number;
   private _connectionAttemptTask: any;
   private _connectionTimeoutTask: any;
   private _connectionState: ConnectionState;
   private _protocolConnection: ProtocolConnection;
   private readonly _url: string;
-  private _options: ConvergenceOptions;
-  private _logger = ConvergenceLogging.logger("connection");
+  private _domainId: string;
+  private _namespace: string;
 
   /**
    *
@@ -85,18 +92,26 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._url;
   }
 
+  public namespace(): string {
+    return this._namespace;
+  }
+
+  public domainId(): string {
+    return this._domainId;
+  }
+
   public session(): ConvergenceSession {
     return this._session;
   }
 
-  public connect(): Promise<IHandshakeResponseMessage> {
+  public connect(): Promise<void> {
     if (this._connectionState !== ConnectionState.DISCONNECTED &&
       this._connectionState !== ConnectionState.INTERRUPTED) {
       throw new Error("Can only call connect on a disconnected or interrupted connection.");
     }
 
     this._connectionAttempts = 0;
-    this._connectionDeferred = new Deferred<IHandshakeResponseMessage>();
+    this._connectionDeferred = new Deferred<void>();
     this._connectionState = ConnectionState.CONNECTING;
 
     this._attemptConnection();
@@ -379,15 +394,14 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             }
 
             if (handshakeResponse.success) {
-              this._connectionState = ConnectionState.CONNECTED;
-              this._connectionDeferred.resolve(handshakeResponse);
-              this._connectionDeferred = null;
+              this._namespace = getOrDefaultString(handshakeResponse.namespace);
+              this._domainId = getOrDefaultString(handshakeResponse.id);
 
-              // We need to do this to make sure the connection deferred is
-              // resolved before we emit this event.
-              Promise.resolve().then(() => {
-                this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
-              });
+              this._connectionState = ConnectionState.CONNECTED;
+              this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
+
+              this._connectionDeferred.resolve();
+              this._connectionDeferred = null;
 
               // We reset the connection attempts to 0, so that when we get dropped
               // we will start with the first interval.
@@ -396,7 +410,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
               this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
               this._protocolConnection
                 .close()
-                .catch(error => console.error(error));
+                .catch(error =>
+                  this._logger.error("Error closing connection after handshake failure", error));
 
               if (handshakeResponse.retryOk) {
                 this._scheduleConnection();
@@ -409,10 +424,11 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             }
           })
           .catch((e: Error) => {
-            console.error("Handshake failed: ", e);
+            this._logger.error("Handshake failed", e);
             this._protocolConnection
               .close()
-              .catch(error => console.error(error));
+              .catch(error =>
+                this._logger.error("Error closing connection after handshake error", error));
             this._protocolConnection = null;
             // This will cause the code to fall into the next catch.
             return Promise.reject(e);

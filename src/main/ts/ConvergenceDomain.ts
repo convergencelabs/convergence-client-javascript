@@ -11,7 +11,7 @@ import {ActivityService} from "./activity/";
 import {IdentityService} from "./identity/";
 import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
-import {ConvergenceError, ConvergenceEventEmitter, StringMap} from "./util/";
+import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
   ErrorEvent,
   IConvergenceDomainEvent,
@@ -26,11 +26,10 @@ import {
   DisconnectedEvent
 } from "./events/";
 import {Validation} from "./util";
-import {io} from "@convergence-internal/convergence-proto";
 import {IdentityCache} from "./identity/IdentityCache";
-import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
+import {TypeChecker} from "./util/TypeChecker";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -61,10 +60,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     if (value === undefined) {
       return () => Promise.resolve(undefined as T);
     } else {
-      const promiseCallback = typeof value === "function" ?
+      return typeof value === "function" ?
         value as (() => Promise<T>) :
         () => Promise.resolve(value as T);
-      return promiseCallback;
     }
   }
 
@@ -114,16 +112,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   private _disposed: boolean;
 
   /**
-   * @internal
-   */
-  private _id: string;
-
-  /**
-   * @internal
-   */
-  private _namespace: string;
-
-  /**
    * Constructs a new ConvergenceDomain using the default options.
    *
    * @param url
@@ -143,31 +131,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._disposed = false;
 
     this._connection = new ConvergenceConnection(url, this);
-
-    this._connection.on(ConvergenceConnection.Events.CONNECTED,
-      () => this._emitEvent(new ConnectedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.CONNECTING,
-      () => this._emitEvent(new ConnectingEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.CONNECTION_SCHEDULED,
-      (e: IConnectionScheduledEvent) => this._emitEvent(new ConnectionScheduledEvent(this, e.delay)));
-    this._connection.on(ConvergenceConnection.Events.CONNECTION_FAILED,
-      () => this._emitEvent(new ConnectionFailedEvent(this)));
-
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATING,
-      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
-      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatedEvent(this, e.method)));
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
-      (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
-
-    this._connection.on(ConvergenceConnection.Events.INTERRUPTED,
-      () => this._emitEvent(new InterruptedEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.DISCONNECTED,
-      () => this._emitEvent(new DisconnectedEvent(this)));
-
-    this._connection.on(ConvergenceConnection.Events.ERROR,
-      (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
-    );
+    this._bindConnectionEvents();
   }
 
   /**
@@ -191,7 +155,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *  The ConvergenceSession object for this domain.
    */
   public namespace(): string {
-    return this._namespace;
+    return this._connection.namespace();
   }
 
   /**
@@ -199,7 +163,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *  The ConvergenceSession object for this domain.
    */
   public id(): string {
-    return this._id;
+    return this._connection.domainId();
   }
 
   /**
@@ -332,11 +296,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public connectWithPassword(credentials: IUsernameAndPassword | (() => Promise<IUsernameAndPassword>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(credentials);
-    return this
-      ._connect()
-      .then(() => {
-        return promiseCallback();
-      })
+    return this._connection
+      .connect()
+      .then(() => promiseCallback())
       .then((creds: IUsernameAndPassword) => {
         Validation.assertNonEmptyString(creds.username, "username");
         Validation.assertNonEmptyString(creds.password, "password");
@@ -357,11 +319,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public connectAnonymously(displayName?: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(displayName);
-    return this
-      ._connect()
-      .then(() => {
-        return promiseCallback();
-      })
+    return this._connection
+      .connect()
+      .then(() => promiseCallback())
       .then((d) => this._authenticateAnonymously(d));
   }
 
@@ -379,11 +339,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public connectWithJwt(jwt: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(jwt);
-    return this
-      ._connect()
-      .then(() => {
-        return promiseCallback();
-      })
+    return this._connection
+      .connect()
+      .then(() => promiseCallback())
       .then((j: string) => {
         Validation.assertNonEmptyString(j, "jwt");
         return this._authenticateWithJwt(j);
@@ -400,9 +358,15 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.
    */
-  public reconnect(token: string): Promise<void> {
-    Validation.assertNonEmptyString(token, "token");
-    return this._connect().then(() => this._authenticateWithReconnectToken(token));
+  public reconnect(token: string | (() => Promise<string>)): Promise<void> {
+    const promiseCallback = ConvergenceDomain._toPromiseCallback(token);
+    return this._connection
+      .connect()
+      .then(() => promiseCallback())
+      .then((t) =>  {
+        Validation.assertNonEmptyString(t, "token");
+        return this._authenticateWithReconnectToken(t);
+      });
   }
 
   /**
@@ -438,7 +402,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   public _authenticateWithReconnectToken(token: string): Promise<void> {
     return this._connection
       .authenticateWithReconnectToken(token)
-      .catch()
       .then(m => this._init(m));
   }
 
@@ -453,16 +416,41 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * @hidden
-   * @internal
    * @private
    */
-  public _connect(): Promise<void> {
-    return this._connection.connect()
-      .then((response: IHandshakeResponseMessage) => {
-        this._namespace = response.namespace;
-        this._id = response.id;
-        return;
+  private _bindConnectionEvents(): void {
+    this._connection.on(ConvergenceConnection.Events.CONNECTING,
+      () => this._emitEvent(new ConnectingEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTED,
+      () => this._emitEvent(new ConnectedEvent(this)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTION_SCHEDULED,
+      (e: IConnectionScheduledEvent) => this._emitEvent(new ConnectionScheduledEvent(this, e.delay)));
+    this._connection.on(ConvergenceConnection.Events.CONNECTION_FAILED,
+      () => this._emitEvent(new ConnectionFailedEvent(this)));
+
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATING,
+      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
+      (e: IAuthenticatingEvent) => {
+        this._emitEvent(new AuthenticatedEvent(this, e.method));
       });
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
+      (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
+
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED,
+      () => {
+        this._emitEvent(new InterruptedEvent(this));
+        this._setOffline();
+      });
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED,
+      () => {
+        this._emitEvent(new DisconnectedEvent(this));
+        this._setOffline();
+      });
+
+    this._connection.on(ConvergenceConnection.Events.ERROR,
+      (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
+    );
   }
 
   /**
@@ -471,15 +459,40 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _init(m: AuthResponse): void {
-    const session: ConvergenceSession = this._connection.session();
-    const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
-    const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
-    this._identityCache = new IdentityCache(this._connection);
-    this._modelService = new ModelService(this._connection, this._identityCache);
-    this._identityService = new IdentityService(this._connection);
-    this._activityService = new ActivityService(this._connection, this._identityCache);
-    this._presenceService = new PresenceService(this._connection, initialPresence, this._identityCache);
-    this._chatService = new ChatService(this._connection, this._identityCache);
+    if (!TypeChecker.isSet(this._identityCache)) {
+      const session: ConvergenceSession = this._connection.session();
+      const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
+      const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
+
+      this._identityCache = new IdentityCache(this._connection);
+      this._modelService = new ModelService(this._connection, this._identityCache);
+      this._identityService = new IdentityService(this._connection);
+      this._activityService = new ActivityService(this._connection, this._identityCache);
+      this._presenceService = new PresenceService(this._connection, initialPresence, this._identityCache);
+      this._chatService = new ChatService(this._connection, this._identityCache);
+    }
+
+    if (this._connection.session().isAuthenticated()) {
+      this._setOnline();
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  private _setOnline(): void {
+    this._activityService._setOnline();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  private _setOffline(): void {
+    this._activityService._setOffline();
   }
 }
 

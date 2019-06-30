@@ -1,5 +1,4 @@
-import {Logger} from "../util/log/Logger";
-import {ConvergenceLogging} from "../util/log/Logging";
+import {Logger, ConvergenceLogging} from "../util/";
 
 /**
  * @hidden

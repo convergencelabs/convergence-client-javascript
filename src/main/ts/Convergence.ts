@@ -149,7 +149,8 @@ export class Convergence {
     const domain: ConvergenceDomain = new ConvergenceDomain(url, options);
     if (typeof cancellationToken === "object") {
       cancellationToken._bind(() => {
-        domain.dispose().catch(e => console.error(e));
+        domain.dispose().catch((e) =>
+          Convergence.logging.root().error("Error disposing the domain on connection cancellation", e));
       });
     }
     return domain;

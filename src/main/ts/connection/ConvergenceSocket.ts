@@ -1,8 +1,12 @@
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
+import {
+  ConvergenceError,
+  ConvergenceEventEmitter,
+  IConvergenceEvent,
+  ConvergenceLogging
+} from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
-import {ConvergenceLogging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -170,7 +174,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           this._socket.close(4006, reason);
         }
       } catch (e) {
-        console.error("Error closing Web Socket connection.", e);
+        this._logger.error("Error closing Web Socket connection.", e);
         this._closeDeferred.reject(e);
       } finally {
         // detach from all events except close immediately.
@@ -206,7 +210,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
           name: ConvergenceSocket.Events.ERROR,
           error: e
         } as ISocketErrorEvent);
-        console.error(e);
+        this._logger.error("Error handling  web socket frame", e);
       }
     };
 

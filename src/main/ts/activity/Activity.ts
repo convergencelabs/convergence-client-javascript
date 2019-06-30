@@ -7,7 +7,7 @@ import {
   ActivityStateClearedEvent,
   ActivityStateRemovedEvent
 } from "./events";
-import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
+import {StringMap, StringMapLike, ConvergenceEventEmitter, Logger, ConvergenceLogging} from "../util/";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable, BehaviorSubject, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
@@ -105,6 +105,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   private _eventSubscription: Subscription;
 
   /**
+   * @internal
+   */
+  private readonly _logger: Logger;
+
+  /**
    * @hidden
    * @internal
    */
@@ -120,6 +125,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._leftCB = leftCB;
     this._joined = true;
     this._connection = connection;
+    this._logger = ConvergenceLogging.logger("activities.activity");
 
     this.events().subscribe((event: IActivityEvent) => {
       const nextParticipants: Map<string, ActivityParticipant> = this._participants.getValue();
@@ -398,6 +404,22 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public _setParticipants(participants: Map<string, ActivityParticipant>) {
     this._participants.next(participants);
+  }
+
+  /**
+   * @hidden
+   * @private
+   */
+  public _setOnline(): void {
+    this._logger.debug(() => `Activity '${this._id}' is online`);
+  }
+
+  /**
+   * @hidden
+   * @private
+   */
+  public _setOffline(): void {
+    this._logger.debug(() => `Activity '${this._id}' is offline`);
   }
 }
 

@@ -14,7 +14,7 @@ import {
   ActivityStateSetEvent
 } from "./events";
 import {Deferred} from "../util/Deferred";
-import {ConvergenceEventEmitter, StringMap} from "../util/";
+import {ConvergenceEventEmitter, ConvergenceLogging, Logger, StringMap} from "../util/";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {IdentityCache} from "../identity/IdentityCache";
@@ -49,11 +49,17 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   private readonly _identityCache: IdentityCache;
 
   /**
+   * @internal
+   */
+  private readonly _logger: Logger;
+
+  /**
    * @hidden
    * @internal
    */
   constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
+    this._logger = ConvergenceLogging.logger("activities.service");
     this._connection = connection;
     this._identityCache = identityCache;
     this._joinedDeferreds = new Map<string, Deferred<Activity>>();
@@ -247,6 +253,24 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public isJoined(id: string): boolean {
     return this._joinedDeferreds.has(id);
+  }
+
+  /**
+   * @hidden
+   * @private
+   */
+  public _setOnline(): void {
+    this._logger.debug("Activity service online");
+    this._joinedActivities.forEach((activity) => activity._setOnline());
+  }
+
+  /**
+   * @hidden
+   * @private
+   */
+  public _setOffline(): void {
+    this._logger.debug("Activity service offline");
+    this._joinedActivities.forEach((activity) => activity._setOffline());
   }
 
   /**

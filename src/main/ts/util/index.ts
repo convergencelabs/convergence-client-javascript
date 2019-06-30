@@ -6,3 +6,4 @@ export * from "./ConvergenceServerError";
 export * from "./ConvergenceError";
 export * from "./CancellationToken";
 export * from "./Validation";
+export * from "./log";

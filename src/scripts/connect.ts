@@ -12,17 +12,18 @@ import {
   DisconnectedEvent,
   ErrorEvent,
   IConvergenceOptions,
-  InterruptedEvent
+  InterruptedEvent,
+  LogLevel
 } from "../main/ts";
 import * as WebSocket from "ws";
-import {LogLevel} from "../main/ts/util/log/LogLevel";
 import {TypeChecker} from "../main/ts/util/TypeChecker";
 
 Convergence.logging.configure({
   root: {
-    level: LogLevel.TRACE
+    level: LogLevel.INFO
   },
   loggers: {
+    "activities.activity": {level: LogLevel.DEBUG}
   }
 });
 
