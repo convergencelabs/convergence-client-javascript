@@ -24,6 +24,9 @@ import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResp
 import {toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
 import {ConvergenceOptions} from "../ConvergenceOptions";
+import {IUsernameAndPassword} from "../IUsernameAndPassword";
+import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
+import {TypeChecker} from "../util/TypeChecker";
 
 /**
  * @hidden
@@ -173,10 +176,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._protocolConnection.request(message, timeout);
   }
 
-  public authenticateWithPassword(username: string, password: string): Promise<AuthResponse> {
+  public authenticateWithPassword(credentials: IUsernameAndPassword): Promise<AuthResponse> {
     const message: IPasswordAuthRequestMessage = {
-      username,
-      password
+      username: credentials.username,
+      password: credentials.password
     };
     return this._authenticate({password: message});
   }
@@ -188,7 +191,29 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   public authenticateWithReconnectToken(token: string): Promise<AuthResponse> {
     const message: IReconnectTokenAuthRequestMessage = {token};
-    return this._authenticate({reconnect: message});
+    return this
+      ._authenticate({reconnect: message})
+      .catch((e) => {
+        if (e instanceof ConvergenceError && e.code === ConvergenceErrorCodes.AUTHENTICATION_FAILED) {
+          if (TypeChecker.isFunction(this._options.passwordCallback)) {
+            return this._options.passwordCallback().then((credentials) => {
+              return this.authenticateWithPassword(credentials);
+            });
+          } else if (TypeChecker.isFunction(this._options.jwtCallback)) {
+            return this._options.jwtCallback().then((jwt) => {
+              return this.authenticateWithJwt(jwt);
+            });
+          } else if (TypeChecker.isFunction(this._options.anonymousCallback)) {
+            return this._options.anonymousCallback().then((displayName) => {
+              return this.authenticateAnonymously(displayName);
+            });
+          } else {
+            return Promise.resolve(e);
+          }
+        } else {
+          return Promise.resolve(e);
+        }
+      });
   }
 
   public authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
@@ -261,7 +286,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             method
           };
           this._emitEvent(authenticationFailedEvent);
-          return Promise.reject(new ConvergenceError("Authentication failed"));
+          return Promise.reject(
+            new ConvergenceError("Authentication failed", ConvergenceErrorCodes.AUTHENTICATION_FAILED));
         }
       });
   }

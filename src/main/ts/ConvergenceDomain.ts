@@ -340,7 +340,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       .then((creds: IUsernameAndPassword) => {
         Validation.assertNonEmptyString(creds.username, "username");
         Validation.assertNonEmptyString(creds.password, "password");
-        return this._authenticateWithPassword(creds.username, creds.password);
+        return this._authenticateWithPassword(creds);
       });
   }
 
@@ -406,12 +406,19 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   }
 
   /**
+   * Disconnects from the server.
+   */
+  public disconnect(): Promise<void> {
+    return this._connection.disconnect();
+  }
+
+  /**
    * @hidden
    * @internal
    * @private
    */
-  public _authenticateWithPassword(username: string, password: string): Promise<void> {
-    return this._connection.authenticateWithPassword(username, password).then(m => this._init(m));
+  public _authenticateWithPassword(credentials: IUsernameAndPassword): Promise<void> {
+    return this._connection.authenticateWithPassword(credentials).then(m => this._init(m));
   }
 
   /**
@@ -429,7 +436,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   public _authenticateWithReconnectToken(token: string): Promise<void> {
-    return this._connection.authenticateWithReconnectToken(token).then(m => this._init(m));
+    return this._connection
+      .authenticateWithReconnectToken(token)
+      .catch()
+      .then(m => this._init(m));
   }
 
   /**

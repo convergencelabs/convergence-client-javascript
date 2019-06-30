@@ -2,6 +2,8 @@ import {IConvergenceOptions} from "./IConvergenceOptions";
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {ConvergenceError} from "./util";
+import {IUsernameAndPassword} from "./IUsernameAndPassword";
+import {TypeChecker} from "./util/TypeChecker";
 
 export class ConvergenceOptions {
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
@@ -40,9 +42,10 @@ export class ConvergenceOptions {
   public readonly autoReconnect: boolean;
   public readonly reconnectIntervals: number[];
 
-  public readonly fallbackAuth: "jwt" | "password" | null;
-  public readonly passwordCallback: () => Promise<string> | null = null;
+  public readonly fallbackAuth: "jwt" | "password" | "anonymous" | null;
+  public readonly passwordCallback: () => Promise<IUsernameAndPassword> | null = null;
   public readonly jwtCallback: () => Promise<string> | null = null;
+  public readonly anonymousCallback: () => Promise<string> | null = null;
 
   public readonly defaultRequestTimeout: number;
   public readonly heartbeatEnabled: boolean;
@@ -67,19 +70,22 @@ export class ConvergenceOptions {
     const defaultReconnectOptions = {
       autoReconnect: ConvergenceOptions.DEFAULT_AUTO_RECONNECT,
       reconnectIntervals: ConvergenceOptions.DEFAULT_RECONNECT_INTERVALS,
-      fallbackAuth: {jwt: null, password: null}
+      fallbackAuth: {jwt: null, password: null, anonymous: null}
     };
     const {autoReconnect, reconnectIntervals, fallbackAuth} = {...defaultReconnectOptions, ...options.reconnect};
 
     this.autoReconnect = autoReconnect;
     this.reconnectIntervals = reconnectIntervals;
     this.fallbackAuth = null;
-    if (typeof fallbackAuth.jwt === "function") {
+    if (TypeChecker.isFunction(fallbackAuth.jwt)) {
       this.fallbackAuth = "jwt";
       this.jwtCallback = fallbackAuth.jwt;
-    } else if (typeof fallbackAuth.password === "function") {
+    } else if (TypeChecker.isFunction(fallbackAuth.password)) {
       this.fallbackAuth = "password";
       this.passwordCallback = fallbackAuth.password;
+    } else if (TypeChecker.isFunction(fallbackAuth.anonymous)) {
+      this.fallbackAuth = "anonymous";
+      this.anonymousCallback = fallbackAuth.anonymous;
     }
 
     const defaultProtocolOptions = {
