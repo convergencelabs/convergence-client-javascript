@@ -59,8 +59,13 @@ domain.events().subscribe((event) => {
 
 export function connect(cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
   if (ANONYMOUS) {
-    return domain.connectAnonymously(DISPLAY_NAME).then(() => domain);
+    return domain.connectAnonymously(() => Promise.resolve(DISPLAY_NAME)).then(() => domain);
   } else {
-    return domain.connectWithPassword(DOMAIN_USERNAME, DOMAIN_PASSWORD).then(() => domain);
+    return domain
+      .connectWithPassword(() => Promise.resolve({
+        username: DOMAIN_USERNAME,
+        password: DOMAIN_PASSWORD
+      }))
+      .then(() => domain);
   }
 }

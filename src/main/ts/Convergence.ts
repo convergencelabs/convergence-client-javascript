@@ -1,6 +1,7 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {CancellationToken} from "./util";
+import {IUsernameAndPassword} from "./IUsernameAndPassword";
 
 /**
  * The Convergence class is the main entry point into the Convergence Client.
@@ -36,7 +37,7 @@ export class Convergence {
                         password: string,
                         options?: IConvergenceOptions,
                         cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
-    return Convergence.connectWithPassword(url, username, password, options, cancellationToken);
+    return Convergence.connectWithPassword(url, {username, password}, options, cancellationToken);
   }
 
   /**
@@ -44,10 +45,8 @@ export class Convergence {
    *
    * @param url
    *   The URL of the Convergence Domain to connect to.
-   * @param username
-   *   The username of the Convergence Domain User to connect as.
-   * @param password
-   *   The password for the corresponding Convergence Domain User.
+   * @param credentials
+   *   The username and password of the Convergence Domain User to connect as.
    * @param options
    *   Options that configure the behavior of the client.
    * @param cancellationToken
@@ -58,12 +57,11 @@ export class Convergence {
    *   successful connection.
    */
   public static connectWithPassword(url: string,
-                                    username: string,
-                                    password: string,
+                                    credentials: IUsernameAndPassword | (() => Promise<IUsernameAndPassword>),
                                     options?: IConvergenceOptions,
                                     cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
     const domain = Convergence._createDomain(url, options, cancellationToken);
-    return domain.connectWithPassword(username, password).then(() => domain);
+    return domain.connectWithPassword(credentials).then(() => domain);
   }
 
   /**
@@ -83,7 +81,7 @@ export class Convergence {
    *   successful connection.
    */
   public static connectAnonymously(url: string,
-                                   displayName?: string,
+                                   displayName?: string | (() => Promise<string>),
                                    options?: IConvergenceOptions,
                                    cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
     const domain = Convergence._createDomain(url, options, cancellationToken);
@@ -108,7 +106,7 @@ export class Convergence {
    *   successful connection.
    */
   public static connectWithJwt(url: string,
-                               jwt: string,
+                               jwt: string | (() => Promise<string>),
                                options?: IConvergenceOptions,
                                cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
     const domain = Convergence._createDomain(url, options, cancellationToken);

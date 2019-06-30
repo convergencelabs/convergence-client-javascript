@@ -30,6 +30,7 @@ import {io} from "@convergence-internal/convergence-proto";
 import {IdentityCache} from "./identity/IdentityCache";
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import {ConvergenceOptions} from "./ConvergenceOptions";
+import {IUsernameAndPassword} from "./IUsernameAndPassword";
 
 /**
  * The ConvergenceDomain represents a single connection to a specific
@@ -55,6 +56,17 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
     ERROR: ErrorEvent.NAME
   };
+
+  private static _toPromiseCallback<T>(value?: T | (() => Promise<T>)): (() => Promise<T>) {
+    if (value === undefined) {
+      return () => Promise.resolve(undefined as T);
+    } else {
+      const promiseCallback = typeof value === "function" ?
+        value as (() => Promise<T>) :
+        () => Promise.resolve(value as T);
+      return promiseCallback;
+    }
+  }
 
   /**
    * @internal
@@ -310,18 +322,26 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * Connects to a Convergence Domain using username / password authentication.
    *
-   * @param username
-   *   The username of the Convergence Domain User to connect as.
-   * @param password
-   *   The password for the corresponding Convergence Domain User.
+   * @param credentials
+   *   The username and password of the Convergence Domain User to connect as.
+   *   The credentials can be supplied directly or can be supplied as a factory
+   *   function that will return a promise to obtain them.
    *
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.
    */
-  public connectWithPassword(username: string, password: string): Promise<void> {
-    Validation.assertNonEmptyString(username, "username");
-    Validation.assertNonEmptyString(password, "password");
-    return this._connect().then(() => this._authenticateWithPassword(username, password));
+  public connectWithPassword(credentials: IUsernameAndPassword | (() => Promise<IUsernameAndPassword>)): Promise<void> {
+    const promiseCallback = ConvergenceDomain._toPromiseCallback(credentials);
+    return this
+      ._connect()
+      .then(() => {
+        return promiseCallback();
+      })
+      .then((creds: IUsernameAndPassword) => {
+        Validation.assertNonEmptyString(creds.username, "username");
+        Validation.assertNonEmptyString(creds.password, "password");
+        return this._authenticateWithPassword(creds.username, creds.password);
+      });
   }
 
   /**
@@ -329,12 +349,20 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *
    * @param displayName
    *   The optional display name to use for the anonymous user.
+   *   The display name can be supplied directly or can be supplied as a
+   *   factory function that will return a promise to obtain it.
    *
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.
    */
-  public connectAnonymously(displayName?: string): Promise<void> {
-    return this._connect().then(() => this._authenticateAnonymously(displayName));
+  public connectAnonymously(displayName?: string | (() => Promise<string>)): Promise<void> {
+    const promiseCallback = ConvergenceDomain._toPromiseCallback(displayName);
+    return this
+      ._connect()
+      .then(() => {
+        return promiseCallback();
+      })
+      .then((d) => this._authenticateAnonymously(d));
   }
 
   /**
@@ -343,13 +371,23 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *
    * @param jwt
    *   A valid JSON Web Token (JWT) indicating the Domain User to connect as.
+   *   The JWT can be supplied directly or can be supplied as a factory
+   *   function that will return a promise to obtain it.
    *
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.
    */
-  public connectWithJwt(jwt: string): Promise<void> {
-    Validation.assertNonEmptyString(jwt, "jwt");
-    return this._connect().then(() => this._authenticateWithJwt(jwt));
+  public connectWithJwt(jwt: string | (() => Promise<string>)): Promise<void> {
+    const promiseCallback = ConvergenceDomain._toPromiseCallback(jwt);
+    return this
+      ._connect()
+      .then(() => {
+        return promiseCallback();
+      })
+      .then((j: string) => {
+        Validation.assertNonEmptyString(j, "jwt");
+        return this._authenticateWithJwt(j);
+      });
   }
 
   /**
@@ -358,7 +396,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *
    * @param token
    *   The reconnect token to use for authentication.
-   * @param options
    *
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.

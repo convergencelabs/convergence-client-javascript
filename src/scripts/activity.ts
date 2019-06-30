@@ -1,4 +1,4 @@
-#!/usr/bin/env node --require ts-node/register
+#!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "./connect";
 
