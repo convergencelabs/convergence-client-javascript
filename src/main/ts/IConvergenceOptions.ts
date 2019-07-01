@@ -119,7 +119,7 @@ export interface IConvergenceOptions {
      * The constructor to use when creating a web socket. Essentially this is
      * class that should be used to represent the web socket.
      */
-    constructor?: IWebSocketClass;
+    class?: IWebSocketClass;
   };
 
   debug?: {

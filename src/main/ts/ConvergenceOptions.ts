@@ -28,10 +28,10 @@ export class ConvergenceOptions {
       // no-op
     }
 
-    if (!webSockets && !options.webSocket && !options.webSocket.constructor) {
+    if (!webSockets && (!options.webSocket || !options.webSocket.class)) {
       const message = "Convergence depends on the WebSockets API. " +
         "If Convergence is not being run in a browser, you must set the " +
-        "'webSocketClass' property in the connection options.";
+        "'webSocket.class' property in the connection options.";
       throw new ConvergenceError(message, "websockets_not_supported");
     }
   }
@@ -53,7 +53,7 @@ export class ConvergenceOptions {
   public readonly pongTimeout: number;
 
   public readonly webSocketFactory: WebSocketFactory | null;
-  public readonly webSocketConstructor: IWebSocketClass | null;
+  public readonly webSocketClass: IWebSocketClass | null;
 
   constructor(options: IConvergenceOptions) {
     ConvergenceOptions.validate(options);
@@ -109,9 +109,9 @@ export class ConvergenceOptions {
       factory: ConvergenceOptions.DEFAULT_WEBSOCKET_FACTORY,
       constructor: ConvergenceOptions.DEFAULT_WEBSOCKET_CONSTRUCTOR
     };
-    const {factory, constructor} = {...defaultWebSocketOptions, ...options.webSocket};
+    const wsOpts = {...defaultWebSocketOptions, ...options.webSocket};
 
-    this.webSocketFactory = factory;
-    this.webSocketConstructor = constructor;
+    this.webSocketFactory = wsOpts.factory;
+    this.webSocketClass = wsOpts.class;
   }
 }

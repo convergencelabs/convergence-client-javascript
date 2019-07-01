@@ -37,7 +37,7 @@ const DISPLAY_NAME = "test user";
 const OPTIONS: IConvergenceOptions = {
   webSocket: {
     factory: (u) => new WebSocket(u, {rejectUnauthorized: false}),
-    constructor: WebSocket
+    class: WebSocket
   },
   reconnect: {
     autoReconnect: true,

@@ -25,7 +25,7 @@ import IJwtAuthRequestMessage = io.convergence.proto.IJwtAuthRequestMessage;
 import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenAuthRequestMessage;
 import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
 import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
-import {getOrDefaultString, toOptional} from "./ProtocolUtil";
+import {getOrDefaultObject, getOrDefaultString, toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
 import {ConvergenceOptions} from "../ConvergenceOptions";
 import {IUsernameAndPassword} from "../IUsernameAndPassword";
@@ -58,6 +58,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private readonly _options: ConvergenceOptions;
   private readonly _session: ConvergenceSession;
   private readonly _logger = ConvergenceLogging.logger("connection");
+  private readonly _url: string;
 
   private _authenticated: boolean;
   private _connectionDeferred: Deferred<void>;
@@ -66,7 +67,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _connectionTimeoutTask: any;
   private _connectionState: ConnectionState;
   private _protocolConnection: ProtocolConnection;
-  private readonly _url: string;
+
   private _domainId: string;
   private _namespace: string;
 
@@ -77,7 +78,14 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
    */
   constructor(url: string, domain: ConvergenceDomain) {
     super();
-    this._url = url;
+
+    this._url = url.trim().toLowerCase();
+    const urlExpression = /^(https?|wss?):\/{2}.+\/.+\/.+/g;
+
+    if (!urlExpression.test(this._url)) {
+      throw new Error(`Invalid domain connection url: ${this._url}`);
+    }
+
     this._options = domain.options();
 
     this._authenticated = false;
@@ -192,7 +200,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._protocolConnection.request(message, timeout);
   }
 
-  public authenticateWithPassword(credentials: IUsernameAndPassword): Promise<AuthResponse> {
+  public authenticateWithPassword(credentials: IUsernameAndPassword): Promise<void> {
     const message: IPasswordAuthRequestMessage = {
       username: credentials.username,
       password: credentials.password
@@ -200,12 +208,12 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._authenticate({password: message});
   }
 
-  public authenticateWithJwt(jwt: string): Promise<AuthResponse> {
+  public authenticateWithJwt(jwt: string): Promise<void> {
     const message: IJwtAuthRequestMessage = {jwt};
     return this._authenticate({jwt: message});
   }
 
-  public authenticateWithReconnectToken(token: string): Promise<AuthResponse> {
+  public authenticateWithReconnectToken(token: string): Promise<void> {
     const message: IReconnectTokenAuthRequestMessage = {token};
     return this
       ._authenticate({reconnect: message})
@@ -232,7 +240,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       });
   }
 
-  public authenticateAnonymously(displayName?: string): Promise<AuthResponse> {
+  public authenticateAnonymously(displayName?: string): Promise<void> {
     const message: IAnonymousAuthRequestMessage = {
       displayName: toOptional(displayName)
     };
@@ -245,10 +253,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       .pipe(filter(e => e.name === "message")) as Observable<MessageEvent>;
   }
 
-  private _authenticate(authRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
+  private _authenticate(authRequest: IAuthenticationRequestMessage): Promise<void> {
     if (this._session.isAuthenticated()) {
       // The user is only allowed to authenticate once.
-      return Promise.reject<AuthResponse>(new ConvergenceError("User already authenticated."));
+      return Promise.reject<void>(new ConvergenceError("User already authenticated."));
     } else if (this.isConnected()) {
       // We are connected already so we can just send the request.
       return this._sendAuthRequest(authRequest);
@@ -259,12 +267,12 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       });
     } else {
       // We are not connecting and are not trying to connect.
-      return Promise.reject<AuthResponse>(
+      return Promise.reject<void>(
         new ConvergenceError("Must be connected or connecting to authenticate."));
     }
   }
 
-  private _sendAuthRequest(authenticationRequest: IAuthenticationRequestMessage): Promise<AuthResponse> {
+  private _sendAuthRequest(authenticationRequest: IAuthenticationRequestMessage): Promise<void> {
     let method = null;
     if (authenticationRequest.anonymous) {
       method = "anonymous";
@@ -284,18 +292,19 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       .then((response: IConvergenceMessage) => {
         const authResponse: IAuthenticationResponseMessage = response.authenticationResponse;
         if (authResponse.success) {
-          const authenticatedEvent: IAuthenticatedEvent = {name: ConvergenceConnection.Events.AUTHENTICATED, method};
-          this._emitEvent(authenticatedEvent);
-
           const success = authResponse.success;
           this._session._setUser(toDomainUser(success.user));
           this._session._setSessionId(success.sessionId);
           this._session._setReconnectToken(success.reconnectToken);
           this._authenticated = true;
-          const resp: AuthResponse = {
-            state: success.presenceState
+
+          const authenticatedEvent: IAuthenticatedEvent = {
+            name: ConvergenceConnection.Events.AUTHENTICATED,
+            method,
+            state: getOrDefaultObject(success.presenceState)
           };
-          return Promise.resolve(resp);
+          this._emitEvent(authenticatedEvent);
+          return Promise.resolve();
         } else {
           const authenticationFailedEvent: IAuthenticationFailedEvent = {
             name: ConvergenceConnection.Events.AUTHENTICATION_FAILED,
@@ -328,7 +337,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
     const socket: ConvergenceSocket = new ConvergenceSocket(
       this._url,
-      this._options.webSocketConstructor,
+      this._options.webSocketClass,
       this._options.webSocketFactory);
     this._protocolConnection = new ProtocolConnection(
       socket,
@@ -504,6 +513,7 @@ export interface IAuthenticatingEvent extends IConnectionEvent {
 export interface IAuthenticatedEvent extends IConnectionEvent {
   name: "authenticated";
   method: string;
+  state: { [key: string]: any };
 }
 
 /**
@@ -533,14 +543,6 @@ export interface MessageEvent extends IConnectionEvent {
   message: IConvergenceMessage; // Model Message??
   request: boolean;
   callback?: ReplyCallback;
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface AuthResponse {
-  state: { [key: string]: any };
 }
 
 /**

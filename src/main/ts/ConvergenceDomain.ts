@@ -1,8 +1,7 @@
 import {
   ConvergenceConnection,
-  AuthResponse,
   IConnectionErrorEvent,
-  IConnectionScheduledEvent, IAuthenticatingEvent, IAuthenticationFailedEvent
+  IConnectionScheduledEvent, IAuthenticatingEvent, IAuthenticationFailedEvent, IAuthenticatedEvent
 } from "./connection/ConvergenceConnection";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
@@ -121,10 +120,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   constructor(url: string, options?: IConvergenceOptions) {
     super();
-
-    if (!Validation.nonEmptyString(url)) {
-      throw new Error("The Convergence connection url must be provided.");
-    }
 
     this._options = new ConvergenceOptions(options || {});
 
@@ -382,7 +377,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   public _authenticateWithPassword(credentials: IUsernameAndPassword): Promise<void> {
-    return this._connection.authenticateWithPassword(credentials).then(m => this._init(m));
+    return this._connection
+      .authenticateWithPassword(credentials)
+      .then(() => undefined);
   }
 
   /**
@@ -391,7 +388,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   public _authenticateWithJwt(jwt: string): Promise<void> {
-    return this._connection.authenticateWithJwt(jwt).then(m => this._init(m));
+    return this._connection
+      .authenticateWithJwt(jwt)
+      .then(() => undefined);
   }
 
   /**
@@ -402,7 +401,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   public _authenticateWithReconnectToken(token: string): Promise<void> {
     return this._connection
       .authenticateWithReconnectToken(token)
-      .then(m => this._init(m));
+      .then(() => undefined);
   }
 
   /**
@@ -411,7 +410,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   public _authenticateAnonymously(displayName?: string): Promise<void> {
-    return this._connection.authenticateAnonymously(displayName).then(m => this._init(m));
+    return this._connection
+      .authenticateAnonymously(displayName)
+      .then(() => undefined);
   }
 
   /**
@@ -431,8 +432,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATING,
       (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
-      (e: IAuthenticatingEvent) => {
+      (e: IAuthenticatedEvent) => {
         this._emitEvent(new AuthenticatedEvent(this, e.method));
+        this._init(e);
       });
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
       (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
@@ -458,10 +460,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  private _init(m: AuthResponse): void {
+  private _init(authEvent: IAuthenticatedEvent): void {
     if (!TypeChecker.isSet(this._identityCache)) {
       const session: ConvergenceSession = this._connection.session();
-      const presenceState: Map<string, any> = StringMap.objectToMap(m.state || {});
+      const presenceState: Map<string, any> = StringMap.objectToMap(authEvent.state || {});
       const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
 
       this._identityCache = new IdentityCache(this._connection);
