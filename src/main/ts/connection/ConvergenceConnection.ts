@@ -192,6 +192,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._authenticated;
   }
 
+  public isOnline(): boolean {
+    return this.isAuthenticated();
+  }
+
   public send(message: IConvergenceMessage): void {
     this._protocolConnection.send(message);
   }

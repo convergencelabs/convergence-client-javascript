@@ -40,13 +40,9 @@ export class ActivityStateSetEvent implements IActivityEvent {
      */
     public readonly local: boolean,
     /**
-     * The key of the state delta that was set.
+     * The state that was modified.
      */
-    public readonly key: string,
-    /**
-     * The data that was set
-     */
-    public readonly value: any) {
+    public readonly updated: Map<string, any>) {
     Object.freeze(this);
   }
 }

@@ -3,20 +3,20 @@ import {IActivityEvent} from "./IActivityEvent";
 import {DomainUser} from "../../identity";
 
 /**
- * The ActivityStateRemovedEvent is fired when a remote session removes one or
- * elements from its state within the [[Activity]].
+ * The ActivityStateClearedEvent is fired when a remote session clears all an
+ * of its state within the [[Activity]].
  */
-export class ActivityStateRemovedEvent implements IActivityEvent {
+export class ActivityLeftEvent implements IActivityEvent {
 
   /**
    * The event name that all instances of this class will use.
    */
-  public static readonly EVENT_NAME: string = "state_removed";
+  public static readonly EVENT_NAME: string = "left";
 
   /**
    * @inheritDoc
    */
-  public readonly name: string = ActivityStateRemovedEvent.EVENT_NAME;
+  public readonly name: string = ActivityLeftEvent.EVENT_NAME;
 
   /**
    * @hidden
@@ -38,11 +38,7 @@ export class ActivityStateRemovedEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly local: boolean,
-    /**
-     * The key of the state that was removed.
-     */
-    public readonly keys: string[]) {
+    public readonly local: boolean) {
     Object.freeze(this);
   }
 }
