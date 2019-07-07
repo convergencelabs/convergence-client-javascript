@@ -31,6 +31,7 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IActivitySessionJoinedMessage = io.convergence.proto.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = io.convergence.proto.IActivitySessionLeftMessage;
 import IActivityStateUpdatedMessage = io.convergence.proto.IActivityStateUpdatedMessage;
+import {EqualsUtil} from "../util/EqualsUtil";
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -481,9 +482,17 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     const participant: ActivityParticipant =
       new ActivityParticipant(this, user, joined.sessionId, false, StringMap.objectToMap(state));
+    this._emitParticipantJoined(participant);
     this._mutateParticipants((participants) => participants.set(participant.sessionId, participant));
+  }
 
-    const event = new ActivitySessionJoinedEvent(this, user, joined.sessionId, false, participant);
+  /**
+   * @hidden
+   * @internal
+   */
+  private _emitParticipantJoined(participant: ActivityParticipant): void {
+    const event =
+      new ActivitySessionJoinedEvent(this, participant.user, participant.sessionId, false, participant);
     this._emitEvent(event);
   }
 
@@ -492,10 +501,17 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private _onSessionLeft(left: IActivitySessionLeftMessage): void {
-    this._mutateParticipants((participants) => participants.delete(left.sessionId));
+    const participant = this._participants.getValue().get(left.sessionId);
+    this._emitParticipantLeft(participant);
+    this._mutateParticipants((participants) => participants.delete(participant.sessionId));
+  }
 
-    const user = this._identityCache.getUserForSession(left.sessionId);
-    const event = new ActivitySessionLeftEvent(this, user, left.sessionId, false);
+  /**
+   * @hidden
+   * @internal
+   */
+  private _emitParticipantLeft(participant: ActivityParticipant): void {
+    const event = new ActivitySessionLeftEvent(this, participant.user, participant.sessionId, participant.local);
     this._emitEvent(event);
   }
 
@@ -538,20 +554,20 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   private _handleStateSet(sessionId: string, stateSet: Map<string, any>): void {
     const user = this._identityCache.getUserForSession(sessionId);
 
-    const updated = new Map<string, any>();
-    Object.keys(stateSet).forEach(key => {
-      const value = protoValueToJson(stateSet.get(key));
-      updated.set(key, value);
+    const mapped = new Map<string, any>();
+    stateSet.forEach((protoValue: any, key: string) => {
+      const value = protoValueToJson(protoValue);
+      mapped.set(key, value);
     });
 
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>(existing.state);
-      updated.forEach((value: any, key: string) => state.set(key, value));
+      mapped.forEach((value: any, key: string) => state.set(key, value));
       participants.set(sessionId, existing.clone({state}));
     });
 
-    const event = new ActivityStateSetEvent(this, user, sessionId, false, updated);
+    const event = new ActivityStateSetEvent(this, user, sessionId, false, mapped);
     this._emitEvent(event);
   }
 
@@ -675,16 +691,27 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
           participants.set(sessionId, participant);
         });
 
-        const newLocalParticipant = participants.get(localSessionId);
-        const currentLocalParticipant = this._localParticipant;
-        this._localParticipant = newLocalParticipant;
+        // If we had a previous state, then we will emit that that participant has left, but
+        // we will merge its state into the new local participant and make sure we send any
+        // outstanding state changes to the server.
+        if (this._localParticipant !== undefined) {
+          this._emitParticipantLeft(this._localParticipant);
 
-        if (currentLocalParticipant !== undefined) {
-          participants.set(localSessionId, currentLocalParticipant);
-          this._syncStateAfterJoinOnline(newLocalParticipant.state, currentLocalParticipant.state);
+          // The local participant as joined, may have out of date state.
+          const joinedLocalParticipant = participants.get(localSessionId);
+
+          const updatedJoinedLocalParticipant =
+            joinedLocalParticipant.clone({state: this._localParticipant.state});
+          this._syncStateAfterJoinOnline(joinedLocalParticipant.state, this._localParticipant.state);
+
+          participants.set(localSessionId, updatedJoinedLocalParticipant);
         }
 
+        this._localParticipant = participants.get(localSessionId);
+
+        participants.forEach(p => this._emitParticipantJoined(p));
         this._participants.next(participants);
+
         deferred.resolve();
       })
       .catch(e => {
@@ -707,12 +734,14 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     const updated = new Map<string, any>();
     localState.forEach((value, key) => {
-      if (!serverState.get(key) !== value) {
+      if (!EqualsUtil.deepEquals(!serverState.get(key), value)) {
         updated.set(key, value);
       }
     });
 
-    this._sendStateUpdate(updated, false, removedKeys);
+    if (removedKeys.length > 0 || updated.size > 0) {
+      this._sendStateUpdate(updated, false, removedKeys);
+    }
   }
 
   /**
