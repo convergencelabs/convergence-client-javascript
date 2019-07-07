@@ -4,24 +4,26 @@ import {ConsoleLogWriter} from "./ConsoleLogWriter";
 import {LogLevel} from "./LogLevel";
 import {ILoggingConfigData} from "./ILoggingConfigData";
 
-export class Logging {
+const DEFAULT_CONFIG: ILoggingConfigData =  {
+  root: {
+    level: LogLevel.WARN
+  }
+};
+
+export class ConvergenceLogging {
 
   private _config: LoggingConfig;
   private _loggers: Map<string, Logger>;
   private readonly _writer: ConsoleLogWriter;
 
   constructor(config?: ILoggingConfigData) {
-    this.configure(config || {
-      root: {
-        level: LogLevel.WARN
-      }
-    });
-
+    this.configure(config ||  {});
     this._writer = new ConsoleLogWriter("");
   }
 
   public configure(config: ILoggingConfigData): void {
-    this._config = new LoggingConfig(config);
+    const defaulted = {...DEFAULT_CONFIG, ...config};
+    this._config = new LoggingConfig(defaulted);
     this._loggers = new Map<string, Logger>();
   }
 
@@ -31,7 +33,7 @@ export class Logging {
 
   public logger(id?: string): Logger {
     if (id === null || id === undefined) {
-      id = "";
+      id = LoggingConfig.ROOT_LOGGER_ID;
     }
 
     if (!this._loggers.has(id)) {
@@ -43,4 +45,4 @@ export class Logging {
   }
 }
 
-export const ConvergenceLogging = new Logging();
+export const Logging = new ConvergenceLogging();

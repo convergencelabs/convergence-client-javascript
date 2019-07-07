@@ -2,7 +2,7 @@ import {
   ConvergenceError,
   ConvergenceEventEmitter,
   IConvergenceEvent,
-  ConvergenceLogging
+  Logging
 } from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
@@ -61,7 +61,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
   private _closeDeferred: Deferred<void>;
   private readonly _webSocketFactory: WebSocketFactory;
   private readonly _webSocketClass: IWebSocketClass;
-  private readonly _logger = ConvergenceLogging.logger("socket");
+  private readonly _logger = Logging.logger("socket");
 
   constructor(url: string,
               webSocketClass?: IWebSocketClass | null,

@@ -1,9 +1,9 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "./connect";
-import {Convergence} from "../main/ts/";
+import {Logging} from "../main/ts/";
 
-const log = Convergence.logging.root();
+const log = Logging.root();
 
 connect()
   .then(domain => {

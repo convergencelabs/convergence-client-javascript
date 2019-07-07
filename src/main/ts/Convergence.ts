@@ -1,8 +1,7 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
-import {CancellationToken} from "./util";
+import {CancellationToken, Logging} from "./util";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
-import {ConvergenceLogging, Logging} from "./util/log/Logging";
 
 /**
  * The Convergence class is the main entry point into the Convergence Client.
@@ -11,11 +10,6 @@ import {ConvergenceLogging, Logging} from "./util/log/Logging";
  * work with a the Convergence Domain at the specified url.
  */
 export class Convergence {
-
-  public static get logging(): Logging {
-    return ConvergenceLogging;
-  }
-
   /**
    * Connects to a Convergence Domain using username / password authentication.
    *
@@ -143,6 +137,10 @@ export class Convergence {
     return domain.reconnect(token).then(() => domain);
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private static _createDomain(url: string,
                                options: IConvergenceOptions,
                                cancellationToken?: CancellationToken): ConvergenceDomain {
@@ -150,7 +148,7 @@ export class Convergence {
     if (typeof cancellationToken === "object") {
       cancellationToken._bind(() => {
         domain.dispose().catch((e) =>
-          Convergence.logging.root().error("Error disposing the domain on connection cancellation", e));
+          Logging.root().error("Error disposing the domain on connection cancellation", e));
       });
     }
     return domain;

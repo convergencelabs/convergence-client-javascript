@@ -1,6 +1,7 @@
 import {ILoggerConfig} from "./ILoggerConfig";
+import {LogLevel} from "./LogLevel";
 
 export interface ILoggingConfigData {
-  root: ILoggerConfig;
-  loggers?: { [key: string]: ILoggerConfig };
+  root?: ILoggerConfig | LogLevel;
+  loggers?: { [key: string]: ILoggerConfig | LogLevel };
 }

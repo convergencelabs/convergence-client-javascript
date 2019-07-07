@@ -5,7 +5,7 @@ import {
   ConvergenceServerError,
   IConvergenceEvent,
   ConvergenceEventEmitter,
-  ConvergenceLogging
+  Logging
 } from "../util/";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
@@ -72,9 +72,9 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private readonly _requests: Map<number, any>;
   private _closeRequested: boolean = false;
 
-  private _logger = ConvergenceLogging.logger("protocol");
-  private _messageLogger = ConvergenceLogging.logger("protocol.messages");
-  private _pingLogger = ConvergenceLogging.logger("protocol.ping");
+  private _logger = Logging.logger("protocol");
+  private _messageLogger = Logging.logger("protocol.messages");
+  private _pingLogger = Logging.logger("protocol.ping");
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();

@@ -3,7 +3,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
 import {IActivityEvent} from "./events";
-import {ConvergenceEventEmitter, ConvergenceLogging, Logger} from "../util/";
+import {ConvergenceEventEmitter, Logging, Logger} from "../util/";
 import {IdentityCache} from "../identity/IdentityCache";
 import {filter, tap} from "rxjs/operators";
 import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
@@ -41,7 +41,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    */
   constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
     super();
-    this._logger = ConvergenceLogging.logger("activities.service");
+    this._logger = Logging.logger("activities.service");
     this._connection = connection;
     this._identityCache = identityCache;
     this._joinedActivities = new Map<string, Activity>();

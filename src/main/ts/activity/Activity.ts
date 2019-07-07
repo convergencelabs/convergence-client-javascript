@@ -7,7 +7,7 @@ import {
   ActivityStateClearedEvent,
   ActivityStateRemovedEvent
 } from "./events";
-import {StringMap, StringMapLike, ConvergenceEventEmitter, Logger, ConvergenceLogging} from "../util/";
+import {StringMap, StringMapLike, ConvergenceEventEmitter, Logging, Logger} from "../util/";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {Observable, BehaviorSubject, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
@@ -155,7 +155,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(new Map());
     this._joined = true;
     this._connection = connection;
-    this._logger = ConvergenceLogging.logger("activities.activity");
+    this._logger = Logging.logger("activities.activity");
     this._joinPromise = null;
 
     this._eventSubscription = this._connection
@@ -283,20 +283,22 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         state = StringMap.coerceToMap(arguments[0]);
       } else if (arguments.length === 2) {
         state = new Map();
-        state[arguments[0]] = arguments[1];
+        state.set(arguments[0], arguments[1]);
       }
 
-      this._sendStateUpdate(state, false, []);
+      if (state.size > 0) {
+        this._sendStateUpdate(state, false, []);
 
-      const newState = this.state();
-      state.forEach((value: string, key: any) => {
-        newState.set(key, value);
-      });
+        const newState = this.state();
+        state.forEach((value: string, key: any) => {
+          newState.set(key, value);
+        });
 
-      this._mutateLocalParticipant((local) => local.clone({state: newState}));
-      const session = this._connection.session();
-      const event = new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, newState);
-      this._emitEvent(event);
+        this._mutateLocalParticipant((local) => local.clone({state: newState}));
+        const session = this._connection.session();
+        const event = new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, state);
+        this._emitEvent(event);
+      }
     }
   }
 
@@ -330,21 +332,22 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         keys = [keys as string];
       }
 
-      this._sendStateUpdate(null, false, keys as string[]);
+      if (keys.length > 0) {
+        this._sendStateUpdate(null, false, keys as string[]);
 
-      const newState = this.state();
-      keys.forEach(key => newState.delete(key));
+        const newState = this.state();
+        keys.forEach(key => newState.delete(key));
 
-      this._mutateLocalParticipant((local) => local.clone({state: newState}));
+        this._mutateLocalParticipant((local) => local.clone({state: newState}));
 
-      this._emitEvent(new ActivityStateRemovedEvent(
-        this,
-        this._connection.session().user(),
-        this._connection.session().sessionId(),
-        true,
-        keys
-      ));
-
+        this._emitEvent(new ActivityStateRemovedEvent(
+          this,
+          this._connection.session().user(),
+          this._connection.session().sessionId(),
+          true,
+          keys
+        ));
+      }
     }
   }
 
@@ -353,13 +356,15 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public clearState(): void {
     if (this.isJoined()) {
-      this._sendStateUpdate(new Map(), true, null);
+      if (this._localParticipant.state.size > 0) {
+        this._sendStateUpdate(new Map(), true, null);
 
-      this._mutateLocalParticipant((local) => local.clone({state: new Map()}));
+        this._mutateLocalParticipant((local) => local.clone({state: new Map()}));
 
-      const session = this._connection.session();
-      const event =
-        this._emitEvent(new ActivityStateClearedEvent(this, session.user(), session.sessionId(), true));
+        const session = this._connection.session();
+        const event = new ActivityStateClearedEvent(this, session.user(), session.sessionId(), true);
+        this._emitEvent(event);
+      }
     }
   }
 
@@ -500,10 +505,6 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   private _onRemoteStateUpdated(updated: IActivityStateUpdatedMessage): void {
     const sessionId = getOrDefaultString(updated.sessionId);
-    const removed = getOrDefaultArray(updated.removed);
-    if (removed.length > 0) {
-      this._handleStateRemoved(sessionId, removed);
-    }
 
     const set = StringMap.objectToMap(getOrDefaultObject(updated.set));
     const complete = getOrDefaultBoolean(updated.complete);
@@ -539,7 +540,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     const updated = new Map<string, any>();
     Object.keys(stateSet).forEach(key => {
-      const value = protoValueToJson(stateSet[key]);
+      const value = protoValueToJson(stateSet.get(key));
       updated.set(key, value);
     });
 
@@ -547,7 +548,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>(existing.state);
       updated.forEach((value: any, key: string) => state.set(key, value));
-      participants.set(event.sessionId, existing.clone({state}));
+      participants.set(sessionId, existing.clone({state}));
     });
 
     const event = new ActivityStateSetEvent(this, user, sessionId, false, updated);
@@ -593,7 +594,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>();
-      participants.set(event.sessionId, existing.clone({state}));
+      participants.set(sessionId, existing.clone({state}));
     });
 
     const event = new ActivityStateClearedEvent(this, user, sessionId, false);
@@ -611,7 +612,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>(existing.state);
       keys.forEach((key: string) => state.delete(key));
-      participants.set(event.sessionId, existing.clone({state}));
+      participants.set(sessionId, existing.clone({state}));
     });
 
     const event = new ActivityStateRemovedEvent(this, user, sessionId, false, keys);
@@ -740,7 +741,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     if (this._connection.isOnline()) {
       const message: IConvergenceMessage = {
-        activityUpdateState: {set, complete, removed}
+        activityUpdateState: {activityId: this._id, set, complete, removed}
       };
       this._connection.send(message);
     }

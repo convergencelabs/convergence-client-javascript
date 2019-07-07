@@ -1,4 +1,4 @@
-import {Logger, ConvergenceLogging} from "../util/";
+import {Logger, Logging} from "../util/";
 
 /**
  * @hidden
@@ -30,7 +30,7 @@ export class HeartbeatHelper {
     this._pingInterval = pingInterval;
     this._pongTimeout = pongTimeout;
     this._started = false;
-    this._logger = ConvergenceLogging.logger("heartbeat");
+    this._logger = Logging.logger("heartbeat");
   }
 
   public setPingInterval(pingInterval: number): void {

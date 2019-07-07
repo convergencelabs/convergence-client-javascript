@@ -111,7 +111,7 @@ export class ConvergenceOptions {
     };
     const wsOpts = {...defaultWebSocketOptions, ...options.webSocket};
 
-    this.webSocketFactory = wsOpts.factory;
-    this.webSocketClass = wsOpts.class;
+    this.webSocketFactory = wsOpts.factory || null;
+    this.webSocketClass = wsOpts.class || null;
   }
 }

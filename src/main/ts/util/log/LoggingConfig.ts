@@ -3,12 +3,15 @@ import {objectForEach} from "../ObjectUtils";
 import {Validation} from "../Validation";
 import {ILoggerConfig} from "./ILoggerConfig";
 import {ILoggingConfigData} from "./ILoggingConfigData";
+import {LogLevel} from "./LogLevel";
 
 /**
  * @hidden
  * @internal
  */
 export class LoggingConfig {
+
+  public static ROOT_LOGGER_ID = "";
 
   private readonly _loggers: Map<string, ILoggerConfig>;
 
@@ -21,11 +24,11 @@ export class LoggingConfig {
           throw new Error("A logger's id must be a non-empty string");
         }
 
-        this._loggers.set(id, loggerConfig);
+        this._loggers.set(id, this._processLoggerConfig(loggerConfig));
       });
     }
 
-    this._loggers.set("", config.root);
+    this._loggers.set(LoggingConfig.ROOT_LOGGER_ID, this._processLoggerConfig(config.root));
   }
 
   public resolveLoggerConfig(loggerId: string): ILoggerConfig {
@@ -40,6 +43,14 @@ export class LoggingConfig {
 
     return logger !== undefined ?
       logger :
-      this._loggers.get("");
+      this._loggers.get(LoggingConfig.ROOT_LOGGER_ID);
+  }
+
+  private _processLoggerConfig(config: ILoggerConfig | LogLevel): ILoggerConfig {
+    if (TypeChecker.isString(config)) {
+      return {level: config};
+    } else {
+      return config;
+    }
   }
 }

@@ -42,7 +42,7 @@ export class ActivityStateSetEvent implements IActivityEvent {
     /**
      * The state that was modified.
      */
-    public readonly updated: Map<string, any>) {
+    public readonly values: Map<string, any>) {
     Object.freeze(this);
   }
 }

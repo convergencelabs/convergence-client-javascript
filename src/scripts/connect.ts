@@ -13,17 +13,15 @@ import {
   ErrorEvent,
   IConvergenceOptions,
   InterruptedEvent,
-  LogLevel
+  LogLevel,
+  Logging
 } from "../main/ts";
 import * as WebSocket from "ws";
 import {TypeChecker} from "../main/ts/util/TypeChecker";
 
-Convergence.logging.configure({
-  root: {
-    level: LogLevel.INFO
-  },
+Logging.configure({
+  root: LogLevel.INFO,
   loggers: {
-    "activities.activity": {level: LogLevel.DEBUG}
   }
 });
 
@@ -48,7 +46,7 @@ const OPTIONS: IConvergenceOptions = {
 };
 
 export function createDomain(): ConvergenceDomain {
-  const log = Convergence.logging.root();
+  const log = Logging.root();
   const domain = new ConvergenceDomain(DOMAIN_URL, OPTIONS);
   domain.events().subscribe((event) => {
       if (event instanceof ConnectionScheduledEvent) {

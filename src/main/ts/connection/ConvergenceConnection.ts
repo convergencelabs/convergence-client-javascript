@@ -12,7 +12,7 @@ import {
   ConvergenceError,
   ConvergenceEventEmitter,
   IConvergenceEvent,
-  ConvergenceLogging
+  Logging
 } from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
@@ -57,7 +57,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   private readonly _options: ConvergenceOptions;
   private readonly _session: ConvergenceSession;
-  private readonly _logger = ConvergenceLogging.logger("connection");
+  private readonly _logger = Logging.logger("connection");
   private readonly _url: string;
 
   private _authenticated: boolean;
