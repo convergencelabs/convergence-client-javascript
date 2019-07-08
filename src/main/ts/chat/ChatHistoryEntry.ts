@@ -1,4 +1,5 @@
 import {DomainUser} from "../identity";
+import {Immutable} from "../util/Immutable";
 
 export interface ChatHistoryEntryTypes {
   CREATED: string;
@@ -36,7 +37,7 @@ export abstract class ChatHistoryEntry {
   }
 }
 
-Object.freeze(ChatHistoryEntry.TYPES);
+Immutable.make(ChatHistoryEntry.TYPES);
 
 export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = "created";
@@ -53,7 +54,7 @@ export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
               public readonly topic: string,
               public readonly members: DomainUser[]) {
     super(ChannelCreatedHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -70,7 +71,7 @@ export class MessageChatHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly message: string) {
     super(MessageChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -86,7 +87,7 @@ export class UserJoinedChatHistoryEntry extends ChatHistoryEntry {
               timestamp: Date,
               user: DomainUser) {
     super(UserJoinedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -102,7 +103,7 @@ export class UserLeftChatHistoryEntry extends ChatHistoryEntry {
               timestamp: Date,
               user: DomainUser) {
     super(UserLeftChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -119,7 +120,7 @@ export class UserAddedChatHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly addedUser: DomainUser) {
     super(UserAddedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -136,7 +137,7 @@ export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly removedUser: DomainUser) {
     super(UserRemovedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -153,7 +154,7 @@ export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly name: string) {
     super(NameChangedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }
 
@@ -170,6 +171,6 @@ export class TopicChangedChatHistoryEntry extends ChatHistoryEntry {
               user: DomainUser,
               public readonly topic: string) {
     super(TopicChangedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
-    Object.freeze(this);
+    Immutable.make(this);
   }
 }

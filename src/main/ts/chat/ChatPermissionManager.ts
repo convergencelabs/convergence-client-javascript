@@ -2,7 +2,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {io} from "@convergence-internal/convergence-proto";
 import {StringMap} from "../util";
 import {domainUserIdToProto, domainUserTypeToProto} from "../connection/ProtocolUtil";
-import {DomainUserId, DomainUserType} from "../identity/DomainUserId";
+import {DomainUserId, DomainUserType} from "../identity/";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = io.convergence.proto.IUserPermissionsEntry;
 

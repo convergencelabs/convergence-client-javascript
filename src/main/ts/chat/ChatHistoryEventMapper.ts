@@ -1,5 +1,3 @@
-import {io} from "@convergence-internal/convergence-proto";
-import IChatChannelEventData = io.convergence.proto.IChatEventData;
 import {
   ChannelCreatedHistoryEntry,
   ChatHistoryEntry,
@@ -20,6 +18,8 @@ import {
 } from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
 import {IdentityCache} from "../identity/IdentityCache";
+import {io} from "@convergence-internal/convergence-proto";
+import IChatChannelEventData = io.convergence.proto.IChatEventData;
 
 export class ChatHistoryEventMapper {
   public static toChatHistoryEntry(data: IChatChannelEventData, identityCache: IdentityCache): ChatHistoryEntry {

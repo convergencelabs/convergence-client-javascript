@@ -31,8 +31,7 @@ import {
   toOptional
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
-import {DomainUserId} from "../identity/DomainUserId";
-import {DomainUserIdentifier} from "../identity";
+import {DomainUserIdentifier, DomainUserId} from "../identity";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
@@ -59,7 +58,7 @@ export type ChatType = "direct" | "channel" | "room";
 
 export const ChatTypes = {
   DIRECT: "direct",
-  CHANNEL: "group",
+  CHANNEL: "channel",
   ROOM: "room"
 };
 
@@ -110,6 +109,10 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     this._emitFrom(this._messageStream);
   }
 
+  /**
+   * @returns
+   *   The current [[ConvergenceSession]].
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
@@ -123,6 +126,14 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   //   });
   // }
 
+  /**
+   * Determines if a Chat with the specified id exists.
+   *
+   * @param chatId
+   *   The chat id to check.
+   * @returns
+   *   A promise resolved with true if the specified chat exists, or false otherwise.
+   */
   public exists(chatId: string): Promise<boolean> {
     Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
@@ -135,6 +146,16 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Gets a [[Chat]] object for the specified id. The exact subclass returned
+   * will depend on the type of [[Chat]] the id refers to.
+   *
+   * @param chatId
+   *   The id of the [[Chat]] to get.
+   *
+   * @returns
+   *   A Promise that will be resolved with the specified Chat, if it exists.
+   */
   public get(chatId: string): Promise<Chat> {
     Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection
@@ -151,7 +172,16 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       });
   }
 
-  // Methods that apply to Group Chat Channels.
+  //
+  // Membership channel related methods.
+  //
+
+  /**
+   * Gets the [[ChatInfo]] for currently joined [[Chat]]s.
+   *
+   * @returns
+   *   A promise that is resolved with the joined chats.
+   */
   public joined(): Promise<ChatInfo[]> {
     return this._connection
       .request({
@@ -163,6 +193,17 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       });
   }
 
+  /**
+   * Creates a new [[Chat]]. The specific type of [[Chat]] created will depend
+   * on the options provided.
+   *
+   * @param options
+   *   The options that define how to create the Chat.
+   *
+   * @returns
+   *   A promise that will be resolved with the id of the successfully created
+   *   [[Chat]].
+   */
   public create(options: CreateChatChannelOptions): Promise<string> {
     if (!options) {
       throw new Error("create options must be supplied");
@@ -223,6 +264,14 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       });
   }
 
+  /**
+   * Removes the [[Chat]] with the specified id.
+   *
+   * @param chatId
+   *   The id of the Chat to remove.
+   * @returns
+   *   A promise that will be resolved when the Chat is successfully removed.
+   */
   public remove(chatId: string): Promise<void> {
     Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
@@ -234,6 +283,16 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Joins a [[Chat]] with the specified id.  The [[Chat]] must already exist.
+   * The type of Chat returned will vary depdning on what type of Chat the
+   * id refers to.
+   *
+   * @param chatId
+   *   The id of an existing [[Chat]] to join.
+   * @returns
+   *   A Promise resolved with the successfully joined [[Chat]].
+   */
   public join(chatId: string): Promise<Chat> {
     Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
@@ -247,6 +306,15 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Leaves the specified [[Chat]]. The id must refer to an existing chat
+   * that the user is presently joined to.
+   *
+   * @param chatId
+   *   The id of the Chat to leave.
+   * @returns
+   *   A Promise that will be resolved when the Chat is successfully left.
+   */
   public leave(chatId: string): Promise<void> {
     Validation.assertNonEmptyString(chatId, "chatId");
     return this._connection.request({
@@ -258,9 +326,32 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
-  // Methods that apply to Direct  Chats.
+  //
+  // Methods that apply to Direct Chats.
+  //
+
+  /**
+   * Gets a [[DirectChat]] for the communication between the local user and
+   * another specified user.
+   *
+   * @param user
+   *   The other user to get the DirectChat for.
+   * @returns
+   *   A Promise resolved with the specified DirectChat.
+   */
   public direct(user: string | DomainUserId): Promise<DirectChat>;
+
+  /**
+   * Gets a [[DirectChat]] for the communication between the local user and
+   * a set of users.
+   *
+   * @param users
+   *   The other users to get the DirectChat for.
+   * @returns
+   *   A Promise resolved with the specified DirectChat.
+   */
   public direct(users: Array<string | DomainUserId>): Promise<DirectChat>;
+
   public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChat> {
     if (typeof users === "string" || users instanceof DomainUserId) {
       users = [users];
@@ -286,6 +377,11 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Get the users permissions for the specified chat.
+   *
+   * @param chatId
+   */
   public permissions(chatId: string): ChatPermissionManager {
     return new ChatPermissionManager(chatId, this._connection);
   }

@@ -4,6 +4,12 @@ import {Observable} from "rxjs";
 import {IChatEvent} from "./events/";
 import {IdentityCache} from "../identity/IdentityCache";
 
+/**
+ * A [[DirectChat]] represents a Chat construct that is defined by a specific
+ * set of users. The communication for a given DirectChat will always be
+ * between the specified set of users.  This can not change for the life of
+ * the DirectChat.
+ */
 export class DirectChat extends Chat {
 
   /**

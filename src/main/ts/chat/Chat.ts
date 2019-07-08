@@ -1,4 +1,4 @@
-import {ConvergenceEventEmitter} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter} from "../util/";
 import {
   ChatNameChanged,
   IChatEvent,
@@ -22,6 +22,8 @@ import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUser} from "../identity";
 import {ChatMembership} from "./MembershipChat";
+import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
+import {Immutable} from "../util/Immutable";
 
 export interface ChatInfo {
   readonly chatType: ChatType;
@@ -58,18 +60,23 @@ const Events: ChatEvents = {
 };
 Object.freeze(Events);
 
+/**
+ * The [[Chat]] class is the base class of all Chat types in Convergence. It
+ * provides several methods and behaviors that are common to all Chat
+ * subclasses, such as the ability to send messages, set a name and topic, etc.
+ */
 export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   public static readonly Events: ChatEvents = Events;
 
   /**
    * @internal
    */
-  protected _info: ChatInfo;
+  protected readonly _connection: ConvergenceConnection;
 
   /**
    * @internal
    */
-  protected _connection: ConvergenceConnection;
+  protected _info: ChatInfo;
 
   /**
    * @internal
@@ -104,19 +111,45 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * @returns
+   *   The [[ConvergenceSession]] this [[Chat]] is associated with.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
+  /**
+   * @returns
+   *   Information which describes the Chat. Subclasses may provide a more
+   *   specific subclass of ChatInfo.
+   */
   public info(): ChatInfo {
     return {...this._info};
   }
 
+  /**
+   * Determines if the Chat is Joined. Chat's must be joined to perform many
+   * functions, such as sending messages.
+   *
+   * @returns
+   *   True if the chat is joined, false otherwise.
+   */
   public isJoined(): boolean {
     return this._joined;
   }
 
+  /**
+   * Publishes a chat message to this Chat.
+   *
+   * @param message
+   *   The message to send.
+   * @returns
+   *   A promise acknowledging that the message has been received by the
+   *   server.
+   */
   public send(message: string): Promise<void> {
+    this._assertOnline();
     this._assertJoined();
     return this._connection.request({
       publishChatMessageRequest: {
@@ -128,7 +161,17 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Sets the short descriptive name for this chat.
+   *
+   * @param name
+   *   The name to set.
+   *
+   * @returns
+   *   A promise acknowledging that the name has been successfully set.
+   */
   public setName(name: string): Promise<void> {
+    this._assertOnline();
     this._assertJoined();
     return this._connection.request({
       setChatNameRequest: {
@@ -140,7 +183,17 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Sets the the current topic being discussed in the chat.
+   *
+   * @param topic
+   *   The topic to set.
+   *
+   * @returns
+   *   A promise acknowledging that the topic has been successfully set.
+   */
   public setTopic(topic: string): Promise<void> {
+    this._assertOnline();
     this._assertJoined();
     return this._connection.request({
       setChatTopicRequest: {
@@ -152,7 +205,19 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Marks the specified event number as having been seen by the local user.
+   * It is assumed that all events prior or equal to this event have been
+   * seen by the user.
+   *
+   * @param eventNumber
+   *   The event number to mark as set.
+   *
+   * @returns
+   *   A promise acknowledging that seen events have been marked successfully.
+   */
   public markSeen(eventNumber: number): Promise<void> {
+    this._assertOnline();
     this._assertJoined();
     return this._connection.request({
       markChatEventsSeenRequest: {
@@ -164,7 +229,20 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     });
   }
 
+  /**
+   * Get the history of events for this [[Chat]]. Events consist of messages,
+   * users joining / leaving, and a variety of other events depending on the chat
+   * type.
+   *
+   * @param options
+   *   Options that define the events the user would like to fetch.
+   *
+   * @returns
+   *   A promise that will be resolved with an array of Chat events that match
+   *   the specified search options.
+   */
   public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
+    this._assertOnline();
     this._assertJoined();
     return this._connection.request({
       getChatHistoryRequest: {
@@ -187,7 +265,19 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    */
   protected _assertJoined(): void {
     if (!this.isJoined()) {
-      throw new Error(`Chat channel not joined: ${this._info.chatId}`);
+      const message = `Chat channel not joined: ${this._info.chatId}`;
+      throw new ConvergenceError(message, ConvergenceErrorCodes.CHAT_NOT_JOINED);
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  protected _assertOnline(): void {
+    if (!this._connection.isOnline()) {
+      const message = `Can not perform the request action while offline`;
+      throw new ConvergenceError(message, ConvergenceErrorCodes.OFFLINE);
     }
   }
 
@@ -225,7 +315,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       this._info = {...this._info, topic: event.topic};
     }
 
-    Object.freeze(this._info);
+    Immutable.make(this._info);
   }
 }
 
