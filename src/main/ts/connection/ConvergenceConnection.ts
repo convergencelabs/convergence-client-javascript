@@ -94,6 +94,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionState = ConnectionState.DISCONNECTED;
 
     this._session = new ConvergenceSession(domain, this, null, null, null);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", this._onWindowOnline);
+    }
   }
 
   public url(): string {
@@ -161,6 +165,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
         this._handleInterrupted();
         deferred.reject(err);
       });
+
+    if (typeof window !== "undefined") {
+      window.removeEventListener("online", this._onWindowOnline);
+    }
 
     return deferred.promise();
   }
@@ -319,6 +327,15 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             new ConvergenceError("Authentication failed", ConvergenceErrorCodes.AUTHENTICATION_FAILED));
         }
       });
+  }
+
+  private _onWindowOnline = (e: Event) => {
+    this._logger.debug(() => `Browser connectivity changed, restarting connection schedule.`);
+
+    if (this._connectionState === ConnectionState.CONNECTING) {
+      this._connectionAttempts = 0;
+      this._attemptConnection();
+    }
   }
 
   private _attemptConnection(): void {

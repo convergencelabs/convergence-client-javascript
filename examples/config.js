@@ -1,1 +1,1 @@
-const DOMAIN_URL = "http://localhost:8080/convergenced/default";
+const DOMAIN_URL = "http://localhost:8080/convergence/default";

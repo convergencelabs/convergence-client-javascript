@@ -485,7 +485,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _setOnline(): void {
-    this._activityService._setOnline();
+    if (this._activityService !== undefined) {
+      this._activityService._setOnline();
+    }
   }
 
   /**
@@ -494,7 +496,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _setOffline(): void {
-    this._activityService._setOffline();
+    if (this._activityService !== undefined) {
+      this._activityService._setOffline();
+    }
   }
 }
 
