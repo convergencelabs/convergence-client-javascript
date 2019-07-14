@@ -38,7 +38,11 @@ export class ActivityStateClearedEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly local: boolean) {
+    public readonly local: boolean,
+    /**
+     * The old state values prior to being cleared.
+     */
+    public readonly oldValues: Map<string, any>) {
     Object.freeze(this);
   }
 }

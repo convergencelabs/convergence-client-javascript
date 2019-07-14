@@ -5,7 +5,8 @@ import {
   ActivitySessionLeftEvent,
   ActivityStateSetEvent,
   ActivityStateClearedEvent,
-  ActivityStateRemovedEvent
+  ActivityStateRemovedEvent,
+  ActivityStateDeltaEvent
 } from "./events";
 import {StringMap, StringMapLike, ConvergenceEventEmitter, Logging, Logger} from "../util/";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
@@ -88,6 +89,17 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      * @event [StateRemovedEvent]{@link ActivityStateRemovedEvent}
      */
     STATE_REMOVED: ActivityStateRemovedEvent.EVENT_NAME,
+
+    /**
+     * Fired when a remote session makes any changes to state within Activity. The
+     * resulting event will be an instance of the
+     * {@link ActivityStateDeltaEvent} class. This is a batch event whereas
+     * ActivityStateClearedEvent and ActivityStateSetEvent are fired for
+     * individual properties.
+     *
+     * @event [StateRemovedEvent]{@link ActivityStateRemovedEvent}
+     */
+    STATE_DELTA: ActivityStateRemovedEvent.EVENT_NAME,
 
     /**
      * Fired when a the activity is left by the local session.
@@ -290,15 +302,33 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       if (state.size > 0) {
         this._sendStateUpdate(state, false, []);
 
+        const oldValues = new Map();
         const newState = this.state();
         state.forEach((value: string, key: any) => {
+          oldValues.set(key, newState.get(key));
           newState.set(key, value);
         });
 
         this._mutateLocalParticipant((local) => local.clone({state: newState}));
         const session = this._connection.session();
-        const event = new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, state);
-        this._emitEvent(event);
+
+        const deltaEvent = new ActivityStateDeltaEvent(
+          this,
+          session.user(),
+          session.sessionId(),
+          true,
+          newState,
+          false,
+          [],
+          oldValues);
+        this._emitEvent(deltaEvent);
+
+        newState.forEach((v, k) => {
+          const oldValue = oldValues.get(k);
+          const event =
+            new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, k, v, oldValue);
+          this._emitEvent(event);
+        });
       }
     }
   }
@@ -337,17 +367,33 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         this._sendStateUpdate(null, false, keys as string[]);
 
         const newState = this.state();
-        keys.forEach(key => newState.delete(key));
+        const oldValues = new Map();
+        keys.forEach(key => {
+          oldValues.set(key, newState.get(key));
+          newState.delete(key);
+        });
 
         this._mutateLocalParticipant((local) => local.clone({state: newState}));
 
-        this._emitEvent(new ActivityStateRemovedEvent(
+        const session = this._connection.session();
+
+        const deltaEvent = new ActivityStateDeltaEvent(
           this,
-          this._connection.session().user(),
-          this._connection.session().sessionId(),
+          session.user(),
+          session.sessionId(),
           true,
-          keys
-        ));
+          new Map(),
+          false,
+          keys,
+          oldValues);
+        this._emitEvent(deltaEvent);
+
+        keys.forEach(key => {
+          const oldValue = oldValues.get(key);
+          const event =
+            new ActivityStateRemovedEvent(this, session.user(), session.sessionId(), true, key, oldValue);
+          this._emitEvent(event);
+        });
       }
     }
   }
@@ -360,11 +406,24 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       if (this._localParticipant.state.size > 0) {
         this._sendStateUpdate(new Map(), true, null);
 
+        const oldValues = this.state();
         this._mutateLocalParticipant((local) => local.clone({state: new Map()}));
 
         const session = this._connection.session();
-        const event = new ActivityStateClearedEvent(this, session.user(), session.sessionId(), true);
-        this._emitEvent(event);
+
+        const deltaEvent = new ActivityStateDeltaEvent(
+          this,
+          session.user(),
+          session.sessionId(),
+          true,
+          new Map(),
+          true,
+          [],
+          oldValues);
+        this._emitEvent(deltaEvent);
+
+        const clearedEvent = new ActivityStateClearedEvent(this, session.user(), session.sessionId(), true, oldValues);
+        this._emitEvent(clearedEvent);
       }
     }
   }
@@ -482,8 +541,10 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     const participant: ActivityParticipant =
       new ActivityParticipant(this, user, joined.sessionId, false, StringMap.objectToMap(state));
-    this._emitParticipantJoined(participant);
+
     this._mutateParticipants((participants) => participants.set(participant.sessionId, participant));
+
+    this._emitParticipantJoined(participant);
   }
 
   /**
@@ -551,7 +612,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  private _handleStateSet(sessionId: string, stateSet: Map<string, any>): void {
+  private _handleStateSet(sessionId: string, stateSet: Map<string, any>, quiet?: boolean): void {
     const user = this._identityCache.getUserForSession(sessionId);
 
     const mapped = new Map<string, any>();
@@ -560,15 +621,26 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       mapped.set(key, value);
     });
 
+    const oldValues = new Map();
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>(existing.state);
-      mapped.forEach((value: any, key: string) => state.set(key, value));
+      mapped.forEach((value: any, key: string) => {
+        oldValues.set(key, state.get(key));
+        state.set(key, value);
+      });
       participants.set(sessionId, existing.clone({state}));
     });
 
-    const event = new ActivityStateSetEvent(this, user, sessionId, false, mapped);
-    this._emitEvent(event);
+    const deltaEvent =
+      new ActivityStateDeltaEvent(this, user, sessionId, true, mapped, false, [], oldValues);
+    this._emitEvent(deltaEvent);
+
+    mapped.forEach((v, k) => {
+      const oldValue = oldValues.get(k);
+      const event = new ActivityStateSetEvent(this, user, sessionId, false, k, v, oldValue);
+      this._emitEvent(event);
+    });
   }
 
   /**
@@ -576,28 +648,43 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private _handleStateReplaced(sessionId: string, state: Map<string, any>): void {
-    const totalState = new Map<string, any>();
+    const user = this._identityCache.getUserForSession(sessionId);
+
+    const newState = new Map<string, any>();
     Object.keys(state).forEach(key => {
       const value = protoValueToJson(state[key]);
-      totalState.set(key, value);
+      newState.set(key, value);
     });
 
-    const previousState = this._participants.getValue().get(sessionId).state;
+    const oldValues = this._participants.getValue().get(sessionId).state;
 
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
-      participants.set(sessionId, existing.clone({state: totalState}));
+      participants.set(sessionId, existing.clone({state: newState}));
     });
 
     const removed: string[] = [];
-    previousState.forEach((value, key) => {
-      if (!totalState.has(key)) {
+    oldValues.forEach((value, key) => {
+      if (!newState.has(key)) {
         removed.push(key);
       }
     });
 
-    this._handleStateRemoved(sessionId, removed);
-    this._handleStateSet(sessionId, totalState);
+    const deltaEvent =
+      new ActivityStateDeltaEvent(this, user, sessionId, true, newState, false, removed, oldValues);
+    this._emitEvent(deltaEvent);
+
+    removed.forEach((key) => {
+      const oldValue = oldValues.get(key);
+      const event = new ActivityStateRemovedEvent(this, user, sessionId, false, key, oldValue);
+      this._emitEvent(event);
+    });
+
+    newState.forEach((v, k) => {
+      const oldValue = oldValues.get(k);
+      const event = new ActivityStateSetEvent(this, user, sessionId, false, k, v, oldValue);
+      this._emitEvent(event);
+    });
   }
 
   /**
@@ -613,7 +700,13 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       participants.set(sessionId, existing.clone({state}));
     });
 
-    const event = new ActivityStateClearedEvent(this, user, sessionId, false);
+    const oldValues = this._participants.getValue().get(sessionId).state;
+
+    const deltaEvent =
+      new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), true, [], oldValues);
+    this._emitEvent(deltaEvent);
+
+    const event = new ActivityStateClearedEvent(this, user, sessionId, false, oldValues);
     this._emitEvent(event);
   }
 
@@ -624,15 +717,26 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   private _handleStateRemoved(sessionId: string, keys: string[]): void {
     const user = this._identityCache.getUserForSession(sessionId);
 
+    const oldValues = new Map();
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>(existing.state);
-      keys.forEach((key: string) => state.delete(key));
+      keys.forEach((key: string) => {
+        oldValues.set(key, state.get(key));
+        state.delete(key);
+      });
       participants.set(sessionId, existing.clone({state}));
     });
 
-    const event = new ActivityStateRemovedEvent(this, user, sessionId, false, keys);
-    this._emitEvent(event);
+    const deltaEvent =
+      new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), false, keys, oldValues);
+    this._emitEvent(deltaEvent);
+
+    keys.forEach((key) => {
+      const oldValue = oldValues.get(key);
+      const event = new ActivityStateRemovedEvent(this, user, sessionId, false, key, oldValue);
+      this._emitEvent(event);
+    });
   }
 
   /**

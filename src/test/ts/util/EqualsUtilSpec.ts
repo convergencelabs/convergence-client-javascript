@@ -1,9 +1,5 @@
 import {EqualsUtil} from "../../../main/ts/util/EqualsUtil";
-
-import * as chai from "chai";
-import ExpectStatic = Chai.ExpectStatic;
-
-const expect: ExpectStatic = chai.expect;
+import {expect} from "chai";
 
 describe("EqualUtil", () => {
 
@@ -66,7 +62,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: <any> null,
+      d: null,
       e: [1, "2", true, null]
     };
 
@@ -76,7 +72,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: <any> null,
+      d: null,
       e: [1, "2", true, null]
     };
 
@@ -90,7 +86,7 @@ describe("EqualUtil", () => {
       c: {
         x: 3
       },
-      d: <any> null,
+      d: null,
       e: [1, "2", true, null]
     };
 
@@ -100,7 +96,7 @@ describe("EqualUtil", () => {
       c: {
         x: 4
       },
-      d: <any> null,
+      d: null,
       e: [1, "2", true, null]
     };
 

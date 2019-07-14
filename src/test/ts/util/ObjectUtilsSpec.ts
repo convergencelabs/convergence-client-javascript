@@ -1,8 +1,5 @@
-import * as chai from "chai";
-import ExpectStatic = Chai.ExpectStatic;
 import {deepClone} from "../../../main/ts/util/ObjectUtils";
-
-const expect: ExpectStatic = chai.expect;
+import {expect} from "chai";
 
 describe("ObjectUtils.deepClone", () => {
 

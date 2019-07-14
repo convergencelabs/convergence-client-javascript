@@ -7,7 +7,11 @@ nodePod { label ->
         sh 'npm install'
       }
 
-      stage('Compile') {
+      stage('Test') {
+        sh 'npm run test'
+      }
+
+      stage('Build') {
         sh 'npm run dist'
       }
 

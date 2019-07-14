@@ -15,8 +15,7 @@ import {
   StringInsertEvent,
   StringRemoveEvent
 } from "../../../main/ts/model/events/";
-import {DomainUser} from "../../../main/ts/identity";
-import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {DomainUser, DomainUserType} from "../../../main/ts/identity";
 import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
 import {ConvergenceSession} from "../../../main/ts";
 

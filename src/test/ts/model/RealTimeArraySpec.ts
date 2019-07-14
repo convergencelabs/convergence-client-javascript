@@ -26,8 +26,7 @@ import {
 } from "../../../main/ts/model/rt/";
 import {StringNode} from "../../../main/ts/model/internal/StringNode";
 import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
-import {ConvergenceSession, DomainUser} from "../../../main/ts";
-import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {ConvergenceSession, DomainUser, DomainUserType} from "../../../main/ts";
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
 

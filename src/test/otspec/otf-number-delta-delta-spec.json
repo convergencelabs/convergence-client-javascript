@@ -1,29 +1,29 @@
 {
-  "serverOpType": "NumberAdd",
-  "clientOpType": "NumberAdd",
+  "serverOpType": "NumberDelta",
+  "clientOpType": "NumberDelta",
   "cases": [
     {
       "id": "N-AA-1",
       "input": {
         "serverOp": {
-          "type": "NumberAdd",
+          "type": "NumberDelta",
           "noOp": false,
           "value": 1
         },
         "clientOp": {
-          "type": "NumberAdd",
+          "type": "NumberDelta",
           "noOp": false,
           "value": 2
         }
       },
       "output": {
         "serverOp": {
-          "type": "NumberAdd",
+          "type": "NumberDelta",
           "noOp": false,
           "value": 1
         },
         "clientOp": {
-          "type": "NumberAdd",
+          "type": "NumberDelta",
           "noOp": false,
           "value": 2
         }

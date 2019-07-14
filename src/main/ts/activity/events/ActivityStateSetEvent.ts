@@ -40,9 +40,17 @@ export class ActivityStateSetEvent implements IActivityEvent {
      */
     public readonly local: boolean,
     /**
+     * The key of the state was set.
+     */
+    public readonly key: string,
+    /**
      * The state that was modified.
      */
-    public readonly values: Map<string, any>) {
+    public readonly value: any,
+    /**
+     * The state that was modified.
+     */
+    public readonly oldValue: any) {
     Object.freeze(this);
   }
 }

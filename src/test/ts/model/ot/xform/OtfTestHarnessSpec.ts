@@ -19,12 +19,9 @@ import {OperationPair} from "../../../../../main/ts/model/ot/xform/OperationPair
 import {OperationTransformationFunction} from "../../../../../main/ts/model/ot/xform/OperationTransformationFunction";
 
 import ExpectStatic = Chai.ExpectStatic;
-import * as chai from "chai";
+import {expect, assert} from "chai";
 import * as fs from "fs";
 import {DateSetOperation} from "../../../../../main/ts/model/ot/ops/DateSetOperation";
-
-const expect: ExpectStatic = chai.expect;
-const fail: Function = chai.assert.fail;
 
 const baseDir: string = "src/test/otspec";
 
@@ -43,7 +40,7 @@ fs.readdirSync(baseDir).forEach((file: string) => {
         if (testCase.error) {
           try {
             xformer.getOperationTransformationFunction(serverInputOp, clientInputOp);
-            fail("The test case was expected to result in an error, but no excpetion was thrown");
+            assert.fail("The test case was expected to result in an error, but no excpetion was thrown");
           } catch (e) {
             // expected
           }
