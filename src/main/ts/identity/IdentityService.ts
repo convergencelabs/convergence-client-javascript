@@ -67,7 +67,7 @@ export class IdentityService {
 
     return this._connection
       .request(message)
-      .then(mapUserResultList;
+      .then(mapUserResultList);
   }
 
   public search(query: UserQuery): Promise<DomainUser[]> {
