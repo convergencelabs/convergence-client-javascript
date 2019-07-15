@@ -142,7 +142,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * @internal
    */
-  private _eventSubscription: Subscription;
+  private _connectionMessageSubscription: Subscription;
 
   /**
    * @internal
@@ -171,7 +171,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._logger = Logging.logger("activities.activity");
     this._joinPromise = null;
 
-    this._eventSubscription = this._connection
+    this._connectionMessageSubscription = this._connection
       .messages()
       .subscribe((event: MessageEvent) => {
         const message = event.message;
@@ -225,7 +225,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       const sessionId = this._connection.session().sessionId();
       const event = new ActivityLeftEvent(this, user, sessionId, true);
       this._emitEvent(event);
-      this._eventSubscription.unsubscribe();
+      this._connectionMessageSubscription.unsubscribe();
       this._completeEventStream();
     }
   }
@@ -317,13 +317,13 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
           session.user(),
           session.sessionId(),
           true,
-          newState,
+          state,
           false,
           [],
           oldValues);
         this._emitEvent(deltaEvent);
 
-        newState.forEach((v, k) => {
+        state.forEach((v, k) => {
           const oldValue = oldValues.get(k);
           const event =
             new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, k, v, oldValue);
@@ -360,7 +360,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public removeState(keys: string | string[]): void {
     if (this.isJoined()) {
       if (TypeChecker.isString(keys)) {
-        keys = [keys as string];
+        keys = [keys];
       }
 
       if (keys.length > 0) {
@@ -612,7 +612,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  private _handleStateSet(sessionId: string, stateSet: Map<string, any>, quiet?: boolean): void {
+  private _handleStateSet(sessionId: string, stateSet: Map<string, any>): void {
     const user = this._identityCache.getUserForSession(sessionId);
 
     const mapped = new Map<string, any>();
@@ -694,13 +694,13 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   private _handleStateCleared(sessionId: string): void {
     const user = this._identityCache.getUserForSession(sessionId);
 
+    const oldValues = this._participants.getValue().get(sessionId).state;
+
     this._mutateParticipants((participants) => {
       const existing = participants.get(sessionId);
       const state = new Map<string, any>();
       participants.set(sessionId, existing.clone({state}));
     });
-
-    const oldValues = this._participants.getValue().get(sessionId).state;
 
     const deltaEvent =
       new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), true, [], oldValues);

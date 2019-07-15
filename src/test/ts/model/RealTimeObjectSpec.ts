@@ -8,8 +8,7 @@ import {RealTimeWrapperFactory} from "../../../main/ts/model/rt/RealTimeWrapperF
 import {Model} from "../../../main/ts/model/internal/Model";
 import {ObjectNode} from "../../../main/ts/model/internal/ObjectNode";
 import {ObjectSetValueEvent} from "../../../main/ts/model/events/";
-import {DomainUser} from "../../../main/ts/identity";
-import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {DomainUser, DomainUserType} from "../../../main/ts/identity";
 import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
 import {ConvergenceSession} from "../../../main/ts";
 
@@ -33,10 +32,10 @@ describe("RealTimeObject", () => {
     return gen.id();
   });
 
-  const identityCache: IdentityCache = createStubInstance(IdentityCache);
-  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
-  const model: Model = createStubInstance(Model);
-  const rtModel: RealTimeModel = createStubInstance(RealTimeModel);
+  const model = createStubInstance(Model) as any as Model;
+  const identityCache = createStubInstance(IdentityCache) as any as IdentityCache;
+  const session = createStubInstance(ConvergenceSession) as any as ConvergenceSession;
+  const rtModel = createStubInstance(RealTimeModel) as any as RealTimeModel;
   rtModel.emitLocalEvents = () => {
     return false;
   };

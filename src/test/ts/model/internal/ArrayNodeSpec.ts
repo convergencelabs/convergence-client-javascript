@@ -8,20 +8,14 @@ import {Model} from "../../../../main/ts/model/internal/Model";
 import {ConvergenceSession} from "../../../../main/ts";
 
 describe("ArrayNode", () => {
-
-  const sessionId: string = "mySession";
-  const username: string = "myUser";
-  const version: number = 1;
-  const timestamp: number = 100;
-
   const gen: TestIdGenerator = new TestIdGenerator();
 
   const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
     return gen.id();
   });
 
-  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
-  const model: Model = createStubInstance(Model);
+  const session = createStubInstance(ConvergenceSession) as any as ConvergenceSession;
+  const model = createStubInstance(Model) as any as Model;
   const primitiveValue: any[] = ["A", "B", "C"];
 
   const arrayValue: ArrayValue = dataValueFactory.createDataValue(primitiveValue) as ArrayValue;
@@ -130,7 +124,6 @@ describe("ArrayNode", () => {
   });
 
   function createArrayNode(value: ArrayValue): ArrayNode {
-    const arrayNode: ArrayNode = new ArrayNode(arrayValue, () => [], model, session, dataValueFactory);
-    return arrayNode;
+    return new ArrayNode(value, () => [], model, session, dataValueFactory);
   }
 });
