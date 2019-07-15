@@ -5,7 +5,7 @@ import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
+import {domainUserIdToProto, getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";
 import {DomainUserId} from "./DomainUserId";
 import {Validation} from "../util";
@@ -14,6 +14,16 @@ export type UserField = "username" | "email" | "firstName" | "lastName" | "displ
 const validSearchFields: UserField[] = ["username", "email", "firstName", "lastName", "displayName"];
 
 export class IdentityService {
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private static _mapUserResultList(response: IConvergenceMessage): DomainUser[] {
+    const {userListResponse} = response;
+    const userData = getOrDefaultArray(userListResponse.userData);
+    return userData.map(toDomainUser);
+  }
 
   /**
    * @internal
@@ -67,10 +77,7 @@ export class IdentityService {
 
     return this._connection
       .request(message)
-      .then((response: IConvergenceMessage) => {
-        const {userListResponse} = response;
-        return userListResponse.userData.map(d => toDomainUser(d));
-      });
+      .then(IdentityService._mapUserResultList);
   }
 
   public search(query: UserQuery): Promise<DomainUser[]> {
@@ -97,10 +104,7 @@ export class IdentityService {
         }
       };
 
-      return this._connection.request(message).then((response: IConvergenceMessage) => {
-        const {userListResponse} = response;
-        return userListResponse.userData.map(d => toDomainUser(d));
-      });
+      return this._connection.request(message).then(IdentityService._mapUserResultList);
     }
   }
 
