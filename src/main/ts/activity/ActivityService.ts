@@ -93,7 +93,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
         .events()
         .pipe(
           filter((evt: IActivityEvent) => evt.name === ActivityLeftEvent.EVENT_NAME),
-          tap((evt: IActivityEvent) => this._onActivityLeave(id))
+          tap(() => this._onActivityLeave(id))
         );
 
       activity._join(options);
@@ -131,24 +131,6 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public isJoined(id: string): boolean {
     return this._joinedActivities.has(id);
-  }
-
-  /**
-   * @hidden
-   * @private
-   */
-  public _setOnline(): void {
-    this._logger.debug("Activity service online");
-    this._joinedActivities.forEach((activity) => activity._setOnline());
-  }
-
-  /**
-   * @hidden
-   * @private
-   */
-  public _setOffline(): void {
-    this._logger.debug("Activity service offline");
-    this._joinedActivities.forEach((activity) => activity._setOffline());
   }
 
   /**

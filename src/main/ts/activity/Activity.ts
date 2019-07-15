@@ -171,6 +171,10 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._logger = Logging.logger("activities.activity");
     this._joinPromise = null;
 
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+
     this._connectionMessageSubscription = this._connection
       .messages()
       .subscribe((event: MessageEvent) => {
@@ -504,7 +508,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @private
    */
-  public _setOnline(): void {
+  private _setOnline = () => {
     this._logger.debug(() => `Activity '${this._id}' is online`);
     const initialState = this._localParticipant.state;
     const deferred = new Deferred<void>();
@@ -515,7 +519,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @private
    */
-  public _setOffline(): void {
+  private _setOffline = () => {
     this._logger.debug(() => `Activity '${this._id}' is offline`);
 
     // We will remove all participants in a single shot, but
