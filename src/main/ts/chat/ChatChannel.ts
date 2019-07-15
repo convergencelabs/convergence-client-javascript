@@ -40,8 +40,6 @@ export class ChatChannel extends MembershipChat {
         chatId: this._info.chatId,
         userToAdd: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 }

@@ -42,9 +42,7 @@ export abstract class MembershipChat extends Chat {
       leaveChatRequest: {
         chatId: this._info.chatId
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**
@@ -64,9 +62,7 @@ export abstract class MembershipChat extends Chat {
         chatId: this._info.chatId,
         userToRemove: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 }
 
