@@ -17,16 +17,6 @@ export class IdentityService {
 
   /**
    * @internal
-   * @hidden
-   */
-  private static _mapUserResultList(response: IConvergenceMessage): DomainUser[] {
-    const {userListResponse} = response;
-    const userData = getOrDefaultArray(userListResponse.userData);
-    return userData.map(toDomainUser);
-  }
-
-  /**
-   * @internal
    */
   private _connection: ConvergenceConnection;
 
@@ -77,7 +67,7 @@ export class IdentityService {
 
     return this._connection
       .request(message)
-      .then(IdentityService._mapUserResultList);
+      .then(mapUserResultList;
   }
 
   public search(query: UserQuery): Promise<DomainUser[]> {
@@ -104,7 +94,7 @@ export class IdentityService {
         }
       };
 
-      return this._connection.request(message).then(IdentityService._mapUserResultList);
+      return this._connection.request(message).then(mapUserResultList);
     }
   }
 
@@ -168,4 +158,10 @@ export class IdentityService {
     });
     return result;
   }
+}
+
+function mapUserResultList(response: IConvergenceMessage): DomainUser[] {
+  const {userListResponse} = response;
+  const userData = getOrDefaultArray(userListResponse.userData);
+  return userData.map(toDomainUser);
 }
