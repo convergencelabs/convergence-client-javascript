@@ -14,9 +14,21 @@ import {HistoricalContainerElement} from "./HistoricalContainerElement";
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
 
+/**
+ * This represents a particular node in a [[HistoricalModel]]'s contents.  If you think
+ * of the contents of a model as a JSON tree, this could be the root object, an array,
+ * or any other element.
+ *
+ * Since [[HistoricalElement]]s represent a snapshot of a [[RealTimeModel]] in a given
+ * moment in time, they are read-only.
+ */
 export abstract class HistoricalElement<T>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
 
+  /**
+   * An interface enumerating the different events that could be fired on this
+   * [[HistoricalElement]].
+   */
   public static readonly Events: HistoricalElementEvents = ObservableElementEventConstants;
 
   /**
@@ -59,18 +71,54 @@ export abstract class HistoricalElement<T>
     });
   }
 
+  /**
+   * Each node within a [[RealTimeModel]] has a system-generated ID that is unique
+   * within this model's contents.
+   */
   public id(): string {
     return this._delegate.id();
   }
 
+  /**
+   * This element's type.  See [[ModelElementType]] for an enumeration of types.
+   */
   public type(): string {
     return this._delegate.type();
   }
 
+  /**
+   * The [[Path]] representing this element's location in the containing model's data.
+   */
   public path(): Path {
     return this._delegate.path();
   }
 
+  /**
+   * This returns the [[PathElement]] representing this element's location relevant
+   * to its parent. For example, given a model with contents
+   *
+   * ```json
+   * {
+   *   obj: {
+   *     with: 1,
+   *     stuff: ['a', 'string']
+   *   }
+   * }
+   * ````
+   *
+   * ```typescript
+   * let rtNumber = rtModel.elementAt(['obj', 'with']);
+   * rtNumber.value() // 1
+   * rtNumber.relativePath() // 'with'
+   *
+   * let rtString = rtModel.elementAt(['obj', 'stuff', 0]);
+   * rtString.value() // 'a'
+   * rtString.relativePath() // 0
+   * ```
+   *
+   * @returns a PathElement representing this node's location relative to its parent,
+   * or null if it has no parent.
+   */
   public relativePath(): PathElement {
     const parentPath = this._delegate.path().slice(0);
     if (parentPath.length > 0) {
