@@ -1,6 +1,6 @@
 /**
- * PagedData represents a set of data from Convergence that is
- * paged using and offset. It contains the current window of data,
+ * PagedData represents a read-only set of data from Convergence that is
+ * paged using an offset. It contains the current window of data,
  * the offset at which the data starts, and the total results.
  */
 export class PagedData<T> {

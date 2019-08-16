@@ -3,8 +3,10 @@ import {ConvergenceDomain} from "./ConvergenceDomain";
 import {DomainUser} from "./identity";
 
 /**
- * The [[ConvergenceSession]] represents connection state information for a
- * particular connection to a specific domain.
+ * This represents connection state information for a
+ * particular connection to a specific domain.  It is tied to the client device
+ * rather than the user, so a single user could potentially have multiple sessions
+ * open at a time.
  */
 export class ConvergenceSession {
 
@@ -76,7 +78,7 @@ export class ConvergenceSession {
   }
 
   /**
-   * @returns The username of the authenticated client or null if not authenticated
+   * @returns The user associated with the authenticated client or null if not authenticated
    */
   public user(): DomainUser {
     return this._user;

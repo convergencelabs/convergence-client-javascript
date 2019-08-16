@@ -1,8 +1,8 @@
 # Introduction
-This is the API documentation for the Convergence JavaScript client.  The main entrypoint is the [Convergence](classes/convergence.html) class which has several methods for connecting to the Convergence server. From there the [ConvergenceDomain](classes/convergencedomain.html) class will provide access to interact with the Convergence Domain and the various services it provides.
+This is the API Documentation for the Convergence JavaScript client.  The main entry point is the [[Convergence]] class which has several methods for connecting to the Convergence server. From there the [[ConvergenceDomain]] class will provide access to interact with the Convergence Domain and the various services it provides.
 
-# Getting Started
-The example below shows the basics for connecting to the Convergence Service.
+## Getting Started
+The example below shows a simple use case: Connecting to a [domain](https://docs.convergence.io/guide/domain/overview.html), opening a [[RealTimeModel]] from the domain's [[ModelService]], and finally writing out the contents of that model to the console.  
 
 ```Typescript
 import Convergence from "@convergence/convergence";
@@ -11,7 +11,7 @@ const url = "ws://localhost:8000/api/realtime/convergence/default";
 Convergence
   .connect(url, "username", "password")
   .then(domain => {
-    return domain.models.open("someModelId")
+    return domain.models.open("someModelId");
   })
   .then(model => {
     console.log(model.root().value());

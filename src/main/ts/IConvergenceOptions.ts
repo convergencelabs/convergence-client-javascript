@@ -33,6 +33,9 @@ export interface IConvergenceOptions {
    * Defines the class / constructor that should be used to create WebSocket
    * objects. This is useful when operating in NodeJS where a library like
    * ws or isomorphic-ws can be used to provide a client side WebSocket API.
+   *
+   * See the Node.js Usage section on [this page] for an example of these
+   * parameters in action.
    */
   webSocketFactory?: WebSocketFactory;
 
