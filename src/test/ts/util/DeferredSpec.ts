@@ -1,12 +1,9 @@
-import * as chai from "chai";
-import ExpectStatic = Chai.ExpectStatic;
+import {expect} from "chai";
 import {Deferred} from "../../../main/ts/util/Deferred";
-
-const expect: ExpectStatic = chai.expect;
 
 describe("DeferredSpec", () => {
 
-  it("calling resolve on the deferred must resolve the promise with the correct valeue", (done: Function) => {
+  it("calling resolve on the deferred must resolve the promise with the correct valeue", (done) => {
     const resolveVal: string = "resolve";
 
     const def: Deferred<string> = new Deferred<string>();
@@ -20,7 +17,7 @@ describe("DeferredSpec", () => {
     def.resolve(resolveVal);
   });
 
-  it("calling reject on the deferred must reject the promise with the correct error", (done: Function) => {
+  it("calling reject on the deferred must reject the promise with the correct error", (done) => {
     const rejectError: Error = new Error("Test Error");
 
     const def: Deferred<string> = new Deferred<string>();

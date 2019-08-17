@@ -3,6 +3,7 @@
  * @internal
  */
 import {type} from "os";
+import {TypeChecker} from "./TypeChecker";
 
 export class Validation {
   public static isSet(value: any): boolean {
@@ -69,14 +70,12 @@ export class Validation {
   }
 
   public static assertDate(value: Date, name?: string): void {
-    if ((value instanceof Date)) {
-      throw new Error(`${Validation.getValueName(name)} must be a Data but was: ${typeof value}`);
+    if (!TypeChecker.isDate(value)) {
+      throw new Error(`${Validation.getValueName(name)} must be a Date but was: ${(value as any).constructor.name}`);
     }
   }
 
   private static getValueName(name?: string, defaultValue?: string): string {
     return name || defaultValue || "value";
   }
-
-
 }

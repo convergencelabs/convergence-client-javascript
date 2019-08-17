@@ -7,15 +7,15 @@ export class TypeChecker {
     return Array.isArray(value);
   }
 
-  public static isBoolean(value): value is boolean {
+  public static isBoolean(value: any): value is boolean {
     return typeof value === "boolean";
   }
 
-  public static isDate(value): value is Date {
-    return value instanceof Date;
+  public static isDate(value: any): value is Date {
+    return value instanceof Date || value.constructor.name === "Date";
   }
 
-  public static isError(value): value is Error {
+  public static isError(value: any): value is Error {
     return value instanceof Error && typeof value.message !== "undefined";
   }
 
@@ -23,7 +23,7 @@ export class TypeChecker {
     return typeof value === "function";
   }
 
-  public static isNull(value): value is null {
+  public static isNull(value: any): value is null {
     return value === null;
   }
 
@@ -43,15 +43,15 @@ export class TypeChecker {
     return typeof value === "symbol";
   }
 
-  public static isRegExp(value): value is RegExp {
+  public static isRegExp(value: any): value is RegExp {
     return value && typeof value === "object" && value.constructor === RegExp;
   }
 
-  public static isUndefined(value): value is undefined {
+  public static isUndefined(value: any): value is undefined {
     return typeof value === "undefined";
   }
 
-  public static isSet(value): value is any {
+  public static isSet(value: any): value is any {
     return !TypeChecker.isNull(value) && !TypeChecker.isUndefined(value);
   }
 

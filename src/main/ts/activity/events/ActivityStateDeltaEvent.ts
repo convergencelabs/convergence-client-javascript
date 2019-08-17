@@ -3,20 +3,20 @@ import {IActivityEvent} from "./IActivityEvent";
 import {DomainUser} from "../../identity";
 
 /**
- * The ActivityStateRemovedEvent is fired when a remote session removes one or
+ * The ActivityStateSetEvent is fired when a remote session sets one or
  * elements from its state within the [[Activity]].
  */
-export class ActivityStateRemovedEvent implements IActivityEvent {
+export class ActivityStateDeltaEvent implements IActivityEvent {
 
   /**
    * The event name that all instances of this class will use.
    */
-  public static readonly EVENT_NAME: string = "state_removed";
+  public static readonly EVENT_NAME: string = "state_delta";
 
   /**
    * @inheritDoc
    */
-  public readonly name: string = ActivityStateRemovedEvent.EVENT_NAME;
+  public readonly name: string = ActivityStateDeltaEvent.EVENT_NAME;
 
   /**
    * @hidden
@@ -40,13 +40,21 @@ export class ActivityStateRemovedEvent implements IActivityEvent {
      */
     public readonly local: boolean,
     /**
-     * The key of the state that was removed.
-     */
-    public readonly key: string,
-    /**
      * The state that was modified.
      */
-    public readonly oldValue: any) {
+    public readonly values: Map<string, any>,
+    /**
+     * Indicates if the full state map was set.
+     */
+    public readonly complete: boolean,
+    /**
+     * The keys of state that was removed.
+     */
+    public readonly removed: string[],
+    /**
+     * The previous values of any state that was removed or set.
+     */
+    public readonly oldValues: Map<string, any>) {
     Object.freeze(this);
   }
 }

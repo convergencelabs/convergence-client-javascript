@@ -156,9 +156,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         message
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**
@@ -178,9 +176,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         name
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**
@@ -200,9 +196,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         topic
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**
@@ -224,9 +218,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         eventNumber
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**

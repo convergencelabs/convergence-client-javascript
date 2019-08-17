@@ -26,8 +26,7 @@ import {
 } from "../../../main/ts/model/rt/";
 import {StringNode} from "../../../main/ts/model/internal/StringNode";
 import {IdentityCache} from "../../../main/ts/identity/IdentityCache";
-import {ConvergenceSession, DomainUser} from "../../../main/ts";
-import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {ConvergenceSession, DomainUser, DomainUserType} from "../../../main/ts";
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
 
@@ -45,11 +44,10 @@ describe("RealTimeArray", () => {
     return gen.id();
   });
 
-  const model: Model = createStubInstance(Model);
-  const identityCache: IdentityCache = createStubInstance(IdentityCache);
-  const session: ConvergenceSession = createStubInstance(ConvergenceSession);
-
-  const rtModel: RealTimeModel = createStubInstance(RealTimeModel);
+  const model = createStubInstance(Model) as any as Model;
+  const identityCache = createStubInstance(IdentityCache) as any as IdentityCache;
+  const session = createStubInstance(ConvergenceSession) as any as ConvergenceSession;
+  const rtModel = createStubInstance(RealTimeModel) as any as RealTimeModel;
   rtModel.permissions = () => {
     return {
       read: true,

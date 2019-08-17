@@ -364,7 +364,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     return this._connection
       .connect()
       .then(() => promiseCallback())
-      .then((t) =>  {
+      .then((t) => {
         Validation.assertNonEmptyString(t, "token");
         return this._authenticateWithReconnectToken(t);
       });
@@ -445,16 +445,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
       (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
 
-    this._connection.on(ConvergenceConnection.Events.INTERRUPTED,
-      () => {
-        this._emitEvent(new InterruptedEvent(this));
-        this._setOffline();
-      });
-    this._connection.on(ConvergenceConnection.Events.DISCONNECTED,
-      () => {
-        this._emitEvent(new DisconnectedEvent(this));
-        this._setOffline();
-      });
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () => {
+      this._emitEvent(new InterruptedEvent(this));
+    });
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, () => {
+      this._emitEvent(new DisconnectedEvent(this));
+    });
 
     this._connection.on(ConvergenceConnection.Events.ERROR,
       (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
@@ -478,32 +474,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       this._activityService = new ActivityService(this._connection, this._identityCache);
       this._presenceService = new PresenceService(this._connection, initialPresence, this._identityCache);
       this._chatService = new ChatService(this._connection, this._identityCache);
-    }
-
-    if (this._connection.session().isAuthenticated()) {
-      this._setOnline();
-    }
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  private _setOnline(): void {
-    if (this._activityService !== undefined) {
-      this._activityService._setOnline();
-    }
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  private _setOffline(): void {
-    if (this._activityService !== undefined) {
-      this._activityService._setOffline();
     }
   }
 }

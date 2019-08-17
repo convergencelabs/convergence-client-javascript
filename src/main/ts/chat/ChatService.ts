@@ -278,9 +278,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       removeChatRequest: {
         chatId
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   /**
@@ -321,9 +319,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       leaveChatRequest: {
         chatId
       }
-    }).then(() => {
-      return;
-    });
+    }).then(() => undefined);
   }
 
   //

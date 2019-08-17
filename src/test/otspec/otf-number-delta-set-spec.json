@@ -1,31 +1,31 @@
 {
-  "serverOpType": "NumberSet",
-  "clientOpType": "NumberAdd",
+  "serverOpType": "NumberDelta",
+  "clientOpType": "NumberSet",
   "cases": [
     {
-      "id": "N-SA-1",
+      "id": "N-AS-1",
       "input": {
         "serverOp": {
+          "type": "NumberDelta",
+          "noOp": false,
+          "value": 1
+        },
+        "clientOp": {
           "type": "NumberSet",
           "noOp": false,
           "value": 2
-        },
-        "clientOp": {
-          "type": "NumberAdd",
-          "noOp": false,
-          "value": 1
         }
       },
       "output": {
         "serverOp": {
+          "type": "NumberDelta",
+          "noOp": true,
+          "value": 1
+        },
+        "clientOp": {
           "type": "NumberSet",
           "noOp": false,
           "value": 2
-        },
-        "clientOp": {
-          "type": "NumberAdd",
-          "noOp": true,
-          "value": 1
         }
       }
     }

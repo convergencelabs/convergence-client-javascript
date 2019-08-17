@@ -1,10 +1,14 @@
 import {Subject} from "rxjs";
-import {UserPresence} from "../../../main/ts/presence/";
+import {
+  PresenceStateClearedEvent,
+  PresenceStateRemovedEvent,
+  PresenceStateSetEvent,
+  UserPresence
+} from "../../../main/ts/presence/";
 import {UserPresenceManager} from "../../../main/ts/presence/UserPresenceManager";
 import {MessageEvent} from "../../../main/ts/connection/ConvergenceConnection";
 import {expect} from "chai";
-import {DomainUser} from "../../../main/ts/identity";
-import {DomainUserType} from "../../../main/ts/identity/DomainUserId";
+import {DomainUser, DomainUserType} from "../../../main/ts/identity";
 import {filter} from "rxjs/operators";
 import {IConvergenceEvent} from "../../../main/ts/util";
 
@@ -100,16 +104,16 @@ describe("UserPresenceManager", () => {
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
-    mgr.on("state_set", (e) => {
+    mgr.on("state_set", (e: PresenceStateSetEvent) => {
       firedEvent++;
       expect(e.name).to.equal("state_set");
-      expect(e.username).to.equal(initialPresence.user.username);
+      expect(e.user.userId.toGuid()).to.equal(initialPresence.user.userId.toGuid());
       expect(e.state.size).to.equal(1);
       expect(e.state.get("key")).to.equal("value");
     });
 
     let firedObserver: number = 0;
-    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_set")).subscribe((e) => {
+    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_set")).subscribe(() => {
       firedObserver++;
     });
 
@@ -129,14 +133,14 @@ describe("UserPresenceManager", () => {
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
-    mgr.on("state_cleared", (e) => {
+    mgr.on("state_cleared", (e: PresenceStateClearedEvent) => {
       expect(e.name).to.equal("state_cleared");
-      expect(e.username).to.equal(initialPresence.user.username);
+      expect(e.user.userId.toGuid()).to.equal(initialPresence.user.userId.toGuid());
       firedEvent++;
     });
 
     let firedObserver: number = 0;
-    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_cleared")).subscribe((e) => {
+    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_cleared")).subscribe(() => {
       firedObserver++;
     });
 
@@ -154,15 +158,15 @@ describe("UserPresenceManager", () => {
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), noOp);
 
     let firedEvent: number = 0;
-    mgr.on("state_removed", (e) => {
+    mgr.on("state_removed", (e: PresenceStateRemovedEvent) => {
       firedEvent++;
-      expect(e.username).to.equal(initialPresence.user.username);
+      expect(e.user.userId.toGuid()).to.equal(initialPresence.user.userId.toGuid());
       expect(e.name).to.equal("state_removed");
       expect(e.keys).to.deep.equal(["k1", "k2"]);
     });
 
     let firedObserver: number = 0;
-    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_removed")).subscribe((e) => {
+    mgr.events().pipe(filter((e: IConvergenceEvent) => e.name === "state_removed")).subscribe(() => {
       firedObserver++;
     });
 
@@ -197,7 +201,7 @@ describe("UserPresenceManager", () => {
     const initialPresence = new UserPresence(user, false, state);
     const mgr = new UserPresenceManager(initialPresence, testSubject.asObservable(), (u) => {
       called++;
-      expect(u).to.equal(initialPresence.user.username);
+      expect(u.toGuid()).to.equal(initialPresence.user.userId.toGuid());
     });
 
     const s1 = mgr.subscribe();
