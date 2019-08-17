@@ -80,6 +80,25 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   PERMISSIONS_CHANGED: ModelPermissionsChangedEvent.NAME
 };
 
+/**
+ * This is the core construct for dealing with distributed data in Convergence.
+ * It is essentially a distributed data model: Anybody in the same domain with permissions
+ * to this model can open it at the same time, be notified of remote changes, and modify
+ * the data within, which is itself synchronized in the same way between all participants.
+ * Any co-modification conflicts are resolved automatically and consistently
+ * for all connected users so that everybody sees the same thing.
+ *
+ * See [this page](https://docs.convergence.io/guide/models/overview.html) in the
+ * developer guide for a few of the interesting things you can do with a [[RealTimeModel]].
+ *
+ * Any data that can be represented with JSON can be stored in a [[RealTimeModel]].  This
+ * allows a huge range of applications to sync data instantly and seamlessly with Convergence.
+ *
+ * To work with the data within (reading and writing):
+ * * [[root]] to get the root object
+ * * [[elementAt]] to query for a particular node within the data
+ *
+ */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
   public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
@@ -274,20 +293,43 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._initializeReferences(references);
   }
 
+  /**
+   * Returns the permissions the current user has on this model.
+   */
   public permissions(): ModelPermissions {
     return this._permissions;
   }
 
+  /**
+   * Returns a permission manager that can be used to manage global or per-user
+   * permissions on this model. Requires the `manage` permission.
+   */
   public permissionsManager(): ModelPermissionManager {
     return new ModelPermissionManager(this._modelId, this._connection);
   }
 
+  /**
+   * The session associated with this opened model.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
-  // fixme inconsistent with isOpen()
+  /**
+   * Returns true if local changes to this model are being emiited.
+   *
+   * fixme inconsistent with isOpen()
+   */
   public emitLocalEvents(): boolean;
+
+  /**
+   * Toggles the `emitLocalEvents` setting.  If set to `true`, whenever any data
+   * within this model is mutated, the same events will be emitted as if the mutation
+   * happended remotely.  This is useful for handling change events in one place,
+   * switching on the [[IConvergenceModelValueEvent]].local field.
+   *
+   * @param emit true if local changes to this model should emit
+   */
   public emitLocalEvents(emit: boolean): void;
   public emitLocalEvents(emit?: boolean): any {
     if (arguments.length === 0) {

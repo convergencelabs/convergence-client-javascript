@@ -14,10 +14,23 @@ export interface ICreateModelOptions {
 
   /**
    * The initial contents of the model, either provided directly or as the result
-   * of a callback function.
+   * of a callback function.  This data should be easily serializable.
    */
   data?: ModelDataInitializer;
+
+  /**
+   * Set to true if the permissions set in this object should override those set
+   * in the parent collection.
+   */
   overrideCollectionWorldPermissions?: boolean;
+
+  /**
+   * Generic permissions for this model for all users.
+   */
   worldPermissions?: ModelPermissions;
-  userPermissions?: { [key: string]: ModelPermissions };
+
+  /**
+   * Per-user permissions can be set here, where the key is an existing user's username.
+   */
+  userPermissions?: { [username: string]: ModelPermissions };
 }
