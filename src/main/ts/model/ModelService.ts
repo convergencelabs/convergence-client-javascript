@@ -33,18 +33,13 @@ import {
   toOptional
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
-import {ModelPermissions} from "./ModelPermissions";
-import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
-import {objectForEach} from "../util/ObjectUtils";
-import {DomainUserId} from "../identity/DomainUserId";
 import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
-import {of} from "rxjs";
 
 /**
- * The [[ModelService]] is the main entry point in Convergence for working with
- * real time data models. Models can be created, opened, deleted, and managed
- * from the [[ModelService]].
+ * This is the main entry point in Convergence for working with
+ * [real time data models](https://docs.convergence.io/guide/models/overview.html).
+ * Models can be created, opened, deleted, and managed from the [[ModelService]].
  */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
@@ -99,14 +94,24 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * @returns
-   *  The ConvergenceSession object for this domain.
+   *  The ConvergenceSession attached to this domain.
    */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
   /**
-   * Searches for models using the Model Query Syntax.
+   * Searches for models using the model [query syntax](https://docs.convergence.io/guide/models/queries.html).
+   * Only SELECTs are currently supported.  The grammar is as follows:
+   *
+   * ```
+   * SELECT [ * ]
+   * [ FROM <Collection> ]
+   * [ WHERE <Condition>* ]
+   * [ ORDER BY (<Field> [ ASC|DESC ])* ]
+   * [ LIMIT <MaxRecords> ]
+   * [ OFFSET <SkipRecords> ]
+   * ```
    *
    * @param query
    *   The query string to use to look up the model.
@@ -148,7 +153,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
-   * Determines if a model with the specified id is being opened.
+   * Determines if a model with the specified ID is currently in the process
+   * of being opened.
    *
    * @param id
    *   The id of the model to check.
@@ -203,7 +209,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
-   * Creates a new model according to the options provided.
+   * Creates a new model according to the options provided.  If a model with
+   * the given ID already exists, this will return a rejected Promise.
    *
    * @param options
    *   A options object specifying how the model is to be created.
@@ -273,13 +280,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
-   * Opens an existing model, by id, in history mode.
+   * Opens an existing model, by id, in [history mode](https://docs.convergence.io/guide/models/history.html).
    *
    * @param id
    *   The id of the model to open in history mode.
    *
    * @returns
-   *   A Promise resolved with the HistoricalModel when opened.
+   *   A Promise resolved with the [[HistoricalModel]] when opened.
    */
   public history(id: string): Promise<HistoricalModel> {
     Validation.assertNonEmptyString(id, "id");

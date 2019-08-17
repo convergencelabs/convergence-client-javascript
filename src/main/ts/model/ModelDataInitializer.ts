@@ -1,4 +1,4 @@
-export type ModelDataCallback = () => { [key: string]: any };
+export type ModelDataCallback = () => { ModelData };
 export interface ModelData {
   [key: string]: any;
 }

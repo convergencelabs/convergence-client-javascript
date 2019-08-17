@@ -106,6 +106,9 @@ export interface IConvergenceOptions {
 
   /**
    * Options that configure how Convergence will use WebSockets.
+   *
+   * See the Node.js Usage section on [this page] for an example of these
+   * parameters in action.
    */
   webSocket?: {
     /**
