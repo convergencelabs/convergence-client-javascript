@@ -23,9 +23,25 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
 
+/**
+ * This is an abstract representation of a particular node in a [[RealTimeModel]]'s
+ * contents.  If you think of the contents of a model as a JSON tree, this could be the
+ * root object, an array, or any other element. This provides utilities common to
+ * all data elements, like getting the element's [[value]], a unique [[id]], its
+ * [[path]] within the complete data tree, and much more.
+ *
+ * See the [developer guide](https://docs.convergence.io/guide/models/data/real-time-elements.html)
+ * for a more in-depth analysis of the potential types of data this could wrap.
+ *
+ * Use [[value]] to get the current actual value of this element.
+ */
 export abstract class RealTimeElement<T = any>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
 
+  /**
+   * An interface enumerating the different events that could be fired on this
+   * [[RealTimeElement]].
+   */
   public static readonly Events: RealTimeElementEvents = ObservableElementEventConstants;
 
   /**
@@ -92,6 +108,9 @@ export abstract class RealTimeElement<T = any>
     });
   }
 
+  /**
+   * Returns the model to which this element belongs.
+   */
   public model(): RealTimeModel {
     return this._model;
   }
@@ -115,6 +134,32 @@ export abstract class RealTimeElement<T = any>
     return parent as any as RealTimeContainerElement<any>;
   }
 
+  /**
+   * This returns the [[PathElement]] representing this element's location relevant
+   * to its parent. For example, given a model with contents
+   *
+   * ```json
+   * {
+   *   obj: {
+   *     with: 1,
+   *     stuff: ['a', 'string']
+   *   }
+   * }
+   * ````
+   *
+   * ```typescript
+   * let rtNumber = rtModel.elementAt(['obj', 'with']);
+   * rtNumber.value() // 1
+   * rtNumber.relativePath() // 'with'
+   *
+   * let rtString = rtModel.elementAt(['obj', 'stuff', 0]);
+   * rtString.value() // 'a'
+   * rtString.relativePath() // 0
+   * ```
+   *
+   * @returns a PathElement representing this node's location relative to its parent,
+   * or null if it has no parent.
+   */
   public relativePath(): PathElement {
     const parentPath = this._delegate.path().slice(0);
     if (parentPath.length > 0) {
@@ -137,10 +182,18 @@ export abstract class RealTimeElement<T = any>
     parent._removeChild(relPath);
   }
 
+  /**
+   * True if the element is no longer synchronizing with the server.  See the
+   * [developer guide](https://docs.convergence.io/guide/models/data/real-time-elements.html)
+   * for more information.
+   */
   public isDetached(): boolean {
     return this._delegate.isDetached();
   }
 
+  /**
+   * True if the element is currently set up to synchronize with the server.
+   */
   public isAttached(): boolean {
     return !this._delegate.isDetached();
   }

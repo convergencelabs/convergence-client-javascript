@@ -80,6 +80,25 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   PERMISSIONS_CHANGED: ModelPermissionsChangedEvent.NAME
 };
 
+/**
+ * This is the core construct for dealing with distributed data in Convergence.
+ * It is essentially a distributed data model: Anybody in the same domain with permissions
+ * to this model can open it at the same time, be notified of remote changes, and modify
+ * the data within, which is itself synchronized in the same way between all participants.
+ * Any co-modification conflicts are resolved automatically and consistently
+ * for all connected users so that everybody sees the same thing.
+ *
+ * See [this page](https://docs.convergence.io/guide/models/overview.html) in the
+ * developer guide for a few of the interesting things you can do with a [[RealTimeModel]].
+ *
+ * Any data that can be represented with JSON can be stored in a [[RealTimeModel]].  This
+ * allows a huge range of applications to sync data instantly and seamlessly with Convergence.
+ *
+ * To work with the data within (reading and writing):
+ * * [[root]] to get the root object
+ * * [[elementAt]] to query for a particular node within the data
+ *
+ */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
   public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
@@ -274,20 +293,43 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._initializeReferences(references);
   }
 
+  /**
+   * Returns the permissions the current user has on this model.
+   */
   public permissions(): ModelPermissions {
     return this._permissions;
   }
 
+  /**
+   * Returns a permission manager that can be used to manage global or per-user
+   * permissions on this model. Requires the `manage` permission.
+   */
   public permissionsManager(): ModelPermissionManager {
     return new ModelPermissionManager(this._modelId, this._connection);
   }
 
+  /**
+   * The session associated with this opened model.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
-  // fixme inconsistent with isOpen()
+  /**
+   * Returns true if local changes to this model are being emiited.
+   *
+   * fixme inconsistent with isOpen()
+   */
   public emitLocalEvents(): boolean;
+
+  /**
+   * Toggles the `emitLocalEvents` setting.  If set to `true`, whenever any data
+   * within this model is mutated, the same events will be emitted as if the mutation
+   * happended remotely.  This is useful for handling change events in one place,
+   * switching on the [[IConvergenceModelValueEvent]].local field.
+   *
+   * @param emit true if local changes to this model should emit
+   */
   public emitLocalEvents(emit: boolean): void;
   public emitLocalEvents(emit?: boolean): any {
     if (arguments.length === 0) {
@@ -298,6 +340,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
   }
 
+  /**
+   * Returns an array of collaborators, or other users who currently have this model
+   * open.
+   *
+   * @returns an array of collaborators
+   */
   public collaborators(): ModelCollaborator[] {
     return this._sessions.map((sessionId: string) => {
       const user = this._identityCache.getUserForSession(sessionId);
@@ -308,60 +356,119 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     });
   }
 
+  /**
+   * Returns an [observable](https://docs.convergence.io/guide/overview/events-and-observables.html)
+   * which emits whenever a collaborator opens or closes this model.  This is useful
+   * for keeping an up-to-date listing of current collaborators.
+   *
+   * Also see the [[PresenceService]] for a more robust mechanism for keeping tabs
+   * on who is available for participation within the domain.
+   */
   public collaboratorsAsObservable(): Observable<ModelCollaborator[]> {
     return this._collaboratorsSubject.asObservable();
   }
 
+  /**
+   * The collection ID to which this model belongs.
+   */
   public collectionId(): string {
     return this._collectionId;
   }
 
+  /**
+   * This model's ID, unique in the Domain.
+   */
   public modelId(): string {
     return this._modelId;
   }
 
+  /**
+   * The timestamp at which this model was last modified.
+   */
   public time(): Date {
     return this._time;
   }
 
+  /**
+   * Alias of [[createdTime]]
+   */
   public minTime(): Date {
     return this._createdTime;
   }
 
+  /**
+   * Alias of [[time]]
+   */
   public maxTime(): Date {
     return this.time();
   }
 
+  /**
+   * The timestamp at which this model was first created.
+   */
   public createdTime(): Date {
     return this._createdTime;
   }
 
+  /**
+   * The current version of the model.
+   */
   public version(): number {
     return this._version;
   }
 
+  /**
+   * The first version of the model (`0`).
+   */
   public minVersion(): number {
     return 0;
   }
 
+  /**
+   * Alias for [[version]]
+   */
   public maxVersion(): number {
     return this.version();
   }
 
+  /**
+   * Returns a [[RealTimeObject]] wrapping the root node of this model's data.  From here
+   * one can view or modify all or any part of the subtree at any level of granularity.
+   */
   public root(): RealTimeObject {
     return this._wrapperFactory.wrap(this._model.root()) as RealTimeObject;
   }
 
+  /**
+   * Given a search path, returns the [[RealTimeElement]] at that path, or null if
+   * no such element exists.
+   *
+   * @param path the search path for accessing a node within this model's data
+   */
   public elementAt(path: Path): RealTimeElement<any>;
+
+  /**
+   * Given an array of search path elements, returns the [[RealTimeElement]] at
+   * that path, or null if no such element exists.
+   *
+   * @param path an array of search path elements (which in totality are a [[Path]])
+   */
   public elementAt(...elements: PathElement[]): RealTimeElement<any>;
   public elementAt(...path: any[]): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._model.valueAt(...path));
   }
 
+  /**
+   * Returns true if this model is currently open.
+   */
   public isOpen(): boolean {
     return this._open;
   }
 
+  /**
+   * Closes the model, emitting the appropriate events to any other participants
+   * and cleaning up any opened resources.
+   */
   public close(): Promise<void> {
     if (this._open) {
       // We need to cache the connection here because the _close method sets it to null.
@@ -395,32 +502,73 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
   }
 
+  /**
+   * Sets a flag on this model to indicate that any subsequent changes will be batched into
+   * one atomic operation.  See [Batch Changes](https://docs.convergence.io/guide/models/batch-changes.html)
+   * in the developer guide.
+   *
+   * Note that a single batch operation must be fully encompassed in a single JS
+   * event loop ("tick").  This is to guarantee that no incoming events can conflict with
+   * the batch job.
+   */
   public startBatch(): void {
     this._concurrencyControl.startBatchOperation();
   }
 
+  /**
+   * Sends the batched operations to the server.
+   *
+   * Use [[completeBatch]] instead.
+   */
   /** @deprecated */
   public endBatch(): void {
     this.completeBatch();
   }
 
+  /**
+   * Sends any accumulated model changes to the server as one atomic operation.
+   * This also removes the batch flag such that subsequent individual changes are immediately
+   * processed and sent as normal.
+   */
   public completeBatch(): void {
     const opEvent: UnprocessedOperationEvent = this._concurrencyControl.completeBatchOperation();
     this._sendOperation(opEvent);
   }
 
+  /**
+   * Returns the number of model changes that have accumulated since [[startBatch]]
+   * was called.
+   */
   public batchSize(): number {
     return this._concurrencyControl.batchSize();
   }
 
+  /**
+   * Cancels the batch job.  Note that calling this once changes have occurred
+   * on this model since the batch was started (that is, `batchSize() > 0`) will
+   * result in an error.
+   */
   public cancelBatch(): void {
     return this._concurrencyControl.cancelBatchOperation();
   }
 
+  /**
+   * Returns true if this model is currently in batch mode, that is, `startBatch`
+   * was called and the batch was not completed or cancelled.
+   */
   public isBatchStarted(): boolean {
     return this._concurrencyControl.isBatchOperationInProgress();
   }
 
+  /**
+   * Creates an [Element Reference](https://docs.convergence.io/guide/models/references/realtimemodel.html),
+   * which is a [Reference](https://docs.convergence.io/guide/models/references/references.html)
+   * bound to one more [elements](#elementat) in this model's data.
+   *
+   * @param key a unique name for this ElementReference
+   *
+   * @returns an empty `LocalElementReference` which can then be bound to one or more elements.
+   */
   public elementReference(key: string): LocalElementReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
@@ -443,10 +591,31 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
   }
 
+  /**
+   * Returns the remote [[ModelReference]] created by the given `sessionId` with
+   * the unique name `key`, or `undefined` if no such reference exists.
+   *
+   * See [Remote References](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * in the developer guide.
+   *
+   * @param sessionId The session ID that created the reference
+   * @param key the reference's unique key
+   */
   public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
   }
 
+  /**
+   * Returns any remote references that match the given filter.  You can provide
+   * a single `key` which could return references from multiple users, `sessionId`
+   * which would return all of a particular user session's references, or both,
+   * which is really just the same as using the [[reference]] method.
+   *
+   * @param filter an object containing either a `sessionId`, `key`, or both
+   *
+   * @returns An array of remote [[ModelReference]]s, or an empty array if there
+   * were no matches.
+   */
   public references(filter?: ReferenceFilter): Array<ModelReference<any>> {
     return this._referenceManager.getAll(filter);
   }

@@ -19,7 +19,10 @@ export interface HistoricalElementEvents extends ObservableElementEvents {
  * of the contents of a model as a JSON tree, this could be the root object, an array,
  * or any other element.
  *
- * Since [[HistoricalElement]]s represent a snapshot of a [[RealTimeModel]] in a given
+ * Much of the API of this class is designed to be the same as a [[RealTimeModel]],
+ * since the logic that deals with each respresentation is likely to be shared.
+ *
+ * As [[HistoricalElement]]s represent a snapshot of a [[RealTimeModel]] in a given
  * moment in time, they are read-only.
  */
 export abstract class HistoricalElement<T>
@@ -128,6 +131,11 @@ export abstract class HistoricalElement<T>
     }
   }
 
+  /**
+   * Returns the parent of this element within the model.
+   *
+   * @returns the parent of this element, or `this` if this is the root element
+   */
   public parent(): HistoricalContainerElement<any> {
     const parentPath = this._delegate.path().slice(0);
     parentPath.pop();
@@ -135,22 +143,43 @@ export abstract class HistoricalElement<T>
     return parent as any as HistoricalContainerElement<any>;
   }
 
+  /**
+   * This doesn't have much utility in the context of a [[HistoricalModel]] and
+   * is really only provided for API compatibility with a [[RealTimeModel]].
+   *
+   * @returns true
+   */
   public isAttached(): boolean {
     return !this._delegate.isDetached();
   }
 
+  /**
+   * This doesn't have much utility in the context of a [[HistoricalModel]] and
+   * is really only provided for API compatibility with a [[RealTimeModel]].
+   *
+   * @returns false
+   */
   public isDetached(): boolean {
     return this._delegate.isDetached();
   }
 
+  /**
+   * The value of this element at the parent model's current version.
+   */
   public value(): T {
     return this._delegate.data();
   }
 
+  /**
+   * Returns a JSON-compatible representation of this element.
+   */
   public toJSON(): any {
     return this._delegate.toJson();
   }
 
+  /**
+   * Returns the model to which this element belongs.
+   */
   public model(): HistoricalModel {
     return this._model;
   }
