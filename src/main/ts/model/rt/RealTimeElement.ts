@@ -26,12 +26,14 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
 /**
  * This is an abstract representation of a particular node in a [[RealTimeModel]]'s
  * contents.  If you think of the contents of a model as a JSON tree, this could be the
- * root object, an array, or any other element.
+ * root object, an array, or any other element. This provides utilities common to
+ * all data elements, like getting the element's [[value]], a unique [[id]], its
+ * [[path]] within the complete data tree, and much more.
  *
  * See the [developer guide](https://docs.convergence.io/guide/models/data/real-time-elements.html)
  * for a more in-depth analysis of the potential types of data this could wrap.
  *
- * Use [[value]] to get the actual value of this element.
+ * Use [[value]] to get the current actual value of this element.
  */
 export abstract class RealTimeElement<T = any>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
@@ -106,6 +108,9 @@ export abstract class RealTimeElement<T = any>
     });
   }
 
+  /**
+   * Returns the model to which this element belongs.
+   */
   public model(): RealTimeModel {
     return this._model;
   }

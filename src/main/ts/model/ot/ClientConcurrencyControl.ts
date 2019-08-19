@@ -117,7 +117,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     }
 
     if (this._pendingCompoundOperation.length !== 0) {
-      throw new Error("Can not cancel a batch operation if operation shave been issued.");
+      throw new Error("Can not cancel a batch operation if operations have been issued.");
     }
 
     this._compoundOpInProgress = false;

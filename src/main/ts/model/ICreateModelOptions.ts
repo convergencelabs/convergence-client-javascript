@@ -9,6 +9,8 @@ export interface ICreateModelOptions {
 
   /**
    * The model's ID.  If not provided, a UUID will be generated.
+   *
+   * Note that model IDs must be unique *even across collections*!
    */
   id?: string;
 

@@ -171,6 +171,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * Opens an existing model with a known model id. A model with the specified
    * id must already exist in the system.
    *
+   * *Don't forget to [[RealTimeModel.close]] the model when you're done with it
+   * to avoid memory leaks!*
+   *
    * @param id
    *   The id of the model to open.
    *

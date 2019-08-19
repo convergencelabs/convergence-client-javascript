@@ -131,11 +131,26 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     return this.addListener(event, wrapper);
   }
 
+  /**
+   * Removes all listeners for all events. This is useful for cleanup before
+   * disposing of this particular event emitter.
+   * 
+   * @return
+   *   This object, in support of a fluent API.
+   */
   public removeAllListeners(): ConvergenceEventEmitter<T> {
     Object.keys(this._listeners).forEach(event => this.removeListeners(event));
     return this;
   }
 
+  /**
+   * Removes all listeners bound on the given event.
+   *
+   * @param event the name of the event to remove listeners for
+   *
+   * @return
+   *   This object, in support of a fluent API.
+   */
   public removeListeners(event: string): ConvergenceEventEmitter<T> {
     event = ConvergenceEventEmitter._resolveEventKey(event);
     const registrations: Array<EventRegistration<T>> = this._listeners[event];
