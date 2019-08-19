@@ -378,18 +378,68 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
     }
   }
 
+  /**
+   * Returns the index of the first item in this array that passes the provided test
+   * function. Analagous to the javascript
+   * [array.findIndex](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex)
+   * method.
+   *
+   * ```typescript
+   * rtArray.value() // ['red', 'green']
+   * let foundIndex = rtArray.findIndex(rtString => {
+   *    return rtString.value().startsWith('g');
+   * })
+   * console.log(foundIndex) // 1
+   *
+   * foundIndex = rtArray.find(rtString => {
+   *    return rtString.length() < 3;
+   * })
+   * console.log(foundIndex) // -1
+   * ```
+   *
+   * @param callback a test function returning a truthy value
+   *
+   * @returns the index of the first item in this array which passes the given
+   * test function, or `-1` if there were no matches.
+   */
   public findIndex(callback: (element: RealTimeElement<any>, index?: number) => boolean): number {
     return this._delegate.findIndex((modelNode, index) => {
       return callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
+  /**
+   * Synchronously calls the provided callback function for each item in this array.
+   * Analagous to the javascript
+   * [array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+   * method.
+   *
+   * ```typescript
+   * rtArray.value() // ['red', 'green']
+   * rtArray.forEach(rtString => {
+   *    console.log(rtString.value(), 'has', rtString.length(), 'characters')
+   * })
+   * // red has 3 characters
+   * // green has 5 characters
+   * ```
+   *
+   * @param callback a function to be called for each item in this array
+   */
   public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
   }
 
+  /**
+   * Given a search path, returns the [[RealTimeElement]] at that path, or null if
+   * no such element exists. Scoped to this array, so the first element in the given
+   * path should be an array index.
+   *
+   * @param path the search path for accessing a node within this model's data
+   *
+   * @returns The [[RealTimeElement]] at the given path, or null if no such element exists
+   */
   public elementAt(path: Path): RealTimeElement<any>;
   public elementAt(...elements: PathElement[]): RealTimeElement<any>;
   public elementAt(...path: any[]): RealTimeElement<any> {
