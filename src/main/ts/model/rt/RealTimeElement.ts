@@ -34,6 +34,10 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
  * for a more in-depth analysis of the potential types of data this could wrap.
  *
  * Use [[value]] to get the current actual value of this element.
+ *
+ * @typeparam T The underlying javascript data type of this element.
+ * For instance, T would be `number` for a [[RealTimeNumber]] and `string` for a [[RealTimeString]].
+ * This is the type that [[value]] returns.
  */
 export abstract class RealTimeElement<T = any>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
@@ -115,18 +119,46 @@ export abstract class RealTimeElement<T = any>
     return this._model;
   }
 
+  /**
+   * Each node within a [[RealTimeModel]] has a system-generated ID that is unique
+   * within this model's contents.
+   *
+   * @returns a unique (to the model) ID for this element
+   */
   public id(): string {
     return this._delegate.id();
   }
 
+  /**
+   * This element's type.  See [[ModelElementType]] for an enumeration of types.
+   */
   public type(): string {
     return this._delegate.type();
   }
 
+  /**
+   * The [[Path]] representing this element's location in the containing model's data.
+   * For instance, with model data
+   *
+   * ```json
+   * {
+   *   user: {
+   *     age: 32
+   *   }
+   * }
+   * ```
+   *
+   * The [[RealTimeNumber]] representing `32` would have path `['user', 'age']`.
+   */
   public path(): Path {
     return this._delegate.path();
   }
 
+  /**
+   * Returns the parent of this element within the model.
+   *
+   * @returns the parent of this element, or `this` if this is the root element
+   */
   public parent(): RealTimeContainerElement<any> {
     const parentPath = this._delegate.path().slice(0);
     parentPath.pop();
@@ -169,6 +201,10 @@ export abstract class RealTimeElement<T = any>
     }
   }
 
+  /**
+   * A convenience function to delete this element. Throws an error if this is
+   * the root object in a model.
+   */
   public removeFromParent(): void {
     this._assertWritable();
     const parentPath = this._delegate.path().slice(0);
@@ -198,6 +234,11 @@ export abstract class RealTimeElement<T = any>
     return !this._delegate.isDetached();
   }
 
+  /**
+   * Returns the current underlying value of this element.  Note that the return value
+   * will not be kept up to date automatically; rather, this function will need to
+   * be called each time the most up-to-date value is required.
+   */
   public value(): T;
   public value(value: T): void;
   public value(value?: T): any {
@@ -210,14 +251,38 @@ export abstract class RealTimeElement<T = any>
     }
   }
 
+  /**
+   * Returns a JSON-compatible representation of this element.
+   */
   public toJSON(): any {
     return this._delegate.toJson();
   }
 
+  /**
+   * Returns the remote [[ModelReference]] created by the given `sessionId` with
+   * the unique name `key`, or `undefined` if no such reference exists.
+   *
+   * See [Remote References](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * in the developer guide.
+   *
+   * @param sessionId The session ID that created the reference
+   * @param key the reference's unique key
+   */
   public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
   }
 
+  /**
+   * Returns any remote references that match the given filter.  You can provide
+   * a single `key` which could return references from multiple users, `sessionId`
+   * which would return all of a particular user session's references, or both,
+   * which is really just the same as using the [[reference]] method.
+   *
+   * @param filter an object containing either a `sessionId`, `key`, or both
+   *
+   * @returns An array of remote [[ModelReference]]s, or an empty array if there
+   * were no matches.
+   */
   public references(referenceFilter?: ReferenceFilter): Array<ModelReference<any>> {
     return this._referenceManager.getAll(referenceFilter);
   }
