@@ -1,9 +1,8 @@
+
 /**
  * @hidden
  * @internal
  */
-import {type} from "os";
-
 export class Validation {
   public static isSet(value: any): boolean {
     return value !== undefined && value !== null;
@@ -77,6 +76,5 @@ export class Validation {
   private static getValueName(name?: string, defaultValue?: string): string {
     return name || defaultValue || "value";
   }
-
 
 }

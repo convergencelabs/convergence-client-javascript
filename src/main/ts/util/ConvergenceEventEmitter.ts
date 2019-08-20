@@ -134,7 +134,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
   /**
    * Removes all listeners for all events. This is useful for cleanup before
    * disposing of this particular event emitter.
-   * 
+   *
    * @return
    *   This object, in support of a fluent API.
    */

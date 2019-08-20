@@ -28,7 +28,8 @@ export interface RealTimeArrayEvents extends ObservableArrayEvents {
  * A distributed Array. This mimics the native Javascript Array API, but has additional
  * functionality for e.g. emitting events for remote changes.
  *
- * See [[RealTimeArrayEvents]] for the events that may be emitted for remote users.
+ * See [[RealTimeArrayEvents]] for the events that may be emitted on remote changes
+ * to this object.
  *
  * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-array.html)
  * for more information.
@@ -248,7 +249,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * rtString.value() // 'yellow'
    * ```
    *
-   * On a successful `unshift`, an [[ArrayInsertEvent]] will be emitted to any remote users.
+   * On a successful `unshift`, an [[ArrayInsertEvent]] will be emitted for any remote users.
    *
    * @returns a `RealTimeElement` wrapping the just-inserted value
    */

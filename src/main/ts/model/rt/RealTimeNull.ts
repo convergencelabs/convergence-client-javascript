@@ -9,6 +9,17 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeNullEvents extends ObservableNullEvents {
 }
 
+/**
+ * This is a convenience object that wraps a javascript `null`. These are returned
+ * when a [[RealTimeObject]] or [[RealTimeArray]] contains a null value. The `value()`
+ * of this is always `null` and cannot be changed.
+ *
+ * See [[RealTimeNullEvents]] for the events that can be emitted on remote
+ * changes to this object.
+ *
+ * More information is in the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-null.html).
+ */
 export class RealTimeNull extends RealTimeElement<void> implements ObservableNull {
 
   public static readonly Events: RealTimeNullEvents = ObservableNullEventConstants;

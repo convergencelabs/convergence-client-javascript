@@ -12,6 +12,17 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeNumberEvents extends ObservableNumberEvents {
 }
 
+/**
+ * This is a distributed number that wraps a native javascript `number`.  It provides
+ * a few convenience functions for doing arithmetic and incrementing/decrementing.
+ *
+ * See [[RealTimeNumberEvents]] for the events that can be emitted on remote
+ * changes to this object.
+ *
+ * See the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-number.html)
+ * for the most common use cases.
+ */
 export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 
   public static readonly Events: RealTimeNumberEvents = ObservableNumberEventConstants;
@@ -40,21 +51,69 @@ export class RealTimeNumber extends RealTimeElement<number> implements Observabl
     });
   }
 
+  /**
+   * Adds the given number to this object's underlying number.
+   *
+   * ```typescript
+   * rtNumber.value() // 13
+   * rtNumber.add(4)
+   * rtNumber.value() // 17
+   * ```
+   *
+   * On a successful `add`, a [[NumberDeltaEvent]] will be emitted for any remote users.
+   *
+   * @param value the addend to be added
+   */
   public add(value: number): void {
     this._assertWritable();
     (this._delegate as NumberNode).add(value);
   }
 
+  /**
+   * Subtracts the given number from this object's underlying number.
+   *
+   * ```typescript
+   * rtNumber.value() // 13
+   * rtNumber.subtract(4)
+   * rtNumber.value() // 9
+   * ```
+   *
+   * On a successful `subtract`, a [[NumberDeltaEvent]] will be emitted for any remote users.
+   *
+   * @param value the subtrahend to be subtracted
+   */
   public subtract(value: number): void {
     this._assertWritable();
     (this._delegate as NumberNode).subtract(value);
   }
 
+  /**
+   * Increments the underlying number by 1.  Equivalent to `add(1)`
+   *
+   * ```typescript
+   * rtNumber.value() // 13
+   * rtNumber.increment()
+   * rtNumber.value() // 14
+   * ```
+   *
+   * On a successful `increment`, a [[NumberDeltaEvent]] will be emitted for any remote users.
+   */
   public increment(): void {
     this._assertWritable();
     (this._delegate as NumberNode).increment();
   }
 
+  /**
+   * Decrements the underlying number by 1.  Equivalent to `subtract(1)`
+   *
+   * ```typescript
+   * rtNumber.value() // 13
+   * rtNumber.decrement()
+   * rtNumber.value() // 12
+   * ```
+   *
+   * On a successful `decrement`, a [[NumberDeltaEvent]] will be emitted for any remote users.
+   */
   public decrement(): void {
     this._assertWritable();
     (this._delegate as NumberNode).decrement();
