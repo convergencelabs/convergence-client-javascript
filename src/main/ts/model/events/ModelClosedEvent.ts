@@ -7,6 +7,11 @@ import {ObservableModel} from "../observable/ObservableModel";
  */
 export class ModelClosedEvent implements IModelEvent {
   public static readonly NAME = "closed";
+
+  /**
+   * The name of this event type.  This can be e.g. used to filter when using the
+   * [[ConvergenceEventEmitter.events]] stream.
+   */
   public readonly name: string = ModelClosedEvent.NAME;
 
   /**
@@ -17,9 +22,22 @@ export class ModelClosedEvent implements IModelEvent {
    * @hidden
    * @internal
    */
-  constructor(public readonly src: ObservableModel,
-              public readonly local: boolean,
-              public readonly reason?: string) {
+  constructor(
+    /**
+     * A read-only representation of the [[RealTimeModel]] which was closed.
+     */
+    public readonly src: ObservableModel,
+
+    /**
+     * True if this change occurred locally (in the current session)
+     */
+    public readonly local: boolean,
+
+    /**
+     * In the event that the model was closed by the server, a reason may be provided.
+     */
+    public readonly reason?: string
+  ) {
     Object.freeze(this);
   }
 }

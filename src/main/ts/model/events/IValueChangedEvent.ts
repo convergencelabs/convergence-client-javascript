@@ -6,7 +6,18 @@ import {DomainUser} from "../../identity";
  * individual model elements when their data changes.
  */
 export interface IValueChangedEvent extends IConvergenceModelValueEvent {
+  /**
+   * The user which performed the modification
+   */
   readonly user: DomainUser;
+
+  /**
+   * The sessionId corresponding to the session that performed the modification
+   */
   readonly sessionId: string;
+
+  /**
+   * True if this change occurred locally (in the current session)
+   */
   readonly local: boolean;
 }
