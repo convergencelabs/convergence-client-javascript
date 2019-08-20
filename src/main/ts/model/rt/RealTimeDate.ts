@@ -15,6 +15,20 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeDateEvents extends ObservableDateEvents {
 }
 
+/**
+ * A distributed date.  This is provided to give dates and timestamps first-class
+ * support, as opposed to just using an epoch number or standard ISO string.
+ *
+ * The underlying value is a native Javascript
+ * [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date).
+ *
+ * See [[RealTimeDateEvents]] for the events that can be emitted on remote
+ * changes to this object.
+ *
+ * See the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-date.html)
+ * for the most common use cases.
+ */
 export class RealTimeDate extends RealTimeElement<Date> implements ObservableDate {
 
   public static readonly Events: RealTimeDateEvents = ObservableDateEventConstants;

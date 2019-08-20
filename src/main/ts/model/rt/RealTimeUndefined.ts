@@ -15,6 +15,14 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
 }
 
+/**
+ * This is a convenience object that represents the absence of a value.  These
+ * are not actually part of the model, but can be returned in instances where
+ * the requested element does not exist.
+ *
+ * More information is in the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-undefined.html).
+ */
 export class RealTimeUndefined extends RealTimeElement<void> implements ObservableUndefined {
 
   public static readonly Events: RealTimeUndefinedEvents = ObservableUndefinedEventConstants;

@@ -29,6 +29,23 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeStringEvents extends ObservableStringEvents {
 }
 
+/**
+ * This is a distributed string that wraps a native javascript `string`.  Most often,
+ * these objects are mutated with the [[insert]] and [[remove]] methods which can operate
+ * on either individual characters or substrings.
+ *
+ * See [[RealTimeStringEvents]] for the events that can be emitted on remote
+ * changes to this object.
+ *
+ * Convergence supports two types of
+ * [references](https://docs.convergence.io/guide/models/references/realtimestring.html)
+ * unique to [[RealTimeString]]s.  These are useful for rendering remote cursors and
+ * selections.
+ *
+ * See the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-string.html)
+ * for the most common use cases.
+ */
 export class RealTimeString extends RealTimeElement<string> implements ObservableString {
 
   public static readonly Events: RealTimeStringEvents = ObservableStringEventConstants;
@@ -50,16 +67,55 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     (this._delegate as StringNode).events().subscribe(e => this._handleReferenceModelEvents(e));
   }
 
+  /**
+   * Inserts a substring of zero or more characters into this string at the provided
+   * index. Subsequent characters are shifted to the right appropriately.
+   *
+   * ```typescript
+   * rtString.value() // "Hello world"
+   * rtString.insert(6, 'magical ');
+   * rtString.value() // "Hello magical world"
+   * ```
+   *
+   * On a successful `insert`, a [[StringInsertEvent]] will be emitted to any remote users.
+   *
+   * @param index the zero-based index at which to being inserting the new `value`
+   * @param value the single character or substring to be inserted
+   */
   public insert(index: number, value: string): void {
     this._assertWritable();
     (this._delegate as StringNode).insert(index, value);
   }
 
+  /**
+   * Removes `length` characters from this string, starting at `index`.  Subsequent
+   * characters are left-shifted appropriately.
+   *
+   * On a successful `remove`, a [[StringRemoveEvent]] will be emitted to any remote users.
+   * 
+   * ```typescript
+   * rtString.value() // "Hello world"
+   * rtString.remove(0, 6);
+   * rtString.value() // "world"
+   * ```
+   *
+   * @param index the zero-based index at which to start removing characters
+   * @param length the number of characters to remove
+   */
   public remove(index: number, length: number): void {
     this._assertWritable();
     ((this._delegate as StringNode) as StringNode).remove(index, length);
   }
 
+  /**
+   * Just like the `string.length` Javascript property. Returns the number of characters
+   * in this string.
+   *
+   * ```typescript
+   * rtString.value() // "Hello world"
+   * rtString.length() // 11
+   * ```
+   */
   public length(): number {
     return (this._delegate as StringNode).length();
   }
@@ -68,8 +124,19 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
   // References
   /////////////////////////////////////////////////////////////////////////////
 
-  // fixme the index and range reference methods are almost the same.  can we refactor?
+  /**
+   * Creates an [IndexReference](LocalIndexReference) anchored to this string. Its index
+   * is automatically updated on all local and remote changes.
+   *
+   * See the [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+   * for more information.
+   *
+   * @param key a unique name for the reference
+   *
+   * @returns A local index reference anchored to this string
+   */
   public indexReference(key: string): LocalIndexReference {
+    // fixme the index and range reference methods are almost the same.  can we refactor?
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {
       if (existing.reference().type() !== ModelReference.Types.INDEX) {
@@ -90,6 +157,17 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     }
   }
 
+  /**
+   * Creates a [[LocalRangeReference]] bound to this object.  Its index bounds are
+   * automatically updated on all local and remote changes.
+   *
+   * See the [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+   * for more information.
+   *
+   * @param key a unique name for the range reference
+   *
+   * @returns A local range reference anchored to this string
+   */
   public rangeReference(key: string): LocalRangeReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
     if (existing !== undefined) {

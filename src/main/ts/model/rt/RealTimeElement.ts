@@ -240,6 +240,23 @@ export abstract class RealTimeElement<T = any>
    * be called each time the most up-to-date value is required.
    */
   public value(): T;
+
+  /**
+   * Sets the value of this element, whose type must be the underlying type of this
+   * object.
+   *
+   * On a succesful `value` call, the appropriate [[IValueChangedEvent]] will be emitted
+   * to any remote users. This will be one of:
+   *
+   * * [[ArraySetValueEvent]]
+   * * [[BooleanSetValueEvent]]
+   * * [[DateSetValueEvent]]
+   * * [[NumberSetValueEvent]]
+   * * [[ObjectSetValueEvent]]
+   * * [[StringSetValueEvent]]
+   *
+   * @param value the new value for this object.
+   */
   public value(value: T): void;
   public value(value?: T): any {
     if (arguments.length === 0) {

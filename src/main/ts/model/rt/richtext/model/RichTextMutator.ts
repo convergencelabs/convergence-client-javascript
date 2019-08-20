@@ -1,9 +1,10 @@
+
+import {RichTextLocationTransformer} from "./RichTextLocationTransformer";
+
 /**
  * @hidden
  * @internal
  */
-import {RichTextLocationTransformer} from "./RichTextLocationTransformer";
-
 export class RichTextMutator {
   private readonly _document: RichTextDocument;
 

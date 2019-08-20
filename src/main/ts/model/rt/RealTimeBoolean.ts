@@ -15,6 +15,15 @@ import {IdentityCache} from "../../identity/IdentityCache";
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
 
+/**
+ * A distributed boolean.  This wraps a native javascript `boolean` primitive.
+ *
+ * See [[RealTimeBooleanEvents]] for the events that can be emitted on remote
+ * changes to this object.
+ *
+ * Common use cases are documented in the
+ * [developer guide](https://docs.convergence.io/guide/models/data/real-time-boolean.html).
+ */
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
   public static readonly Events: RealTimeBooleanEvents = ObservableBooleanEventConstants;
