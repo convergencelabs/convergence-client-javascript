@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalBooleanEvents extends ObservableBooleanEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeBoolean]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalBoolean extends HistoricalElement<boolean> implements ObservableBoolean {
 
   public static readonly Events: HistoricalBooleanEvents = ObservableBooleanEventConstants;

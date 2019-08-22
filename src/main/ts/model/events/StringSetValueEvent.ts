@@ -28,6 +28,7 @@ export class StringSetValueEvent implements IValueChangedEvent {
      * A read-only representation of the [[RealTimeString]] which was modified
      */
     public readonly element: ObservableString,
+
     /**
      * The user which performed the modification
      */

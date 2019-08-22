@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalNumberEvents extends ObservableNumberEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeNumber]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalNumber extends HistoricalElement<number> implements ObservableNumber {
   public static readonly Events: HistoricalNumberEvents = ObservableNumberEventConstants;
 

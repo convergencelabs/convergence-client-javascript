@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalDateEvents extends ObservableDateEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeDate]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalDate extends HistoricalElement<Date> implements ObservableDate {
 
   public static readonly Events: HistoricalDateEvents = ObservableDateEventConstants;

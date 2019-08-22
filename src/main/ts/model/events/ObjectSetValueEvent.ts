@@ -29,6 +29,7 @@ export class ObjectSetValueEvent implements IValueChangedEvent {
      * A read-only representation of the [[RealTimeObject]] which was modified
      */
     public readonly element: ObservableObject,
+
     /**
      * The user which performed the modification
      */

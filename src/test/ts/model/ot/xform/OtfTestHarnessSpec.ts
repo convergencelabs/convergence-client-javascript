@@ -99,7 +99,7 @@ function json2Operation(opData: any): DiscreteOperation {
     case "BooleanSet":
       return new BooleanSetOperation(commonId, opData.noOp, opData.value);
 
-    case "NumberDelta":
+    case "NumberAdd":
       return new NumberDeltaOperation(commonId, opData.noOp, opData.value);
     case "NumberSet":
       return new NumberSetOperation(commonId, opData.noOp, opData.value);

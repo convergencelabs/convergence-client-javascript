@@ -20,6 +20,9 @@ import {ReferenceType} from "../reference/ReferenceType";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * An enumeration of the events that could be emitted by a [[RealTimeElement]].
+ */
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
 

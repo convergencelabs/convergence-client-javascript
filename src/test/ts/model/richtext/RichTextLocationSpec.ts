@@ -170,7 +170,7 @@ describe("RichTextLocation", () => {
       const document = TestDocumentCreator.createDocument(TWO_PARAGRAPHS_WITH_OBJECT);
       const root = document.getRoot("main");
       const location = RichTextLocation.ofTextOffset(root, 2);
-      console.log(location);
+      // console.log(location);
     });
   });
 });

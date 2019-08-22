@@ -42,6 +42,16 @@ export interface RealTimeObjectEvents extends ObservableObjectEvents {
 export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {
 
+  /**
+   * A mapping of the events this array could emit to each event's unique name.
+   * Use this to refer an event name, e.g.
+   *
+   * ```typescript
+   * rtObj.on(RealTimeObject.Events.SET, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeObjectEvents = ObservableObjectEventConstants;
 
   /**

@@ -68,8 +68,8 @@ export class Validation {
   }
 
   public static assertDate(value: Date, name?: string): void {
-    if ((value instanceof Date)) {
-      throw new Error(`${Validation.getValueName(name)} must be a Data but was: ${typeof value}`);
+    if (!(value instanceof Date)) {
+      throw new Error(`${Validation.getValueName(name)} must be a Date but was: ${typeof value}`);
     }
   }
 

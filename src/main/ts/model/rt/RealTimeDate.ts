@@ -12,6 +12,9 @@ import {
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * An enumeration of the events that could be emitted by a [[RealTimeDate]].
+ */
 export interface RealTimeDateEvents extends ObservableDateEvents {
 }
 

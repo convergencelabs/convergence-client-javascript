@@ -13,11 +13,10 @@ import {ModelReference} from "./ModelReference";
 import {RealTimeElement} from "../rt";
 import {IndexRange} from "./RangeReference";
 
-export function isReferenceMessage(message: IConvergenceMessage): boolean {
-  return !!(message.referenceShared || message.referenceSet ||
-    message.referenceCleared || message.referenceUnshared);
-}
-
+/**
+ * @hidden
+ * @internal
+ */
 export function toRemoteReferenceEvent(message: IConvergenceMessage): RemoteReferenceEvent {
   if (message.referenceShared) {
     const {sessionId, key, references, valueId, resourceId} = message.referenceShared;
@@ -64,6 +63,10 @@ interface ValueAndType {
   values: any[];
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function extractValueAndType(values: IReferenceValues): ValueAndType {
   if (values.indices) {
     const vals = getOrDefaultArray(values.indices.values);
@@ -83,6 +86,10 @@ export function extractValueAndType(values: IReferenceValues): ValueAndType {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toIReferenceValues(type: ReferenceType, values: any[]): IReferenceValues {
   switch (type) {
     case ModelReference.Types.INDEX:

@@ -61,6 +61,9 @@ import {
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * An enumeration of the events that could be emitted by a [[RealTimeModel]].
+ */
 export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly MODIFIED: string;
   readonly COMMITTED: string;
@@ -101,6 +104,16 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
+  /**
+   * A mapping of the events this model could emit to each event's unique name.
+   * Use this to refer an event name:
+   *
+   * ```typescript
+   * rtModel.on(RealTimeModel.Events.COLLABORATOR_OPENED, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
 
   /**

@@ -24,8 +24,19 @@ export class RemoteReferenceCreatedEvent implements IConvergenceEvent {
    * @internal
    */
   constructor(
+    /**
+     * The reference that was just created
+     */
     public readonly reference: ModelReference<any>,
+
+    /**
+     * The model on which the reference was created
+     */
     public readonly model: RealTimeModel,
+
+    /**
+     * The element to which this reference is bound to, or `undefined` if it is not yet bound
+     */
     public readonly element?: RealTimeElement<any>
   ) {
     Object.freeze(this);

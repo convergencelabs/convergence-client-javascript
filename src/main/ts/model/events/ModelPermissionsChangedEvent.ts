@@ -2,6 +2,10 @@ import {IConvergenceEvent} from "../../util";
 import {RealTimeModel} from "../rt";
 import {ModelPermissions} from "../ModelPermissions";
 
+/**
+ * Emitted when the permissions on a model are modified. See [[ModelPermissionManager]]
+ * to manage permissions programmatically.
+ */
 export class ModelPermissionsChangedEvent implements IConvergenceEvent {
   public static readonly NAME = "permissions_changed";
 
@@ -20,8 +24,20 @@ export class ModelPermissionsChangedEvent implements IConvergenceEvent {
    * @internal
    */
   constructor(
+    /**
+     * The model whose permissions changed
+     */
     public readonly model: RealTimeModel,
+
+    /**
+     * The permissions that changed
+     */
     public readonly permissions: ModelPermissions,
+
+    /**
+     * A list of the specific permissions that were changed: One or more of
+     * `read`, `write`, `remove` or `manage`
+     */
     public readonly changes: string[]
   ) {
     Object.freeze(this);

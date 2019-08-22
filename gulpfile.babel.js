@@ -140,12 +140,16 @@ const copyTypes = () => src([`${distInternalDir}/typings/**/*`]).pipe(dest(`${di
 
 const distNpmJs = series(copyNpmJs, updateNpmJs);
 
-const test = () =>
-  src("src/test*/**/*Spec.ts")
+const test = () => {
+  // Required because ts-node doesn't deal with ES6 module imports:
+  // https://github.com/TypeStrong/ts-node/issues/617
+  process.env.TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }';
+  return src("src/test*/**/*Spec.ts")
     .pipe(mocha({
       reporter: "progress",
       require: ['ts-node/register']
     }));
+};
 
 const clean = () => del([distInternalDir, distDir, "coverage", ".nyc_output"]);
 const dist = series(distInternal, distNpmJs, distCopyMin, copyTypes, docs);

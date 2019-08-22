@@ -25,6 +25,16 @@ export interface RealTimeNumberEvents extends ObservableNumberEvents {
  */
 export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 
+  /**
+   * A mapping of the events this array could emit to each event's unique name.
+   * Use this to refer an event name, e.g.
+   *
+   * ```typescript
+   * rtNum.on(RealTimeNumber.Events.DELTA, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeNumberEvents = ObservableNumberEventConstants;
 
   /**
