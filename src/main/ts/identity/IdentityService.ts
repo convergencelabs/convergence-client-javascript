@@ -1,5 +1,5 @@
 import {ConvergenceSession} from "../ConvergenceSession";
-import {DomainUser} from "./DomainUser";
+import {DomainUser, DomainUserIdentifier} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
@@ -13,6 +13,13 @@ import {Validation} from "../util";
 export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 const validSearchFields: UserField[] = ["username", "email", "firstName", "lastName", "displayName"];
 
+/**
+ * Provides a suite of utilities for looking up users and groups in the current domain.
+ *
+ * See some common use cases in the [developer guide](https://docs.convergence.io/guide/identity/overview.html).
+ *
+ * This service can be accessed using [[ConvergenceDomain.identity]].
+ */
 export class IdentityService {
 
   /**
@@ -28,15 +35,31 @@ export class IdentityService {
     this._connection = connection;
   }
 
+  /**
+   * The current session.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
+  /**
+   * Returns a promise that resolves with some information about the current user.
+   *
+   * @returns a promise to be resolved with the current user's information
+   */
   public profile(): Promise<DomainUser> {
     return this.user(this._connection.session().user().userId);
   }
 
-  public user(userId: DomainUserId): Promise<DomainUser> {
+  /**
+   * Looks up a user by either a username or [[DomainUserId]].
+   *
+   * @param userId either a username string or [[DomainUserId]]
+   *
+   * @returns a promise which will be resolved with a [[DomainUser]] if one is found,
+   * otherwise `undefined`
+   */
+  public user(userId: DomainUserIdentifier): Promise<DomainUser> {
     if (Validation.isNotSet(userId)) {
       return Promise.reject<DomainUser>("Must specify a user id.");
     }
@@ -52,13 +75,28 @@ export class IdentityService {
     });
   }
 
-  public users(users: DomainUserId[]): Promise<DomainUser[]> {
+  /**
+   * Looks up multiple users at once by username or [[DomainUserId]].
+   *
+   * @param users an array of username strings, [[DomainUserId]]s, or any combination therein
+   *
+   * @returns a promise which will be resolved with an array of length equal to `users`,
+   * with a [[DomainUser]] or `undefined` for each user query
+   */
+  public users(users: DomainUserIdentifier[]): Promise<DomainUser[]> {
     Validation.assertArray(users, "users");
     if (users.length === 0) {
       return Promise.resolve([]);
     }
 
-    const unique: DomainUserId[] = Array.from(new Set(users));
+    const guids: DomainUserId[] = users.map((id: DomainUserIdentifier) => {
+      if (!(id instanceof DomainUserId)) {
+        return DomainUserId.normal(id);
+      }
+      return id;
+    });
+
+    const unique: DomainUserId[] = Array.from(new Set(guids));
     const message: IConvergenceMessage = {
       usersGetRequest: {
         userIds: unique.map(domainUserIdToProto)

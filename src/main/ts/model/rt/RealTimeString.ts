@@ -102,7 +102,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * characters are left-shifted appropriately.
    *
    * On a successful `remove`, a [[StringRemoveEvent]] will be emitted to any remote users.
-   * 
+   *
    * ```typescript
    * rtString.value() // "Hello world"
    * rtString.remove(0, 6);

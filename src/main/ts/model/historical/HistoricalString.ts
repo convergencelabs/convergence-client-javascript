@@ -29,7 +29,7 @@ export class HistoricalString extends HistoricalElement<string> implements Obser
 
   /**
    * The length of this string at the current version.
-   * 
+   *
    * @returns the length of this string
    */
   public length(): number {

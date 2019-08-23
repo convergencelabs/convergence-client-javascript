@@ -1,20 +1,21 @@
 {
   "extends": "tslint:latest",
   "rules": {
-    "interface-name": false,
-    "ordered-imports": false,
-    "object-literal-sort-keys": false,
-    "trailing-comma": false,
-    "no-string-literal": false,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
-    "no-console": false,
     "arrow-parens": false,
+    "interface-name": false,
     "max-classes-per-file": false,
-    "no-submodule-imports": false,
-    "no-object-literal-type-assertion": false,
-    "unified-signatures": false,
+    "no-console": false,
     "no-empty-interface": false,
     "no-implicit-dependencies": [true, "dev"],
-    "no-unused-expression": false
+    "no-string-literal": false,
+    "no-submodule-imports": false,
+    "no-object-literal-type-assertion": false,
+    "no-unused-expression": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "prefer-const": false,
+    "trailing-comma": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
+    "unified-signatures": false
   }
 }

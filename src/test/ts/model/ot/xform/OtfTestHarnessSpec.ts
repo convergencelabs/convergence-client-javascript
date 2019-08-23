@@ -24,7 +24,7 @@ import * as fs from "fs";
 import {DateSetOperation} from "../../../../../main/ts/model/ot/ops/DateSetOperation";
 
 const expect: ExpectStatic = chai.expect;
-const fail: Function = chai.assert.fail;
+const fail: (actual?: any, expected?: any, msg?: string, operator?: string) => void = chai.assert.fail;
 
 const baseDir: string = "src/test/otspec";
 
