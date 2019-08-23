@@ -48,6 +48,16 @@ export interface RealTimeStringEvents extends ObservableStringEvents {
  */
 export class RealTimeString extends RealTimeElement<string> implements ObservableString {
 
+  /**
+   * A mapping of the events this array could emit to each event's unique name.
+   * Use this to refer an event name, e.g.
+   *
+   * ```typescript
+   * rtStr.on(RealTimeString.Events.INSERT, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeStringEvents = ObservableStringEventConstants;
 
   /**

@@ -32,6 +32,10 @@ import {
   timestampToDate
 } from "../connection/ProtocolUtil";
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toOperation(operationData: IOperationData): Operation {
   if (operationData.compoundOperation) {
     return toCompoundOperation(operationData.compoundOperation);
@@ -154,6 +158,10 @@ function toDiscreteOperation(discreteOperationData: IDiscreteOperationData): Dis
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toIOperationData(operation: Operation): IOperationData {
   if (operation instanceof CompoundOperation) {
     return {compoundOperation: toICompoundOperationData(operation)};

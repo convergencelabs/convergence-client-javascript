@@ -21,6 +21,9 @@ import {Path, PathElement} from "../Path";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * An enumeration of the events that could be emitted by a [[RealTimeArray]].
+ */
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
 
@@ -36,6 +39,16 @@ export interface RealTimeArrayEvents extends ObservableArrayEvents {
  */
 export class RealTimeArray extends RealTimeElement<any[]> implements ObservableArray, RealTimeContainerElement<any[]> {
 
+  /**
+   * A mapping of the events this array could emit to each event's unique name.
+   * Use this to refer an event name, e.g.
+   *
+   * ```typescript
+   * rtArray.on(RealTimeArray.Events.INSERT, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeArrayEvents = ObservableArrayEventConstants;
 
   /**

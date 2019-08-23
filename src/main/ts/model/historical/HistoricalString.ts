@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalStringEvents extends ObservableStringEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeString]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalString extends HistoricalElement<string> implements ObservableString {
 
   public static readonly Events: HistoricalStringEvents = ObservableStringEventConstants;
@@ -23,6 +27,11 @@ export class HistoricalString extends HistoricalElement<string> implements Obser
     super(delegate, wrapperFactory, model);
   }
 
+  /**
+   * The length of this string at the current version.
+   * 
+   * @returns the length of this string
+   */
   public length(): number {
     return (this._delegate as StringNode).length();
   }

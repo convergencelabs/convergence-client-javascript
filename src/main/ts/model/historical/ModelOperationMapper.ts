@@ -35,6 +35,10 @@ import {
 } from "../../connection/ProtocolUtil";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toModelOperation(operationData: IModelOperationData, identityCache: IdentityCache): ModelOperation {
   let appliedOp: AppliedOperation;
   if (operationData.operation.compoundOperation) {

@@ -88,7 +88,11 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     }
 
     const subscription: Subscription =
-      this._observable.pipe(filter((e) => e.name.toLowerCase() === event)).subscribe((e: T) => listener(e));
+      this._observable
+        .pipe(filter((e) => e.name.toLowerCase() === event))
+        .subscribe((e: T) => {
+          listener(e);
+        });
 
     listeners.push({listener, subscription});
 

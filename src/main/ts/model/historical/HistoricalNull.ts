@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalNullEvents extends ObservableNullEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeNull]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalNull extends HistoricalElement<void> implements ObservableNull {
   public static readonly Events: HistoricalNullEvents = ObservableNullEventConstants;
 

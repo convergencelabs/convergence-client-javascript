@@ -11,6 +11,10 @@ import {HistoricalModel} from "./HistoricalModel";
 export interface HistoricalUndefinedEvents extends ObservableUndefinedEvents {
 }
 
+/**
+ * A read-only history-aware version of a [[RealTimeUndefined]].  See [[HistoricalElement]]
+ * and [[HistoricalModel]] for some common usages.
+ */
 export class HistoricalUndefined extends HistoricalElement<void> implements ObservableUndefined {
 
   public static readonly Events: HistoricalUndefinedEvents = ObservableUndefinedEventConstants;

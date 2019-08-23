@@ -1,4 +1,6 @@
-import {RealTimeModel, RealTimeElement} from "../rt/";
+import {RealTimeElement} from "../rt/RealTimeElement";
+import {RealTimeModel} from "../rt/RealTimeModel";
+
 import {ModelReference} from "./ModelReference";
 import {ElementDetachedEvent} from "../events/ElementDetachedEvent";
 import {ReferenceManager} from "./ReferenceManager";

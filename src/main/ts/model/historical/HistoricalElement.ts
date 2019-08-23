@@ -20,9 +20,9 @@ export interface HistoricalElementEvents extends ObservableElementEvents {
  * or any other element.
  *
  * Much of the API of this class is designed to be the same as a [[RealTimeModel]],
- * since the logic that deals with each respresentation is likely to be shared.
+ * since the logic that deals with each representation is likely to be shared.
  *
- * As [[HistoricalElement]]s represent a snapshot of a [[RealTimeModel]] in a given
+ * As [[HistoricalElement]]s represent a snapshot of a [[RealTimeElement]] in a given
  * moment in time, they are read-only.
  */
 export abstract class HistoricalElement<T>

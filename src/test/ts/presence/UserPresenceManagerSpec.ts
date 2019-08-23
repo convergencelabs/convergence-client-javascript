@@ -125,7 +125,7 @@ describe("UserPresenceManager", () => {
     expect(firedObserver).to.equal(1);
   });
 
-  it("clear fires the proper event", () => {
+  it("clear fires the proper event", async () => {
     const state = new Map<string, any>();
 
     const testSubject = new Subject<MessageEvent>();

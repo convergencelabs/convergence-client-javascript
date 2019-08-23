@@ -12,6 +12,9 @@ import {
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * An enumeration of the events that could be emitted by a [[RealTimeBoolean]].
+ */
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
 
@@ -26,6 +29,16 @@ export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
  */
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
+  /**
+   * A mapping of the events this array could emit to each event's unique name.
+   * Use this to refer an event name, e.g.
+   *
+   * ```typescript
+   * rtBoolean.on(RealTimeBoolean.Events.VALUE, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: RealTimeBooleanEvents = ObservableBooleanEventConstants;
 
   /**
