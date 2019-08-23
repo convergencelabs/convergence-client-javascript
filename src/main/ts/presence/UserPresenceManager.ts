@@ -9,9 +9,8 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
+import {DomainUser, DomainUserId} from "../identity";
 import {deepClone, mapObjectValues} from "../util/ObjectUtils";
-import {DomainUserId} from "../identity/DomainUserId";
-import {DomainUser} from "../identity";
 import {getOrDefaultArray, getOrDefaultBoolean, getOrDefaultObject, protoValueToJson} from "../connection/ProtocolUtil";
 
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {

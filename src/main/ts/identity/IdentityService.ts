@@ -3,12 +3,12 @@ import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
-import {io} from "@convergence-internal/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {domainUserIdToProto, getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
-import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";
 import {DomainUserId} from "./DomainUserId";
 import {Validation} from "../util";
+import {domainUserIdToProto, getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
+import {toDomainUser, toUserFieldCode} from "./IdentityMessageUtils";
+import {io} from "@convergence-internal/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 
 export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 const validSearchFields: UserField[] = ["username", "email", "firstName", "lastName", "displayName"];
@@ -34,6 +34,12 @@ export class IdentityService {
 
   public profile(): Promise<DomainUser> {
     return this.user(this._connection.session().user().userId);
+  }
+
+  public userExists(userId: DomainUserId): Promise<boolean> {
+    // todo add a specific message for this, to avoid sending unnessesary data.
+    // also we could use our identity cache to answer this.
+    return this.user(userId).then((user) => user !== undefined);
   }
 
   public user(userId: DomainUserId): Promise<DomainUser> {

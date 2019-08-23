@@ -17,8 +17,6 @@ import {
   PresenceStateRemovedEvent,
   PresenceStateClearedEvent
 } from "./events/";
-import {io} from "@convergence-internal/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {mapObjectValues} from "../util/ObjectUtils";
 import {
   domainUserIdToProto, getOrDefaultArray,
@@ -27,9 +25,10 @@ import {
   protoToDomainUserId,
   protoValueToJson
 } from "../connection/ProtocolUtil";
-import {DomainUserId} from "../identity/DomainUserId";
 import {IdentityCache} from "../identity/IdentityCache";
-import {DomainUserIdentifier} from "../identity";
+import {DomainUserIdentifier, DomainUserId} from "../identity";
+import {io} from "@convergence-internal/convergence-proto";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPresence = io.convergence.proto.IUserPresence;
 
 export interface PresenceServiceEvents {
@@ -39,6 +38,14 @@ export interface PresenceServiceEvents {
   AVAILABILITY_CHANGED: string;
 }
 
+/**
+ * The [[PresenceService]] is the main entry point into Convergence's User
+ * Presence subsystem. User Presence tracks the availability and state of
+ * Domain Users within the System.  Users are generally available or not
+ * if they have at least one session that is connected. Each user in the
+ * system can set presence state. Presence state is global for each user
+ * in that the state is shared across all sessions.
+ */
 export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: PresenceServiceEvents = {
@@ -84,6 +91,11 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   private readonly _identityCache: IdentityCache;
 
   /**
+   * @internal
+   */
+  private _lastOnlineState: Map<string, any> | null;
+
+  /**
    * @hidden
    * @internal
    */
@@ -106,18 +118,34 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     this._presenceStreams.set(localUser.userId.toGuid(), localStream);
 
     this._localManager = new UserPresenceManager(presence, localStream, () => {
-      // TODO: do we need to do something on unsubscribe
+      // TODO: do we need to do something on unsubscribe?
     });
 
     this._managers.set(localUser.userId.toGuid(), this._localManager);
 
     this._localPresence = this._localManager.subscribe();
+
+    this._lastOnlineState = this._connection.isOnline() ? null : new Map();
+
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
   }
 
+  /**
+   * @returns
+   *   The session that this client is connected with.
+   */
   public session(): ConvergenceSession {
     return this._connection.session();
   }
 
+  /**
+   * Determines if the local user is available.
+   *
+   * @returns
+   *   True if the local user is available, false otherwise.
+   */
   public isAvailable(): boolean {
     return this._localPresence.available;
   }
@@ -135,13 +163,15 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     this._localManager.set(state);
 
-    const message: IConvergenceMessage = {
-      presenceSetState: {
-        state: mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue)
-      }
-    };
+    if (this._connection.isOnline()) {
+      const message: IConvergenceMessage = {
+        presenceSetState: {
+          state: mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue)
+        }
+      };
 
-    this._connection.send(message);
+      this._connection.send(message);
+    }
   }
 
   public removeState(key: string): void;
@@ -151,23 +181,27 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     this._localManager.remove(stateKeys);
 
-    const message: IConvergenceMessage = {
-      presenceRemoveState: {
-        keys: stateKeys
-      }
-    };
+    if (this._connection.isOnline()) {
+      const message: IConvergenceMessage = {
+        presenceRemoveState: {
+          keys: stateKeys
+        }
+      };
 
-    this._connection.send(message);
+      this._connection.send(message);
+    }
   }
 
   public clearState(): void {
     this._localManager.clear();
 
-    const message: IConvergenceMessage = {
-      presenceClearState: {}
-    };
+    if (this._connection.isOnline()) {
+      const message: IConvergenceMessage = {
+        presenceClearState: {}
+      };
 
-    this._connection.send(message);
+      this._connection.send(message);
+    }
   }
 
   public state(): Map<string, any> {
@@ -293,23 +327,45 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _unsubscribe(userId: DomainUserId): void {
-    const message: IConvergenceMessage = {
-      presenceUnsubscribe: {
-        users: [domainUserIdToProto(userId)]
-      }
-    };
-
-    this._connection.send(message);
+    if (this._connection.isOnline()) {
+      const message: IConvergenceMessage = {
+        presenceUnsubscribe: {
+          users: [domainUserIdToProto(userId)]
+        }
+      };
+      this._connection.send(message);
+    }
 
     const guid = userId.toGuid();
     this._managers.delete(guid);
     this._presenceStreams.delete(guid);
   }
 
+  /**
+   * @internal
+   * @hidden
+   */
   private _mapUserPresence(p: IUserPresence): UserPresence {
     const user = this._identityCache.getUser(protoToDomainUserId(p.user));
     const available = getOrDefaultBoolean(p.available);
     const state = StringMap.objectToMap(mapObjectValues(getOrDefaultObject(p.state), protoValueToJson));
     return new UserPresence(user, available, state);
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOnline = () => {
+    //
+    this._lastOnlineState = null;
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOffline = () => {
+    this._lastOnlineState = this.state();
   }
 }

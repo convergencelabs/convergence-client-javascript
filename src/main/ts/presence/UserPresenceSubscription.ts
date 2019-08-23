@@ -17,6 +17,10 @@ export interface UserPresenceSubscriptionEvents {
   AVAILABILITY_CHANGED: string;
 }
 
+/**
+ * The [[UserPresenceSubscription]] represents the subscription to the presence
+ * of a specific Domain User.
+ */
 export class UserPresenceSubscription extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: UserPresenceSubscriptionEvents = {
