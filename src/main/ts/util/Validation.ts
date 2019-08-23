@@ -6,6 +6,10 @@ import {TypeChecker} from "./TypeChecker";
  */
 export class Validation {
 
+  public static isSet(value: any): boolean {
+    return !Validation.isNotSet(value);
+  }
+
   public static isNotSet(value: any): boolean {
     return value === undefined || value === null;
   }

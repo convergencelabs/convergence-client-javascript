@@ -28,7 +28,8 @@ import {
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
 import {
   getOrDefaultArray,
-  getOrDefaultNumber, getOrDefaultString,
+  getOrDefaultNumber,
+  getOrDefaultString,
   timestampToDate,
   toOptional
 } from "../connection/ProtocolUtil";
@@ -200,7 +201,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise resolved with the RealTimeModel, once opened.
    */
   public openAutoCreate(options: IAutoCreateModelOptions): Promise<RealTimeModel> {
-    if (!Validation.isSet(options)) {
+    if (Validation.isNotSet(options)) {
       throw new ConvergenceError("'options' is a required parameter");
     }
 
@@ -222,7 +223,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *   A Promise that is resolved with the id of the created model.
    */
   public create(options: ICreateModelOptions): Promise<string> {
-    if (!Validation.isSet(options)) {
+    if (Validation.isNotSet(options)) {
       throw new ConvergenceError("'options' is a required parameter");
     }
 
