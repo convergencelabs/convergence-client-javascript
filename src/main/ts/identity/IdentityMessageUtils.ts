@@ -1,9 +1,11 @@
 import {ConvergenceError} from "../util";
 import {DomainUser} from "./DomainUser";
-import {fromOptional, protoToDomainUserType} from "../connection/ProtocolUtil";
+import {fromOptional, protoToDomainUserType, protoToDomainUserId} from "../connection/ProtocolUtil";
 import {UserField} from "./IdentityService";
 import {io} from "@convergence-internal/convergence-proto";
 import IDomainUserData = io.convergence.proto.IDomainUserData;
+import IUserGroupData = io.convergence.proto.IUserGroupData;
+import { UserGroup } from "./UserGroup";
 
 /**
  * @hidden
@@ -38,4 +40,16 @@ export function toDomainUser(userData: IDomainUserData): DomainUser {
     fromOptional(userData.lastName),
     fromOptional(userData.displayName),
     fromOptional(userData.email));
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export function toUserGroup(userData: IUserGroupData): UserGroup {
+  return new UserGroup(
+    userData.id,
+    userData.description,
+    userData.members ? userData.members.map(m => protoToDomainUserId(m)) : []
+  );
 }
