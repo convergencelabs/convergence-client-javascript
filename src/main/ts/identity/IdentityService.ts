@@ -162,16 +162,23 @@ export class IdentityService {
   }
 
   /**
-   * Looks up one or more groups by ID. Each group will contain an array of the
-   * usernames of member users.
+   * Looks up one or more User Groups by their User Group Ids. Each returned
+   * User Group will contain the details of the User Group, including an array
+   * of users ids for those users that are members of the group.
    *
-   * Note that if any of the provided group IDs don't exist, the promise will be rejected.
+   * Note: that if any of the provided User Group Ids does not exist, the
+   * promise will be rejected.
    *
-   * @param ids the IDs of the user groups you're interested in
+   * @param ids
+   *   An array of UserGroup Id's for the groups to get.
    *
-   * @returns a promise to be resolved with the desired [[UserGroup]]s
+   * @returns
+   *   A promise resolved with an array of [[UserGroup]]s that positionally
+   *   correspond to the supplied User Group Id's.
    */
   public groups(ids: string[]): Promise<UserGroup[]> {
+    Validation.assertNonEmptyArray(ids, "ids");
+
     const message: IConvergenceMessage = {
       userGroupsRequest: {
         ids

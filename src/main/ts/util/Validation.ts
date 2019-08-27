@@ -48,6 +48,13 @@ export class Validation {
     }
   }
 
+  public static assertNonEmptyArray(value: any[], name?: string): void {
+    Validation.assertArray(value, name);
+    if (value.length === 0) {
+      throw new Error(`${Validation.getValueName(name)} must be a non-empty array: ${typeof value}`);
+    }
+  }
+
   public static assertValidArrayIndex(index: number, array: any[], name?: string): void {
     Validation.assertValidIndex(index, 0, array.length, name);
   }
