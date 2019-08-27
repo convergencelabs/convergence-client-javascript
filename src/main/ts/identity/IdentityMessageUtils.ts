@@ -50,6 +50,6 @@ export function toUserGroup(userData: IUserGroupData): UserGroup {
   return new UserGroup(
     userData.id,
     userData.description,
-    userData.members ? userData.members.map(m => protoToDomainUserId(m)) : []
+    userData.members ? userData.members.map(m => protoToDomainUserId(m).username) : []
   );
 }

@@ -5,7 +5,7 @@ import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
+import {domainUserIdToProto, toOptional, protoToDomainUserId} from "../connection/ProtocolUtil";
 import {toDomainUser, toUserFieldCode, toUserGroup} from "./IdentityMessageUtils";
 import {DomainUserId} from "./DomainUserId";
 import {Validation} from "../util";
@@ -21,6 +21,9 @@ const validSearchFields: UserField[] = ["username", "email", "firstName", "lastN
  * Provides a suite of utilities for looking up users and groups in the current domain.
  *
  * See some common use cases in the [developer guide](https://docs.convergence.io/guide/identity/overview.html).
+ *
+ * Note that users and groups cannot (yet) be managed through this service.  See the
+ * REST API for domain user and group management.
  *
  * This service can be accessed using [[ConvergenceDomain.identity]].
  */
@@ -222,10 +225,13 @@ export class IdentityService {
 
     return this._connection.request(message).then((response: IConvergenceMessage) => {
       const {userGroupsForUsersResponse} = response;
-      const groupData = userGroupsForUsersResponse.userGroups;
+
       const groupsForUsers = {};
-      Object.keys(groupData).forEach(username => {
-        groupsForUsers[username] = groupData[username].values;
+      userGroupsForUsersResponse.userGroups.forEach(userGroupsEntry => {
+        if (userGroupsEntry.hasOwnProperty("user")) {
+          let domainUserId = protoToDomainUserId(userGroupsEntry.user);
+          groupsForUsers[domainUserId.username] = userGroupsEntry.groups;
+        }
       });
       return groupsForUsers;
     });

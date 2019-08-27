@@ -11,7 +11,8 @@ import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IDomainUserData = io.convergence.proto.IDomainUserData;
 import IUserListMessage = io.convergence.proto.IUserListMessage;
-import { toUserGroup } from "../../../main/ts/identity/IdentityMessageUtils";
+import IUserGroupData = io.convergence.proto.IUserGroupData;
+import IUserGroupsEntry = io.convergence.proto.IUserGroupsEntry;
 
 function createStubbedService(users: DomainUser[], groups?: UserGroup[]) {
   let connection = createStubInstance(ConvergenceConnection);
@@ -33,9 +34,22 @@ function createStubbedService(users: DomainUser[], groups?: UserGroup[]) {
           groupData: groups.map(g => {
             return {
               ...g,
-              members: g.members.map(m => domainUserIdToProto(m))
+              members: g.members.map(m => {
+                return domainUserIdToProto(DomainUserId.normal(m));
+              })
             };
-          })
+          }) as IUserGroupData[]
+        }
+      };
+    } else if (message.hasOwnProperty("userGroupsForUsersRequest")) {
+      return {
+        userGroupsForUsersResponse: {
+          userGroups: users.map(u => {
+            return {
+              user: domainUserIdToProto(u.userId),
+              groups: groups.map(g => g.id)
+            };
+          }) as IUserGroupsEntry[]
         }
       };
     }
@@ -89,12 +103,10 @@ describe("IdentityService", () => {
   it("parses user groups correctly", async () => {
     let users: DomainUser[] = [
       new DomainUser(DomainUserType.NORMAL, "jimbo"),
-      new DomainUser(DomainUserType.CONVERGENCE, "fred")
+      new DomainUser(DomainUserType.NORMAL, "fred")
     ];
 
-    let group = new UserGroup("test", "A Test", users.map(u => {
-      return new DomainUserId(u.userType, u.username);
-    }));
+    let group = new UserGroup("test", "A Test", users.map(u => u.username));
 
     let service = createStubbedService(users, [group]);
 
@@ -104,9 +116,23 @@ describe("IdentityService", () => {
     expect(foundGroup.description).to.equal("A Test");
     expect(foundGroup.members.length).to.equal(2);
 
-    expect(foundGroup.members[0].username).to.equal("jimbo");
-    expect(foundGroup.members[0].userType).to.equal(DomainUserType.NORMAL);
-    expect(foundGroup.members[1].username).to.equal("fred");
-    expect(foundGroup.members[1].userType).to.equal(DomainUserType.CONVERGENCE);
+    expect(foundGroup.members[0]).to.equal("jimbo");
+    expect(foundGroup.members[1]).to.equal("fred");
+  });
+
+  it("returns the groups a user belongs to", async () => {
+    let users: DomainUser[] = [
+      new DomainUser(DomainUserType.NORMAL, "jimbo")
+    ];
+
+    let group = new UserGroup("test", "A Test", users.map(u => u.username));
+
+    let service = createStubbedService(users, [group]);
+
+    let userGroups = await service.groupsForUsers(["jimbo"]);
+
+    expect(userGroups).to.have.property("jimbo");
+    expect(userGroups.jimbo).to.have.lengthOf(1);
+    expect(userGroups.jimbo[0]).to.equal("test");
   });
 });

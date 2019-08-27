@@ -24,7 +24,7 @@ export class UserGroup {
     /**
      * The usernames of all the users contained in this group.
      */
-    public readonly members: DomainUserId[]
+    public readonly members: string[]
   ) {
     Object.freeze(this);
   }
