@@ -39,7 +39,10 @@ export interface ModelReferenceEvents {
 }
 
 /**
- * The base class for all references.
+ * The base class for all [references](https://docs.convergence.io/guide/models/references/references.html),
+ * which are essentially pointers to elements and data within a [[RealTimeModel]].
+ * They are typically used to implement transient UX constructs such as text selections
+ * and cursors.
  */
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
 

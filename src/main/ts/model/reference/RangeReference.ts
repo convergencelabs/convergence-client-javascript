@@ -6,6 +6,13 @@ import {DomainUser} from "../../identity";
 
 /**
  * A single range to be used with a [[RangeReference]].
+ *
+ * For example, in
+ * ```
+ *  The quick brown fox jumped over the lazy dog
+ * ```
+ *
+ * a selection of "fox jumped" would be represented with the range `{start: 16, end: 26}`
  */
 export interface IndexRange {
   start: number;
