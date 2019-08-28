@@ -4,6 +4,12 @@ import {RealTimeElement} from "../rt/";
 import {ReferenceManager} from "./ReferenceManager";
 import {DomainUser} from "../../identity";
 
+/**
+ * Represents one or more indices in a [[RealTimeString]] that must be adjusted while
+ * the data is changing.  See the
+ * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+ * for some examples.
+ */
 export class IndexReference extends ModelReference<number> {
 
   /**

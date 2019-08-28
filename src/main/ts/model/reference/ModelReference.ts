@@ -8,6 +8,7 @@ import {
 } from "./events/";
 import {ReferenceType} from "./ReferenceType";
 import {DomainUser} from "../../identity";
+import { RealTimeElement, RealTimeModel } from "../rt";
 
 export interface ModelReferenceTypes {
   [key: string]: ReferenceType;
@@ -17,12 +18,29 @@ export interface ModelReferenceTypes {
   readonly ELEMENT: ReferenceType;
 }
 
+/**
+ * The generic events available on any reference.
+ */
 export interface ModelReferenceEvents {
+  /**
+   * Indicates that a new value on a reference was set.
+   */
   readonly SET: string;
+
+  /**
+   * Indicates that a reference's value was cleared.
+   */
   readonly CLEARED: string;
+
+  /**
+   * Indicates that a reference was disposed.
+   */
   readonly DISPOSED: string;
 }
 
+/**
+ * The base class for all references.
+ */
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   public static readonly Events: ModelReferenceEvents = {
@@ -91,7 +109,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   protected constructor(referenceManager: ReferenceManager,
                         type: ReferenceType,
                         key: string,
-                        source: any,
+                        source: RealTimeElement<any> | RealTimeModel,
                         user: DomainUser,
                         sessionId: string,
                         local: boolean) {
@@ -107,30 +125,51 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     this._local = local;
   }
 
+  /**
+   * Returns a string indicating the type of reference this is.
+   */
   public type(): ReferenceType {
     return this._type;
   }
 
+  /**
+   * Returns the unique key corresponding to this reference.
+   */
   public key(): string {
     return this._key;
   }
 
-  public source(): any {
+  /**
+   * Returns the element or model on which this reference was created.
+   */
+  public source(): RealTimeElement<any> | RealTimeModel {
     return this._source;
   }
 
+  /**
+   * Returns true if this reference was created locally.
+   */
   public isLocal(): boolean {
     return this._local;
   }
 
+  /**
+   * Returns the user that created this reference.
+   */
   public user(): DomainUser {
     return this._user;
   }
 
+  /**
+   * Returns the session ID of the user session that created this reference.
+   */
   public sessionId(): string {
     return this._sessionId;
   }
 
+  /**
+   * Returns true if this reference has already been disposed (cleaned up).
+   */
   public isDisposed(): boolean {
     return this._disposed;
   }
@@ -147,14 +186,23 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     this._referenceManager._handleReferenceDisposed(this);
   }
 
+  /**
+   * Returns the first value of the underlying reference.
+   */
   public value(): V {
     return this._values[0];
   }
 
+  /**
+   * Returns all values of the underlying reference.
+   */
   public values(): V[] {
     return this._values;
   }
 
+  /**
+   * Returns true if a value is currenly set on the reference.
+   */
   public isSet(): boolean {
     return this._values.length > 0;
   }
