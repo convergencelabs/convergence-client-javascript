@@ -126,7 +126,7 @@ export class RichTextIterator implements IterableIterator<RichTextContent> {
       }
 
       if (start !== 0 || end !== nodeToProcess.getData().length - 1) {
-        const fragment = new RichTextStringFragment(nodeToProcess, start, (end - start) + 1 );
+        const fragment = new RichTextStringFragment(nodeToProcess, start, (end - start) + 1);
         return this._createIteratorResult(fragment);
       } else {
         return this._createIteratorResult(nodeToProcess);

@@ -18,7 +18,6 @@ import {DiscreteOperation} from "../../../../../main/ts/model/ot/ops/DiscreteOpe
 import {OperationPair} from "../../../../../main/ts/model/ot/xform/OperationPair";
 import {OperationTransformationFunction} from "../../../../../main/ts/model/ot/xform/OperationTransformationFunction";
 
-import ExpectStatic = Chai.ExpectStatic;
 import {expect, assert} from "chai";
 import * as fs from "fs";
 import {DateSetOperation} from "../../../../../main/ts/model/ot/ops/DateSetOperation";

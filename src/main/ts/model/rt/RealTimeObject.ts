@@ -199,7 +199,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    * no such element exists. Scoped to this object, so the first element in the given
    * path should be a string (representing an existing key)
    *
-   * @param path the search path for accessing a node within this model's data
+   * @param path the search path for accessing a node within this object
    *
    * @returns The [[RealTimeElement]] at the given path, or null if no such element exists
    */

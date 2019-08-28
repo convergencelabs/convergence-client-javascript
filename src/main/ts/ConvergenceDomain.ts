@@ -35,7 +35,7 @@ import {TypeChecker} from "./util/TypeChecker";
  * Convergence. All interactions with the Domain start with this class, through
  * several "services" that provide access to
  * [Models (data)](https://docs.convergence.io/guide/models/model-service.html),
- * [Users](https://docs.convergence.io/guide/identity/overview.html),
+ * [Users and Groups](https://docs.convergence.io/guide/identity/overview.html),
  * [Activities](https://docs.convergence.io/guide/activities/overview.html),
  * [Presence](https://docs.convergence.io/guide/presence/overview.html), and
  * [Chat](https://docs.convergence.io/guide/chat/overview.html).

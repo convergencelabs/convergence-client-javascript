@@ -6,6 +6,11 @@ import {ElementDetachedEvent} from "../events/ElementDetachedEvent";
 import {ReferenceManager} from "./ReferenceManager";
 import {DomainUser} from "../../identity";
 
+/**
+ * Represents one or more elements in a [[RealTimeModel]] that must be adjusted
+ * while the data is changing. See an example in the
+ * [developer guide](https://docs.convergence.io/guide/models/references/realtimemodel.html).
+ */
 export class ElementReference extends ModelReference<RealTimeElement<any>> {
 
   /**

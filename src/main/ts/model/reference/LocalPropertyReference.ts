@@ -1,6 +1,10 @@
 import {ModelReferenceCallbacks, LocalModelReference} from "./LocalModelReference";
 import {PropertyReference} from "./PropertyReference";
 
+/**
+ * An [[PropertyReference]] that was created locally.
+ * See [[RealTimeObject.propertyReference]]
+ */
 export class LocalPropertyReference extends LocalModelReference<string, PropertyReference> {
 
   /**

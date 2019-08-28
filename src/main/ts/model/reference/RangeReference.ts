@@ -4,11 +4,27 @@ import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
 import {ReferenceManager} from "./ReferenceManager";
 import {DomainUser} from "../../identity";
 
+/**
+ * A single range to be used with a [[RangeReference]].
+ *
+ * For example, in
+ * ```
+ *  The quick brown fox jumped over the lazy dog
+ * ```
+ *
+ * a selection of "fox jumped" would be represented with the range `{start: 16, end: 26}`
+ */
 export interface IndexRange {
   start: number;
   end: number;
 }
 
+/**
+ * Represents a range of text in a [[RealTimeString]] that must be adjusted while
+ * the data is changing.  See the
+ * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+ * for some examples.
+ */
 export class RangeReference extends ModelReference<IndexRange> {
 
   /**

@@ -3,6 +3,12 @@ import {ModelReference} from "./ModelReference";
 import {ReferenceManager} from "./ReferenceManager";
 import {DomainUser} from "../../identity";
 
+/**
+ * Represents one or more properties in a [[RealTimeObject]] that must be adjusted while
+ * the data is changing.  See the
+ * [developer guide](https://docs.convergence.io/guide/models/references/realtimeobject.html)
+ * for some examples.
+ */
 export class PropertyReference extends ModelReference<string> {
 
   /**
