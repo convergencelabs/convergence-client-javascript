@@ -17,7 +17,7 @@ import IUserGroupsEntry = io.convergence.proto.IUserGroupsEntry;
 function createStubbedService(users: DomainUser[], groups?: UserGroup[]) {
   let connection = createStubInstance(ConvergenceConnection);
 
-  connection.request = async (message: IConvergenceMessage) => {
+  connection.request = (async (message: IConvergenceMessage) => {
     if (message.hasOwnProperty("usersGetRequest")) {
       return {
         userListResponse: {
@@ -53,9 +53,9 @@ function createStubbedService(users: DomainUser[], groups?: UserGroup[]) {
         }
       };
     }
-  };
+  }) as any;
 
-  return new IdentityService(connection);
+  return new IdentityService(connection as any);
 }
 
 describe("IdentityService", () => {
