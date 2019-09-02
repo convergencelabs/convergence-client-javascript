@@ -1,8 +1,9 @@
-import {ChatInfo, Chat, ChatMember} from "./Chat";
+import {Chat, ChatMember} from "./Chat";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {IChatEvent} from "./events/";
 import {IdentityCache} from "../identity/IdentityCache";
+import {ChatInfo} from "./ChatInfo";
 
 /**
  * A [[DirectChat]] represents a Chat construct that is defined by a specific

@@ -1,6 +1,8 @@
 import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {DomainUser} from "./identity";
+import {ConvergenceError} from "./util/ConvergenceError";
+import {ConvergenceErrorCodes} from "./util/ConvergenceErrorCodes";
 
 /**
  * This represents connection state information for a
@@ -96,6 +98,16 @@ export class ConvergenceSession {
    */
   public isConnected(): boolean {
     return this._connection.isConnected();
+  }
+
+  /**
+   * Asserts that the user is currently authenticated, throwing a [[ConvergenceError]] if not.
+   */
+  public assertOnline(): void {
+    if (!this.isAuthenticated()) {
+      const message = `Cannot perform this action while offline`;
+      throw new ConvergenceError(message, ConvergenceErrorCodes.OFFLINE);
+    }
   }
 
   /**

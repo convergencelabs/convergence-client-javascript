@@ -1,10 +1,11 @@
-import {ChatInfo, Chat} from "./Chat";
+import {Chat} from "./Chat";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {IChatEvent} from "./events/";
 import {Observable} from "rxjs";
 import {IdentityCache} from "../identity/IdentityCache";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {DomainUserIdentifier, DomainUserId} from "../identity";
+import {ChatInfo} from "./ChatInfo";
 
 /**
  * A [[MembershipChat]] chat is a chat construct that has a specific set of

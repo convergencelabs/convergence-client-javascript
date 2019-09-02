@@ -58,6 +58,7 @@ export class ChatPermissionManager {
   }
 
   public getPermissions(): Promise<ChatPermission[]> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getClientPermissionsRequest: {
         idType: CHAT,
@@ -72,6 +73,7 @@ export class ChatPermissionManager {
   }
 
   public addWorldPermissions(permissions: ChatPermission[]): Promise<void> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
@@ -86,6 +88,7 @@ export class ChatPermissionManager {
   }
 
   public removeWorldPermissions(permissions: ChatPermission[]): Promise<void> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
@@ -100,6 +103,7 @@ export class ChatPermissionManager {
   }
 
   public setWorldPermissions(permissions: ChatPermission[]): Promise<void> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
@@ -114,6 +118,7 @@ export class ChatPermissionManager {
   }
 
   public getWorldPermissions(): Promise<ChatPermission[]> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getWorldPermissionsRequest: {
         idType: CHAT,
@@ -131,6 +136,7 @@ export class ChatPermissionManager {
   public addUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -159,6 +165,7 @@ export class ChatPermissionManager {
   public removeUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -187,6 +194,7 @@ export class ChatPermissionManager {
   public setUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setUserPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -212,6 +220,7 @@ export class ChatPermissionManager {
   }
 
   public getAllUserPermissions(): Promise<Map<string, ChatPermission[]>> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getAllUserPermissionsRequest: {
         idType: CHAT,
@@ -226,6 +235,7 @@ export class ChatPermissionManager {
   }
 
   public getUserPermissions(username: string): Promise<ChatPermission[]> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getUserPermissionsRequest: {
         idType: CHAT,
@@ -244,6 +254,7 @@ export class ChatPermissionManager {
   public addGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -271,6 +282,7 @@ export class ChatPermissionManager {
   public removeGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -298,6 +310,7 @@ export class ChatPermissionManager {
   public setGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setGroupPermissions(permissions: Map<string, ChatPermission[]> |
     { [key: string]: ChatPermission[] }): Promise<void> {
+    this._connection.session().assertOnline();
     let map = new Map<string, ChatPermission[]>();
     if (permissions instanceof Map) {
       map = permissions;
@@ -322,6 +335,7 @@ export class ChatPermissionManager {
   }
 
   public getAllGroupPermissions(): Promise<Map<string, ChatPermission[]>> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getAllGroupPermissionsRequest: {
         idType: CHAT,
@@ -336,6 +350,7 @@ export class ChatPermissionManager {
   }
 
   public getGroupPermissions(groupId: string): Promise<ChatPermission[]> {
+    this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getGroupPermissionsRequest: {
         idType: CHAT,

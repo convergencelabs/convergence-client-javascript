@@ -10,33 +10,20 @@ import {
   UserAddedEvent,
   UserRemovedEvent
 } from "./events/";
-import {ChatType} from "./ChatService";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {ChatHistoryEntry} from "./ChatHistoryEntry";
 import {Observable} from "rxjs";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IChatInfoData = io.convergence.proto.IChatInfoData;
 import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
 import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUser} from "../identity";
-import {ChatMembership} from "./MembershipChat";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {Immutable} from "../util/Immutable";
-
-export interface ChatInfo {
-  readonly chatType: ChatType;
-  readonly chatId: string;
-  readonly membership: ChatMembership;
-  readonly name: string;
-  readonly topic: string;
-  readonly createdTime: Date;
-  readonly lastEventTime: Date;
-  readonly lastEventNumber: number;
-  readonly maxSeenEventNumber: number;
-  readonly members: ChatMember[];
-}
+import {ChatInfo, createChatInfo} from "./ChatInfo";
 
 export interface ChatMember {
   readonly user: DomainUser;
@@ -81,12 +68,12 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
-  private readonly _identityCache: IdentityCache;
+  protected _joined: boolean;
 
   /**
    * @internal
    */
-  private _joined: boolean;
+  private readonly _identityCache: IdentityCache;
 
   /**
    * @internal
@@ -94,16 +81,14 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   protected constructor(connection: ConvergenceConnection,
                         identityCache: IdentityCache,
                         messageStream: Observable<IChatEvent>,
-                        info: ChatInfo) {
+                        chatInfo: ChatInfo) {
     super();
     this._connection = connection;
     this._identityCache = identityCache;
-    this._info = info;
+    this._info = chatInfo;
 
     // TODO this might not make sense for rooms
-    this._joined = info.members
-      .map(m => m.user.userId)
-      .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
+    this._calculateJoinedState();
 
     messageStream.subscribe(event => {
       this._processEvent(event);
@@ -149,7 +134,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   server.
    */
   public send(message: string): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       publishChatMessageRequest: {
@@ -169,7 +154,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise acknowledging that the name has been successfully set.
    */
   public setName(name: string): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       setChatNameRequest: {
@@ -189,7 +174,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise acknowledging that the topic has been successfully set.
    */
   public setTopic(topic: string): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       setChatTopicRequest: {
@@ -211,7 +196,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise acknowledging that seen events have been marked successfully.
    */
   public markSeen(eventNumber: number): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       markChatEventsSeenRequest: {
@@ -234,7 +219,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   the specified search options.
    */
   public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       getChatHistoryRequest: {
@@ -255,21 +240,35 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    * @hidden
    * @internal
    */
-  protected _assertJoined(): void {
-    if (!this.isJoined()) {
-      const message = `Chat channel not joined: ${this._info.chatId}`;
-      throw new ConvergenceError(message, ConvergenceErrorCodes.CHAT_NOT_JOINED);
-    }
+  public _updateWithData(chatData: IChatInfoData) {
+    this._info = createChatInfo(this._connection.session(), this._identityCache, chatData);
+    // TODO this might not make sense for rooms
+    this._calculateJoinedState();
   }
 
   /**
    * @hidden
    * @internal
    */
-  protected _assertOnline(): void {
-    if (!this._connection.isOnline()) {
-      const message = `Can not perform the request action while offline`;
-      throw new ConvergenceError(message, ConvergenceErrorCodes.OFFLINE);
+  protected _join(): Promise<void> {
+    return this._connection.request({
+      joinChatRequest: {
+        chatId: this._info.chatId
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {joinChatResponse} = response;
+      this._updateWithData(joinChatResponse.chatInfo);
+    });
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  protected _assertJoined(): void {
+    if (!this.isJoined()) {
+      const message = `Chat channel not joined: ${this._info.chatId}`;
+      throw new ConvergenceError(message, ConvergenceErrorCodes.CHAT_NOT_JOINED);
     }
   }
 
@@ -308,6 +307,16 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     }
 
     Immutable.make(this._info);
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _calculateJoinedState() {
+    this._joined = this._info.members
+      .map(m => m.user.userId)
+      .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
   }
 }
 

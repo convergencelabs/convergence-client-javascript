@@ -23,5 +23,25 @@ export class ChatRoom extends MembershipChat {
               messageStream: Observable<IChatEvent>,
               info: MembershipChatInfo) {
     super(connection, identityCache, messageStream, info);
+
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOnline = () => {
+    this._join();
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOffline = () => {
+    this._joined = false;
   }
 }
