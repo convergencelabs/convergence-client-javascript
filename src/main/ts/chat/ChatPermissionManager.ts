@@ -5,6 +5,8 @@ import {domainUserIdToProto, domainUserTypeToProto} from "../connection/Protocol
 import {DomainUserId, DomainUserType} from "../identity/";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = io.convergence.proto.IUserPermissionsEntry;
+import IPermissionsList = io.convergence.proto.IPermissionsList;
+import { mapObjectValues } from "../util/ObjectUtils";
 
 export type ChatPermission =
   "create_chat"
@@ -17,22 +19,12 @@ export type ChatPermission =
   | "set_topic"
   | "manage_chat_permissions";
 
+type MapLikeChatPermissions = Map<string, ChatPermission[]> |
+                              { [key: string]: ChatPermission[] };
+
 const CHAT = 1;
 
 export class ChatPermissionManager {
-  /**
-   * @internal
-   */
-  private static _permissionsMapToPermissionEntries(map: Map<string, ChatPermission[]>): IUserPermissionsEntry[] {
-    const userPermissions: IUserPermissionsEntry[] = [];
-    map.forEach((userPerms, username) => {
-      userPermissions.push({
-        user: {userType: domainUserTypeToProto(DomainUserType.NORMAL), username},
-        permissions: userPerms
-      });
-    });
-    return userPermissions;
-  }
 
   /**
    * @internal
@@ -134,25 +126,16 @@ export class ChatPermissionManager {
 
   public addUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public addUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public addUserPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public addUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
 
-    const userPermissions = ChatPermissionManager._permissionsMapToPermissionEntries(map);
+    let map = StringMap.coerceToMap<ChatPermission[]>(permissions);
+
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        user: userPermissions
+        user: this._permissionsMapToPermissionEntries(map)
       }
     };
 
@@ -163,25 +146,15 @@ export class ChatPermissionManager {
 
   public removeUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public removeUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public removeUserPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public removeUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
+    let map = StringMap.coerceToMap<ChatPermission[]>(permissions);
 
-    const userPermissions = ChatPermissionManager._permissionsMapToPermissionEntries(map);
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        user: userPermissions
+        user: this._permissionsMapToPermissionEntries(map)
       }
     };
 
@@ -192,25 +165,15 @@ export class ChatPermissionManager {
 
   public setUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public setUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public setUserPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public setUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
+    let map = StringMap.coerceToMap<ChatPermission[]>(permissions);
 
-    const userPermissions = ChatPermissionManager._permissionsMapToPermissionEntries(map);
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        user: userPermissions
+        user: this._permissionsMapToPermissionEntries(map)
       }
     };
 
@@ -230,7 +193,7 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getAllUserPermissionsResponse} = response;
-      return StringMap.objectToMap(getAllUserPermissionsResponse.users);
+      return this._permissionsEntriesToUserMap(getAllUserPermissionsResponse.users);
     });
   }
 
@@ -252,24 +215,16 @@ export class ChatPermissionManager {
 
   public addGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public addGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public addGroupPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public addGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
+
+    let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
 
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        group: StringMap.mapToObject(map)
+        group: permissionsByGroup
       }
     };
 
@@ -280,24 +235,16 @@ export class ChatPermissionManager {
 
   public removeGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public removeGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public removeGroupPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public removeGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
+
+    let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
 
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        group: StringMap.mapToObject(map)
+        group: permissionsByGroup
       }
     };
 
@@ -308,24 +255,16 @@ export class ChatPermissionManager {
 
   public setGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public setGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
-  public setGroupPermissions(permissions: Map<string, ChatPermission[]> |
-    { [key: string]: ChatPermission[] }): Promise<void> {
+  public setGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
     this._connection.session().assertOnline();
-    let map = new Map<string, ChatPermission[]>();
-    if (permissions instanceof Map) {
-      map = permissions;
-    } else {
-      const permsObject = permissions as { [key: string]: ChatPermission[] };
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
-      });
-    }
+
+    let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
 
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         idType: CHAT,
         id: this._chatId,
-        group: StringMap.mapToObject(map)
+        group: permissionsByGroup
       }
     };
 
@@ -345,7 +284,12 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getAllGroupPermissionsResponse} = response;
-      return StringMap.objectToMap(getAllGroupPermissionsResponse.groups);
+
+      let permissions = mapObjectValues(getAllGroupPermissionsResponse.groups, permissionsList => {
+        return permissionsList.values as ChatPermission[];
+      });
+
+      return StringMap.objectToMap(permissions);
     });
   }
 
@@ -364,4 +308,46 @@ export class ChatPermissionManager {
       return getGroupPermissionsResponse.permissions as ChatPermission[];
     });
   }
+
+  /**
+   * @internal
+   */
+  private _permissionsMapToPermissionEntries(map: Map<string, ChatPermission[]>): IUserPermissionsEntry[] {
+    const userPermissions: IUserPermissionsEntry[] = [];
+    map.forEach((userPerms, username) => {
+      userPermissions.push({
+        user: {userType: domainUserTypeToProto(DomainUserType.NORMAL), username},
+        permissions: userPerms
+      });
+    });
+    return userPermissions;
+  }
+
+  /**
+   * @internal
+   */
+  private _permissionsEntriesToUserMap(entries: IUserPermissionsEntry[]): Map<string, ChatPermission[]> {
+    const userPermissions = new Map<string, ChatPermission[]>();
+
+    entries.forEach((entry: IUserPermissionsEntry) => {
+      const username = entry.user.username;
+      let permissions = entry.permissions as ChatPermission[];
+      userPermissions.set(username, permissions);
+    });
+
+    return userPermissions;
+  }
+
+  /**
+   * @internal
+   */
+  private _coercePermissionsToGroupedProtoPermissionList(
+    permissions: MapLikeChatPermissions): {[group: string]: IPermissionsList} {
+      let groupedPermissions = StringMap.coerceToObject<ChatPermission[]>(permissions);
+      return mapObjectValues(groupedPermissions, permissionsArr => {
+        return {
+          values: permissionsArr
+        };
+      });
+    }
 }

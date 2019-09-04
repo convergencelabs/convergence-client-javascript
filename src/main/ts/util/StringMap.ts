@@ -1,19 +1,19 @@
 export type StringMapLike = Map<string, any> | {[key: string]: any};
 
 export class StringMap {
-  public static objectToMap(obj: {[key: string]: any}): Map<string, any> {
-    const map: Map<string, any> = new Map<string, any>();
+  public static objectToMap<T>(obj: {[key: string]: T}): Map<string, T> {
+    const map: Map<string, T> = new Map<string, T>();
     Object.keys(obj).forEach(k => map.set(k, obj[k]));
     return map;
   }
 
-  public static mapToObject(map: Map<string, any>): {[key: string]: any} {
-    const obj: {[key: string]: any} = {};
+  public static mapToObject<T>(map: Map<string, T>): {[key: string]: T} {
+    const obj: {[key: string]: T} = {};
     map.forEach((v, k) => obj[k] = v);
     return obj;
   }
 
-  public static coerceToObject(map: StringMapLike): {[key: string]: any} {
+  public static coerceToObject<T>(map: StringMapLike): {[key: string]: T} {
     if (map instanceof Map) {
       return StringMap.mapToObject(map);
     } else {
@@ -21,7 +21,7 @@ export class StringMap {
     }
   }
 
-  public static coerceToMap(map: StringMapLike): Map<string, any> {
+  public static coerceToMap<T>(map: StringMapLike): Map<string, T> {
     if (map instanceof Map) {
       return map;
     } else {
@@ -29,9 +29,9 @@ export class StringMap {
     }
   }
 
-  public static toStringMap(map: StringMapLike): Map<string, any> {
+  public static toStringMap<T>(map: StringMapLike): Map<string, T> {
     if (!map) {
-      return map as Map<string, any>;
+      return map as Map<string, T>;
     }
 
     if (map instanceof Map) {
