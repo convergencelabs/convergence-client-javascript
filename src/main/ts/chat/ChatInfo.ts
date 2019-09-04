@@ -2,9 +2,9 @@ import { IdentityCache } from "../identity/IdentityCache";
 import {io} from "@convergence-internal/convergence-proto";
 import IChatInfoData = io.convergence.proto.IChatInfoData;
 import { ChatMembership } from "./MembershipChat";
-import { ChatMember } from "./Chat";
 import { protoToDomainUserId, getOrDefaultNumber, timestampToDate } from "../connection/ProtocolUtil";
 import { ConvergenceSession } from "../ConvergenceSession";
+import { DomainUser } from "../identity";
 
 export interface ChatInfo {
   readonly chatType: ChatType;
@@ -19,6 +19,10 @@ export interface ChatInfo {
   readonly members: ChatMember[];
 }
 
+export interface ChatMember {
+  readonly user: DomainUser;
+  readonly maxSeenEventNumber: number;
+}
 export type ChatType = "direct" | "channel" | "room";
 
 export const ChatTypes = {

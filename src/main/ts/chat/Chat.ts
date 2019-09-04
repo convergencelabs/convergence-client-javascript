@@ -1,8 +1,8 @@
 import {ConvergenceError, ConvergenceEventEmitter} from "../util/";
 import {
-  ChatNameChanged,
+  ChatNameChangedEvent,
   IChatEvent,
-  ChatTopicChanged,
+  ChatTopicChangedEvent,
   ChatMessageEvent,
   ChatEvent,
   UserJoinedEvent,
@@ -20,15 +20,9 @@ import IChatInfoData = io.convergence.proto.IChatInfoData;
 import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
 import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
-import {DomainUser} from "../identity";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {Immutable} from "../util/Immutable";
 import {ChatInfo, createChatInfo} from "./ChatInfo";
-
-export interface ChatMember {
-  readonly user: DomainUser;
-  readonly maxSeenEventNumber: number;
-}
 
 export interface ChatEvents {
   readonly MESSAGE: string;
@@ -300,9 +294,9 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       }
       const members = this._info.members.filter(member => !member.user.userId.equals(removedUser.userId));
       this._info = {...this._info, members};
-    } else if (event instanceof ChatNameChanged) {
+    } else if (event instanceof ChatNameChangedEvent) {
       this._info = {...this._info, name: event.chatName};
-    } else if (event instanceof ChatTopicChanged) {
+    } else if (event instanceof ChatTopicChangedEvent) {
       this._info = {...this._info, topic: event.topic};
     }
 
@@ -320,9 +314,46 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   }
 }
 
+/**
+ * An object containing some options for fetching chat history. By default, all
+ * events in this chat are returned, not just the actual messages.  Also, by default
+ * events are returned in descending order, starting from the end.
+ *
+ * To return the last 25 messages:
+ * ```
+ * chat.getHistory({
+ *   limit: 25,
+ *   eventFilter: [ChatMessageEvent.NAME]
+ * })
+ * ```
+ *
+ * To return the first 10 events:
+ * ```
+ * chat.getHistory({
+ *   startEvent: 0,
+ *   limit: 10,
+ *   forward: true
+ * })
+ * ```
+ */
 export interface ChatHistorySearchOptions {
+  /**
+   * The sequential event number at which to start the query
+   */
   startEvent?: number;
+
+  /**
+   * The maximum number of query results
+   */
   limit?: number;
+
+  /**
+   * Set to true to return events in ascending order
+   */
   forward?: boolean;
+
+  /**
+   * An array of [[ChatEvent]] names to which the results will be limited
+   */
   eventFilter?: string[];
 }

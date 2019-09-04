@@ -2,16 +2,16 @@ import {ChatEvent} from "./ChatEvent";
 import {DomainUser} from "../../identity";
 
 /**
- * Emitted when a [[DomainUser]] leaves a [[Chat]].
+ * Emitted when a [[Chat]]'s topic changes.
  */
-export class UserLeftEvent extends ChatEvent {
-  public static readonly NAME = "user_left";
+export class ChatTopicChangedEvent extends ChatEvent {
+  public static readonly NAME = "topic_changed";
 
   /**
    * The name of this event type.  This can be e.g. used to filter when using the
    * [[ConvergenceEventEmitter.events]] stream.
    */
-  public readonly name: string = UserLeftEvent.NAME;
+  public readonly name: string = ChatTopicChangedEvent.NAME;
 
   /**
    * @hidden
@@ -38,6 +38,11 @@ export class UserLeftEvent extends ChatEvent {
      * The user associated wth the event
      */
     public readonly user: DomainUser,
+
+    /**
+     * The Chat's new topic
+     */
+    public readonly topic: string
   ) {
     super(chatId, eventNumber, timestamp, user);
     Object.freeze(this);

@@ -1,5 +1,6 @@
 export * from "./ChatService";
 export * from "./Chat";
+export * from "./ChatInfo";
 export * from "./ChatChannel";
 export * from "./DirectChat";
 export * from "./ChatRoom";
@@ -12,8 +13,8 @@ export {UserJoinedEvent} from "./events/UserJoinedEvent";
 export {UserLeftEvent} from "./events/UserLeftEvent";
 export {UserAddedEvent} from "./events/UserAddedEvent";
 export {UserRemovedEvent} from "./events/UserRemovedEvent";
-export {ChatNameChanged} from "./events/ChatNameChanged";
-export {ChatTopicChanged} from "./events/ChatTopicChanged";
+export {ChatNameChangedEvent} from "./events/ChatNameChangedEvent";
+export {ChatTopicChangedEvent} from "./events/ChatTopicChangedEvent";
 export {ChatJoinedEvent} from "./events/ChatJoinedEvent";
 export {ChatLeftEvent} from "./events/ChatLeftEvent";
 export {ChatRemovedEvent} from "./events/ChatRemovedEvent";

@@ -201,8 +201,8 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       throw new Error("create options must be supplied");
     }
 
-    if (options.type !== "group" && options.type !== "room") {
-      throw new Error(`type must be 'group' or 'room': ${options.type}`);
+    if (options.type !== "channel" && options.type !== "room") {
+      throw new Error(`type must be 'channel' or 'room': ${options.type}`);
     }
 
     if (options.membership !== "public" && options.membership !== "private") {

@@ -37,7 +37,7 @@ export abstract class MembershipChat extends Chat {
    *   A promise that will be resolved when the Chat is left successfully.
    */
   public leave(): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       leaveChatRequest: {
@@ -56,7 +56,7 @@ export abstract class MembershipChat extends Chat {
    *   removed from the chat.
    */
   public remove(user: DomainUserIdentifier): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       removeUserFromChatChannelRequest: {

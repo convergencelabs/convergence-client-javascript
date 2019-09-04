@@ -5,8 +5,8 @@ import {
   UserLeftEvent,
   UserAddedEvent,
   UserRemovedEvent,
-  ChatNameChanged,
-  ChatTopicChanged, IChatEvent
+  ChatNameChangedEvent,
+  ChatTopicChangedEvent, IChatEvent
 } from "./events/";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
@@ -73,7 +73,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
     return new ChatRemovedEvent(removedMsg.chatId);
   } else if (message.chatNameChanged) {
     const nameSet = message.chatNameChanged;
-    return new ChatNameChanged(
+    return new ChatNameChangedEvent(
       nameSet.chatId,
       getOrDefaultNumber(nameSet.eventNumber),
       timestampToDate(nameSet.timestamp),
@@ -82,7 +82,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
     );
   } else if (message.chatTopicChanged) {
     const topicSet = message.chatTopicChanged;
-    return new ChatTopicChanged(
+    return new ChatTopicChangedEvent(
       topicSet.chatId,
       getOrDefaultNumber(topicSet.eventNumber),
       timestampToDate(topicSet.timestamp),

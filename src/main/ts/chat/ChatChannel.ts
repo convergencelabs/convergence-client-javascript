@@ -33,7 +33,7 @@ export class ChatChannel extends MembershipChat {
    *   A promise that is resolved when the user has successfully be added.
    */
   public add(user: DomainUserIdentifier): Promise<void> {
-    this._assertOnline();
+    this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
       addUserToChatChannelRequest: {
