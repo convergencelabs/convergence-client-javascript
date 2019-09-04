@@ -35,7 +35,7 @@ export class UserLeftEvent extends ChatEvent {
     public readonly timestamp: Date,
 
     /**
-     * The user associated wth the event
+     * The user that left the chat.
      */
     public readonly user: DomainUser,
   ) {

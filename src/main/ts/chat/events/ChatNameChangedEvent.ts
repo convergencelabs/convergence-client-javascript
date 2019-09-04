@@ -35,7 +35,7 @@ export class ChatNameChangedEvent extends ChatEvent {
     public readonly timestamp: Date,
 
     /**
-     * The user associated wth the event
+     * The user that initiated the event
      */
     public readonly user: DomainUser,
 

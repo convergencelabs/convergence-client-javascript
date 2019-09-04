@@ -47,6 +47,14 @@ const Events: ChatServiceEvents = {
 };
 Object.freeze(Events);
 
+/**
+ * The `ChatService` is the entry point for chat functionality.  Chat is defined
+ * as textual communication limited to either a fixed set of participants, or a
+ * [[ChatRoom]] in which any members can send and receive messages.
+ *
+ * See the [developer guide](https://docs.convergence.io/guide/chat/overview.html)
+ * for a few chat examples.
+ */
 export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   public static readonly Events: ChatServiceEvents = Events;
@@ -412,12 +420,43 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 //   topic?: string;
 // }
 
+/**
+ * A set of options when creating a [[ChatChannel]] or [[ChatRoom]].
+ */
 export interface CreateChatChannelOptions {
-  type: string;
-  membership: string;
+  /**
+   * The type of chat.  Must be "channel" or "room".
+   */
+  type: "channel" | "room";
+
+  /**
+   * The visibility of the chat room.  Must be "public" or "private".
+   */
+  membership: "public" | "private";
+
+  /**
+   * The ID which the new chat should have.  Returns an error if a chat with this
+   * ID already exists AND `ignoreExistsError` is not true.
+   */
   id?: string;
+
+  /**
+   * An optional name for the chat.
+   */
   name?: string;
+
+  /**
+   * An optional topic for the chat.
+   */
   topic?: string;
+
+  /**
+   * An array of [[DomainUser]]s to which this chat is available.
+   */
   members?: DomainUserIdentifier[];
+
+  /**
+   * Set to true to ignore an error in the case of an existing desired Chat ID
+   */
   ignoreExistsError?: boolean;
 }

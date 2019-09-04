@@ -35,7 +35,7 @@ export class UserJoinedEvent extends ChatEvent {
     public readonly timestamp: Date,
 
     /**
-     * The user associated wth the event
+     * The user that joined the chat.
      */
     public readonly user: DomainUser,
   ) {
