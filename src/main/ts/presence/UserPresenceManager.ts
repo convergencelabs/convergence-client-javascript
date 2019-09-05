@@ -153,6 +153,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     } else if (message.presenceStateSet) {
       const {state} = message.presenceStateSet;
       const jsonState = StringMap.objectToMap(mapObjectValues(getOrDefaultObject(state), protoValueToJson));
+      // todo the set method does a deep clone which is not really needed. We should optimize this
+      // path so internally the clone is not needed.
       this.set(jsonState);
     } else if (message.presenceStateCleared) {
       this.clear();

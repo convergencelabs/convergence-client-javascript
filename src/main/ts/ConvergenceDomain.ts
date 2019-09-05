@@ -29,6 +29,8 @@ import {IdentityCache} from "./identity/IdentityCache";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
 import {TypeChecker} from "./util/TypeChecker";
+import {getOrDefaultObject, protoValueToJson} from "./connection/ProtocolUtil";
+import {mapObjectValues} from "./util/ObjectUtils";
 
 /**
  * This represents a single connection to a specific Domain in
@@ -465,7 +467,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   private _init(authEvent: IAuthenticatedEvent): void {
     if (!TypeChecker.isSet(this._identityCache)) {
       const session: ConvergenceSession = this._connection.session();
-      const presenceState: Map<string, any> = StringMap.objectToMap(authEvent.state || {});
+      const initialPresenceState = mapObjectValues(getOrDefaultObject(authEvent.state), protoValueToJson);
+      const presenceState: Map<string, any> = StringMap.objectToMap(initialPresenceState);
       const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
 
       this._identityCache = new IdentityCache(this._connection);

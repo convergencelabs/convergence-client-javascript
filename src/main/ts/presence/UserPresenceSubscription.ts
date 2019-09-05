@@ -1,4 +1,4 @@
-import {IConvergenceEvent, ConvergenceEventEmitter} from "../util/";
+import {ConvergenceEventEmitter} from "../util/";
 import {UserPresence} from "./UserPresence";
 import {UserPresenceManager} from "./UserPresenceManager";
 import {Observable} from "rxjs";
@@ -6,7 +6,7 @@ import {
   PresenceAvailabilityChangedEvent,
   PresenceStateSetEvent,
   PresenceStateRemovedEvent,
-  PresenceStateClearedEvent
+  PresenceStateClearedEvent, IPresenceEvent
 } from "./events/";
 import {DomainUser} from "../identity";
 
@@ -21,7 +21,7 @@ export interface UserPresenceSubscriptionEvents {
  * The [[UserPresenceSubscription]] represents the subscription to the presence
  * of a specific Domain User.
  */
-export class UserPresenceSubscription extends ConvergenceEventEmitter<IConvergenceEvent> {
+export class UserPresenceSubscription extends ConvergenceEventEmitter<IPresenceEvent> {
 
   public static readonly Events: UserPresenceSubscriptionEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,
