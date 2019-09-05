@@ -1,7 +1,7 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {io} from "@convergence-internal/convergence-proto";
 import {StringMap} from "../util";
-import {domainUserIdToProto, domainUserTypeToProto} from "../connection/ProtocolUtil";
+import {domainUserIdToProto, domainUserTypeToProto, getOrDefaultArray} from "../connection/ProtocolUtil";
 import {DomainUserId, DomainUserType} from "../identity/";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = io.convergence.proto.IUserPermissionsEntry;
@@ -24,6 +24,14 @@ type MapLikeChatPermissions = Map<string, ChatPermission[]> |
 
 const CHAT = 1;
 
+/**
+ * Allows getting and setting permissions for the various capabilities of [[Chat]]s.
+ * The specific permissions are defined in [[ChatPermission]].  Permissions can be
+ * assigned per-[[DomainUser]], per-[[UserGroup]], or for everybody
+ * ([[setWorldPermissions]]).
+ *
+ * Generally speaking, more specific permissions override less-specific ones.
+ */
 export class ChatPermissionManager {
 
   /**
@@ -45,10 +53,18 @@ export class ChatPermissionManager {
     this._connection = connection;
   }
 
+  /**
+   * The [[Chat]] ID to which these permissions apply.
+   */
   get chatId() {
     return this._chatId;
   }
 
+  /**
+   * Returns the *resolved* permissions for the current user for this [[chatId]].
+   * Resolved means computed from the set of any relevant `world`, `group` or `user`
+   * permissions.
+   */
   public getPermissions(): Promise<ChatPermission[]> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -60,10 +76,22 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getClientPermissionsResponse} = response;
-      return getClientPermissionsResponse.permissions as ChatPermission[];
+      return getOrDefaultArray(getClientPermissionsResponse.permissions as ChatPermission[]);
     });
   }
 
+  /**
+   * WORLD permissions
+   */
+
+  /**
+   * Adds the given permissions to any existing WORLD permissions for this [[chatId]].
+   *
+   * @param permissions an array of permission strings
+   *
+   * @returns
+   *   A promise if successful
+   */
   public addWorldPermissions(permissions: ChatPermission[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -79,6 +107,14 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Removes the given permissions from any existing WORLD permissions for this [[chatId]].
+   *
+   * @param permissions an array of permission strings
+   *
+   * @returns
+   *   A promise if successful
+   */
   public removeWorldPermissions(permissions: ChatPermission[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -94,6 +130,14 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Sets the given permissions for WORLD for this [[chatId]].
+   *
+   * @param permissions an array of permission strings
+   *
+   * @returns
+   *   A promise if successful
+   */
   public setWorldPermissions(permissions: ChatPermission[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -109,6 +153,12 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Returns the permissions for WORLD for this [[chatId]].
+   *
+   * @returns
+   *   A promise, which resolves with an array of permission strings
+   */
   public getWorldPermissions(): Promise<ChatPermission[]> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -120,10 +170,24 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getWorldPermissionsResponse} = response;
-      return getWorldPermissionsResponse.permissions as ChatPermission[];
+      return getOrDefaultArray(getWorldPermissionsResponse.permissions as ChatPermission[]);
     });
   }
 
+  /**
+   * USER permissions
+   */
+
+  /**
+   * Adds the given permissions to any existing permissions for this [[chatId]] for all
+   * given users.
+   *
+   * @param permissions
+   *   an object, mapping usernames to an array of desired permission strings to be added
+   *
+   * @returns
+   *   A promise if successful
+   */
   public addUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public addUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -144,6 +208,16 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Removes the given permissions from any of the provided users' permissions for this
+   * [[chatId]].
+   *
+   * @param permissions
+   *   An object, mapping usernames to an array of desired permission strings to be removed
+   *
+   * @returns
+   *   A promise if successful
+   */
   public removeUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public removeUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -163,6 +237,15 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Sets the given permissions for the given users for this [[chatId]].
+   *
+   * @param permissions
+   *   an object which maps one or more usernames to their new set of permissions
+   *
+   * @returns
+   *   A promise if successful
+   */
   public setUserPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public setUserPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setUserPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -182,6 +265,12 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Returns the permissions for all users for this [[chatId]].
+   *
+   * @returns
+   *   A promise, which resolves with a map of permission strings per username.
+   */
   public getAllUserPermissions(): Promise<Map<string, ChatPermission[]>> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -197,6 +286,14 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Returns the permissions for the given user for this [[chatId]].
+   *
+   * @param username an existing user's username
+   *
+   * @returns
+   *   A promise, which resolves with an array of permission strings
+   */
   public getUserPermissions(username: string): Promise<ChatPermission[]> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -209,10 +306,24 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getUserPermissionsResponse} = response;
-      return getUserPermissionsResponse.permissions as ChatPermission[];
+      return getOrDefaultArray(getUserPermissionsResponse.permissions as ChatPermission[]);
     });
   }
 
+  /**
+   * GROUP permissions
+   */
+
+  /**
+   * Adds the given permissions to any existing permissions for this [[chatId]] for all
+   * given groups.
+   *
+   * @param permissions
+   *   an object, mapping group IDs to an array of desired permission strings to be added
+   *
+   * @returns
+   *   A promise if successful
+   */
   public addGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public addGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public addGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -233,6 +344,16 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Removes the given permissions from any of the provided groups' permissions for this
+   * [[chatId]].
+   *
+   * @param permissions
+   *   An object, mapping group IDs to an array of desired permission strings to be removed
+   *
+   * @returns
+   *   A promise if successful
+   */
   public removeGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public removeGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public removeGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -253,6 +374,15 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Sets the given permissions for the given groups for this [[chatId]].
+   *
+   * @param permissions
+   *   an object which maps one or more group IDs to their new set of permissions
+   *
+   * @returns
+   *   A promise if successful
+   */
   public setGroupPermissions(permissions: { [key: string]: ChatPermission[] }): Promise<void>;
   public setGroupPermissions(permissions: Map<string, ChatPermission[]>): Promise<void>;
   public setGroupPermissions(permissions: MapLikeChatPermissions): Promise<void> {
@@ -273,6 +403,12 @@ export class ChatPermissionManager {
     });
   }
 
+  /**
+   * Returns the permissions for all groups for this [[chatId]].
+   *
+   * @returns
+   *   A promise, which resolves with a map of permission strings per group ID.
+   */
   public getAllGroupPermissions(): Promise<Map<string, ChatPermission[]>> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -286,13 +422,21 @@ export class ChatPermissionManager {
       const {getAllGroupPermissionsResponse} = response;
 
       let permissions = mapObjectValues(getAllGroupPermissionsResponse.groups, permissionsList => {
-        return permissionsList.values as ChatPermission[];
+        return getOrDefaultArray(permissionsList.values as ChatPermission[]);
       });
 
       return StringMap.objectToMap(permissions);
     });
   }
 
+  /**
+   * Returns the permissions for the given group for this [[chatId]].
+   *
+   * @param groupId an existing group ID
+   *
+   * @returns
+   *   A promise, which resolves with an array of permission strings
+   */
   public getGroupPermissions(groupId: string): Promise<ChatPermission[]> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
@@ -305,7 +449,7 @@ export class ChatPermissionManager {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {getGroupPermissionsResponse} = response;
-      return getGroupPermissionsResponse.permissions as ChatPermission[];
+      return getOrDefaultArray(getGroupPermissionsResponse.permissions as ChatPermission[]);
     });
   }
 
@@ -331,7 +475,7 @@ export class ChatPermissionManager {
 
     entries.forEach((entry: IUserPermissionsEntry) => {
       const username = entry.user.username;
-      let permissions = entry.permissions as ChatPermission[];
+      let permissions = getOrDefaultArray(entry.permissions as ChatPermission[]);
       userPermissions.set(username, permissions);
     });
 

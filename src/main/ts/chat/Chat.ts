@@ -338,7 +338,9 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
  */
 export interface ChatHistorySearchOptions {
   /**
-   * The sequential event number at which to start the query
+   * The sequential event number at which to start the query.
+   *
+   * [[ChatInfo.lastEventNumber]] could be a useful piece of information here.
    */
   startEvent?: number;
 

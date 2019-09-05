@@ -21,6 +21,9 @@ import {IdentityCache} from "../identity/IdentityCache";
 import {io} from "@convergence-internal/convergence-proto";
 import IChatChannelEventData = io.convergence.proto.IChatEventData;
 
+/**
+ * @internal
+ */
 export class ChatHistoryEventMapper {
   public static toChatHistoryEntry(data: IChatChannelEventData, identityCache: IdentityCache): ChatHistoryEntry {
     if (data.created) {

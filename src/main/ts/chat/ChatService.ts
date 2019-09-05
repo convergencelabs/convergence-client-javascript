@@ -383,7 +383,8 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
   }
 
   /**
-   * Get the users permissions for the specified chat.
+   * Gets a [[ChatPermissionManager]] which allows for querying and modifying
+   * permissions for the specified chat.
    *
    * @param chatId
    */
@@ -431,6 +432,9 @@ export interface CreateChatChannelOptions {
 
   /**
    * The visibility of the chat room.  Must be "public" or "private".
+   *
+   * Private chats cannot be joined by a user, but rather added ([[ChatChannel.add]])
+   * by another member with the appropriate permissions
    */
   membership: "public" | "private";
 

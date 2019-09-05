@@ -35,12 +35,12 @@ export class ChatMessageEvent extends ChatEvent {
     public readonly timestamp: Date,
 
     /**
-     * The user that initiated the event
+     * The user that sent the message
      */
     public readonly user: DomainUser,
 
     /**
-     * The session associated with the event
+     * The session ID of the user that sent the message
      */
     public readonly sessionId: string,
 
