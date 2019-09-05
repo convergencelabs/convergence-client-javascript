@@ -155,6 +155,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
     this._connectionState = ConnectionState.DISCONNECTING;
 
+    this._authenticated = false;
+
     this._protocolConnection
       .close()
       .then(() => {
@@ -484,7 +486,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _handleDisconnected(): void {
-    this._authenticated = false;
     this._connectionState = ConnectionState.DISCONNECTED;
     this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
   }

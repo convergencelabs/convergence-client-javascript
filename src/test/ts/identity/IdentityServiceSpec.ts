@@ -1,11 +1,14 @@
-import { IdentityService } from "../../../main/ts/identity/IdentityService";
-import { DomainUser } from "../../../main/ts/identity/DomainUser";
-import { UserGroup } from "../../../main/ts/identity/UserGroup";
-import { createStubInstance } from "sinon";
-import { ConvergenceConnection } from "../../../main/ts/connection/ConvergenceConnection";
-import { DomainUserType, DomainUserId } from "../../../main/ts/identity/DomainUserId";
-import { expect } from "chai";
-import { domainUserIdToProto } from "../../../main/ts/connection/ProtocolUtil";
+import {
+  IdentityService,
+  DomainUser,
+  DomainUserType,
+  DomainUserId
+} from "../../../main/ts/identity/";
+
+import {UserGroup} from "../../../main/ts/identity/UserGroup";
+import {createStubInstance} from "sinon";
+import {domainUserIdToProto} from "../../../main/ts/connection/ProtocolUtil";
+import {ConvergenceConnection} from "../../../main/ts/connection/ConvergenceConnection";
 
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
@@ -14,8 +17,10 @@ import IUserListMessage = io.convergence.proto.IUserListMessage;
 import IUserGroupData = io.convergence.proto.IUserGroupData;
 import IUserGroupsEntry = io.convergence.proto.IUserGroupsEntry;
 
+import {expect} from "chai";
+
 function createStubbedService(users: DomainUser[], groups?: UserGroup[]) {
-  let connection = createStubInstance(ConvergenceConnection);
+  const connection = createStubInstance(ConvergenceConnection);
 
   connection.request = (async (message: IConvergenceMessage) => {
     if (message.hasOwnProperty("usersGetRequest")) {

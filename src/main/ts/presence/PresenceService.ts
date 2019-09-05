@@ -2,7 +2,7 @@ import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {
   ConvergenceEventEmitter,
-  IConvergenceEvent,
+  Logging,
   StringMap,
   StringMapLike
 } from "../util/";
@@ -15,7 +15,7 @@ import {
   PresenceAvailabilityChangedEvent,
   PresenceStateSetEvent,
   PresenceStateRemovedEvent,
-  PresenceStateClearedEvent
+  PresenceStateClearedEvent, IPresenceEvent
 } from "./events/";
 import {mapObjectValues} from "../util/ObjectUtils";
 import {
@@ -46,7 +46,7 @@ export interface PresenceServiceEvents {
  * system can set presence state. Presence state is global for each user
  * in that the state is shared across all sessions.
  */
-export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> {
+export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 
   public static readonly Events: PresenceServiceEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,
@@ -54,6 +54,11 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
     STATE_CLEARED: PresenceStateClearedEvent.NAME,
     AVAILABILITY_CHANGED: PresenceAvailabilityChangedEvent.NAME
   };
+
+  /**
+   * @internal
+   */
+  private readonly _logger = Logging.logger("connection");
 
   /**
    * @internal
@@ -91,11 +96,6 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
   private readonly _identityCache: IdentityCache;
 
   /**
-   * @internal
-   */
-  private _lastOnlineState: Map<string, any> | null;
-
-  /**
    * @hidden
    * @internal
    */
@@ -125,7 +125,7 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
 
     this._localPresence = this._localManager.subscribe();
 
-    this._lastOnlineState = this._connection.isOnline() ? null : new Map();
+    this._emitFrom(this._localPresence.events());
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
@@ -357,8 +357,19 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _setOnline = () => {
-    //
-    this._lastOnlineState = null;
+    // FIXME we don't handle re-synchronizing the presence state.
+    const resubscribe: DomainUserId[] = [];
+    this._managers.forEach(manager => {
+      resubscribe.push(manager.user().userId);
+    });
+
+    this._subscribe(resubscribe)
+      .then(() => {
+        this._logger.debug("PresenceService resubscribed");
+      })
+      .catch((error) => {
+        this._logger.error("Error resubscribing to presence", error);
+      });
   }
 
   /**
@@ -366,6 +377,6 @@ export class PresenceService extends ConvergenceEventEmitter<IConvergenceEvent> 
    * @hidden
    */
   private _setOffline = () => {
-    this._lastOnlineState = this.state();
+    // FIXME set all managers offline.
   }
 }
