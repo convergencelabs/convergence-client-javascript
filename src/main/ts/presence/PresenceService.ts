@@ -213,6 +213,8 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
   public presence(users: DomainUserIdentifier[]): Promise<UserPresence[]>;
   public presence(
     users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence | UserPresence[]> {
+    this._connection.session().assertOnline();
+
     if (!Array.isArray(users)) {
       return this._get([DomainUserId.toDomainUserId(users)]).then(result => {
         return result[0] as UserPresence;
@@ -298,16 +300,8 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
         this._presenceStreams.set(userId.toGuid(), stream);
       });
 
-      const message: IConvergenceMessage = {
-        presenceSubscribeRequest: {
-          users: notSubscribed.map(domainUserIdToProto)
-        }
-      };
-
-      return this._connection.request(message).then((response: IConvergenceMessage) => {
-        const {userPresences} = response.presenceSubscribeResponse;
-        userPresences.forEach(presence => {
-          const userPresence = this._mapUserPresence(presence);
+      return this._subscribeToServer(notSubscribed).then(userPresences => {
+        userPresences.forEach(userPresence => {
           const guid = userPresence.user.userId.toGuid();
           const manager: UserPresenceManager = new UserPresenceManager(
             userPresence,
@@ -316,10 +310,25 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
           );
           this._managers.set(guid, manager);
         });
+
+        return;
       });
     } else {
       return Promise.resolve();
     }
+  }
+
+  private _subscribeToServer(users: DomainUserId[]): Promise<UserPresence[]> {
+    const message: IConvergenceMessage = {
+      presenceSubscribeRequest: {
+        users: users.map(domainUserIdToProto)
+      }
+    };
+
+    return this._connection.request(message).then((response: IConvergenceMessage) => {
+      const {userPresences} = response.presenceSubscribeResponse;
+      return getOrDefaultArray(userPresences).map(presence => this._mapUserPresence(presence));
+    });
   }
 
   /**
@@ -357,15 +366,20 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * @hidden
    */
   private _setOnline = () => {
-    // FIXME we don't handle re-synchronizing the presence state.
     const resubscribe: DomainUserId[] = [];
     this._managers.forEach(manager => {
       resubscribe.push(manager.user().userId);
     });
 
-    this._subscribe(resubscribe)
-      .then(() => {
-        this._logger.debug("PresenceService resubscribed");
+    this._subscribeToServer(resubscribe)
+      .then((userPresences: UserPresence[]) => {
+        userPresences.forEach(userPresence => {
+          const guid = userPresence.user.userId.toGuid();
+          const manager = this._managers.get(guid);
+          if (manager) {
+            manager._setOnline(userPresence);
+          }
+        });
       })
       .catch((error) => {
         this._logger.error("Error resubscribing to presence", error);
@@ -377,6 +391,8 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * @hidden
    */
   private _setOffline = () => {
-    // FIXME set all managers offline.
+    this._managers.forEach((manager) => {
+      manager._setOffline();
+    });
   }
 }

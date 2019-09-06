@@ -92,17 +92,19 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     }
   }
 
-  public availability(availability: boolean): void {
+  public availability(availability: boolean, emitSubject = true): void {
     this._presence =
       new UserPresence(this._presence.user, availability, this._presence.state);
 
     const event: PresenceAvailabilityChangedEvent =
       new PresenceAvailabilityChangedEvent(this._presence.user, availability);
     this._emitEvent(event);
-    this._subject.next(this._presence);
+    if (emitSubject) {
+      this._subject.next(this._presence);
+    }
   }
 
-  public set(state: Map<string, any>): void {
+  public set(state: Map<string, any>, emitSubject = true): void {
     const newState: Map<string, any> = this._presence.state;
     state.forEach((v, k) => newState.set(k, deepClone(v)));
 
@@ -113,10 +115,12 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
     const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.user, newState);
     this._emitEvent(event);
-    this._subject.next(this._presence);
+    if (emitSubject) {
+      this._subject.next(this._presence);
+    }
   }
 
-  public remove(keys: string[]): void {
+  public remove(keys: string[], emitSubject = true): void {
     const newState: Map<string, any> = this._presence.state;
     keys.forEach(k => newState.delete(k));
 
@@ -127,10 +131,12 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
     const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.user, keys);
     this._emitEvent(event);
-    this._subject.next(this._presence);
+    if (emitSubject) {
+      this._subject.next(this._presence);
+    }
   }
 
-  public clear(): void {
+  public clear(emitSubject = true): void {
     this._presence = new UserPresence(
       this._presence.user,
       this._presence.available,
@@ -138,7 +144,29 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
     const event: PresenceStateClearedEvent = new PresenceStateClearedEvent(this._presence.user);
     this._emitEvent(event);
-    this._subject.next(this._presence);
+    if (emitSubject) {
+      this._subject.next(this._presence);
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  public _setOnline(newPresence: UserPresence): void {
+    this.availability(newPresence.available, false);
+    this.clear(false);
+    this.set(newPresence.state);
+
+    this._subject.next(newPresence);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  public _setOffline(): void {
+    this.availability(false);
   }
 
   /**
