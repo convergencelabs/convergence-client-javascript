@@ -17,28 +17,7 @@ export class UserJoinedEvent extends ChatEvent {
    * @hidden
    * @internal
    */
-  constructor(
-    /**
-     * The ID of the [[Chat]] on which this event occurred
-     */
-    public readonly chatId: string,
-
-    /**
-     * This event's unique sequential number.  This can be useful when e.g. querying for
-     * events on a particular chat ([[Chat.getHistory]]).
-     */
-    public readonly eventNumber: number,
-
-    /**
-     * The timestamp when the event occurred
-     */
-    public readonly timestamp: Date,
-
-    /**
-     * The user that joined the chat.
-     */
-    public readonly user: DomainUser,
-  ) {
+  constructor(chatId: string, eventNumber: number, timestamp: Date, user: DomainUser) {
     super(chatId, eventNumber, timestamp, user);
     Object.freeze(this);
   }

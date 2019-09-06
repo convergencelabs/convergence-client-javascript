@@ -11,6 +11,9 @@ import {IdentityCache} from "../identity/IdentityCache";
  * session. If a particular session is not connected and currently in a given
  * room, then messages published to that room will not be delivered to that
  * session.
+ *
+ * If your session is disconnected while joined to a `ChatRoom`, you will automatically
+ * rejoin when connectivity is restored.
  */
 export class ChatRoom extends MembershipChat {
 
@@ -24,9 +27,9 @@ export class ChatRoom extends MembershipChat {
               info: MembershipChatInfo) {
     super(connection, identityCache, messageStream, info);
 
-    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
-    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+    connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
+    connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
+    connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
   }
 
   /**

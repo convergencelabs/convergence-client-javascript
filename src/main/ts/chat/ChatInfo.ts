@@ -6,26 +6,90 @@ import { protoToDomainUserId, getOrDefaultNumber, timestampToDate } from "../con
 import { ConvergenceSession } from "../ConvergenceSession";
 import { DomainUser } from "../identity";
 
+/**
+ * The relevant metadata for a [[Chat]].
+ */
 export interface ChatInfo {
+
+  /**
+   * The type of chat: [[ChatRoom]], [[ChatChannel]] or [[DirectChat]].
+   */
   readonly chatType: ChatType;
+
+  /**
+   * The unique ID for this chat.
+   */
   readonly chatId: string;
+
+  /**
+   * Whether this chat is public or private.  In a private chat, members must be
+   * explicitly added by another member with the appropriate permissions
+   * (see [[ChatPermission]]).
+   */
   readonly membership: ChatMembership;
+
+  /**
+   * An optional name for this chat.
+   */
   readonly name: string;
+
+  /**
+   * An optional topic for this chat.
+   */
   readonly topic: string;
+
+  /**
+   * The timestamp when this chat was created.
+   */
   readonly createdTime: Date;
+
+  /**
+   * The timestamp of the most recent event for this chat.
+   */
   readonly lastEventTime: Date;
+
+  /**
+   * The sequential number of the most recent event for this chat.
+   */
   readonly lastEventNumber: number;
+
+  /**
+   * The number of the most recent event which *any* member has received.
+   */
   readonly maxSeenEventNumber: number;
+
+  /**
+   * An array of the current members of this chat.
+   */
   readonly members: ChatMember[];
 }
 
+/**
+ * A member, or participant, of a Chat.  Has slightly different semantics depending on the
+ * type of [[Chat]].
+ */
 export interface ChatMember {
+  /**
+   * The chat member's underlying user.
+   */
   readonly user: DomainUser;
+
+  /**
+   * The number of the most recent event which this member has received.  This is useful
+   * for e.g. querying ([[Chat.getHistory]]) for events that a member hasn't yet seen.
+   */
   readonly maxSeenEventNumber: number;
 }
+
+/**
+ * The valid strings for a [[ChatInfo.chatType]].
+ */
 export type ChatType = "direct" | "channel" | "room";
 
-export const ChatTypes = {
+/**
+ * Use this rather than a hardcoded string to refer to a particular type of Chat.
+ */
+export const ChatTypes: {[key: string]: ChatType} = {
   DIRECT: "direct",
   CHANNEL: "channel",
   ROOM: "room"
