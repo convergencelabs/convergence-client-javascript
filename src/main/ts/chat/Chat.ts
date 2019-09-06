@@ -355,7 +355,7 @@ export interface ChatHistorySearchOptions {
   forward?: boolean;
 
   /**
-   * An array of [[ChatEvent]] names to which the results will be limited
+   * An array of [[ChatHistoryEntry]] types to which the results will be limited
    */
   eventFilter?: string[];
 }

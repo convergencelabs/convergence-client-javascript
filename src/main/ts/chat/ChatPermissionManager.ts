@@ -22,7 +22,7 @@ export type ChatPermission =
 type MapLikeChatPermissions = Map<string, ChatPermission[]> |
                               { [key: string]: ChatPermission[] };
 
-const CHAT = 1;
+const CHAT_PERMISSION_IDENTIFIER = 1;
 
 /**
  * Allows getting and setting permissions for the various capabilities of [[Chat]]s.
@@ -30,7 +30,9 @@ const CHAT = 1;
  * assigned per-[[DomainUser]], per-[[UserGroup]], or for everybody
  * ([[setWorldPermissions]]).
  *
- * Generally speaking, more specific permissions override less-specific ones.
+ * Generally speaking, more specific permissions override less-specific ones.  So a
+ * user's explicit permission would override the group's permission which the user
+ * is in, which would itself override any world permission for this `Chat`.
  */
 export class ChatPermissionManager {
 
@@ -69,7 +71,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getClientPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId
       }
     };
@@ -96,7 +98,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         world: permissions
       }
@@ -119,7 +121,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         world: permissions
       }
@@ -142,7 +144,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         world: permissions
       }
@@ -163,7 +165,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getWorldPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId
       }
     };
@@ -197,7 +199,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         user: this._permissionsMapToPermissionEntries(map)
       }
@@ -226,7 +228,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         user: this._permissionsMapToPermissionEntries(map)
       }
@@ -254,7 +256,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         user: this._permissionsMapToPermissionEntries(map)
       }
@@ -275,7 +277,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getAllUserPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId
       }
     };
@@ -298,7 +300,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getUserPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         user: domainUserIdToProto(DomainUserId.normal(username))
       }
@@ -333,7 +335,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         group: permissionsByGroup
       }
@@ -363,7 +365,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         group: permissionsByGroup
       }
@@ -392,7 +394,7 @@ export class ChatPermissionManager {
 
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         group: permissionsByGroup
       }
@@ -413,7 +415,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getAllGroupPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId
       }
     };
@@ -441,7 +443,7 @@ export class ChatPermissionManager {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       getGroupPermissionsRequest: {
-        idType: CHAT,
+        idType: CHAT_PERMISSION_IDENTIFIER,
         id: this._chatId,
         groupId
       }
