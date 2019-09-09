@@ -36,6 +36,9 @@ export abstract class ChatEvent implements IChatEvent {
    *
    * @hidden
    * @internal
+   *
+   * Rather than define the public members here as the norm, we define them above to
+   * work around this typedoc bug: https://github.com/TypeStrong/typedoc/issues/1036
    */
   protected constructor(_chatId: string, _eventNumber: number, _timestamp: Date, _user: DomainUser) {
     this.chatId = _chatId;

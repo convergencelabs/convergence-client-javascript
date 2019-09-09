@@ -1,12 +1,13 @@
 export * from "./ModelService";
 export * from "./ModelElementType";
-export * from "./events";
 export * from "./Path";
 
-export * from "./historical/index";
-export * from "./rt/index";
-export * from "./query/index";
-export * from "./reference/index";
+export * from "./events";
+export * from "./historical";
+export * from "./query";
+export * from "./reference";
+export * from "./reference/events";
+export * from "./rt";
 
 export * from "./ModelPermissionManager";
 export * from "./ModelPermissions";
