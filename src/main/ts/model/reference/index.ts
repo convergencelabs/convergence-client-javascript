@@ -8,3 +8,4 @@ export * from "./ModelReference";
 export * from "./PropertyReference";
 export * from "./RangeReference";
 export * from "./ReferenceFilter";
+export * from "./events";

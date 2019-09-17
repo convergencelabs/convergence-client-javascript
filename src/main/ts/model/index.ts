@@ -6,7 +6,6 @@ export * from "./events";
 export * from "./historical";
 export * from "./query";
 export * from "./reference";
-export * from "./reference/events";
 export * from "./rt";
 
 export * from "./ModelPermissionManager";
