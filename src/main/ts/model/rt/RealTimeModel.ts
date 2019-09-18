@@ -1,4 +1,4 @@
-import {ConvergenceError, ConvergenceEventEmitter} from "../../util";
+import {ConvergenceError, ConvergenceEventEmitter, Logger, Logging} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
@@ -68,11 +68,20 @@ import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
 import IRemoteClientOpenedMessage = io.convergence.proto.IRemoteClientOpenedMessage;
 import IRemoteClientClosedMessage = io.convergence.proto.IRemoteClientClosedMessage;
+import {ModelOfflineEvent} from "../events/ModelOnlineEvent";
+import {ResyncStartedEvent} from "../events/ResyncStartedEvent";
+import {ModelReconnectingEvent} from "../events/ModelReconnectingEvent";
+import {ResyncCompletedEvent} from "../events/ResyncCompletedEvent";
+import {ModelOnlineEvent} from "../events/ModelOfflineEvent";
 
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeModel]].
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
+  readonly RESYNC_STARTED: string;
+  readonly RESYNC_COMPLETED: string;
+  readonly OFFLINE: string;
+  readonly ONLINE: string;
   readonly MODIFIED: string;
   readonly COMMITTED: string;
   readonly COLLABORATOR_OPENED: string;
@@ -85,6 +94,10 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   ...ObservableModelEventConstants,
   MODIFIED: "modified",
   COMMITTED: "committed",
+  RESYNC_STARTED: "resync_started",
+  RESYNC_COMPLETED: "resync_completed",
+  OFFLINE: "offline",
+  ONLINE: "online",
   COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
   COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
   REFERENCE: RemoteReferenceCreatedEvent.NAME,
@@ -123,6 +136,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * ```
    */
   public static readonly Events: RealTimeModelEvents = RealTimeModelEventConstants;
+
+  /**
+   * @internal
+   */
+  private static readonly _log: Logger = Logging.logger("model");
 
   /**
    * @internal
@@ -278,9 +296,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     // model as well.
     this._referencesBySession = new Map();
     this._sessions = sessions.slice(0);
-    this._sessions.forEach((sessionId: string) => {
-      this._referencesBySession.set(sessionId, []);
-    });
 
     this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
@@ -711,7 +726,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOffline(): void {
-    console.log("model offline");
+    RealTimeModel._log.debug(`model offline: ${this._modelId}`);
+    this._emitEvent(new ModelOfflineEvent(this));
+
     this._reconnectData = {
       previousSessionId: this._connection.session().sessionId(),
       bufferedOperations: []
@@ -724,21 +741,25 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOnline(): void {
-    console.log("re-opening model");
+    RealTimeModel._log.debug(`model reconnecting: ${this._modelId}`);
+    this._emitEvent(new ModelReconnectingEvent(this));
 
     const request: IConvergenceMessage = {
       modelReconnectRequest: {
-        contextVersion: this._concurrencyControl.contextVersion(),
-        previousSessionId: this._reconnectData.previousSessionId
+        modelId: this._modelId,
+        contextVersion: this._concurrencyControl.contextVersion()
       }
     };
 
     this._connection.request(request).then((response: IConvergenceMessage) => {
-      console.log("model reconnect response, starting reconnect");
+      RealTimeModel._log.debug(`model resynchronization started: ${this._modelId}`);
+      this._emitEvent(new ResyncStartedEvent(this));
+
       const {modelReconnectResponse} = response;
       this._reconnectData.reconnectVersion = getOrDefaultNumber(modelReconnectResponse.currentVersion) as number;
+      const oldResourceId = this._resourceId;
       this._resourceId = getOrDefaultString(modelReconnectResponse.resourceId);
-      // FIXME need to tell the model service about the resourceId change
+      this._modelService._resourceIdChanged(this._modelId, oldResourceId, this._resourceId);
     });
   }
 
@@ -873,9 +894,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }
 
       // TODO if we wind up being able to pause the processing of incoming
-      // operations, then we would put this in a queue.  We would also need
-      // to somehow wrap this in an object that stores the currentContext
-      // version right now, so we know when to distribute this event.
+      //   operations, then we would put this in a queue.  We would also need
+      //   to somehow wrap this in an object that stores the currentContext
+      //   version right now, so we know when to distribute this event.
       value._handleRemoteReferenceEvent(event);
 
       if (event instanceof RemoteReferenceShared) {
@@ -921,7 +942,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
     const version = getOrDefaultNumber(message.version);
-    this._concurrencyControl.processAcknowledgement(message.sequenceNumber, version);
+    const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
+    this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
     this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
   }
@@ -933,13 +955,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleRemoteOperation(message: IRemoteOperationMessage): void {
     // FIXME need sequenceNumber
     if (this._reconnectData !== null) {
-      if (message.version > this._reconnectData.reconnectVersion) {
+      if (message.contextVersion > this._reconnectData.reconnectVersion) {
         // new message buffer it for later.
         this._reconnectData.bufferedOperations.push(message);
       } else if (message.sessionId === this._reconnectData.previousSessionId) {
         const syntheticAck = {
           resourceId: message.resourceId,
-          version: message.version,
+          version: message.contextVersion,
           timestamp: message.timestamp
         };
         this._handelOperationAck(syntheticAck);
@@ -958,7 +980,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _processRemoteOperation(message: IRemoteOperationMessage): void {
     const unprocessed = new ServerOperationEvent(
       getOrDefaultString(message.sessionId),
-      getOrDefaultNumber(message.version),
+      getOrDefaultNumber(message.contextVersion),
       timestampToDate(message.timestamp),
       toOperation(message.operation)
     );
@@ -1002,15 +1024,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleReconnectCompleted(message: IModelReconnectCompleteMessage): void {
     // TODO when we get to offline mode we may have to rethink value id prefixes a bit
     //   two clients can not be re-initialized with the same vid prefix.
-    console.log("reconnect completed, applying buffered operations");
+
     // fixme this could be heavy weight and block the UI a bit.
     this._reconnectData.bufferedOperations.forEach(m => {
       this._processRemoteOperation(m);
     });
 
-    this._initializeReferences(getOrDefaultArray(message.references));
     this._sessions = getOrDefaultArray(message.connectedClients);
     this._permissions = toModelPermissions(message.permissions);
+
+    this._initializeReferences(getOrDefaultArray(message.references));
 
     this._reconnectData = null;
 
@@ -1018,6 +1041,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     const resend = this._concurrencyControl.getInFlightOperations();
     resend.forEach(op => this._sendOperation(op));
+
+    RealTimeModel._log.debug(`model resynchronization completed: ${this._modelId}`);
+    this._emitEvent(new ResyncCompletedEvent(this));
+
+    RealTimeModel._log.debug(`model online: ${this._modelId}`);
+    this._emitEvent(new ModelOnlineEvent(this));
   }
 
   /**
@@ -1084,6 +1113,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _initializeReferences(references: IReferenceData[]): void {
     this._referencesBySession.clear();
+
+    this._sessions.forEach((sessionId: string) => {
+      this._referencesBySession.set(sessionId, []);
+    });
 
     references.forEach((ref: IReferenceData) => {
       let element: RealTimeElement<any>;
