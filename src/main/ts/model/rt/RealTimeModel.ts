@@ -1014,6 +1014,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._reconnectData = null;
 
+    this._concurrencyControl.resetSequenceNumber();
+
     const resend = this._concurrencyControl.getInFlightOperations();
     resend.forEach(op => this._sendOperation(op));
   }

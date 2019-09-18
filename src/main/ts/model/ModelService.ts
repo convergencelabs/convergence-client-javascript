@@ -427,7 +427,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         const referenceTransformer: ReferenceTransformer =
           new ReferenceTransformer(new TransformationFunctionRegistry());
         const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
-          this._connection.session().sessionId(),
           getOrDefaultNumber(openRealTimeModelResponse.version),
           transformer,
           referenceTransformer);

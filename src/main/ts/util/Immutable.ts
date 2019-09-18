@@ -16,17 +16,17 @@ export class Immutable {
   public static copy(source: any, updates?: any): any {
     const result: any = {};
     Object.keys(source).forEach((prop: any, idx: number, array: any[]) => {
-      if (updates[prop] !== undefined) {
-        result[prop] = updates[prop];
-      } else {
-        result[prop] = source[prop];
-      }
+      result[prop] = updates[prop] !== undefined ? updates[prop] : source[prop];
     });
 
     // we do a shallow freeze here since we assume that the whole thing was
     // already immutable.
     Object.freeze(result);
     return result;
+  }
+
+  public static getOrDefault<T>(value: T, defaultValue: T): T {
+    return value === undefined ? defaultValue : value;
   }
 
   public static update(current: any, update: any): any {

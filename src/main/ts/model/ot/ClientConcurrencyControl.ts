@@ -35,7 +35,6 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     COMMIT_STATE_CHANGED: "commitStateChanged"
   };
 
-  private readonly _clientId: string;
   private _seqNo: number;
 
   private _compoundOpInProgress: boolean;
@@ -48,13 +47,11 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
   private _transformer: OperationTransformer;
   private _referenceTransformer: ReferenceTransformer;
 
-  constructor(clientId: string,
-              contextVersion: number,
+  constructor(contextVersion: number,
               transformer: OperationTransformer,
               referenceTransformer: ReferenceTransformer) {
     super();
 
-    this._clientId = clientId;
     this._seqNo = 0;
     this._contextVersion = contextVersion;
     this._unappliedOperations = [];
@@ -64,6 +61,10 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._referenceTransformer = referenceTransformer;
     this._compoundOpInProgress = false;
     this._pendingCompoundOperation = [];
+  }
+
+  public resetSequenceNumber(): void {
+    this._seqNo = 0;
   }
 
   public contextVersion(): number {
@@ -138,7 +139,6 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     const compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
     this._pendingCompoundOperation = [];
     const outgoingOperation = new ClientOperationEvent(
-      this._clientId,
       this._seqNo++,
       this._contextVersion,
       new Date(),
@@ -180,7 +180,6 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       // todo We really don't need the time here. The client sends this out, and we are going
       //   to use the server time. We may want to refactor this whole holder concept.
       const outgoingEvent = new ClientOperationEvent(
-        this._clientId,
         this._seqNo++,
         this._contextVersion,
         new Date(),
@@ -266,21 +265,10 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       const opEvent = this._inflightOperations[i];
       const opPair: OperationPair = this._transformer.transform(sPrime, opEvent.operation);
       sPrime = opPair.serverOp;
-      this._inflightOperations[i] = new ClientOperationEvent(
-        opEvent.clientId,
-        opEvent.seqNo,
-        serverOp.version,
-        opEvent.timestamp,
-        opPair.clientOp
-      );
+      this._inflightOperations[i] = opEvent.copy({contextVersion: serverOp.version, operation: opPair.clientOp});
     }
 
-    return new ServerOperationEvent(
-      serverOp.clientId,
-      serverOp.version,
-      serverOp.timestamp,
-      sPrime
-    );
+    return serverOp.copy({operation: sPrime});
   }
 
   private transformPendingCompoundOperations(serverOp: ServerOperationEvent): ServerOperationEvent {
@@ -293,24 +281,15 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       this._pendingCompoundOperation[i] = opPair.clientOp as DiscreteOperation;
     }
 
-    return new ServerOperationEvent(
-      serverOp.clientId,
-      serverOp.version,
-      serverOp.timestamp,
-      sPrime
-    );
+    return serverOp.copy({operation: sPrime});
   }
 
   private transformOutgoing(serverOps: ServerOperationEvent[], clientOp: Operation): DiscreteOperation {
     let cPrime: Operation = clientOp;
     for (let i: number = 0; i < serverOps.length; i++) {
-      const opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
-      serverOps[i] = new ServerOperationEvent(
-        serverOps[i].clientId,
-        serverOps[i].version,
-        serverOps[i].timestamp,
-        opPair.serverOp
-      );
+      const serverOp = serverOps[i];
+      const opPair: OperationPair = this._transformer.transform(serverOp.operation, cPrime);
+      serverOps[i] = serverOp.copy({operation: opPair.serverOp});
       cPrime = opPair.clientOp;
     }
     return cPrime as DiscreteOperation;
