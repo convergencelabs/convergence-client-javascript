@@ -4,10 +4,9 @@ import {Operation} from "./ops/Operation";
  * @hidden
  * @internal
  */
-export class ProcessedOperationEvent {
+export class ServerOperationEvent {
   constructor(
     public clientId: string,
-    public seqNo: number,
     public version: number,
     public timestamp: Date,
     public operation: Operation) {

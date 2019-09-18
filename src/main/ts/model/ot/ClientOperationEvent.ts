@@ -4,7 +4,7 @@ import {Operation} from "./ops/Operation";
  * @hidden
  * @internal
  */
-export class UnprocessedOperationEvent {
+export class ClientOperationEvent {
   constructor(
     public clientId: string,
     public seqNo: number,

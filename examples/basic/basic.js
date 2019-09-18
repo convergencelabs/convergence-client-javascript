@@ -7,8 +7,8 @@ const objectTable = document.getElementById("objectVal");
 const dateInput = document.getElementById("currentDate");
 
 // The realTimeModel.
-var model;
-var domain;
+let model;
+let domain;
 
 const baseURL = window.location.href.split('?')[0];
 const modelId = getParameterByName("modelId");
@@ -20,7 +20,7 @@ Convergence.connectAnonymously(DOMAIN_URL).then(d => {
     collection: "test",
     id: modelId,
     data: {
-      "string": "test delta",
+      "string": "String data to edit",
       "number": 10,
       "boolean": true,
       "array": [
@@ -39,7 +39,7 @@ Convergence.connectAnonymously(DOMAIN_URL).then(d => {
     },
     overrideWorld: true,
     worldPermissions: {read: true, write: true, remove: false, manage: false},
-    ephemeral: true
+    ephemeral: false
   });
 }).then(function (model) {
   const modelId = model.modelId();
@@ -53,16 +53,16 @@ Convergence.connectAnonymously(DOMAIN_URL).then(d => {
 function bindToModel(realTimeModel) {
   model = realTimeModel;
 
-  var rtString = model.elementAt("string");
+  const rtString = model.elementAt("string");
   bindToTextInput(stringInput, rtString);
 
-  var rtBoolean = model.elementAt("boolean");
+  const rtBoolean = model.elementAt("boolean");
   bindCheckboxInput(booleanInput, rtBoolean);
 
-  var rtNumber = model.elementAt("number");
+  const rtNumber = model.elementAt("number");
   bindNumberInput(numberInput, rtNumber);
 
-  var rtArray = model.elementAt("array");
+  const rtArray = model.elementAt("array");
   bindSelectList(arrayInput, rtArray);
 
   renderTable(model.elementAt("object"));
@@ -77,13 +77,13 @@ function bindToModel(realTimeModel) {
 
 function numberIncrement() {
   numberInput.value = Number(numberInput.value) + 1;
-  var rtNumber = model.elementAt("number");
+  const rtNumber = model.elementAt("number");
   rtNumber.increment();
 }
 
 function numberDecrement() {
   numberInput.value = Number(numberInput.value) - 1;
-  var rtNumber = model.elementAt("number");
+  const rtNumber = model.elementAt("number");
   rtNumber.decrement();
 }
 
@@ -91,36 +91,36 @@ function numberDecrement() {
 //
 // Handle the array buttons.
 //
-var arrayRemoveButton = document.getElementById("arrayRemoveButton");
+const arrayRemoveButton = document.getElementById("arrayRemoveButton");
 arrayRemoveButton.onclick = function () {
-  var selected = Number(arrayInput.selectedIndex);
+  const selected = Number(arrayInput.selectedIndex);
   if (selected >= 0) {
     arrayInput.remove(selected);
-    var rtArray = model.elementAt("array");
+    const rtArray = model.elementAt("array");
     rtArray.remove(selected);
   }
 };
 
-var arrayAddButton = document.getElementById("arrayAddButton");
-var arrayAddValue = document.getElementById("arrayAddValue");
+const arrayAddButton = document.getElementById("arrayAddButton");
+const arrayAddValue = document.getElementById("arrayAddValue");
 arrayAddButton.onclick = function () {
-  var index = Number(arrayInput.selectedIndex);
+  let index = Number(arrayInput.selectedIndex);
   if (index < 0) {
     index = arrayInput.length;
   }
 
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.textContent = arrayAddValue.value;
   arrayInput.add(option, index);
-  var rtArray = model.elementAt("array");
+  const rtArray = model.elementAt("array");
   rtArray.insert(index, arrayAddValue.value);
 };
 
-var arraySetButton = document.getElementById("arraySetButton");
-var arraySetValue = document.getElementById("arraySetValue");
+const arraySetButton = document.getElementById("arraySetButton");
+const arraySetValue = document.getElementById("arraySetValue");
 
 arrayInput.onchange = function () {
-  var index = arrayInput.selectedIndex;
+  let index = arrayInput.selectedIndex;
   if (index < 0) {
     arraySetValue.value = "";
   } else {
@@ -129,31 +129,31 @@ arrayInput.onchange = function () {
 };
 
 arraySetButton.onclick = function () {
-  var index = arrayInput.selectedIndex;
+  let index = arrayInput.selectedIndex;
   if (index >= 0) {
     arrayInput.options[index].textContent = arraySetValue.value;
-    var rtArray = model.elementAt("array");
+    const rtArray = model.elementAt("array");
     rtArray.set(index, arraySetValue.value);
   }
 };
 
-var arrayReorderButton = document.getElementById("arrayReorderButton");
-var arrayReorderValue = document.getElementById("arrayReorderValue");
+const arrayReorderButton = document.getElementById("arrayReorderButton");
+const arrayReorderValue = document.getElementById("arrayReorderValue");
 
 arrayReorderButton.onclick = function () {
-  var fromIdx = arrayInput.selectedIndex;
+  const fromIdx = arrayInput.selectedIndex;
   if (fromIdx >= 0) {
-    var toIdx = Number(arrayReorderValue.value);
-    var option = arrayInput.options[fromIdx];
+    const toIdx = Number(arrayReorderValue.value);
+    const option = arrayInput.options[fromIdx];
     arrayInput.remove(fromIdx);
     arrayInput.add(option, toIdx);
-    var rtArray = model.elementAt("array");
+    const rtArray = model.elementAt("array");
     rtArray.reorder(fromIdx, toIdx);
   }
 };
 
 function bindSelectList(selectInput, arrayModel) {
-  var values = arrayModel.value();
+  const values = arrayModel.value();
 
   // clear anything that might be there.
   while (selectInput.firstChild) {
@@ -161,7 +161,7 @@ function bindSelectList(selectInput, arrayModel) {
   }
 
   values.forEach(function (item) {
-    var option = document.createElement('option');
+    const option = document.createElement('option');
     option.value = option.textContent = item;
     selectInput.appendChild(option);
   });
@@ -171,7 +171,7 @@ function bindSelectList(selectInput, arrayModel) {
   });
 
   arrayModel.on("insert", function (evt) {
-    var option = document.createElement("option");
+    const option = document.createElement("option");
     option.textContent = evt.value.value();
     selectInput.add(option, evt.index)
   });
@@ -182,7 +182,7 @@ function bindSelectList(selectInput, arrayModel) {
   });
 
   arrayModel.on("reorder", function (evt) {
-    var option = selectInput.options[evt.fromIndex];
+    const option = selectInput.options[evt.fromIndex];
     selectInput.remove(evt.fromIndex);
     selectInput.add(option, evt.toIndex);
   });
@@ -193,19 +193,19 @@ function bindSelectList(selectInput, arrayModel) {
 // Handle the object buttons.
 //
 
-var objectRemoveButton = document.getElementById("objectRemoveButton");
-var objectRemoveProp = document.getElementById("objectRemoveProp");
+const objectRemoveButton = document.getElementById("objectRemoveButton");
+const objectRemoveProp = document.getElementById("objectRemoveProp");
 
-var objectSetButton = document.getElementById("objectSetButton");
-var objectSetProp = document.getElementById("objectSetProp");
-var objectSetValue = document.getElementById("objectSetValue");
+const objectSetButton = document.getElementById("objectSetButton");
+const objectSetProp = document.getElementById("objectSetProp");
+const objectSetValue = document.getElementById("objectSetValue");
 
-var objectRenameButton = document.getElementById("objectRenameButton");
-var objectRenameOldProp = document.getElementById("objectRenameOldProp");
-var objectRenameNewProp = document.getElementById("objectRenameNewProp");
+const objectRenameButton = document.getElementById("objectRenameButton");
+const objectRenameOldProp = document.getElementById("objectRenameOldProp");
+const objectRenameNewProp = document.getElementById("objectRenameNewProp");
 
 function bindTableButtons() {
-  var rtObject = model.elementAt("object");
+  const rtObject = model.elementAt("object");
 
   objectRemoveButton.onclick = function () {
     rtObject.remove(objectRemoveProp.value);
@@ -218,29 +218,29 @@ function bindTableButtons() {
   };
 
   objectRenameButton.onclick = function () {
-    model.startCompound();
-    var curVal = rtObject.get(objectRenameOldProp.value).value();
+    model.startBatch();
+    const curVal = rtObject.get(objectRenameOldProp.value).value();
     rtObject.remove(objectRenameOldProp.value);
     rtObject.set(objectRenameNewProp.value, curVal);
-    model.endCompound();
+    model.completeBatch();
     renderTable(rtObject);
   };
 }
 
 function bindTableEvents() {
-  var rtObject = model.elementAt("object");
-  rtObject.on("remove", function (evt) {
+  const rtObject = model.elementAt("object");
+  rtObject.on("remove", () => {
     renderTable(rtObject);
   });
 
-  rtObject.on("set", function (evt) {
+  rtObject.on("set", () => {
     renderTable(rtObject);
   });
 }
 
 
 function renderTable(rtObject) {
-  var body = objectTable.tBodies[0];
+  const body = objectTable.tBodies[0];
   // clear anything that might be there.
   while (body.firstChild) {
     body.removeChild(body.firstChild);
@@ -252,12 +252,12 @@ function renderTable(rtObject) {
 }
 
 function addTableRow(prop, val) {
-  var row = document.createElement("tr");
-  var propElement = document.createElement("td");
+  const row = document.createElement("tr");
+  const propElement = document.createElement("td");
   propElement.innerText = prop;
   row.appendChild(propElement);
 
-  var valElement = document.createElement("td");
+  const valElement = document.createElement("td");
   valElement.innerText = val;
   row.appendChild(valElement);
 
@@ -265,7 +265,7 @@ function addTableRow(prop, val) {
 }
 
 function bindDateEvents() {
-  var rtDate = model.elementAt("date");
+  const rtDate = model.elementAt("date");
   dateInput.value = rtDate.value().toUTCString();
   rtDate.on("value", function (evt) {
     dateInput.value = evt.element.value().toUTCString();
@@ -273,8 +273,8 @@ function bindDateEvents() {
 }
 
 function setDate() {
-  var rtDate = model.elementAt("date");
-  var date = new Date();
+  const rtDate = model.elementAt("date");
+  const date = new Date();
   rtDate.value(date);
   dateInput.value = date.toUTCString()
 }

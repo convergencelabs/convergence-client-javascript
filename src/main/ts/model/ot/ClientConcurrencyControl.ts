@@ -1,7 +1,7 @@
-import {ProcessedOperationEvent} from "./ProcessedOperationEvent";
+import {ServerOperationEvent} from "./ServerOperationEvent";
 import {Operation} from "./ops/Operation";
 import {DiscreteOperation} from "./ops/DiscreteOperation";
-import {UnprocessedOperationEvent} from "./UnprocessedOperationEvent";
+import {ClientOperationEvent} from "./ClientOperationEvent";
 import {CompoundOperation} from "./ops/CompoundOperation";
 import {OperationTransformer} from "./xform/OperationTransformer";
 import {OperationPair} from "./xform/OperationPair";
@@ -41,8 +41,8 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
   private _compoundOpInProgress: boolean;
   private _pendingCompoundOperation: DiscreteOperation[];
 
-  private readonly _inflightOperations: Operation[];
-  private readonly _unappliedOperations: ProcessedOperationEvent[];
+  private readonly _inflightOperations: ClientOperationEvent[];
+  private readonly _unappliedOperations: ServerOperationEvent[];
 
   private _contextVersion: number;
   private _transformer: OperationTransformer;
@@ -66,24 +66,24 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._pendingCompoundOperation = [];
   }
 
-  public clientId(): string {
-    return this._clientId;
-  }
-
   public contextVersion(): number {
     return this._contextVersion;
+  }
+
+  public getInFlightOperations(): ClientOperationEvent[] {
+    return this._inflightOperations.slice(0);
   }
 
   public hasNextIncomingOperation(): boolean {
     return this._unappliedOperations.length !== 0;
   }
 
-  public getNextIncomingOperation(): ProcessedOperationEvent {
+  public getNextIncomingOperation(): ServerOperationEvent {
     if (this._unappliedOperations.length === 0) {
       return null;
     } else {
       // todo: should we fire incoming reference if references are now
-      // available???
+      //   available???
       return this._unappliedOperations.shift();
     }
   }
@@ -92,12 +92,12 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     return this._unappliedOperations.length !== 0;
   }
 
-  public getNextRemoteReferenceSetEvent(): ProcessedOperationEvent {
+  public getNextRemoteReferenceSetEvent(): ServerOperationEvent {
     if (this._unappliedOperations.length === 0) {
       return null;
     } else {
       // todo: should we fire incoming reference if references are now
-      // available???
+      //   available???
       return this._unappliedOperations.shift();
     }
   }
@@ -123,7 +123,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._compoundOpInProgress = false;
   }
 
-  public completeBatchOperation(): UnprocessedOperationEvent {
+  public completeBatchOperation(): ClientOperationEvent {
     if (!this._compoundOpInProgress) {
       throw new Error("Batch operation not in progress.");
     }
@@ -137,16 +137,14 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
 
     const compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
     this._pendingCompoundOperation = [];
-    this._inflightOperations.push(compoundOp);
-
-    const event: UnprocessedOperationEvent = new UnprocessedOperationEvent(
+    const outgoingOperation = new ClientOperationEvent(
       this._clientId,
       this._seqNo++,
       this._contextVersion,
       new Date(),
       compoundOp);
-
-    return event;
+    this._inflightOperations.push(outgoingOperation);
+    return outgoingOperation;
   }
 
   public batchSize(): number {
@@ -157,7 +155,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     return this._compoundOpInProgress;
   }
 
-  public processOutgoingOperation(operation: DiscreteOperation): UnprocessedOperationEvent {
+  public processOutgoingOperation(operation: DiscreteOperation): ClientOperationEvent {
     if (this._compoundOpInProgress && !(operation instanceof DiscreteOperation)) {
       throw new Error("Can't process a compound operation that is in progress");
     }
@@ -176,19 +174,19 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     }
 
     if (this._compoundOpInProgress) {
-      // this cast is ok due to the check at the beginning of the method.
       this._pendingCompoundOperation.push(outgoingOperation);
       return null;
     } else {
       // todo We really don't need the time here. The client sends this out, and we are going
-      // to use the server time. We may want to refactor this whole holder concept.
-      this._inflightOperations.push(outgoingOperation);
-      return new UnprocessedOperationEvent(
+      //   to use the server time. We may want to refactor this whole holder concept.
+      const outgoingEvent = new ClientOperationEvent(
         this._clientId,
         this._seqNo++,
         this._contextVersion,
         new Date(),
         outgoingOperation);
+      this._inflightOperations.push(outgoingEvent);
+      return outgoingEvent;
     }
   }
 
@@ -203,20 +201,25 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     // todo
   }
 
-  public processAcknowledgementOperation(seqNo: number, version: number): void {
+  public processAcknowledgement(version: number, seqNo?: number): void {
     if (this._inflightOperations.length === 0) {
-      throw new Error("Received an operation from this site, but with no operations in flight.");
+      throw new Error("Received an acknowledgment, but had no uncommitted operations.");
     }
 
     if (this._contextVersion !== version) {
-      throw new Error("Acknowledgement did not meet expected context version of " +
-        this._contextVersion + ": " + version);
+      throw new Error(`Acknowledgement did not meet expected context version of ${this._contextVersion}: ${version}`);
+    }
+
+    // FIXME when we are reconnecting we don't actually have the seq no.
+    const acked = this._inflightOperations.shift();
+    if (seqNo !== undefined) {
+      if (acked.seqNo !== seqNo) {
+        throw new Error(`Acknowledgement did not meet expected sequence number of ${acked.seqNo}: ${seqNo}`);
+      }
     }
 
     this._contextVersion++;
-    this._inflightOperations.shift();
 
-    // fixme we need to store an unprocessed event so we can verify te seqNo
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
       // we had inflight ops before. Now we have none. So now we have
       // changed commit state.
@@ -228,58 +231,82 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     }
   }
 
-  public processRemoteOperation(incomingOperation: UnprocessedOperationEvent): void {
-    if (incomingOperation.contextVersion > this._contextVersion) {
+  public processRemoteOperation(incomingOperation: ServerOperationEvent): void {
+    if (incomingOperation.version > this._contextVersion) {
       throw new Error(
-        `Invalid context version of ${incomingOperation.contextVersion}, expected ${this._contextVersion}.`);
+        `Invalid version of ${incomingOperation.version}, expected ${this._contextVersion}.`);
     }
-
-    let remoteOperation: Operation = incomingOperation.operation;
 
     // forward transform the operation against the in flight operations to
     // prepare it to be applied to the data model.
-    remoteOperation = this.transformIncoming(remoteOperation, this._inflightOperations);
+    incomingOperation = this.transformInflightOperations(incomingOperation);
 
     // forward transform the operation against the compound op (if there is
     // one) if it is not already in flight then it must come after the in
     // flight ops so we do this after handling the in flight.
-    remoteOperation = this.transformIncoming(remoteOperation, this._pendingCompoundOperation);
+    incomingOperation = this.transformPendingCompoundOperations(incomingOperation);
 
     this._contextVersion++;
 
     // add the processed operation to the incoming operations.
-    this._unappliedOperations.push(new ProcessedOperationEvent(
-      incomingOperation.clientId,
-      incomingOperation.seqNo,
-      incomingOperation.contextVersion,
-      incomingOperation.timestamp,
-      remoteOperation));
+    this._unappliedOperations.push(incomingOperation);
   }
 
   public processRemoteReferenceSet(r: ModelReferenceData): ModelReferenceData {
     for (let i: number = 0; i < this._inflightOperations.length && r; i++) {
-      r = this._referenceTransformer.transform(this._inflightOperations[i], r);
+      r = this._referenceTransformer.transform(this._inflightOperations[i].operation, r);
     }
     return r;
   }
 
-  private transformIncoming(serverOp: Operation, clientOps: Operation[]): Operation {
-    let sPrime: Operation = serverOp;
-    for (let i: number = 0; i < clientOps.length; i++) {
-      const opPair: OperationPair = this._transformer.transform(sPrime, clientOps[i]);
+  private transformInflightOperations(serverOp: ServerOperationEvent): ServerOperationEvent {
+    let sPrime: Operation = serverOp.operation;
+
+    for (let i: number = 0; i < this._inflightOperations.length; i++) {
+      const opEvent = this._inflightOperations[i];
+      const opPair: OperationPair = this._transformer.transform(sPrime, opEvent.operation);
       sPrime = opPair.serverOp;
-      clientOps[i] = opPair.clientOp;
+      this._inflightOperations[i] = new ClientOperationEvent(
+        opEvent.clientId,
+        opEvent.seqNo,
+        serverOp.version,
+        opEvent.timestamp,
+        opPair.clientOp
+      );
     }
-    return sPrime;
+
+    return new ServerOperationEvent(
+      serverOp.clientId,
+      serverOp.version,
+      serverOp.timestamp,
+      sPrime
+    );
   }
 
-  private transformOutgoing(serverOps: ProcessedOperationEvent[], clientOp: Operation): DiscreteOperation {
+  private transformPendingCompoundOperations(serverOp: ServerOperationEvent): ServerOperationEvent {
+    let sPrime: Operation = serverOp.operation;
+
+    for (let i: number = 0; i < this._pendingCompoundOperation.length; i++) {
+      const op = this._pendingCompoundOperation[i];
+      const opPair: OperationPair = this._transformer.transform(sPrime, op);
+      sPrime = opPair.serverOp;
+      this._pendingCompoundOperation[i] = opPair.clientOp as DiscreteOperation;
+    }
+
+    return new ServerOperationEvent(
+      serverOp.clientId,
+      serverOp.version,
+      serverOp.timestamp,
+      sPrime
+    );
+  }
+
+  private transformOutgoing(serverOps: ServerOperationEvent[], clientOp: Operation): DiscreteOperation {
     let cPrime: Operation = clientOp;
     for (let i: number = 0; i < serverOps.length; i++) {
       const opPair: OperationPair = this._transformer.transform(serverOps[i].operation, cPrime);
-      serverOps[i] = new ProcessedOperationEvent(
+      serverOps[i] = new ServerOperationEvent(
         serverOps[i].clientId,
-        serverOps[i].seqNo,
         serverOps[i].version,
         serverOps[i].timestamp,
         opPair.serverOp

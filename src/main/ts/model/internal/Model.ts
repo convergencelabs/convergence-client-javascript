@@ -25,19 +25,25 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   private _vidCounter: number;
 
+  private _session: ConvergenceSession;
+  private _valueIdPrefix: string;
+
   /**
    * Constructs a new RealTimeModel.
    */
-  constructor(private session: ConvergenceSession,
-              private valueIdPrefix: string,
+  constructor(session: ConvergenceSession,
+              valueIdPrefix: string,
               data: ObjectValue) {
     super();
+
+    this._session = session;
+    this._valueIdPrefix = valueIdPrefix;
 
     this._idToValue = new Map<string, ModelNode<any>>();
     this._vidCounter = 0;
 
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return this.valueIdPrefix + VALUE_SEPARATOR + this._vidCounter++;
+      return this._valueIdPrefix + VALUE_SEPARATOR + this._vidCounter++;
     });
 
     this._data = new ObjectNode(data, () => {
@@ -53,6 +59,10 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
   public valueAt(...elements: PathElement[]): ModelNode<any>;
   public valueAt(...path: any[]): ModelNode<any> {
     return this._data.valueAt(...path);
+  }
+
+  public setValueIdPrefix(prefix: string): void {
+    this._valueIdPrefix = prefix;
   }
 
   //

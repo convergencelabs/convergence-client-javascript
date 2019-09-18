@@ -91,6 +91,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       .messages()
       .subscribe(message => this._handleMessage(message));
     this._autoRequestId = 0;
+
+    this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
+    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
   }
 
   /**
@@ -546,6 +550,27 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       };
       replyCallback.reply(response);
     }
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOnline = () => {
+    this._openModelsByModelId.forEach((model) => {
+      model._setOnline();
+    });
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _setOffline = () => {
+    this._openModelsByModelId.forEach((model) => {
+      model._setOffline();
+    });
+    this._openModelsByRid.clear();
   }
 }
 
