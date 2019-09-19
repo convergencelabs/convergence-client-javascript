@@ -1,7 +1,8 @@
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
-import {CancellationToken, Logging} from "./util";
+import {CancellationToken, ILoggingConfigData} from "./util";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
+import {Logging} from "./util/log/Logging";
 
 /**
  * This is the entry point for the Convergence JS client. It allows users to connect
@@ -143,6 +144,24 @@ export class Convergence {
   }
 
   /**
+   * Allows customization of both the root (default) logger and any ancillary loggers.
+   *
+   * ```javascript
+   * Logging.configure({
+   *   root: LogLevel.ERROR,
+   *   loggers: {
+   *     "connection": LogLevel.DEBUG
+   *   }
+   * });
+   * ```
+   *
+   * @param config the log levels for the root logger and any other loggers.
+   */
+  public static configureLogging(config: ILoggingConfigData): void {
+    Logging.configure(config);
+  }
+
+  /**
    * @internal
    * @hidden
    */
@@ -165,3 +184,4 @@ export const connectWithPassword = Convergence.connectWithPassword;
 export const connectAnonymously = Convergence.connectAnonymously;
 export const connectWithJwt = Convergence.connectWithJwt;
 export const reconnect = Convergence.reconnect;
+export const configureLogging = Convergence.configureLogging;

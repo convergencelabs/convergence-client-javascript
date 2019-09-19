@@ -1,12 +1,12 @@
 import {
   ConvergenceError,
   ConvergenceEventEmitter,
-  IConvergenceEvent,
-  Logging
+  IConvergenceEvent
 } from "../util/";
 import {Deferred} from "../util/Deferred";
 import {IWebSocketClass} from "./IWebSocketClass";
 import {WebSocketFactory} from "./WebSocketFactory";
+import {Logging} from "../util/log/Logging";
 
 /**
  * @hidden

@@ -11,8 +11,7 @@ import {Deferred} from "../util/Deferred";
 import {
   ConvergenceError,
   ConvergenceEventEmitter,
-  IConvergenceEvent,
-  Logging
+  IConvergenceEvent
 } from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
@@ -32,6 +31,8 @@ import {IUsernameAndPassword} from "../IUsernameAndPassword";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {TypeChecker} from "../util/TypeChecker";
 import {FallbackAuthCoordinator} from "./FallbackAuthCoordinator";
+import {Logging} from "../util/log/Logging";
+import {Logger} from "../util/log/Logger";
 
 /**
  * @hidden
@@ -58,7 +59,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   private readonly _options: ConvergenceOptions;
   private readonly _session: ConvergenceSession;
-  private readonly _logger = Logging.logger("connection");
+  private readonly _logger: Logger = Logging.logger("connection");
   private readonly _url: string;
 
   private _authenticated: boolean;

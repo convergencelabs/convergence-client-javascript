@@ -8,7 +8,7 @@ import {
   ActivityStateRemovedEvent,
   ActivityStateDeltaEvent
 } from "./events";
-import {StringMap, StringMapLike, ConvergenceEventEmitter, Logging, Logger} from "../util/";
+import {StringMap, StringMapLike, ConvergenceEventEmitter} from "../util/";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {Observable, BehaviorSubject, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
@@ -33,6 +33,8 @@ import IActivitySessionJoinedMessage = io.convergence.proto.IActivitySessionJoin
 import IActivitySessionLeftMessage = io.convergence.proto.IActivitySessionLeftMessage;
 import IActivityStateUpdatedMessage = io.convergence.proto.IActivityStateUpdatedMessage;
 import {EqualsUtil} from "../util/EqualsUtil";
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
 
 /**
  * The [[Activity]] class represents a activity that the users of a

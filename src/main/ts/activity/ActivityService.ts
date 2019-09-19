@@ -3,10 +3,12 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Activity} from "./Activity";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
 import {IActivityEvent} from "./events";
-import {ConvergenceEventEmitter, Logging, Logger} from "../util/";
+import {ConvergenceEventEmitter} from "../util/";
 import {IdentityCache} from "../identity/IdentityCache";
 import {filter, tap} from "rxjs/operators";
 import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
 
 /**
  * The [[ActivityService]] provides the main entry point into working with

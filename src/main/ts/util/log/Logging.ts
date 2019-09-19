@@ -11,13 +11,8 @@ const DEFAULT_CONFIG: ILoggingConfigData =  {
 };
 
 /**
- * A flexible class for configuring the logging within Convergence.  Currently only
- * supports customization of verbosity ([[LogLevel]]).
- *
- * A single instance of this is exported as [[Logging]].  Use that rather than
- * instantiating new instances of this class.
- *
- * By default, [[LogLevel.WARN]] messages are written to the console.
+ * @hidden
+ * @internal
  */
 export class ConvergenceLogging {
 
@@ -35,15 +30,8 @@ export class ConvergenceLogging {
   }
 
   /**
-   * Allows customization of both the root (default) logger and any ancillary loggers.
-   *
-   * ```javascript
-   * Logging.configure({
-   *   root: LogLevel.DEBUG
-   * });
-   * ```
-   *
-   * @param config the log levels for the root logger and any other loggers.
+   * @hidden
+   * @internal
    */
   public configure(config: ILoggingConfigData): void {
     const defaulted = {...DEFAULT_CONFIG, ...config};
@@ -80,5 +68,8 @@ export class ConvergenceLogging {
 /**
  * The exported single global instance of `ConvergenceLogging`.  Interface with this
  * to customize logging.
+ *
+ * @internal
+ * @hidden
  */
 export const Logging = new ConvergenceLogging();

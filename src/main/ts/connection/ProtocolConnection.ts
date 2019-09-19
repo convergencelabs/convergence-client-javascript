@@ -4,8 +4,7 @@ import {ProtocolConfiguration} from "./ProtocolConfiguration";
 import {
   ConvergenceServerError,
   IConvergenceEvent,
-  ConvergenceEventEmitter,
-  Logging
+  ConvergenceEventEmitter
 } from "../util/";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
@@ -14,6 +13,7 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IErrorMessage = io.convergence.proto.IErrorMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IHandshakeRequestMessage = io.convergence.proto.IHandshakeRequestMessage;
+import {Logging} from "../util/log/Logging";
 
 /**
  * @hidden

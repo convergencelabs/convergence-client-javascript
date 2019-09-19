@@ -1,4 +1,4 @@
-import {ConvergenceError, ConvergenceEventEmitter, Logger, Logging} from "../../util";
+import {ConvergenceError, ConvergenceEventEmitter} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
@@ -30,7 +30,12 @@ import {
   ModelClosedEvent,
   VersionChangedEvent,
   RemoteReferenceCreatedEvent,
-  ModelPermissionsChangedEvent
+  ModelPermissionsChangedEvent,
+  ModelOfflineEvent,
+  ResyncStartedEvent,
+  ModelReconnectingEvent,
+  ResyncCompletedEvent,
+  ModelOnlineEvent
 } from "../events/";
 import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
@@ -66,13 +71,8 @@ import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
-import IRemoteClientOpenedMessage = io.convergence.proto.IRemoteClientOpenedMessage;
-import IRemoteClientClosedMessage = io.convergence.proto.IRemoteClientClosedMessage;
-import {ModelOfflineEvent} from "../events/ModelOnlineEvent";
-import {ResyncStartedEvent} from "../events/ResyncStartedEvent";
-import {ModelReconnectingEvent} from "../events/ModelReconnectingEvent";
-import {ResyncCompletedEvent} from "../events/ResyncCompletedEvent";
-import {ModelOnlineEvent} from "../events/ModelOfflineEvent";
+import {Logger} from "../../util/log/Logger";
+import {Logging} from "../../util/log/Logging";
 
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeModel]].

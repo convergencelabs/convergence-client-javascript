@@ -13,12 +13,12 @@ import {
   IConvergenceOptions,
   InterruptedEvent,
   LogLevel,
-  Logging
+  Convergence
 } from "../main/ts";
 import * as WebSocket from "ws";
 import {TypeChecker} from "../main/ts/util/TypeChecker";
 
-Logging.configure({
+Convergence.configureLogging({
   root: LogLevel.INFO,
   loggers: {
   }
@@ -45,29 +45,28 @@ const OPTIONS: IConvergenceOptions = {
 };
 
 export function createDomain(): ConvergenceDomain {
-  const log = Logging.root();
   const domain = new ConvergenceDomain(DOMAIN_URL, OPTIONS);
   domain.events().subscribe((event) => {
       if (event instanceof ConnectionScheduledEvent) {
-        log.info(`Connection scheduled in ${event.delay} seconds`);
+        console.log(`Connection scheduled in ${event.delay} seconds`);
       } else if (event instanceof ConnectingEvent) {
-        log.info(`Connecting to: ${domain.url()}`);
+        console.log(`Connecting to: ${domain.url()}`);
       } else if (event instanceof ConnectionFailedEvent) {
-        log.info(`Connection failed`);
+        console.log(`Connection failed`);
       } else if (event instanceof ConnectedEvent) {
-        log.info(`Connected to ${event.domain.namespace()}/${event.domain.id()}`);
+        console.log(`Connected to ${event.domain.namespace()}/${event.domain.id()}`);
       } else if (event instanceof AuthenticatingEvent) {
-        log.info(`Authenticating {method: "${event.method}"}`);
+        console.log(`Authenticating {method: "${event.method}"}`);
       } else if (event instanceof AuthenticationFailedEvent) {
-        log.info(`Authentication failed {method: "${event.method}"}`);
+        console.log(`Authentication failed {method: "${event.method}"}`);
       } else if (event instanceof AuthenticatedEvent) {
-        log.info(`Authenticated {method: "${event.method}"}`);
+        console.log(`Authenticated {method: "${event.method}"}`);
       } else if (event instanceof DisconnectedEvent) {
-        log.info(`Disconnected`);
+        console.log(`Disconnected`);
       } else if (event instanceof InterruptedEvent) {
-        log.info(`Interrupted`);
+        console.log(`Interrupted`);
       } else if (event instanceof ErrorEvent) {
-        log.info(`Error: ${event.error}`);
+        console.log(`Error: ${event.error}`);
       }
     }
   );

@@ -2,7 +2,6 @@ import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {
   ConvergenceEventEmitter,
-  Logging,
   StringMap,
   StringMapLike
 } from "../util/";
@@ -30,6 +29,7 @@ import {DomainUserIdentifier, DomainUserId} from "../identity";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPresence = io.convergence.proto.IUserPresence;
+import {Logging} from "../util/log/Logging";
 
 export interface PresenceServiceEvents {
   STATE_SET: string;
