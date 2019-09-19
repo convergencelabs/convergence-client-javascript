@@ -39,7 +39,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private _published: boolean;
+  private _shared: boolean;
 
   /**
    * @internal
@@ -58,7 +58,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._emitFrom(reference.events());
     this._reference = reference;
-    this._published = false;
+    this._shared = false;
     this._callbacks = callbacks;
   }
 
@@ -138,7 +138,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public share(): void {
     this._ensureAttached();
-    this._published = true;
+    this._shared = true;
     this._callbacks.onShare(this);
   }
 
@@ -147,7 +147,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public unshare(): void {
     this._ensureAttached();
-    this._published = false;
+    this._shared = false;
     this._callbacks.onUnshare(this);
   }
 
@@ -155,7 +155,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
    * Returns true if this reference is currently being shared.
    */
   public isShared(): boolean {
-    return this._published;
+    return this._shared;
   }
 
   /**

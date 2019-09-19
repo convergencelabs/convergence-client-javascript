@@ -31,7 +31,7 @@ export type OnRemoteReference = (reference: ModelReference<any>) => void;
  */
 export class ReferenceManager {
   private readonly _referenceMap: ReferenceMap;
-  private readonly _localReferences: { [key: string]: LocalModelReference<any, any> };
+  private readonly _localReferences: Map<string, LocalModelReference<any, any>>;
   private readonly _validTypes: ReferenceType[];
   private readonly _source: any;
   private readonly _onRemoteReference: OnRemoteReference;
@@ -42,7 +42,7 @@ export class ReferenceManager {
               onRemoteReference: OnRemoteReference,
               identityCache: IdentityCache) {
     this._referenceMap = new ReferenceMap();
-    this._localReferences = {};
+    this._localReferences = new Map();
     this._validTypes = validTypes;
     this._source = source;
     this._onRemoteReference = onRemoteReference;
@@ -63,33 +63,32 @@ export class ReferenceManager {
 
   public addLocalReference(reference: LocalModelReference<any, any>): void {
     const key: string = reference.reference().key();
-    if (this._localReferences[key] !== undefined) {
+    if (this._localReferences.has(key)) {
       throw new Error(`Local reference already set for key: ${key}`);
     }
-    this._localReferences[key] = reference;
+    this._localReferences.set(key, reference);
     this._referenceMap.put(reference.reference());
   }
 
   public removeLocalReference(key: string): void {
-    const current: LocalModelReference<any, any> = this._localReferences[key];
+    const current: LocalModelReference<any, any> = this._localReferences.get(key);
     if (current !== undefined) {
       current.dispose();
     }
   }
 
   public removeAllLocalReferences(): void {
-    const keys: string[] = Object.getOwnPropertyNames(this._localReferences);
-    keys.forEach((key: string) => {
+    this._localReferences.forEach((reference, key) => {
       this.removeLocalReference(key);
     });
   }
 
   public getLocalReference(key: string): LocalModelReference<any, any> {
-    return this._localReferences[key];
+    return this._localReferences.get(key);
   }
 
-  public localReferences(): { [key: string]: LocalModelReference<any, any> } {
-    return Immutable.copy(this._localReferences);
+  public localReferences(): Map<string, LocalModelReference<any, any>> {
+    return new Map(this._localReferences);
   }
 
   public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
@@ -106,10 +105,21 @@ export class ReferenceManager {
     }
   }
 
+  public reshare(): void {
+    this._localReferences.forEach(reference => {
+      if (reference.isShared()) {
+        reference.share();
+      }
+    });
+  }
+
+  /**
+   * @private
+   */
   public _handleReferenceDisposed(reference: ModelReference<any>): void {
     this._referenceMap.remove(reference.sessionId(), reference.key());
     if (reference.isLocal()) {
-      delete this._localReferences[reference.key()];
+      this._localReferences.delete(reference.key());
     }
   }
 

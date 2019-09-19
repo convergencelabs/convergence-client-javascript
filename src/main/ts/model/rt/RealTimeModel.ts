@@ -299,7 +299,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
-    const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferencePublished(ref);
+    const onRemoteReference: OnRemoteReference = (ref) => this._onRemoteReferenceShared(ref);
     this._referenceManager = new ReferenceManager(
       this, [ModelReference.Types.ELEMENT], onRemoteReference, this._identityCache);
 
@@ -708,9 +708,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const remoteRefEvent = toRemoteReferenceEvent(event.message);
       this._handleRemoteReferenceEvent(remoteRefEvent);
     } else if (remoteClientOpenedModel) {
-      this._handleClientOpen(remoteClientOpenedModel);
+      this._handleClientOpen(getOrDefaultString(remoteClientOpenedModel.sessionId));
     } else if (remoteClientClosedModel) {
-      this._handleClientClosed(remoteClientClosedModel);
+      this._handleClientClosed(getOrDefaultString(remoteClientClosedModel.sessionId));
     } else if (modelPermissionsChanged) {
       this._handleModelPermissionsChanged(modelPermissionsChanged);
     } else if (modelReconnectComplete) {
@@ -728,6 +728,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   public _setOffline(): void {
     RealTimeModel._log.debug(`model offline: ${this._modelId}`);
     this._emitEvent(new ModelOfflineEvent(this));
+
+    this._sessions.forEach(sessionId => this._handleClientClosed(sessionId));
+
+    this._sessions = [];
 
     this._reconnectData = {
       previousSessionId: this._connection.session().sessionId(),
@@ -798,13 +802,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _handleClientOpen(message: IRemoteClientOpenedMessage): void {
-    this._sessions.push(message.sessionId);
-    this._referencesBySession.set(message.sessionId, []);
+  private _handleClientOpen(sessionId: string): void {
+    this._sessions.push(sessionId);
+    this._referencesBySession.set(sessionId, []);
 
-    const user = this._identityCache.getUserForSession(message.sessionId);
+    const user = this._identityCache.getUserForSession(sessionId);
     const event: CollaboratorOpenedEvent = new CollaboratorOpenedEvent(
-      this, new ModelCollaborator(user, message.sessionId));
+      this, new ModelCollaborator(user, sessionId));
     this._emitEvent(event);
     this._collaboratorsSubject.next(this.collaborators());
   }
@@ -814,23 +818,23 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _handleClientClosed(message: IRemoteClientClosedMessage): void {
-    this._sessions = this._sessions.filter(s => s !== message.sessionId);
+  private _handleClientClosed(sessionId: string): void {
+    this._sessions = this._sessions.filter(s => s !== sessionId);
 
-    const refs: Array<ModelReference<any>> = this._referencesBySession.get(message.sessionId);
-    this._referencesBySession.delete(message.sessionId);
+    const refs: Array<ModelReference<any>> = this._referencesBySession.get(sessionId);
+    this._referencesBySession.delete(sessionId);
 
     refs.forEach((ref: ModelReference<any>) => {
       ref._dispose();
     });
 
-    const user = this._identityCache.getUserForSession(message.sessionId);
+    const user = this._identityCache.getUserForSession(sessionId);
     const event: CollaboratorClosedEvent = new CollaboratorClosedEvent(
-      this, new ModelCollaborator(user, message.sessionId)
+      this, new ModelCollaborator(user, sessionId)
     );
     this._emitEvent(event);
 
-    // todo we could make this more performant by not calc'ing every time.
+    // todo we could make this more efficient by not calc'ing every time.
     this._collaboratorsSubject.next(this.collaborators());
   }
 
@@ -1030,7 +1034,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._processRemoteOperation(m);
     });
 
-    this._sessions = getOrDefaultArray(message.connectedClients);
+    const sessions = getOrDefaultArray(message.connectedClients);
+    sessions.forEach(sessionId => this._handleClientOpen(sessionId));
     this._permissions = toModelPermissions(message.permissions);
 
     this._initializeReferences(getOrDefaultArray(message.references));
@@ -1041,6 +1046,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     const resend = this._concurrencyControl.getInFlightOperations();
     resend.forEach(op => this._sendOperation(op));
+
+    this._referenceManager.reshare();
 
     RealTimeModel._log.debug(`model resynchronization completed: ${this._modelId}`);
     this._emitEvent(new ResyncCompletedEvent(this));
@@ -1101,7 +1108,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _onRemoteReferencePublished(reference: ModelReference<any>): void {
+  private _onRemoteReferenceShared(reference: ModelReference<any>): void {
     this._referencesBySession.get(reference.sessionId()).push(reference);
     this._emitEvent(new RemoteReferenceCreatedEvent(reference, this));
   }
@@ -1114,7 +1121,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _initializeReferences(references: IReferenceData[]): void {
     this._referencesBySession.clear();
 
-    this._sessions.forEach((sessionId: string) => {
+    this._sessions.forEach(sessionId => {
       this._referencesBySession.set(sessionId, []);
     });
 
@@ -1126,7 +1133,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }
 
       const {referenceType, values} = extractValueAndType(ref.reference);
-      const published = new RemoteReferenceShared(
+      const shared = new RemoteReferenceShared(
         ref.sessionId,
         this._resourceId,
         valueId,
@@ -1136,11 +1143,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       );
 
       if (element !== undefined) {
-        element._handleRemoteReferenceEvent(published);
+        element._handleRemoteReferenceEvent(shared);
         const r: ModelReference<any> = element.reference(ref.sessionId, ref.key);
         this._referencesBySession.get(ref.sessionId).push(r);
       } else {
-        this._modelReferenceEvent(published);
+        this._modelReferenceEvent(shared);
       }
     });
   }
