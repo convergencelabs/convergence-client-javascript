@@ -1,5 +1,6 @@
 import {ModelReference} from "./ModelReference";
 import {ReferenceFilter} from "./ReferenceFilter";
+import {TypeChecker} from "../../util/TypeChecker";
 
 /**
  * @hidden
@@ -7,56 +8,58 @@ import {ReferenceFilter} from "./ReferenceFilter";
  */
 export class ReferenceMap {
 
-  // stored by sessionId first, then key.
-  private _references: { [key: string]: { [key: string]: ModelReference<any> } };
+  /**
+   * Contains references mapped first by sessionId and then by reference key.
+   */
+  private _referencesBySessionId: Map<string, Map<string, ModelReference<any>>>;
 
   constructor() {
-    this._references = {};
+    this._referencesBySessionId = new Map();
   }
 
   public put(reference: ModelReference<any>): void {
-    const sessionId: string = reference.sessionId();
-    const key: string = reference.key();
+    const sessionId = reference.sessionId();
+    const key = reference.key();
 
-    let sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
-    if (sessionModels === undefined) {
-      sessionModels = {};
-      this._references[sessionId] = sessionModels;
+    let sessionReferences = this._referencesBySessionId.get(sessionId);
+    if (TypeChecker.isUndefined(sessionReferences)) {
+      sessionReferences = new Map();
+      this._referencesBySessionId.set(sessionId, sessionReferences);
     }
 
-    if (sessionModels[key] !== undefined) {
-      throw new Error("Model reference already exists");
+    if (sessionReferences.has(key)) {
+      throw new Error(`Reference with key "${key}" already exists for session "${sessionId}".`);
     }
 
-    sessionModels[key] = reference;
+    sessionReferences.set(key, reference);
   }
 
   public get(sessionId: string, key: string): ModelReference<any> {
-    const sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
-    if (sessionModels !== undefined) {
-      return sessionModels[key];
+    const sessionReferences = this._referencesBySessionId.get(sessionId);
+    if (!TypeChecker.isUndefined(sessionReferences)) {
+      return sessionReferences.get(key);
     } else {
       return;
     }
   }
 
   public getAll(filter?: ReferenceFilter): Array<ModelReference<any>> {
-    if (typeof filter === "undefined") {
+    if (TypeChecker.isUndefined(filter)) {
       filter = {};
     }
 
     const refs: Array<ModelReference<any>> = [];
 
-    const sessionIds: string[] = (filter.sessionId !== undefined && filter.sessionId !== null) ?
+    const sessionIds: string[] = TypeChecker.isSet(filter.sessionId) ?
       [filter.sessionId] :
-      Object.getOwnPropertyNames(this._references);
+      Array.from(this._referencesBySessionId.keys());
 
     sessionIds.forEach((sid: string) => {
-      const sessionRefs: { [key: string]: ModelReference<any> } = this._references[sid];
-      const keys: string[] = filter.key !== undefined ? [filter.key] : Object.getOwnPropertyNames(sessionRefs);
+      const sessionRefs = this._referencesBySessionId.get(sid);
+      const keys: string[] = TypeChecker.isSet(filter.key) ? [filter.key] : Array.from(sessionRefs.keys());
       keys.forEach((k: string) => {
-        const r: ModelReference<any> = sessionRefs[k];
-        if (r !== undefined) {
+        const r: ModelReference<any> = sessionRefs.get(k);
+        if (!TypeChecker.isUndefined(r)) {
           refs.push(r);
         }
       });
@@ -66,14 +69,14 @@ export class ReferenceMap {
   }
 
   public removeAll(): void {
-    this._references = {};
+    this._referencesBySessionId.clear();
   }
 
   public remove(sessionId: string, key: string): ModelReference<any> {
-    const sessionModels: { [key: string]: ModelReference<any> } = this._references[sessionId];
-    if (sessionModels !== undefined) {
-      const current: ModelReference<any> = sessionModels[key];
-      delete sessionModels[key];
+    const sessionReferences = this._referencesBySessionId.get(sessionId);
+    if (sessionReferences !== undefined) {
+      const current = sessionReferences.get(key);
+      sessionReferences.delete(key);
       return current;
     } else {
       return;
@@ -81,13 +84,12 @@ export class ReferenceMap {
   }
 
   public removeBySession(sessionId: string): void {
-    delete this._references[sessionId];
+    this._referencesBySessionId.delete(sessionId);
   }
 
   public removeByKey(key: string): void {
-    const sessionIds: string[] = Object.getOwnPropertyNames(this._references);
-    sessionIds.forEach((sessionId: string) => {
-      delete this._references[sessionId][key];
+    this._referencesBySessionId.forEach(referencesForSession => {
+      referencesForSession.delete(key);
     });
   }
 }
