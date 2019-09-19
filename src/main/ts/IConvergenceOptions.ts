@@ -124,8 +124,4 @@ export interface IConvergenceOptions {
      */
     class?: IWebSocketClass;
   };
-
-  debug?: {
-    connection: boolean;
-  };
 }

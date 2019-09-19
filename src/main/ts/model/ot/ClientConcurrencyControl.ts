@@ -265,7 +265,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       const opEvent = this._inflightOperations[i];
       const opPair: OperationPair = this._transformer.transform(sPrime, opEvent.operation);
       sPrime = opPair.serverOp;
-      this._inflightOperations[i] = opEvent.copy({contextVersion: serverOp.version, operation: opPair.clientOp});
+      this._inflightOperations[i] = opEvent.copy({contextVersion: serverOp.version + 1, operation: opPair.clientOp});
     }
 
     return serverOp.copy({operation: sPrime});

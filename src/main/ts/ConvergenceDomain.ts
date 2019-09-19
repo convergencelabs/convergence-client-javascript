@@ -62,6 +62,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     ERROR: ErrorEvent.NAME
   };
 
+  /**
+   * @hidden
+   * @internal
+   */
   private static _toPromiseCallback<T>(value?: T | (() => Promise<T>)): (() => Promise<T>) {
     if (value === undefined) {
       return () => Promise.resolve(undefined as T);
@@ -268,12 +272,13 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @return
    *   A promise that is resolved when the ConvergenceDomain is disposed.
    */
-  public dispose(): Promise<void> {
+  public dispose(): void {
     this._disposed = true;
     if (this._modelService !== undefined) {
       this._modelService._dispose();
     }
-    return this._connection.disconnect();
+
+    this._connection.disconnect();
   }
 
   /**
@@ -361,7 +366,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @returns
    *   A Promise which will be resolved upon successful connection and authentication.
    */
-  public reconnect(token: string | (() => Promise<string>)): Promise<void> {
+  public reconnect(token?: string | (() => Promise<string>)): Promise<void> {
+    // FIXME what if there isn't one?
+    token = token || this._connection.session().reconnectToken();
+
     const promiseCallback = ConvergenceDomain._toPromiseCallback(token);
     return this._connection
       .connect()
@@ -375,8 +383,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * Disconnects from the server.
    */
-  public disconnect(): Promise<void> {
-    return this._connection.disconnect();
+  public disconnect(): void {
+    this._connection.disconnect();
   }
 
   /**

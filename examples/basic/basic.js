@@ -1,3 +1,6 @@
+const status = document.getElementById("connectionStatus");
+status.innerHTML = "Connecting";
+
 // These are the various inputs in the example page.
 const stringInput = document.getElementById("stringVal");
 const booleanInput = document.getElementById("booleanVal");
@@ -8,14 +11,35 @@ const dateInput = document.getElementById("currentDate");
 
 // The realTimeModel.
 let model;
-let domain;
 
 const baseURL = window.location.href.split('?')[0];
 const modelId = getParameterByName("modelId");
 
-// Connect to the domain.
-Convergence.connectAnonymously(DOMAIN_URL).then(d => {
-  domain = d;
+Convergence.Logging.configure({
+  loggers: {
+    "protocol.messages": Convergence.LogLevel.DEBUG
+  }
+});
+
+const options = {
+};
+
+const domain = new Convergence.ConvergenceDomain(DOMAIN_URL, options);
+domain.events().subscribe(e => {
+  switch (e.name) {
+    case "connecting":
+      status.innerHTML = "Connecting";
+      break;
+    case "connected":
+      status.innerHTML = "Connected";
+      break;
+    case "disconnected":
+      status.innerHTML = "Disconnected";
+      break;
+  }
+});
+
+domain.connectAnonymously(DOMAIN_URL, options).then(d => {
   return domain.models().openAutoCreate({
     collection: "test",
     id: modelId,
@@ -279,7 +303,6 @@ function setDate() {
   dateInput.value = date.toUTCString()
 }
 
-
 function getParameterByName(name, url) {
   if (!url) {
     url = window.location.href;
@@ -290,4 +313,12 @@ function getParameterByName(name, url) {
   if (!results) return null;
   if (!results[2]) return '';
   return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function disconnect() {
+  domain.disconnect();
+}
+
+function connect() {
+  domain.reconnect();
 }

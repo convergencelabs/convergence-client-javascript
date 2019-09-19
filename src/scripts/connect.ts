@@ -81,7 +81,7 @@ export function connect(cancellationToken?: CancellationToken): Promise<Converge
 
   if (TypeChecker.isSet(cancellationToken)) {
     cancellationToken._bind(() => {
-      domain.disconnect().catch((e) => console.error(e));
+      domain.disconnect();
     });
   }
 

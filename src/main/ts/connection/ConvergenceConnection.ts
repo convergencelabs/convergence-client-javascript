@@ -131,8 +131,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     return this._connectionDeferred.promise();
   }
 
-  public disconnect(): Promise<void> {
-    const deferred: Deferred<void> = new Deferred<void>();
+  public disconnect(): void {
 
     if (this._connectionTimeoutTask !== null) {
       clearTimeout(this._connectionTimeoutTask);
@@ -150,34 +149,25 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     }
 
     if (this._connectionState === ConnectionState.DISCONNECTED) {
-      deferred.reject(new Error("Connection is already disconnected."));
+      throw new Error("Connection is already disconnected.");
+    } else {
+      this._connectionState = ConnectionState.DISCONNECTING;
+
+      this._authenticated = false;
+
+      this._protocolConnection.close();
+      this._handleDisconnected();
+
+      if (typeof window !== "undefined") {
+        window.removeEventListener("online", this._onWindowOnline);
+      }
     }
-
-    this._connectionState = ConnectionState.DISCONNECTING;
-
-    this._authenticated = false;
-
-    this._protocolConnection
-      .close()
-      .then(() => {
-        this._handleDisconnected();
-        deferred.resolve();
-      })
-      .catch((err: Error) => {
-        this._handleInterrupted();
-        deferred.reject(err);
-      });
-
-    if (typeof window !== "undefined") {
-      window.removeEventListener("online", this._onWindowOnline);
-    }
-
-    return deferred.promise();
   }
 
   public reconnect(): Promise<void> {
-    if (this._connectionState !== ConnectionState.INTERRUPTED) {
-      throw new Error("Can only call reconnect on an interrupted connection.");
+    if (this._connectionState !== ConnectionState.INTERRUPTED &&
+      this._connectionState !== ConnectionState.DISCONNECTED) {
+      throw new Error("Can only call reconnect on an disconnected connection.");
     }
 
     return this
@@ -331,7 +321,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       });
   }
 
-  private _onWindowOnline = (e: Event) => {
+  private _onWindowOnline = (_: Event) => {
     this._logger.debug(() => `Browser connectivity changed, restarting connection schedule.`);
 
     if (this._connectionState === ConnectionState.CONNECTING) {
@@ -440,10 +430,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
               this._connectionAttempts = 0;
             } else {
               this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
-              this._protocolConnection
-                .close()
-                .catch(error =>
-                  this._logger.error("Error closing connection after handshake failure", error));
+              this._protocolConnection.close();
 
               if (handshakeResponse.retryOk) {
                 this._scheduleConnection();
@@ -457,10 +444,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           })
           .catch((e: Error) => {
             this._logger.error("Handshake failed", e);
-            this._protocolConnection
-              .close()
-              .catch(error =>
-                this._logger.error("Error closing connection after handshake error", error));
+            this._protocolConnection.close();
             this._protocolConnection = null;
             // This will cause the code to fall into the next catch.
             return Promise.reject(e);

@@ -72,7 +72,6 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private readonly _requests: Map<number, any>;
   private _closeRequested: boolean = false;
 
-  private _logger = Logging.logger("protocol");
   private _messageLogger = Logging.logger("protocol.messages");
   private _pingLogger = Logging.logger("protocol.ping");
 
@@ -179,26 +178,20 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     }
 
     if (this._socket.isOpen() || this._socket.isConnecting()) {
-      this._socket.terminate(reason)
-        .then(() => {
-          // no-op
-        })
-        .catch((error) => {
-          this._logger.warn("Unable to terminate web socket connection: " + error.message);
-        });
+      this._socket.terminate(reason);
     }
 
     this.onSocketDropped();
   }
 
-  public close(): Promise<void> {
+  public close(): void {
     this._closeRequested = true;
     this.removeAllListeners();
     if (this._heartbeatHelper !== undefined && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
 
-    return this._socket.close();
+    this._socket.close();
   }
 
   public sendMessage(message: IConvergenceMessage): void {
