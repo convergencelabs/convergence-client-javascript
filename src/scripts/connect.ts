@@ -7,7 +7,6 @@ import {
   ConnectingEvent,
   ConnectionFailedEvent,
   ConnectionScheduledEvent,
-  Convergence,
   ConvergenceDomain,
   DisconnectedEvent,
   ErrorEvent,
@@ -39,8 +38,8 @@ const OPTIONS: IConvergenceOptions = {
   },
   reconnect: {
     autoReconnect: true,
-    fallbackAuth: {
-      anonymous: () => Promise.resolve(DISPLAY_NAME)
+    fallbackAuth: (authChallenge) => {
+      authChallenge.anonymous(DISPLAY_NAME);
     }
   }
 };

@@ -8,18 +8,40 @@ export class Deferred<R> {
   private _resolve: (value?: R | PromiseLike<R>) => any;
   private _reject: (error: Error) => void;
 
+  private _rejected: boolean;
+  private _resolved: boolean;
+
   constructor() {
     this._promise = new Promise((resolve: (value?: R | PromiseLike<R>) => any, reject: (error: Error) => void) => {
       this._resolve = resolve;
       this._reject = reject;
     });
+
+    this._rejected = false;
+    this._resolved = false;
+  }
+
+  public isPending(): boolean {
+    return this._resolved || this._rejected;
+  }
+
+  public isRejected(): boolean {
+    return this._rejected;
+  }
+
+  public isResolved(): boolean {
+    return this._resolved;
   }
 
   public resolve(value?: R | PromiseLike<R>): void {
+    this._rejected = false;
+    this._resolved = true;
     this._resolve(value);
   }
 
   public reject(error: Error): void {
+    this._rejected = true;
+    this._resolved = false;
     this._reject(error);
   }
 
