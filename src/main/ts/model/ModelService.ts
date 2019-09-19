@@ -354,6 +354,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
+  public _resourceIdChanged(modelId: string, oldResourceId: string, newResourceId: string): void {
+    if (this._openModelsByModelId.has(modelId)) {
+      const model: RealTimeModel = this._openModelsByModelId.get(modelId);
+      this._openModelsByRid.delete(oldResourceId);
+      this._openModelsByRid.set(newResourceId, model);
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
   public _dispose(): void {
     this._openModelsByModelId.forEach(model => model
       .close()
@@ -487,7 +500,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       (message.referenceShared && message.referenceShared.resourceId) ||
       (message.referenceUnshared && message.referenceUnshared.resourceId) ||
       (message.referenceSet && message.referenceSet.resourceId) ||
-      (message.referenceCleared && message.referenceCleared.resourceId);
+      (message.referenceCleared && message.referenceCleared.resourceId) ||
+      (message.modelReconnectComplete && message.modelReconnectComplete.resourceId);
 
     if (resourceId) {
       const model: RealTimeModel = this._openModelsByRid.get(resourceId);
