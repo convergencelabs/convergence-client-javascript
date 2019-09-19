@@ -5,6 +5,7 @@ export * from "./Convergence";
 export * from "./ConvergenceSession";
 export * from "./ConvergenceDomain";
 export * from "./IConvergenceOptions";
+export * from "./IFallbackAuthChallenge";
 
 export * from "./activity";
 export * from "./chat";

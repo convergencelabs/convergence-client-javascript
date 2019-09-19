@@ -22,6 +22,11 @@ Convergence.Logging.configure({
 });
 
 const options = {
+  reconnect: {
+    fallbackAuth: (authChallenge) => {
+      authChallenge.anonymous();
+    }
+  }
 };
 
 const domain = new Convergence.ConvergenceDomain(DOMAIN_URL, options);

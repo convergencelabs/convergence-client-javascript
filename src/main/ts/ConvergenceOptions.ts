@@ -2,8 +2,8 @@ import {IConvergenceOptions} from "./IConvergenceOptions";
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {ConvergenceError} from "./util";
-import {IUsernameAndPassword} from "./IUsernameAndPassword";
 import {TypeChecker} from "./util/TypeChecker";
+import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
 
 export class ConvergenceOptions {
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
@@ -42,10 +42,7 @@ export class ConvergenceOptions {
   public readonly autoReconnect: boolean;
   public readonly reconnectIntervals: number[];
 
-  public readonly fallbackAuth: "jwt" | "password" | "anonymous" | null;
-  public readonly passwordCallback: () => Promise<IUsernameAndPassword> | null = null;
-  public readonly jwtCallback: () => Promise<string> | null = null;
-  public readonly anonymousCallback: () => Promise<string> | null = null;
+  public readonly fallbackAuth: (authChallenge: IFallbackAuthChallenge) => void;
 
   public readonly defaultRequestTimeout: number;
   public readonly heartbeatEnabled: boolean;
@@ -77,15 +74,8 @@ export class ConvergenceOptions {
     this.autoReconnect = autoReconnect;
     this.reconnectIntervals = reconnectIntervals;
     this.fallbackAuth = null;
-    if (TypeChecker.isFunction(fallbackAuth.jwt)) {
-      this.fallbackAuth = "jwt";
-      this.jwtCallback = fallbackAuth.jwt;
-    } else if (TypeChecker.isFunction(fallbackAuth.password)) {
-      this.fallbackAuth = "password";
-      this.passwordCallback = fallbackAuth.password;
-    } else if (TypeChecker.isFunction(fallbackAuth.anonymous)) {
-      this.fallbackAuth = "anonymous";
-      this.anonymousCallback = fallbackAuth.anonymous;
+    if (TypeChecker.isFunction(fallbackAuth)) {
+      this.fallbackAuth = fallbackAuth;
     }
 
     const defaultProtocolOptions = {

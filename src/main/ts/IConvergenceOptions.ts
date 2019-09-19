@@ -1,6 +1,6 @@
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
-import {IUsernameAndPassword} from "./IUsernameAndPassword";
+import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
 
 /**
  * The [[IConvergenceOptions]] interface represents that options that can be
@@ -75,33 +75,10 @@ export interface IConvergenceOptions {
     reconnectIntervals?: number[];
 
     /**
-     * The fallback authentication method to use when a reconnect token is
-     * rejected. Only one of the following properties should be specified.
+     * The fallbackAuth method to use when a reconnect token is rejected. It
+     * provides the opportunity to use a fallback method of authentication.
      */
-    fallbackAuth?: {
-      /**
-       * Indicates the the fallback authentication should use password
-       * authentication. The specified callback will be used to get the
-       * password for password authentication when the reconnect token
-       * is rejected.
-       */
-      password?: () => Promise<IUsernameAndPassword>;
-
-      /**
-       * Indicates the the fallback authentication should use JWT
-       * authentication. The specified callback will be used to get the
-       * JWT for JWT authentication when the reconnect token is rejected.
-       */
-      jwt?: () => Promise<string>;
-
-      /**
-       * Indicates the the fallback authentication should use anonymous
-       * authentication. The specified callback will be used to get the
-       * Display name for anonymous authentication when the reconnect token is
-       * rejected.
-       */
-      anonymous?: () => Promise<string>;
-    }
+    fallbackAuth?: (authChallenge: IFallbackAuthChallenge) => void;
   };
 
   /**

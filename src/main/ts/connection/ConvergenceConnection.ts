@@ -31,6 +31,7 @@ import {ConvergenceOptions} from "../ConvergenceOptions";
 import {IUsernameAndPassword} from "../IUsernameAndPassword";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {TypeChecker} from "../util/TypeChecker";
+import {FallbackAuthCoordinator} from "./FallbackAuthCoordinator";
 
 /**
  * @hidden
@@ -223,17 +224,28 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       ._authenticate({reconnect: message})
       .catch((e) => {
         if (e instanceof ConvergenceError && e.code === ConvergenceErrorCodes.AUTHENTICATION_FAILED) {
-          if (TypeChecker.isFunction(this._options.passwordCallback)) {
-            return this._options.passwordCallback().then((credentials) => {
-              return this.authenticateWithPassword(credentials);
-            });
-          } else if (TypeChecker.isFunction(this._options.jwtCallback)) {
-            return this._options.jwtCallback().then((jwt) => {
-              return this.authenticateWithJwt(jwt);
-            });
-          } else if (TypeChecker.isFunction(this._options.anonymousCallback)) {
-            return this._options.anonymousCallback().then((displayName) => {
-              return this.authenticateAnonymously(displayName);
+          if (TypeChecker.isFunction(this._options.fallbackAuth)) {
+            const authCoordinator = new FallbackAuthCoordinator();
+
+            this._options.fallbackAuth(authCoordinator.challenge());
+            if (!authCoordinator.isCompleted()) {
+              return Promise.reject(new Error("You must call one of the auth challenge methods."));
+            }
+
+            authCoordinator.fulfilled().then(() => {
+              if (authCoordinator.isPassword()) {
+                const username = this.session().user().username;
+                const password = authCoordinator.getPassword();
+                return this.authenticateWithPassword({username, password});
+              } else if (authCoordinator.isJwt()) {
+                return this.authenticateWithJwt(authCoordinator.getJwt());
+              } else if (authCoordinator.isAnonymous()) {
+                return this.authenticateAnonymously(authCoordinator.getDisplayName());
+              } else if (authCoordinator.isCanceled()) {
+                return Promise.reject(e);
+              } else {
+                return Promise.reject(e);
+              }
             });
           } else {
             return Promise.resolve(e);
