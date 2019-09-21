@@ -4,6 +4,7 @@ import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {ConvergenceError} from "./util";
 import {TypeChecker} from "./util/TypeChecker";
 import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
+import {IStorageAdapter} from "./storage/api";
 
 export class ConvergenceOptions {
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
@@ -51,6 +52,9 @@ export class ConvergenceOptions {
 
   public readonly webSocketFactory: WebSocketFactory | null;
   public readonly webSocketClass: IWebSocketClass | null;
+
+  public readonly offlineStorageEnabled: boolean;
+  public readonly storageAdapter: IStorageAdapter | null;
 
   constructor(options: IConvergenceOptions) {
     ConvergenceOptions.validate(options);
@@ -103,5 +107,9 @@ export class ConvergenceOptions {
 
     this.webSocketFactory = wsOpts.factory || null;
     this.webSocketClass = wsOpts.class || null;
+
+    const offlineOpts = {...options.offline};
+    this.storageAdapter = offlineOpts.storage || null;
+    this.offlineStorageEnabled = this.storageAdapter !== null;
   }
 }

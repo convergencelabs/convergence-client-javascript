@@ -1,6 +1,7 @@
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
+import {IStorageAdapter} from "./storage/api";
 
 /**
  * The [[IConvergenceOptions]] interface represents that options that can be
@@ -80,6 +81,14 @@ export interface IConvergenceOptions {
      */
     fallbackAuth?: (authChallenge: IFallbackAuthChallenge) => void;
   };
+
+  /**
+   * Configures offline storage for Convergence. Several of these options are
+   * required to enable offline editing of data.
+   */
+  offline?: {
+    storage: IStorageAdapter
+  },
 
   /**
    * Options that configure how Convergence will use WebSockets.
