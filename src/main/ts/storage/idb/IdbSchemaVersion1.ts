@@ -1,0 +1,36 @@
+import {IdbSchema} from "./IdbSchema";
+
+export class IdbSchemaVersion1 {
+  public static upgrade(db: IDBDatabase) {
+    const modelStore = db.createObjectStore(
+      IdbSchema.Model.Name, {keyPath: IdbSchema.Model.Fields.Id});
+    modelStore.createIndex(
+      IdbSchema.Model.Indices.Id,
+      IdbSchema.Model.Fields.Id,
+      {unique: true});
+
+    const serverOperationStore = db.createObjectStore(
+      IdbSchema.ModelServerOperation.Name,
+      {keyPath: [IdbSchema.ModelServerOperation.Fields.ModelId, IdbSchema.ModelServerOperation.Fields.Version]});
+    serverOperationStore.createIndex(
+      IdbSchema.ModelServerOperation.Indices.ModelId,
+      IdbSchema.ModelServerOperation.Fields.ModelId,
+      {unique: false});
+    serverOperationStore.createIndex(
+      IdbSchema.ModelServerOperation.Indices.ModelId_Version,
+      [IdbSchema.ModelServerOperation.Fields.ModelId, IdbSchema.ModelServerOperation.Fields.Version],
+      {unique: true});
+
+    const localOperationStore = db.createObjectStore(
+      IdbSchema.ModelLocalOperation.Name,
+      {keyPath: [IdbSchema.ModelLocalOperation.Fields.ModelId, IdbSchema.ModelLocalOperation.Fields.SequenceNumber]});
+    localOperationStore.createIndex(
+      IdbSchema.ModelLocalOperation.Indices.ModelId,
+      IdbSchema.ModelLocalOperation.Fields.ModelId,
+      {unique: false});
+    localOperationStore.createIndex(
+      IdbSchema.ModelLocalOperation.Indices.ModelId_SequenceNumber,
+      [IdbSchema.ModelLocalOperation.Fields.ModelId, IdbSchema.ModelLocalOperation.Fields.SequenceNumber],
+      {unique: true});
+  }
+}
