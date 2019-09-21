@@ -23,7 +23,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public putModel(modelState: IModelState): Promise<void> {
     const {model, localOperations} = modelState;
-    const stores = [IdbSchema.Model.Name, IdbSchema.ModelLocalOperation.Name, IdbSchema.ModelServerOperation.Name];
+    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       modelStore.put(model);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, model.id);
@@ -32,16 +32,23 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
+  public modelExists(modelId: string): Promise<boolean> {
+    return this._withReadStore(IdbSchema.Model.Store, (store) => {
+      const idx = store.index(IdbSchema.Model.Indices.Id);
+      return toPromise(idx.count(modelId)).then((count => count > 0));
+    });
+  }
+
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
-    return this.put(IdbSchema.ModelServerOperation.Name, serverOp);
+    return this.put(IdbSchema.ModelServerOperation.Store, serverOp);
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
-    return this.put(IdbSchema.ModelLocalOperation.Name, localOp);
+    return this.put(IdbSchema.ModelLocalOperation.Store, localOp);
   }
 
   public processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void> {
-    const stores = [IdbSchema.ModelLocalOperation.Name, IdbSchema.ModelServerOperation.Name];
+    const stores = [IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([localOpStore, serverOpStore]) => {
       localOpStore.delete([modelId, seqNo]);
       serverOpStore.put(serverOp);
@@ -49,7 +56,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public getModel(modelId: string): Promise<IModelState> {
-    const stores = [IdbSchema.Model.Name, IdbSchema.ModelLocalOperation.Name];
+    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store];
     return this._withReadStores(stores, async ([modelStore, localOpStore]) => {
       const model = await toPromise(modelStore.get(modelId));
       const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
@@ -62,7 +69,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public deleteModel(modelId: string): Promise<void> {
-    const stores = [IdbSchema.Model.Name, IdbSchema.ModelLocalOperation.Name, IdbSchema.ModelServerOperation.Name];
+    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       modelStore.delete(modelId);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);

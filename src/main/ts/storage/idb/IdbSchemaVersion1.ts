@@ -3,14 +3,14 @@ import {IdbSchema} from "./IdbSchema";
 export class IdbSchemaVersion1 {
   public static upgrade(db: IDBDatabase) {
     const modelStore = db.createObjectStore(
-      IdbSchema.Model.Name, {keyPath: IdbSchema.Model.Fields.Id});
+      IdbSchema.Model.Store, {keyPath: IdbSchema.Model.Fields.Id});
     modelStore.createIndex(
       IdbSchema.Model.Indices.Id,
       IdbSchema.Model.Fields.Id,
       {unique: true});
 
     const serverOperationStore = db.createObjectStore(
-      IdbSchema.ModelServerOperation.Name,
+      IdbSchema.ModelServerOperation.Store,
       {keyPath: [IdbSchema.ModelServerOperation.Fields.ModelId, IdbSchema.ModelServerOperation.Fields.Version]});
     serverOperationStore.createIndex(
       IdbSchema.ModelServerOperation.Indices.ModelId,
@@ -22,7 +22,7 @@ export class IdbSchemaVersion1 {
       {unique: true});
 
     const localOperationStore = db.createObjectStore(
-      IdbSchema.ModelLocalOperation.Name,
+      IdbSchema.ModelLocalOperation.Store,
       {keyPath: [IdbSchema.ModelLocalOperation.Fields.ModelId, IdbSchema.ModelLocalOperation.Fields.SequenceNumber]});
     localOperationStore.createIndex(
       IdbSchema.ModelLocalOperation.Indices.ModelId,

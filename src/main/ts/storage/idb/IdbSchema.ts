@@ -1,6 +1,6 @@
 export const IdbSchema = {
   Model: {
-    Name: "Model",
+    Store: "Model",
     Indices: {
       Id: "id"
     },
@@ -9,7 +9,7 @@ export const IdbSchema = {
     }
   },
   ModelServerOperation: {
-    Name: "ModelServerOperation",
+    Store: "ModelServerOperation",
     Indices: {
       ModelId: "ModelServerOperation.modelId",
       ModelId_Version: "ModelServerOperation.modelId_version"
@@ -20,7 +20,7 @@ export const IdbSchema = {
     }
   },
   ModelLocalOperation: {
-    Name: "ModelLocalOperation",
+    Store: "ModelLocalOperation",
     Indices: {
       ModelId: "ModelLocalOperation.modelId",
       ModelId_SequenceNumber: "ModelLocalOperation.modelId_sequenceNumber"

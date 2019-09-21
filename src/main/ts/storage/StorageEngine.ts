@@ -1,9 +1,9 @@
-import {IModelStore, IOfflineStorage} from "./api";
+import {IModelStore, IStorageAdapter} from "./api";
 
 export class StorageEngine {
-  private _storage: IOfflineStorage | null = null;
+  private _storage: IStorageAdapter | null = null;
 
-  public configure(storage: IOfflineStorage, namespace: string, domainId: string): Promise<void> {
+  public configure(storage: IStorageAdapter, namespace: string, domainId: string): Promise<void> {
     if (!storage) {
       throw new Error("storage must be specified");
     }

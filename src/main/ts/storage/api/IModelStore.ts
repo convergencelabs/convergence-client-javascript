@@ -8,6 +8,8 @@ export interface IModelStore {
 
   deleteModel(modelId: string): Promise<void>;
 
+  modelExists(modelId: string): Promise<boolean>;
+
   processServerOperation(serverOp: IServerOperationData): Promise<void>;
 
   processLocalOperation(localOp: ILocalOperationData): Promise<void>;
