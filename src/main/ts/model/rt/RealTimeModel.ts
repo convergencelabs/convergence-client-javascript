@@ -73,6 +73,9 @@ import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
 import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
+import {IModelStore} from "../../storage/api";
+import {StorageEngine} from "../../storage/StorageEngine";
+import {IModelState} from "../../storage/api/IModelState";
 
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeModel]].
@@ -253,6 +256,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _reconnectData: IReconnectData | null;
 
   /**
+   * @internal
+   */
+  private _storage: StorageEngine;
+
+  /**
    * @hidden
    * @internal
    *
@@ -313,7 +321,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     const referenceCallbacks: ModelReferenceCallbacks = {
       onShare: this._onShareReference.bind(this),
-      onUnshare: this._onUnshareReference.bind(this),
+      onUnShare: this._onUnshareReference.bind(this),
       onSet: this._onSetReference.bind(this),
       onClear: this._onClearReference.bind(this)
     };
@@ -334,6 +342,31 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._committed = true;
 
     this._initializeReferences(references);
+  }
+
+  public setAvailableOffline(enabled: boolean): void {
+    if (!this._storage.isEnabled()) {
+      throw new ConvergenceError("Offline storage not configured.");
+    }
+
+    const localOps = this._concurrencyControl.getInFlightOperations();
+
+    const modelState: IModelState = {
+      model: {
+        id: this._modelId,
+        collection: this._collectionId,
+        version: this.version(),
+        createdTime: this._createdTime,
+        modifiedTime: this.maxTime(),
+        data: this._model.root().dataValue()
+      },
+      localOperations: [],
+      serverOperations: []
+    };
+
+    this._storage.modelManager().putModel(modelState).catch(e => {
+      console.error(e);
+    });
   }
 
   /**

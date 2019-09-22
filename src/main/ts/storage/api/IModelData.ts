@@ -4,7 +4,7 @@ export interface IModelData {
   id: string;
   collection: string;
   version: number;
-  createdTime: number;
-  modifiedTime: number;
+  createdTime: Date;
+  modifiedTime: Date;
   data: ObjectValue;
 }

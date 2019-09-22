@@ -52,8 +52,8 @@ const modelState: IModelState = {
     id: "modelId",
     collection: "collection",
     version: 10,
-    createdTime: 5,
-    modifiedTime: 6,
+    createdTime: new Date(),
+    modifiedTime: new Date(),
     data: {
       type: "object",
       id: "1:0",

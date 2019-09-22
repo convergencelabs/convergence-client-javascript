@@ -56,7 +56,7 @@ describe("RealTimeDate", () => {
       sendOperationCallback: spy(),
       referenceEventCallbacks: {
         onShare: spy(),
-        onUnshare: spy(),
+        onUnShare: spy(),
         onSet: spy(),
         onClear: spy()
       }

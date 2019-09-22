@@ -1,5 +1,5 @@
 const types: {[key: string]: string}  = {
-  COMPOUND: "compound",
+  COMPOUND: "Compound",
   ARRAY_INSERT: "ArrayInsert",
   ARRAY_REORDER: "ArrayReorder",
   ARRAY_REMOVE: "ArrayRemove",

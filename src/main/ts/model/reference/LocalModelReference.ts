@@ -6,7 +6,7 @@ import { ReferenceType } from "./ReferenceType";
 
 export interface ModelReferenceCallbacks {
   onShare: (reference: LocalModelReference<any, any>) => void;
-  onUnshare: (reference: LocalModelReference<any, any>) => void;
+  onUnShare: (reference: LocalModelReference<any, any>) => void;
   onSet: (reference: LocalModelReference<any, any>) => void;
   onClear: (reference: LocalModelReference<any, any>) => void;
 }
@@ -148,7 +148,7 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
   public unshare(): void {
     this._ensureAttached();
     this._shared = false;
-    this._callbacks.onUnshare(this);
+    this._callbacks.onUnShare(this);
   }
 
   /**

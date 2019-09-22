@@ -77,7 +77,7 @@ describe("RealTimeArray", () => {
       sendOperationCallback: spy(),
       referenceEventCallbacks: {
         onShare: spy(),
-        onUnshare: spy(),
+        onUnShare: spy(),
         onSet: spy(),
         onClear: spy()
       }

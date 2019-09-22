@@ -8,5 +8,5 @@ export abstract class Operation implements Change {
   protected constructor(public readonly type: string) {
   }
 
-  public abstract copy(properties: any): Operation;
+  public abstract copy(modifications: any): Operation;
 }
