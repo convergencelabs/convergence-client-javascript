@@ -55,16 +55,17 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public getModel(modelId: string): Promise<IModelState> {
+  public getModel(modelId: string): Promise<IModelState | undefined> {
     const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store];
     return this._withReadStores(stores, async ([modelStore, localOpStore]) => {
       const model = await toPromise(modelStore.get(modelId));
-      const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
-      const localOperations = await toPromise(idx.getAll(modelId));
-      return {
-        model,
-        localOperations
-      } as IModelState;
+      if (model) {
+        const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
+        const localOperations = await toPromise(idx.getAll(modelId));
+        return {model, localOperations} as IModelState;
+      } else {
+        return;
+      }
     });
   }
 

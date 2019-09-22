@@ -50,7 +50,7 @@ export class IdbPersistenceStore {
     mode: IDBTransactionMode,
     body: (stores: IDBObjectStore[]) => Promise<T>): Promise<T> {
     const tx = this._db.transaction(stores, mode);
-    const objectStores = stores.map(tx.objectStore);
+    const objectStores = stores.map(storeName => tx.objectStore(storeName));
     const result = body(objectStores);
     return txToPromise(tx).then(() => result);
   }

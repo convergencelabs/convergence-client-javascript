@@ -9,5 +9,7 @@ export interface IStorageAdapter {
 
   isDisposed(): boolean;
 
+  destroy(): void;
+
   modelStore(): IModelStore;
 }
