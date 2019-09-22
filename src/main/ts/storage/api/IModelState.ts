@@ -1,7 +1,8 @@
 import {IModelData} from "./IModelData";
-import {ILocalOperationData} from "./IModelOperationData";
+import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 
 export interface IModelState {
   model: IModelData;
+  serverOperations: IServerOperationData[];
   localOperations: ILocalOperationData[];
 }

@@ -21,14 +21,19 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     operations.forEach(op => store.add(op));
   }
 
+  private static putServerOperationsForModel(store: IDBObjectStore, operations: IServerOperationData[]): void {
+    operations.forEach(op => store.add(op));
+  }
+
   public putModel(modelState: IModelState): Promise<void> {
-    const {model, localOperations} = modelState;
+    const {model, localOperations, serverOperations} = modelState;
     const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       modelStore.put(model);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, model.id);
       IdbModelStore.deleteLocalOperationsForModel(localOpStore, model.id);
       IdbModelStore.putLocalOperationsForModel(localOpStore, localOperations);
+      IdbModelStore.putServerOperationsForModel(serverOpStore, serverOperations);
     });
   }
 
@@ -56,13 +61,17 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public getModel(modelId: string): Promise<IModelState | undefined> {
-    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store];
-    return this._withReadStores(stores, async ([modelStore, localOpStore]) => {
+    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
+    return this._withReadStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       const model = await toPromise(modelStore.get(modelId));
       if (model) {
-        const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
-        const localOperations = await toPromise(idx.getAll(modelId));
-        return {model, localOperations} as IModelState;
+        const localOpsIndex = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
+        const localOperations = await toPromise(localOpsIndex.getAll(modelId));
+
+        const serverOpsIndex = serverOpStore.index(IdbSchema.ModelServerOperation.Indices.ModelId);
+        const serverOperations = await toPromise(serverOpsIndex.getAll(modelId));
+
+        return {model, localOperations, serverOperations} as IModelState;
       } else {
         return;
       }

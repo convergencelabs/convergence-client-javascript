@@ -31,6 +31,20 @@ describe("IdbModelStore", () => {
       })
     );
   });
+
+  describe("deleteModel()", () => {
+    it("deletes and existing model ", () => withStorage(async (adapter) => {
+        const modelStore = adapter.modelStore();
+        await modelStore.putModel(modelState);
+        const exists = await modelStore.modelExists(modelState.model.id);
+        expect(exists).to.be.true;
+
+        await modelStore.deleteModel(modelState.model.id);
+        const afterDelete = await modelStore.modelExists(modelState.model.id);
+        expect(afterDelete).to.be.false;
+      })
+    );
+  });
 });
 
 const modelState: IModelState = {
@@ -46,7 +60,8 @@ const modelState: IModelState = {
       children: {}
     }
   },
-  localOperations: []
+  localOperations: [],
+  serverOperations: []
 };
 let counter = 1;
 
