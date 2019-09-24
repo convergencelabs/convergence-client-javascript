@@ -162,4 +162,5 @@ import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {RichTextContentType} from "./RichTextContentType";
-import {ConvergenceError, Validation} from "../../../../util/";
+import {ConvergenceError} from "../../../../util/";
+import { Validation } from "../../../../util/Validation";

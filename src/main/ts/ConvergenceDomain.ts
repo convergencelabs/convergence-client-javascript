@@ -24,7 +24,7 @@ import {
   InterruptedEvent,
   DisconnectedEvent
 } from "./events/";
-import {Validation} from "./util";
+import {Validation} from "./util/Validation";
 import {IdentityCache} from "./identity/IdentityCache";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";

@@ -96,5 +96,5 @@ import {RichTextNode} from "./RichTextNode";
 import {
   StringMapLike,
   StringMap,
-  Validation,
   ConvergenceError} from "../../../../util";
+import { Validation } from "../../../../util/Validation";

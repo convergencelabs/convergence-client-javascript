@@ -24,7 +24,7 @@ import {
 } from "../ot/ops/operationChanges";
 import {DomainUser} from "../../identity";
 import {ConvergenceSession} from "../../ConvergenceSession";
-import {Validation} from "../../util";
+import {Validation} from "../../util/Validation";
 
 /**
  * @hidden

@@ -1,6 +1,6 @@
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ConvergenceEventEmitter, Validation, ConvergenceServerError} from "../util/";
+import {ConvergenceEventEmitter, ConvergenceServerError} from "../util/";
 import {
   IChatEvent,
   ChatLeftEvent,
@@ -25,6 +25,7 @@ import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUserIdentifier, DomainUserId} from "../identity";
 import {ChatInfo, createChatInfo, ChatTypes} from "./ChatInfo";
+import { Validation } from "../util/Validation";
 
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;

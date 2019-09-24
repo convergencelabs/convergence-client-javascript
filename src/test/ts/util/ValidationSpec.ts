@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Validation} from "../../../main/ts/util";
+import {Validation} from "../../../main/ts/util/Validation";
 
 describe("Validation", () => {
 

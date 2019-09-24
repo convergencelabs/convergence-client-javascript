@@ -3,8 +3,9 @@ import {RichTextNode} from "./RichTextNode";
 import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextContent} from "./RichTextContent";
 import {RichTextString} from "./RichTextString";
-import {ConvergenceError, Validation} from "../../../../util/";
+import {ConvergenceError} from "../../../../util/";
 import {RichTextContentType} from "./RichTextContentType";
+import { Validation } from "../../../../util/Validation";
 
 /**
  * @hidden

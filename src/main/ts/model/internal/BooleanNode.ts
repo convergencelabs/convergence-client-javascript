@@ -9,7 +9,7 @@ import {BooleanNodeSetValueEvent} from "./events";
 import {BooleanSet} from "../ot/ops/operationChanges";
 import {ConvergenceSession} from "../../ConvergenceSession";
 import {DomainUser} from "../../identity";
-import {Validation} from "../../util";
+import {Validation} from "../../util/Validation";
 
 /**
  * @hidden

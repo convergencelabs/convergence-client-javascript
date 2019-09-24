@@ -8,7 +8,7 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent, Validation} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {RealTimeModel} from "./rt/";
 import {HistoricalModel} from "./historical/";
 import {ModelResult} from "./query/";
@@ -36,6 +36,7 @@ import {
 import {IdentityCache} from "../identity/IdentityCache";
 import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
+import { Validation } from "../util/Validation";
 
 /**
  * This is the main entry point in Convergence for working with

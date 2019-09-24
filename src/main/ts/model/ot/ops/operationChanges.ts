@@ -134,6 +134,10 @@ export interface StringInsert extends DiscreteChange {
   value: string;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface StringRemove extends DiscreteChange {
   index: number;
   value: string;

@@ -2,7 +2,7 @@ import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
 import {ObjectValue, DataValueType, DataValue} from "../dataValue";
-import {Validation} from "../../util";
+import {Validation} from "../../util/Validation";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";

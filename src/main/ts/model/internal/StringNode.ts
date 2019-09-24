@@ -11,7 +11,7 @@ import {Path} from "../Path";
 import {StringNodeInsertEvent, StringNodeRemoveEvent, StringNodeSetValueEvent} from "./events";
 import {ConvergenceSession} from "../../ConvergenceSession";
 import {DomainUser} from "../../identity";
-import {Validation} from "../../util";
+import {Validation} from "../../util/Validation";
 
 /**
  * @hidden

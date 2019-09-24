@@ -4,7 +4,7 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
 import {DomainUserId} from "./DomainUserId";
-import {Validation} from "../util";
+import {Validation} from "../util/Validation";
 import {domainUserIdToProto, getOrDefaultArray, toOptional, protoToDomainUserId} from "../connection/ProtocolUtil";
 import {toDomainUser, toUserFieldCode, toUserGroup} from "./IdentityMessageUtils";
 import {io} from "@convergence-internal/convergence-proto";

@@ -22,6 +22,7 @@ import {io} from "@convergence-internal/convergence-proto";
 import IChatChannelEventData = io.convergence.proto.IChatEventData;
 
 /**
+ * @hidden
  * @internal
  */
 export class ChatHistoryEventMapper {
