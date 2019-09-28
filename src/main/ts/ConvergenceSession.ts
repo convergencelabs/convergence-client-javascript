@@ -1,7 +1,7 @@
 import {ConvergenceConnection} from "./connection/ConvergenceConnection";
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {DomainUser} from "./identity";
-import {ConvergenceError} from "./util/ConvergenceError";
+import {ConvergenceError} from "./util/";
 import {ConvergenceErrorCodes} from "./util/ConvergenceErrorCodes";
 
 /**

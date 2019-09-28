@@ -60,4 +60,10 @@ export class IdbPersistenceStore {
       return toVoidPromise(store.put(data));
     });
   }
+
+  protected add(storeName: string, data: any): Promise<void> {
+    return this._withWriteStore(storeName, (store) => {
+      return toVoidPromise(store.add(data));
+    });
+  }
 }

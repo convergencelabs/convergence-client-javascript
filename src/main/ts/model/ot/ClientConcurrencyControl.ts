@@ -200,7 +200,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     // todo
   }
 
-  public processAcknowledgement(version: number, seqNo?: number): void {
+  public processAcknowledgement(version: number, seqNo?: number): ClientOperationEvent {
     if (this._inflightOperations.length === 0) {
       throw new Error("Received an acknowledgment, but had no uncommitted operations.");
     }
@@ -228,6 +228,8 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       };
       this._emitEvent(evt);
     }
+
+    return acked;
   }
 
   public processRemoteOperation(incomingOperation: ServerOperationEvent): void {

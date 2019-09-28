@@ -73,9 +73,10 @@ import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
 import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
-import {IModelStore} from "../../storage/api";
-import {StorageEngine} from "../../storage/StorageEngine";
 import {IModelState} from "../../storage/api/IModelState";
+import {ModelOfflineManager} from "../ModelOfflineManager";
+import {ILocalOperationData, IServerOperationData} from "../../storage/api";
+import {toOfflineOperationData} from "../../storage/OfflineOperationMapper";
 
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeModel]].
@@ -258,7 +259,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _storage: StorageEngine;
+  private readonly _offlineManager: ModelOfflineManager;
+
+  private _storeOffline: boolean;
 
   /**
    * @hidden
@@ -280,7 +283,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               concurrencyControl: ClientConcurrencyControl,
               connection: ConvergenceConnection,
               identityCache: IdentityCache,
-              modelService: ModelService) {
+              modelService: ModelService,
+              modelOfflineManager: ModelOfflineManager) {
     super();
 
     this._resourceId = resourceId;
@@ -294,6 +298,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._modelService = modelService;
     this._permissions = permissions;
     this._identityCache = identityCache;
+    this._offlineManager = modelOfflineManager;
 
     this._reconnectData = null;
 
@@ -330,7 +335,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       sendOperationCallback: (operation: DiscreteOperation): void => {
         const opEvent: ClientOperationEvent = this._concurrencyControl.processOutgoingOperation(operation);
         if (!this._concurrencyControl.isBatchOperationInProgress()) {
-          this._sendOperation(opEvent);
+          this._handleLocalOperation(opEvent);
         }
       },
       referenceEventCallbacks: referenceCallbacks
@@ -342,15 +347,27 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._committed = true;
 
     this._initializeReferences(references);
-  }
 
-  public setAvailableOffline(enabled: boolean): void {
-    if (!this._storage.isEnabled()) {
-      throw new ConvergenceError("Offline storage not configured.");
+    if (this._offlineManager.isOfflineEnabled()) {
+      this._offlineManager.onModelOpen(this);
     }
 
+    this._storeOffline = false;
+  }
+
+  public setAvailableOffline(enabled: boolean): Promise<void> {
+    return this._offlineManager.setModelOffline(this._modelId, enabled);
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _getCurrentStateSnapshot(): IModelState {
     const localOps = this._concurrencyControl.getInFlightOperations();
 
+    // fixme map operations.
     const modelState: IModelState = {
       model: {
         id: this._modelId,
@@ -364,9 +381,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       serverOperations: []
     };
 
-    this._storage.modelManager().putModel(modelState).catch(e => {
-      console.error(e);
-    });
+    return modelState;
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _setOfflineEnabled(enabled): void {
+    this._storeOffline = enabled;
   }
 
   /**
@@ -608,7 +632,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public completeBatch(): void {
     const opEvent: ClientOperationEvent = this._concurrencyControl.completeBatchOperation();
-    this._sendOperation(opEvent);
+    this._handleLocalOperation(opEvent);
   }
 
   /**
@@ -980,9 +1004,24 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
     const version = getOrDefaultNumber(message.version);
     const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
-    this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
+    const ackedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
     this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
+
+    if (this._offlineManager.isOfflineEnabled()) {
+      const operation = toOfflineOperationData(ackedOperation.operation);
+
+      const serverOp: IServerOperationData = {
+        modelId: this._modelId,
+        version,
+        timestamp: this._time,
+        operation
+      };
+
+      // fixme handle error.
+      this._offlineManager.processOperationAck(this.modelId(), sequenceNumber, serverOp)
+        .catch(e => console.error(e));
+    }
   }
 
   /**
@@ -1051,6 +1090,18 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._deliverToChild(modelEvent);
       }
     }
+
+    if (this._offlineManager.isOfflineEnabled()) {
+      const opData = toOfflineOperationData(operation);
+      const serverOp: IServerOperationData = {
+        modelId: this._modelId,
+        version: processed.version,
+        timestamp: processed.timestamp,
+        operation: opData
+      };
+      this._offlineManager.processServerOperation(serverOp)
+        .catch(e => console.error(e));
+    }
   }
 
   /**
@@ -1096,6 +1147,27 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _deliverToChild(modelEvent: ModelOperationEvent): void {
     this._model.handleModelOperationEvent(modelEvent);
+  }
+
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
+  private _handleLocalOperation(opEvent: ClientOperationEvent): void {
+    if (this._offlineManager.isOfflineEnabled()) {
+      const opData = toOfflineOperationData(opEvent.operation);
+      const localOp: ILocalOperationData = {
+        modelId: this._modelId,
+        sequenceNumber: opEvent.seqNo,
+        contextVersion: this._version,
+        timestamp: opEvent.timestamp,
+        operation: opData
+      };
+      this._offlineManager.processLocalOperation(localOp)
+        .catch(e => RealTimeModel._log.error(`model persistence error: ${this._modelId}`, e));
+    }
+    this._sendOperation(opEvent);
   }
 
   /**

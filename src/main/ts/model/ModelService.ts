@@ -36,7 +36,9 @@ import {
 import {IdentityCache} from "../identity/IdentityCache";
 import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
-import { Validation } from "../util/Validation";
+import {Validation} from "../util/Validation";
+import {StorageEngine} from "../storage/StorageEngine";
+import {ModelOfflineManager} from "./ModelOfflineManager";
 
 /**
  * This is the main entry point in Convergence for working with
@@ -81,10 +83,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _identityCache: IdentityCache;
 
   /**
+   * @internal
+   */
+  private readonly _modelOfflineManager: ModelOfflineManager;
+
+  /**
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection, identityCache: IdentityCache) {
+  constructor(connection: ConvergenceConnection, identityCache: IdentityCache, storageEngine: StorageEngine) {
     super();
     this._connection = connection;
     this._identityCache = identityCache;
@@ -96,6 +103,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+
+    this._modelOfflineManager = new ModelOfflineManager(
+      10 * 60 * 1000,
+      100,
+      storageEngine
+    );
   }
 
   /**
@@ -460,7 +473,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           clientConcurrencyControl,
           this._connection,
           this._identityCache,
-          this
+          this,
+          this._modelOfflineManager
         );
 
         this._openModelsByModelId.set(openRealTimeModelResponse.modelId, model);

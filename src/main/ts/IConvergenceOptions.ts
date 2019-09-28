@@ -88,7 +88,7 @@ export interface IConvergenceOptions {
    */
   offline?: {
     storage: IStorageAdapter
-  },
+  };
 
   /**
    * Options that configure how Convergence will use WebSockets.

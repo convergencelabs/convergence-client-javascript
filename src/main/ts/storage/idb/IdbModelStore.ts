@@ -45,18 +45,18 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
-    return this.put(IdbSchema.ModelServerOperation.Store, serverOp);
+    return this.add(IdbSchema.ModelServerOperation.Store, serverOp);
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
-    return this.put(IdbSchema.ModelLocalOperation.Store, localOp);
+    return this.add(IdbSchema.ModelLocalOperation.Store, localOp);
   }
 
   public processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void> {
     const stores = [IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([localOpStore, serverOpStore]) => {
       localOpStore.delete([modelId, seqNo]);
-      serverOpStore.put(serverOp);
+      serverOpStore.add(serverOp);
     });
   }
 
@@ -78,12 +78,39 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public deleteModel(modelId: string): Promise<void> {
-    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
-    return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
+  public setModelSubscriptions(modelIds: string[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  public getSubscribedModels(): Promise<string[]> {
+    const storeName = IdbSchema.ModelSubscriptions.Store;
+    return this._withReadStore(storeName, async (store) => {
+      return toPromise(store.getAll())
+        .then(results => results.map(modelSub => modelSub.id));
+    });
+  }
+
+  public subscribeToModel(modelId: string): Promise<void> {
+    const storeName = IdbSchema.ModelSubscriptions.Store;
+    return this._withWriteStore(storeName, async (store) => {
+      const data = {id: modelId};
+      store.put(data);
+    });
+  }
+
+  public unsubscribeToModel(modelId: string): Promise<void> {
+    const stores = [
+      IdbSchema.Model.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store,
+      IdbSchema.ModelSubscriptions.Store
+    ];
+
+    return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore, subStore]) => {
       modelStore.delete(modelId);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
       IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
+      subStore.delete(modelId);
     });
   }
 }

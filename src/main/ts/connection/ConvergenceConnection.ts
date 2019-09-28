@@ -8,23 +8,11 @@ import ConvergenceSocket from "./ConvergenceSocket";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Deferred} from "../util/Deferred";
-import {
-  ConvergenceError,
-  ConvergenceEventEmitter,
-  IConvergenceEvent
-} from "../util/";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
 import {io} from "@convergence-internal/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
-import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
-import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;
-import IAuthenticationRequestMessage = io.convergence.proto.IAuthenticationRequestMessage;
-import IJwtAuthRequestMessage = io.convergence.proto.IJwtAuthRequestMessage;
-import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenAuthRequestMessage;
-import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
-import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
-import {getOrDefaultObject, getOrDefaultString, toOptional} from "./ProtocolUtil";
+import {getOrDefaultObject, toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
 import {ConvergenceOptions} from "../ConvergenceOptions";
 import {IUsernameAndPassword} from "../IUsernameAndPassword";
@@ -33,6 +21,14 @@ import {TypeChecker} from "../util/TypeChecker";
 import {FallbackAuthCoordinator} from "./FallbackAuthCoordinator";
 import {Logging} from "../util/log/Logging";
 import {Logger} from "../util/log/Logger";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
+import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;
+import IAuthenticationRequestMessage = io.convergence.proto.IAuthenticationRequestMessage;
+import IJwtAuthRequestMessage = io.convergence.proto.IJwtAuthRequestMessage;
+import IReconnectTokenAuthRequestMessage = io.convergence.proto.IReconnectTokenAuthRequestMessage;
+import IAnonymousAuthRequestMessage = io.convergence.proto.IAnonymousAuthRequestMessage;
+import IAuthenticationResponseMessage = io.convergence.proto.IAuthenticationResponseMessage;
 
 /**
  * @hidden
@@ -70,9 +66,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _connectionState: ConnectionState;
   private _protocolConnection: ProtocolConnection;
 
-  private _domainId: string;
-  private _namespace: string;
-
   /**
    *
    * @param url
@@ -81,14 +74,9 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   constructor(url: string, domain: ConvergenceDomain) {
     super();
 
-    this._url = url.trim().toLowerCase();
-    const urlExpression = /^(https?|wss?):\/{2}.+\/.+\/.+/g;
-
-    if (!urlExpression.test(this._url)) {
-      throw new Error(`Invalid domain connection url: ${this._url}`);
-    }
-
     this._options = domain.options();
+
+    this._url = url;
 
     this._authenticated = false;
 
@@ -104,14 +92,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   public url(): string {
     return this._url;
-  }
-
-  public namespace(): string {
-    return this._namespace;
-  }
-
-  public domainId(): string {
-    return this._domainId;
   }
 
   public session(): ConvergenceSession {
@@ -178,12 +158,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       .then(() => {
         return;
       });
-  }
-
-  public connectNow(): void {
-    if (this._connectionState !== ConnectionState.CONNECTING) {
-      throw new Error("Can only call connectNow on an connecting connection.");
-    }
   }
 
   public isConnected(): boolean {
@@ -429,9 +403,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             }
 
             if (handshakeResponse.success) {
-              this._namespace = getOrDefaultString(handshakeResponse.namespace);
-              this._domainId = getOrDefaultString(handshakeResponse.id);
-
               this._connectionState = ConnectionState.CONNECTED;
               this._emitEvent({name: ConvergenceConnection.Events.CONNECTED});
 

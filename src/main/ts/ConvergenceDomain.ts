@@ -1,7 +1,10 @@
 import {
   ConvergenceConnection,
+  IAuthenticatedEvent,
+  IAuthenticatingEvent,
+  IAuthenticationFailedEvent,
   IConnectionErrorEvent,
-  IConnectionScheduledEvent, IAuthenticatingEvent, IAuthenticationFailedEvent, IAuthenticatedEvent
+  IConnectionScheduledEvent
 } from "./connection/ConvergenceConnection";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {ConvergenceSession} from "./ConvergenceSession";
@@ -12,25 +15,25 @@ import {PresenceService, UserPresence} from "./presence/";
 import {ChatService} from "./chat/";
 import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
-  ErrorEvent,
-  IConvergenceDomainEvent,
+  AuthenticatedEvent,
+  AuthenticatingEvent,
+  AuthenticationFailedEvent,
   ConnectedEvent,
-  ConnectionScheduledEvent,
   ConnectingEvent,
   ConnectionFailedEvent,
-  AuthenticatingEvent,
-  AuthenticatedEvent,
-  AuthenticationFailedEvent,
-  InterruptedEvent,
-  DisconnectedEvent
+  ConnectionScheduledEvent,
+  DisconnectedEvent,
+  ErrorEvent,
+  IConvergenceDomainEvent,
+  InterruptedEvent
 } from "./events/";
 import {Validation} from "./util/Validation";
 import {IdentityCache} from "./identity/IdentityCache";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
-import {TypeChecker} from "./util/TypeChecker";
 import {getOrDefaultObject, protoValueToJson} from "./connection/ProtocolUtil";
 import {mapObjectValues} from "./util/ObjectUtils";
+import {StorageEngine} from "./storage/StorageEngine";
 
 /**
  * This represents a single connection to a specific Domain in
@@ -79,37 +82,52 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * @internal
    */
-  private _modelService: ModelService;
+  private readonly _modelService: ModelService;
 
   /**
    * @internal
    */
-  private _identityService: IdentityService;
+  private readonly _identityService: IdentityService;
 
   /**
    * @internal
    */
-  private _activityService: ActivityService;
+  private readonly _activityService: ActivityService;
 
   /**
    * @internal
    */
-  private _presenceService: PresenceService;
+  private readonly _presenceService: PresenceService;
 
   /**
    * @internal
    */
-  private _chatService: ChatService;
+  private readonly _chatService: ChatService;
 
   /**
    * @internal
    */
-  private _identityCache: IdentityCache;
+  private readonly _identityCache: IdentityCache;
+
+  /**
+   * @internal
+   */
+  private readonly _namespace: string;
+
+  /**
+   * @internal
+   */
+  private readonly _domainId: string;
 
   /**
    * @internal
    */
   private readonly _connection: ConvergenceConnection;
+
+  /**
+   * @internal
+   */
+  private readonly _storage: StorageEngine;
 
   /**
    * @internal
@@ -132,11 +150,47 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   constructor(url: string, options?: IConvergenceOptions) {
     super();
 
+    Validation.assertString(url, "url");
+
+    const urlExpression = /^(https?|wss?):\/{2}(.+)\/(.+)\/(.+)/;
+
+    const urlParts = urlExpression.exec(url.trim());
+    if (!urlParts || urlParts.length !== 5) {
+      throw new Error(`Invalid url: ${url}`);
+    }
+
+    this._namespace = urlParts[3];
+    this._domainId = urlParts[4];
+
     this._options = new ConvergenceOptions(options || {});
 
     this._disposed = false;
 
     this._connection = new ConvergenceConnection(url, this);
+
+    this._storage = new StorageEngine();
+
+    if (this._options.storageAdapter) {
+      this._storage
+        .configure(this._options.storageAdapter, this._namespace, this._domainId)
+        .catch(e => {
+          // Fixme use logging.
+          console.error(e);
+        });
+    }
+
+    const session: ConvergenceSession = this._connection.session();
+    const initialPresenceState = {};
+    const presenceState: Map<string, any> = StringMap.objectToMap(initialPresenceState);
+    const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
+
+    this._identityCache = new IdentityCache(this._connection);
+    this._modelService = new ModelService(this._connection, this._identityCache, this._storage);
+    this._identityService = new IdentityService(this._connection);
+    this._activityService = new ActivityService(this._connection, this._identityCache);
+    this._presenceService = new PresenceService(this._connection, initialPresence, this._identityCache);
+    this._chatService = new ChatService(this._connection, this._identityCache);
+
     this._bindConnectionEvents();
   }
 
@@ -160,14 +214,14 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @returns The namespace of this domain.
    */
   public namespace(): string {
-    return this._connection.namespace();
+    return this._namespace;
   }
 
   /**
    * @returns The unique ID of this domain.
    */
   public id(): string {
-    return this._connection.domainId();
+    return this._domainId;
   }
 
   /**
@@ -450,7 +504,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
       (e: IAuthenticatedEvent) => {
         this._emitEvent(new AuthenticatedEvent(this, e.method));
-        this._init(e);
+        this._onAuthenticated(e);
       });
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
       (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
@@ -472,20 +526,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  private _init(authEvent: IAuthenticatedEvent): void {
-    if (!TypeChecker.isSet(this._identityCache)) {
-      const session: ConvergenceSession = this._connection.session();
-      const initialPresenceState = mapObjectValues(getOrDefaultObject(authEvent.state), protoValueToJson);
-      const presenceState: Map<string, any> = StringMap.objectToMap(initialPresenceState);
-      const initialPresence: UserPresence = new UserPresence(session.user(), true, presenceState);
-
-      this._identityCache = new IdentityCache(this._connection);
-      this._modelService = new ModelService(this._connection, this._identityCache);
-      this._identityService = new IdentityService(this._connection);
-      this._activityService = new ActivityService(this._connection, this._identityCache);
-      this._presenceService = new PresenceService(this._connection, initialPresence, this._identityCache);
-      this._chatService = new ChatService(this._connection, this._identityCache);
-    }
+  private _onAuthenticated(authEvent: IAuthenticatedEvent): void {
+    const state = mapObjectValues(getOrDefaultObject(authEvent.state), protoValueToJson);
+    this._presenceService._setInternalState(StringMap.objectToMap(state));
   }
 }
 

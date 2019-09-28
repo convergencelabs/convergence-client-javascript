@@ -1,6 +1,6 @@
 import {IdbModelStore} from "./IdbModelStore";
 import {toPromise} from "./promise";
-import {IModelStore, IStorageAdapter} from "../api/";
+import {IStorageAdapter} from "../api/";
 import {IdbSchemaManager} from "./IdbSchemaManager";
 
 export class IdbStorageAdapter implements IStorageAdapter {

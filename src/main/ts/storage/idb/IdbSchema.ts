@@ -1,8 +1,23 @@
+export interface IObjectStoreSchema {
+  Store: string;
+  Indices: {[key: string]: string};
+  Fields: {[key: string]: string};
+}
+
 export const IdbSchema = {
+  ModelSubscriptions: {
+    Store: "ModelSubscription",
+    Indices: {
+      ModelId: "ModelSubscription.modelId"
+    },
+    Fields: {
+      ModelId: "modelId"
+    }
+  },
   Model: {
     Store: "Model",
     Indices: {
-      Id: "id"
+      Id: "Model.id"
     },
     Fields: {
       Id: "id"

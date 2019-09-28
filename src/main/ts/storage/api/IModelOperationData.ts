@@ -3,6 +3,7 @@ import {DataValue} from "../../model/dataValue";
 export interface IServerOperationData {
   modelId: string;
   version: number;
+  timestamp: Date;
   operation: IModelOperationData;
 }
 
@@ -10,6 +11,7 @@ export interface ILocalOperationData {
   modelId: string;
   contextVersion: number;
   sequenceNumber: number;
+  timestamp: Date;
   operation: IModelOperationData;
 }
 
@@ -21,6 +23,11 @@ export interface IModelOperationData {
     "boolean_set" |
     "date_set" |
     "compound";
+}
+
+export interface ICompoundOperationData extends IModelOperationData {
+  type: "compound";
+  ops: IModelDiscreteOperationData[];
 }
 
 export interface IModelDiscreteOperationData extends IModelOperationData {
@@ -50,7 +57,7 @@ export interface IStringRemoveOperationData extends IModelDiscreteOperationData 
 }
 
 export interface IStringSetOperationData extends IModelDiscreteOperationData {
-  type: "string_remove";
+  type: "string_set";
   value: string;
 }
 
@@ -58,7 +65,7 @@ export interface IStringSetOperationData extends IModelDiscreteOperationData {
 // Array Operations
 //
 export interface IArrayInsertOperationData extends IModelDiscreteOperationData {
-  type: "array_set";
+  type: "array_insert";
   index: number;
   value: DataValue;
 }
@@ -75,7 +82,7 @@ export interface IArrayRemoveOperationData extends IModelDiscreteOperationData {
 }
 
 export interface IArrayMoveOperationData extends IModelDiscreteOperationData {
-  type: "array_replace";
+  type: "array_move";
   fromIndex: number;
   toIndex: number;
 }

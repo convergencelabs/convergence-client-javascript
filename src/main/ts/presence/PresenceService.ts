@@ -249,6 +249,16 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
   /////////////////////////////////////////////////////////////////////////////
 
   /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _setInternalState(state: Map<string, any>): void {
+    this._localManager.clear(false);
+    this._localManager.set(state);
+  }
+
+  /**
    * @internal
    * @hidden
    */

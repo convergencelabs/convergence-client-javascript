@@ -2,6 +2,13 @@ import {IdbSchema} from "./IdbSchema";
 
 export class IdbSchemaVersion1 {
   public static upgrade(db: IDBDatabase) {
+    const modelSubscriptionStore = db.createObjectStore(
+      IdbSchema.ModelSubscriptions.Store, {keyPath: IdbSchema.ModelSubscriptions.Fields.ModelId});
+    modelSubscriptionStore.createIndex(
+      IdbSchema.ModelSubscriptions.Indices.ModelId,
+      IdbSchema.ModelSubscriptions.Fields.ModelId,
+      {unique: true});
+
     const modelStore = db.createObjectStore(
       IdbSchema.Model.Store, {keyPath: IdbSchema.Model.Fields.Id});
     modelStore.createIndex(

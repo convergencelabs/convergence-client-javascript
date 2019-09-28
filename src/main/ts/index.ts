@@ -14,3 +14,5 @@ export * from "./model";
 export * from "./presence";
 export * from "./util";
 export * from "./events";
+
+export * from "./storage";

@@ -1,6 +1,9 @@
 import {IModelStore, IStorageAdapter} from "./api";
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
 
 export class StorageEngine {
+  private static _log: Logger = Logging.logger("storage");
   private _storage: IStorageAdapter | null = null;
 
   public configure(storage: IStorageAdapter, namespace: string, domainId: string): Promise<void> {
@@ -16,8 +19,17 @@ export class StorageEngine {
       throw new Error("domain must be a non-empty string");
     }
 
-    this._storage = storage;
-    return this._storage.init(namespace, domainId);
+    StorageEngine._log.debug("Initializing storage");
+    return storage
+      .init(namespace, domainId)
+      .then(() => {
+        StorageEngine._log.debug("Storage initialized.");
+        this._storage = storage;
+      })
+      .catch((e) => {
+        StorageEngine._log.error("could not initialize storage adapter, storage disabled");
+        return Promise.reject(e);
+      });
   }
 
   public isEnabled(): boolean {
@@ -44,7 +56,7 @@ export class StorageEngine {
     return this._storage !== null && this._storage.isDisposed();
   }
 
-  public modelManager(): IModelStore {
+  public modelStore(): IModelStore {
     return this._storage.modelStore();
   }
 }

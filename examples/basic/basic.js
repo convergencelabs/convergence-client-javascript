@@ -17,15 +17,21 @@ const modelId = getParameterByName("modelId");
 
 Convergence.configureLogging({
   loggers: {
-    "protocol.messages": Convergence.LogLevel.DEBUG
+    "protocol.messages": Convergence.LogLevel.DEBUG,
+    "storage": Convergence.LogLevel.DEBUG
   }
 });
+
+const storage = new Convergence.IdbStorageAdapter();
 
 const options = {
   reconnect: {
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous();
     }
+  },
+  offline: {
+    storage: storage
   }
 };
 
@@ -44,38 +50,40 @@ domain.events().subscribe(e => {
   }
 });
 
-domain.connectAnonymously(DOMAIN_URL, options).then(d => {
-  return domain.models().openAutoCreate({
-    collection: "test",
-    id: modelId,
-    data: {
-      "string": "String data to edit",
-      "number": 10,
-      "boolean": true,
-      "array": [
-        "Apples",
-        "Bananas",
-        "Pears",
-        "Orange"
-      ],
-      "object": {
-        "key1": "value1",
-        "key2": "value2",
-        "key3": "value3",
-        "key4": "value4"
-      },
-      "date": new Date()
+domain.models().openAutoCreate({
+  collection: "test",
+  id: modelId,
+  data: {
+    "string": "String data to edit",
+    "number": 10,
+    "boolean": true,
+    "array": [
+      "Apples",
+      "Bananas",
+      "Pears",
+      "Orange"
+    ],
+    "object": {
+      "key1": "value1",
+      "key2": "value2",
+      "key3": "value3",
+      "key4": "value4"
     },
-    overrideWorld: true,
-    worldPermissions: {read: true, write: true, remove: false, manage: false},
-    ephemeral: false
-  });
+    "date": new Date()
+  },
+  overrideWorld: true,
+  worldPermissions: {read: true, write: true, remove: false, manage: false},
+  ephemeral: false
 }).then(function (model) {
   const modelId = model.modelId();
   const url = baseURL + "?modelId=" + modelId;
   window.history.pushState(modelId, modelId, url);
   bindToModel(model);
 });
+
+domain.connectAnonymously(DOMAIN_URL, options).then(d => {
+
+})
 
 
 // Set up all the events on all the models.
