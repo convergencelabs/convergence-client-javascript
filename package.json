@@ -39,7 +39,8 @@
   },
   "dependencies": {
     "protobufjs": "6.8.8",
-    "rxjs": "6.5.3"
+    "rxjs": "6.5.3",
+    "typedoc": "^0.15.0"
   },
   "devDependencies": {
     "@babel/cli": "7.5.0",
