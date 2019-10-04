@@ -108,7 +108,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * Searches for models using the model [query syntax](https://docs.convergence.io/guide/models/queries.html).
-   * Only SELECTs are currently supported.  The grammar is as follows:
+   * Only `SELECT`s are currently supported.  The grammar is as follows:
    *
    * ```
    * SELECT [ * ]

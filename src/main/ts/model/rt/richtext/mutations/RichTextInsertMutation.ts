@@ -12,7 +12,7 @@ import {RichTextInsert} from "../operations/RichTextInsert";
 export class RichTextInsertMutation extends RichTextMutation {
   public static get TYPE() {
     return "insert";
-  };
+  }
 
   private _location: RichTextLocation;
   private _content: RichTextFragment;

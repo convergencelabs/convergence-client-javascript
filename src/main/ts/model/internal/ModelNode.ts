@@ -25,10 +25,10 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
 
   protected _model: Model;
   protected _path: () => Path;
+  protected readonly _session: ConvergenceSession;
 
   private readonly _id: string;
   private readonly _modelType: string;
-  protected readonly _session: ConvergenceSession;
 
   /**
    * Constructs a new RealTimeElement.

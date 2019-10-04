@@ -152,6 +152,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     return (this._delegate as ObjectNode).keys();
   }
 
+  // tslint:disable:max-line-length
   /**
    * Returns true if a value exists at the given key, even if the value is `null`.
    * Analagous to the Javascript object
@@ -169,6 +170,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @returns true if a value exists
    */
+  // tslint:enable:max-line-length
   public hasKey(key: string): boolean {
     return (this._delegate as ObjectNode).hasKey(key);
   }

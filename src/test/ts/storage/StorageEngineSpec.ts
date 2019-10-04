@@ -55,7 +55,7 @@ describe("StorageEngine", () => {
       expect(() => engine.dispose()).to.throw();
     });
 
-    it("throws if already disposed", async() => {
+    it("throws if already disposed", async () => {
       const engine = new StorageEngine();
       const adapter = new IdbStorageAdapter();
       await engine.configure(adapter, "namespace", "domainId");

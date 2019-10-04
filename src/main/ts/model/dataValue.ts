@@ -16,7 +16,6 @@ Object.freeze(types);
  */
 export const DataValueType: any = types;
 
-
 export interface DataValue {
   id: string;
   type: string;

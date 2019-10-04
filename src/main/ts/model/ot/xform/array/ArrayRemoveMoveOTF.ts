@@ -2,9 +2,8 @@ import {OperationTransformationFunction} from "../OperationTransformationFunctio
 import {OperationPair} from "../OperationPair";
 import {ArrayRemoveOperation} from "../../ops/ArrayRemoveOperation";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
-import {ArrayMoveHelper} from "./ArrayMoveHelper";
+import {ArrayMoveHelper, MoveDirection} from "./ArrayMoveHelper";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
-import {MoveDirection} from "./ArrayMoveHelper";
 
 /**
  * @hidden
