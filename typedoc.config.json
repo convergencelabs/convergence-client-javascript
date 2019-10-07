@@ -11,7 +11,7 @@
   "baseUrl": "src/main/ts",
   "readme": "src/docs/README.md",
 
-  "theme": "src/docs/theme",
+  "theme": "node_modules/typedoc-theme-convergence/bin/default",
 
   "gaId": "UA-84372428-3",
 

@@ -39,8 +39,7 @@
   },
   "dependencies": {
     "protobufjs": "6.8.8",
-    "rxjs": "6.5.3",
-    "typedoc": "^0.15.0"
+    "rxjs": "6.5.3"
   },
   "devDependencies": {
     "@babel/cli": "7.5.0",
@@ -105,7 +104,9 @@
     "ts-node": "8.3.0",
     "tslib": "1.9.3",
     "tslint": "5.12.0",
+    "typedoc": "^0.15.0",
     "typedoc-plugin-as-member-of": "1.0.2",
+    "typedoc-theme-convergence": "^1.0.0",
     "typescript": "3.5.3",
     "uglify-es": "3.3.9",
     "uglify-js": "3.4.9",
