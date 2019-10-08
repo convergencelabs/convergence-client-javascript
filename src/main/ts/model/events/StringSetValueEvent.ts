@@ -9,8 +9,7 @@ export class StringSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = StringSetValueEvent.NAME;
 
@@ -25,17 +24,17 @@ export class StringSetValueEvent implements IValueChangedEvent {
    */
   constructor(
     /**
-     * A read-only representation of the [[RealTimeString]] which was modified
+     * The [[RealTimeString]] or [[HistoricalString]] which was modified
      */
     public readonly element: ObservableString,
 
     /**
-     * The user which performed the modification
+     * @inheritdoc
      */
     public readonly user: DomainUser,
 
     /**
-     * The sessionId corresponding to the session that performed the modification
+     * @inheritdoc
      */
     public readonly sessionId: string,
 

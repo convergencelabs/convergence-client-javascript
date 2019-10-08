@@ -7,7 +7,7 @@ import {ObservableModel} from "../observable/ObservableModel";
 export interface IModelEvent extends IConvergenceEvent {
 
   /**
-   * A read-only representation of the [[RealTimeModel]] on which this change occurred.
+   * The [[RealTimeModel]] or [[HistoricalModel]] on which this change occurred.
    */
   readonly src: ObservableModel;
 }

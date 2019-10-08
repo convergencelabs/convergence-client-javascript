@@ -7,8 +7,7 @@ export class ChatRemovedEvent implements IChatEvent {
   public static readonly NAME = "removed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ChatRemovedEvent.NAME;
 

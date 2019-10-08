@@ -15,9 +15,4 @@ export interface IValueChangedEvent extends IConvergenceModelValueEvent {
    * The sessionId corresponding to the session that performed the modification
    */
   readonly sessionId: string;
-
-  /**
-   * True if this change occurred locally (in the current session)
-   */
-  readonly local: boolean;
 }

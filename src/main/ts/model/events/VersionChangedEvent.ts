@@ -12,8 +12,7 @@ export class VersionChangedEvent implements IModelEvent {
   public static readonly NAME = "version_changed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = VersionChangedEvent.NAME;
 
@@ -26,7 +25,7 @@ export class VersionChangedEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] or [[HistoricalModel]] whose version just changed
      */
     public readonly src: ObservableModel,
 

@@ -43,23 +43,99 @@ import {mapObjectValues} from "./util/ObjectUtils";
  * - [Presence](https://docs.convergence.io/guide/presence/overview.html)
  * - [Chat](https://docs.convergence.io/guide/chat/overview.html)
  *
- * This object itself is the result of a successful authentication to Convergence.
+ * This object itself is the result of a successful connection and authentication
+ * to a Convergence server via one of the [[Convergence]] connection methods.
+ * Or, to begin working in an offline state, instantiate this class directly.
+ *
+ * See the [[Events]] section for all the possible events that could be emitted
+ * from a domain.
  */
 export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomainEvent> {
 
+  /**
+   * A list of all the events that could be emitted from a domain.
+   */
   public static readonly Events = {
+    /**
+     * Emitted when the domain is scheduled to attempt to reconnect.
+     * The actual emitted event is a [[ConnectionScheduledEvent]].
+     *
+     * @event
+     */
     CONNECTION_SCHEDULED: ConnectionScheduledEvent.NAME,
+
+    /**
+     * Emitted when the domain is actively attempting to connect to the server.
+     * The actual emitted event is a [[ConnectingEvent]].
+     *
+     * @event
+     */
     CONNECTING: ConnectingEvent.NAME,
+
+    /**
+     * Emitted when the domain successfully (re)connected to the server.
+     * The actual emitted event is a [[ConnectedEvent]].
+     *
+     * @event
+     */
     CONNECTED: ConnectedEvent.NAME,
+
+    /**
+     * Emitted when a connection attempt failed. The actual emitted event is a [[ConnectionFailedEvent]].
+     *
+     * @event
+     */
     CONNECTION_FAILED: ConnectionFailedEvent.NAME,
 
+    /**
+     * Emitted when the domain is actively attempting to authenticate.
+     * The actual emitted event is an [[AuthenticatingEvent]].
+     *
+     * @event
+     */
     AUTHENTICATING: AuthenticatingEvent.NAME,
+
+    /**
+     * Emitted when the domain successfully (re)authenticated.
+     * The actual emitted event is an [[AuthenticatedEvent]].
+     *
+     * @event
+     */
     AUTHENTICATED: AuthenticatedEvent.NAME,
+
+    /**
+     * Emitted when the domain attempted to (re)authenticate but failed.
+     * The actual emitted event is an [[AuthenticationFailedEvent]].
+     *
+     * @event
+     */
     AUTHENTICATION_FAILED: AuthenticationFailedEvent.NAME,
 
+    /**
+     * Emitted when the domain's connection was interrupted. This indicates that
+     * the domain is in a state where it is currently disconnected, but is
+     * automatically and continuously attempting to reconect.
+     *
+     * The actual emitted event is an [[InterruptedEvent]].
+     *
+     * @event
+     */
     INTERRUPTED: InterruptedEvent.NAME,
+
+    /**
+     * Emitted when the domain is currently disconnected and is not attempting
+     * to automatically reconnect. The actual emitted event is a [[DisconnectedEvent]].
+     *
+     * @event
+     */
     DISCONNECTED: DisconnectedEvent.NAME,
 
+    /**
+     * Emitted when the domain encountered an unexpected error.
+     * The actual emitted event is an [[ErrorEvent]].
+     *
+     * @event
+     */
     ERROR: ErrorEvent.NAME
   };
 

@@ -114,6 +114,17 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly ONLINE: string;
 
   /**
+   * Emitted when the model is attempting to reconnect to the server after
+   * being offline. This only has to to with the connection; see
+   * [[RESYNC_STARTED]] and [[RESYNC_COMPLETED]] for data reconciliation events.
+   *
+   * The actual emitted event is a [[ModelReconnectingEvent]].
+   *
+   * @event
+   */
+  readonly RECONNECTING: string;
+
+  /**
    * @event
    */
   readonly MODIFIED: string;
@@ -160,10 +171,11 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   ...ObservableModelEventConstants,
   MODIFIED: "modified",
   COMMITTED: "committed",
-  RESYNC_STARTED: "resync_started",
-  RESYNC_COMPLETED: "resync_completed",
-  OFFLINE: "offline",
-  ONLINE: "online",
+  RESYNC_STARTED: ResyncStartedEvent.NAME,
+  RESYNC_COMPLETED: ResyncCompletedEvent.NAME,
+  OFFLINE: ModelOfflineEvent.NAME,
+  ONLINE: ModelOnlineEvent.NAME,
+  RECONNECTING: ModelReconnectingEvent.NAME,
   COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
   COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
   REFERENCE: RemoteReferenceCreatedEvent.NAME,

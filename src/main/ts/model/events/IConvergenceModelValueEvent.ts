@@ -8,7 +8,7 @@ import {ObservableElement} from "../observable/ObservableElement";
 export interface IConvergenceModelValueEvent extends IConvergenceEvent {
 
   /**
-   * A read-only representation of the [[RealTimeElement]] whose contents changed.
+   * The [[RealTimeElement]] or [[HistoricalElement]] whose contents changed.
    */
   readonly element: ObservableElement<any>;
 

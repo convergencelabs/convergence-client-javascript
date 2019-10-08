@@ -20,7 +20,7 @@ export class ResyncCompletedEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] that just completed the resync
      */
     public readonly src: RealTimeModel
   ) {

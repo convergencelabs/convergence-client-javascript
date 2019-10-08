@@ -8,8 +8,7 @@ export class ChatTopicChangedEvent extends ChatEvent {
   public static readonly NAME = "topic_changed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ChatTopicChangedEvent.NAME;
 

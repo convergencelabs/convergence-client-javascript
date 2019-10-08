@@ -6,9 +6,12 @@
 export interface IConvergenceEvent {
 
   /**
-   * The name of the event that was fired. Note that the name is only
-   * guaranteed to be unique within the class / subsystem that is firing
-   * it. Names might be reused across classes and subsystems.
+   * The name of the event that was fired. This is commonly used to filter when
+   * using the [[ConvergenceEventEmitter.events]] stream.
+   *
+   * Note that the name is only guaranteed to be unique within the class /
+   * subsystem that is firing it. Names might be reused across classes and
+   * subsystems.
    */
   name: string;
 }

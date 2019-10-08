@@ -8,8 +8,7 @@ export class UserJoinedEvent extends ChatEvent {
   public static readonly NAME = "user_joined";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = UserJoinedEvent.NAME;
 

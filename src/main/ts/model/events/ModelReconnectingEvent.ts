@@ -20,7 +20,7 @@ export class ModelReconnectingEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] that is reconnecting
      */
     public readonly src: RealTimeModel
   ) {
