@@ -2,7 +2,7 @@ import {IConvergenceEvent} from "../../util";
 import {ObservableElement} from "../observable/ObservableElement";
 
 /**
- * Emitted when an element becomes detached.  This generally happens when the element
+ * Emitted when an element becomes detached.  This typically happens when the element
  * is removed from its parent.
  */
 export class ElementDetachedEvent implements IConvergenceEvent {

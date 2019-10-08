@@ -3,7 +3,7 @@ import {ObservableArray} from "../observable/ObservableArray";
 import {DomainUser} from "../../identity";
 
 /**
- * Emitted when the entire [[RealTimeArray.value]] of a [[RealTimeArray]] is set,
+ * Emitted when the entire [[RealTimeArray.value|value]] of a [[RealTimeArray]] is set,
  * meaning its entire contents were replaced (or initially set)
  */
 export class ArraySetValueEvent implements IValueChangedEvent {

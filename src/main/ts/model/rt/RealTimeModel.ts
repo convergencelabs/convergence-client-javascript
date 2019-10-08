@@ -73,23 +73,86 @@ import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
 import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
-import {IModelStore} from "../../storage/api";
 import {StorageEngine} from "../../storage/StorageEngine";
 import {IModelState} from "../../storage/api/IModelState";
 
 /**
- * An enumeration of the events that could be emitted by a [[RealTimeModel]].
+ * The complete list of events that could be emitted by a [[RealTimeModel]].
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
+  /**
+   * Emitted when the resync process begins.  This automatically happens
+   * when a client becomes disconnected and accumulates local changes
+   * that must be reconciled with the server.
+   *
+   * The actual event emitted is a [[ResyncStartedEvent]].
+   *
+   * @event
+   */
   readonly RESYNC_STARTED: string;
+
+  /**
+   * Emitted when the resync process ends. The actual emitted event is a [[ResyncCompletedEvent]].
+   *
+   * @event
+   */
   readonly RESYNC_COMPLETED: string;
+
+  /**
+   * Emitted when this model goes offline. The actual emitted event is a [[ModelOfflineEvent]].
+   *
+   * @event
+   */
   readonly OFFLINE: string;
+
+  /**
+   * Emitted when this model comes back online after being offline.
+   * The actual emitted event is a [[ModelOfflineEvent]].
+   *
+   * @event
+   */
   readonly ONLINE: string;
+
+  /**
+   * @event
+   */
   readonly MODIFIED: string;
+
+  /**
+   * @event
+   */
   readonly COMMITTED: string;
+
+  /**
+   * Emitted when another user opens this model. The actual event is a [[CollaboratorOpenedEvent]].
+   *
+   * @event
+   */
   readonly COLLABORATOR_OPENED: string;
+
+  /**
+   * Emitted when another user closes this model. The actual event is a [[CollaboratorClosedEvent]].
+   *
+   * @event
+   */
   readonly COLLABORATOR_CLOSED: string;
+
+  /**
+   * Emitted when a [Remote Reference](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * is created on this model with [[RealTimeModel.elementReference]].
+   *
+   * The actual emitted event is a [[RemoteReferenceCreatedEvent]].
+   *
+   * @event
+   */
   readonly REFERENCE: string;
+
+  /**
+   * Emitted when the [permissions](https://docs.convergence.io/guide/models/permissions.html)
+   * on this model change.  The actual emitted event is a [[ModelPermissionsChangedEvent]].
+   *
+   * @event
+   */
   readonly PERMISSIONS_CHANGED: string;
 }
 
@@ -125,6 +188,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  * * [[root]] to get the root object
  * * [[elementAt]] to query for a particular node within the data
  *
+ * See [[RealTimeModelEvents]] for the events that may be emitted on this model.
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 

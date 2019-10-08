@@ -2,19 +2,18 @@ import {IModelEvent} from "./IModelEvent";
 import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when a [[RealTimeModel]] goes offline, generally because the client
- * lost connectivity to the server.  The event is emitted after the model
- * reconnects and the resynchronization process completes. Subscribe to this
- * directly on a [[RealTimeModel]] rather than a [[RealTimeElement]] within.
+ * Emitted when a [[RealTimeModel]] goes online after being offline. Subscribe
+ * to this directly on a [[RealTimeModel]] rather than a [[RealTimeElement]]
+ * within.
  */
-export class ModelOfflineEvent implements IModelEvent {
-  public static readonly NAME = "offline";
+export class ModelOnlineEvent implements IModelEvent {
+  public static readonly NAME = "online";
 
   /**
    * The name of this event type.  This can be used to filter when using the
    * [[ConvergenceEventEmitter.events]] stream.
    */
-  public readonly name: string = ModelOfflineEvent.NAME;
+  public readonly name: string = ModelOnlineEvent.NAME;
 
   /**
    * @hidden
@@ -22,7 +21,7 @@ export class ModelOfflineEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] that came online.
      */
     public readonly src: RealTimeModel
   ) {

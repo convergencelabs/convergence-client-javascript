@@ -1,4 +1,3 @@
-# Introduction
 This is the API Documentation for the Convergence JavaScript client.  The main entry point is the [[Convergence]] class which has several methods for connecting to the Convergence server. From there the [[ConvergenceDomain]] class will provide access to interact with the Convergence Domain and the various services it provides.
 
 ## Getting Started
