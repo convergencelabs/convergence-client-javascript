@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class ModelElementType {
   public static readonly OBJECT = "object";
   public static readonly ARRAY = "array";

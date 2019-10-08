@@ -2,6 +2,8 @@ import {IChatEvent} from "./IChatEvent";
 
 /**
  * Emitted when a [[Chat]] is deleted.  See [[ChatService.delete]]
+ *
+ * @category Chat Subsytem
  */
 export class ChatRemovedEvent implements IChatEvent {
   public static readonly NAME = "removed";

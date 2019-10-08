@@ -4,6 +4,8 @@ import {ObservableElement} from "../observable/ObservableElement";
 /**
  * Emitted when an element becomes detached.  This typically happens when the element
  * is removed from its parent.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ElementDetachedEvent implements IConvergenceEvent {
   public static readonly NAME = "detached";

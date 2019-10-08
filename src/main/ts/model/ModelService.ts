@@ -42,6 +42,8 @@ import { Validation } from "../util/Validation";
  * This is the main entry point in Convergence for working with
  * [real time data models](https://docs.convergence.io/guide/models/overview.html).
  * Models can be created, opened, deleted, and managed from the [[ModelService]].
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 

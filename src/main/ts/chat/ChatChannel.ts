@@ -9,6 +9,8 @@ import {domainUserIdToProto} from "../connection/ProtocolUtil";
 /**
  * A [[ChatChannel]] is a Chat construct that has persistent membership of
  * users whether they are currently connected or not.
+ *
+ * @category Chat Subsytem
  */
 export class ChatChannel extends MembershipChat {
 

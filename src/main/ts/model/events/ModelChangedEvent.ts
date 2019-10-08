@@ -9,6 +9,8 @@ import {DomainUser} from "../../identity";
  * element has a change.  This is a convenience event which you can listen to e.g.
  * within a [[RealTimeContainerElement]] when you'd like to know about *any* changes
  * to the data within.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelChangedEvent implements IConvergenceModelValueEvent {
   public static readonly NAME = "model_changed";

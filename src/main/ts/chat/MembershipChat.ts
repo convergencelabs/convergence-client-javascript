@@ -11,6 +11,8 @@ import {ChatInfo} from "./ChatInfo";
  * A [[MembershipChat]] chat is a chat construct that has a specific set of
  * users who belong to that chat. A [[MembershipChat]] keeps track of which
  * users are part of the chat.
+ *
+ * @category Chat Subsytem
  */
 export abstract class MembershipChat extends Chat {
 
@@ -67,8 +69,18 @@ export abstract class MembershipChat extends Chat {
   }
 }
 
+/**
+ * The possible types of [[ChatInfo.membership]].
+ *
+ * @category Chat Subsytem
+ */
 export type ChatMembership = "public" | "private";
 
+/**
+ * The [[ChatInfo]] relevant to a [[MembershipChat]].
+ *
+ * @category Chat Subsytem
+ */
 export interface MembershipChatInfo extends ChatInfo {
   readonly membership: ChatMembership;
 }

@@ -6,6 +6,8 @@ import {DomainUser} from "../../identity";
  * Emitted when an element is reordered from a [[RealTimeArray]].
  *
  * The value that was moved can be found at [[toIndex]].
+ *
+ * @category Real Time Data Subsystem
  */
 export class ArrayReorderEvent implements IValueChangedEvent {
   public static readonly NAME = "reorder";

@@ -7,6 +7,8 @@ import {DomainUser} from "../../identity";
  * Emitted when a value is inserted into a [[RealTimeArray]].  This could be from a
  * [[RealTimeArray.insert]], [[RealTimeArray.push]], [[RealTimeArray.unshift]], or some
  * other method.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ArrayInsertEvent implements IValueChangedEvent {
   public static readonly NAME = "insert";

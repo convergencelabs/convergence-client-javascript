@@ -27,6 +27,11 @@ import {DomainUserIdentifier, DomainUserId} from "../identity";
 import {ChatInfo, createChatInfo, ChatTypes} from "./ChatInfo";
 import { Validation } from "../util/Validation";
 
+/**
+ * All the possible events that could be emitted from the [[ChatService]].
+ *
+ * @category Chat Subsytem
+ */
 export declare interface ChatServiceEvents {
   readonly MESSAGE: string;
   readonly USER_JOINED: string;
@@ -55,6 +60,8 @@ Object.freeze(Events);
  *
  * See the [developer guide](https://docs.convergence.io/guide/chat/overview.html)
  * for a few chat examples.
+ *
+ * @category Chat Subsytem
  */
 export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
@@ -424,6 +431,8 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
 /**
  * A set of options when creating a [[ChatChannel]] or [[ChatRoom]].
+ *
+ * @category Chat Subsytem
  */
 export interface CreateChatChannelOptions {
   /**

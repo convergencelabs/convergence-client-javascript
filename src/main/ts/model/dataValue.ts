@@ -16,6 +16,10 @@ Object.freeze(types);
  */
 export const DataValueType: any = types;
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface DataValue {
   id: string;
   type: string;
@@ -53,6 +57,10 @@ export interface BooleanValue extends DataValue {
   value: boolean;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ObjectValue extends DataValue {
   children: {[key: string]: DataValue};
 }

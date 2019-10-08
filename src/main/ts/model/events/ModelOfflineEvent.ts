@@ -5,6 +5,8 @@ import {RealTimeModel} from "../rt";
  * Emitted when a [[RealTimeModel]] goes offline, generally because the client
  * lost connectivity to the server.  Subscribe to this
  * directly on a [[RealTimeModel]] rather than a [[RealTimeElement]] within.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelOfflineEvent implements IModelEvent {
   public static readonly NAME = "offline";

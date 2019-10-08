@@ -5,6 +5,8 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when a key-value pair is set on a [[RealTimeObject]].
+ *
+ * @category Real Time Data Subsystem
  */
 export class ObjectSetEvent implements IValueChangedEvent {
   public static readonly NAME = "set";

@@ -4,6 +4,8 @@ import {RealTimeModel} from "../rt";
 /**
  * Emitted when a [[RealTimeModel]] is attempting to reconnect to the server
  * after being offline.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelReconnectingEvent implements IModelEvent {
   public static readonly NAME = "reconnecting";

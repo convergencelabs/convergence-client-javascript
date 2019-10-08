@@ -1,25 +1,23 @@
-import {
-  ChannelCreatedHistoryEntry,
-  ChatHistoryEntry,
-  MessageChatHistoryEntry,
-  NameChangedChatHistoryEntry,
-  TopicChangedChatHistoryEntry,
-  UserAddedChatHistoryEntry,
-  UserJoinedChatHistoryEntry,
-  UserLeftChatHistoryEntry,
-  UserRemovedChatHistoryEntry
-} from "./ChatHistoryEntry";
+import {ChatHistoryEntry} from "./ChatHistoryEntry";
 import {
   getOrDefaultArray,
   getOrDefaultNumber,
   getOrDefaultString,
   protoToDomainUserId,
   timestampToDate
-} from "../connection/ProtocolUtil";
-import {ConvergenceError} from "../util";
-import {IdentityCache} from "../identity/IdentityCache";
+} from "../../connection/ProtocolUtil";
+import {ConvergenceError} from "../../util";
+import {IdentityCache} from "../../identity/IdentityCache";
 import {io} from "@convergence-internal/convergence-proto";
 import IChatChannelEventData = io.convergence.proto.IChatEventData;
+import { ChannelCreatedHistoryEntry } from "./ChannelCreatedHistoryEntry";
+import { MessageChatHistoryEntry } from "./MessageChatHistoryEntry";
+import { UserAddedChatHistoryEntry } from "./UserAddedChatHistoryEntry";
+import { UserRemovedChatHistoryEntry } from "./UserRemovedChatHistoryEntry";
+import { UserJoinedChatHistoryEntry } from "./UserJoinedChatHistoryEntry";
+import { UserLeftChatHistoryEntry } from "./UserLeftChatHistoryEntry";
+import { NameChangedChatHistoryEntry } from "./NameChangedChatHistoryEntry";
+import { TopicChangedChatHistoryEntry } from "./TopicChangedChatHistoryEntry";
 
 /**
  * @hidden

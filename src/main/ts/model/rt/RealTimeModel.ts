@@ -78,6 +78,8 @@ import {IModelState} from "../../storage/api/IModelState";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
+ *
+ * @category Real Time Data Subsystem
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
   /**
@@ -125,11 +127,18 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly RECONNECTING: string;
 
   /**
+   * Emitted immediately when a local modification is made to a model.
+   * The emitted event is an [[IModelEvent]].
+   *
    * @event
    */
   readonly MODIFIED: string;
 
   /**
+   * Emitted when the server acknowledges a local modification.  Note that
+   * multiple modifications may be batched together into a single
+   * `COMMITTED` response from the server.  See https://forum.convergence.io/t/behavior-of-model-version/16/4
+   *
    * @event
    */
   readonly COMMITTED: string;
@@ -201,6 +210,8 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  * * [[elementAt]] to query for a particular node within the data
  *
  * See [[RealTimeModelEvents]] for the events that may be emitted on this model.
+ *
+ * @category Real Time Data Subsystem
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 

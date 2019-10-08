@@ -10,6 +10,8 @@ import {ChatInfo, ChatMember} from "./ChatInfo";
  * set of users. The communication for a given DirectChat will always be
  * between the specified set of users.  This can not change for the life of
  * the DirectChat.
+ *
+ * @category Chat Subsytem
  */
 export class DirectChat extends Chat {
 
@@ -32,6 +34,11 @@ export class DirectChat extends Chat {
   }
 }
 
+/**
+ * The [[ChatInfo]] relevant to a [[DirectChat]].
+ *
+ * @category Chat Subsytem
+ */
 export interface DirectChatInfo extends ChatInfo {
   readonly otherUsers: ChatMember[];
 }

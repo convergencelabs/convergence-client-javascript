@@ -4,6 +4,8 @@ import {ObservableElement} from "./ObservableElement";
 
 /**
  * The events that could be emitted by a [[RealTimeModel]] or [[HistoricalModel]].
+ *
+ * @category Real Time Data Subsystem
  */
 export interface ObservableModelEvents {
   /**
@@ -29,6 +31,9 @@ export interface ObservableModelEvents {
   readonly VERSION_CHANGED: string;
 }
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export const ObservableModelEventConstants: ObservableModelEvents = {
   CLOSED: "closed",
   DELETED: "deleted",
@@ -36,6 +41,9 @@ export const ObservableModelEventConstants: ObservableModelEvents = {
 };
 Object.freeze(ObservableModelEventConstants);
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export interface ObservableModel {
 
   session(): ConvergenceSession;

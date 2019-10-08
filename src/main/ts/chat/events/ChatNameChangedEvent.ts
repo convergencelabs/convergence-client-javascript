@@ -3,6 +3,8 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when a [[Chat]]'s name changes.
+ *
+ * @category Chat Subsytem
  */
 export class ChatNameChangedEvent extends ChatEvent {
   public static readonly NAME = "name_changed";

@@ -3,6 +3,8 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when a [[DomainUser]] joins a [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class UserJoinedEvent extends ChatEvent {
   public static readonly NAME = "user_joined";

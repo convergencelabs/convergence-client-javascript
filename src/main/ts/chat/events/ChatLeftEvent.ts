@@ -8,6 +8,8 @@ import {IChatEvent} from "./IChatEvent";
  * listen for this event *outside* of the actual `ChatChannel`.
  *
  * Note that this is emitted from the [[ChatService]] as opposed to a [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class ChatLeftEvent implements IChatEvent {
   public static readonly NAME = "left";

@@ -4,6 +4,8 @@ import {ObservableElement} from "../observable/ObservableElement";
 /**
  * The [[IConvergenceModelValueEvent]] is the parent interface of all events
  * representing changes to model values.
+ *
+ * @category Real Time Data Subsystem
  */
 export interface IConvergenceModelValueEvent extends IConvergenceEvent {
 

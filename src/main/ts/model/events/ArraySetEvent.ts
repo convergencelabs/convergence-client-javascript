@@ -5,6 +5,8 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when a value is set on a [[RealTimeArray]].
+ *
+ * @category Real Time Data Subsystem
  */
 export class ArraySetEvent implements IValueChangedEvent {
   public static readonly NAME = "set";

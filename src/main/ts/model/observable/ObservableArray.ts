@@ -3,6 +3,8 @@ import {ObservableContainerElement} from "./ObservableContainerElement";
 
 /**
  * The events that could be emitted by a [[RealTimeArray]] or [[HistoricalArray]].
+ *
+ * @category Real Time Data Subsystem
  */
 export interface ObservableArrayEvents extends ObservableElementEvents {
   /**
@@ -47,6 +49,9 @@ export interface ObservableArrayEvents extends ObservableElementEvents {
   readonly VALUE: string;
 }
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export const ObservableArrayEventConstants: ObservableArrayEvents = {
   ...ObservableElementEventConstants,
   INSERT: "insert",
@@ -55,6 +60,9 @@ export const ObservableArrayEventConstants: ObservableArrayEvents = {
   REORDER: "reorder"};
 Object.freeze(ObservableArrayEventConstants);
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export interface ObservableArray extends ObservableContainerElement<any[]> {
   get(index: number): ObservableElement<any>;
 
