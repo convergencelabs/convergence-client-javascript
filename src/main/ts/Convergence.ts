@@ -147,7 +147,7 @@ export class Convergence {
    * Allows customization of both the root (default) logger and any ancillary loggers.
    *
    * ```javascript
-   * Logging.configure({
+   * Convergence.configureLogging({
    *   root: LogLevel.ERROR,
    *   loggers: {
    *     "connection": LogLevel.DEBUG

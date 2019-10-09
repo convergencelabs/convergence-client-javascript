@@ -36,7 +36,7 @@ function setState() {
 
 function removeState() {
   var key = document.getElementById("removeKey").value;
-  presence.removeState(kMey);
+  presence.removeState(key);
 }
 
 function clearState() {

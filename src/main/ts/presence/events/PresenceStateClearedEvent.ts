@@ -1,11 +1,25 @@
 import {IPresenceEvent} from "./IPresenceEvent";
 import {DomainUser} from "../../identity";
 
+/**
+ * Emitted when a particular [[DomainUser]]'s [[UserPresence.state|state]] was cleared.
+ *
+ * @category Presence Subsystem
+ */
 export class PresenceStateClearedEvent implements IPresenceEvent {
   public static readonly NAME = "state_cleared";
+
+  /**
+   * @inheritdoc
+   */
   public readonly name: string = PresenceStateClearedEvent.NAME;
 
-  constructor(public readonly user: DomainUser) {
+  constructor(
+    /**
+     * @inheritdoc
+     */
+    public readonly user: DomainUser
+  ) {
     Object.freeze(this);
   }
 }

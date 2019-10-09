@@ -13,6 +13,10 @@ import {DomainUser, DomainUserId} from "../identity";
 import {deepClone, mapObjectValues} from "../util/ObjectUtils";
 import {getOrDefaultArray, getOrDefaultBoolean, getOrDefaultObject, protoValueToJson} from "../connection/ProtocolUtil";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
   /**
@@ -111,7 +115,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     this._presence = new UserPresence(
       this._presence.user,
       this._presence.available,
-      newState);
+      newState
+    );
 
     const event: PresenceStateSetEvent = new PresenceStateSetEvent(this._presence.user, newState);
     this._emitEvent(event);
@@ -166,7 +171,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
    * @internal
    */
   public _setOffline(): void {
-    this.availability(false);
+    this.availability(false, false);
   }
 
   /**

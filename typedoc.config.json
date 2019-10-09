@@ -17,6 +17,5 @@
 
   "verbose": true,
   "hideGenerator": true,
-  "json": "dist/docs/docs.json",
-  "categorizeByGroup": true
+  "json": "dist/docs/docs.json"
 }

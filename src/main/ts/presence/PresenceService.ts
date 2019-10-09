@@ -31,10 +31,46 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPresence = io.convergence.proto.IUserPresence;
 import {Logging} from "../util/log/Logging";
 
+/**
+ * All the events that could be emitted from the [[PresenceService]].
+ *
+ * @category Presence Subsystem
+ */
 export interface PresenceServiceEvents {
+  /**
+   * Emitted when one or more items of a particular [[DomainUser]]'s presence
+   * [[UserPresence.state|state]] are [[PresenceService.setState|set]].
+   *
+   * The actual event emitted is a [[PresenceStateSetEvent]].
+   *
+   * @event
+   */
   STATE_SET: string;
+
+  /**
+   * Emitted when one or more key-value pairs of a particular [[DomainUser]]'s
+   * presence [[UserPresence.state|state]] were [[PresenceService.removeState|removed]].
+   *
+   * The actual event emitted is a [[PresenceStateRemovedEvent]].
+   *
+   * @event
+   */
   STATE_REMOVED: string;
+
+  /**
+   * Emitted when a particular [[DomainUser]]'s [[UserPresence.state|state]] was cleared.
+   * The actual event emitted is a [[PresenceStateClearedEvent]].
+   *
+   * @event
+   */
   STATE_CLEARED: string;
+
+  /**
+   * Emitted when the availability of a particular [[DomainUser]] changes.
+   * The actual event emitted is a [[PresenceAvailabilityChangedEvent]].
+   *
+   * @event
+   */
   AVAILABILITY_CHANGED: string;
 }
 
@@ -45,9 +81,25 @@ export interface PresenceServiceEvents {
  * if they have at least one session that is connected. Each user in the
  * system can set presence state. Presence state is global for each user
  * in that the state is shared across all sessions.
+ *
+ * See the [developer guide](https://docs.convergence.io/guide/presence/overview.html) for additional background.
+ *
+ * See [[PresenceServiceEvents]] for the events that may be emitted on this service.
+ *
+ * @category Presence Subsystem
  */
 export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 
+  /**
+   * A mapping of the events this service could emit to each event's unique name.
+   * Use this to refer an event name:
+   *
+   * ```typescript
+   * presenceService.on(PresenceService.Events.STATE_SET, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: PresenceServiceEvents = {
     STATE_SET: PresenceStateSetEvent.NAME,
     STATE_REMOVED: PresenceStateRemovedEvent.NAME,
@@ -150,7 +202,19 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     return this._localPresence.available;
   }
 
+  /**
+   * Sets the given items on the local user's presence state.
+   *
+   * @param state a `Map` or object literal whose keys are `String`s.
+   */
   public setState(state: StringMapLike): void;
+
+  /**
+   * Sets a single key-value pair on the local user's presence state.
+   *
+   * @param key the new pair's key
+   * @param value the new pair's value
+   */
   public setState(key: string, value: any): void;
   public setState(): void {
     let state: Map<string, any>;
@@ -159,6 +223,9 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     } else if (arguments.length === 2) {
       state = new Map<string, any>();
       state.set(arguments[0], arguments[1]);
+    } else if (arguments.length === 0) {
+      // no-op
+      return;
     }
 
     this._localManager.set(state);
@@ -174,7 +241,18 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     }
   }
 
+  /**
+   * Removes the key-value pair of the provided key on the local user's presence state.
+   *
+   * @param key an existing key in the local user's presence state
+   */
   public removeState(key: string): void;
+
+  /**
+   * Removes all the entries in the local user's presence state matching the provided array of keys.
+   *
+   * @param keys an array of keys
+   */
   public removeState(keys: string[]): void;
   public removeState(keys: string | string[]): void {
     const stateKeys: string[] = typeof keys === "string" ? [keys] : keys;
@@ -192,6 +270,9 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     }
   }
 
+  /**
+   * Deletes all items in the local user's presence state.
+   */
   public clearState(): void {
     this._localManager.clear();
 
@@ -204,15 +285,34 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     }
   }
 
+  /**
+   * Returns a `Map` representing the local user's presence state.
+   *
+   * @returns a `Map` of the local user's presence state
+   */
   public state(): Map<string, any> {
     // The underlying class takes care of returning a clone
     return this._localPresence.state;
   }
 
+  /**
+   * Returns the given user's current presence.
+   *
+   * @param user a username or [[DomainUserId]]
+   *
+   * @returns a promise that resolves with the give user's presence
+   */
   public presence(user: DomainUserIdentifier): Promise<UserPresence>;
+
+  /**
+   * Returns the current presence of all the provided users.
+   *
+   * @param user an array of usernames or [[DomainUserId]]s
+   *
+   * @returns a promise that resolves with the give users' presences
+   */
   public presence(users: DomainUserIdentifier[]): Promise<UserPresence[]>;
-  public presence(
-    users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence | UserPresence[]> {
+  public presence(users: DomainUserIdentifier | DomainUserIdentifier[]): Promise<UserPresence | UserPresence[]> {
     this._connection.session().assertOnline();
 
     if (!Array.isArray(users)) {
@@ -224,7 +324,33 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     }
   }
 
+  /**
+   * Returns a [[UserPresenceSubscription]] linked to the provided user.  From
+   * this object, consumers can get the current presence and listen to changes
+   * on the user's presence state or availability.
+   *
+   * Make sure to [[UserPresenceSubscription.unsubscribe]] when you're done with
+   * the returned subscription.
+   *
+   * @param user a username or [[DomainUserId]]
+   *
+   * @returns a promise that resolves with a subscription to the given user's presence changes
+   */
   public subscribe(user: DomainUserIdentifier): Promise<UserPresenceSubscription>;
+
+  /**
+   * Returns an array of [[UserPresenceSubscription]]s corresponding to the
+   * provided users.  From these objects, consumers can get the current presence
+   * and listen to changes on the user's presence state or availability.
+   *
+   * Make sure to [[UserPresenceSubscription.unsubscribe]] when you're done with
+   * the returned subscriptions.
+   *
+   * @param user an array of usernames or [[DomainUserId]]s
+   *
+   * @returns a promise that resolves with an array of subscriptions to the
+   * given users' presence changes
+   */
   public subscribe(users: DomainUserIdentifier[]): Promise<UserPresenceSubscription[]>;
   public subscribe(users: DomainUserIdentifier | DomainUserIdentifier[]):
     Promise<UserPresenceSubscription | UserPresenceSubscription[]> {
@@ -396,3 +522,5 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     });
   }
 }
+
+Object.freeze(PresenceService.Events);
