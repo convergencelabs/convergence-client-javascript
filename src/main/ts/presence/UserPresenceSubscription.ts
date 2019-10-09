@@ -59,6 +59,8 @@ export interface UserPresenceSubscriptionEvents {
  * and availability can be queried from this object, OR you can use
  * [[asObservable]] to subscribe to changes.
  *
+ * Instances of this can be obtained from [[PresenceService.subscribe]].
+ *
  * Make sure to [[unsubscribe]] when you're done using this.
  *
  * @category Presence Subsystem

@@ -13,6 +13,8 @@ import {DomainUser} from "../../identity";
  * ```
  *
  * a selection of "fox jumped" would be represented with the range `{start: 16, end: 26}`
+ *
+ * @category Collaboration Awareness
  */
 export interface IndexRange {
   start: number;
@@ -24,6 +26,8 @@ export interface IndexRange {
  * the data is changing.  See the
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
  * for some examples.
+ *
+ * @category Collaboration Awareness
  */
 export class RangeReference extends ModelReference<IndexRange> {
 

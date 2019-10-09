@@ -9,6 +9,8 @@ import {DomainUser} from "../../identity";
  * the data is changing.  See the
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
  * for some examples.
+ *
+ * @category Collaboration Awareness
  */
 export class IndexReference extends ModelReference<number> {
 

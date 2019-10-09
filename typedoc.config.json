@@ -1,5 +1,5 @@
 {
-  "name": "Convergence JavaScript Client API",
+  "name": "Convergence JavaScript Client API Documentation",
   "target": "ES6",
 
   "excludeNotExported": true,

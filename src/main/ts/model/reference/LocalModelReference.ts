@@ -4,6 +4,10 @@ import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util/";
 import {DomainUser} from "../../identity";
 import { ReferenceType } from "./ReferenceType";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ModelReferenceCallbacks {
   onShare: (reference: LocalModelReference<any, any>) => void;
   onUnShare: (reference: LocalModelReference<any, any>) => void;
@@ -14,6 +18,8 @@ export interface ModelReferenceCallbacks {
 /**
  * The parent class for a
  * [local reference](https://docs.convergence.io/guide/models/references/local-references.html).
+ *
+ * @category Collaboration Awareness
  */
 export abstract class LocalModelReference<V, R extends ModelReference<V>>
 extends ConvergenceEventEmitter<IConvergenceEvent> {

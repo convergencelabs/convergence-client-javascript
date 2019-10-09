@@ -41,7 +41,6 @@ import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable, BehaviorSubject} from "rxjs";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
-import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
 import {Path, PathElement} from "../Path";
@@ -75,6 +74,8 @@ import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
 import {StorageEngine} from "../../storage/StorageEngine";
 import {IModelState} from "../../storage/api/IModelState";
+import { CollaboratorOpenedEvent } from "../events/CollaboratorOpenedEvent";
+import { CollaboratorClosedEvent } from "../events/CollaboratorClosedEvent";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].

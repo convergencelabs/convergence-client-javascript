@@ -5,6 +5,8 @@ import {DomainUser} from "../../identity";
 /**
  * The ActivityStateRemovedEvent is fired when a remote session removes one or
  * elements from its state within the [[Activity]].
+ *
+ * @category Collaboration Awareness
  */
 export class ActivityStateRemovedEvent implements IActivityEvent {
 

@@ -3,6 +3,8 @@ import {ModelReference} from "../ModelReference";
 
 /**
  * Emitted when a [[ModelReference]]'s value is set.
+ *
+ * @category Collaboration Awareness
  */
 export class ReferenceChangedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "set";
