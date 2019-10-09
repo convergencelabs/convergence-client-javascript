@@ -254,19 +254,27 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * @param keys an array of keys
    */
   public removeState(keys: string[]): void;
+
   public removeState(keys: string | string[]): void {
     const stateKeys: string[] = typeof keys === "string" ? [keys] : keys;
 
-    this._localManager.remove(stateKeys);
+    // Filter out any keys that don't exist.
+    const existingKeys = stateKeys.filter(k => this._localManager.hasKey(k));
 
-    if (this._connection.isOnline()) {
-      const message: IConvergenceMessage = {
-        presenceRemoveState: {
-          keys: stateKeys
-        }
-      };
+    // If none of the provided keys actually exist in the state, this is a no-op.
+    if (existingKeys.length > 0) {
+      this._localManager.remove(existingKeys);
 
-      this._connection.send(message);
+      if (this._connection.isOnline()) {
+        const message: IConvergenceMessage = {
+          presenceRemoveState: {
+            keys: existingKeys
+          }
+        };
+
+        this._connection.send(message);
+      }
+
     }
   }
 

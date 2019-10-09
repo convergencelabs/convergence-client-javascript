@@ -132,7 +132,8 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     this._presence = new UserPresence(
       this._presence.user,
       this._presence.available,
-      newState);
+      newState
+    );
 
     const event: PresenceStateRemovedEvent = new PresenceStateRemovedEvent(this._presence.user, keys);
     this._emitEvent(event);
@@ -152,6 +153,10 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     if (emitSubject) {
       this._subject.next(this._presence);
     }
+  }
+
+  public hasKey(key: string): boolean {
+    return this._presence.state.has(key);
   }
 
   /**
