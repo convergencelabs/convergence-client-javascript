@@ -213,7 +213,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
     this._disposed = false;
 
-    this._connection = new ConvergenceConnection(url, this);
+    this._connection = new ConvergenceConnection(url, this, this._options);
     this._bindConnectionEvents();
   }
 
@@ -229,8 +229,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @returns
    *  The resolved options for this domain.
    */
-  public options(): ConvergenceOptions {
-    return this._options;
+  public options(): IConvergenceOptions {
+    return this._options.getOptions();
   }
 
   /**

@@ -6,6 +6,10 @@ import {TypeChecker} from "./util/TypeChecker";
 import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
 import {IStorageAdapter} from "./storage/api";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class ConvergenceOptions {
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
   public static DEFAULT_HANDSHAKE_TIMEOUT = 5;
@@ -56,6 +60,12 @@ export class ConvergenceOptions {
   public readonly offlineStorageEnabled: boolean;
   public readonly storageAdapter: IStorageAdapter | null;
 
+  /**
+   * @hidden
+   * @internal
+   *
+   * @param options
+   */
   constructor(options: IConvergenceOptions) {
     ConvergenceOptions.validate(options);
 
@@ -111,5 +121,38 @@ export class ConvergenceOptions {
     const offlineOpts = {...options.offline};
     this.storageAdapter = offlineOpts.storage || null;
     this.offlineStorageEnabled = this.storageAdapter !== null;
+  }
+
+  /**
+   * Returns an object literal with this instance's options in a format matching the
+   * consumer-facing [[IConvergenceOptions]] interface.
+   */
+  public getOptions(): IConvergenceOptions {
+    return {
+      connection: {
+        timeout: this.connectionTimeout,
+        handshakeTimeout: this.handshakeTimeout
+      },
+      protocol: {
+        defaultRequestTimeout: this.defaultRequestTimeout,
+        heartbeat: {
+          enabled: this.heartbeatEnabled,
+          pingInterval: this.pingInterval,
+          pongTimeout: this.pongTimeout
+        }
+      },
+      reconnect: {
+        autoReconnect: this.autoReconnect,
+        reconnectIntervals: this.reconnectIntervals,
+        fallbackAuth: this.fallbackAuth
+      },
+      offline: {
+        storage: this.storageAdapter
+      },
+      webSocket: {
+        factory: this.webSocketFactory,
+        class: this.webSocketClass
+      }
+    };
   }
 }

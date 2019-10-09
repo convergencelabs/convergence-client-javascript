@@ -1,5 +1,9 @@
 import {IModelStore, IStorageAdapter} from "./api";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StorageEngine {
   private _storage: IStorageAdapter | null = null;
 

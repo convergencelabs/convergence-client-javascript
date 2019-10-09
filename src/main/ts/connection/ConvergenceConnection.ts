@@ -79,7 +79,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
    * @param url
    * @param domain
    */
-  constructor(url: string, domain: ConvergenceDomain) {
+  constructor(url: string, domain: ConvergenceDomain, options: ConvergenceOptions) {
     super();
 
     this._url = url.trim().toLowerCase();
@@ -89,7 +89,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       throw new Error(`Invalid domain connection url: ${this._url}`);
     }
 
-    this._options = domain.options();
+    this._options = options;
 
     this._authenticated = false;
 

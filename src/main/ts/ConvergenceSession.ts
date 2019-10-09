@@ -9,6 +9,8 @@ import {ConvergenceErrorCodes} from "./util/ConvergenceErrorCodes";
  * particular connection to a specific domain.  It is tied to the client device
  * rather than the user, so a single user could potentially have multiple sessions
  * open at a time.
+ *
+ * @category Users and Identity
  */
 export class ConvergenceSession {
 

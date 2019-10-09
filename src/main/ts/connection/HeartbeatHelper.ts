@@ -1,10 +1,10 @@
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
+
 /**
  * @hidden
  * @internal
  */
-import {Logger} from "../util/log/Logger";
-import {Logging} from "../util/log/Logging";
-
 export interface HeartbeatHandler {
   sendPing(): void;
 

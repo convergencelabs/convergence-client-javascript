@@ -16,9 +16,7 @@ const baseURL = window.location.href.split('?')[0];
 const modelId = getParameterByName("modelId");
 
 Convergence.configureLogging({
-  loggers: {
-    "protocol.messages": Convergence.LogLevel.DEBUG
-  }
+  root: Convergence.LogLevel.DEBUG
 });
 
 const options = {

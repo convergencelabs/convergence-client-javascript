@@ -3,6 +3,8 @@ import { DomainUserId } from "./DomainUserId";
 /**
  * A group of [[DomainUser]]s.  Contains meta information about the group plus
  * usernames of all the member users.
+ *
+ * @category Users and Identity
  */
 export class UserGroup {
 

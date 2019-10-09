@@ -3,6 +3,10 @@ import {toPromise, toVoidPromise, txToPromise} from "./promise";
 const READONLY = "readonly";
 const READWRITE = "readwrite";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbPersistenceStore {
 
   protected static deleteFromIndex(store: IDBObjectStore, index: string, range: IDBKeyRange): void {

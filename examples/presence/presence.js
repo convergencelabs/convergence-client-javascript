@@ -9,11 +9,12 @@ var domain;
 var presence;
 
 function connect() {
-  var url = "http://localhost:8080/convergence/default";
   Convergence.configureLogging({
-    root: Convergence.LogLevel.DEBUG
+    loggers: {
+      "protocol.messages": Convergence.LogLevel.DEBUG
+    }
   });
-  Convergence.connectAnonymously(url, usernameInput.value).then(function(d) {
+  Convergence.connectAnonymously(DOMAIN_URL, usernameInput.value).then(function(d) {
     domain = d;
     presence = domain.presence();
     updateLocal();

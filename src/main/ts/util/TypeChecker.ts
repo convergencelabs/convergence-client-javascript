@@ -103,6 +103,10 @@ export class TypeChecker {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ITypeMatch {
   array?: (value: any[]) => void;
   boolean?: (value: boolean) => void;
@@ -120,6 +124,10 @@ export interface ITypeMatch {
   custom?: Array<ICustomTypeMatchRule<any>>;
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface ICustomTypeMatchRule<T> {
   test(value: any): boolean;
 

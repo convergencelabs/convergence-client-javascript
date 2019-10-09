@@ -4,6 +4,8 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
 /**
  * Emitted when a [[ConvergenceDomain]] is scheduled to attempt to reconnect
  * to the server.
+ *
+ * @category Connection and Authentication
  */
 export class ConnectionScheduledEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "connection_scheduled";

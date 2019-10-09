@@ -5,6 +5,8 @@ import { AuthenticationMethod } from "../connection/AuthenticationMethod";
 /**
  * Emitted when a [[ConvergenceDomain]] attempted to (re)authenticate
  * but failed.
+ *
+ * @category Connection and Authentication
  */
 export class AuthenticationFailedEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "authentication_failed";

@@ -17,5 +17,14 @@
 
   "verbose": true,
   "hideGenerator": true,
-  "json": "dist/docs/docs.json"
+  "json": "dist/docs/docs.json",
+
+  "categoryOrder": [
+    "Connection and Authentication",
+    "Real Time Data Subsystem",
+    "Users and Identity",
+    "Collaboration Awareness",
+    "Presence Subsystem",
+    "Chat Subsystem"
+  ]
 }

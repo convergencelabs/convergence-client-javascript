@@ -3,6 +3,10 @@ import {toPromise} from "./promise";
 import {IModelStore, IStorageAdapter} from "../api/";
 import {IdbSchemaManager} from "./IdbSchemaManager";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbStorageAdapter implements IStorageAdapter {
   private static readonly _DATABASE_NAME = "convergence.offline.storage";
   private static readonly _VERSION = 1;

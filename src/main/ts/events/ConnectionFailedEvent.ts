@@ -3,6 +3,8 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
 
 /**
  * Emitted when a [[ConvergenceDomain]]'s (re)connection attempt fails.
+ *
+ * @category Connection and Authentication
  */
 export class ConnectionFailedEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "connection_failed";

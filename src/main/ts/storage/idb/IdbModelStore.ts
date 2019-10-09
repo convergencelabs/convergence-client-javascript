@@ -4,6 +4,10 @@ import {toPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {IModelState} from "../api/IModelState";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   private static deleteServerOperationsForModel(store: IDBObjectStore, modelId: string): void {
     IdbPersistenceStore.deleteFromIndex(store,
