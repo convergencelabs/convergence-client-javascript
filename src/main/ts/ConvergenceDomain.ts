@@ -34,6 +34,7 @@ import {IUsernameAndPassword} from "./IUsernameAndPassword";
 import {getOrDefaultObject, protoValueToJson} from "./connection/ProtocolUtil";
 import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
+import {TypeChecker} from "./util/TypeChecker";
 
 /**
  * This represents a single connection to a specific Domain in
@@ -137,6 +138,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * @internal
    */
+  private _initialized: boolean;
+
+  /**
+   * @internal
+   */
   private _disposed: boolean;
 
   /**
@@ -165,19 +171,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._options = new ConvergenceOptions(options || {});
 
     this._disposed = false;
+    this._initialized = false;
 
     this._connection = new ConvergenceConnection(url, this);
 
     this._storage = new StorageEngine();
-
-    if (this._options.storageAdapter) {
-      this._storage
-        .configure(this._options.storageAdapter, this._namespace, this._domainId)
-        .catch(e => {
-          // Fixme use logging.
-          console.error(e);
-        });
-    }
 
     const session: ConvergenceSession = this._connection.session();
     const initialPresenceState = {};
@@ -384,7 +382,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     return this._connection
       .connect()
       .then(() => promiseCallback())
-      .then((d) => this._authenticateAnonymously(d));
+      .then((d) => this._authenticateAnonymously(d))
+      .then(e => this._init());
   }
 
   /**
@@ -407,7 +406,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       .then((j: string) => {
         Validation.assertNonEmptyString(j, "jwt");
         return this._authenticateWithJwt(j);
-      });
+      })
+      .then(e => this._init());
   }
 
   /**
@@ -421,17 +421,32 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *   A Promise which will be resolved upon successful connection and authentication.
    */
   public reconnect(token?: string | (() => Promise<string>)): Promise<void> {
-    // FIXME what if there isn't one?
     token = token || this._connection.session().reconnectToken();
+    if (!TypeChecker.isSet(token)) {
+      return Promise.reject(new Error("No reconnect token was provided, and there is not one in memory"));
+    } else {
+      const promiseCallback = ConvergenceDomain._toPromiseCallback(token);
+      return this._connection
+        .connect()
+        .then(() => promiseCallback())
+        .then((t) => {
+          Validation.assertNonEmptyString(t, "token");
+          return this._authenticateWithReconnectToken(t);
+        })
+        .then(e => this._init());
+    }
+  }
 
-    const promiseCallback = ConvergenceDomain._toPromiseCallback(token);
-    return this._connection
-      .connect()
-      .then(() => promiseCallback())
-      .then((t) => {
-        Validation.assertNonEmptyString(t, "token");
-        return this._authenticateWithReconnectToken(t);
-      });
+  public connectOffline(username?: string | (() => Promise<string>)): Promise<void> {
+    const promiseCallback = ConvergenceDomain._toPromiseCallback(username);
+
+    if (TypeChecker.isNotSet(username) && TypeChecker.isNotSet(this._options.offlineKey)) {
+      throw new Error("An offline key or username must be provided in the options to connect offline.");
+    }
+
+    return promiseCallback().then(uname => {
+      return this._init(uname);
+    });
   }
 
   /**
@@ -519,6 +534,39 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._connection.on(ConvergenceConnection.Events.ERROR,
       (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
     );
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  private _init(username?: string): Promise<void> {
+    if (this._options.storageAdapter) {
+      this._storage.configure(this._options.storageAdapter);
+
+      // FIXME figure out how to create an offline key.
+
+      let storagePromise: Promise<void> = null;
+
+      if (this._options.offlineKey) {
+        storagePromise = this._storage.openStore(this._namespace, this._domainId, this._options.offlineKey);
+      } else {
+        // FIXME check for username.
+        if (TypeChecker.isNotSet(username)) {
+          storagePromise = Promise.reject();
+        } else {
+          storagePromise = this._storage.createStore(this._namespace, this._domainId, username);
+        }
+      }
+
+      return storagePromise.then(() => {
+        this._initialized = true;
+      });
+    } else {
+      this._initialized = true;
+      return Promise.resolve();
+    }
   }
 
   /**

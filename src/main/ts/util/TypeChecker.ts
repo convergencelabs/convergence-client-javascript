@@ -55,6 +55,10 @@ export class TypeChecker {
     return !TypeChecker.isNull(value) && !TypeChecker.isUndefined(value);
   }
 
+  public static isNotSet(value: any): value is any {
+    return !TypeChecker.isSet(value);
+  }
+
   public static switch(value: any, matcher: ITypeMatch): void {
     if (TypeChecker.isUndefined(matcher) || TypeChecker.isNull(matcher)) {
       throw new Error("matcher must be defined.");

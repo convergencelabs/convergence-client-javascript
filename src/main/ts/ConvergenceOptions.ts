@@ -55,6 +55,7 @@ export class ConvergenceOptions {
 
   public readonly offlineStorageEnabled: boolean;
   public readonly storageAdapter: IStorageAdapter | null;
+  public readonly offlineKey: string | null;
 
   constructor(options: IConvergenceOptions) {
     ConvergenceOptions.validate(options);
@@ -111,5 +112,6 @@ export class ConvergenceOptions {
     const offlineOpts = {...options.offline};
     this.storageAdapter = offlineOpts.storage || null;
     this.offlineStorageEnabled = this.storageAdapter !== null;
+    this.offlineKey = offlineOpts.key || null;
   }
 }

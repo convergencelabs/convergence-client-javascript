@@ -16,33 +16,38 @@ export const IdbSchema = {
   },
   Model: {
     Store: "Model",
-    Indices: {
-      Id: "Model.id"
-    },
     Fields: {
-      Id: "id"
+      Id: "id",
+      SessionId: "sessionId",
+    },
+    Indices: {
+      Id: "Model.id",
+      SessionId: "Model.SessionId",
+      Id_SessionId: "Model.Id_SessionId",
     }
   },
   ModelServerOperation: {
     Store: "ModelServerOperation",
+    Fields: {
+      ModelId: "modelId",
+      SessionId: "sessionId",
+      Version: "version"
+    },
     Indices: {
       ModelId: "ModelServerOperation.modelId",
       ModelId_Version: "ModelServerOperation.modelId_version"
-    },
-    Fields: {
-      ModelId: "modelId",
-      Version: "version"
     }
   },
   ModelLocalOperation: {
     Store: "ModelLocalOperation",
-    Indices: {
-      ModelId: "ModelLocalOperation.modelId",
-      ModelId_SequenceNumber: "ModelLocalOperation.modelId_sequenceNumber"
-    },
     Fields: {
       ModelId: "modelId",
+      SessionId: "sessionId",
       SequenceNumber: "sequenceNumber"
-    }
+    },
+    Indices: {
+      ModelId: "ModelLocalOperation.modelId",
+      ModelId_SessionId_SequenceNumber: "ModelLocalOperation.modelId_sessionId_sequenceNumber"
+    },
   }
 };

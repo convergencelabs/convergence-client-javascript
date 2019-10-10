@@ -1,7 +1,8 @@
 import {IdbModelStore} from "./IdbModelStore";
 import {toPromise} from "./promise";
-import {IStorageAdapter} from "../api/";
+import {IMetaStore, IStorageAdapter} from "../api/";
 import {IdbSchemaManager} from "./IdbSchemaManager";
+import {IdbMetaStore} from "./IdbMetaStore";
 
 export class IdbStorageAdapter implements IStorageAdapter {
   private static readonly _DATABASE_NAME = "convergence.offline.storage";
@@ -10,28 +11,15 @@ export class IdbStorageAdapter implements IStorageAdapter {
   private _disposed: boolean = false;
 
   private _modelStore: IdbModelStore;
+  private _metaStore: IMetaStore;
 
-  public init(namespace: string, domainId: string): Promise<void> {
-    if (!namespace) {
-      throw new Error("namespace must be a non-empty string");
-    }
+  public createStore(namespace: string, domainId: string, username: string): Promise<string> {
+    // todo generate key
+    return Promise.reject();
+  }
 
-    if (!domainId) {
-      throw new Error("domain must be a non-empty string");
-    }
-
-    const dbName = `${IdbStorageAdapter._DATABASE_NAME}:${namespace}/${domainId}`;
-    const openRequest = indexedDB.open(dbName, IdbStorageAdapter._VERSION);
-    openRequest.onupgradeneeded = () => {
-      const db = openRequest.result;
-      const version = openRequest.result.version;
-      IdbSchemaManager.upgrade(db, version);
-    };
-
-    return toPromise(openRequest).then((db: IDBDatabase) => {
-      this._db = db;
-      this._modelStore = new IdbModelStore(this._db);
-    });
+  public openStore(namespace: string, domainId: string, storageKey: string): Promise<void> {
+    return this._openDatabase(namespace, domainId, storageKey);
   }
 
   public isInitialized(): boolean {
@@ -40,6 +28,10 @@ export class IdbStorageAdapter implements IStorageAdapter {
 
   public modelStore(): IdbModelStore {
     return this._modelStore;
+  }
+
+  public metaStore(): IMetaStore {
+    return this._metaStore;
   }
 
   public destroy(): void {
@@ -64,5 +56,34 @@ export class IdbStorageAdapter implements IStorageAdapter {
 
   public isDisposed(): boolean {
     return this._disposed;
+  }
+
+  private _openDatabase(namespace: string, domainId: string, key: string): Promise<void> {
+    if (!namespace) {
+      throw new Error("namespace must be a non-empty string");
+    }
+
+    if (!domainId) {
+      throw new Error("domain must be a non-empty string");
+    }
+
+    if (!key) {
+      throw new Error("key must be a non-empty string");
+    }
+
+    const dbName = `${IdbStorageAdapter._DATABASE_NAME}:${namespace}/${domainId}/${key}`;
+    const openRequest = indexedDB.open(dbName, IdbStorageAdapter._VERSION);
+    openRequest.onupgradeneeded = () => {
+      const db = openRequest.result;
+      const version = openRequest.result.version;
+      IdbSchemaManager.upgrade(db, version);
+    };
+
+    return toPromise(openRequest).then((db: IDBDatabase) => {
+      this._db = db;
+      this._modelStore = new IdbModelStore(this._db);
+      this._metaStore = new IdbMetaStore(this._db);
+      return;
+    });
   }
 }

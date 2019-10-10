@@ -67,7 +67,7 @@ let counter = 1;
 
 function withStorage(body: (IdbStorageAdapter) => Promise<any>): Promise<any> {
   const adapter = new IdbStorageAdapter();
-  return adapter.init("namespace", "domain" + counter++)
+  return adapter.openStore("namespace", "domain" + counter++, "")
     .then(() => body(adapter))
     .then(() => {
       adapter.destroy();

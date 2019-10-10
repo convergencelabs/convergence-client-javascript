@@ -5,31 +5,29 @@ import {Logging} from "../util/log/Logging";
 export class StorageEngine {
   private static _log: Logger = Logging.logger("storage");
   private _storage: IStorageAdapter | null = null;
+  private _storageKey: string | null;
 
-  public configure(storage: IStorageAdapter, namespace: string, domainId: string): Promise<void> {
+  public configure(storage: IStorageAdapter): void {
     if (!storage) {
       throw new Error("storage must be specified");
     }
 
-    if (!namespace) {
-      throw new Error("namespace must be a non-empty string");
-    }
+    this._storage = storage;
+  }
 
-    if (!domainId) {
-      throw new Error("domain must be a non-empty string");
-    }
-
-    StorageEngine._log.debug("Initializing storage");
-    return storage
-      .init(namespace, domainId)
-      .then(() => {
-        StorageEngine._log.debug("Storage initialized.");
-        this._storage = storage;
-      })
-      .catch((e) => {
-        StorageEngine._log.error("could not initialize storage adapter, storage disabled");
-        return Promise.reject(e);
+  public createStore(namespace: string, domainId: string, username: string): Promise<void> {
+    return this._storage.createStore(namespace, domainId, username)
+      .then(key => {
+        this._storageKey = key;
       });
+  }
+
+  public openStore(namespace: string, domainId: string, storageKey: string): Promise<void> {
+    return this._storage.openStore(namespace, domainId, storageKey);
+  }
+
+  public storageKey(): string | null {
+    return this._storageKey;
   }
 
   public isEnabled(): boolean {

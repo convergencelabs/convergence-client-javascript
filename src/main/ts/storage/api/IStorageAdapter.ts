@@ -1,7 +1,10 @@
 import {IModelStore} from "./IModelStore";
+import {IMetaStore} from "./IMetaStore";
 
 export interface IStorageAdapter {
-  init(namespace: string, domainId: string): Promise<void>;
+  createStore(namespace: string, domainId: string, username: string): Promise<string>;
+
+  openStore(namespace: string, domainId: string, storageKey: string): Promise<void>;
 
   isInitialized(): boolean;
 
@@ -12,4 +15,6 @@ export interface IStorageAdapter {
   destroy(): void;
 
   modelStore(): IModelStore;
+
+  metaStore(): IMetaStore;
 }
