@@ -36,6 +36,11 @@ const options = {
 };
 
 const domain = new Convergence.ConvergenceDomain(DOMAIN_URL, options);
+
+domain.connectAnonymously(DOMAIN_URL, options).then(d => {
+
+});
+
 domain.events().subscribe(e => {
   switch (e.name) {
     case "connecting":
@@ -80,11 +85,6 @@ domain.models().openAutoCreate({
   window.history.pushState(modelId, modelId, url);
   bindToModel(model);
 });
-
-domain.connectAnonymously(DOMAIN_URL, options).then(d => {
-
-})
-
 
 // Set up all the events on all the models.
 function bindToModel(realTimeModel) {
