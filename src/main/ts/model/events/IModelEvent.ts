@@ -3,11 +3,13 @@ import {ObservableModel} from "../observable/ObservableModel";
 
 /**
  * A parent interface indicating an event that occurred on a [[RealTimeModel]].
+ *
+ * @category Real Time Data Subsystem
  */
 export interface IModelEvent extends IConvergenceEvent {
 
   /**
-   * A read-only representation of the [[RealTimeModel]] on which this change occurred.
+   * The [[RealTimeModel]] or [[HistoricalModel]] on which this event occurred.
    */
   readonly src: ObservableModel;
 }

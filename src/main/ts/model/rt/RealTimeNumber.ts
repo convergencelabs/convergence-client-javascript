@@ -9,6 +9,9 @@ import {ObservableNumber, ObservableNumberEvents, ObservableNumberEventConstants
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export interface RealTimeNumberEvents extends ObservableNumberEvents {
 }
 
@@ -22,6 +25,8 @@ export interface RealTimeNumberEvents extends ObservableNumberEvents {
  * See the
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-number.html)
  * for the most common use cases.
+ *
+ * @category Real Time Data Subsystem
  */
 export class RealTimeNumber extends RealTimeElement<number> implements ObservableNumber {
 

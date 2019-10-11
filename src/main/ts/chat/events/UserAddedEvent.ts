@@ -3,13 +3,14 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when a new user is added to a particular [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class UserAddedEvent extends ChatEvent {
   public static readonly NAME = "user_added";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = UserAddedEvent.NAME;
 

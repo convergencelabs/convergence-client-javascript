@@ -8,6 +8,8 @@ import { DomainUser } from "../identity";
 
 /**
  * The relevant metadata for a [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export interface ChatInfo {
 
@@ -67,6 +69,8 @@ export interface ChatInfo {
 /**
  * A member, or participant, of a Chat.  Has slightly different semantics depending on the
  * type of [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export interface ChatMember {
   /**
@@ -82,18 +86,22 @@ export interface ChatMember {
 }
 
 /**
- * The valid strings for a [[ChatInfo.chatType]].
+ * Use these rather than hardcoded strings to refer to a particular type of Chat.
+ *
+ * @category Chat Subsytem
  */
-export type ChatType = "direct" | "channel" | "room";
+export enum ChatTypes {
+  DIRECT = "direct",
+  CHANNEL = "channel",
+  ROOM = "room"
+}
 
 /**
- * Use this rather than a hardcoded string to refer to a particular type of Chat.
+ * The valid strings for a [[ChatInfo.chatType]].
+ *
+ * @category Chat Subsytem
  */
-export const ChatTypes: {[key: string]: ChatType} = {
-  DIRECT: "direct",
-  CHANNEL: "channel",
-  ROOM: "room"
-};
+export type ChatType = ChatTypes.DIRECT | ChatTypes.CHANNEL | ChatTypes.ROOM;
 
 /**
  * @hidden

@@ -1,5 +1,9 @@
 import {IdbSchema} from "./IdbSchema";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbSchemaVersion1 {
   public static upgrade(db: IDBDatabase) {
 

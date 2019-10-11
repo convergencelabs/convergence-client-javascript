@@ -1,5 +1,9 @@
 import {IdbSchemaVersion1} from "./IdbSchemaVersion1";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbSchemaManager {
   public static upgrade(db: IDBDatabase, targetVersion: number) {
     switch (targetVersion) {

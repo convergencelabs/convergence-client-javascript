@@ -3,13 +3,14 @@ import {ModelReference} from "../ModelReference";
 
 /**
  * Emitted when a [[ModelReference]]'s value is explicitly cleared.
+ *
+ * @category Collaboration Awareness
  */
 export class ReferenceClearedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "cleared";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ReferenceClearedEvent.NAME;
 

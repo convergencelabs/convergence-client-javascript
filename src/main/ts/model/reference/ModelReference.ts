@@ -10,6 +10,11 @@ import {ReferenceType} from "./ReferenceType";
 import {DomainUser} from "../../identity";
 import { RealTimeElement, RealTimeModel } from "../rt";
 
+/**
+ * All the different types of [references](https://docs.convergence.io/guide/models/references/references.html).
+ *
+ * @category Collaboration Awareness
+ */
 export interface ModelReferenceTypes {
   [key: string]: ReferenceType;
   readonly INDEX: ReferenceType;
@@ -20,6 +25,8 @@ export interface ModelReferenceTypes {
 
 /**
  * The generic events available on any reference.
+ *
+ * @category Collaboration Awareness
  */
 export interface ModelReferenceEvents {
   /**
@@ -43,15 +50,33 @@ export interface ModelReferenceEvents {
  * which are essentially pointers to elements and data within a [[RealTimeModel]].
  * They are typically used to implement transient UX constructs such as text selections
  * and cursors.
+ *
+ * See [[ModelReferenceEvents]] for all of the events that could be emitted from
+ * instances of this class.
+ *
+ * @category Collaboration Awareness
  */
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
 
+  /**
+   * A mapping of the events this instance could emit to each event's unique name.
+   * Use this to refer an event name:
+   *
+   * ```typescript
+   * reference.on(ModelReference.Events.SET, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: ModelReferenceEvents = {
     SET: ReferenceChangedEvent.NAME,
     CLEARED: ReferenceClearedEvent.NAME,
     DISPOSED: ReferenceDisposedEvent.NAME
   };
 
+  /**
+   * All the types of references available on the various [[RealTimeElement]]s.
+   */
   public static readonly Types: ModelReferenceTypes = {
     INDEX: "index",
     RANGE: "range",

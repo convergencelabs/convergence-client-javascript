@@ -1,6 +1,10 @@
 import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface IModelStore {
   getSubscribedModels(): Promise<string[]>;
 

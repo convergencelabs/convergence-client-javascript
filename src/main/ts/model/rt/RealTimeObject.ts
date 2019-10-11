@@ -24,6 +24,9 @@ import {ObservableObject, ObservableObjectEvents, ObservableObjectEventConstants
 import {Path, PathElement} from "../Path";
 import {IdentityCache} from "../../identity/IdentityCache";
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
 
@@ -38,6 +41,8 @@ export interface RealTimeObjectEvents extends ObservableObjectEvents {
  *
  * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-object.html)
  * for examples of some of the most common use cases.
+ *
+ * @category Real Time Data Subsystem
  */
 export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {
@@ -152,6 +157,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     return (this._delegate as ObjectNode).keys();
   }
 
+  // tslint:disable:max-line-length
   /**
    * Returns true if a value exists at the given key, even if the value is `null`.
    * Analagous to the Javascript object
@@ -169,6 +175,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @returns true if a value exists
    */
+  // tslint:enable:max-line-length
   public hasKey(key: string): boolean {
     return (this._delegate as ObjectNode).hasKey(key);
   }

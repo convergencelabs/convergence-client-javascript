@@ -3,13 +3,14 @@ import {DomainUser} from "../../identity";
 
 /**
  * Emitted when another user sends a message to a particular [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class ChatMessageEvent extends ChatEvent {
   public static readonly NAME = "message";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ChatMessageEvent.NAME;
 

@@ -7,13 +7,14 @@ import {DomainUser} from "../../identity";
  *
  * When the value of a [[RealTimeNumber]] is directly set
  * (with e.g. `rtNumber.value(23)`), a [[NumberSetValueEvent]] is emitted.
+ *
+ * @category Real Time Data Subsystem
  */
 export class NumberDeltaEvent implements IValueChangedEvent {
   public static readonly NAME = "delta";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = NumberDeltaEvent.NAME;
 
@@ -29,22 +30,22 @@ export class NumberDeltaEvent implements IValueChangedEvent {
    */
   constructor(
     /**
-     * A read-only representation of the [[RealTimeNumber]] which was modified
+     * The [[RealTimeNumber]] or [[HistoricalNumber]] which was modified
      */
     public readonly element: ObservableNumber,
 
     /**
-     * The user which performed the modification
+     * @inheritdoc
      */
     public readonly user: DomainUser,
 
     /**
-     * The sessionId corresponding to the session that performed the modification
+     * @inheritdoc
      */
     public readonly sessionId: string,
 
     /**
-     * True if this change occurred locally (in the current session)
+     * True if the change occurred locally (within the current session)
      */
     public readonly local: boolean,
 

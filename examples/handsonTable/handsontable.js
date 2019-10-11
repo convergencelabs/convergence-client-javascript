@@ -6,16 +6,16 @@ var hot;
 var model;
 
 // Connect to the domain.
-ConvergenceDomain.debugFlags.protocol.messages = true;
-var domain = new ConvergenceDomain(connectionConfig.SERVER_URL + "/domain/namespace1/domain1");
-domain.on("connected", function () {
-  console.log("connected");
+Convergence.configureLogging({
+  loggers: {
+    "protocol.messages": Convergence.LogLevel.DEBUG
+  }
 });
-
-// Now authenticate.  This is deferred unti connection is successful.
-domain.authenticateWithPassword("test1", "password").then(function (username) {
-  return domain.modelService().open("foo", "basic-example", function (collectionId, modelId) {
-    return defaultData;
+Convergence.connect(DOMAIN_URL, "test1", "password").then(function (domain) {
+  return domain.models().openAutoCreate({
+    collection: "foo",
+    id: "basic-example",
+    data: defaultData
   });
 }).then(function (model) {
   bindToModel(model);

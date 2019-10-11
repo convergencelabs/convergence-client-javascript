@@ -2,6 +2,10 @@ import {IModelStore, IStorageAdapter} from "./api";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StorageEngine {
   private static _log: Logger = Logging.logger("storage");
   private _storage: IStorageAdapter | null = null;

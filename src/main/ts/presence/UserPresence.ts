@@ -5,6 +5,8 @@ import {DomainUser} from "../identity";
  * The [[UserPresence]] class represents the Presence state of a single domain
  * user within Convergence. An instance of [[UserPresence]] can be obtained
  * from the [[PresenceService]].
+ *
+ * @category Presence Subsystem
  */
 export class UserPresence {
 
@@ -26,17 +28,18 @@ export class UserPresence {
      * The domain user that this instance represents the presence of.
      */
     public readonly user: DomainUser,
+
     /**
      * True if the user is online in at least one session, false otherwise.
      */
-    public readonly available: boolean,
-    state: Map<string, any>) {
+    public readonly available: boolean, state: Map<string, any>
+  ) {
     this._state = deepClone(state);
     Object.freeze(this);
   }
 
   /**
-   * The current state associated with this user's online presence.
+   * Returns the current state associated with this user's online presence.
    */
   public get state(): Map<string, any> {
     return deepClone(this._state);

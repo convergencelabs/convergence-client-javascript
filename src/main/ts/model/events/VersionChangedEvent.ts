@@ -7,13 +7,14 @@ import {ObservableModel} from "../observable/ObservableModel";
  *
  * Note that on a local change, this won't be fired until the version is updated on the
  * server and a response message sent back to the client.
+ *
+ * @category Real Time Data Subsystem
  */
 export class VersionChangedEvent implements IModelEvent {
   public static readonly NAME = "version_changed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = VersionChangedEvent.NAME;
 
@@ -26,7 +27,7 @@ export class VersionChangedEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] or [[HistoricalModel]] whose version just changed
      */
     public readonly src: ObservableModel,
 

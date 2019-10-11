@@ -8,13 +8,14 @@ import {IChatEvent} from "./IChatEvent";
  * listen for this event to update their membership status.
  *
  * Note that this is emitted from the [[ChatService]] as opposed to a [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class ChatJoinedEvent implements IChatEvent {
   public static readonly NAME = "joined";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ChatJoinedEvent.NAME;
 

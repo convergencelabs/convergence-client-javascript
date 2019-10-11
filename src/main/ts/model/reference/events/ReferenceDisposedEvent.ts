@@ -3,13 +3,14 @@ import {ModelReference} from "../ModelReference";
 
 /**
  * Emitted when a [[ModelReference]] is disposed.
+ *
+ * @category Collaboration Awareness
  */
 export class ReferenceDisposedEvent implements IConvergenceEvent {
   public static readonly NAME = "disposed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ReferenceDisposedEvent.NAME;
 

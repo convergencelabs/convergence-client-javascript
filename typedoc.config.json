@@ -1,5 +1,5 @@
 {
-  "name": "Convergence JavaScript Client API",
+  "name": "Convergence JavaScript Client API Documentation",
   "target": "ES6",
 
   "excludeNotExported": true,
@@ -11,10 +11,30 @@
   "baseUrl": "src/main/ts",
   "readme": "src/docs/README.md",
 
-  "theme": "src/docs/theme",
+  "theme": "node_modules/typedoc-theme-convergence/bin/default",
 
   "gaId": "UA-84372428-3",
 
   "verbose": true,
-  "hideGenerator": true
+  "hideGenerator": true,
+
+  "categoryOrder": [
+    "Connection and Authentication",
+    "Real Time Data Subsystem",
+    "Users and Identity",
+    "Collaboration Awareness",
+    "Presence Subsystem",
+    "Chat Subsystem"
+  ],
+
+  "toc": [
+    "Convergence",
+    "ConvergenceDomain",
+    "ModelService",
+    "RealTimeModel",
+    "ActivityService",
+    "PresenceService",
+    "ChatService",
+    "IdentityService"
+  ]
 }

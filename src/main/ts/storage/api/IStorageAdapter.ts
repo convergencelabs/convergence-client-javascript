@@ -1,6 +1,10 @@
 import {IModelStore} from "./IModelStore";
 import {IMetaStore} from "./IMetaStore";
 
+/**
+ * @hidden
+ * @internal
+ */
 export interface IStorageAdapter {
   createStore(namespace: string, domainId: string, username: string): Promise<string>;
 

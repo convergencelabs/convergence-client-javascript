@@ -10,6 +10,8 @@ import {DomainUser} from "../../identity";
  * Represents one or more elements in a [[RealTimeModel]] that must be adjusted
  * while the data is changing. See an example in the
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimemodel.html).
+ *
+ * @category Collaboration Awareness
  */
 export class ElementReference extends ModelReference<RealTimeElement<any>> {
 

@@ -12,6 +12,8 @@ import {Logging} from "./util/log/Logging";
  *
  * See the [Developer Guide](https://docs.convergence.io/guide/authentication/overview.html)
  * for more information about authentication options.
+ *
+ * @category Connection and Authentication
  */
 export class Convergence {
   /**
@@ -147,7 +149,7 @@ export class Convergence {
    * Allows customization of both the root (default) logger and any ancillary loggers.
    *
    * ```javascript
-   * Logging.configure({
+   * Convergence.configureLogging({
    *   root: LogLevel.ERROR,
    *   loggers: {
    *     "connection": LogLevel.DEBUG
@@ -178,10 +180,42 @@ export class Convergence {
 
 /**
  * @deprecated
+ *
+ * @category Connection and Authentication
  */
 export const connect = Convergence.connect;
+
+/**
+ * @deprecated
+ *
+ * @category Connection and Authentication
+ */
 export const connectWithPassword = Convergence.connectWithPassword;
+
+/**
+ * @deprecated
+ *
+ * @category Connection and Authentication
+ */
 export const connectAnonymously = Convergence.connectAnonymously;
+
+/**
+ * @deprecated
+ *
+ * @category Connection and Authentication
+ */
 export const connectWithJwt = Convergence.connectWithJwt;
+
+/**
+ * @deprecated
+ *
+ * @category Connection and Authentication
+ */
 export const reconnect = Convergence.reconnect;
+
+/**
+ * @deprecated
+ *
+ * @category Connection and Authentication
+ */
 export const configureLogging = Convergence.configureLogging;

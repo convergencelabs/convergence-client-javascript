@@ -9,9 +9,12 @@ var domain;
 var presence;
 
 function connect() {
-  var url = "https://localhost/realtime/domain/test/example";
-  ConvergenceDomain.debugFlags.protocol.messages = true;
-  ConvergenceDomain.connectAnonymously(url, usernameInput.value).then(function(d) {
+  Convergence.configureLogging({
+    loggers: {
+      "protocol.messages": Convergence.LogLevel.DEBUG
+    }
+  });
+  Convergence.connectAnonymously(DOMAIN_URL, usernameInput.value).then(function(d) {
     domain = d;
     presence = domain.presence();
     updateLocal();
@@ -23,25 +26,24 @@ function connect() {
 
 function updateLocal() {
   localAvailability.innerHTML = presence.isAvailable();
-  localState.innerHTML = JSON.stringify(presence.state().keys());
+  localState.innerHTML = JSON.stringify(Object.fromEntries(presence.state()));
 }
 
 function setState() {
   var key = document.getElementById("setKey").value;
   var value = document.getElementById("setValue").value;
-  presence.set(key, value);
+  presence.setState(key, value);
 }
 
 function removeState() {
   var key = document.getElementById("removeKey").value;
-  presence.remove(kMey);
+  presence.removeState(key);
 }
 
 function clearState() {
-  presence.clear();
+  presence.clearState();
 }
 
 function disconnect() {
-
   domain.dispose();
 }

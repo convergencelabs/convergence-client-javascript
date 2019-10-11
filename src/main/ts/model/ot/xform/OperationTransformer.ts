@@ -22,7 +22,7 @@ export class OperationTransformer {
     } else if (c instanceof CompoundOperation) {
       return this.transformClientCompoundOperation(s, c);
     } else {
-      return this.transformTwoDiscreteOps(<DiscreteOperation> s, <DiscreteOperation> c);
+      return this.transformTwoDiscreteOps(s as DiscreteOperation, c as DiscreteOperation);
     }
   }
 
@@ -31,7 +31,7 @@ export class OperationTransformer {
     const newOps: DiscreteOperation[] = c.ops.map((o: DiscreteOperation) => {
       const opPair: OperationPair = this.transform(xFormedS, o);
       xFormedS = opPair.serverOp;
-      return <DiscreteOperation> opPair.clientOp;
+      return opPair.clientOp as DiscreteOperation;
     });
     return new OperationPair(xFormedS, new CompoundOperation(newOps));
   }
@@ -41,7 +41,7 @@ export class OperationTransformer {
     const newOps: DiscreteOperation[] = s.ops.map((o: DiscreteOperation) => {
       const opPair: OperationPair = this.transform(o, xFormedC);
       xFormedC = opPair.clientOp;
-      return <DiscreteOperation> opPair.serverOp;
+      return opPair.serverOp as DiscreteOperation;
     });
     return new OperationPair(new CompoundOperation(newOps), xFormedC);
   }

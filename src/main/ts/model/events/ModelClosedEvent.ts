@@ -4,13 +4,14 @@ import {ObservableModel} from "../observable/ObservableModel";
 /**
  * The [[ModelClosedEvent]] is fired when a Model is closed either by the
  * client or the server.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelClosedEvent implements IModelEvent {
   public static readonly NAME = "closed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ModelClosedEvent.NAME;
 
@@ -24,7 +25,7 @@ export class ModelClosedEvent implements IModelEvent {
    */
   constructor(
     /**
-     * A read-only representation of the [[RealTimeModel]] which was closed.
+     * The [[RealTimeModel]] or [[HistoricalModel]] that was closed.
      */
     public readonly src: ObservableModel,
 

@@ -30,7 +30,7 @@ export class ReferenceTransformer {
     if (o instanceof CompoundOperation) {
       return this.transformCompoundOperation(o, r);
     } else {
-      return this.transformDiscreteOperation(<DiscreteOperation> o, r);
+      return this.transformDiscreteOperation(o as DiscreteOperation, r);
     }
   }
 

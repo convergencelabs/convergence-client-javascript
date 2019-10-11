@@ -3,7 +3,7 @@ import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
-import {Model} from "../internal/Model";
+import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
@@ -41,7 +41,6 @@ import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {Observable, BehaviorSubject} from "rxjs";
 import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
-import {CollaboratorOpenedEvent, CollaboratorClosedEvent} from "./events";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
 import {Path, PathElement} from "../Path";
@@ -77,20 +76,107 @@ import {IModelState} from "../../storage/api/IModelState";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {ILocalOperationData, IServerOperationData} from "../../storage/api";
 import {toOfflineOperationData} from "../../storage/OfflineOperationMapper";
+import {CollaboratorOpenedEvent} from "../events/CollaboratorOpenedEvent";
+import {CollaboratorClosedEvent} from "../events/CollaboratorClosedEvent";
+import {ModelDeletedEvent} from "../events/ModelDeletedEvent";
 
 /**
- * An enumeration of the events that could be emitted by a [[RealTimeModel]].
+ * The complete list of events that could be emitted by a [[RealTimeModel]].
+ *
+ * @category Real Time Data Subsystem
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
+  /**
+   * Emitted when the resync process begins.  This automatically happens
+   * when a client becomes disconnected and accumulates local changes
+   * that must be reconciled with the server.
+   *
+   * The actual event emitted is a [[ResyncStartedEvent]].
+   *
+   * @event ResyncStartedEvent
+   */
   readonly RESYNC_STARTED: string;
+
+  /**
+   * Emitted when the resync process ends. The actual emitted event is a [[ResyncCompletedEvent]].
+   *
+   * @event
+   */
   readonly RESYNC_COMPLETED: string;
+
+  /**
+   * Emitted when this model goes offline. The actual emitted event is a [[ModelOfflineEvent]].
+   *
+   * @event
+   */
   readonly OFFLINE: string;
+
+  /**
+   * Emitted when this model comes back online after being offline.
+   * The actual emitted event is a [[ModelOfflineEvent]].
+   *
+   * @event
+   */
   readonly ONLINE: string;
+
+  /**
+   * Emitted when the model is attempting to reconnect to the server after
+   * being offline. This only has to to with the connection; see
+   * [[RESYNC_STARTED]] and [[RESYNC_COMPLETED]] for data reconciliation events.
+   *
+   * The actual emitted event is a [[ModelReconnectingEvent]].
+   *
+   * @event
+   */
+  readonly RECONNECTING: string;
+
+  /**
+   * Emitted immediately when a local modification is made to a model.
+   * The emitted event is an [[IModelEvent]].
+   *
+   * @event
+   */
   readonly MODIFIED: string;
+
+  /**
+   * Emitted when the server acknowledges a local modification.  Note that
+   * multiple modifications may be batched together into a single
+   * `COMMITTED` response from the server.  See https://forum.convergence.io/t/behavior-of-model-version/16/4
+   *
+   * @event
+   */
   readonly COMMITTED: string;
+
+  /**
+   * Emitted when another user opens this model. The actual event is a [[CollaboratorOpenedEvent]].
+   *
+   * @event
+   */
   readonly COLLABORATOR_OPENED: string;
+
+  /**
+   * Emitted when another user closes this model. The actual event is a [[CollaboratorClosedEvent]].
+   *
+   * @event
+   */
   readonly COLLABORATOR_CLOSED: string;
+
+  /**
+   * Emitted when a [Remote Reference](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * is created on this model with [[RealTimeModel.elementReference]].
+   *
+   * The actual emitted event is a [[RemoteReferenceCreatedEvent]].
+   *
+   * @event
+   */
   readonly REFERENCE: string;
+
+  /**
+   * Emitted when the [permissions](https://docs.convergence.io/guide/models/permissions.html)
+   * on this model change.  The actual emitted event is a [[ModelPermissionsChangedEvent]].
+   *
+   * @event
+   */
   readonly PERMISSIONS_CHANGED: string;
 }
 
@@ -98,10 +184,11 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   ...ObservableModelEventConstants,
   MODIFIED: "modified",
   COMMITTED: "committed",
-  RESYNC_STARTED: "resync_started",
-  RESYNC_COMPLETED: "resync_completed",
-  OFFLINE: "offline",
-  ONLINE: "online",
+  RESYNC_STARTED: ResyncStartedEvent.NAME,
+  RESYNC_COMPLETED: ResyncCompletedEvent.NAME,
+  OFFLINE: ModelOfflineEvent.NAME,
+  ONLINE: ModelOnlineEvent.NAME,
+  RECONNECTING: ModelReconnectingEvent.NAME,
   COLLABORATOR_OPENED: CollaboratorOpenedEvent.NAME,
   COLLABORATOR_CLOSED: CollaboratorClosedEvent.NAME,
   REFERENCE: RemoteReferenceCreatedEvent.NAME,
@@ -126,6 +213,9 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  * * [[root]] to get the root object
  * * [[elementAt]] to query for a particular node within the data
  *
+ * See [[RealTimeModelEvents]] for the events that may be emitted on this model.
+ *
+ * @category Real Time Data Subsystem
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 
@@ -982,6 +1072,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       reason: message.reason
     };
     this._close(event);
+
+    if (message.reasonCode === ModelForcedCloseReasonCodes.DELETED) {
+      const deletedEvent: ModelDeletedEvent = {
+        src: this,
+        name: RealTimeModel.Events.DELETED,
+        local: false,
+        reason: message.reason
+      };
+      this._emitEvent(deletedEvent);
+    }
   }
 
   /**

@@ -1,9 +1,17 @@
+/**
+ * @hidden
+ * @internal
+ */
 export interface IObjectStoreSchema {
   Store: string;
   Indices: {[key: string]: string};
   Fields: {[key: string]: string};
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export const IdbSchema = {
   ModelSubscriptions: {
     Store: "ModelSubscription",

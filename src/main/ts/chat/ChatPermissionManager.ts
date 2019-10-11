@@ -8,6 +8,11 @@ import IUserPermissionsEntry = io.convergence.proto.IUserPermissionsEntry;
 import IPermissionsList = io.convergence.proto.IPermissionsList;
 import { mapObjectValues } from "../util/ObjectUtils";
 
+/**
+ * The possible permissions a chat can have.
+ *
+ * @category Chat Subsytem
+ */
 export type ChatPermission =
   "create_chat"
   | "remove_chat"
@@ -33,6 +38,8 @@ const CHAT_PERMISSION_IDENTIFIER = 1;
  * Generally speaking, more specific permissions override less-specific ones.  So a
  * user's explicit permission would override the group's permission which the user
  * is in, which would itself override any world permission for this `Chat`.
+ *
+ * @category Chat Subsytem
  */
 export class ChatPermissionManager {
 

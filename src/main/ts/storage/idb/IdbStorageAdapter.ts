@@ -4,6 +4,10 @@ import {IMetaStore, IStorageAdapter} from "../api/";
 import {IdbSchemaManager} from "./IdbSchemaManager";
 import {IdbMetaStore} from "./IdbMetaStore";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class IdbStorageAdapter implements IStorageAdapter {
   private static readonly _DATABASE_NAME = "convergence.offline.storage";
   private static readonly _VERSION = 1;

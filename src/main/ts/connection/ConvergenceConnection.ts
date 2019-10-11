@@ -21,6 +21,7 @@ import {TypeChecker} from "../util/TypeChecker";
 import {FallbackAuthCoordinator} from "./FallbackAuthCoordinator";
 import {Logging} from "../util/log/Logging";
 import {Logger} from "../util/log/Logger";
+import { AuthenticationMethods, AuthenticationMethod } from "./AuthenticationMethod";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;
@@ -71,10 +72,17 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
    * @param url
    * @param domain
    */
-  constructor(url: string, domain: ConvergenceDomain) {
+  constructor(url: string, domain: ConvergenceDomain, options: ConvergenceOptions) {
     super();
 
-    this._options = domain.options();
+    this._url = url.trim().toLowerCase();
+    const urlExpression = /^(https?|wss?):\/{2}.+\/.+\/.+/g;
+
+    if (!urlExpression.test(this._url)) {
+      throw new Error(`Invalid domain connection url: ${this._url}`);
+    }
+
+    this._options = options;
 
     this._url = url;
 
@@ -264,15 +272,15 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _sendAuthRequest(authenticationRequest: IAuthenticationRequestMessage): Promise<void> {
-    let method = null;
+    let method: AuthenticationMethod = null;
     if (authenticationRequest.anonymous) {
-      method = "anonymous";
+      method = AuthenticationMethods.ANONYMOUS;
     } else if (authenticationRequest.password) {
-      method = "password";
+      method = AuthenticationMethods.PASSWORD;
     } else if (authenticationRequest.jwt) {
-      method = "jwt";
+      method = AuthenticationMethods.JWT;
     } else if (authenticationRequest.reconnect) {
-      method = "reconnect";
+      method = AuthenticationMethods.RECONNECT;
     }
 
     const authenticatingEvent: IAuthenticatingEvent = {name: ConvergenceConnection.Events.AUTHENTICATING, method};
@@ -493,7 +501,7 @@ export interface IConnectionErrorEvent extends IConnectionEvent {
  */
 export interface IAuthenticatingEvent extends IConnectionEvent {
   name: "authenticating";
-  method: string;
+  method: AuthenticationMethod;
 }
 
 /**
@@ -502,7 +510,7 @@ export interface IAuthenticatingEvent extends IConnectionEvent {
  */
 export interface IAuthenticatedEvent extends IConnectionEvent {
   name: "authenticated";
-  method: string;
+  method: AuthenticationMethod;
   state: { [key: string]: any };
 }
 
@@ -512,7 +520,7 @@ export interface IAuthenticatedEvent extends IConnectionEvent {
  */
 export interface IAuthenticationFailedEvent extends IConnectionEvent {
   name: "authenticationFailed";
-  method: string;
+  method: AuthenticationMethod;
 }
 
 /**

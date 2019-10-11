@@ -62,7 +62,10 @@ describe("DeltaConverter", () => {
     expect(node1 instanceof RichTextElement).to.eq(true);
     expect(node1.getName()).to.eq("image");
 
-    const expected = Object.assign({$$ConvergenceQuillBlotValue$$: "url"}, ops[1].attributes);
+    const expected = {
+      $$ConvergenceQuillBlotValue$$: "url",
+      ...ops[1].attributes
+    };
     const attrs = StringMap.mapToObject(node1.attributes());
     expect(attrs).to.deep.eq(expected);
 

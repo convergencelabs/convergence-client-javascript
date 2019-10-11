@@ -1,5 +1,9 @@
 export type StringMapLike = Map<string, any> | {[key: string]: any};
 
+/**
+ * @hidden
+ * @internal
+ */
 export class StringMap {
   public static objectToMap<T>(obj: {[key: string]: T}): Map<string, T> {
     const map: Map<string, T> = new Map<string, T>();

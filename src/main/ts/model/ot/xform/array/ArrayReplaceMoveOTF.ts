@@ -3,8 +3,7 @@ import {OperationPair} from "../OperationPair";
 import {ArrayReplaceOperation} from "../../ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../ops/ArrayMoveOperation";
 import {RangeIndexRelationship} from "../../util/RangeRelationshipUtil";
-import {ArrayMoveHelper} from "./ArrayMoveHelper";
-import {MoveDirection} from "./ArrayMoveHelper";
+import {ArrayMoveHelper, MoveDirection} from "./ArrayMoveHelper";
 
 /**
  * @hidden

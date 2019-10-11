@@ -12,6 +12,12 @@ import {DomainUserIdentifier} from "../identity";
 import {DomainUserId} from "../identity/DomainUserId";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 
+/**
+ * Use this class to manage or query the permissions of a particular
+ * [[RealTimeModel]].
+ *
+ * @category Real Time Data Subsystem
+ */
 export class ModelPermissionManager {
 
   /**

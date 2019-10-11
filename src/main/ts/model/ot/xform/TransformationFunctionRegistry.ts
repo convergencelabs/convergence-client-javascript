@@ -58,13 +58,17 @@ import {ObjectSetSetOTF} from "./object/ObjectSetSetOTF";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 import {ModelReferenceData} from "./ReferenceTransformer";
 import {ModelReference} from "../../reference/ModelReference";
-import {StringInsertIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
+import {
+  StringInsertIndexTransformationFunction,
+  StringRemoveIndexTransformationFunction,
+  StringSetIndexTransformationFunction
+} from "./reference/IndexTransformationFunctions";
 import {OperationType} from "../ops/OperationType";
-import {StringRemoveIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
-import {StringSetIndexTransformationFunction} from "./reference/IndexTransformationFunctions";
-import {StringInsertRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
-import {StringRemoveRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
-import {StringSetRangeTransformationFunction} from "./reference/RangeTransformationFunctions";
+import {
+  StringInsertRangeTransformationFunction,
+  StringRemoveRangeTransformationFunction,
+  StringSetRangeTransformationFunction
+} from "./reference/RangeTransformationFunctions";
 import {DateSetSetOTF} from "./date/DateSetSetOTF";
 
 /**
@@ -169,8 +173,8 @@ export class TransformationFunctionRegistry {
     this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_VALUE, StringSetRangeTransformationFunction);
   }
 
-  public registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>
-  (s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
+  // tslint:disable-next-line: max-line-length
+  public registerOtf<S extends DiscreteOperation, C extends DiscreteOperation>(s: string, c: string, otf: OperationTransformationFunction<S, C>): void {
     const key: string = s + c;
     if (this._otfs[key]) {
       throw new Error("Function already registered for " + s + ", " + c);
@@ -188,14 +192,14 @@ export class TransformationFunctionRegistry {
     }
   }
 
-  public getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>
-  (s: S, c: C): OperationTransformationFunction<S, C> {
+  public getOperationTransformationFunction<S extends DiscreteOperation, C extends DiscreteOperation>(s: S, c: C):
+  OperationTransformationFunction<S, C> {
     const key: string = s.type + c.type;
     return this._otfs[key];
   }
 
-  public getReferenceTransformationFunction<O extends DiscreteOperation>
-  (o: O, r: ModelReferenceData): ReferenceTransformationFunction {
+  public getReferenceTransformationFunction<O extends DiscreteOperation>(o: O, r: ModelReferenceData):
+  ReferenceTransformationFunction {
     const key: string = o.type + r.type;
     return this._rtfs[key];
   }

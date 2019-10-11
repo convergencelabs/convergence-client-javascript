@@ -12,18 +12,23 @@ import {
 } from "./events/";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ChatHistoryEntry} from "./ChatHistoryEntry";
+import {ChatHistoryEntry} from "./history/ChatHistoryEntry";
 import {Observable} from "rxjs";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatInfoData = io.convergence.proto.IChatInfoData;
-import {ChatHistoryEventMapper} from "./ChatHistoryEventMapper";
+import {ChatHistoryEventMapper} from "./history/ChatHistoryEventMapper";
 import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {Immutable} from "../util/Immutable";
 import {ChatInfo, createChatInfo} from "./ChatInfo";
 
+/**
+ * The events that could be emitted from a particular [[Chat]].
+ *
+ * @category Chat Subsytem
+ */
 export interface ChatEvents {
   readonly MESSAGE: string;
   readonly USER_JOINED: string;
@@ -45,6 +50,8 @@ Object.freeze(Events);
  * The [[Chat]] class is the base class of all Chat types in Convergence. It
  * provides several methods and behaviors that are common to all Chat
  * subclasses, such as the ability to send messages, set a name and topic, etc.
+ *
+ * @category Chat Subsytem
  */
 export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   public static readonly Events: ChatEvents = Events;
@@ -335,6 +342,8 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
  *   forward: true
  * })
  * ```
+ *
+ * @category Chat Subsytem
  */
 export interface ChatHistorySearchOptions {
   /**

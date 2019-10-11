@@ -4,6 +4,8 @@ import {RealTimeModel} from "../rt";
 /**
  * Emitted when a [[RealTimeModel]] reconnects to the server and when the
  * resynchronization process completes.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ResyncCompletedEvent implements IModelEvent {
   public static readonly NAME = "resync_completed";
@@ -20,7 +22,7 @@ export class ResyncCompletedEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] whose version just changed
+     * The [[RealTimeModel]] that just completed the resync
      */
     public readonly src: RealTimeModel
   ) {

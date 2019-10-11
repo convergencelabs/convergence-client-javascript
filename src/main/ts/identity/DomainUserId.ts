@@ -1,5 +1,10 @@
 import {DomainUserIdentifier} from "./DomainUser";
 
+/**
+ * The different "types" of [[DomainUser]]s in Convergence.
+ *
+ * @category Users and Identity
+ */
 export enum DomainUserType {
   /**
    * "normal" domain users are the typical users of your application.
@@ -26,6 +31,8 @@ export enum DomainUserType {
  * which combines their [[userType]] with [[username]].
  *
  * [[DomainUserId]]s are read-only.
+ *
+ * @category Users and Identity
  */
 export class DomainUserId {
 

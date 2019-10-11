@@ -1,3 +1,7 @@
+
+/**
+ * @category Connection and Authentication
+ */
 export interface IWebSocketClass {
   prototype: WebSocket;
   readonly CLOSED: number;

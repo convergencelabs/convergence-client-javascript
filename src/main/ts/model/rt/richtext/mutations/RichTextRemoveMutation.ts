@@ -12,7 +12,7 @@ import {RichTextRemove} from "../operations/RichTextRemove";
 export class RichTextInsertMutation extends RichTextMutation {
   public static get TYPE() {
     return "remove";
-  };
+  }
 
   private _range: RichTextRange;
   private _content: RichTextFragment;

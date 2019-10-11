@@ -6,6 +6,8 @@ import {IStorageAdapter} from "./storage/api";
 /**
  * The [[IConvergenceOptions]] interface represents that options that can be
  * set within Convergence when connecting to a domain.
+ *
+ * @category Connection and Authentication
  */
 export interface IConvergenceOptions {
 
@@ -78,6 +80,14 @@ export interface IConvergenceOptions {
     /**
      * The fallbackAuth method to use when a reconnect token is rejected. It
      * provides the opportunity to use a fallback method of authentication.
+     *
+     * ```
+     * options.reconnect.fallbackAuth = (authChallenge:IFallbackAuthChallenge) => {
+     *   return Authentication.fetchJWT().then(jwt => {
+     *     authChallenge.jwt(jwt);
+     *   })
+     * };
+     * ```
      */
     fallbackAuth?: (authChallenge: IFallbackAuthChallenge) => void;
   };

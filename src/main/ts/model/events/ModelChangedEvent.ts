@@ -9,13 +9,14 @@ import {DomainUser} from "../../identity";
  * element has a change.  This is a convenience event which you can listen to e.g.
  * within a [[RealTimeContainerElement]] when you'd like to know about *any* changes
  * to the data within.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ModelChangedEvent implements IConvergenceModelValueEvent {
   public static readonly NAME = "model_changed";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ModelChangedEvent.NAME;
 
@@ -32,7 +33,7 @@ export class ModelChangedEvent implements IConvergenceModelValueEvent {
    */
   constructor(
     /**
-     * A read-only representation of the [[RealTimeElement]] from which this event was emitted.
+     * @inheritdoc
      */
     public readonly element: ObservableElement<any>,
 
@@ -47,7 +48,7 @@ export class ModelChangedEvent implements IConvergenceModelValueEvent {
     public readonly sessionId: string,
 
     /**
-     * True if this change occurred locally (in the current session)
+     * @inheritdoc
      */
     public readonly local: boolean,
 

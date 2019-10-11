@@ -4,6 +4,8 @@ import {DomainUser} from "../../identity";
 /**
  * The [[IValueChangedEvent]] is the parent interface to all events fired by
  * individual model elements when their data changes.
+ *
+ * @category Real Time Data Subsystem
  */
 export interface IValueChangedEvent extends IConvergenceModelValueEvent {
   /**
@@ -15,9 +17,4 @@ export interface IValueChangedEvent extends IConvergenceModelValueEvent {
    * The sessionId corresponding to the session that performed the modification
    */
   readonly sessionId: string;
-
-  /**
-   * True if this change occurred locally (in the current session)
-   */
-  readonly local: boolean;
 }

@@ -44,6 +44,8 @@ import {Logging} from "../util/log/Logging";
  * which users are part of that activity. Each [[ActivityParticipant]]
  * can share state which indicates what they are doing within the
  * [[Activity]].
+ *
+ * @category Collaboration Awareness
  */
 export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
@@ -54,59 +56,60 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public static readonly Events = {
     /**
      * Fired when a remote session joins the activity. The resulting event will
-     * be an instance of the [[ActivitySessionJoinedEvent]] class.
+     * be an [[ActivitySessionJoinedEvent]].
      *
-     * @event [ActivitySessionJoinedEvent]{@link ActivitySessionJoinedEvent}
+     * @event
      */
     SESSION_JOINED: ActivitySessionJoinedEvent.EVENT_NAME,
 
     /**
      * Fired when a remote session leaves the activity. The resulting event will
-     * be an instance of the {@link ActivitySessionLeftEvent} class.
+     * be an [[ActivitySessionLeftEvent]].
      *
-     * @event [SessionLeftEvent]{@link ActivitySessionLeftEvent}
+     * @event
      */
     SESSION_LEFT: ActivitySessionLeftEvent.EVENT_NAME,
 
     /**
      * Fired when a remote session sets state within the Activity. The resulting
-     * event will be an instance of the {@link ActivityStateSetEvent} class.
+     * event will be an [[ActivityStateSetEvent]].
      *
-     * @event [StateSetEvent]{@link ActivityStateSetEvent}
+     * @event
      */
     STATE_SET: ActivityStateSetEvent.EVENT_NAME,
 
     /**
      * Fired when a remote session clears state within the Activity. The resulting
-     * event will be an instance of the {@link ActivityStateClearedEvent} class.
+     * event will be an [[ActivityStateClearedEvent]].
      *
-     * @event [StateClearedEvent]{@link ActivityStateClearedEvent}
+     * @event
      */
     STATE_CLEARED: ActivityStateClearedEvent.EVENT_NAME,
 
     /**
      * Fired when a remote session clears state within the Activity. The resulting
-     * event will be an instance of the {@link ActivityStateRemovedEvent} class.
+     * event will be an [[ActivityStateRemovedEvent]].
      *
-     * @event [StateRemovedEvent]{@link ActivityStateRemovedEvent}
+     * @event
      */
     STATE_REMOVED: ActivityStateRemovedEvent.EVENT_NAME,
 
     /**
      * Fired when a remote session makes any changes to state within Activity. The
-     * resulting event will be an instance of the
-     * {@link ActivityStateDeltaEvent} class. This is a batch event whereas
-     * ActivityStateClearedEvent and ActivityStateSetEvent are fired for
-     * individual properties.
+     * resulting event will be a [[ActivityStateDeltaEvent]].
      *
-     * @event [StateRemovedEvent]{@link ActivityStateRemovedEvent}
+     * This is a batch event whereas [[ActivityStateClearedEvent]] and
+     * [[ActivityStateSetEvent]] are fired for individual properties.
+     *
+     * @event
      */
     STATE_DELTA: ActivityStateRemovedEvent.EVENT_NAME,
 
     /**
-     * Fired when a the activity is left by the local session.
+     * Fired when a the activity is left by the local session. The resulting event
+     * will be an [[ActivityLeftEvent]].
      *
-     * @event [LeftEvent]{@link ActivityLeftEvent}
+     * @event
      */
     LEFT: ActivityLeftEvent.EVENT_NAME
   };

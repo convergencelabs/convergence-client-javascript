@@ -43,6 +43,7 @@ export class RichTextElement extends RichTextNode {
   }
 
   public getChildByPath(path: RichTextPath): RichTextNode {
+    // tslint:disable-next-line: no-this-assignment
     let node: RichTextNode = this;
 
     path.forEach((val, index) => {
@@ -85,12 +86,7 @@ export class RichTextElement extends RichTextNode {
   public removeChild(index: number): void;
   public removeChild(child: RichTextNode): void;
   public removeChild(child: number | RichTextNode): void {
-    let index: number;
-    if (typeof child === "number") {
-      index = child;
-    } else {
-      index = this._children.indexOf(child);
-    }
+    let index: number = typeof child === "number" ? child : this._children.indexOf(child);
 
     if (index >= 0) {
       const removed = this._children.splice(index, 1);

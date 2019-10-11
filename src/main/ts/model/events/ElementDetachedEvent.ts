@@ -2,15 +2,16 @@ import {IConvergenceEvent} from "../../util";
 import {ObservableElement} from "../observable/ObservableElement";
 
 /**
- * Emitted when an element becomes detached.  This generally happens when the element
+ * Emitted when an element becomes detached.  This typically happens when the element
  * is removed from its parent.
+ *
+ * @category Real Time Data Subsystem
  */
 export class ElementDetachedEvent implements IConvergenceEvent {
   public static readonly NAME = "detached";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ElementDetachedEvent.NAME;
 
@@ -22,7 +23,7 @@ export class ElementDetachedEvent implements IConvergenceEvent {
    */
   constructor(
     /**
-     * A read-only representation of the [[RealTimeElement]] that was detached.
+     * The [[RealTimeElement]] or [[HistoricalElement]] that was detached.
      */
     public readonly src: ObservableElement<any>
   ) { }

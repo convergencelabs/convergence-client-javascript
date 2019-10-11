@@ -8,12 +8,17 @@ import {
 } from "../observable/ObservableString";
 import {HistoricalModel} from "./HistoricalModel";
 
+/**
+ * @category Real Time Data Subsystem
+ */
 export interface HistoricalStringEvents extends ObservableStringEvents {
 }
 
 /**
  * A read-only history-aware version of a [[RealTimeString]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
+ *
+ * @category Real Time Data Subsystem
  */
 export class HistoricalString extends HistoricalElement<string> implements ObservableString {
 

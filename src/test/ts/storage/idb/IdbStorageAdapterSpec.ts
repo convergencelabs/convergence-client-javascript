@@ -39,7 +39,7 @@ describe("IdbStorageAdapter", () => {
       // expect(() => adapter.dispose()).to.throw();
     });
 
-    it("throws if already disposed", async() => {
+    it("throws if already disposed", async () => {
       // const adapter = new IdbStorageAdapter();
       // await adapter.init("namespace", "domainId");
       // adapter.dispose();

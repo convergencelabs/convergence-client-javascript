@@ -7,6 +7,8 @@ import {UserField} from "./IdentityService";
  *
  * See the [developer guide](https://docs.convergence.io/guide/identity/overview.html)
  * for an example.
+ *
+ * @category Users and Identity
  */
 export declare interface UserQuery {
   /**

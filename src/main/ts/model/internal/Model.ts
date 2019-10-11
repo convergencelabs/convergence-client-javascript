@@ -90,3 +90,17 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
 }
 
 Object.freeze(Model.Events);
+
+/**
+ * @hidden
+ * @internal
+ */
+export enum ModelForcedCloseReasonCodes {
+  UNKNOWN = 0,
+  UNAUTHORIZED = 1,
+  DELETED = 2,
+  ERROR_APPLYING_OPERATION = 3,
+  INVALID_REFERENCE_EVENT = 4,
+  PERMISSION_ERROR = 5,
+  UNEXPECTED_COMMITTED_VERSION = 6
+}

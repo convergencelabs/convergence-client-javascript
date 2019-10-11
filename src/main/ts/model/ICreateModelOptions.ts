@@ -1,6 +1,12 @@
 import {ModelPermissions} from "./ModelPermissions";
 import {ModelDataInitializer} from "./ModelDataInitializer";
 
+/**
+ * The configuration available when creating a model with the
+ * [[ModelService.create]] or [[ModelService.openAutoCreate]] methods.
+ *
+ * @category Real Time Data Subsystem
+ */
 export interface ICreateModelOptions {
   /**
    * The collection in which this model will live.

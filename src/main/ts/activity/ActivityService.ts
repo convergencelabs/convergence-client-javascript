@@ -14,6 +14,11 @@ import {Logging} from "../util/log/Logging";
  * The [[ActivityService]] provides the main entry point into working with
  * Activities in Convergence. Activities provide a mechanism to communicate
  * `where` users are operating within a system and `what` they are doing.
+ *
+ * See the [developer guide](https://docs.convergence.io/guide/activities/overview.html)
+ * for an introduction to Activities.
+ *
+ * @category Collaboration Awareness
  */
 export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 

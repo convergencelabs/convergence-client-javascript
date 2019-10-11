@@ -8,13 +8,14 @@ import {IChatEvent} from "./IChatEvent";
  * listen for this event *outside* of the actual `ChatChannel`.
  *
  * Note that this is emitted from the [[ChatService]] as opposed to a [[Chat]].
+ *
+ * @category Chat Subsytem
  */
 export class ChatLeftEvent implements IChatEvent {
   public static readonly NAME = "left";
 
   /**
-   * The name of this event type.  This can be e.g. used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ChatLeftEvent.NAME;
 

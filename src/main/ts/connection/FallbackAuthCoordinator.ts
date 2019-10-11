@@ -2,6 +2,10 @@ import {Deferred} from "../util/Deferred";
 import {TypeChecker} from "../util/TypeChecker";
 import {IFallbackAuthChallenge} from "../IFallbackAuthChallenge";
 
+/**
+ * @hidden
+ * @internal
+ */
 export class FallbackAuthCoordinator {
   private _deferred: Deferred<void>;
 
