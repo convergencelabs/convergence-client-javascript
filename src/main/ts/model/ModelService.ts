@@ -19,6 +19,7 @@ import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {
+  getModelMessageResourceId,
   modelUserPermissionMapToProto,
   toIObjectValue,
   toModelPermissions,
@@ -37,6 +38,7 @@ import {IdentityCache} from "../identity/IdentityCache";
 import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
 import { Validation } from "../util/Validation";
+import { ModelDeletedEvent } from "./events/ModelDeletedEvent";
 
 /**
  * This is the main entry point in Convergence for working with
@@ -286,7 +288,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     };
 
     return this._connection.request(request).then(() => {
-      return;
+      const model = this._openModelsByModelId[id];
+      const deletedEvent: ModelDeletedEvent = {
+        src: model,
+        name: RealTimeModel.Events.DELETED,
+        local: true,
+      };
+      this._emitEvent(deletedEvent);
     });
   }
 
@@ -494,17 +502,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _handleMessage(messageEvent: MessageEvent): void {
     const message = messageEvent.message;
 
-    // todo this is a bit long winded, is there a more concise way?
-    const resourceId: string =
-      (message.remoteOperation && message.remoteOperation.resourceId) ||
-      (message.operationAck && message.operationAck.resourceId) ||
-      (message.remoteClientOpenedModel && message.remoteClientOpenedModel.resourceId) ||
-      (message.remoteClientClosedModel && message.remoteClientClosedModel.resourceId) ||
-      (message.referenceShared && message.referenceShared.resourceId) ||
-      (message.referenceUnshared && message.referenceUnshared.resourceId) ||
-      (message.referenceSet && message.referenceSet.resourceId) ||
-      (message.referenceCleared && message.referenceCleared.resourceId) ||
-      (message.modelReconnectComplete && message.modelReconnectComplete.resourceId);
+    const resourceId: string = getModelMessageResourceId(message);
 
     if (resourceId) {
       const model: RealTimeModel = this._openModelsByRid.get(resourceId);

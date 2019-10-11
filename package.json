@@ -52,7 +52,7 @@
     "@babel/preset-env": "7.5.4",
     "@babel/preset-typescript": "7.3.3",
     "@babel/register": "7.4.4",
-    "@convergence-internal/convergence-proto": "^1.0.0-SNAPSHOT",
+    "@convergence-internal/convergence-proto": "^1.0.0-SNAPSHOT.1570741296952",
     "@types/chai": "4.1.7",
     "@types/long": "4.0.0",
     "@types/mocha": "5.2.7",

@@ -26,6 +26,19 @@ import {ModelResult} from "./query";
 import IModelResult = io.convergence.proto.IModelResult;
 import {DomainUserId} from "../identity/DomainUserId";
 import IUserModelPermissionsEntry = io.convergence.proto.IUserModelPermissionsEntry;
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+
+import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
+import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
+import IRemoteReferenceSharedMessage = io.convergence.proto.IRemoteReferenceSharedMessage;
+import IRemoteReferenceUnsharedMessage = io.convergence.proto.IRemoteReferenceUnsharedMessage;
+import IRemoteReferenceSetMessage = io.convergence.proto.IRemoteReferenceSetMessage;
+import IRemoteReferenceClearedMessage = io.convergence.proto.IRemoteReferenceClearedMessage;
+import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
+import IRemoteClientOpenedMessage = io.convergence.proto.IRemoteClientOpenedMessage;
+import IRemoteClientClosedMessage = io.convergence.proto.IRemoteClientClosedMessage;
+import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsChangedMessage;
+import IModelReconnectCompleteMessage = io.convergence.proto.IModelReconnectCompleteMessage;
 
 /**
  * @hidden
@@ -176,4 +189,40 @@ export function protoToModelUserPermissionMap(perms: IUserModelPermissionsEntry[
     });
   }
   return map;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export function getModelMessageResourceId(message: IConvergenceMessage): string {
+  const modelMessage = toModelMessage(message);
+  return modelMessage ? modelMessage.resourceId : null;
+}
+
+type ModelMessage =
+  IModelForceCloseMessage |
+  IRemoteOperationMessage |
+  IRemoteReferenceSharedMessage |
+  IRemoteReferenceUnsharedMessage  |
+  IRemoteReferenceSetMessage |
+  IRemoteReferenceClearedMessage |
+  IOperationAcknowledgementMessage |
+  IRemoteClientOpenedMessage |
+  IRemoteClientClosedMessage |
+  IModelPermissionsChangedMessage |
+  IModelReconnectCompleteMessage;
+
+function toModelMessage(message: IConvergenceMessage): ModelMessage {
+  return message.forceCloseRealTimeModel ||
+    message.remoteOperation ||
+    message.referenceShared ||
+    message.referenceSet ||
+    message.referenceCleared ||
+    message.referenceUnshared ||
+    message.operationAck ||
+    message.remoteClientOpenedModel ||
+    message.remoteClientClosedModel ||
+    message.modelPermissionsChanged ||
+    message.modelReconnectComplete;
 }

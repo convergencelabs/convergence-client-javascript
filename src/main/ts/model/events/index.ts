@@ -26,6 +26,7 @@ export * from  "./StringSetValueEvent";
 export * from "./ElementDetachedEvent";
 export * from "./ModelChangedEvent";
 export * from "./ModelClosedEvent";
+export * from "./ModelDeletedEvent";
 export * from "./ModelPermissionsChangedEvent";
 export * from "./VersionChangedEvent";
 export * from "./ModelOnlineEvent";

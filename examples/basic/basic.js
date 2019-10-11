@@ -80,6 +80,13 @@ domain.connectAnonymously(DOMAIN_URL, options).then(d => {
 function bindToModel(realTimeModel) {
   model = realTimeModel;
 
+  model.on(Convergence.ModelDeletedEvent.NAME, function(event) {
+    console.log('model deleted', event.src.modelId(), 'remotely?', !event.local);
+  })
+  model.on(Convergence.ModelPermissionsChangedEvent.NAME, function (event) {
+    console.log('permissions changed', event.permissions, event.changed);
+  });
+
   const rtString = model.elementAt("string");
   bindToTextInput(stringInput, rtString);
 

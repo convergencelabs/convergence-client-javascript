@@ -17,7 +17,6 @@
 
   "verbose": true,
   "hideGenerator": true,
-  "json": "dist/docs/docs.json",
 
   "categoryOrder": [
     "Connection and Authentication",
@@ -26,5 +25,16 @@
     "Collaboration Awareness",
     "Presence Subsystem",
     "Chat Subsystem"
+  ],
+
+  "toc": [
+    "Convergence",
+    "ConvergenceDomain",
+    "ModelService",
+    "RealTimeModel",
+    "ActivityService",
+    "PresenceService",
+    "ChatService",
+    "IdentityService"
   ]
 }

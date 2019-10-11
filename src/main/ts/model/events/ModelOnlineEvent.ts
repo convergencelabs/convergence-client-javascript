@@ -12,8 +12,7 @@ export class ModelOnlineEvent implements IModelEvent {
   public static readonly NAME = "online";
 
   /**
-   * The name of this event type.  This can be used to filter when using the
-   * [[ConvergenceEventEmitter.events]] stream.
+   * @inheritdoc
    */
   public readonly name: string = ModelOnlineEvent.NAME;
 

@@ -3,7 +3,7 @@ import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
-import {Model} from "../internal/Model";
+import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
@@ -76,6 +76,7 @@ import {StorageEngine} from "../../storage/StorageEngine";
 import {IModelState} from "../../storage/api/IModelState";
 import { CollaboratorOpenedEvent } from "../events/CollaboratorOpenedEvent";
 import { CollaboratorClosedEvent } from "../events/CollaboratorClosedEvent";
+import { ModelDeletedEvent } from "../events/ModelDeletedEvent";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -90,7 +91,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    *
    * The actual event emitted is a [[ResyncStartedEvent]].
    *
-   * @event
+   * @event ResyncStartedEvent
    */
   readonly RESYNC_STARTED: string;
 
@@ -1046,6 +1047,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       reason: message.reason
     };
     this._close(event);
+
+    if (message.reasonCode === ModelForcedCloseReasonCodes.DELETED) {
+      const deletedEvent: ModelDeletedEvent = {
+        src: this,
+        name: RealTimeModel.Events.DELETED,
+        local: false,
+        reason: message.reason
+      };
+      this._emitEvent(deletedEvent);
+    }
   }
 
   /**
