@@ -19,15 +19,8 @@ export class StorageEngine {
     this._storage = storage;
   }
 
-  public createStore(namespace: string, domainId: string, username: string): Promise<void> {
-    return this._storage.createStore(namespace, domainId, username)
-      .then(key => {
-        this._storageKey = key;
-      });
-  }
-
-  public openStore(namespace: string, domainId: string, storageKey: string): Promise<void> {
-    return this._storage.openStore(namespace, domainId, storageKey);
+  public openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string> {
+    return this._storage.openStore(namespace, domainId, username, storageKey);
   }
 
   public storageKey(): string | null {

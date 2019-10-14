@@ -620,26 +620,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   private _init(username?: string): Promise<void> {
     if (this._options.storageAdapter) {
+      // FIXME do we need to make sure we are not an anonymous user here?
       this._storage.configure(this._options.storageAdapter);
-
-      // FIXME figure out how to create an offline key.
-
-      let storagePromise: Promise<void> = null;
-
-      if (this._options.offlineKey) {
-        storagePromise = this._storage.openStore(this._namespace, this._domainId, this._options.offlineKey);
-      } else {
-        // FIXME check for username.
-        if (TypeChecker.isNotSet(username)) {
-          storagePromise = Promise.reject();
-        } else {
-          storagePromise = this._storage.createStore(this._namespace, this._domainId, username);
-        }
-      }
-
-      return storagePromise.then(() => {
-        this._initialized = true;
-      });
+      return this._storage.openStore(this._namespace, this._domainId, this._options.offlineKey)
+        .then(() => {
+          this._initialized = true;
+        });
     } else {
       this._initialized = true;
       return Promise.resolve();

@@ -15,55 +15,55 @@ describe("IdbStorageAdapter", () => {
     });
   });
 
-  describe("init()", () => {
+  describe("openStore()", () => {
     it("throws if namespace is not defined", () => {
       const adapter = new IdbStorageAdapter();
-      // expect(() => adapter.createStore("", "domainId")).to.throw();
+      expect(() => adapter.openStore("", "domainId", "username")).to.throw();
     });
 
     it("throws if domainId is not defined", () => {
       const adapter = new IdbStorageAdapter();
-      // expect(() => adapter.init("namespace", "")).to.throw();
+      expect(() => adapter.openStore("namespace", "", "username")).to.throw();
     });
 
     it("isInitialized() returns true after init() called", async () => {
       const adapter = new IdbStorageAdapter();
-      // await adapter.init("namespace", "domainId");
-      // expect(adapter.isInitialized()).to.be.true;
+      await adapter.openStore("namespace", "domainId", "username");
+      expect(adapter.isInitialized()).to.be.true;
     });
   });
 
   describe("dispose()", () => {
     it("throws if not initialized", () => {
       const adapter = new IdbStorageAdapter();
-      // expect(() => adapter.dispose()).to.throw();
+      expect(() => adapter.dispose()).to.throw();
     });
 
     it("throws if already disposed", async () => {
-      // const adapter = new IdbStorageAdapter();
-      // await adapter.init("namespace", "domainId");
-      // adapter.dispose();
-      // expect(() => adapter.dispose()).to.throw;
+      const adapter = new IdbStorageAdapter();
+      await adapter.openStore("namespace", "domainId", "username");
+      adapter.dispose();
+      expect(() => adapter.dispose()).to.throw;
     });
 
     it("does not throw if initialized()", async () => {
-      // const adapter = new IdbStorageAdapter();
-      // await adapter.init("namespace", "domainId");
-      // adapter.dispose();
+      const adapter = new IdbStorageAdapter();
+      await adapter.openStore("namespace", "domainId", "username");
+      adapter.dispose();
     });
 
     it("isDisposed() returns true after dispose() called", async () => {
-      // const adapter = new IdbStorageAdapter();
-      // await adapter.init("namespace", "domainId");
-      // adapter.dispose();
-      // expect(adapter.isDisposed()).to.be.true;
+      const adapter = new IdbStorageAdapter();
+      await adapter.openStore("namespace", "domainId", "username");
+      adapter.dispose();
+      expect(adapter.isDisposed()).to.be.true;
     });
 
     it("isInitialized() returns false after dispose() called", async () => {
-      // const adapter = new IdbStorageAdapter();
-      // await adapter.init("namespace", "domainId");
-      // adapter.dispose();
-      // expect(adapter.isInitialized()).to.be.false;
+      const adapter = new IdbStorageAdapter();
+      await adapter.openStore("namespace", "domainId", "username");
+      adapter.dispose();
+      expect(adapter.isInitialized()).to.be.false;
     });
   });
 });

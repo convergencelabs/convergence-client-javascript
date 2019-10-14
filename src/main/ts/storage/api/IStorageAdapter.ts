@@ -6,9 +6,7 @@ import {IMetaStore} from "./IMetaStore";
  * @internal
  */
 export interface IStorageAdapter {
-  createStore(namespace: string, domainId: string, username: string): Promise<string>;
-
-  openStore(namespace: string, domainId: string, storageKey: string): Promise<void>;
+  openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string>;
 
   isInitialized(): boolean;
 

@@ -16,14 +16,44 @@ export class IdbStorageAdapter implements IStorageAdapter {
 
   private _modelStore: IdbModelStore;
   private _metaStore: IMetaStore;
+  private _storageKey: string;
 
-  public createStore(namespace: string, domainId: string, username: string): Promise<string> {
-    // todo generate key
-    return Promise.reject();
-  }
+  public openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string> {
+    if (!namespace) {
+      throw new Error("namespace must be a non-empty string");
+    }
 
-  public openStore(namespace: string, domainId: string, storageKey: string): Promise<void> {
-    return this._openDatabase(namespace, domainId, storageKey);
+    if (!domainId) {
+      throw new Error("domain must be a non-empty string");
+    }
+
+    if (!username) {
+      throw new Error("username must be a non-empty string");
+    }
+
+    const dbName = `${IdbStorageAdapter._DATABASE_NAME}:${namespace}/${domainId}/${username}`;
+    const openRequest = indexedDB.open(dbName, IdbStorageAdapter._VERSION);
+    let exists = true;
+    openRequest.onupgradeneeded = () => {
+      const db = openRequest.result;
+      const version = openRequest.result.version;
+      exists = version === 1;
+      IdbSchemaManager.upgrade(db, version);
+    };
+
+    if (!exists) {
+      // fixme make random string?
+      this._storageKey = "some key that needs to be generate";
+    } else {
+      this._storageKey = storageKey;
+    }
+
+    return toPromise(openRequest).then((db: IDBDatabase) => {
+      this._db = db;
+      this._modelStore = new IdbModelStore(this._db);
+      this._metaStore = new IdbMetaStore(this._db);
+      return this._storageKey;
+    });
   }
 
   public isInitialized(): boolean {
@@ -60,34 +90,5 @@ export class IdbStorageAdapter implements IStorageAdapter {
 
   public isDisposed(): boolean {
     return this._disposed;
-  }
-
-  private _openDatabase(namespace: string, domainId: string, key: string): Promise<void> {
-    if (!namespace) {
-      throw new Error("namespace must be a non-empty string");
-    }
-
-    if (!domainId) {
-      throw new Error("domain must be a non-empty string");
-    }
-
-    if (!key) {
-      throw new Error("key must be a non-empty string");
-    }
-
-    const dbName = `${IdbStorageAdapter._DATABASE_NAME}:${namespace}/${domainId}/${key}`;
-    const openRequest = indexedDB.open(dbName, IdbStorageAdapter._VERSION);
-    openRequest.onupgradeneeded = () => {
-      const db = openRequest.result;
-      const version = openRequest.result.version;
-      IdbSchemaManager.upgrade(db, version);
-    };
-
-    return toPromise(openRequest).then((db: IDBDatabase) => {
-      this._db = db;
-      this._modelStore = new IdbModelStore(this._db);
-      this._metaStore = new IdbMetaStore(this._db);
-      return;
-    });
   }
 }
