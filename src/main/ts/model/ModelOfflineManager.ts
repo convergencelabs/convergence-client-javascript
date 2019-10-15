@@ -59,7 +59,7 @@ export class ModelOfflineManager {
     return this._storage.modelStore();
   }
 
-  public getOfflineModelData(modelId: string): Promise<IModelState> {
+  public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
     return this._storage
       .modelStore()
       .getModel(modelId);

@@ -16,7 +16,7 @@ export interface IModelStore {
 
   putModel(model: IModelState): Promise<void>;
 
-  getModel(modelId: string): Promise<IModelState>;
+  getModel(modelId: string): Promise<IModelState | undefined>;
 
   modelExists(modelId: string): Promise<boolean>;
 

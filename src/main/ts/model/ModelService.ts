@@ -74,7 +74,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private _autoCreateRequests: { [key: number]: IAutoCreateModelOptions } = {};
+  private readonly _autoCreateRequests: Map<number, IAutoCreateModelOptions>;
 
   /**
    * @internal
@@ -103,6 +103,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       .messages()
       .subscribe(message => this._handleMessage(message));
     this._autoRequestId = 0;
+    this._autoCreateRequests = new Map();
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
@@ -430,7 +431,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     const autoRequestId: number = options ? this._autoRequestId++ : undefined;
     if (options !== undefined) {
-      this._autoCreateRequests[autoRequestId] = options;
+      this._autoCreateRequests.set(autoRequestId, options);
     }
 
     const deferred: Deferred<RealTimeModel> = new Deferred<RealTimeModel>();
@@ -441,6 +442,45 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openRequestsByModelId.set(id, deferred);
     }
 
+    const open = this._connection.isOnline() ?
+      this._openOnline(id, autoRequestId) :
+      this._openOffline(id, autoRequestId);
+
+    open
+      .then(model => {
+        // Todo this code id duplicated
+        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+          this._openRequestsByModelId.delete(id);
+        }
+
+        if (autoRequestId !== undefined) {
+          this._autoCreateRequests.delete(autoRequestId);
+        }
+
+        this._openModelsByModelId.set(model.modelId(), model);
+      })
+      .catch((error: Error) => {
+        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+          this._openRequestsByModelId.delete(id);
+        }
+
+        if (autoRequestId !== undefined) {
+          this._autoCreateRequests.delete(autoRequestId);
+        }
+
+        return Promise.reject(error);
+      });
+
+    deferred.resolveFromPromise(open);
+
+    return deferred.promise();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     const request: IConvergenceMessage = {
       openRealTimeModelRequest: {
         modelId: toOptional(id),
@@ -448,16 +488,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     };
 
-    this._connection.request(request)
+    return this._connection.request(request)
       .then((response: IConvergenceMessage) => {
-        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-          this._openRequestsByModelId.delete(id);
-        }
-
-        if (autoRequestId !== undefined) {
-          delete this._autoCreateRequests[autoRequestId];
-        }
-
         const {openRealTimeModelResponse} = response;
 
         const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
@@ -487,26 +519,36 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           this._modelOfflineManager
         );
 
-        this._openModelsByModelId.set(openRealTimeModelResponse.modelId, model);
         this._openModelsByRid.set(openRealTimeModelResponse.resourceId, model);
-
-        deferred.resolve(model);
-        return;
-      })
-      .catch((error: Error) => {
-        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-          this._openRequestsByModelId.delete(id);
-        }
-
-        if (autoRequestId !== undefined) {
-          delete this._autoCreateRequests[autoRequestId];
-        }
-
-        deferred.reject(error);
-        return;
+        return model;
       });
+  }
 
-    return deferred.promise();
+  private _openOffline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
+    if (TypeChecker.isUndefined(id)) {
+      // todo we could generate an uuid just like the server.
+      return Promise.reject(new Error("can not open an offline model without an id"));
+    } else {
+      this._modelOfflineManager
+        .getOfflineModelData(id)
+        .then(modelState => {
+          if (!TypeChecker.isUndefined(modelState)) {
+            // TODO load  the model from this data.
+            //  1. Probably need to initialize the data using the initial state.
+            //  2. Then play server ops.
+            //  3. Then play local ops.
+            return Promise.reject(new Error("Model not available offline"));
+          } else if (this._autoCreateRequests.has(autoRequestId)) {
+            const options = this._autoCreateRequests.get(autoRequestId);
+            const data: any = this._getDataFromAutoCreate(options);
+
+            // TODO create model from data.
+            return Promise.reject(new Error("Model not available offline"));
+          } else {
+            return Promise.reject(new Error("Model not available offline"));
+          }
+        });
+    }
   }
 
   /**
@@ -538,23 +580,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private _handleModelDataRequest(request: IAutoCreateModelConfigRequestMessage, replyCallback: ReplyCallback): void {
     const autoCreateId = request.autoCreateId || 0;
-    const options: IAutoCreateModelOptions = this._autoCreateRequests[autoCreateId];
-    if (options === undefined) {
+
+    if (!this._autoCreateRequests.has(autoCreateId)) {
       const message = `Received a request for an auto create id that was not expected: ${autoCreateId}`;
       console.error(message);
       replyCallback.expectedError("unknown_model", message);
     } else {
-      delete this._autoCreateRequests[autoCreateId];
+      const options: IAutoCreateModelOptions = this._autoCreateRequests.get(autoCreateId);
+      this._autoCreateRequests.delete(autoCreateId);
 
-      let data: ModelDataInitializer = options.data;
-      if (TypeChecker.isFunction(data)) {
-        data = (data as ModelDataCallback)();
-      } else if (TypeChecker.isUndefined(data) || TypeChecker.isNull(data)) {
-        data = {};
-      }
-
-      // This makes sure that what we have is actually an object now.
-      data = {...data};
+      const data: any = this._getDataFromAutoCreate(options);
 
       let dataValue: ObjectValue;
       if (data !== undefined) {
@@ -578,6 +613,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       };
       replyCallback.reply(response);
     }
+  }
+
+  private _getDataFromAutoCreate(options: IAutoCreateModelOptions): any {
+    let data: ModelDataInitializer = options.data;
+    if (TypeChecker.isFunction(data)) {
+      data = (data as ModelDataCallback)();
+    } else if (TypeChecker.isNotSet(data)) {
+      data = {};
+    }
+
+    // This makes sure that what we have is actually an object now.
+    data = {...data};
+
+    return data;
   }
 
   /**

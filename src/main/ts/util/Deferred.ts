@@ -45,6 +45,10 @@ export class Deferred<R> {
     this._reject(error);
   }
 
+  public resolveFromPromise(p: Promise<R>): void {
+    p.then((r: R) => this.resolve(r)).catch((e: Error) => this.reject(e));
+  }
+
   public promise(): Promise<R> {
     return this._promise;
   }
