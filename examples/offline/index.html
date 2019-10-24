@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Convergence - Basic (offline)</title>
+  <link rel="stylesheet" href="offline.css"/>
+  <script src="../config.js"></script>
+  <script src="../../node_modules/rxjs/bundles/rxjs.umd.js"></script>
+  <script src="../../dist-internal/convergence.global.js"></script>
+  <script src="../common/binding-helpers.js"></script>
+</head>
+<body>
+
+<h2>Basic Real Time Data Example</h2>
+<div class="directions">
+  Copy the url in the address bar and paste it in another browser window to test collaboration.
+</div>
+
+<div class="connection">
+  <span>Connection Status: </span>
+  <span id="connectionStatus"></span><br/>
+  <button id="disconnect" onclick="disconnect()">Disconnect</button>
+  <button id="connect" onclick="connect()">Connect</button>
+</div>
+
+<div class="dt">
+  <label>String</label>
+  <textarea class="string" id="stringVal"></textarea>
+</div>
+<div class="dt">
+  <label>Boolean</label>
+  <input type="checkbox" id="booleanVal">
+</div>
+<div class="dt">
+  <label>Number</label>
+  <input type="number" id="numberVal">
+  <button onclick="numberIncrement()">Increment</button><button onclick="numberDecrement()">Decrement</button>
+</div>
+<div class="dt">
+  <label>Array</label>
+  <select size="10" id="arrayVal">
+  </select>
+  <div>
+    <button id="arrayRemoveButton">Remove Item</button>
+  </div>
+  <div>
+    <button id="arrayAddButton">Add Item</button>
+    Value: <input id="arrayAddValue" type="text"/>
+  </div>
+  <div>
+    <button id="arraySetButton">Set Value</button>
+    Value: <input id="arraySetValue" type="text"/>
+  </div>
+  <div>
+    <button id="arrayReorderButton">Reorder</button>
+    Value: <input id="arrayReorderValue" type="number"/>
+  </div>
+</div>
+<div class="dt">
+  <label>Object</label>
+  <table id="objectVal">
+    <thead>
+    <th>Property</th>
+    <th>Value</th>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  <div>
+    <button id="objectRemoveButton">Remove Property</button>
+    Property: <input id="objectRemoveProp" type="text"/>
+  </div>
+  <div>
+    <button id="objectSetButton">Set Property</button>
+    Property: <input id="objectSetProp" type="text"/>
+    Value: <input id="objectSetValue" type="text"/>
+  </div>
+  <div>
+    <button id="objectRenameButton">Rename Property (Compound)</button>
+    Old Property: <input id="objectRenameOldProp" type="text"/>
+    New Property: <input id="objectRenameNewProp" type="text"/>
+  </div>
+</div>
+<div class="dt">
+  <label>Date</label>
+  <div>
+    <button onclick="setDate()">Set Date To Now</button>
+    Date: <input id="currentDate" type="text" disabled="disabled"/>
+  </div>
+</div>
+<script src="offline.js"></script>
+</body>
+</html>
