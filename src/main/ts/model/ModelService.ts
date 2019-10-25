@@ -43,13 +43,49 @@ import {ModelOfflineManager} from "./ModelOfflineManager";
 import {ModelDeletedEvent} from "./events/ModelDeletedEvent";
 
 /**
+ * The complete list of events that could be emitted by the [[ModelService]].
+ *
+ * @category Real Time Data Subsystem
+ */
+export interface ModelServiceEvents {
+  /**
+   * Emitted when a model is deleted. The actual event emitted is a [[ModelDeletedEvent]].
+   *
+   * @event
+   */
+  readonly MODEL_DELETED: string;
+}
+
+/**
+ * @category Real Time Data Subsystem
+ */
+export const ModelServiceEventConstants: ModelServiceEvents = {
+  MODEL_DELETED: "deleted",
+};
+Object.freeze(ModelServiceEventConstants);
+
+/**
  * This is the main entry point in Convergence for working with
  * [real time data models](https://docs.convergence.io/guide/models/overview.html).
- * Models can be created, opened, deleted, and managed from the [[ModelService]].
+ * [[RealTimeModel]]s can be created, opened, deleted, and managed from the [[ModelService]].
+ *
+ * See [[ModelServiceEvents]] for the events that may be emitted on this model.
  *
  * @category Real Time Data Subsystem
  */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
+
+ /**
+  * A mapping of the events this model could emit to each event's unique name.
+  * Use this to refer an event name:
+  *
+  * ```typescript
+  * modelService.on(ModelService.Events.MODEL_DELETED, function listener(e) {
+  *   // ...
+  * })
+  * ```
+  */
+  public static readonly Events: ModelServiceEvents = ModelServiceEventConstants;
 
   /**
    * @internal
