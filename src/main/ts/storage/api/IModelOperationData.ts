@@ -1,11 +1,9 @@
 import {DataValue} from "../../model/dataValue";
 
-/**
- * @hidden
- * @internal
- */
-export interface IServerOperationData {
+export interface IOfflineOperationData {
+  type: "server" | "local";
   modelId: string;
+  sessionId: string;
   version: number;
   timestamp: Date;
   operation: IModelOperationData;
@@ -15,9 +13,23 @@ export interface IServerOperationData {
  * @hidden
  * @internal
  */
-export interface ILocalOperationData {
+export interface IServerOperationData extends IOfflineOperationData {
+  type: "server";
   modelId: string;
-  contextVersion: number;
+  sessionId: string;
+  version: number;
+  timestamp: Date;
+  operation: IModelOperationData;
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+export interface ILocalOperationData extends IOfflineOperationData {
+  type: "local";
+  modelId: string;
+  version: number;
   sequenceNumber: number;
   timestamp: Date;
   operation: IModelOperationData;

@@ -84,6 +84,7 @@ domain.models().openAutoCreate({
   const url = baseURL + "?modelId=" + modelId;
   window.history.pushState(modelId, modelId, url);
   bindToModel(model);
+  model.permissionsManager().setWorldPermissions({read: false, write: false, remove: false, manage: false})
 });
 
 // Set up all the events on all the models.

@@ -1,4 +1,5 @@
 import {ObjectValue} from "../../model/dataValue";
+import {ModelPermissions} from "../../model";
 
 /**
  * @hidden
@@ -10,5 +11,6 @@ export interface IModelData {
   version: number;
   createdTime: Date;
   modifiedTime: Date;
+  permissions: ModelPermissions;
   data: ObjectValue;
 }

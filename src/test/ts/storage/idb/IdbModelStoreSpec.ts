@@ -1,4 +1,4 @@
-import {IdbStorageAdapter} from "../../../../main/ts/storage/idb/IdbStorageAdapter";
+import {IdbStorageAdapter} from "../../../../main/ts/storage/idb/";
 import {IModelState} from "../../../../main/ts/storage/api/IModelState";
 
 import {expect} from "chai";
@@ -58,7 +58,8 @@ const modelState: IModelState = {
       type: "object",
       id: "1:0",
       children: {}
-    }
+    },
+    permissions: {read: true, write: true, remove: true, manage: true}
   },
   localOperations: [],
   serverOperations: []

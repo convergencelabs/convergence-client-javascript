@@ -40,7 +40,10 @@ import {PagedData} from "../util/PagedData";
 import {Validation} from "../util/Validation";
 import {StorageEngine} from "../storage/StorageEngine";
 import {ModelOfflineManager} from "./ModelOfflineManager";
-import {ModelDeletedEvent} from "./events/ModelDeletedEvent";
+import {ModelDeletedEvent} from "./events/";
+import {ModelPermissions} from "./ModelPermissions";
+import IReferenceData = io.convergence.proto.IReferenceData;
+import {IModelState} from "../storage/api/IModelState";
 
 /**
  * This is the main entry point in Convergence for working with
@@ -524,6 +527,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       });
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _openOffline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isUndefined(id)) {
       // todo we could generate an uuid just like the server.
@@ -533,22 +540,110 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         .getOfflineModelData(id)
         .then(modelState => {
           if (!TypeChecker.isUndefined(modelState)) {
-            // TODO load  the model from this data.
-            //  1. Probably need to initialize the data using the initial state.
-            //  2. Then play server ops.
-            //  3. Then play local ops.
-            return Promise.reject(new Error("Model not available offline"));
+            const model = this._creteModelFromOfflineState(modelState);
+            return Promise.resolve(model);
           } else if (this._autoCreateRequests.has(autoRequestId)) {
             const options = this._autoCreateRequests.get(autoRequestId);
-            const data: any = this._getDataFromAutoCreate(options);
-
-            // TODO create model from data.
-            return Promise.reject(new Error("Model not available offline"));
+            const model = this._createNewModelOffline(id, options);
+            return Promise.resolve(model);
           } else {
-            return Promise.reject(new Error("Model not available offline"));
+            return Promise.reject(new Error("Model not available offline, and not auto create options were provided"));
           }
         });
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _creteModelFromOfflineState(state: IModelState): RealTimeModel {
+    // FIXME what should these be?
+    const resourceId = "fake";
+    const valueIdPrefix = "fake2";
+
+    const model = this._createModel(
+      resourceId,
+      state.model.id,
+      state.model.collection,
+      state.model.version,
+      state.model.createdTime,
+      state.model.modifiedTime,
+      valueIdPrefix, [],
+      [],
+      state.model.permissions,
+      state.model.data
+    );
+
+    model._rehydrateFromOfflineState(state.serverOperations, state.localOperations);
+
+    return model;
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _createNewModelOffline(id: string, options: IAutoCreateModelOptions): RealTimeModel {
+    const dataValue = this._getDataFromAutoCreate(options);
+
+    // FIXME what should these be?
+    const resourceId = "fake";
+    const valueIdPrefix = "fake2";
+    const currentTime = new Date();
+    const permissions = new ModelPermissions(true, true, true, true);
+
+    return this._createModel(
+      resourceId,
+      id,
+      options.collection,
+      0,
+      currentTime,
+      currentTime,
+      valueIdPrefix, [],
+      [],
+      permissions,
+      dataValue
+    );
+  }
+
+  private _createModel(
+    resourceId: string,
+    modelId: string,
+    collection: string,
+    version: number,
+    createdTime: Date,
+    modifiedTime: Date,
+    valueIdPrefix: string,
+    connectedClients: string[],
+    references: IReferenceData[],
+    permissions: ModelPermissions,
+    data: ObjectValue): RealTimeModel {
+
+    const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
+    const referenceTransformer: ReferenceTransformer =
+      new ReferenceTransformer(new TransformationFunctionRegistry());
+    const clientConcurrencyControl: ClientConcurrencyControl =
+      new ClientConcurrencyControl(version, transformer, referenceTransformer);
+
+    return new RealTimeModel(
+      resourceId,
+      valueIdPrefix,
+      data,
+      connectedClients,
+      references,
+      permissions,
+      version,
+      createdTime,
+      modifiedTime,
+      modelId,
+      collection,
+      clientConcurrencyControl,
+      this._connection,
+      this._identityCache,
+      this,
+      this._modelOfflineManager
+    );
   }
 
   /**
@@ -589,16 +684,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const options: IAutoCreateModelOptions = this._autoCreateRequests.get(autoCreateId);
       this._autoCreateRequests.delete(autoCreateId);
 
-      const data: any = this._getDataFromAutoCreate(options);
-
-      let dataValue: ObjectValue;
-      if (data !== undefined) {
-        const idGen: InitialIdGenerator = new InitialIdGenerator();
-        const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-          return idGen.id();
-        });
-        dataValue = dataValueFactory.createDataValue(data) as ObjectValue;
-      }
+      const dataValue: ObjectValue = this._getDataFromAutoCreate(options);
 
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
       const response: IConvergenceMessage = {
@@ -615,7 +701,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
   }
 
-  private _getDataFromAutoCreate(options: IAutoCreateModelOptions): any {
+  private _getDataFromAutoCreate(options: IAutoCreateModelOptions): ObjectValue {
     let data: ModelDataInitializer = options.data;
     if (TypeChecker.isFunction(data)) {
       data = (data as ModelDataCallback)();
@@ -626,7 +712,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // This makes sure that what we have is actually an object now.
     data = {...data};
 
-    return data;
+    const idGen: InitialIdGenerator = new InitialIdGenerator();
+    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
+      return idGen.id();
+    });
+    return dataValueFactory.createDataValue(data) as ObjectValue;
   }
 
   /**

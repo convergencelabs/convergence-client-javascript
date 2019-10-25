@@ -75,7 +75,7 @@ import {Logging} from "../../util/log/Logging";
 import {IModelState} from "../../storage/api/IModelState";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {ILocalOperationData, IServerOperationData} from "../../storage/api";
-import {toOfflineOperationData} from "../../storage/OfflineOperationMapper";
+import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
 import {CollaboratorOpenedEvent} from "../events/CollaboratorOpenedEvent";
 import {CollaboratorClosedEvent} from "../events/CollaboratorClosedEvent";
 import {ModelDeletedEvent} from "../events/ModelDeletedEvent";
@@ -465,7 +465,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         version: this.version(),
         createdTime: this._createdTime,
         modifiedTime: this.maxTime(),
-        data: this._model.root().dataValue()
+        data: this._model.root().dataValue(),
+        permissions: this._permissions
       },
       localOperations: [],
       serverOperations: []
@@ -819,6 +820,27 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
+  public _rehydrateFromOfflineState(serverOps: IServerOperationData[], localOps: ILocalOperationData[]): void {
+    // Server ops come contextually before local operations.
+    serverOps.forEach(serverOp => {
+      const op = fromOfflineOperationData(serverOp.operation);
+
+      const unprocessed = new ServerOperationEvent(
+        serverOp.sessionId,
+        serverOp.version,
+        serverOp.timestamp,
+        op
+      );
+
+      this._processServerOperationEvent(unprocessed);
+    });
+  }
+
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _getRegisteredValue(id: string): RealTimeElement<any> {
     return this._wrapperFactory.wrap(this._model._getRegisteredValue(id));
   }
@@ -1104,22 +1126,25 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
     const version = getOrDefaultNumber(message.version);
     const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
-    const ackedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
+    const acknowledgedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
     this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
 
     if (this._offlineManager.isOfflineEnabled()) {
-      const operation = toOfflineOperationData(ackedOperation.operation);
+      const operation = toOfflineOperationData(acknowledgedOperation.operation);
 
       const serverOp: IServerOperationData = {
+        type: "server",
         modelId: this._modelId,
+        sessionId: this._connection.session().sessionId(),
         version,
         timestamp: this._time,
         operation
       };
 
       // fixme handle error.
-      this._offlineManager.processOperationAck(this.modelId(), sequenceNumber, serverOp)
+      this._offlineManager
+        .processOperationAck(this.modelId(), sequenceNumber, serverOp)
         .catch(e => console.error(e));
     }
   }
@@ -1161,6 +1186,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       toOperation(message.operation)
     );
 
+    this._processServerOperationEvent(unprocessed);
+  }
+
+  private _processServerOperationEvent(unprocessed: ServerOperationEvent): void {
     this._concurrencyControl.processRemoteOperation(unprocessed);
     const processed: ServerOperationEvent = this._concurrencyControl.getNextIncomingOperation();
 
@@ -1169,7 +1198,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const contextVersion: number = processed.version;
     const timestamp: Date = processed.timestamp;
 
-    const user = this._identityCache.getUserForSession(message.sessionId);
+    const user = this._identityCache.getUserForSession(unprocessed.clientId);
     this._version = contextVersion + 1;
     this._time = new Date(timestamp);
 
@@ -1194,7 +1223,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     if (this._offlineManager.isOfflineEnabled()) {
       const opData = toOfflineOperationData(operation);
       const serverOp: IServerOperationData = {
+        type: "server",
         modelId: this._modelId,
+        sessionId: processed.clientId,
         version: processed.version,
         timestamp: processed.timestamp,
         operation: opData
@@ -1258,9 +1289,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     if (this._offlineManager.isOfflineEnabled()) {
       const opData = toOfflineOperationData(opEvent.operation);
       const localOp: ILocalOperationData = {
+        type: "local",
+        sessionId: this._connection.session().sessionId(),
         modelId: this._modelId,
         sequenceNumber: opEvent.seqNo,
-        contextVersion: this._version,
+        version: this._version,
         timestamp: opEvent.timestamp,
         operation: opData
       };
