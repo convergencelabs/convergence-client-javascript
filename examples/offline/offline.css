@@ -1,0 +1,32 @@
+div.connection {
+  margin-bottom: 20px;
+}
+
+div.directions {
+  margin-bottom: 20px;
+  border-bottom: 1px solid darkblue;
+}
+
+div.dt {
+  margin-bottom: 15px;
+}
+
+div.dt label {
+  display: block;
+  font-weight: bold;
+}
+
+textarea.string {
+  height: 100px;
+  width: 300px;
+}
+
+select#arrayVal {
+  width: 300px;
+}
+
+#objectVal {
+  width: 300px;
+  border: 1px solid black;
+  margin-bottom: 15px;
+}
