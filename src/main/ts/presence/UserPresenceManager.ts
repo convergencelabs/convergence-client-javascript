@@ -32,7 +32,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
   /**
    * @internal
    */
-  private readonly _messageSubscription: Subscription;
+  private _messageSubscription: Subscription;
 
   /**
    * @internal
@@ -61,7 +61,7 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
 
     this._subscriptions = [];
     this._onUnsubscribe = onUnsubscribe;
-    this._messageSubscription = eventStream.subscribe(message => this._handleMessage(message));
+    this._setStream(eventStream);
     this._subject = new BehaviorSubject(this._presence);
   }
 
@@ -169,6 +169,17 @@ export class UserPresenceManager extends ConvergenceEventEmitter<any> {
     this.set(newPresence.state);
 
     this._subject.next(newPresence);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  public _setStream(stream: Observable<MessageEvent>): void {
+    if (this._messageSubscription) {
+      this._messageSubscription.unsubscribe();
+    }
+    this._messageSubscription = stream.subscribe(message => this._handleMessage(message));
   }
 
   /**

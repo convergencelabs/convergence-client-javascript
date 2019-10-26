@@ -3,11 +3,13 @@ import {IModelState} from "../../../../main/ts/storage/api/IModelState";
 
 import {expect} from "chai";
 import "fake-indexeddb/auto";
+import {Immutable} from "../../../../main/ts/util/Immutable";
 
 describe("IdbModelStore", () => {
   describe("modelExists()", () => {
     it("returns false for a model that does not exist", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
+        const modelState = createModelState();
         const exists = await modelStore.modelExists(modelState.model.id);
         expect(exists).to.be.false;
       })
@@ -15,6 +17,7 @@ describe("IdbModelStore", () => {
 
     it("returns true for a model that does not exist", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
+        const modelState = createModelState();
         await modelStore.putModel(modelState);
         const exists = await modelStore.modelExists(modelState.model.id);
         expect(exists).to.be.true;
@@ -25,6 +28,7 @@ describe("IdbModelStore", () => {
   describe("putModel()", () => {
     it("stores the correct model", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
+        const modelState = createModelState();
         await modelStore.putModel(modelState);
         const retrieved = await modelStore.getModel(modelState.model.id);
         expect(retrieved).to.deep.equal(modelState);
@@ -35,6 +39,7 @@ describe("IdbModelStore", () => {
   describe("deleteModel()", () => {
     it("deletes and existing model ", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
+        const modelState = createModelState();
         await modelStore.putModel(modelState);
         const exists = await modelStore.modelExists(modelState.model.id);
         expect(exists).to.be.true;
@@ -47,28 +52,34 @@ describe("IdbModelStore", () => {
   });
 });
 
-const modelState: IModelState = {
-  model: {
-    id: "modelId",
-    collection: "collection",
-    version: 10,
-    createdTime: new Date(),
-    modifiedTime: new Date(),
-    data: {
-      type: "object",
-      id: "1:0",
-      children: {}
+let modelCounter = 1;
+
+function createModelState(): IModelState {
+  return {
+    model: {
+      sessionId: "boo",
+      id: "modelId" + modelCounter++,
+      collection: "collection",
+      version: 10,
+      createdTime: new Date(),
+      modifiedTime: new Date(),
+      data: {
+        type: "object",
+        id: "1:0",
+        children: {}
+      },
+      permissions: {read: true, write: true, remove: true, manage: true}
     },
-    permissions: {read: true, write: true, remove: true, manage: true}
-  },
-  localOperations: [],
-  serverOperations: []
-};
+    localOperations: [],
+    serverOperations: []
+  };
+}
+
 let counter = 1;
 
 function withStorage(body: (IdbStorageAdapter) => Promise<any>): Promise<any> {
   const adapter = new IdbStorageAdapter();
-  return adapter.openStore("namespace", "domain" + counter++, "")
+  return adapter.openStore("namespace", "domain" + counter++, "someuser")
     .then(() => body(adapter))
     .then(() => {
       adapter.destroy();

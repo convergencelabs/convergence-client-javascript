@@ -78,16 +78,16 @@ Object.freeze(ModelServiceEventConstants);
  */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
- /**
-  * A mapping of the events this model could emit to each event's unique name.
-  * Use this to refer an event name:
-  *
-  * ```typescript
-  * modelService.on(ModelService.Events.MODEL_DELETED, function listener(e) {
-  *   // ...
-  * })
-  * ```
-  */
+  /**
+   * A mapping of the events this model could emit to each event's unique name.
+   * Use this to refer an event name:
+   *
+   * ```typescript
+   * modelService.on(ModelService.Events.MODEL_DELETED, function listener(e) {
+   *   // ...
+   * })
+   * ```
+   */
   public static readonly Events: ModelServiceEvents = ModelServiceEventConstants;
 
   /**
@@ -485,30 +485,28 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openOnline(id, autoRequestId) :
       this._openOffline(id, autoRequestId);
 
-    open
-      .then(model => {
-        // Todo this code id duplicated
-        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-          this._openRequestsByModelId.delete(id);
-        }
+    open.then(model => {
+      // Todo this code id duplicated
+      if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+        this._openRequestsByModelId.delete(id);
+      }
 
-        if (autoRequestId !== undefined) {
-          this._autoCreateRequests.delete(autoRequestId);
-        }
+      if (autoRequestId !== undefined) {
+        this._autoCreateRequests.delete(autoRequestId);
+      }
 
-        this._openModelsByModelId.set(model.modelId(), model);
-      })
-      .catch((error: Error) => {
-        if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-          this._openRequestsByModelId.delete(id);
-        }
+      this._openModelsByModelId.set(model.modelId(), model);
+    }).catch((error: Error) => {
+      if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+        this._openRequestsByModelId.delete(id);
+      }
 
-        if (autoRequestId !== undefined) {
-          this._autoCreateRequests.delete(autoRequestId);
-        }
+      if (autoRequestId !== undefined) {
+        this._autoCreateRequests.delete(autoRequestId);
+      }
 
-        return Promise.reject(error);
-      });
+      return Promise.reject(error);
+    });
 
     deferred.resolveFromPromise(open);
 

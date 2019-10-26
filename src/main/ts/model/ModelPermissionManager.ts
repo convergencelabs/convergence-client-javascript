@@ -61,7 +61,7 @@ export class ModelPermissionManager {
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
-        overridesCollection: overrideCollection,
+        overrideCollection: { value: overrideCollection },
         removeAllUserPermissionsBeforeSet: false,
         setUserPermissions: [],
         removedUserPermissions: []
@@ -172,7 +172,6 @@ export class ModelPermissionManager {
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
-        overridesCollection: false,
         worldPermissions: null,
         setUserPermissions: [{user: domainUserIdToProto(userId), permissions}],
         removeAllUserPermissionsBeforeSet: false,

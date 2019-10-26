@@ -7,6 +7,7 @@ import {ModelPermissions} from "../../model";
  */
 export interface IModelData {
   id: string;
+  sessionId: string;
   collection: string;
   version: number;
   createdTime: Date;

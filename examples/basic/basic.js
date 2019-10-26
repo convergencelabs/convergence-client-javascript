@@ -17,29 +17,19 @@ const modelId = getParameterByName("modelId");
 
 Convergence.configureLogging({
   loggers: {
-    "protocol.messages": Convergence.LogLevel.DEBUG,
-    "storage": Convergence.LogLevel.DEBUG
+    "protocol.messages": Convergence.LogLevel.DEBUG
   }
 });
-
-const storage = new Convergence.IdbStorageAdapter();
 
 const options = {
   reconnect: {
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous();
     }
-  },
-  offline: {
-    storage: storage
   }
 };
 
 const domain = new Convergence.ConvergenceDomain(DOMAIN_URL, options);
-
-domain.connectAnonymously(DOMAIN_URL, options).then(d => {
-
-});
 
 domain.events().subscribe(e => {
   switch (e.name) {
@@ -55,43 +45,44 @@ domain.events().subscribe(e => {
   }
 });
 
-domain.models().openAutoCreate({
-  collection: "test",
-  id: modelId,
-  data: {
-    "string": "String data to edit",
-    "number": 10,
-    "boolean": true,
-    "array": [
-      "Apples",
-      "Bananas",
-      "Pears",
-      "Orange"
-    ],
-    "object": {
-      "key1": "value1",
-      "key2": "value2",
-      "key3": "value3",
-      "key4": "value4"
+domain.connectAnonymously(DOMAIN_URL, options).then(d => {
+  domain.models().openAutoCreate({
+    collection: "test",
+    id: modelId,
+    data: {
+      "string": "String data to edit",
+      "number": 10,
+      "boolean": true,
+      "array": [
+        "Apples",
+        "Bananas",
+        "Pears",
+        "Orange"
+      ],
+      "object": {
+        "key1": "value1",
+        "key2": "value2",
+        "key3": "value3",
+        "key4": "value4"
+      },
+      "date": new Date()
     },
-    "date": new Date()
-  },
-  overrideWorld: true,
-  worldPermissions: {read: true, write: true, remove: false, manage: false},
-  ephemeral: false
-}).then(function (model) {
-  const modelId = model.modelId();
-  const url = baseURL + "?modelId=" + modelId;
-  window.history.pushState(modelId, modelId, url);
-  bindToModel(model);
-  model.permissionsManager().setWorldPermissions({read: false, write: false, remove: false, manage: false})
+    overrideCollectionWorldPermissions: true,
+    worldPermissions: {read: true, write: true, remove: true, manage: true},
+    ephemeral: false
+  }).then(function (model) {
+    const modelId = model.modelId();
+    const url = baseURL + "?modelId=" + modelId;
+    window.history.pushState(modelId, modelId, url);
+    bindToModel(model);
+  });
 });
 
 // Set up all the events on all the models.
 function bindToModel(realTimeModel) {
   model = realTimeModel;
 
-  model.on(Convergence.ModelDeletedEvent.NAME, function(event) {
+  model.on(Convergence.ModelDeletedEvent.NAME, function (event) {
     console.log('model deleted', event.src.modelId(), 'remotely?', !event.local);
   })
   model.on(Convergence.ModelPermissionsChangedEvent.NAME, function (event) {

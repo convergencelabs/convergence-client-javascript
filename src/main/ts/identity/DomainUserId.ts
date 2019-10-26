@@ -46,6 +46,15 @@ export class DomainUserId {
   }
 
   /**
+   * Constructs a "anonymous" `DomainUserId` by username.
+   *
+   * @param username the anonymous unique users username.
+   */
+  public static anonymous(username: string): DomainUserId {
+    return new DomainUserId(DomainUserType.ANONYMOUS, username);
+  }
+
+  /**
    * Constructs a GUID from the given user type and username.
    *
    * Equivalent to `new DomainUserId(userType, username).toGuid()`
