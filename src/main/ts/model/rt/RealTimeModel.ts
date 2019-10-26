@@ -462,7 +462,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       model: {
         id: this._modelId,
         collection: this._collectionId,
-        sessionId: this._connection.session().sessionId(),
         version: this.version(),
         createdTime: this._createdTime,
         modifiedTime: this.maxTime(),

@@ -12,7 +12,7 @@ export interface IModelStore {
 
   setModelSubscriptions(modelIds: string[]): Promise<void>;
 
-  unsubscribeToModel(modelId: string): Promise<void>;
+  unsubscribeFromModel(modelId: string): Promise<void>;
 
   putModel(model: IModelState): Promise<void>;
 

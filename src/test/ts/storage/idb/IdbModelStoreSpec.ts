@@ -57,7 +57,6 @@ let modelCounter = 1;
 function createModelState(): IModelState {
   return {
     model: {
-      sessionId: "boo",
       id: "modelId" + modelCounter++,
       collection: "collection",
       version: 10,

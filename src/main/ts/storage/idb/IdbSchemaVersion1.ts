@@ -24,21 +24,11 @@ export class IdbSchemaVersion1 {
     //
     const modelStore = db.createObjectStore(
       IdbSchema.Model.Store,
-      {keyPath: [IdbSchema.Model.Fields.Id, IdbSchema.Model.Fields.SessionId]});
+      {keyPath: IdbSchema.Model.Fields.Id});
 
     modelStore.createIndex(
       IdbSchema.Model.Indices.Id,
       IdbSchema.Model.Fields.Id,
-      {unique: true});
-
-    modelStore.createIndex(
-      IdbSchema.Model.Indices.SessionId,
-      IdbSchema.Model.Fields.SessionId,
-      {unique: false});
-
-    modelStore.createIndex(
-      IdbSchema.Model.Indices.Id_SessionId,
-      [IdbSchema.Model.Fields.Id, IdbSchema.Model.Fields.SessionId],
       {unique: true});
 
     //

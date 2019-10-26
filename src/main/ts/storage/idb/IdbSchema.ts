@@ -25,13 +25,10 @@ export const IdbSchema = {
   Model: {
     Store: "Model",
     Fields: {
-      Id: "id",
-      SessionId: "sessionId",
+      Id: "id"
     },
     Indices: {
-      Id: "Model.id",
-      SessionId: "Model.SessionId",
-      Id_SessionId: "Model.Id_SessionId",
+      Id: "Model.id"
     }
   },
   ModelServerOperation: {

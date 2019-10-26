@@ -48,7 +48,7 @@ export class ModelOfflineManager {
     } else {
       return this._storage
         .modelStore()
-        .unsubscribeToModel(modelId)
+        .unsubscribeFromModel(modelId)
         .then(() => {
           this._subscribedModels.add(modelId);
         });

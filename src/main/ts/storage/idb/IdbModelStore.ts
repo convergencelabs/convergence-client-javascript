@@ -102,7 +102,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public unsubscribeToModel(modelId: string): Promise<void> {
+  public unsubscribeFromModel(modelId: string): Promise<void> {
     const stores = [
       IdbSchema.Model.Store,
       IdbSchema.ModelLocalOperation.Store,
@@ -115,6 +115,15 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
       IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
       subStore.delete(modelId);
+    });
+  }
+
+  public deleteModel(modelId: string): Promise<void> {
+    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
+    return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
+      modelStore.delete(modelId);
+      IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
+      IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
     });
   }
 }
