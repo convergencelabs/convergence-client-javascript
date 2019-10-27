@@ -35,3 +35,6 @@ export * from "./ModelReconnectingEvent";
 export * from "./ResyncStartedEvent";
 export * from "./ResyncCompletedEvent";
 export * from "./RemoteReferenceCreatedEvent";
+
+export * from "./CollaboratorOpenedEvent";
+export * from "./CollaboratorClosedEvent";

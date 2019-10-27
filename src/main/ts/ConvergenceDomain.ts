@@ -618,7 +618,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     if (this._options.storageAdapter) {
       // FIXME do we need to make sure we are not an anonymous user here?
       this._storage.configure(this._options.storageAdapter);
-      return this._storage.openStore(this._namespace, this._domainId, this._options.offlineKey)
+      return this._storage.openStore(this._namespace, this._domainId, username, this._options.offlineKey)
         .then(() => {
           this._initialized = true;
         });

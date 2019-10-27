@@ -42,6 +42,10 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public modelExists(modelId: string): Promise<boolean> {
+    if (modelId === undefined || modelId === null) {
+      throw new Error("modelId must be defined");
+    }
+
     return this._withReadStore(IdbSchema.Model.Store, (store) => {
       const idx = store.index(IdbSchema.Model.Indices.Id);
       return toPromise(idx.count(modelId)).then((count => count > 0));
@@ -65,6 +69,10 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public getModel(modelId: string): Promise<IModelState | undefined> {
+    if (modelId === undefined || modelId === null) {
+      throw new Error("modelId must be defined");
+    }
+
     const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withReadStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       const model = await toPromise(modelStore.get(modelId));

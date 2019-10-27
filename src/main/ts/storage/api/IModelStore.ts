@@ -20,7 +20,7 @@ export interface IModelStore {
 
   modelExists(modelId: string): Promise<boolean>;
 
-  processServerOperation(serverOp: IServerOperationData): Promise<void>;
+  processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void>;
 
   processLocalOperation(localOp: ILocalOperationData): Promise<void>;
 

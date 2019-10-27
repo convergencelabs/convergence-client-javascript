@@ -44,6 +44,8 @@ import {ModelDeletedEvent} from "./events/";
 import {ModelPermissions} from "./ModelPermissions";
 import IReferenceData = io.convergence.proto.IReferenceData;
 import {IModelState} from "../storage/api/IModelState";
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -131,6 +133,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _modelOfflineManager: ModelOfflineManager;
 
   /**
+   * @internal
+   */
+  private readonly _log: Logger;
+
+  /**
    * @hidden
    * @internal
    */
@@ -151,8 +158,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._modelOfflineManager = new ModelOfflineManager(
       10 * 60 * 1000,
       100,
-      storageEngine
+      storageEngine,
+      this._connection.session().sessionId()
     );
+
+    this._log = Logging.logger("models");
   }
 
   /**
@@ -448,7 +458,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // todo validate options, specifically the model initializer.
 
-    if (id === undefined) {
+    if (TypeChecker.isNotSet(id)) {
       id = options.id;
     }
 
@@ -570,16 +580,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       // todo we could generate an uuid just like the server.
       return Promise.reject(new Error("can not open an offline model without an id"));
     } else {
-      this._modelOfflineManager
+      return this._modelOfflineManager
         .getOfflineModelData(id)
         .then(modelState => {
-          if (!TypeChecker.isUndefined(modelState)) {
+          if (TypeChecker.isSet(modelState)) {
             const model = this._creteModelFromOfflineState(modelState);
             return Promise.resolve(model);
           } else if (this._autoCreateRequests.has(autoRequestId)) {
             const options = this._autoCreateRequests.get(autoRequestId);
             const model = this._createNewModelOffline(id, options);
-            return Promise.resolve(model);
+            const snapshot = model._enableOffline();
+            return this._modelOfflineManager.createOfflineModel(snapshot).then(() => model);
           } else {
             return Promise.reject(new Error("Model not available offline, and not auto create options were provided"));
           }
@@ -592,6 +603,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _creteModelFromOfflineState(state: IModelState): RealTimeModel {
+    this._log.debug(`Opening model '${state.model.id}' from offline state`);
+
     // FIXME what should these be?
     const resourceId = "fake";
     const valueIdPrefix = "fake2";
@@ -619,6 +632,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _createNewModelOffline(id: string, options: IAutoCreateModelOptions): RealTimeModel {
+    this._log.debug(`Creating new offline model model '${id}' using auto-create options.`);
     const dataValue = this._getDataFromAutoCreate(options);
 
     // FIXME what should these be?
@@ -627,7 +641,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const currentTime = new Date();
     const permissions = new ModelPermissions(true, true, true, true);
 
-    return this._createModel(
+    const model =  this._createModel(
       resourceId,
       id,
       options.collection,
@@ -639,6 +653,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       permissions,
       dataValue
     );
+    return model;
   }
 
   private _createModel(

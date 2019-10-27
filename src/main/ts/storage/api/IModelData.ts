@@ -9,6 +9,7 @@ export interface IModelData {
   id: string;
   collection: string;
   version: number;
+  seqNo: number;
   createdTime: Date;
   modifiedTime: Date;
   permissions: ModelPermissions;

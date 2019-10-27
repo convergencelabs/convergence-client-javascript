@@ -13,12 +13,12 @@ const dateInput = document.getElementById("currentDate");
 let model;
 
 const baseURL = window.location.href.split('?')[0];
-const modelId = getParameterByName("modelId");
+const modelId = getModelId();
 
 Convergence.configureLogging({
   loggers: {
     "protocol.messages": Convergence.LogLevel.DEBUG,
-    "storage": Convergence.LogLevel.DEBUG
+    "models": Convergence.LogLevel.DEBUG
   }
 });
 
@@ -29,8 +29,7 @@ const options = {
     }
   },
   offline: {
-    key: 'some-password',
-    username: 'jimbo'
+    storage: new Convergence.IdbStorageAdapter()
   }
 };
 
@@ -50,35 +49,37 @@ domain.events().subscribe(e => {
   }
 });
 
-domain.models().openAutoCreate({
-  collection: "test",
-  id: modelId,
-  data: {
-    "string": "String data to edit",
-    "number": 10,
-    "boolean": true,
-    "array": [
-      "Apples",
-      "Bananas",
-      "Pears",
-      "Orange"
-    ],
-    "object": {
-      "key1": "value1",
-      "key2": "value2",
-      "key3": "value3",
-      "key4": "value4"
+domain.connectOffline("test").then(() => {
+  domain.models().openAutoCreate({
+    collection: "test",
+    id: modelId,
+    data: {
+      "string": "String data to edit",
+      "number": 10,
+      "boolean": true,
+      "array": [
+        "Apples",
+        "Bananas",
+        "Pears",
+        "Orange"
+      ],
+      "object": {
+        "key1": "value1",
+        "key2": "value2",
+        "key3": "value3",
+        "key4": "value4"
+      },
+      "date": new Date()
     },
-    "date": new Date()
-  },
-  overrideWorld: true,
-  worldPermissions: {read: true, write: true, remove: false, manage: false},
-  ephemeral: false
-}).then(function (model) {
-  const modelId = model.modelId();
-  const url = baseURL + "?modelId=" + modelId;
-  window.history.pushState(modelId, modelId, url);
-  bindToModel(model);
+    overrideWorld: true,
+    worldPermissions: {read: true, write: true, remove: false, manage: false},
+    ephemeral: false
+  }).then(function (model) {
+    const modelId = model.modelId();
+    const url = baseURL + "?modelId=" + modelId;
+    window.history.pushState(modelId, modelId, url);
+    bindToModel(model);
+  });
 });
 
 // Set up all the events on all the models.
@@ -318,16 +319,23 @@ function setDate() {
   dateInput.value = date.toUTCString()
 }
 
-function getParameterByName(name, url) {
-  if (!url) {
-    url = window.location.href;
+function getModelId() {
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.has("modelId")) {
+    return urlParams.get("modelId");
+  } else {
+    return createUUID();
   }
-  name = name.replace(/[\[\]]/g, "\\$&");
-  const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-    results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
-  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function   createUUID() {
+  let dt = new Date().getTime();
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (dt + Math.random() * 16) % 16 | 0;
+    dt = Math.floor(dt / 16);
+    return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+  return uuid;
 }
 
 function disconnect() {
@@ -335,5 +343,5 @@ function disconnect() {
 }
 
 function connect() {
-  domain.reconnect();
+  domain.connectWithPassword({username: "test", password: "password"});
 }

@@ -3,7 +3,6 @@ import {IModelState} from "../../../../main/ts/storage/api/IModelState";
 
 import {expect} from "chai";
 import "fake-indexeddb/auto";
-import {Immutable} from "../../../../main/ts/util/Immutable";
 
 describe("IdbModelStore", () => {
   describe("modelExists()", () => {
@@ -60,6 +59,7 @@ function createModelState(): IModelState {
       id: "modelId" + modelCounter++,
       collection: "collection",
       version: 10,
+      seqNo: 0,
       createdTime: new Date(),
       modifiedTime: new Date(),
       data: {

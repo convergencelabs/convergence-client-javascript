@@ -63,6 +63,10 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._pendingCompoundOperation = [];
   }
 
+  public sequenceNumber(): number {
+    return this._seqNo;
+  }
+
   public resetSequenceNumber(): void {
     this._seqNo = 0;
   }

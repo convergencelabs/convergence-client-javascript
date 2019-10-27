@@ -2,17 +2,17 @@ import {ConvergenceError, ConvergenceEventEmitter} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
 import {ModelReference} from "../reference/";
 import {RealTimeElement} from "./RealTimeElement";
-import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
+import {OnRemoteReference, ReferenceManager} from "../reference/ReferenceManager";
 import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
 import {ObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
 import {
-  ModelReferenceCallbacks,
-  LocalModelReference,
-  LocalElementReference,
   ElementReference,
+  LocalElementReference,
+  LocalModelReference,
+  ModelReferenceCallbacks,
   ReferenceFilter
 } from "../reference";
 import {ModelReferenceData} from "../ot/xform/ReferenceTransformer";
@@ -26,21 +26,24 @@ import {OperationType} from "../ot/ops/OperationType";
 import {CompoundOperation} from "../ot/ops/CompoundOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {
+  CollaboratorClosedEvent,
+  CollaboratorOpenedEvent,
   IModelEvent,
   ModelClosedEvent,
-  VersionChangedEvent,
-  RemoteReferenceCreatedEvent,
-  ModelPermissionsChangedEvent,
+  ModelDeletedEvent,
   ModelOfflineEvent,
-  ResyncStartedEvent,
+  ModelOnlineEvent,
+  ModelPermissionsChangedEvent,
   ModelReconnectingEvent,
+  RemoteReferenceCreatedEvent,
   ResyncCompletedEvent,
-  ModelOnlineEvent
+  ResyncStartedEvent,
+  VersionChangedEvent
 } from "../events/";
 import {IConvergenceEvent} from "../../util/";
 import {ModelCollaborator} from "./ModelCollaborator";
-import {Observable, BehaviorSubject} from "rxjs";
-import {ObservableModel, ObservableModelEvents, ObservableModelEventConstants} from "../observable/ObservableModel";
+import {BehaviorSubject, Observable} from "rxjs";
+import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
 import {ModelPermissionManager} from "../ModelPermissionManager";
 import {ModelPermissions} from "../ModelPermissions";
 import {Path, PathElement} from "../Path";
@@ -49,7 +52,8 @@ import {toModelPermissions} from "../ModelMessageConverter";
 import {
   fromOptional,
   getOrDefaultArray,
-  getOrDefaultNumber, getOrDefaultString,
+  getOrDefaultNumber,
+  getOrDefaultString,
   timestampToDate,
   toOptional
 } from "../../connection/ProtocolUtil";
@@ -63,6 +67,10 @@ import {
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
 
 import {io} from "@convergence-internal/convergence-proto";
+import {Logger} from "../../util/log/Logger";
+import {Logging} from "../../util/log/Logging";
+import {ModelOfflineManager} from "../ModelOfflineManager";
+import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsChangedMessage;
 import IModelReconnectCompleteMessage = io.convergence.proto.IModelReconnectCompleteMessage;
@@ -70,15 +78,8 @@ import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
-import {Logger} from "../../util/log/Logger";
-import {Logging} from "../../util/log/Logging";
-import {IModelState} from "../../storage/api/IModelState";
-import {ModelOfflineManager} from "../ModelOfflineManager";
-import {ILocalOperationData, IServerOperationData} from "../../storage/api";
-import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
-import {CollaboratorOpenedEvent} from "../events/CollaboratorOpenedEvent";
-import {CollaboratorClosedEvent} from "../events/CollaboratorClosedEvent";
-import {ModelDeletedEvent} from "../events/ModelDeletedEvent";
+import {ILocalOperationData, IModelData, IServerOperationData} from "../../storage/api";
+import {IModelSnapshot} from "../IModelSnapshot";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -438,11 +439,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._initializeReferences(references);
 
-    if (this._offlineManager.isOfflineEnabled()) {
-      this._offlineManager.onModelOpen(this);
-    }
-
-    this._storeOffline = false;
+    this._offlineManager.modelOpened(this);
+    this._storeOffline = this._offlineManager.isModelSubscribed(this._modelId);
   }
 
   public setAvailableOffline(enabled: boolean): Promise<void> {
@@ -454,22 +452,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
-  public _getCurrentStateSnapshot(): IModelState {
-    const localOps = this._concurrencyControl.getInFlightOperations();
-
-    // fixme map operations.
-    const modelState: IModelState = {
-      model: {
-        id: this._modelId,
-        collection: this._collectionId,
-        version: this.version(),
-        createdTime: this._createdTime,
-        modifiedTime: this.maxTime(),
-        data: this._model.root().dataValue(),
-        permissions: this._permissions
-      },
-      localOperations: [],
-      serverOperations: []
+  public _getCurrentStateSnapshot(): IModelData {
+    const modelState: IModelData = {
+      id: this._modelId,
+      collection: this._collectionId,
+      version: this.version(),
+      seqNo: this._concurrencyControl.sequenceNumber(),
+      createdTime: this._createdTime,
+      modifiedTime: this.maxTime(),
+      data: this._model.root().dataValue(),
+      permissions: this._permissions
     };
 
     return modelState;
@@ -480,8 +472,20 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
-  public _setOfflineEnabled(enabled): void {
-    this._storeOffline = enabled;
+  public _enableOffline(): IModelSnapshot {
+    this._storeOffline = true;
+    const snapshot = this._getCurrentStateSnapshot();
+    const localOps = this._concurrencyControl.getInFlightOperations();
+    return {snapshot, localOps};
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _disableOffline(): void {
+    this._storeOffline = false;
   }
 
   /**
@@ -1112,6 +1116,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _close(event: ModelClosedEvent): void {
+    this._offlineManager.modelClosed(this);
     this._model.root()._detach(false);
     this._open = false;
     this._connection = null;
@@ -1130,7 +1135,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
 
-    if (this._offlineManager.isOfflineEnabled()) {
+    if (this._storeOffline) {
       const operation = toOfflineOperationData(acknowledgedOperation.operation);
 
       const serverOp: IServerOperationData = {
@@ -1220,18 +1225,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }
     }
 
-    if (this._offlineManager.isOfflineEnabled()) {
-      const opData = toOfflineOperationData(operation);
-      const serverOp: IServerOperationData = {
-        type: "server",
-        modelId: this._modelId,
-        sessionId: processed.clientId,
-        version: processed.version,
-        timestamp: processed.timestamp,
-        operation: opData
-      };
-      this._offlineManager.processServerOperation(serverOp)
+    if (this._storeOffline) {
+      const inflight = this._concurrencyControl.getInFlightOperations();
+      this._offlineManager
+        .processServerOperationEvent(this._modelId, processed, inflight)
         .catch(e => console.error(e));
+      // FIXME handle this error
     }
   }
 
@@ -1287,17 +1286,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _handleLocalOperation(opEvent: ClientOperationEvent): void {
     if (this._offlineManager.isOfflineEnabled()) {
-      const opData = toOfflineOperationData(opEvent.operation);
-      const localOp: ILocalOperationData = {
-        type: "local",
-        sessionId: this._connection.session().sessionId(),
-        modelId: this._modelId,
-        sequenceNumber: opEvent.seqNo,
-        version: this._version,
-        timestamp: opEvent.timestamp,
-        operation: opData
-      };
-      this._offlineManager.processLocalOperation(localOp)
+      this._offlineManager.processLocalOperation(this._modelId, opEvent)
         .catch(e => RealTimeModel._log.error(`model persistence error: ${this._modelId}`, e));
     }
     this._sendOperation(opEvent);
