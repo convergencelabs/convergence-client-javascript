@@ -38,3 +38,6 @@ export * from "./RemoteReferenceCreatedEvent";
 
 export * from "./CollaboratorOpenedEvent";
 export * from "./CollaboratorClosedEvent";
+
+export * from "./ModelCommittedEvent";
+export * from "./ModelModifiedEvent";

@@ -3,7 +3,6 @@ import {StorageEngine} from "../../../main/ts/storage/StorageEngine";
 import {IdbStorageAdapter} from "../../../main/ts/storage/idb";
 import "fake-indexeddb/auto";
 
-
 describe("StorageEngine", () => {
   describe("constructor()", () => {
     it("isEnabled() returns false", () => {

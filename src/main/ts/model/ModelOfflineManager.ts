@@ -6,6 +6,7 @@ import {ServerOperationEvent} from "./ot/ServerOperationEvent";
 import {toOfflineOperationData} from "../storage/OfflineOperationMapper";
 import {RealTimeModel} from "./rt";
 import {IModelSnapshot} from "./IModelSnapshot";
+import {TypeChecker} from "../util/TypeChecker";
 
 /**
  * @hidden
@@ -92,7 +93,7 @@ export class ModelOfflineManager {
       model: model.snapshot,
       localOperations: localOps,
       serverOperations: []
-    }
+    };
     return this._storage
       .modelStore()
       .putModel(state);
@@ -118,7 +119,6 @@ export class ModelOfflineManager {
                                      transformedLocalOps: ClientOperationEvent[]): Promise<void> {
     const opData = toOfflineOperationData(serverOperation.operation);
     const serverOp: IServerOperationData = {
-      type: "server",
       modelId,
       sessionId: serverOperation.clientId,
       version: serverOperation.version,
@@ -143,11 +143,10 @@ export class ModelOfflineManager {
   private _mapClientOperationEvent(modelId: string, opEvent: ClientOperationEvent): ILocalOperationData {
     const opData = toOfflineOperationData(opEvent.operation);
     return {
-      type: "local",
       sessionId: this._sessionId,
       modelId,
       sequenceNumber: opEvent.seqNo,
-      version: opEvent.contextVersion,
+      contextVersion: opEvent.contextVersion,
       timestamp: opEvent.timestamp,
       operation: opData
     };

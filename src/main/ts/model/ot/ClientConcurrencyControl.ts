@@ -71,6 +71,14 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._seqNo = 0;
   }
 
+  public setState(contextVersion: number, seqNo: number, inFlight: ClientOperationEvent[]): void {
+    this._contextVersion = contextVersion;
+    this._seqNo = seqNo;
+
+    this._inflightOperations.length = 0;
+    this._inflightOperations.push(...inFlight);
+  }
+
   public contextVersion(): number {
     return this._contextVersion;
   }

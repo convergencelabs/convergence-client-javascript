@@ -30,7 +30,9 @@ import {
   CollaboratorOpenedEvent,
   IModelEvent,
   ModelClosedEvent,
+  ModelCommittedEvent,
   ModelDeletedEvent,
+  ModelModifiedEvent,
   ModelOfflineEvent,
   ModelOnlineEvent,
   ModelPermissionsChangedEvent,
@@ -66,11 +68,15 @@ import {
 } from "../reference/RemoteReferenceEvent";
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
 
-import {io} from "@convergence-internal/convergence-proto";
 import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
+import {ILocalOperationData, IModelData, IServerOperationData} from "../../storage/api";
+import {IModelSnapshot} from "../IModelSnapshot";
+import {DomainUser} from "../../identity";
+
+import {io} from "@convergence-internal/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsChangedMessage;
 import IModelReconnectCompleteMessage = io.convergence.proto.IModelReconnectCompleteMessage;
@@ -78,8 +84,6 @@ import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
-import {ILocalOperationData, IModelData, IServerOperationData} from "../../storage/api";
-import {IModelSnapshot} from "../IModelSnapshot";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -94,21 +98,21 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    *
    * The actual event emitted is a [[ResyncStartedEvent]].
    *
-   * @event ResyncStartedEvent
+   * @event [[ResyncStartedEvent]]
    */
   readonly RESYNC_STARTED: string;
 
   /**
    * Emitted when the resync process ends. The actual emitted event is a [[ResyncCompletedEvent]].
    *
-   * @event
+   * @event [[ResyncCompletedEvent]]
    */
   readonly RESYNC_COMPLETED: string;
 
   /**
    * Emitted when this model goes offline. The actual emitted event is a [[ModelOfflineEvent]].
    *
-   * @event
+   * @event [[ModelOfflineEvent]]
    */
   readonly OFFLINE: string;
 
@@ -116,7 +120,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    * Emitted when this model comes back online after being offline.
    * The actual emitted event is a [[ModelOfflineEvent]].
    *
-   * @event
+   * @event [[ModelOfflineEvent]]
    */
   readonly ONLINE: string;
 
@@ -127,15 +131,15 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    *
    * The actual emitted event is a [[ModelReconnectingEvent]].
    *
-   * @event
+   * @event [[ModelReconnectingEvent]]
    */
   readonly RECONNECTING: string;
 
   /**
    * Emitted immediately when a local modification is made to a model.
-   * The emitted event is an [[IModelEvent]].
+   * The emitted event is an [[ModelModifiedEvent]].
    *
-   * @event
+   * @event [[ModelModifiedEvent]]
    */
   readonly MODIFIED: string;
 
@@ -144,21 +148,21 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    * multiple modifications may be batched together into a single
    * `COMMITTED` response from the server.  See https://forum.convergence.io/t/behavior-of-model-version/16/4
    *
-   * @event
+   * @event [[ModelCommittedEvent]]
    */
   readonly COMMITTED: string;
 
   /**
    * Emitted when another user opens this model. The actual event is a [[CollaboratorOpenedEvent]].
    *
-   * @event
+   * @event [[CollaboratorOpenedEvent]]
    */
   readonly COLLABORATOR_OPENED: string;
 
   /**
    * Emitted when another user closes this model. The actual event is a [[CollaboratorClosedEvent]].
    *
-   * @event
+   * @event [[CollaboratorClosedEvent]]
    */
   readonly COLLABORATOR_CLOSED: string;
 
@@ -168,7 +172,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    *
    * The actual emitted event is a [[RemoteReferenceCreatedEvent]].
    *
-   * @event
+   * @event [[RemoteReferenceCreatedEvent]]
    */
   readonly REFERENCE: string;
 
@@ -176,15 +180,15 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    * Emitted when the [permissions](https://docs.convergence.io/guide/models/permissions.html)
    * on this model change.  The actual emitted event is a [[ModelPermissionsChangedEvent]].
    *
-   * @event
+   * @event [[ModelPermissionsChangedEvent]]
    */
   readonly PERMISSIONS_CHANGED: string;
 }
 
 const RealTimeModelEventConstants: RealTimeModelEvents = {
   ...ObservableModelEventConstants,
-  MODIFIED: "modified",
-  COMMITTED: "committed",
+  MODIFIED: ModelModifiedEvent.NAME,
+  COMMITTED: ModelCommittedEvent.NAME,
   RESYNC_STARTED: ResyncStartedEvent.NAME,
   RESYNC_COMPLETED: ResyncCompletedEvent.NAME,
   OFFLINE: ModelOfflineEvent.NAME,
@@ -410,8 +414,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._concurrencyControl
       .on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (event: ICommitStatusChanged) => {
         this._committed = event.committed;
-        const name: string = this._committed ? RealTimeModel.Events.COMMITTED : RealTimeModel.Events.MODIFIED;
-        const evt: IModelEvent = {src: this, name};
+        const evt: IModelEvent = this._committed ?
+          new ModelCommittedEvent(this) : new ModelModifiedEvent(this);
         this._emitEvent(evt);
       });
 
@@ -453,7 +457,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   public _getCurrentStateSnapshot(): IModelData {
-    const modelState: IModelData = {
+    return {
       id: this._modelId,
       collection: this._collectionId,
       version: this.version(),
@@ -463,8 +467,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       data: this._model.root().dataValue(),
       permissions: this._permissions
     };
-
-    return modelState;
   }
 
   /**
@@ -750,6 +752,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * Returns true if this model is currently in batch mode, that is, `startBatch`
    * was called and the batch was not completed or cancelled.
+   *
+   * @returns True if a batch is in progress, false otherwise.
    */
   public isBatchStarted(): boolean {
     return this._concurrencyControl.isBatchOperationInProgress();
@@ -762,7 +766,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * @param key a unique name for this ElementReference
    *
-   * @returns an empty `LocalElementReference` which can then be bound to one or more elements.
+   * @returns An empty `LocalElementReference` which can then be bound to one or more elements.
    */
   public elementReference(key: string): LocalElementReference {
     const existing: LocalModelReference<any, any> = this._referenceManager.getLocalReference(key);
@@ -795,6 +799,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * @param sessionId The session ID that created the reference
    * @param key the reference's unique key
+   *
+   * @returns A model reference for thee specified sessionId and key.
    */
   public reference(sessionId: string, key: string): ModelReference<any> {
     return this._referenceManager.get(sessionId, key);
@@ -825,19 +831,55 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _rehydrateFromOfflineState(serverOps: IServerOperationData[], localOps: ILocalOperationData[]): void {
-    // Server ops come contextually before local operations.
-    serverOps.forEach(serverOp => {
+    const serverEvents = serverOps.map(serverOp => {
       const op = fromOfflineOperationData(serverOp.operation);
-
-      const unprocessed = new ServerOperationEvent(
+      return new ServerOperationEvent(
         serverOp.sessionId,
         serverOp.version,
         serverOp.timestamp,
         op
       );
+    }).sort((a, b) => a.version - b.version);
 
-      this._processServerOperationEvent(unprocessed);
+    const clientEvents = localOps.map(localOp => {
+      const op = fromOfflineOperationData(localOp.operation);
+      return new ClientOperationEvent(
+        localOp.sequenceNumber,
+        localOp.contextVersion,
+        localOp.timestamp,
+        op
+      );
+    }).sort((a, b) => {
+      if (a.contextVersion === b.contextVersion) {
+        return a.seqNo - b.seqNo;
+      } else {
+        return a.contextVersion - b.contextVersion;
+      }
     });
+
+    let contextVersion = this._concurrencyControl.contextVersion();
+    let seqNo = this._concurrencyControl.sequenceNumber();
+    let inFlight: ClientOperationEvent[] = [];
+    while (serverEvents.length > 0 || clientEvents.length > 0) {
+      while (serverEvents.length > 0 && serverEvents[0].version < clientEvents[0].contextVersion) {
+        const serverEvent = serverEvents.shift();
+        this._applyOperation(serverEvent.operation, serverEvent.clientId, serverEvent.version, serverEvent.timestamp);
+        contextVersion = serverEvent.version;
+      }
+
+      while (clientEvents.length > 0 && clientEvents[0].contextVersion === this._concurrencyControl.contextVersion()) {
+        const clientEvent = clientEvents.shift();
+        this._applyOperation(
+          clientEvent.operation,
+          this._connection.session().sessionId(),
+          clientEvent.contextVersion,
+          clientEvent.timestamp);
+        seqNo = clientEvent.seqNo + 1;
+        inFlight.push(clientEvent);
+      }
+    }
+
+    this._concurrencyControl.setState(contextVersion, seqNo, inFlight);
   }
 
   /**
@@ -1139,7 +1181,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const operation = toOfflineOperationData(acknowledgedOperation.operation);
 
       const serverOp: IServerOperationData = {
-        type: "server",
         modelId: this._modelId,
         sessionId: this._connection.session().sessionId(),
         version,
@@ -1203,27 +1244,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const contextVersion: number = processed.version;
     const timestamp: Date = processed.timestamp;
 
-    const user = this._identityCache.getUserForSession(unprocessed.clientId);
     this._version = contextVersion + 1;
     this._time = new Date(timestamp);
 
-    if (operation.type === OperationType.COMPOUND) {
-      const compoundOp: CompoundOperation = operation as CompoundOperation;
-      compoundOp.ops.forEach((op: DiscreteOperation) => {
-        if (!op.noOp) {
-          const modelEvent: ModelOperationEvent =
-            new ModelOperationEvent(clientId, user, contextVersion, timestamp, op);
-          this._deliverToChild(modelEvent);
-        }
-      });
-    } else {
-      const discreteOp: DiscreteOperation = operation as DiscreteOperation;
-      if (!discreteOp.noOp) {
-        const modelEvent: ModelOperationEvent =
-          new ModelOperationEvent(clientId, user, contextVersion, timestamp, discreteOp);
-        this._deliverToChild(modelEvent);
-      }
-    }
+    this._applyOperation(operation, clientId, contextVersion, timestamp);
 
     if (this._storeOffline) {
       const inflight = this._concurrencyControl.getInFlightOperations();
@@ -1231,6 +1255,43 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         .processServerOperationEvent(this._modelId, processed, inflight)
         .catch(e => console.error(e));
       // FIXME handle this error
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _applyOperation(operation: Operation,
+                          sessionId: string,
+                          version: number,
+                          timestamp: Date): void {
+    const user = this._identityCache.getUserForSession(sessionId);
+
+    if (operation.type === OperationType.COMPOUND) {
+      const compoundOp: CompoundOperation = operation as CompoundOperation;
+      compoundOp.ops.forEach((discreteOp: DiscreteOperation) => {
+        this._applyDiscreteOperation(discreteOp, user, sessionId, version, timestamp);
+      });
+    } else {
+      const discreteOp: DiscreteOperation = operation as DiscreteOperation;
+      this._applyDiscreteOperation(discreteOp, user, sessionId, version, timestamp);
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _applyDiscreteOperation(discreteOp: DiscreteOperation,
+                                  user: DomainUser,
+                                  sessionId: string,
+                                  version: number,
+                                  timestamp: Date): void {
+    if (!discreteOp.noOp) {
+      const modelEvent: ModelOperationEvent =
+        new ModelOperationEvent(sessionId, user, version, timestamp, discreteOp);
+      this._deliverToChild(modelEvent);
     }
   }
 

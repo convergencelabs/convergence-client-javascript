@@ -11,7 +11,7 @@ import {ConvergenceSession} from "./ConvergenceSession";
 import {ModelService} from "./model/";
 import {ActivityService} from "./activity/";
 import {IdentityService} from "./identity/";
-import {PresenceService, UserPresence} from "./presence/";
+import {PresenceService} from "./presence/";
 import {ChatService} from "./chat/";
 import {ConvergenceEventEmitter, StringMap} from "./util/";
 import {
@@ -64,7 +64,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain is scheduled to attempt to reconnect.
      * The actual emitted event is a [[ConnectionScheduledEvent]].
      *
-     * @event
+     * @event [[ConnectionScheduledEvent]]
      */
     CONNECTION_SCHEDULED: ConnectionScheduledEvent.NAME,
 
@@ -72,7 +72,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain is actively attempting to connect to the server.
      * The actual emitted event is a [[ConnectingEvent]].
      *
-     * @event
+     * @event [[ConnectingEvent]]
      */
     CONNECTING: ConnectingEvent.NAME,
 
@@ -80,14 +80,15 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain successfully (re)connected to the server.
      * The actual emitted event is a [[ConnectedEvent]].
      *
-     * @event
+     * @event [[ConnectedEvent]]
      */
     CONNECTED: ConnectedEvent.NAME,
 
     /**
-     * Emitted when a connection attempt failed. The actual emitted event is a [[ConnectionFailedEvent]].
+     * Emitted when a connection attempt failed. The actual emitted event is
+     * a [[ConnectionFailedEvent]].
      *
-     * @event
+     * @event [[ConnectionFailedEvent]]
      */
     CONNECTION_FAILED: ConnectionFailedEvent.NAME,
 
@@ -95,7 +96,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain is actively attempting to authenticate.
      * The actual emitted event is an [[AuthenticatingEvent]].
      *
-     * @event
+     * @event [[AuthenticatingEvent]]
      */
     AUTHENTICATING: AuthenticatingEvent.NAME,
 
@@ -103,7 +104,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain successfully (re)authenticated.
      * The actual emitted event is an [[AuthenticatedEvent]].
      *
-     * @event
+     * @event [[AuthenticatedEvent]]
      */
     AUTHENTICATED: AuthenticatedEvent.NAME,
 
@@ -111,18 +112,18 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain attempted to (re)authenticate but failed.
      * The actual emitted event is an [[AuthenticationFailedEvent]].
      *
-     * @event
+     * @event [[AuthenticationFailedEvent]]
      */
     AUTHENTICATION_FAILED: AuthenticationFailedEvent.NAME,
 
     /**
      * Emitted when the domain's connection was interrupted. This indicates that
      * the domain is in a state where it is currently disconnected, but is
-     * automatically and continuously attempting to reconect.
+     * automatically and continuously attempting to reconnect.
      *
      * The actual emitted event is an [[InterruptedEvent]].
      *
-     * @event
+     * @event [[InterruptedEvent]]
      */
     INTERRUPTED: InterruptedEvent.NAME,
 
@@ -130,7 +131,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain is currently disconnected and is not attempting
      * to automatically reconnect. The actual emitted event is a [[DisconnectedEvent]].
      *
-     * @event
+     * @event [[DisconnectedEvent]]
      */
     DISCONNECTED: DisconnectedEvent.NAME,
 
@@ -138,7 +139,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * Emitted when the domain encountered an unexpected error.
      * The actual emitted event is an [[ErrorEvent]].
      *
-     * @event
+     * @event [[ErrorEvent]]
      */
     ERROR: ErrorEvent.NAME
   };
@@ -456,7 +457,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       .connect()
       .then(() => promiseCallback())
       .then((d) => this._authenticateAnonymously(d))
-      .then(e => this._init());
+      .then(() => this._init());
   }
 
   /**
@@ -480,7 +481,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
         Validation.assertNonEmptyString(j, "jwt");
         return this._authenticateWithJwt(j);
       })
-      .then(e => this._init());
+      .then(() => this._init());
   }
 
   /**
@@ -506,7 +507,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
           Validation.assertNonEmptyString(t, "token");
           return this._authenticateWithReconnectToken(t);
         })
-        .then(e => this._init());
+        .then(() => this._init());
     }
   }
 

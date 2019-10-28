@@ -21,7 +21,7 @@ import {TypeChecker} from "../util/TypeChecker";
 import {FallbackAuthCoordinator} from "./FallbackAuthCoordinator";
 import {Logging} from "../util/log/Logging";
 import {Logger} from "../util/log/Logger";
-import { AuthenticationMethods, AuthenticationMethod } from "./AuthenticationMethod";
+import {AuthenticationMethod, AuthenticationMethods} from "./AuthenticationMethod";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IHandshakeResponseMessage = io.convergence.proto.IHandshakeResponseMessage;
 import IPasswordAuthRequestMessage = io.convergence.proto.IPasswordAuthRequestMessage;
@@ -91,7 +91,9 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
 
-    this._session = new ConvergenceSession(domain, this, null, null, null);
+    // TODO create a random string.
+    const initialSessionId = "local:"
+    this._session = new ConvergenceSession(domain, this, null, initialSessionId, null);
 
     if (typeof window !== "undefined") {
       window.addEventListener("online", this._onWindowOnline);

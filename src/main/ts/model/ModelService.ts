@@ -616,7 +616,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.model.version,
       state.model.createdTime,
       state.model.modifiedTime,
-      valueIdPrefix, [],
+      valueIdPrefix,
+      [],
       [],
       state.model.permissions,
       state.model.data
@@ -641,7 +642,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const currentTime = new Date();
     const permissions = new ModelPermissions(true, true, true, true);
 
-    const model =  this._createModel(
+    const model = this._createModel(
       resourceId,
       id,
       options.collection,
