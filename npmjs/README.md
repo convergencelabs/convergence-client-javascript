@@ -1,12 +1,12 @@
 # Overview
-This package provides a npm version of the Convergence JavaScript API, for use with the [Convergence](https://convergence.io) platform.
+This package provides a npm distribution of the Convergence JavaScript API, for use with the [Convergence Collaboration Engine](https://convergence.io).
 
-Convergence is a hosted platform for rapidly developing real-time collaborative applications. At the heart of Convergence is its collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
+Convergence is an engine for rapidly developing real-time collaborative applications. At the heart of Convergence is its collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
 
 * **Real-time Data**: Allows users to edit the same data at the same time, keeping everyone's view of the data in sync.
 * **Users and Identity**: Allows developers to create and manage users and their identity within the system so users know who they are collaborating with.
 * **Presence**: Allows users to know "who is here?" and "who is available" so they can more effectively collaborate with the other users they need to.
-* **Collaboration Awareness**: The best way to resolve editing conflicts is to avoid them in the fist place. Convergence provides robust collaboration awareness capabilities that help users work together without conflicts.
+* **Collaboration Awareness**: The best way to resolve editing conflicts is to avoid them in the first place. Convergence provides robust collaboration awareness capabilities that help users work together without conflicts.
 * **Chat & Messaging**: Allow users to communicate through chat embedded directly in the application.
 
 Convergence provides all of this and more in a single API reducing the time and complexity of gluing multiple frameworks together. With Convergence you can get up and running in hours, instead of months.
@@ -65,7 +65,6 @@ Convergence requires RxJS 6.x.  This dependency is taken care of when using the 
 ```
 
 This will add a `Convergence` variable to the global namespace.
-
 
 There is also an AMD version:
 ```html

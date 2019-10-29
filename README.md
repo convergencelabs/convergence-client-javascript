@@ -17,7 +17,7 @@ See our [developer guide](https://docs.convergence.io/guide/getting-started.html
 [Convergence Labs](https://convergencelabs.com) provides several different channels for support:
 
 - Please use the [Discourse Forum](https://forum.convergence.io) for general and technical questions, so the whole community can benefit.
-- For paid dedicated support or custom development services, [contact us](https://convergence.io/contact-sales/) directly.
+- For paid dedicated support, integration assistance, or other custom development services, [contact us](https://convergence.io/contact-sales/) directly.
 - Email <support@convergencelabs.com> for all other inquiries.
 
 

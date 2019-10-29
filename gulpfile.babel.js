@@ -37,6 +37,10 @@ function minify() {
     .pipe(dest(distDir));
 }
 
+function readAndParse(path) {
+  return JSON.parse(fs.readFileSync(path));
+}
+
 const lint = () =>
   src(["src/**/*.ts"])
     .pipe(tsLint({formatter: "prose"}))
@@ -44,7 +48,7 @@ const lint = () =>
 
 const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));
 const bumpPackageVersion = (cb) => {
-  const packageJson = JSON.parse(fs.readFileSync("./package.json"));
+  const packageJson = readAndParse("./package.json");
   if (packageJson.version.endsWith("SNAPSHOT")) {
     return src(`${distDir}/package.json`)
       .pipe(bump({version: packageJson.version + "." + new Date().getTime()}))
@@ -54,7 +58,15 @@ const bumpPackageVersion = (cb) => {
   }
 };
 
-const docs = shell.task(['typedoc --options typedoc.config.json src/main/ts']);
+const docsBuild = shell.task(['typedoc --options typedoc.config.json src/main/ts']);
+const docsMarkup = () => {
+  const packageJson = readAndParse(`${distDir}/package.json`);
+  return src([`${distDir}/docs/index.html`])
+    .pipe(replace('$PROJECT_VERSION', `${packageJson.version}`))
+    .pipe(dest(`${distDir}/docs`));
+};
+const docs = series(docsBuild, docsMarkup);
+
 
 const webpackBundle = () => {
   return merge(
@@ -70,7 +82,7 @@ const webpackBundle = () => {
 const rollupBundle = shell.task(['rollup -c']);
 
 const injectVersion = () => {
-  const packageJson = JSON.parse(fs.readFileSync(`${distDir}/package.json`));
+  const packageJson = readAndParse(`${distDir}/package.json`);
   return src([`${distDir}/**/*.js`])
     .pipe(replace('CONVERGENCE_CLIENT_VERSION', "" + packageJson.version))
     .pipe(dest(distDir));
@@ -101,7 +113,7 @@ const typings = series(tsDeclarations, declarationsNamedExport);
 
 const applyHeader = () => {
   const headerTxt = fs.readFileSync("./copyright-header.txt");
-  const packageJson = JSON.parse(fs.readFileSync(`${distDir}/package.json`));
+  const packageJson = readAndParse(`${distDir}/package.json`);
   return src([`${distDir}/**/*.js`])
     .pipe(header(headerTxt, {package: packageJson}))
     .pipe(dest(`${distDir}`));
