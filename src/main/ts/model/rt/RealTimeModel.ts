@@ -447,7 +447,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._storeOffline = this._offlineManager.isModelSubscribed(this._modelId);
   }
 
-  public setAvailableOffline(enabled: boolean): Promise<void> {
+  public setSubscribedOffline(enabled: boolean): Promise<void> {
     return this._offlineManager.setModelOffline(this._modelId, enabled);
   }
 
@@ -844,6 +844,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const clientEvents = localOps.map(localOp => {
       const op = fromOfflineOperationData(localOp.operation);
       return new ClientOperationEvent(
+        localOp.sessionId,
         localOp.sequenceNumber,
         localOp.contextVersion,
         localOp.timestamp,
@@ -861,7 +862,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     let seqNo = this._concurrencyControl.sequenceNumber();
     let inFlight: ClientOperationEvent[] = [];
     while (serverEvents.length > 0 || clientEvents.length > 0) {
-      while (serverEvents.length > 0 && serverEvents[0].version < clientEvents[0].contextVersion) {
+      while (serverEvents.length > 0 &&
+      (clientEvents.length === 0 || serverEvents[0].version < clientEvents[0].contextVersion)) {
         const serverEvent = serverEvents.shift();
         this._applyOperation(serverEvent.operation, serverEvent.clientId, serverEvent.version, serverEvent.timestamp);
         contextVersion = serverEvent.version;
@@ -949,7 +951,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._sessions = [];
 
     this._reconnectData = {
-      previousSessionId: this._connection.session().sessionId(),
       bufferedOperations: []
     };
   }
@@ -1202,10 +1203,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleRemoteOperation(message: IRemoteOperationMessage): void {
     // FIXME need sequenceNumber
     if (this._reconnectData !== null) {
-      if (message.contextVersion > this._reconnectData.reconnectVersion) {
+      if (getOrDefaultNumber(message.contextVersion) > this._reconnectData.reconnectVersion) {
         // new message buffer it for later.
         this._reconnectData.bufferedOperations.push(message);
-      } else if (message.sessionId === this._reconnectData.previousSessionId) {
+      } else if (this._concurrencyControl.hasInflightOperation() &&
+        this._concurrencyControl.firstInFlightOperation().sessionId === message.sessionId) {
         const syntheticAck = {
           resourceId: message.resourceId,
           version: message.contextVersion,
@@ -1573,7 +1575,6 @@ export interface ModelEventCallbacks {
 }
 
 interface IReconnectData {
-  previousSessionId: string;
   bufferedOperations: IRemoteOperationMessage[];
   reconnectVersion?: number;
 }

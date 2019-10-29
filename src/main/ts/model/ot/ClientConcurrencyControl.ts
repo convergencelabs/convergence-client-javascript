@@ -5,7 +5,7 @@ import {ClientOperationEvent} from "./ClientOperationEvent";
 import {CompoundOperation} from "./ops/CompoundOperation";
 import {OperationTransformer} from "./xform/OperationTransformer";
 import {OperationPair} from "./xform/OperationPair";
-import {ReferenceTransformer, ModelReferenceData} from "./xform/ReferenceTransformer";
+import {ModelReferenceData, ReferenceTransformer} from "./xform/ReferenceTransformer";
 import {ConvergenceEventEmitter, IConvergenceEvent} from "../../util";
 
 /**
@@ -43,15 +43,18 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
   private readonly _inflightOperations: ClientOperationEvent[];
   private readonly _unappliedOperations: ServerOperationEvent[];
 
+  private _sessionId: () => string;
   private _contextVersion: number;
   private _transformer: OperationTransformer;
   private _referenceTransformer: ReferenceTransformer;
 
-  constructor(contextVersion: number,
+  constructor(sessionId: () => string,
+              contextVersion: number,
               transformer: OperationTransformer,
               referenceTransformer: ReferenceTransformer) {
     super();
 
+    this._sessionId = sessionId;
     this._seqNo = 0;
     this._contextVersion = contextVersion;
     this._unappliedOperations = [];
@@ -81,6 +84,14 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
 
   public contextVersion(): number {
     return this._contextVersion;
+  }
+
+  public hasInflightOperation(): boolean {
+    return this._inflightOperations.length > 0;
+  }
+
+  public firstInFlightOperation(): ClientOperationEvent {
+    return this._inflightOperations[0];
   }
 
   public getInFlightOperations(): ClientOperationEvent[] {
@@ -145,12 +156,12 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
 
     if (this._pendingCompoundOperation.length === 0) {
       throw new Error("A Batch operation must have at least one operation.");
-
     }
 
     const compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
     this._pendingCompoundOperation = [];
     const outgoingOperation = new ClientOperationEvent(
+      this._sessionId(),
       this._seqNo++,
       this._contextVersion,
       new Date(),
@@ -189,9 +200,8 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       this._pendingCompoundOperation.push(outgoingOperation);
       return null;
     } else {
-      // todo We really don't need the time here. The client sends this out, and we are going
-      //   to use the server time. We may want to refactor this whole holder concept.
       const outgoingEvent = new ClientOperationEvent(
+        this._sessionId(),
         this._seqNo++,
         this._contextVersion,
         new Date(),

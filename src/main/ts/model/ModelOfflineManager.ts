@@ -1,12 +1,11 @@
 import {StorageEngine} from "../storage/StorageEngine";
 import {IModelState} from "../storage/api/IModelState";
-import {ILocalOperationData, IModelData, IModelStore, IServerOperationData} from "../storage/api";
+import {ILocalOperationData, IModelStore, IServerOperationData} from "../storage/api";
 import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 import {ServerOperationEvent} from "./ot/ServerOperationEvent";
 import {toOfflineOperationData} from "../storage/OfflineOperationMapper";
 import {RealTimeModel} from "./rt";
 import {IModelSnapshot} from "./IModelSnapshot";
-import {TypeChecker} from "../util/TypeChecker";
 
 /**
  * @hidden
@@ -17,13 +16,11 @@ export class ModelOfflineManager {
   private readonly _openModels: Map<string, RealTimeModel>;
   private readonly _syncInterval: number;
   private readonly _storage: StorageEngine;
-  private _sessionId: string;
 
-  constructor(syncInterval: number, snapshotInterval: number, storage: StorageEngine, sessionId: string) {
+  constructor(syncInterval: number, snapshotInterval: number, storage: StorageEngine) {
     this._syncInterval = syncInterval;
     this._storage = storage;
     this._subscribedModels = new Set();
-    this._sessionId = sessionId;
     this._openModels = new Map();
   }
 
@@ -143,7 +140,7 @@ export class ModelOfflineManager {
   private _mapClientOperationEvent(modelId: string, opEvent: ClientOperationEvent): ILocalOperationData {
     const opData = toOfflineOperationData(opEvent.operation);
     return {
-      sessionId: this._sessionId,
+      sessionId: opEvent.sessionId,
       modelId,
       sequenceNumber: opEvent.seqNo,
       contextVersion: opEvent.contextVersion,

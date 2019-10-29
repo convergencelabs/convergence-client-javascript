@@ -105,7 +105,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   public subscribeToModel(modelId: string): Promise<void> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withWriteStore(storeName, async (store) => {
-      const data = {id: modelId};
+      const data = {modelId};
       store.put(data);
     });
   }

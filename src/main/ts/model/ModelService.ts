@@ -17,7 +17,6 @@ import {ICreateModelOptions} from "./ICreateModelOptions";
 import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
 import {io} from "@convergence-internal/convergence-proto";
-import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {
   getModelMessageResourceId,
   modelUserPermissionMapToProto,
@@ -26,7 +25,6 @@ import {
   toModelResult,
   toObjectValue
 } from "./ModelMessageConverter";
-import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
 import {
   getOrDefaultArray,
   getOrDefaultNumber,
@@ -42,10 +40,12 @@ import {StorageEngine} from "../storage/StorageEngine";
 import {ModelOfflineManager} from "./ModelOfflineManager";
 import {ModelDeletedEvent} from "./events/";
 import {ModelPermissions} from "./ModelPermissions";
-import IReferenceData = io.convergence.proto.IReferenceData;
 import {IModelState} from "../storage/api/IModelState";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
+import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
+import IReferenceData = io.convergence.proto.IReferenceData;
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -56,7 +56,7 @@ export interface ModelServiceEvents {
   /**
    * Emitted when a model is deleted. The actual event emitted is a [[ModelDeletedEvent]].
    *
-   * @event
+   * @event [[ModelDeletedEvent]]
    */
   readonly MODEL_DELETED: string;
 }
@@ -158,8 +158,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._modelOfflineManager = new ModelOfflineManager(
       10 * 60 * 1000,
       100,
-      storageEngine,
-      this._connection.session().sessionId()
+      storageEngine
     );
 
     this._log = Logging.logger("models");
@@ -538,32 +537,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._connection.request(request)
       .then((response: IConvergenceMessage) => {
         const {openRealTimeModelResponse} = response;
-
-        const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
-        const referenceTransformer: ReferenceTransformer =
-          new ReferenceTransformer(new TransformationFunctionRegistry());
-        const clientConcurrencyControl: ClientConcurrencyControl = new ClientConcurrencyControl(
-          getOrDefaultNumber(openRealTimeModelResponse.version),
-          transformer,
-          referenceTransformer);
         const data = toObjectValue(openRealTimeModelResponse.data);
-        const model: RealTimeModel = new RealTimeModel(
-          openRealTimeModelResponse.resourceId,
-          getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
-          data,
-          getOrDefaultArray(openRealTimeModelResponse.connectedClients),
-          getOrDefaultArray(openRealTimeModelResponse.references),
-          toModelPermissions(openRealTimeModelResponse.permissions),
+        const model = this._createModel(
+          getOrDefaultString(openRealTimeModelResponse.resourceId),
+          getOrDefaultString(openRealTimeModelResponse.modelId),
+          getOrDefaultString(openRealTimeModelResponse.collection),
           getOrDefaultNumber(openRealTimeModelResponse.version),
           timestampToDate(openRealTimeModelResponse.createdTime),
           timestampToDate(openRealTimeModelResponse.modifiedTime),
-          openRealTimeModelResponse.modelId,
-          openRealTimeModelResponse.collection,
-          clientConcurrencyControl,
-          this._connection,
-          this._identityCache,
-          this,
-          this._modelOfflineManager
+          getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
+          getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+          getOrDefaultArray(openRealTimeModelResponse.references),
+          toModelPermissions(openRealTimeModelResponse.permissions),
+          data
         );
 
         this._openModelsByRid.set(openRealTimeModelResponse.resourceId, model);
@@ -585,6 +571,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         .then(modelState => {
           if (TypeChecker.isSet(modelState)) {
             const model = this._creteModelFromOfflineState(modelState);
+            model._setOffline();
             return Promise.resolve(model);
           } else if (this._autoCreateRequests.has(autoRequestId)) {
             const options = this._autoCreateRequests.get(autoRequestId);
@@ -649,7 +636,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       0,
       currentTime,
       currentTime,
-      valueIdPrefix, [],
+      valueIdPrefix,
+      [],
       [],
       permissions,
       dataValue
@@ -657,6 +645,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return model;
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _createModel(
     resourceId: string,
     modelId: string,
@@ -674,7 +666,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const referenceTransformer: ReferenceTransformer =
       new ReferenceTransformer(new TransformationFunctionRegistry());
     const clientConcurrencyControl: ClientConcurrencyControl =
-      new ClientConcurrencyControl(version, transformer, referenceTransformer);
+      new ClientConcurrencyControl(
+        () => this._connection.session().sessionId(),
+        version,
+        transformer,
+        referenceTransformer);
 
     return new RealTimeModel(
       resourceId,
