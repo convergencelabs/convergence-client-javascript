@@ -16,7 +16,7 @@ nodePod { label ->
       }
 
       stage('Publish') {
-        sh 'npm publish dist-internal'
+        sh 'npm publish dist'
       }
     }
 
