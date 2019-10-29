@@ -25,7 +25,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    path: path.resolve(__dirname, '../dist-internal'),
+    path: path.resolve(__dirname, '../dist'),
     library: 'Convergence'
   },
   externals: [

@@ -7,6 +7,7 @@ import {Immutable} from "../../util/Immutable";
  */
 export class ClientOperationEvent {
   constructor(
+    public sessionId: string,
     public seqNo: number,
     public contextVersion: number,
     public timestamp: Date,
@@ -15,6 +16,7 @@ export class ClientOperationEvent {
   }
 
   public copy(mods?: {
+    sessionId?: string,
     seqNo?: number,
     contextVersion?: number,
     timestamp?: Date,
@@ -22,6 +24,7 @@ export class ClientOperationEvent {
   }) {
     mods = Immutable.getOrDefault(mods, {});
     return new ClientOperationEvent(
+      Immutable.getOrDefault(mods.sessionId, this.sessionId),
       Immutable.getOrDefault(mods.seqNo, this.seqNo),
       Immutable.getOrDefault(mods.contextVersion, this.contextVersion),
       Immutable.getOrDefault(mods.timestamp, this.timestamp),

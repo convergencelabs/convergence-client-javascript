@@ -60,10 +60,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return this.add(IdbSchema.ModelLocalOperation.Store, localOp);
   }
 
-  public processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void> {
+  public processOperationAck(modelId: string,
+                             sessionId: string,
+                             seqNo: number,
+                             serverOp: IServerOperationData): Promise<void> {
     const stores = [IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([localOpStore, serverOpStore]) => {
-      localOpStore.delete([modelId, seqNo]);
+      localOpStore.delete([modelId, sessionId, seqNo]);
       serverOpStore.add(serverOp);
     });
   }
@@ -105,7 +108,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   public subscribeToModel(modelId: string): Promise<void> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withWriteStore(storeName, async (store) => {
-      const data = {id: modelId};
+      const data = {modelId};
       store.put(data);
     });
   }

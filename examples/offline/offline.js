@@ -49,7 +49,23 @@ domain.events().subscribe(e => {
   }
 });
 
-domain.connectOffline("test").then(() => {
+function connectOnline() {
+  domain
+    .connectWithPassword({username: "test", password: "password"})
+    .catch(e => console.error())
+}
+
+function connectOffline() {
+  domain
+    .connectOffline("test")
+    .catch(e => console.error())
+}
+
+function disconnect() {
+  domain.disconnect();
+}
+
+function openModel() {
   domain.models().openAutoCreate({
     collection: "test",
     id: modelId,
@@ -78,9 +94,10 @@ domain.connectOffline("test").then(() => {
     const modelId = model.modelId();
     const url = baseURL + "?modelId=" + modelId;
     window.history.pushState(modelId, modelId, url);
+    model.setSubscribedOffline(true);
     bindToModel(model);
-  });
-});
+  }).catch(e => console.error(e));
+}
 
 // Set up all the events on all the models.
 function bindToModel(realTimeModel) {
@@ -336,12 +353,4 @@ function   createUUID() {
     return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
   });
   return uuid;
-}
-
-function disconnect() {
-  domain.disconnect();
-}
-
-function connect() {
-  domain.connectWithPassword({username: "test", password: "password"});
 }

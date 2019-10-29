@@ -19,7 +19,7 @@ export default [
   {
     input: input,
     output: [
-      {file: "dist-internal/convergence.js", format: 'cjs', sourcemap: true, exports: "named"},
+      {file: "dist/convergence.js", format: 'cjs', sourcemap: true, exports: "named"},
     ],
     external: [
       "rxjs",
@@ -44,7 +44,7 @@ export default [
   {
     input: input,
     output: [
-      {file: "dist-internal/convergence.esm.js", format: 'es', sourcemap: true, exports: "named"}
+      {file: "dist/convergence.esm.js", format: 'es', sourcemap: true, exports: "named"}
     ],
     external: [
       "rxjs",

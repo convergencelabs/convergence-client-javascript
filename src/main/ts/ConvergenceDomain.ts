@@ -39,6 +39,7 @@ import {TypeChecker} from "./util/TypeChecker";
 /**
  * This represents a single connection to a specific Domain in
  * Convergence. All interactions with the Domain start with this class, through
+<<<<<<< HEAD
  * several "services" that provide the following functionality:
  *
  * - [[ModelService]]: Manage [models (data)](https://docs.convergence.io/guide/models/model-service.html)
@@ -46,6 +47,14 @@ import {TypeChecker} from "./util/TypeChecker";
  * - [[ActivityService]]: Manage [activities](https://docs.convergence.io/guide/activities/overview.html)
  * - [[PresenceService]]: Manage [presence](https://docs.convergence.io/guide/presence/overview.html)
  * - [[ChatService]]: Create [chat](https://docs.convergence.io/guide/chat/overview.html)s and send and receive messages
+=======
+ * several "services" that provide access to:
+ * - [Models (data)](https://docs.convergence.io/guide/models/model-service.html)
+ * - [Users and Groups](https://docs.convergence.io/guide/identity/overview.html)
+ * - [Activities](https://docs.convergence.io/guide/activities/overview.html)
+ * - [Presence](https://docs.convergence.io/guide/presence/overview.html)
+ * - [Chat](https://docs.convergence.io/guide/chat/overview.html)
+>>>>>>> 9e5c8bdb8162feb63e80eed96ea39f7d2d1a5d12
  *
  * This object itself is the result of a successful connection and authentication
  * to a Convergence server via one of the [[Convergence]] connection methods.
@@ -437,7 +446,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
         Validation.assertNonEmptyString(creds.username, "username");
         Validation.assertNonEmptyString(creds.password, "password");
         return this._authenticateWithPassword(creds);
-      });
+      })
+      .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -457,7 +467,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       .connect()
       .then(() => promiseCallback())
       .then((d) => this._authenticateAnonymously(d))
-      .then(() => this._init());
+      .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -481,7 +491,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
         Validation.assertNonEmptyString(j, "jwt");
         return this._authenticateWithJwt(j);
       })
-      .then(() => this._init());
+      .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -507,7 +517,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
           Validation.assertNonEmptyString(t, "token");
           return this._authenticateWithReconnectToken(t);
         })
-        .then(() => this._init());
+        .then(() => this._init(this._connection.session().user().username));
     }
   }
 
@@ -615,7 +625,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  private _init(username?: string): Promise<void> {
+  private _init(username: string): Promise<void> {
+    // FIXME perhaps this should take a user so we can tell the user type
     if (this._options.storageAdapter) {
       // FIXME do we need to make sure we are not an anonymous user here?
       this._storage.configure(this._options.storageAdapter);
