@@ -39,13 +39,13 @@ import {TypeChecker} from "./util/TypeChecker";
 /**
  * This represents a single connection to a specific Domain in
  * Convergence. All interactions with the Domain start with this class, through
- * several "services" that provide access to:
+ * several "services" that provide the following functionality:
  *
- * - [Models (data)](https://docs.convergence.io/guide/models/model-service.html)
- * - [Users and Groups](https://docs.convergence.io/guide/identity/overview.html)
- * - [Activities](https://docs.convergence.io/guide/activities/overview.html)
- * - [Presence](https://docs.convergence.io/guide/presence/overview.html)
- * - [Chat](https://docs.convergence.io/guide/chat/overview.html)
+ * - [[ModelService]]: Manage [models (data)](https://docs.convergence.io/guide/models/model-service.html)
+ * - [[Identity Service]]: Manage [users and groups](https://docs.convergence.io/guide/identity/overview.html)
+ * - [[ActivityService]]: Manage [activities](https://docs.convergence.io/guide/activities/overview.html)
+ * - [[PresenceService]]: Manage [presence](https://docs.convergence.io/guide/presence/overview.html)
+ * - [[ChatService]]: Create [chat](https://docs.convergence.io/guide/chat/overview.html)s and send and receive messages
  *
  * This object itself is the result of a successful connection and authentication
  * to a Convergence server via one of the [[Convergence]] connection methods.
