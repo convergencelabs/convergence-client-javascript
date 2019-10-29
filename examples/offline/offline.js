@@ -61,6 +61,10 @@ function connectOffline() {
     .catch(e => console.error())
 }
 
+function disconnect() {
+  domain.disconnect();
+}
+
 function openModel() {
   domain.models().openAutoCreate({
     collection: "test",
@@ -349,8 +353,4 @@ function   createUUID() {
     return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
   });
   return uuid;
-}
-
-function disconnect() {
-  domain.disconnect();
 }

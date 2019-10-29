@@ -863,13 +863,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     let inFlight: ClientOperationEvent[] = [];
     while (serverEvents.length > 0 || clientEvents.length > 0) {
       while (serverEvents.length > 0 &&
-      (clientEvents.length === 0 || serverEvents[0].version < clientEvents[0].contextVersion)) {
+      (clientEvents.length === 0 || serverEvents[0].version <= clientEvents[0].contextVersion)) {
         const serverEvent = serverEvents.shift();
         this._applyOperation(serverEvent.operation, serverEvent.clientId, serverEvent.version, serverEvent.timestamp);
-        contextVersion = serverEvent.version;
+        contextVersion++;
       }
 
-      while (clientEvents.length > 0 && clientEvents[0].contextVersion === this._concurrencyControl.contextVersion()) {
+      while (clientEvents.length > 0 && clientEvents[0].contextVersion === contextVersion) {
         const clientEvent = clientEvents.shift();
         this._applyOperation(
           clientEvent.operation,
@@ -1191,7 +1191,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       // fixme handle error.
       this._offlineManager
-        .processOperationAck(this.modelId(), sequenceNumber, serverOp)
+        .processOperationAck(this.modelId(), this._connection.session().sessionId(), sequenceNumber, serverOp)
         .catch(e => console.error(e));
     }
   }

@@ -107,8 +107,11 @@ export class ModelOfflineManager {
     return this._storage.modelStore().processLocalOperation(localOpData);
   }
 
-  public processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void> {
-    return this._storage.modelStore().processOperationAck(modelId, seqNo, serverOp);
+  public processOperationAck(modelId: string,
+                             sessionId: string,
+                             seqNo: number,
+                             serverOp: IServerOperationData): Promise<void> {
+    return this._storage.modelStore().processOperationAck(modelId, sessionId, seqNo, serverOp);
   }
 
   public processServerOperationEvent(modelId: string,
