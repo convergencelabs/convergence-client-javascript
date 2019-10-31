@@ -6,6 +6,6 @@ import {IModelData} from "../storage/api";
  * @internal
  */
 export interface IModelSnapshot {
-  snapshot: IModelData;
+  model: IModelData;
   localOps: ClientOperationEvent[];
 }

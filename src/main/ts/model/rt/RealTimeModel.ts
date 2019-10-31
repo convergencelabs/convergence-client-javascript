@@ -84,6 +84,7 @@ import IModelForceCloseMessage = io.convergence.proto.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = io.convergence.proto.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = io.convergence.proto.IRemoteOperationMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
+import {ICreateModelOptions} from "../ICreateModelOptions";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -239,7 +240,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private static readonly _log: Logger = Logging.logger("model");
+  private static readonly _log: Logger = Logging.logger("models");
 
   /**
    * @internal
@@ -357,6 +358,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private readonly _offlineManager: ModelOfflineManager;
 
   private _storeOffline: boolean;
+  private _local: boolean;
 
   /**
    * @hidden
@@ -367,6 +369,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   constructor(resourceId: string,
               valueIdPrefix: string,
               data: ObjectValue,
+              local: boolean,
               sessions: string[],
               references: IReferenceData[],
               permissions: ModelPermissions,
@@ -384,6 +387,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._resourceId = resourceId;
     this._version = version;
+    this._local = local;
     this._createdTime = createdTime;
     this._time = modifiedTime;
     this._modelId = modelId;
@@ -458,8 +462,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _getCurrentStateSnapshot(): IModelData {
     return {
-      id: this._modelId,
+      modelId: this._modelId,
       collection: this._collectionId,
+      local: this._local,
       version: this.version(),
       seqNo: this._concurrencyControl.sequenceNumber(),
       createdTime: this._createdTime,
@@ -478,7 +483,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._storeOffline = true;
     const snapshot = this._getCurrentStateSnapshot();
     const localOps = this._concurrencyControl.getInFlightOperations();
-    return {snapshot, localOps};
+    return {model: snapshot, localOps};
   }
 
   /**
@@ -513,16 +518,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
-   * Returns true if local changes to this model are being emiited.
+   * Returns true if local changes to this model are being emitted.
    *
-   * fixme inconsistent with isOpen()
+   * FIXME inconsistent with isOpen()
    */
   public emitLocalEvents(): boolean;
 
   /**
    * Toggles the `emitLocalEvents` setting.  If set to `true`, whenever any data
    * within this model is mutated, the same events will be emitted as if the mutation
-   * happended remotely.  This is useful for handling change events in one place,
+   * happened remotely.  This is useful for handling change events in one place,
    * switching on the [[IConvergenceModelValueEvent]].local field.
    *
    * @param emit true if local changes to this model should emit
@@ -961,7 +966,32 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOnline(): void {
-    RealTimeModel._log.debug(`model reconnecting: ${this._modelId}`);
+    if (this._local) {
+      RealTimeModel._log.debug(`sending locally created model to the server: ${this._modelId}`);
+      this._offlineManager.getModelCreationData(this._modelId).then(creation => {
+        const options: ICreateModelOptions = {
+          id: creation.modelId,
+          collection: creation.collection,
+          overrideCollectionWorldPermissions: creation.overrideCollectionWorldPermissions,
+          worldPermissions: creation.worldPermissions,
+          userPermissions: creation.userPermissions
+        };
+        return this._modelService._create(creation.initialData, options);
+      }).then(() => {
+        return this._offlineManager.modelCreated(this._modelId);
+      }).then(() => {
+        this._local = false;
+        this._reconnect();
+      }).catch(e => {
+        RealTimeModel._log.error("Error creating offline model on reconnect.", e);
+      });
+    } else {
+      this._reconnect();
+    }
+  }
+
+  private _reconnect(): void {
+    RealTimeModel._log.debug(`remote model reconnecting: ${this._modelId}`);
     this._emitEvent(new ModelReconnectingEvent(this));
 
     const request: IConvergenceMessage = {

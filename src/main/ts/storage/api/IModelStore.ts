@@ -1,5 +1,6 @@
 import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
+import {IModelCreationData} from "./IModelCreationData";
 
 /**
  * @hidden
@@ -14,7 +15,11 @@ export interface IModelStore {
 
   unsubscribeFromModel(modelId: string): Promise<void>;
 
-  putModel(model: IModelState): Promise<void>;
+  createLocalModel(model: IModelCreationData): Promise<void>;
+
+  getModelCreationData(modelId: string): Promise<IModelCreationData>;
+
+  putModelState(model: IModelState): Promise<void>;
 
   getModel(modelId: string): Promise<IModelState | undefined>;
 
@@ -25,4 +30,6 @@ export interface IModelStore {
   processLocalOperation(localOp: ILocalOperationData): Promise<void>;
 
   processOperationAck(modelId: string, sessionId: string, seqNo: number, serverOp: IServerOperationData): Promise<void>;
+
+  modelCreated(modelId: string): Promise<void>;
 }

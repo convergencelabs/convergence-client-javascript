@@ -20,15 +20,27 @@ export class IdbSchemaVersion1 {
       {unique: true});
 
     //
-    // Model Store
+    // Local Model Store
     //
-    const modelStore = db.createObjectStore(
-      IdbSchema.Model.Store,
-      {keyPath: IdbSchema.Model.Fields.Id});
+    const localModelStore = db.createObjectStore(
+      IdbSchema.ModelCreation.Store,
+      {keyPath: IdbSchema.ModelCreation.Fields.ModelId});
 
-    modelStore.createIndex(
-      IdbSchema.Model.Indices.Id,
-      IdbSchema.Model.Fields.Id,
+    localModelStore.createIndex(
+      IdbSchema.ModelSubscriptions.Indices.ModelId,
+      IdbSchema.ModelSubscriptions.Fields.ModelId,
+      {unique: true});
+
+    //
+    // Model Snapshot Store
+    //
+    const modelSnapshotStore = db.createObjectStore(
+      IdbSchema.ModelData.Store,
+      {keyPath: IdbSchema.ModelData.Fields.ModelId});
+
+    modelSnapshotStore.createIndex(
+      IdbSchema.ModelData.Indices.ModelId,
+      IdbSchema.ModelData.Fields.ModelId,
       {unique: true});
 
     //

@@ -1,8 +1,10 @@
 import {IdbPersistenceStore} from "./IdbPersistenceStore";
-import {ILocalOperationData, IModelStore, IServerOperationData} from "../api/";
-import {toPromise} from "./promise";
+import {ILocalOperationData, IModelData, IModelStore, IServerOperationData} from "../api/";
+import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {IModelState} from "../api/IModelState";
+import {IModelCreationData} from "../api/IModelCreationData";
+import {ModelPermissions} from "../../model";
 
 /**
  * @hidden
@@ -29,15 +31,79 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     operations.forEach(op => store.add(op));
   }
 
-  public putModel(modelState: IModelState): Promise<void> {
+  private static _putModelState(
+    modelState: IModelState,
+    modelStore: IDBObjectStore,
+    localOpStore: IDBObjectStore,
+    serverOpStore: IDBObjectStore): void {
     const {model, localOperations, serverOperations} = modelState;
-    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
+    modelStore.put(model);
+    IdbModelStore.deleteServerOperationsForModel(serverOpStore, model.modelId);
+    IdbModelStore.deleteLocalOperationsForModel(localOpStore, model.modelId);
+    IdbModelStore.putLocalOperationsForModel(localOpStore, localOperations);
+    IdbModelStore.putServerOperationsForModel(serverOpStore, serverOperations);
+  }
+
+  public createLocalModel(modelCreation: IModelCreationData): Promise<void> {
+    const stores = [
+      IdbSchema.ModelCreation.Store,
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store];
+
+    return this._withWriteStores(stores, async ([creationStore, modelStore, localOpStore, serverOpStore]) => {
+      creationStore.put(modelCreation);
+
+      const version = 0;
+      const seqNo = 0;
+      const now = new Date();
+      const permissions = new ModelPermissions(true, true, true, true);
+      const modelState: IModelState = {
+        model: {
+          modelId: modelCreation.modelId,
+          local: true,
+          collection: modelCreation.collection,
+          version,
+          seqNo,
+          createdTime: now,
+          modifiedTime: now,
+          permissions,
+          data: modelCreation.initialData
+        },
+        localOperations: [],
+        serverOperations: []
+      };
+
+      IdbModelStore._putModelState(modelState, modelStore, localOpStore, serverOpStore);
+    });
+  }
+
+  public modelCreated(modelId: string): Promise<void> {
+    const stores = [
+      IdbSchema.ModelCreation.Store,
+      IdbSchema.ModelData.Store];
+
+    return this._withWriteStores(stores, async ([creationStore, snapshotStore]) => {
+      creationStore.delete(modelId);
+      const model: IModelData = await toPromise(snapshotStore.get(modelId));
+      model.local = false;
+      return toVoidPromise(snapshotStore.put(model));
+    });
+  }
+
+  public getModelCreationData(modelId: string): Promise<IModelCreationData> {
+    return this._withReadStore(IdbSchema.ModelCreation.Store, async store => {
+      return toPromise(store.get(modelId));
+    });
+  }
+
+  public putModelState(modelState: IModelState): Promise<void> {
+    const stores = [
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
-      modelStore.put(model);
-      IdbModelStore.deleteServerOperationsForModel(serverOpStore, model.id);
-      IdbModelStore.deleteLocalOperationsForModel(localOpStore, model.id);
-      IdbModelStore.putLocalOperationsForModel(localOpStore, localOperations);
-      IdbModelStore.putServerOperationsForModel(serverOpStore, serverOperations);
+      IdbModelStore._putModelState(modelState, modelStore, localOpStore, serverOpStore);
     });
   }
 
@@ -46,8 +112,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       throw new Error("modelId must be defined");
     }
 
-    return this._withReadStore(IdbSchema.Model.Store, (store) => {
-      const idx = store.index(IdbSchema.Model.Indices.Id);
+    return this._withReadStore(IdbSchema.ModelData.Store, (store) => {
+      const idx = store.index(IdbSchema.ModelData.Indices.ModelId);
       return toPromise(idx.count(modelId)).then((count => count > 0));
     });
   }
@@ -76,7 +142,10 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       throw new Error("modelId must be defined");
     }
 
-    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
+    const stores = [
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store];
     return this._withReadStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       const model = await toPromise(modelStore.get(modelId));
       if (model) {
@@ -115,7 +184,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public unsubscribeFromModel(modelId: string): Promise<void> {
     const stores = [
-      IdbSchema.Model.Store,
+      IdbSchema.ModelData.Store,
       IdbSchema.ModelLocalOperation.Store,
       IdbSchema.ModelServerOperation.Store,
       IdbSchema.ModelSubscriptions.Store
@@ -130,7 +199,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public deleteModel(modelId: string): Promise<void> {
-    const stores = [IdbSchema.Model.Store, IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
+    const stores = [IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       modelStore.delete(modelId);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);

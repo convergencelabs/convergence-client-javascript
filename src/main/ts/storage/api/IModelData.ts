@@ -6,7 +6,8 @@ import {ModelPermissions} from "../../model";
  * @internal
  */
 export interface IModelData {
-  id: string;
+  modelId: string;
+  local: boolean;
   collection: string;
   version: number;
   seqNo: number;

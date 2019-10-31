@@ -43,6 +43,7 @@ import {ModelPermissions} from "./ModelPermissions";
 import {IModelState} from "../storage/api/IModelState";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
+import {IModelCreationData} from "../storage/api/IModelCreationData";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage = io.convergence.proto.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = io.convergence.proto.IReferenceData;
@@ -298,7 +299,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       throw new ConvergenceError("'options' is a required parameter");
     }
 
-    const collection = options.collection;
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
     }
@@ -313,6 +313,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     });
     const dataValue: ObjectValue = dataValueFactory.createDataValue(data) as ObjectValue;
 
+    return this._create(dataValue, options);
+  }
+
+  /**
+   *
+   * @param dataValue
+   * @param options
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _create(dataValue: ObjectValue, options: ICreateModelOptions): Promise<string> {
+    const collection = options.collection;
     const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
     const request: IConvergenceMessage = {
       createRealTimeModelRequest: {
@@ -542,6 +555,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           getOrDefaultString(openRealTimeModelResponse.resourceId),
           getOrDefaultString(openRealTimeModelResponse.modelId),
           getOrDefaultString(openRealTimeModelResponse.collection),
+          false,
           getOrDefaultNumber(openRealTimeModelResponse.version),
           timestampToDate(openRealTimeModelResponse.createdTime),
           timestampToDate(openRealTimeModelResponse.modifiedTime),
@@ -571,13 +585,21 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         .then(modelState => {
           if (TypeChecker.isSet(modelState)) {
             const model = this._creteModelFromOfflineState(modelState);
-            model._setOffline();
+            model._enableOffline();
             return Promise.resolve(model);
           } else if (this._autoCreateRequests.has(autoRequestId)) {
             const options = this._autoCreateRequests.get(autoRequestId);
             const model = this._createNewModelOffline(id, options);
             const snapshot = model._enableOffline();
-            return this._modelOfflineManager.createOfflineModel(snapshot).then(() => model);
+            const creationData: IModelCreationData = {
+              modelId: id,
+              collection: options.collection,
+              initialData: snapshot.model.data,
+              overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
+              worldPermissions: options.worldPermissions,
+              userPermissions: options.userPermissions
+            };
+            return this._modelOfflineManager.createOfflineModel(creationData).then(() => model);
           } else {
             return Promise.reject(new Error("Model not available offline, and not auto create options were provided"));
           }
@@ -590,7 +612,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _creteModelFromOfflineState(state: IModelState): RealTimeModel {
-    this._log.debug(`Opening model '${state.model.id}' from offline state`);
+    this._log.debug(`Opening model '${state.model.modelId}' from offline state`);
 
     // FIXME what should these be?
     const resourceId = "fake";
@@ -598,8 +620,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     const model = this._createModel(
       resourceId,
-      state.model.id,
+      state.model.modelId,
       state.model.collection,
+      state.model.local,
       state.model.version,
       state.model.createdTime,
       state.model.modifiedTime,
@@ -610,6 +633,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.model.data
     );
 
+    model._setOffline();
     model._rehydrateFromOfflineState(state.serverOperations, state.localOperations);
 
     return model;
@@ -628,12 +652,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const valueIdPrefix = "fake2";
     const currentTime = new Date();
     const permissions = new ModelPermissions(true, true, true, true);
+    const version = 1;
+    const local = true;
 
     const model = this._createModel(
       resourceId,
       id,
       options.collection,
-      0,
+      local,
+      version,
       currentTime,
       currentTime,
       valueIdPrefix,
@@ -642,6 +669,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       permissions,
       dataValue
     );
+
+    model._setOffline();
+
     return model;
   }
 
@@ -653,6 +683,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     resourceId: string,
     modelId: string,
     collection: string,
+    local: boolean,
     version: number,
     createdTime: Date,
     modifiedTime: Date,
@@ -676,6 +707,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       resourceId,
       valueIdPrefix,
       data,
+      local,
       connectedClients,
       references,
       permissions,

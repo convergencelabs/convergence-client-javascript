@@ -2,16 +2,6 @@
  * @hidden
  * @internal
  */
-export interface IObjectStoreSchema {
-  Store: string;
-  Indices: {[key: string]: string};
-  Fields: {[key: string]: string};
-}
-
-/**
- * @hidden
- * @internal
- */
 export const IdbSchema = {
   ModelSubscriptions: {
     Store: "ModelSubscription",
@@ -22,13 +12,22 @@ export const IdbSchema = {
       ModelId: "modelId"
     }
   },
-  Model: {
-    Store: "Model",
+  ModelCreation: {
+    Store: "ModelCreation",
     Fields: {
-      Id: "id"
+      ModelId: "modelId"
     },
     Indices: {
-      Id: "Model.id"
+      ModelId: "ModelCreation.modelId"
+    }
+  },
+  ModelData: {
+    Store: "ModelData",
+    Fields: {
+      ModelId: "modelId"
+    },
+    Indices: {
+      ModelId: "ModelData.modelId"
     }
   },
   ModelServerOperation: {

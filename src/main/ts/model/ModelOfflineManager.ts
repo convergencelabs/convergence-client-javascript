@@ -1,17 +1,32 @@
 import {StorageEngine} from "../storage/StorageEngine";
 import {IModelState} from "../storage/api/IModelState";
-import {ILocalOperationData, IModelStore, IServerOperationData} from "../storage/api";
+import {ILocalOperationData, IServerOperationData} from "../storage/api";
 import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 import {ServerOperationEvent} from "./ot/ServerOperationEvent";
 import {toOfflineOperationData} from "../storage/OfflineOperationMapper";
 import {RealTimeModel} from "./rt";
-import {IModelSnapshot} from "./IModelSnapshot";
+import {IModelCreationData} from "../storage/api/IModelCreationData";
+import {Logging} from "../util/log/Logging";
 
 /**
  * @hidden
  * @internal
  */
 export class ModelOfflineManager {
+  private static readonly _log = Logging.logger("models.offline");
+
+  private static _mapClientOperationEvent(modelId: string, opEvent: ClientOperationEvent): ILocalOperationData {
+    const opData = toOfflineOperationData(opEvent.operation);
+    return {
+      sessionId: opEvent.sessionId,
+      modelId,
+      sequenceNumber: opEvent.seqNo,
+      contextVersion: opEvent.contextVersion,
+      timestamp: opEvent.timestamp,
+      operation: opData
+    };
+  }
+
   private readonly _subscribedModels: Set<string>;
   private readonly _openModels: Map<string, RealTimeModel>;
   private readonly _syncInterval: number;
@@ -24,13 +39,13 @@ export class ModelOfflineManager {
     this._openModels = new Map();
   }
 
-  public init(): Promise<void> {
-    return this._storage.modelStore().getSubscribedModels().then(modelIds => {
+  public init(): void {
+    this._storage.modelStore().getSubscribedModels().then(modelIds => {
       modelIds.forEach(modelId => {
         this._subscribedModels.add(modelId);
       });
-
-      return;
+    }).catch(e => {
+      ModelOfflineManager._log.error("Error initializing offline model manager.", e);
     });
   }
 
@@ -80,20 +95,18 @@ export class ModelOfflineManager {
     }
   }
 
-  public modelStore(): IModelStore {
-    return this._storage.modelStore();
+  public getModelCreationData(modelId: string): Promise<IModelCreationData> {
+    return this._storage.modelStore().getModelCreationData(modelId);
   }
 
-  public createOfflineModel(model: IModelSnapshot): Promise<void> {
-    const localOps = model.localOps.map(op => this._mapClientOperationEvent(model.snapshot.id, op));
-    const state: IModelState = {
-      model: model.snapshot,
-      localOperations: localOps,
-      serverOperations: []
-    };
+  public modelCreated(modelId: string): Promise<void> {
+    return this._storage.modelStore().modelCreated(modelId);
+  }
+
+  public createOfflineModel(creationData: IModelCreationData): Promise<void> {
     return this._storage
       .modelStore()
-      .putModel(state);
+      .createLocalModel(creationData);
   }
 
   public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
@@ -103,7 +116,7 @@ export class ModelOfflineManager {
   }
 
   public processLocalOperation(modelId: string, clientEvent: ClientOperationEvent): Promise<void> {
-    const localOpData = this._mapClientOperationEvent(modelId, clientEvent);
+    const localOpData = ModelOfflineManager._mapClientOperationEvent(modelId, clientEvent);
     return this._storage.modelStore().processLocalOperation(localOpData);
   }
 
@@ -127,28 +140,17 @@ export class ModelOfflineManager {
     };
 
     const currentLocalOps = transformedLocalOps
-      .map(clientEvent => this._mapClientOperationEvent(modelId, clientEvent));
+      .map(clientEvent => ModelOfflineManager._mapClientOperationEvent(modelId, clientEvent));
 
     return this._storage.modelStore().processServerOperation(serverOp, currentLocalOps);
   }
 
   private _initOpenModelForOffline(rtModel: RealTimeModel): Promise<void> {
     const offlineState = rtModel._enableOffline();
-    const model = offlineState.snapshot;
-    const localOperations = offlineState.localOps.map(op => this._mapClientOperationEvent(rtModel.modelId(), op));
+    const model = offlineState.model;
+    const localOperations = offlineState.localOps
+      .map(op => ModelOfflineManager._mapClientOperationEvent(rtModel.modelId(), op));
     const serverOperations: IServerOperationData [] = [];
-    return this._storage.modelStore().putModel({model, localOperations, serverOperations});
-  }
-
-  private _mapClientOperationEvent(modelId: string, opEvent: ClientOperationEvent): ILocalOperationData {
-    const opData = toOfflineOperationData(opEvent.operation);
-    return {
-      sessionId: opEvent.sessionId,
-      modelId,
-      sequenceNumber: opEvent.seqNo,
-      contextVersion: opEvent.contextVersion,
-      timestamp: opEvent.timestamp,
-      operation: opData
-    };
+    return this._storage.modelStore().putModelState({model, localOperations, serverOperations});
   }
 }

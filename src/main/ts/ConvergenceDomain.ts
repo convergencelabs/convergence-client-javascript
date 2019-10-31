@@ -42,7 +42,7 @@ import {TypeChecker} from "./util/TypeChecker";
  * several "services" that provide the following functionality:
  *
  * - [[ModelService]]: Manage [models (data)](https://docs.convergence.io/guide/models/model-service.html)
- * - [[Identity Service]]: Manage [users and groups](https://docs.convergence.io/guide/identity/overview.html)
+ * - [[IdentityService]]: Manage [users and groups](https://docs.convergence.io/guide/identity/overview.html)
  * - [[ActivityService]]: Manage [activities](https://docs.convergence.io/guide/activities/overview.html)
  * - [[PresenceService]]: Manage [presence](https://docs.convergence.io/guide/presence/overview.html)
  * - [[ChatService]]: Create [chat](https://docs.convergence.io/guide/chat/overview.html)s and send and receive messages
