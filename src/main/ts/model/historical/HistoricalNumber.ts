@@ -9,7 +9,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface HistoricalNumberEvents extends ObservableNumberEvents {
 }
@@ -18,7 +18,7 @@ export interface HistoricalNumberEvents extends ObservableNumberEvents {
  * A read-only history-aware version of a [[RealTimeNumber]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class HistoricalNumber extends HistoricalElement<number> implements ObservableNumber {
   public static readonly Events: HistoricalNumberEvents = ObservableNumberEventConstants;

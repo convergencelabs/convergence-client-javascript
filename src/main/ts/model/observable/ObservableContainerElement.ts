@@ -2,7 +2,7 @@ import {ObservableElement} from "./ObservableElement";
 import {Path, PathElement} from "../Path";
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableContainerElement<T> extends ObservableElement<T> {
   elementAt(path: Path): ObservableElement<any>;

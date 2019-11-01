@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when another user sends a message to a particular [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class ChatMessageEvent extends ChatEvent {
   public static readonly NAME = "message";

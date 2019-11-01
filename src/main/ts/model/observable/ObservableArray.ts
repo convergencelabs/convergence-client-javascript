@@ -4,7 +4,7 @@ import {ObservableContainerElement} from "./ObservableContainerElement";
 /**
  * The events that could be emitted by a [[RealTimeArray]] or [[HistoricalArray]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableArrayEvents extends ObservableElementEvents {
   /**
@@ -50,7 +50,7 @@ export interface ObservableArrayEvents extends ObservableElementEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export const ObservableArrayEventConstants: ObservableArrayEvents = {
   ...ObservableElementEventConstants,
@@ -61,7 +61,7 @@ export const ObservableArrayEventConstants: ObservableArrayEvents = {
 Object.freeze(ObservableArrayEventConstants);
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableArray extends ObservableContainerElement<any[]> {
   get(index: number): ObservableElement<any>;

@@ -9,7 +9,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface HistoricalUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -18,7 +18,7 @@ export interface HistoricalUndefinedEvents extends ObservableUndefinedEvents {
  * A read-only history-aware version of a [[RealTimeUndefined]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class HistoricalUndefined extends HistoricalElement<void> implements ObservableUndefined {
 

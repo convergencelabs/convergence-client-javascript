@@ -5,7 +5,7 @@ import {ObservableElement} from "./ObservableElement";
 /**
  * The events that could be emitted by a [[RealTimeModel]] or [[HistoricalModel]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableModelEvents {
   /**
@@ -32,7 +32,7 @@ export interface ObservableModelEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export const ObservableModelEventConstants: ObservableModelEvents = {
   CLOSED: "closed",
@@ -42,7 +42,7 @@ export const ObservableModelEventConstants: ObservableModelEvents = {
 Object.freeze(ObservableModelEventConstants);
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableModel {
 

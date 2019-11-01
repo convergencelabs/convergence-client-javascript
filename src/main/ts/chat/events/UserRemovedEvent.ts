@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a particular [[DomainUser]] is removed from a [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserRemovedEvent extends ChatEvent {
   public static readonly NAME = "user_removed";

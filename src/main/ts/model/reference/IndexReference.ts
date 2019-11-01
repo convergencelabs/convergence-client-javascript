@@ -10,7 +10,7 @@ import {DomainUser} from "../../identity";
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
  * for some examples.
  *
- * @category Collaboration Awareness
+ * @module CollaborationAwareness
  */
 export class IndexReference extends ModelReference<number> {
 

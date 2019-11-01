@@ -8,7 +8,7 @@ import {DomainUser} from "../../identity";
  * [[RealTimeArray.insert]], [[RealTimeArray.push]], [[RealTimeArray.unshift]], or some
  * other method.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class ArrayInsertEvent implements IValueChangedEvent {
   public static readonly NAME = "insert";

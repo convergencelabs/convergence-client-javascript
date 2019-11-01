@@ -5,7 +5,7 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
  * Emitted when a [[ConvergenceDomain]] becomes disconnected but is still
  * attempting to automatically reconnect.
  *
- * @category Connection and Authentication
+ * @module ConnectionAndAuthentication
  */
 export class InterruptedEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "interrupted";

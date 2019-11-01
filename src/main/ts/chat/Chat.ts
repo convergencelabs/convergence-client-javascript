@@ -27,7 +27,7 @@ import {ChatInfo, createChatInfo} from "./ChatInfo";
 /**
  * The events that could be emitted from a particular [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface ChatEvents {
   readonly MESSAGE: string;
@@ -51,7 +51,7 @@ Object.freeze(Events);
  * provides several methods and behaviors that are common to all Chat
  * subclasses, such as the ability to send messages, set a name and topic, etc.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   public static readonly Events: ChatEvents = Events;
@@ -343,7 +343,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
  * })
  * ```
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface ChatHistorySearchOptions {
   /**

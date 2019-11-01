@@ -6,7 +6,7 @@ import {IModelEvent} from "./IModelEvent";
  * Emitted when a remote user opens a model.  This is only emitted if the
  * current user has that particular model already open.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class CollaboratorOpenedEvent implements IModelEvent {
   public static readonly NAME = "collaborator_opened";

@@ -5,7 +5,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a user leaving this chat.  Analogous to a [[UserLeftEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserLeftChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.USER_LEFT;

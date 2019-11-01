@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when the availability of a particular [[DomainUser]] changed.
  *
- * @category Presence Subsystem
+ * @module Presence Subsystem
  */
 export class PresenceAvailabilityChangedEvent implements IPresenceEvent {
   public static readonly NAME = "availability_changed";

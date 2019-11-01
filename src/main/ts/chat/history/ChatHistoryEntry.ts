@@ -4,7 +4,7 @@ import {Immutable} from "../../util/Immutable";
 /**
  * All the possible chat history entries.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface ChatHistoryEntryTypes {
   CREATED: string;
@@ -22,7 +22,7 @@ export interface ChatHistoryEntryTypes {
  * end up in their history, which can be queried with [[Chat.getHistory]] and optionally
  * filtered.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export abstract class ChatHistoryEntry {
 

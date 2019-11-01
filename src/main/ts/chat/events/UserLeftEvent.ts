@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a [[DomainUser]] leaves a [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserLeftEvent extends ChatEvent {
   public static readonly NAME = "user_left";

@@ -9,7 +9,7 @@ import { DomainUser } from "../identity";
 /**
  * The relevant metadata for a [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface ChatInfo {
 
@@ -70,7 +70,7 @@ export interface ChatInfo {
  * A member, or participant, of a Chat.  Has slightly different semantics depending on the
  * type of [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface ChatMember {
   /**
@@ -88,7 +88,7 @@ export interface ChatMember {
 /**
  * Use these rather than hardcoded strings to refer to a particular type of Chat.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export enum ChatTypes {
   DIRECT = "direct",
@@ -99,7 +99,7 @@ export enum ChatTypes {
 /**
  * The valid strings for a [[ChatInfo.chatType]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export type ChatType = ChatTypes.DIRECT | ChatTypes.CHANNEL | ChatTypes.ROOM;
 

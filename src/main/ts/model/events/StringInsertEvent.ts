@@ -5,7 +5,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when one or more characters are added to a [[RealTimeString]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class StringInsertEvent implements IValueChangedEvent {
   public static readonly NAME = "insert";

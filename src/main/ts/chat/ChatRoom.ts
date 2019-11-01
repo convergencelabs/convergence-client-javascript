@@ -15,7 +15,7 @@ import {IdentityCache} from "../identity/IdentityCache";
  * If your session is disconnected while joined to a `ChatRoom`, you will automatically
  * rejoin when connectivity is restored.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class ChatRoom extends MembershipChat {
 

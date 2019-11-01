@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * A superclass for any events occurring on a particular existing [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export abstract class ChatEvent implements IChatEvent {
   public abstract readonly name: string;

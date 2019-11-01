@@ -58,14 +58,15 @@ const bumpPackageVersion = (cb) => {
   }
 };
 
-const docsBuild = shell.task(['typedoc --options typedoc.config.json src/main/ts']);
+const docsClean = () => del([`${distDir}/docs`]);
+const docsBuild = shell.task(['typedoc src/main/ts']);
 const docsMarkup = () => {
   const packageJson = readAndParse(`${distDir}/package.json`);
   return src([`${distDir}/docs/index.html`])
     .pipe(replace('$PROJECT_VERSION', `${packageJson.version}`))
     .pipe(dest(`${distDir}/docs`));
 };
-const docs = series(docsBuild, docsMarkup);
+const docs = series(docsClean, docsBuild, docsMarkup);
 
 
 const webpackBundle = () => {

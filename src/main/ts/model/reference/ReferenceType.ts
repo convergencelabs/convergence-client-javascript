@@ -1,6 +1,6 @@
 /**
  * A unified type representing any type of reference.
  *
- * @category Collaboration Awareness
+ * @module CollaborationAwareness
  */
 export type ReferenceType = "index" | "range" | "element" | "property";

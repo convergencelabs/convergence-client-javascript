@@ -1,6 +1,6 @@
 
 /**
- * @category Connection and Authentication
+ * @module ConnectionAndAuthentication
  */
 export interface IWebSocketClass {
   prototype: WebSocket;

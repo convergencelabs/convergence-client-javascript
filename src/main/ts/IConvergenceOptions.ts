@@ -7,7 +7,8 @@ import {IStorageAdapter} from "./storage/api";
  * The [[IConvergenceOptions]] interface represents that options that can be
  * set within Convergence when connecting to a domain.
  *
- * @category Connection and Authentication
+ * @module ConnectionAndAuthentication
+ * @module ConnectionAndAuthentication
  */
 export interface IConvergenceOptions {
 

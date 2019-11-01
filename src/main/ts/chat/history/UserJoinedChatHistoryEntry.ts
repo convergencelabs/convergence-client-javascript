@@ -5,7 +5,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a user joining this chat.  Analogous to a [[UserJoinedEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserJoinedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.USER_JOINED;

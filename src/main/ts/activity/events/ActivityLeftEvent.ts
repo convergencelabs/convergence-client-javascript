@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * The ActivityStateClearedEvent is fired when a remote session clears all an
  * of its state within the [[Activity]].
  *
- * @category Collaboration Awareness
+ * @module CollaborationAwareness
  */
 export class ActivityLeftEvent implements IActivityEvent {
 

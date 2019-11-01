@@ -2,7 +2,7 @@
  * Represents a single read-only result entry from a model query. Includes the relevant
  * data and metadata for a particular model.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class ModelResult {
   constructor(

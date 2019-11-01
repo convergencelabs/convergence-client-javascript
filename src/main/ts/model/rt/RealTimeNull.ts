@@ -7,7 +7,7 @@ import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface RealTimeNullEvents extends ObservableNullEvents {
 }
@@ -23,7 +23,7 @@ export interface RealTimeNullEvents extends ObservableNullEvents {
  * More information is in the
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-null.html).
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class RealTimeNull extends RealTimeElement<void> implements ObservableNull {
 

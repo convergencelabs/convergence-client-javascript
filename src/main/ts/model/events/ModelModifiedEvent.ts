@@ -7,7 +7,7 @@ import {IModelEvent} from "./IModelEvent";
  * and a change is made. It will not be fired on subsequent consecutive
  * changes unless all changes are first acknowledged.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class ModelModifiedEvent implements IModelEvent {
   public static readonly NAME = "modified";

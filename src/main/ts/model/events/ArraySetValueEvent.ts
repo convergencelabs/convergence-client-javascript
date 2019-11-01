@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * Emitted when the entire [[RealTimeArray.value|value]] of a [[RealTimeArray]] is set,
  * meaning its entire contents were replaced (or initially set)
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class ArraySetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";

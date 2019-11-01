@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * The base interface for [[UserPresence]]-related events.
  *
- * @category Presence Subsystem
+ * @module Presence Subsystem
  */
 export interface IPresenceEvent extends IConvergenceEvent {
   /**

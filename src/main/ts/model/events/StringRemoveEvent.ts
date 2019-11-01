@@ -28,7 +28,7 @@ import {DomainUser} from "../../identity";
  * // removed value: "ar"
  * ```
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class StringRemoveEvent implements IValueChangedEvent {
   public static readonly NAME = "remove";

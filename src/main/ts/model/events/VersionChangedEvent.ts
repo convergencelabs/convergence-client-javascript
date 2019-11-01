@@ -8,7 +8,7 @@ import {ObservableModel} from "../observable/ObservableModel";
  * Note that on a local change, this won't be fired until the version is updated on the
  * server and a response message sent back to the client.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class VersionChangedEvent implements IModelEvent {
   public static readonly NAME = "version_changed";

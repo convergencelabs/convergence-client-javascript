@@ -3,7 +3,7 @@ import {ObservableElement, ObservableElementEvents, ObservableElementEventConsta
 /**
  * The events that could be emitted by a [[RealTimeString]] or [[HistoricalString]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableStringEvents extends ObservableElementEvents {
   /**
@@ -33,7 +33,7 @@ export interface ObservableStringEvents extends ObservableElementEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export const ObservableStringEventConstants: ObservableStringEvents = {
   INSERT: "insert",
@@ -43,7 +43,7 @@ export const ObservableStringEventConstants: ObservableStringEvents = {
 Object.freeze(ObservableStringEventConstants);
 
 /**
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface ObservableString extends ObservableElement<string> {
   length(): number;

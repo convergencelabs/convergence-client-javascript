@@ -11,7 +11,7 @@ import { mapObjectValues } from "../util/ObjectUtils";
 /**
  * The possible permissions a chat can have.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export type ChatPermission =
   "create_chat"
@@ -39,7 +39,7 @@ const CHAT_PERMISSION_IDENTIFIER = 1;
  * user's explicit permission would override the group's permission which the user
  * is in, which would itself override any world permission for this `Chat`.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class ChatPermissionManager {
 

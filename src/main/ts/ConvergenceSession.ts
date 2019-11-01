@@ -10,7 +10,7 @@ import {ConvergenceErrorCodes} from "./util/ConvergenceErrorCodes";
  * rather than the user, so a single user could potentially have multiple sessions
  * open at a time.
  *
- * @category Users and Identity
+ * @module UsersAndIdentity
  */
 export class ConvergenceSession {
 

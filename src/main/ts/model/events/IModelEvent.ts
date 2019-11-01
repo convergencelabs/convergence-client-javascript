@@ -4,7 +4,7 @@ import {ObservableModel} from "../observable/ObservableModel";
 /**
  * A parent interface indicating an event that occurred on a [[RealTimeModel]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface IModelEvent extends IConvergenceEvent {
 

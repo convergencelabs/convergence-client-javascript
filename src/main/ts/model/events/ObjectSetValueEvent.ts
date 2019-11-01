@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * Emitted when the entire [[RealTimeObject.value]] of a [[RealTimeObject]] is set,
  * meaning its entire contents were replaced, or set initially.
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class ObjectSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";

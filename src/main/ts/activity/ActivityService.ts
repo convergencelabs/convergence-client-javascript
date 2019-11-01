@@ -18,7 +18,7 @@ import {Logging} from "../util/log/Logging";
  * See the [developer guide](https://docs.convergence.io/guide/activities/overview.html)
  * for an introduction to Activities.
  *
- * @category Collaboration Awareness
+ * @module CollaborationAwareness
  */
 export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
 

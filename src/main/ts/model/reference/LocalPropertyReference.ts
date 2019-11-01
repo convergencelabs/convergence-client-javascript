@@ -5,7 +5,7 @@ import {PropertyReference} from "./PropertyReference";
  * An [[PropertyReference]] that was created locally.
  * See [[RealTimeObject.propertyReference]]
  *
- * @category Collaboration Awareness
+ * @module CollaborationAwareness
  */
 export class LocalPropertyReference extends LocalModelReference<string, PropertyReference> {
 

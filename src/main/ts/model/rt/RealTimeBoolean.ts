@@ -15,7 +15,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeBoolean]].
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
 }
@@ -29,7 +29,7 @@ export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
  * Common use cases are documented in the
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-boolean.html).
  *
- * @category Real Time Data Subsystem
+ * @module RealTimeData
  */
 export class RealTimeBoolean extends RealTimeElement<boolean> implements ObservableBoolean {
 
