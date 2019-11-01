@@ -31,10 +31,6 @@
     "protobufjs": "^6.8.8"
   },
   "license": "See LICENSE.txt",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
-  },
   "repository": {
     "type": "none",
     "url": "https://convergence.io"
