@@ -14,7 +14,7 @@ import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {ChatHistoryEntry} from "./history/ChatHistoryEntry";
 import {Observable} from "rxjs";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IChatInfoData = io.convergence.proto.IChatInfoData;
 import {ChatHistoryEventMapper} from "./history/ChatHistoryEventMapper";

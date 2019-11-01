@@ -10,7 +10,7 @@ import {createStubInstance} from "sinon";
 import {domainUserIdToProto} from "../../../main/ts/connection/ProtocolUtil";
 import {ConvergenceConnection} from "../../../main/ts/connection/ConvergenceConnection";
 
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IDomainUserData = io.convergence.proto.IDomainUserData;
 import IUserListMessage = io.convergence.proto.IUserListMessage;

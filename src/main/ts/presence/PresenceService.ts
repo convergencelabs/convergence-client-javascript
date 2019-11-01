@@ -25,7 +25,7 @@ import {
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUser, DomainUserId, DomainUserIdentifier, DomainUserType} from "../identity";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import {Logging} from "../util/log/Logging";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IUserPresence = io.convergence.proto.IUserPresence;

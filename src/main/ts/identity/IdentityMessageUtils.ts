@@ -2,7 +2,7 @@ import {ConvergenceError} from "../util";
 import {DomainUser} from "./DomainUser";
 import {fromOptional, protoToDomainUserType, protoToDomainUserId} from "../connection/ProtocolUtil";
 import {UserField} from "./IdentityService";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IDomainUserData = io.convergence.proto.IDomainUserData;
 import IUserGroupData = io.convergence.proto.IUserGroupData;
 import { UserGroup } from "./UserGroup";

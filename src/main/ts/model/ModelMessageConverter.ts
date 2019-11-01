@@ -1,4 +1,4 @@
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IDataValue = io.convergence.proto.IDataValue;
 import {
   ArrayValue,

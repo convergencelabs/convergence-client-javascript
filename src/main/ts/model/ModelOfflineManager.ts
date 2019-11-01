@@ -95,6 +95,18 @@ export class ModelOfflineManager {
     }
   }
 
+  public subscribe(modelIds: string[]): void {
+
+  }
+
+  public unsubscribe(modelIds: string[]): void {
+
+  }
+
+  public setSubscriptions(modelIds: string[]): void {
+
+  }
+
   public getModelCreationData(modelId: string): Promise<IModelCreationData> {
     return this._storage.modelStore().getModelCreationData(modelId);
   }

@@ -27,7 +27,7 @@ import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
 import {Deferred} from "../util/Deferred";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
 import {TypeChecker} from "../util/TypeChecker";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IActivitySessionJoinedMessage = io.convergence.proto.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = io.convergence.proto.IActivitySessionLeftMessage;

@@ -19,7 +19,7 @@ import {filter, share, tap, map} from "rxjs/operators";
 import {ChatChannel} from "./ChatChannel";
 import {ChatRoom} from "./ChatRoom";
 import {ChatPermissionManager} from "./ChatPermissionManager";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";

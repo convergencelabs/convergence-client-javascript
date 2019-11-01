@@ -35,6 +35,7 @@ import {getOrDefaultObject, protoValueToJson} from "./connection/ProtocolUtil";
 import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
+import {ModelOfflineManager} from "./model/ModelOfflineManager";
 
 /**
  * This represents a single connection to a specific Domain in
@@ -211,6 +212,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * @internal
    */
+  private readonly _modelOfflineManager: ModelOfflineManager;
+
+  /**
+   * @internal
+   */
   private readonly _options: ConvergenceOptions;
 
   /**
@@ -256,7 +262,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._storage = new StorageEngine();
 
     this._identityCache = new IdentityCache(this._connection);
-    this._modelService = new ModelService(this._connection, this._identityCache, this._storage);
+    this._modelOfflineManager = new ModelOfflineManager(
+      10 * 60 * 1000,
+      100,
+      this._storage
+    );
+    this._modelService = new ModelService(this._connection, this._identityCache, this._modelOfflineManager);
     this._identityService = new IdentityService(this._connection);
     this._activityService = new ActivityService(this._connection, this._identityCache);
     // FIXME if we have a username we should construct a user, and potentially get from the cache.
@@ -624,6 +635,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       return this._storage.openStore(this._namespace, this._domainId, username, this._options.offlineKey)
         .then(() => {
           this._initialized = true;
+          return this._modelOfflineManager.init();
         });
     } else {
       this._initialized = true;

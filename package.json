@@ -1,6 +1,7 @@
 {
   "name": "@convergence-internal/convergence",
   "version": "1.0.0-SNAPSHOT",
+  "private": true,
   "description": "Convergence JavaScript client library.",
   "keywords": [
     "Convergence",
@@ -24,8 +25,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "dist": "gulp dist",
-    "dist:internal": "gulp distInternal",
-    "webpack": "webpack --config webpack/webpack.global.config.js",
     "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
@@ -52,7 +51,7 @@
     "@babel/preset-env": "7.5.4",
     "@babel/preset-typescript": "7.3.3",
     "@babel/register": "7.4.4",
-    "@convergence-internal/convergence-proto": "^1.0.0-SNAPSHOT.1570741296952",
+    "@convergence/convergence-proto": "^1.0.0-SNAPSHOT",
     "@convergence/typedoc-theme": "^1.0.0",
     "@types/chai": "4.1.7",
     "@types/long": "4.0.0",
