@@ -1,12 +1,12 @@
 {
   "name": "@convergence/convergence",
   "version": "0.0.0",
-  "description": "Convergence JavaScript client library.",
+  "description": "Convergence JavaScript client library",
   "keywords": [
     "Convergence",
     "client",
     "collaboration",
-    "real time",
+    "realtime",
     "database"
   ],
   "author": {
@@ -31,11 +31,7 @@
     "protobufjs": "^6.8.8"
   },
   "license": "See LICENSE.txt",
-  "repository": {
-    "type": "none",
-    "url": "https://convergence.io"
-  },
   "engines" : {
-    "node" : ">=6.0.0"
+    "node" : ">=10.0.0"
   }
 }
