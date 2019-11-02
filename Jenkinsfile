@@ -16,10 +16,7 @@ nodePod { label ->
       }
 
       stage('Publish') {
-        sh '''
-        npm config set registry https://nexus.dev.convergencelabs.tech/repository/npm-convergence
-        npm --registry=https://nexus.dev.convergencelabs.tech/repository/npm-convergence publish dist
-        '''
+        sh 'npm publish --registry=https://nexus.dev.convergencelabs.tech/repository/npm-convergence/ dist'
       }
     }
 
