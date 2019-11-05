@@ -1,19 +1,20 @@
 import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
+import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 
 /**
  * @hidden
  * @internal
  */
 export interface IModelStore {
-  getSubscribedModels(): Promise<string[]>;
+  getSubscribedModels(): Promise<IOfflineModelSubscription[]>;
 
-  subscribeToModel(modelId: string): Promise<void>;
+  addSubscription(modelIds: string[]): Promise<void>;
+
+  removeSubscription(modelId: string[]): Promise<void>;
 
   setModelSubscriptions(modelIds: string[]): Promise<void>;
-
-  unsubscribeFromModel(modelId: string): Promise<void>;
 
   createLocalModel(model: IModelCreationData): Promise<void>;
 

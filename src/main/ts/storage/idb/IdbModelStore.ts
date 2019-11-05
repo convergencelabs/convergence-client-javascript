@@ -5,6 +5,7 @@ import {IdbSchema} from "./IdbSchema";
 import {IModelState} from "../api/IModelState";
 import {IModelCreationData} from "../api/IModelCreationData";
 import {ModelPermissions} from "../../model";
+import {IOfflineModelSubscription} from "../api/IOfflineModelSubscription";
 
 /**
  * @hidden
@@ -166,7 +167,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     throw new Error("Method not implemented.");
   }
 
-  public getSubscribedModels(): Promise<string[]> {
+  public getSubscribedModels(): Promise<IOfflineModelSubscription[]> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withReadStore(storeName, async (store) => {
       return toPromise(store.getAll())
@@ -174,15 +175,17 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public subscribeToModel(modelId: string): Promise<void> {
+  public addSubscription(modelIds: string[]): Promise<void> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withWriteStore(storeName, async (store) => {
-      const data = {modelId};
-      store.put(data);
+      modelIds.forEach(modelId => {
+        const data: IOfflineModelSubscription = {modelId, version: 0};
+        store.put(data);
+      });
     });
   }
 
-  public unsubscribeFromModel(modelId: string): Promise<void> {
+  public removeSubscription(modelIds: string[]): Promise<void> {
     const stores = [
       IdbSchema.ModelData.Store,
       IdbSchema.ModelLocalOperation.Store,
@@ -191,10 +194,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
 
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore, subStore]) => {
-      modelStore.delete(modelId);
-      IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
-      IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
-      subStore.delete(modelId);
+      modelIds.forEach(modelId => {
+        modelStore.delete(modelId);
+        IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
+        IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
+        subStore.delete(modelId);
+      });
     });
   }
 
