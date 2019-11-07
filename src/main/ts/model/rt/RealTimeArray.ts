@@ -24,7 +24,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeArray]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface RealTimeArrayEvents extends ObservableArrayEvents {
 }
@@ -39,7 +39,7 @@ export interface RealTimeArrayEvents extends ObservableArrayEvents {
  * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-array.html)
  * for more information.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class RealTimeArray extends RealTimeElement<any[]> implements ObservableArray, RealTimeContainerElement<any[]> {
 

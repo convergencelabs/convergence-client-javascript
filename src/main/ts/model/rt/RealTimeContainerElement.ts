@@ -5,7 +5,7 @@ import {Path, PathElement} from "../Path";
 /**
  * An abstraction for `RealTimeElement`s with child elements.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface RealTimeContainerElement<T> extends ObservableContainerElement<T> {
   elementAt(path: Path): RealTimeElement<any>;

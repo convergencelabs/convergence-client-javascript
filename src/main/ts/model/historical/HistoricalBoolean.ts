@@ -9,7 +9,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface HistoricalBooleanEvents extends ObservableBooleanEvents {
 }
@@ -18,7 +18,7 @@ export interface HistoricalBooleanEvents extends ObservableBooleanEvents {
  * A read-only history-aware version of a [[RealTimeBoolean]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class HistoricalBoolean extends HistoricalElement<boolean> implements ObservableBoolean {
 

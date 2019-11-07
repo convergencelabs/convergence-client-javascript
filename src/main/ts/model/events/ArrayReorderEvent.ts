@@ -7,7 +7,7 @@ import {DomainUser} from "../../identity";
  *
  * The value that was moved can be found at [[toIndex]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ArrayReorderEvent implements IValueChangedEvent {
   public static readonly NAME = "reorder";

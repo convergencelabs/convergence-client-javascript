@@ -6,7 +6,7 @@ import {RealTimeModel} from "../rt";
  * to this directly on a [[RealTimeModel]] rather than a [[RealTimeElement]]
  * within.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ModelOnlineEvent implements IModelEvent {
   public static readonly NAME = "online";

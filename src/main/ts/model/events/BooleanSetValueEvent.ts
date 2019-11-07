@@ -5,7 +5,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when the [[RealTimeBoolean.value]] of a [[RealTimeBoolean]] is set.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class BooleanSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";

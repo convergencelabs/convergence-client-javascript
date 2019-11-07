@@ -6,7 +6,7 @@ import {IModelEvent} from "./IModelEvent";
  * modifications to the model, and then all modifications are acknowledged by
  * the server.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ModelCommittedEvent implements IModelEvent {
   public static readonly NAME = "committed";

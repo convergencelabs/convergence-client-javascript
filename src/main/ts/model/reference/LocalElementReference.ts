@@ -5,7 +5,7 @@ import {RealTimeElement} from "../rt/";
 /**
  * An [[ElementReference]] that was created locally. See [[RealTimeModel.elementReference]]
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class LocalElementReference extends LocalModelReference<RealTimeElement<any>, ElementReference> {
   /**

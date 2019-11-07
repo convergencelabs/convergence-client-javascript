@@ -16,7 +16,7 @@ import {domainUserIdToProto} from "../connection/ProtocolUtil";
  * Use this class to manage or query the permissions of a particular
  * [[RealTimeModel]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ModelPermissionManager {
 

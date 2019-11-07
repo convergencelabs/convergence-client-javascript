@@ -4,7 +4,7 @@ export {ObservableElementEventConstants as ObservableDateEventConstants} from ".
 /**
  * The events that could be emitted by a [[RealTimeDate]] or [[HistoricalDate]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableDateEvents extends ObservableElementEvents {
   /**
@@ -18,7 +18,7 @@ export interface ObservableDateEvents extends ObservableElementEvents {
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableDate extends ObservableElement<Date> {
 

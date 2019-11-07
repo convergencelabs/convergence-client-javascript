@@ -4,7 +4,7 @@ import {RangeReference, IndexRange} from "./RangeReference";
 /**
  * A [[RangeReference]] that was created locally. See [[RealTimeString.rangeReference]]
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class LocalRangeReference extends LocalModelReference<IndexRange, RangeReference> {
 

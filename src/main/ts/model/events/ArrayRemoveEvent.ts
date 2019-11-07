@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a value is removed from a [[RealTimeArray]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ArrayRemoveEvent implements IValueChangedEvent {
   public static readonly NAME = "remove";

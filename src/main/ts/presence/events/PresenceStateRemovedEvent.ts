@@ -5,7 +5,7 @@ import {DomainUser} from "../../identity";
  * Emitted when one or more key-value pairs of a particular [[DomainUser]]'s
  * presence [[UserPresence.state|state]] were [[PresenceService.removeState|removed]].
  *
- * @module Presence Subsystem
+ * @module Presence
  */
 export class PresenceStateRemovedEvent implements IPresenceEvent {
   public static readonly NAME = "state_removed";

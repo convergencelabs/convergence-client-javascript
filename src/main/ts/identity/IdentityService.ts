@@ -13,7 +13,7 @@ import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 /**
  * The fields of a user that are available to be queried on. See [[search]]
  *
- * @module UsersAndIdentity
+ * @module Users and Identity
  */
 export type UserField = "username" | "email" | "firstName" | "lastName" | "displayName";
 
@@ -29,7 +29,7 @@ const validSearchFields: UserField[] = ["username", "email", "firstName", "lastN
  *
  * This service can be accessed using [[ConvergenceDomain.identity]].
  *
- * @module UsersAndIdentity
+ * @module Users and Identity
  */
 export class IdentityService {
 

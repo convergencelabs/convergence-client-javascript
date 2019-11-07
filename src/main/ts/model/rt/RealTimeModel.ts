@@ -89,7 +89,7 @@ import {ICreateModelOptions} from "../ICreateModelOptions";
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
   /**
@@ -221,7 +221,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  *
  * See [[RealTimeModelEvents]] for the events that may be emitted on this model.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 

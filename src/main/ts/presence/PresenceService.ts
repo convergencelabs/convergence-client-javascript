@@ -33,7 +33,7 @@ import IUserPresence = io.convergence.proto.IUserPresence;
 /**
  * All the events that could be emitted from the [[PresenceService]].
  *
- * @module Presence Subsystem
+ * @module Presence
  */
 export interface PresenceServiceEvents {
   /**
@@ -85,7 +85,7 @@ export interface PresenceServiceEvents {
  *
  * See [[PresenceServiceEvents]] for the events that may be emitted on this service.
  *
- * @module Presence Subsystem
+ * @module Presence
  */
 export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 

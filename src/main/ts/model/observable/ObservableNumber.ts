@@ -3,7 +3,7 @@ import {ObservableElement, ObservableElementEvents, ObservableElementEventConsta
 /**
  * The events that could be emitted by a [[RealTimeNumber]] or [[HistoricalNumber]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableNumberEvents extends ObservableElementEvents {
   /**
@@ -26,7 +26,7 @@ export interface ObservableNumberEvents extends ObservableElementEvents {
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export const ObservableNumberEventConstants: ObservableNumberEvents = {
   DELTA: "delta",
@@ -36,7 +36,7 @@ export const ObservableNumberEventConstants: ObservableNumberEvents = {
 Object.freeze(ObservableNumberEventConstants);
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableNumber extends ObservableElement<number> {
 

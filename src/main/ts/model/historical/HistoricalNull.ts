@@ -9,7 +9,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface HistoricalNullEvents extends ObservableNullEvents {
 }
@@ -18,7 +18,7 @@ export interface HistoricalNullEvents extends ObservableNullEvents {
  * A read-only history-aware version of a [[RealTimeNull]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class HistoricalNull extends HistoricalElement<void> implements ObservableNull {
   public static readonly Events: HistoricalNullEvents = ObservableNullEventConstants;

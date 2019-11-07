@@ -45,7 +45,7 @@ import {Logging} from "../util/log/Logging";
  * can share state which indicates what they are doing within the
  * [[Activity]].
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 

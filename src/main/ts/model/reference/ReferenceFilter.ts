@@ -1,7 +1,7 @@
 /**
  * An object used to query for remote references.  See [[RealTimeModel.references]]
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export interface ReferenceFilter {
   sessionId?: string;

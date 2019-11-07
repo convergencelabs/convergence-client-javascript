@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a key-value pair is set on a [[RealTimeObject]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ObjectSetEvent implements IValueChangedEvent {
   public static readonly NAME = "set";

@@ -2,14 +2,14 @@ import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 export {ObservableElementEventConstants as ObservableNullEventConstants} from "./ObservableElement";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableNullEvents extends ObservableElementEvents {
 
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableNull extends ObservableElement<void>  {
 

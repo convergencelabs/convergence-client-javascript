@@ -6,7 +6,7 @@ import {IModelEvent} from "./IModelEvent";
  * Emitted when a remote user closes a model.  This is only emitted if the
  * current user has that particular model already open.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class CollaboratorClosedEvent implements IModelEvent {
   public static readonly NAME = "collaborator_closed";

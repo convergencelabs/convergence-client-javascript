@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * The ActivityStateSetEvent is fired when a remote session sets one or
  * elements from its state within the [[Activity]].
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ActivityStateDeltaEvent implements IActivityEvent {
 

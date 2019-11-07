@@ -9,7 +9,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface HistoricalStringEvents extends ObservableStringEvents {
 }
@@ -18,7 +18,7 @@ export interface HistoricalStringEvents extends ObservableStringEvents {
  * A read-only history-aware version of a [[RealTimeString]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class HistoricalString extends HistoricalElement<string> implements ObservableString {
 

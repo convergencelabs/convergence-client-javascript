@@ -6,7 +6,7 @@
  * but fails. This allows the application to provide authentication information
  * synchronously or asynchronously.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export interface IFallbackAuthChallenge {
   /**

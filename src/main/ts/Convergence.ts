@@ -1,3 +1,9 @@
+/**
+ * Cuz you gots to connect to use this stuff!
+ *
+ * @moduledefinition Connection and Authentication
+ */
+
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {CancellationToken, ILoggingConfigData} from "./util";
@@ -13,7 +19,7 @@ import {Logging} from "./util/log/Logging";
  * See the [Developer Guide](https://docs.convergence.io/guide/authentication/overview.html)
  * for more information about authentication options.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export class Convergence {
   /**

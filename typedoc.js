@@ -10,13 +10,14 @@ module.exports = {
     '**/model/ot/**',
     '**/model/internal/**',
     '**/model/rt/richtext/**',
-    '**/index'
+    '**/index' // this doesn't do anything..
   ],
 
   mode: "modules",
   out: "dist/docs",
   baseUrl: "src/main/ts",
   readme: "src/docs/README.md",
+  json: "dist/docs.json",
 
   theme: "node_modules/@convergence/typedoc-theme/bin/default",
 

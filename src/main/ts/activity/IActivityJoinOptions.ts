@@ -3,7 +3,7 @@ import {StringMapLike} from "../util";
 /**
  * Represents the options that can be set when Joining an activity.
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export interface IActivityJoinOptions {
   /**

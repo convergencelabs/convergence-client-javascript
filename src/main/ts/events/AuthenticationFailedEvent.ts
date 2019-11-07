@@ -6,7 +6,7 @@ import { AuthenticationMethod } from "../connection/AuthenticationMethod";
  * Emitted when a [[ConvergenceDomain]] attempted to (re)authenticate
  * but failed.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export class AuthenticationFailedEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "authentication_failed";

@@ -6,7 +6,7 @@ import {DomainUser} from "../identity";
  * The ActivityParticipant represents an individual user session that has
  * joined a particular [[Activity]].
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ActivityParticipant {
 

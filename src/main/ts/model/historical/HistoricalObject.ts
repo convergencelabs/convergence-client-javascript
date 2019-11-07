@@ -11,7 +11,7 @@ import {HistoricalModel} from "./HistoricalModel";
 import {Path, PathElement} from "../Path";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface HistoricalObjectEvents extends ObservableObjectEvents {
 }
@@ -20,7 +20,7 @@ export interface HistoricalObjectEvents extends ObservableObjectEvents {
  * A read-only history-aware version of a [[RealTimeObject]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class HistoricalObject extends HistoricalElement<{[key: string]: any}>
                               implements HistoricalContainerElement<{[key: string]: any}>, ObservableObject {

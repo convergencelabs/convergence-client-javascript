@@ -4,7 +4,7 @@ import {ObservableContainerElement} from "./ObservableContainerElement";
 /**
  * The events that could be emitted by a [[RealTimeObject]] or [[HistoricalObject]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableObjectEvents extends ObservableElementEvents {
   /**
@@ -34,7 +34,7 @@ export interface ObservableObjectEvents extends ObservableElementEvents {
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export const ObservableObjectEventConstants: ObservableObjectEvents = {
   SET: "set",
@@ -44,7 +44,7 @@ export const ObservableObjectEventConstants: ObservableObjectEvents = {
 Object.freeze(ObservableObjectEventConstants);
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableObject extends ObservableContainerElement<{ [key: string]: any }> {
 

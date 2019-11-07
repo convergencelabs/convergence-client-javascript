@@ -6,7 +6,7 @@ import {DomainUser} from "../identity";
  * user within Convergence. An instance of [[UserPresence]] can be obtained
  * from the [[PresenceService]].
  *
- * @module Presence Subsystem
+ * @module Presence
  */
 export class UserPresence {
 

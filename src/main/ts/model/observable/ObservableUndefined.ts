@@ -2,14 +2,14 @@ import {ObservableElement, ObservableElementEvents} from "./ObservableElement";
 export {ObservableElementEventConstants as ObservableUndefinedEventConstants} from "./ObservableElement";
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableUndefinedEvents extends ObservableElementEvents {
 
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableUndefined extends ObservableElement<void> {
 

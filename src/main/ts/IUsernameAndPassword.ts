@@ -2,7 +2,7 @@
 /**
  * A username and password to authenticate with.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export interface IUsernameAndPassword {
   username: string;

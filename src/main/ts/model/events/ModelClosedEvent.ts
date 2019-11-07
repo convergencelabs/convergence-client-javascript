@@ -5,7 +5,7 @@ import {ObservableModel} from "../observable/ObservableModel";
  * The [[ModelClosedEvent]] is fired when a Model is closed either by the
  * client or the server.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ModelClosedEvent implements IModelEvent {
   public static readonly NAME = "closed";

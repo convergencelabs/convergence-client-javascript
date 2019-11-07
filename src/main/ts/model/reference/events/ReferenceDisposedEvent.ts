@@ -4,7 +4,7 @@ import {ModelReference} from "../ModelReference";
 /**
  * Emitted when a [[ModelReference]] is disposed.
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ReferenceDisposedEvent implements IConvergenceEvent {
   public static readonly NAME = "disposed";

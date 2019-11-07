@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a key-value pair is removed from a [[RealTimeObject]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class ObjectRemoveEvent implements IValueChangedEvent {
   public static readonly NAME = "remove";

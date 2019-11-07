@@ -25,7 +25,7 @@ interface OperationRequest {
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface HistoricalModelEvents extends ObservableModelEvents {
   readonly TARGET_VERSION_CHANGED: string;
@@ -58,7 +58,7 @@ Object.freeze(HistoricalModelEventConstants);
  * See the [developer guide](https://docs.convergence.io/guide/models/history.html)
  * for some examples and additional information.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class HistoricalModel implements ObservableModel {
 

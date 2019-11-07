@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * IActivityEvent is the base interface for all events fired by the Activity
  * subsystem. All Activity events will implement this interface.
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export interface IActivityEvent extends IConvergenceEvent {
   /**

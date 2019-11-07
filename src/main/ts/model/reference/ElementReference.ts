@@ -11,7 +11,7 @@ import {DomainUser} from "../../identity";
  * while the data is changing. See an example in the
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimemodel.html).
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ElementReference extends ModelReference<RealTimeElement<any>> {
 

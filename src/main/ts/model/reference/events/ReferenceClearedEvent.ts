@@ -4,7 +4,7 @@ import {ModelReference} from "../ModelReference";
 /**
  * Emitted when a [[ModelReference]]'s value is explicitly cleared.
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ReferenceClearedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "cleared";

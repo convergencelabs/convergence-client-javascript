@@ -4,7 +4,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when a particular [[DomainUser]]'s [[UserPresence.state|state]] was cleared.
  *
- * @module Presence Subsystem
+ * @module Presence
  */
 export class PresenceStateClearedEvent implements IPresenceEvent {
   public static readonly NAME = "state_cleared";

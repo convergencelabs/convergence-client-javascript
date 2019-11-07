@@ -6,7 +6,7 @@ import {DomainUser} from "../../identity";
  * The ActivitySessionLeftEvent is fired when a remote session leaves an
  * [[Activity]].
  *
- * @module CollaborationAwareness
+ * @module Collaboration Awareness
  */
 export class ActivitySessionLeftEvent implements IActivityEvent {
 

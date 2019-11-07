@@ -5,7 +5,7 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
  * Emitted when a [[ConvergenceDomain]] is actively attempting to (re)connect to
  * a server.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export class ConnectingEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "connecting";

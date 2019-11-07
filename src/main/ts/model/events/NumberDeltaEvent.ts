@@ -8,7 +8,7 @@ import {DomainUser} from "../../identity";
  * When the value of a [[RealTimeNumber]] is directly set
  * (with e.g. `rtNumber.value(23)`), a [[NumberSetValueEvent]] is emitted.
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export class NumberDeltaEvent implements IValueChangedEvent {
   public static readonly NAME = "delta";

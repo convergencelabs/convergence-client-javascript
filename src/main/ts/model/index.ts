@@ -1,3 +1,9 @@
+/**
+ * Sync in real time doooood!
+ *
+ * @moduledefinition Real Time Data
+ */
+
 export * from "./ModelService";
 export * from "./ModelElementType";
 export * from "./Path";

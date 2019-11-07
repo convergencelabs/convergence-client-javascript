@@ -4,7 +4,7 @@ export {ObservableElementEventConstants as ObservableBooleanEventConstants} from
 /**
  * The events that could be emitted by a [[RealTimeBoolean]] or [[HistoricalBoolean]].
  *
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableBooleanEvents extends ObservableElementEvents {
   /**
@@ -18,7 +18,7 @@ export interface ObservableBooleanEvents extends ObservableElementEvents {
 }
 
 /**
- * @module RealTimeData
+ * @module Real Time Data
  */
 export interface ObservableBoolean extends ObservableElement<boolean> {
 

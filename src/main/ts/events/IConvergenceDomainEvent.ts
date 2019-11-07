@@ -4,7 +4,7 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
 /**
  * The base interface for any [[ConvergenceDomain]]-related events.
  *
- * @module ConnectionAndAuthentication
+ * @module Connection and Authentication
  */
 export interface IConvergenceDomainEvent extends IConvergenceEvent {
   /**
