@@ -24,6 +24,9 @@ function minify() {
   return src([`${distDir}/*.js`, `!${distDir}/*.min.js`])
     .pipe(sourceMaps.init())
     .pipe(uglify({
+      output: {
+        comments: "some"
+      },
       mangle: {
         properties: {
           regex: /^_/
@@ -87,7 +90,7 @@ const injectVersion = () => {
   return src([`${distDir}/**/*.js`])
     .pipe(replace('CONVERGENCE_CLIENT_VERSION', "" + packageJson.version))
     .pipe(dest(distDir));
-}
+};
 
 const compile = series(rollupBundle, webpackBundle, injectVersion);
 
@@ -115,7 +118,7 @@ const typings = series(tsDeclarations, declarationsNamedExport);
 const applyHeader = () => {
   const headerTxt = fs.readFileSync("./copyright-header.txt");
   const packageJson = readAndParse(`${distDir}/package.json`);
-  return src([`${distDir}/**/*.js`])
+  return src([`${distDir}/*.js`])
     .pipe(header(headerTxt, {package: packageJson}))
     .pipe(dest(`${distDir}`));
 };
@@ -139,8 +142,8 @@ const dist = series(
   bumpPackageVersion,
   typings,
   compile,
-  minify,
   applyHeader,
+  minify,
   docs
 );
 

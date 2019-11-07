@@ -1,5 +1,5 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import {StringMap} from "../util";
 import {domainUserIdToProto, domainUserTypeToProto, getOrDefaultArray} from "../connection/ProtocolUtil";
 import {DomainUserId, DomainUserType} from "../identity/";

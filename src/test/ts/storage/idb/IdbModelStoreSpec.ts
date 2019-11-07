@@ -17,7 +17,7 @@ describe("IdbModelStore", () => {
     it("returns true for a model that does not exist", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
-        await modelStore.putModel(modelState);
+        await modelStore.putModelState(modelState);
         const exists = await modelStore.modelExists(modelState.model.modelId);
         expect(exists).to.be.true;
       })
@@ -28,7 +28,7 @@ describe("IdbModelStore", () => {
     it("stores the correct model", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
-        await modelStore.putModel(modelState);
+        await modelStore.putModelState(modelState);
         const retrieved = await modelStore.getModel(modelState.model.modelId);
         expect(retrieved).to.deep.equal(modelState);
       })
@@ -39,7 +39,7 @@ describe("IdbModelStore", () => {
     it("deletes and existing model ", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
-        await modelStore.putModel(modelState);
+        await modelStore.putModelState(modelState);
         const exists = await modelStore.modelExists(modelState.model.modelId);
         expect(exists).to.be.true;
 

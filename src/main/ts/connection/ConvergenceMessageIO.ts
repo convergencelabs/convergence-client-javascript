@@ -1,5 +1,5 @@
-import * as convergenceProtoJson from "@convergence-internal/convergence-proto/convergence-proto.json";
-import * as convergenceProto from "@convergence-internal/convergence-proto";
+import * as convergenceProtoJson from "@convergence/convergence-proto/convergence-proto.json";
+import * as convergenceProto from "@convergence/convergence-proto";
 import * as protobuf from "protobufjs/light";
 
 const ROOT: protobuf.Root = protobuf.Root.fromJSON(convergenceProtoJson as any);

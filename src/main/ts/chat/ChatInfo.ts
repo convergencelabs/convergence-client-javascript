@@ -1,5 +1,5 @@
 import { IdentityCache } from "../identity/IdentityCache";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IChatInfoData = io.convergence.proto.IChatInfoData;
 import { ChatMembership } from "./MembershipChat";
 import { protoToDomainUserId, getOrDefaultNumber, timestampToDate } from "../connection/ProtocolUtil";

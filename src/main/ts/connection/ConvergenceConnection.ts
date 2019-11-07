@@ -11,7 +11,7 @@ import {Deferred} from "../util/Deferred";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util/";
 import {Observable} from "rxjs";
 import {filter} from "rxjs/operators";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import {getOrDefaultObject, toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
 import {ConvergenceOptions} from "../ConvergenceOptions";

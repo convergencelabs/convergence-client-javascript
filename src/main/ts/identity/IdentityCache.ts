@@ -1,5 +1,5 @@
 import {DomainUser} from "./DomainUser";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import {objectForEach} from "../util/ObjectUtils";
 import {
   getOrDefaultArray,

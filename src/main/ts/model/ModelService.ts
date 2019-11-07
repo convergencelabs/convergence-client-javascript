@@ -16,7 +16,7 @@ import {ModelPermissionManager} from "./ModelPermissionManager";
 import {ICreateModelOptions} from "./ICreateModelOptions";
 import {ModelDataCallback, ModelDataInitializer} from "./ModelDataInitializer";
 import {IAutoCreateModelOptions} from "./IAutoCreateModelOptions";
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import {
   getModelMessageResourceId,
   modelUserPermissionMapToProto,
@@ -36,7 +36,6 @@ import {IdentityCache} from "../identity/IdentityCache";
 import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
 import {Validation} from "../util/Validation";
-import {StorageEngine} from "../storage/StorageEngine";
 import {ModelOfflineManager} from "./ModelOfflineManager";
 import {ModelDeletedEvent} from "./events/";
 import {ModelPermissions} from "./ModelPermissions";
@@ -59,14 +58,49 @@ export interface ModelServiceEvents {
    *
    * @event [[ModelDeletedEvent]]
    */
-  readonly MODEL_DELETED: string;
+  readonly MODEL_DELETED: "deleted";
+
+  /**
+   * Emitted when a model is initially downloaded after it was first subscribed
+   * to offline.
+   *
+   * @event
+   */
+  readonly OFFLINE_MODEL_AVAILABLE: "offline_model_available";
+  /**
+   * Emitted whenever a model that is subscribed to offline is updated via the
+   * periodic synchronization.
+   *
+   * @event
+   */
+  readonly OFFLINE_MODEL_UPDATED: "offline_model_updated";
+
+  /**
+   * Emitted whenever a change to the set of subscribed models results in new
+   * models needing to be downloaded.
+   *
+   * @event
+   */
+  readonly OFFLINE_MODEL_SYNC_PENDING: "offline_model_sync_pending";
+
+  /**
+   * Emitted when all models have been downloaded after a subscription change
+   * that required additional models to be downloaded.
+   *
+   * @event
+   */
+  readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
 }
 
 /**
  * @module Real Time Data
  */
 export const ModelServiceEventConstants: ModelServiceEvents = {
-  MODEL_DELETED: "deleted",
+  MODEL_DELETED: ModelDeletedEvent.NAME,
+  OFFLINE_MODEL_AVAILABLE: "offline_model_available",
+  OFFLINE_MODEL_UPDATED: "offline_model_updated",
+  OFFLINE_MODEL_SYNC_PENDING: "offline_model_sync_pending",
+  OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed",
 };
 Object.freeze(ModelServiceEventConstants);
 
@@ -142,7 +176,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  constructor(connection: ConvergenceConnection, identityCache: IdentityCache, storageEngine: StorageEngine) {
+  constructor(connection: ConvergenceConnection,
+              identityCache: IdentityCache,
+              modelOfflineManager: ModelOfflineManager) {
     super();
     this._connection = connection;
     this._identityCache = identityCache;
@@ -156,11 +192,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
 
-    this._modelOfflineManager = new ModelOfflineManager(
-      10 * 60 * 1000,
-      100,
-      storageEngine
-    );
+    this._modelOfflineManager = modelOfflineManager;
 
     this._log = Logging.logger("models");
   }
@@ -420,6 +452,47 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   public permissions(id: string): ModelPermissionManager {
     Validation.assertNonEmptyString(id, "id");
     return new ModelPermissionManager(id, this._connection);
+  }
+
+  /**
+   * Adds a model or a list of models to the set of models that will be
+   * proactively downloaded and made available offline. Note that duplicates
+   * will simply be ignored.
+   *
+   * @param modelId
+   *   A string or string array containing the unique ids of the models to
+   *   be added to the current offline subscription list.
+   */
+  public subscribeOffline(modelId: string | string[]): void {
+    const modelIds = TypeChecker.isArray(modelId) ? modelId : [modelId];
+    this._modelOfflineManager.subscribe(modelIds);
+  }
+
+  /**
+   * Removes a model or a list of models to the set of models that will be
+   * proactively downloaded and made available offline. If a model is
+   * currently stored offline, and it is unsubscribed it will be purged
+   * from the offline store.
+   *
+   * @param modelId
+   *   A string or string array containing the unique ids of the models to
+   *   be removed from the current offline subscription list.
+   */
+  public unsubscribeOffline(modelId: string | string[]): void {
+    const modelIds = TypeChecker.isArray(modelId) ? modelId : [modelId];
+    this._modelOfflineManager.unsubscribe(modelIds);
+  }
+
+  /**
+   * Sets the total set of models that will be proactively downloaded and
+   * made available offline. Any models currently subscribed to that do
+   * not appear in the supplied list of id's will be unsubscribe and
+   * immediately removed from the offline store.
+   *
+   * @param modelIds
+   */
+  public setOfflineSubscription(modelIds: string[]): void {
+    this._modelOfflineManager.setSubscriptions(modelIds);
   }
 
   /**

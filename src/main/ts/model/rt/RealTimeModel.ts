@@ -76,7 +76,7 @@ import {ILocalOperationData, IModelData, IServerOperationData} from "../../stora
 import {IModelSnapshot} from "../IModelSnapshot";
 import {DomainUser} from "../../identity";
 
-import {io} from "@convergence-internal/convergence-proto";
+import {io} from "@convergence/convergence-proto";
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = io.convergence.proto.IModelPermissionsChangedMessage;
 import IModelReconnectCompleteMessage = io.convergence.proto.IModelReconnectCompleteMessage;
@@ -451,50 +451,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._storeOffline = this._offlineManager.isModelSubscribed(this._modelId);
   }
 
-  public setSubscribedOffline(enabled: boolean): Promise<void> {
-    return this._offlineManager.setModelOffline(this._modelId, enabled);
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _getCurrentStateSnapshot(): IModelData {
-    return {
-      modelId: this._modelId,
-      collection: this._collectionId,
-      local: this._local,
-      version: this.version(),
-      seqNo: this._concurrencyControl.sequenceNumber(),
-      createdTime: this._createdTime,
-      modifiedTime: this.maxTime(),
-      data: this._model.root().dataValue(),
-      permissions: this._permissions
-    };
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _enableOffline(): IModelSnapshot {
-    this._storeOffline = true;
-    const snapshot = this._getCurrentStateSnapshot();
-    const localOps = this._concurrencyControl.getInFlightOperations();
-    return {model: snapshot, localOps};
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _disableOffline(): void {
-    this._storeOffline = false;
-  }
-
   /**
    * Returns the permissions the current user has on this model.
    */
@@ -826,9 +782,73 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     return this._referenceManager.getAll(filter);
   }
 
+  /**
+   * Marks this model to be available offline.
+   */
+  public subscribeOffline(): void {
+    this._offlineManager.subscribe([this._modelId]);
+  }
+
+  /**
+   * Marks this model no longer needs to be available offline.
+   */
+  public unsubscribeOffline(): void {
+    this._offlineManager.unsubscribe([this._modelId]);
+  }
+
+  /**
+   * Determines if this model is marked to be made available offline.
+   *
+   * @returns True if the model is marked for offline availability,
+   *   false otherwise.
+   */
+  public isSubscribedOffline(): boolean {
+    return this._offlineManager.isModelSubscribed(this._modelId);
+  }
+
   //
   // Private API
   //
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _getCurrentStateSnapshot(): IModelData {
+    return {
+      modelId: this._modelId,
+      collection: this._collectionId,
+      local: this._local,
+      version: this.version(),
+      seqNo: this._concurrencyControl.sequenceNumber(),
+      createdTime: this._createdTime,
+      modifiedTime: this.maxTime(),
+      data: this._model.root().dataValue(),
+      permissions: this._permissions
+    };
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _enableOffline(): IModelSnapshot {
+    this._storeOffline = true;
+    const snapshot = this._getCurrentStateSnapshot();
+    const localOps = this._concurrencyControl.getInFlightOperations();
+    return {model: snapshot, localOps};
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _disableOffline(): void {
+    this._storeOffline = false;
+  }
 
   /**
    * @private
