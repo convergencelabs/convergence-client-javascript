@@ -163,15 +163,21 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public setModelSubscriptions(modelIds: string[]): Promise<void> {
-    throw new Error("Method not implemented.");
+  public setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void> {
+    const storeName = IdbSchema.ModelSubscriptions.Store;
+    return this._withWriteStore(storeName, async (store) => {
+      return toPromise(store.clear()).then(() => {
+        subscriptions.forEach(subscription => {
+          store.put(subscription);
+        });
+      });
+    });
   }
 
   public getSubscribedModels(): Promise<IOfflineModelSubscription[]> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withReadStore(storeName, async (store) => {
-      return toPromise(store.getAll())
-        .then(results => results.map(modelSub => modelSub.id));
+      return toPromise(store.getAll());
     });
   }
 

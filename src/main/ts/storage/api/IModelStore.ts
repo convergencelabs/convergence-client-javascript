@@ -14,7 +14,7 @@ export interface IModelStore {
 
   removeSubscription(modelId: string[]): Promise<void>;
 
-  setModelSubscriptions(modelIds: string[]): Promise<void>;
+  setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void>;
 
   createLocalModel(model: IModelCreationData): Promise<void>;
 

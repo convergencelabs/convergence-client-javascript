@@ -106,15 +106,24 @@ export class ModelOfflineManager {
   }
 
   public setSubscriptions(modelIds: string[]): void {
-    const subscribed = modelIds.filter(id => this._subscribedModels.has(id));
-    const notSubscribed = modelIds.filter(id => !this._subscribedModels.has(id));
+    // process model ids that need to be subscribed.
+    const subscribe = modelIds.filter(id => !this._subscribedModels.has(id));
+    subscribe.forEach(modelId => this._handleNewSubscriptions(modelId));
+
+    // process model ids that need to be unsubscribed.
+    const unsubscribe = Array.from(this._subscribedModels.keys()).filter(id => !modelIds.includes(id));
+    unsubscribe.forEach(modelId => this._handleUnsubscribed(modelId));
+
+    // Iterate over what is now set, and send that over.
+    const subscriptions: IOfflineModelSubscription[] = [];
+    this._subscribedModels.forEach((version, modelId) => {
+      subscriptions.push({modelId, version});
+    });
+
     this._storage
       .modelStore()
-      .setModelSubscriptions(modelIds)
-      .then(() => this._storage.modelStore().getSubscribedModels())
-      .then((subscriptions) => {
-        subscribed.forEach(modelId => this._handleUnsubscribed(modelId));
-        notSubscribed.forEach((modelId) => this._handleNewSubscriptions(modelId));
+      .setModelSubscriptions(subscriptions)
+      .then(() => {
         return this._sendSubscriptionRequest(subscriptions, [], true);
       });
   }
@@ -199,12 +208,13 @@ export class ModelOfflineManager {
   private _sendSubscriptionRequest(subscribe: IOfflineModelSubscription[],
                                    unsubscribe: string[],
                                    all: boolean): Promise<void> {
-    if (this._connection.isOnline()) {
+    const change = all || subscribe.length > 0 || unsubscribe.length > 0;
+    if (this._connection.isOnline() && change) {
       const subs: IModelOfflineSubscriptionData[] = subscribe.map(({modelId, version}) => {
         return {modelId, currentVersion: version};
       });
       const message: IConvergenceMessage = {
-        modelOfflineSubscriptionChangeRequest: {
+        modelOfflineSubscriptionChange: {
           subscribe: subs,
           unsubscribe,
           all

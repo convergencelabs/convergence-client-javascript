@@ -27,8 +27,8 @@ export class IdbSchemaVersion1 {
       {keyPath: IdbSchema.ModelCreation.Fields.ModelId});
 
     localModelStore.createIndex(
-      IdbSchema.ModelSubscriptions.Indices.ModelId,
-      IdbSchema.ModelSubscriptions.Fields.ModelId,
+      IdbSchema.ModelCreation.Indices.ModelId,
+      IdbSchema.ModelCreation.Fields.ModelId,
       {unique: true});
 
     //

@@ -66,6 +66,8 @@ function disconnect() {
 }
 
 function openModel() {
+  domain.models().setOfflineSubscription(["test"]);
+
   domain.models().openAutoCreate({
     collection: "test",
     id: modelId,
@@ -94,7 +96,7 @@ function openModel() {
     const modelId = model.modelId();
     const url = baseURL + "?modelId=" + modelId;
     window.history.pushState(modelId, modelId, url);
-    model.setSubscribedOffline(true);
+    model.subscribeOffline();
     bindToModel(model);
   }).catch(e => console.error(e));
 }
