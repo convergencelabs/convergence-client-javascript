@@ -531,9 +531,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       throw new Error("An offline key or username must be provided in the options to connect offline.");
     }
 
-    return promiseCallback().then(uname => {
-      return this._init(uname);
-    });
+    return promiseCallback().then(u => this._init(u));
   }
 
   /**

@@ -878,6 +878,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._openModelsByModelId.forEach((model) => {
       model._setOnline();
     });
+
+    this._modelOfflineManager
+      .ready()
+      .then(() => this._modelOfflineManager.resubscribe())
+      .catch(e => console.error(e));
   }
 
   /**

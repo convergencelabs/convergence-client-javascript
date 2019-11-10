@@ -7,11 +7,17 @@ import {toOfflineOperationData} from "../storage/OfflineOperationMapper";
 import {RealTimeModel} from "./rt";
 import {IModelCreationData} from "../storage/api/IModelCreationData";
 import {Logging} from "../util/log/Logging";
-import {ConvergenceConnection} from "../connection/ConvergenceConnection";
+import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {IOfflineModelSubscription} from "../storage/api/IOfflineModelSubscription";
 import {io} from "@convergence/convergence-proto";
+import {Deferred} from "../util/Deferred";
+import {ModelPermissions} from "./ModelPermissions";
+import {getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
+import {toObjectValue} from "./ModelMessageConverter";
+import {IModelUpdate} from "../storage/api/IModelUpdate";
 import IModelOfflineSubscriptionData = io.convergence.proto.IModelOfflineSubscriptionData;
 import IConvergenceMessage = io.convergence.proto.IConvergenceMessage;
+import IOfflineModelUpdatedMessage = io.convergence.proto.IOfflineModelUpdatedMessage;
 
 /**
  * @hidden
@@ -37,6 +43,7 @@ export class ModelOfflineManager {
   private readonly _syncInterval: number;
   private readonly _storage: StorageEngine;
   private readonly _connection: ConvergenceConnection;
+  private readonly _ready: Deferred<void>;
 
   constructor(connection: ConvergenceConnection,
               syncInterval: number,
@@ -47,6 +54,16 @@ export class ModelOfflineManager {
     this._storage = storage;
     this._subscribedModels = new Map();
     this._openModels = new Map();
+    this._ready = new Deferred<void>();
+
+    this._connection
+      .messages()
+      .subscribe((messageEvent: MessageEvent) => {
+        const message = messageEvent.message;
+        if (message.modelOfflineUpdated) {
+          this._handleModelOfflineUpdated(message.modelOfflineUpdated);
+        }
+      });
   }
 
   public init(): void {
@@ -54,9 +71,15 @@ export class ModelOfflineManager {
       modelSubscriptions.forEach(subs => {
         this._subscribedModels.set(subs.modelId, subs.version);
       });
+      this._ready.resolve();
     }).catch(e => {
       ModelOfflineManager._log.error("Error initializing offline model manager.", e);
+      this._ready.reject(e);
     });
+  }
+
+  public ready(): Promise<void> {
+    return this._ready.promise();
   }
 
   public modelOpened(model: RealTimeModel): void {
@@ -124,6 +147,15 @@ export class ModelOfflineManager {
       .modelStore()
       .setModelSubscriptions(subscriptions)
       .then(() => {
+        return this._sendSubscriptionRequest(subscriptions, [], true);
+      });
+  }
+
+  public resubscribe(): Promise<void> {
+    return this._storage
+      .modelStore()
+      .getSubscribedModels()
+      .then((subscriptions) => {
         return this._sendSubscriptionRequest(subscriptions, [], true);
       });
   }
@@ -223,6 +255,54 @@ export class ModelOfflineManager {
       return this._connection.request(message).then(() => undefined);
     } else {
       return Promise.resolve();
+    }
+  }
+
+  private _handleModelOfflineUpdated(message: IOfflineModelUpdatedMessage): void {
+    const modelId = getOrDefaultString(message.modelId);
+
+    // If the model is open this is going to be handled by the open
+    // real time model.
+    if (!this._openModels.has(modelId)) {
+      if (getOrDefaultBoolean(message.deleted)) {
+        // TODO emmit a deleted event.
+        this._storage.modelStore().deleteModel(modelId).catch(e => {
+          // TODO emmit error event.
+          ModelOfflineManager._log.error("Could not delete offline model.", e);
+        });
+      } else if (getOrDefaultBoolean(message.permissionRevoked)) {
+        // TODO emmit a permissions revoked event.
+        this._storage.modelStore().deleteModel(modelId).catch(e => {
+          // TODO emmit error event.
+          ModelOfflineManager._log.error("Could not delete offline model.", e);
+        });
+      } else if (message.updated) {
+        const {model, permissions} = message.updated;
+        const dataUpdate: any = model ? {
+          version: getOrDefaultNumber(model.version),
+          createdTime: timestampToDate(model.createdTime),
+          modifiedTime: timestampToDate(model.modifiedTime),
+          data: toObjectValue(model.data)
+        } : undefined;
+
+        const permissionsUpdate = permissions ?
+          new ModelPermissions(
+            getOrDefaultBoolean(permissions.read),
+            getOrDefaultBoolean(permissions.write),
+            getOrDefaultBoolean(permissions.remove),
+            getOrDefaultBoolean(permissions.manage),
+          ) : undefined;
+
+        const update: IModelUpdate = {
+          modelId,
+          dataUpdate,
+          permissionsUpdate
+        };
+
+        this._storage.modelStore().updateOfflineModel(update).catch(e => {
+          ModelOfflineManager._log.error("Error synchronizing subscribed model from server", e);
+        });
+      }
     }
   }
 }

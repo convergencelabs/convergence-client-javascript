@@ -66,39 +66,38 @@ function disconnect() {
 }
 
 function openModel() {
-  domain.models().setOfflineSubscription(["test"]);
-
-  domain.models().openAutoCreate({
-    collection: "test",
-    id: modelId,
-    data: {
-      "string": "String data to edit",
-      "number": 10,
-      "boolean": true,
-      "array": [
-        "Apples",
-        "Bananas",
-        "Pears",
-        "Orange"
-      ],
-      "object": {
-        "key1": "value1",
-        "key2": "value2",
-        "key3": "value3",
-        "key4": "value4"
-      },
-      "date": new Date()
-    },
-    overrideWorld: true,
-    worldPermissions: {read: true, write: true, remove: false, manage: false},
-    ephemeral: false
-  }).then(function (model) {
-    const modelId = model.modelId();
-    const url = baseURL + "?modelId=" + modelId;
-    window.history.pushState(modelId, modelId, url);
-    model.subscribeOffline();
-    bindToModel(model);
-  }).catch(e => console.error(e));
+  domain.models().subscribeOffline(["test"]);
+  // domain.models().openAutoCreate({
+  //   collection: "test",
+  //   id: modelId,
+  //   data: {
+  //     "string": "String data to edit",
+  //     "number": 10,
+  //     "boolean": true,
+  //     "array": [
+  //       "Apples",
+  //       "Bananas",
+  //       "Pears",
+  //       "Orange"
+  //     ],
+  //     "object": {
+  //       "key1": "value1",
+  //       "key2": "value2",
+  //       "key3": "value3",
+  //       "key4": "value4"
+  //     },
+  //     "date": new Date()
+  //   },
+  //   overrideWorld: true,
+  //   worldPermissions: {read: true, write: true, remove: false, manage: false},
+  //   ephemeral: false
+  // }).then(function (model) {
+  //   const modelId = model.modelId();
+  //   const url = baseURL + "?modelId=" + modelId;
+  //   window.history.pushState(modelId, modelId, url);
+  //   model.subscribeOffline();
+  //   bindToModel(model);
+  // }).catch(e => console.error(e));
 }
 
 // Set up all the events on all the models.

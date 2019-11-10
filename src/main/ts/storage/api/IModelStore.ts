@@ -2,6 +2,7 @@ import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
 import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
+import {IModelUpdate} from "./IModelUpdate";
 
 /**
  * @hidden
@@ -22,9 +23,13 @@ export interface IModelStore {
 
   putModelState(model: IModelState): Promise<void>;
 
+  updateOfflineModel(update: IModelUpdate): Promise<void>;
+
   getModel(modelId: string): Promise<IModelState | undefined>;
 
   modelExists(modelId: string): Promise<boolean>;
+
+  deleteModel(modelId: string): Promise<void>;
 
   processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void>;
 

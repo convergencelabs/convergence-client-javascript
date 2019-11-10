@@ -6,6 +6,7 @@ import {IModelState} from "../api/IModelState";
 import {IModelCreationData} from "../api/IModelCreationData";
 import {ModelPermissions} from "../../model";
 import {IOfflineModelSubscription} from "../api/IOfflineModelSubscription";
+import {IModelUpdate} from "../api/IModelUpdate";
 
 /**
  * @hidden
@@ -105,6 +106,28 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       IdbSchema.ModelServerOperation.Store];
     return this._withWriteStores(stores, async ([modelStore, localOpStore, serverOpStore]) => {
       IdbModelStore._putModelState(modelState, modelStore, localOpStore, serverOpStore);
+    });
+  }
+
+  public updateOfflineModel(update: IModelUpdate): Promise<void> {
+    return this._withWriteStore(IdbSchema.ModelData.Store, async (modelStore) => {
+      const {modelId, dataUpdate, permissionsUpdate} = update;
+      const model: IModelData = await toPromise(modelStore.get(modelId));
+
+      // TODO we should check to see if the model is locally modified.
+
+      if (dataUpdate) {
+        model.data = dataUpdate.data;
+        model.version = dataUpdate.version;
+        model.createdTime = dataUpdate.createdTime;
+        model.modifiedTime = dataUpdate.modifiedTime;
+      }
+
+      if (permissionsUpdate) {
+        model.permissions = permissionsUpdate;
+      }
+
+      return toVoidPromise(modelStore.put(model));
     });
   }
 
