@@ -2,7 +2,7 @@
 
 (global as any).CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true};
 
-import {Chat} from "../main/ts/";
+import {Chat} from "../main/";
 import {connect} from "./connect";
 
 let domain;

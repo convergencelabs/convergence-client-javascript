@@ -3,7 +3,7 @@
 (global as any).CONVERGENCE_DEBUG = {PROTOCOL_MESSAGES: true};
 
 import {connect} from "./connect";
-import {ConvergenceDomain, RealTimeObject} from "../main/ts";
+import {ConvergenceDomain, RealTimeObject} from "../main";
 let domain: ConvergenceDomain;
 
 connect()

@@ -6,7 +6,7 @@ module.exports = {
     minimize: false
   },
   devtool: "source-map",
-  entry: './src/main/ts/index.ts',
+  entry: './src/main/index.ts',
   module: {
     rules: [
       {

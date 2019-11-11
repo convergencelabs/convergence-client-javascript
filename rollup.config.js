@@ -13,7 +13,7 @@ const commonPlugins = [
   json(),
 ];
 
-const input = "src/main/ts/index.ts";
+const input = "src/main/index.ts";
 
 export default [
   {

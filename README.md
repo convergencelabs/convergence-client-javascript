@@ -1,3 +1,7 @@
+<div align="center">
+  <img  alt="Convergence Logo" height="80" src="assets/convergence-logo.png" >
+</div>
+
 # Convergence Javascript Client
 
 This is the first (and only) client for the [Convergence Collaboration Engine](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
