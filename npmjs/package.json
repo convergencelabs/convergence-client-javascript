@@ -1,7 +1,7 @@
 {
   "name": "@convergence/convergence",
   "version": "0.0.0",
-  "description": "Convergence JavaScript client library",
+  "description": "Convergence JavaScript Client",
   "keywords": [
     "Convergence",
     "client",
@@ -9,29 +9,30 @@
     "realtime",
     "database"
   ],
+  "license": "LGPL-3.0-only",
   "author": {
     "name": "Convergence Labs, Inc.",
     "email": "info@convergencelabs.com",
-    "url": "https://convergence.io"
+    "url": "https://convergencelabs.com"
   },
-  "maintainers": [{
+  "maintainers": [
+    {
       "name": "Convergence Labs, Inc.",
       "email": "info@convergencelabs.com",
-      "url": "https://convergence.io"
-  }],
-  "contributors": [],
+      "url": "https://convergencelabs.com"
+    }
+  ],
   "homepage": "https://convergence.io",
-  "bugs": {
-    "email": "support@convergencelabs.com"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/convergencelabs/convergence-client-javascript.git"
   },
+  "bugs": "https://github.com/convergencelabs/convergence-client-javascript/issues",
   "main": "convergence.js",
+  "module": "convergence.esm.js",
   "typings": "typings/index.d.ts",
   "dependencies": {
     "rxjs": "^6.3.3",
     "protobufjs": "^6.8.8"
-  },
-  "license": "See LICENSE.txt",
-  "engines" : {
-    "node" : ">=10.0.0"
   }
 }

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in the files
+ * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
+ */
+
 import {series, src, dest} from "gulp";
 import bump from "gulp-bump";
 import del from "del";
@@ -49,7 +56,7 @@ const lint = () =>
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 
-const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));
+const copyNpmJs = () => src(["./npmjs/**/*", "./LICENSE", "./COPYING.LESSER"]).pipe(dest(distDir));
 const bumpPackageVersion = (cb) => {
   const packageJson = readAndParse("./package.json");
   if (packageJson.version.endsWith("SNAPSHOT")) {
@@ -61,7 +68,7 @@ const bumpPackageVersion = (cb) => {
   }
 };
 
-const docsBuild = shell.task(['typedoc --options typedoc.config.json src/main/ts']);
+const docsBuild = shell.task(['typedoc --options typedoc.config.json src/main']);
 const docsMarkup = () => {
   const packageJson = readAndParse(`${distDir}/package.json`);
   return src([`${distDir}/docs/index.html`])
@@ -73,10 +80,10 @@ const docs = series(docsBuild, docsMarkup);
 
 const webpackBundle = () => {
   return merge(
-    src('src/main/ts/index.ts')
+    src('src/main/index.ts')
       .pipe(webpack(require('./webpack/webpack.amd.config')))
       .pipe(dest(distDir)),
-    src('src/main/ts/index.ts')
+    src('src/main/index.ts')
       .pipe(webpack(require('./webpack/webpack.global.config')))
       .pipe(dest(distDir))
   )
@@ -100,7 +107,7 @@ const tsDeclarations = () => {
     typescript: typescript
   });
 
-  return src(["src/main/ts/**/*.ts", "!src/main/ts/model/rt/richtext/**/*"])
+  return src(["src/main/**/*.ts", "!src/main/model/rt/richtext/**/*"])
     .pipe(tsProject())
     .dts
     .pipe(filter(content => trim(content) !== exportFilter))

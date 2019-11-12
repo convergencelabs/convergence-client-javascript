@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in the files
+ * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
+ */
+
+/**
+ * A PathElement is a particular desired node within a [[RealTimeModel]]'s contents,
+ * which can be thought of as a JSON tree.
+ *
+ * These have no meaning outside of a [[Path]].
+ *
+ * @category Real Time Data Subsystem
+ */
+export type PathElement = string | number;
+
+/**
+ * A `Path` is essentially a set of instructions for retrieving a particular piece of data
+ * (subtree) within a model's contents (JSON tree). e.g.
+ *
+ * for a model with contents
+ *
+ * ```json
+ * {
+ *   "firstName": "James",
+ *   "kidsAges": [4, 7, 9]
+ * }
+ * ```
+ *
+ * one could query:
+ *
+ * ```typescript
+ * realTimeModel.elementAt(['firstName']) // RealTimeString, value() => "James"
+ * realTimeModel.elementAt(['kidsAges', 1]) // RealTimeNumber, value() => 7
+ * ```
+ *
+ * See the
+ * [developer guide](https://docs.convergence.io/guide/models/overview.html#paths) for
+ * more examples of using paths to get parts of a model's contents.
+ *
+ * @category Real Time Data Subsystem
+ */
+export type Path = PathElement[];

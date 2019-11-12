@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "./connect";
-import {CancellationToken} from "../main/ts/";
+import {CancellationToken} from "../main/";
 
 let domain;
 const ct = CancellationToken.create();

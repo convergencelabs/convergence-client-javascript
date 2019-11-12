@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in the files
+ * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
+ */
+
 import rollupTypescript2 from "rollup-plugin-typescript2";
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
@@ -13,7 +20,7 @@ const commonPlugins = [
   json(),
 ];
 
-const input = "src/main/ts/index.ts";
+const input = "src/main/index.ts";
 
 export default [
   {

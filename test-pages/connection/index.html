@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Convergence - Console</title>
+  <link rel="stylesheet" href="connection.css"/>
+  <script src="../config.js"></script>
+  <script src="../../node_modules/rxjs/bundles/rxjs.umd.js"></script>
+  <script src="../../dist/convergence.global.js"></script>
+</head>
+<body>
+<h2>Convergence Console Util</h2>
+<div class="container">
+  <div class="instructions">Select a connection method, then open the console to work with the domain.</div>
+  <div class="title">Anonymous Authentication</div>
+  <div class="group">
+    <label for="displayName">Display Name:</label>
+    <input id="displayName" type="text" value="Test User">
+    <button id="anonymousConnect" onclick="connectAnonymously()">Connect</button>
+  </div>
+
+  <div class="title">Password Authentication</div>
+  <div class="group">
+    <label for="username">Username:</label><input id="username" type="text" value="test"/>
+    <label for="password">Password:</label><input id="password" type="text" value="password"/>
+    <button id="passwordConnect" onclick="connectPassword()">Connect</button>
+  </div>
+
+  <div class="title">JWT Authentication</div>
+  <div class="group">
+    <label for="jwt">JWT</label>
+    <textarea id="jwt" type="text" rows="4"></textarea>
+    <button id="jwtConnect" onclick="connectJwt()">Connect</button>
+  </div>
+</div>
+<script src="connection.js"></script>
+</body>
+</html>
