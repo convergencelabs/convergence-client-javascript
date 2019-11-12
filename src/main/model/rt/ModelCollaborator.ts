@@ -11,7 +11,7 @@ import {DomainUser} from "../../identity";
  * The [[ModelCollaborator]] represents a user / session that has opened
  * a given model for shared editing.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelCollaborator {
   /**

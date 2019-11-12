@@ -11,7 +11,7 @@
  *
  * These have no meaning outside of a [[Path]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export type PathElement = string | number;
 
@@ -39,6 +39,6 @@ export type PathElement = string | number;
  * [developer guide](https://docs.convergence.io/guide/models/overview.html#paths) for
  * more examples of using paths to get parts of a model's contents.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export type Path = PathElement[];

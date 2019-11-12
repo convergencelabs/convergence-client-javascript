@@ -8,7 +8,7 @@
 /**
  * A set of permissions that are configurable on a given model.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelPermissions  {
   /**

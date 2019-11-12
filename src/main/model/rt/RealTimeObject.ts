@@ -32,7 +32,7 @@ import {Path, PathElement} from "../Path";
 import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeObjectEvents extends ObservableObjectEvents {
 }
@@ -49,7 +49,7 @@ export interface RealTimeObjectEvents extends ObservableObjectEvents {
  * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-object.html)
  * for examples of some of the most common use cases.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
   implements RealTimeContainerElement<{ [key: string]: any; }>, ObservableObject {

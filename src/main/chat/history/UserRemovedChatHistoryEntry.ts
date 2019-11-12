@@ -12,7 +12,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a user being removed from this chat.  Analogous to a [[UserRemovedEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserRemovedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.USER_REMOVED;

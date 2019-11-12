@@ -20,7 +20,7 @@ import { RealTimeElement, RealTimeModel } from "../rt";
 /**
  * All the different types of [references](https://docs.convergence.io/guide/models/references/references.html).
  *
- * @category Collaboration Awareness
+ * @module Collaboration Awareness
  */
 export interface ModelReferenceTypes {
   [key: string]: ReferenceType;
@@ -33,7 +33,7 @@ export interface ModelReferenceTypes {
 /**
  * The generic events available on any reference.
  *
- * @category Collaboration Awareness
+ * @module Collaboration Awareness
  */
 export interface ModelReferenceEvents {
   /**
@@ -61,7 +61,7 @@ export interface ModelReferenceEvents {
  * See [[ModelReferenceEvents]] for all of the events that could be emitted from
  * instances of this class.
  *
- * @category Collaboration Awareness
+ * @module Collaboration Awareness
  */
 export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
 

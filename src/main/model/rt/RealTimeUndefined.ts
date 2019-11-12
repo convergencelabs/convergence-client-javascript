@@ -20,7 +20,7 @@ import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
 }
@@ -33,7 +33,7 @@ export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
  * More information is in the
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-undefined.html).
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class RealTimeUndefined extends RealTimeElement<void> implements ObservableUndefined {
 

@@ -9,8 +9,7 @@ import {IModelStore} from "./IModelStore";
 import {IMetaStore} from "./IMetaStore";
 
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
 export interface IStorageAdapter {
   openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string>;

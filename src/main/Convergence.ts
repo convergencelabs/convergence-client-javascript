@@ -5,6 +5,17 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
+/**
+ * Convergence is an engine for realtime collaboration, which implies
+ * connectivity to both a central service and likely other users. Similarly,
+ * authenticated usage is almost always desired for identification, authorization
+ * and consistency advantages.
+ *
+ * The [[Convergence]] class is the entrance point for most usages.
+ *
+ * @moduledefinition Connection and Authentication
+ */
+
 import {ConvergenceDomain} from "./ConvergenceDomain";
 import {IConvergenceOptions} from "./IConvergenceOptions";
 import {CancellationToken, ILoggingConfigData} from "./util";
@@ -19,8 +30,6 @@ import {Logging} from "./util/log/Logging";
  *
  * See the [Developer Guide](https://docs.convergence.io/guide/authentication/overview.html)
  * for more information about authentication options.
- *
- * @category Connection and Authentication
  */
 export class Convergence {
   /**
@@ -188,41 +197,41 @@ export class Convergence {
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const connect = Convergence.connect;
 
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const connectWithPassword = Convergence.connectWithPassword;
 
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const connectAnonymously = Convergence.connectAnonymously;
 
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const connectWithJwt = Convergence.connectWithJwt;
 
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const reconnect = Convergence.reconnect;
 
 /**
  * @deprecated
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export const configureLogging = Convergence.configureLogging;

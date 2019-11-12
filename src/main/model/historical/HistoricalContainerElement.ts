@@ -12,7 +12,7 @@ import {Path, PathElement} from "../Path";
 /**
  * An abstraction representing a unified type for an [[HistoricalObject]] and [[HistoricalArray]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface HistoricalContainerElement<T> extends ObservableContainerElement<T> {
   /**

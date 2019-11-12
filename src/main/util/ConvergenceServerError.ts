@@ -5,6 +5,9 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
+/**
+ * Indicates an error on the Convergence Server.
+ */
 export class ConvergenceServerError extends Error {
   /**
    * @internal

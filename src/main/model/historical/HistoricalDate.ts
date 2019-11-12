@@ -16,7 +16,7 @@ import {
 import {HistoricalModel} from "./HistoricalModel";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface HistoricalDateEvents extends ObservableDateEvents {
 }
@@ -25,7 +25,7 @@ export interface HistoricalDateEvents extends ObservableDateEvents {
  * A read-only history-aware version of a [[RealTimeDate]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class HistoricalDate extends HistoricalElement<Date> implements ObservableDate {
 

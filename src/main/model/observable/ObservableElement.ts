@@ -12,7 +12,7 @@ import {ObservableModel} from "./ObservableModel";
 import {ObservableContainerElement} from "./ObservableContainerElement";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ObservableElementEvents {
 
@@ -51,7 +51,7 @@ export interface ObservableElementEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export const ObservableElementEventConstants: ObservableElementEvents = {
   VALUE: "value",
@@ -62,7 +62,7 @@ export const ObservableElementEventConstants: ObservableElementEvents = {
 Object.freeze(ObservableElementEventConstants);
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ObservableElement<T> extends ConvergenceEventEmitter<IConvergenceEvent> {
   id(): string;

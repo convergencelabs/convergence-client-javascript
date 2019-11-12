@@ -12,7 +12,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a message that was sent to this chat.  Analogous to a [[ChatMessageEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class MessageChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.MESSAGE;

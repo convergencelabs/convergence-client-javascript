@@ -10,6 +10,8 @@
  * cancel method to a method that returns a Promise. A CancellationToken must
  * be "bound" by passing it into a method that accepts one. The token must
  * be bound before calling cancel.
+ *
+ * @module Connection and Authentication
  */
 export class CancellationToken {
   /**

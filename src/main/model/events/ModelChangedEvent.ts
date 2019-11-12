@@ -17,7 +17,7 @@ import {DomainUser} from "../../identity";
  * within a [[RealTimeContainerElement]] when you'd like to know about *any* changes
  * to the data within.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelChangedEvent implements IConvergenceModelValueEvent {
   public static readonly NAME = "model_changed";

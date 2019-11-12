@@ -14,7 +14,7 @@ import {HistoricalModel} from "./HistoricalModel";
 import {Path, PathElement} from "../Path";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface HistoricalArrayEvents extends ObservableArrayEvents {
 }
@@ -23,7 +23,7 @@ export interface HistoricalArrayEvents extends ObservableArrayEvents {
  * A read-only history-aware version of a [[RealTimeArray]].  See [[HistoricalElement]]
  * and [[HistoricalModel]] for some common usages.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class HistoricalArray
   extends HistoricalElement<any[]>

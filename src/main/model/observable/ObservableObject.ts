@@ -11,7 +11,7 @@ import {ObservableContainerElement} from "./ObservableContainerElement";
 /**
  * The events that could be emitted by a [[RealTimeObject]] or [[HistoricalObject]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ObservableObjectEvents extends ObservableElementEvents {
   /**
@@ -41,7 +41,7 @@ export interface ObservableObjectEvents extends ObservableElementEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export const ObservableObjectEventConstants: ObservableObjectEvents = {
   SET: "set",
@@ -51,7 +51,7 @@ export const ObservableObjectEventConstants: ObservableObjectEvents = {
 Object.freeze(ObservableObjectEventConstants);
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ObservableObject extends ObservableContainerElement<{ [key: string]: any }> {
 

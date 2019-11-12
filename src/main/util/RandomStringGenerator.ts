@@ -5,6 +5,10 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
+/**
+ * @hidden
+ * @internal
+ */
 export class RandomStringGenerator {
   public static UpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static LowerCaseLetters = RandomStringGenerator.UpperCaseLetters.toLowerCase();

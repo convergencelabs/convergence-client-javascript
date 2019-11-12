@@ -19,7 +19,7 @@ import {ChatInfo} from "./ChatInfo";
  * users who belong to that chat. A [[MembershipChat]] keeps track of which
  * users are part of the chat.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export abstract class MembershipChat extends Chat {
 
@@ -79,14 +79,14 @@ export abstract class MembershipChat extends Chat {
 /**
  * The possible types of [[ChatInfo.membership]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export type ChatMembership = "public" | "private";
 
 /**
  * The [[ChatInfo]] relevant to a [[MembershipChat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface MembershipChatInfo extends ChatInfo {
   readonly membership: ChatMembership;

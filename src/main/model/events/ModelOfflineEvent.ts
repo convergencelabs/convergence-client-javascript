@@ -13,7 +13,7 @@ import {RealTimeModel} from "../rt";
  * lost connectivity to the server.  Subscribe to this
  * directly on a [[RealTimeModel]] rather than a [[RealTimeElement]] within.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelOfflineEvent implements IModelEvent {
   public static readonly NAME = "offline";

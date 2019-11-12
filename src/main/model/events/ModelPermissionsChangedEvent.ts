@@ -13,7 +13,7 @@ import {ModelPermissions} from "../ModelPermissions";
  * Emitted when the permissions on a model are modified. See [[ModelPermissionManager]]
  * to manage permissions programmatically.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelPermissionsChangedEvent implements IConvergenceEvent {
   public static readonly NAME = "permissions_changed";

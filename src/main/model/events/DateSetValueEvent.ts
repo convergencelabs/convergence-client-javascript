@@ -12,7 +12,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when the [[RealTimeDate.value]] of a [[RealTimeDate]] is set.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class DateSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";

@@ -30,7 +30,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeElement]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeElementEvents extends ObservableElementEvents {
 }
@@ -51,7 +51,7 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
  * For instance, T would be `number` for a [[RealTimeNumber]] and `string` for a [[RealTimeString]].
  * This is the type that [[value]] returns.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export abstract class RealTimeElement<T = any>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {

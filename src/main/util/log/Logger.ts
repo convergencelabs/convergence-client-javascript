@@ -28,6 +28,9 @@ const LogLevelPriority: { [key: string]: number } = {
  * string, or as a callback that produces a string. The callback will only be
  * called when it is certain that the log message will be printed out, avoiding
  * unnecessary concatenation or other expensive operations.
+ *
+ * @hidden
+ * @internal
  */
 export type LogMessage = string | (() => string);
 

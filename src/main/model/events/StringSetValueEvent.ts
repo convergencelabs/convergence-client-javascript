@@ -12,7 +12,7 @@ import {DomainUser} from "../../identity";
 /**
  * Emitted when the [[RealTimeString.value]] of a [[RealTimeString]] is set.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class StringSetValueEvent implements IValueChangedEvent {
   public static readonly NAME = "value";

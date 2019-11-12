@@ -5,6 +5,9 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
+/**
+ * The superclass of all errors within Convergence.
+ */
 export class ConvergenceError extends Error {
 
   /**

@@ -13,6 +13,7 @@ import {StringSetOperation} from "../../ops/StringSetOperation";
 /**
  * @hidden
  * @internal
+ * @ignore
  */
 export const StringRemoveSetOTF: OperationTransformationFunction<StringRemoveOperation, StringSetOperation> =
   (s: StringRemoveOperation, c: StringSetOperation) => {

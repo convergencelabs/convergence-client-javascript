@@ -18,7 +18,7 @@ import {ChatInfo, ChatMember} from "./ChatInfo";
  * between the specified set of users.  This can not change for the life of
  * the DirectChat.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class DirectChat extends Chat {
 
@@ -44,7 +44,7 @@ export class DirectChat extends Chat {
 /**
  * The [[ChatInfo]] relevant to a [[DirectChat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export interface DirectChatInfo extends ChatInfo {
   readonly otherUsers: ChatMember[];

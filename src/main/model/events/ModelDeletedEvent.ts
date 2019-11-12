@@ -11,7 +11,7 @@ import {RealTimeModel} from "../rt";
 /**
  * Emitted when a [[RealTimeModel]] has been deleted.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelDeletedEvent implements IModelEvent {
   public static readonly NAME = "deleted";

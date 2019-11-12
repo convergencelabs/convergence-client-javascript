@@ -10,7 +10,7 @@ import {DomainUserIdentifier} from "./DomainUser";
 /**
  * The different "types" of [[DomainUser]]s in Convergence.
  *
- * @category Users and Identity
+ * @module Users and Identity
  */
 export enum DomainUserType {
   /**
@@ -39,7 +39,7 @@ export enum DomainUserType {
  *
  * [[DomainUserId]]s are read-only.
  *
- * @category Users and Identity
+ * @module Users and Identity
  */
 export class DomainUserId {
 

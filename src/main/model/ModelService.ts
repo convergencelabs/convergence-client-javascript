@@ -59,7 +59,7 @@ import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceDa
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ModelServiceEvents {
   /**
@@ -102,7 +102,7 @@ export interface ModelServiceEvents {
 }
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export const ModelServiceEventConstants: ModelServiceEvents = {
   MODEL_DELETED: ModelDeletedEvent.NAME,
@@ -120,7 +120,7 @@ Object.freeze(ModelServiceEventConstants);
  *
  * See [[ModelServiceEvents]] for the events that may be emitted on this model.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 

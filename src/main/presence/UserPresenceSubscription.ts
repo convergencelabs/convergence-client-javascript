@@ -20,7 +20,7 @@ import {DomainUser} from "../identity";
 /**
  * All the events that could be emitted from a [[UserPresenceSubscription]].
  *
- * @category Presence Subsystem
+ * @module Presence
  */
 export interface UserPresenceSubscriptionEvents {
   /**
@@ -70,7 +70,7 @@ export interface UserPresenceSubscriptionEvents {
  *
  * Make sure to [[unsubscribe]] when you're done using this.
  *
- * @category Presence Subsystem
+ * @module Presence
  */
 export class UserPresenceSubscription extends ConvergenceEventEmitter<IPresenceEvent> {
 

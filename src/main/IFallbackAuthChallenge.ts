@@ -13,7 +13,7 @@
  * but fails. This allows the application to provide authentication information
  * synchronously or asynchronously.
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export interface IFallbackAuthChallenge {
   /**

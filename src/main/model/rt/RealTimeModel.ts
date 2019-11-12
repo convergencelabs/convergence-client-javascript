@@ -96,7 +96,7 @@ import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceDa
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeModelEvents extends ObservableModelEvents {
   /**
@@ -228,7 +228,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  *
  * See [[RealTimeModelEvents]] for the events that may be emitted on this model.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableModel {
 

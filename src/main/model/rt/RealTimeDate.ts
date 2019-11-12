@@ -22,7 +22,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
 /**
  * An enumeration of the events that could be emitted by a [[RealTimeDate]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeDateEvents extends ObservableDateEvents {
 }
@@ -41,7 +41,7 @@ export interface RealTimeDateEvents extends ObservableDateEvents {
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-date.html)
  * for the most common use cases.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class RealTimeDate extends RealTimeElement<Date> implements ObservableDate {
 

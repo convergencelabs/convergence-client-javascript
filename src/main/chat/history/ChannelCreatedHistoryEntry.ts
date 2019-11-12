@@ -12,7 +12,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents the creation of this chat, regardless of type.
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.CREATED;

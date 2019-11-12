@@ -41,7 +41,7 @@ import IUserPresenceData = com.convergencelabs.convergence.proto.presence.IUserP
 /**
  * All the events that could be emitted from the [[PresenceService]].
  *
- * @category Presence Subsystem
+ * @module Presence
  */
 export interface PresenceServiceEvents {
   /**
@@ -93,7 +93,7 @@ export interface PresenceServiceEvents {
  *
  * See [[PresenceServiceEvents]] for the events that may be emitted on this service.
  *
- * @category Presence Subsystem
+ * @module Presence
  */
 export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 

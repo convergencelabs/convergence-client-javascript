@@ -34,7 +34,7 @@ import {
 import {IdentityCache} from "../../identity/IdentityCache";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface RealTimeStringEvents extends ObservableStringEvents {
 }
@@ -56,7 +56,7 @@ export interface RealTimeStringEvents extends ObservableStringEvents {
  * [developer guide](https://docs.convergence.io/guide/models/data/real-time-string.html)
  * for the most common use cases.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class RealTimeString extends RealTimeElement<string> implements ObservableString {
 

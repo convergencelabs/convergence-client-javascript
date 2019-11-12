@@ -12,7 +12,7 @@ import { DomainUser } from "../../identity";
 /**
  * Represents a chat's topic being changed.  Analogous to a [[ChatTopicChangedEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class TopicChangedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.TOPIC_CHANGED;

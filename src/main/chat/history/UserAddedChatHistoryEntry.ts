@@ -12,7 +12,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a user being added this chat.  Analogous to a [[UserAddedEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class UserAddedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.USER_ADDED;

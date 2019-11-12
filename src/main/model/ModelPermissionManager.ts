@@ -23,7 +23,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
  * Use this class to manage or query the permissions of a particular
  * [[RealTimeModel]].
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ModelPermissionManager {
 

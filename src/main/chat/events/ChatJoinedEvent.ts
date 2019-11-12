@@ -16,7 +16,7 @@ import {IChatEvent} from "./IChatEvent";
  *
  * Note that this is emitted from the [[ChatService]] as opposed to a [[Chat]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class ChatJoinedEvent implements IChatEvent {
   public static readonly NAME = "joined";

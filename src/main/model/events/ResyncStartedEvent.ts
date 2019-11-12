@@ -12,7 +12,7 @@ import {RealTimeModel} from "../rt";
  * Emitted when a [[RealTimeModel]] reconnects to the server and when the
  * resynchronization process starts.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export class ResyncStartedEvent implements IModelEvent {
   public static readonly NAME = "resync_started";

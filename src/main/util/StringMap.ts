@@ -5,6 +5,10 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
+/**
+ * @hidden
+ * @internal
+ */
 export type StringMapLike = Map<string, any> | {[key: string]: any};
 
 /**

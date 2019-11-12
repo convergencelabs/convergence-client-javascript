@@ -8,7 +8,7 @@
 /**
  * The methods of authentication supported by Convergence.
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export enum AuthenticationMethods {
   ANONYMOUS = "anonymous",
@@ -20,7 +20,7 @@ export enum AuthenticationMethods {
 /**
  * A method of authentication.  One of the [[AuthenticationMethods]].
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export type AuthenticationMethod =
   AuthenticationMethods.ANONYMOUS |

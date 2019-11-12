@@ -9,7 +9,7 @@
 /**
  * A username and password to authenticate with.
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export interface IUsernameAndPassword {
   username: string;

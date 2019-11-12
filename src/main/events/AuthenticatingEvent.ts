@@ -12,7 +12,7 @@ import { AuthenticationMethod } from "../connection/AuthenticationMethod";
 /**
  * Emitted when a [[ConvergenceDomain]] is actively attempting to authenticate.
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export class AuthenticatingEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "authenticating";

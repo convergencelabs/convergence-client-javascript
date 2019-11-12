@@ -12,7 +12,7 @@ import {ConvergenceDomain} from "../ConvergenceDomain";
  * Emitted when a [[ConvergenceDomain]] becomes disconnected AND is not attempting to reconnect.
  * Essentially, the domain has given up trying to connect and reverted to offline mode.
  *
- * @category Connection and Authentication
+ * @module Connection and Authentication
  */
 export class DisconnectedEvent implements IConvergenceDomainEvent {
   public static readonly NAME = "disconnected";

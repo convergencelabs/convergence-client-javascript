@@ -12,8 +12,7 @@ import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 import {IModelUpdate} from "./IModelUpdate";
 
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
 export interface IModelStore {
   getSubscribedModels(): Promise<IOfflineModelSubscription[]>;

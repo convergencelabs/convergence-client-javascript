@@ -12,7 +12,7 @@ import {ModelDataInitializer} from "./ModelDataInitializer";
  * The configuration available when creating a model with the
  * [[ModelService.create]] or [[ModelService.openAutoCreate]] methods.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface ICreateModelOptions {
   /**

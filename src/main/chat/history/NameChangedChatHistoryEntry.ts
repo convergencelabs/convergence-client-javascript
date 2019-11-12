@@ -12,7 +12,7 @@ import { Immutable } from "../../util/Immutable";
 /**
  * Represents a chat's name being changed.  Analogous to a [[ChatNameChangedEvent]].
  *
- * @category Chat Subsytem
+ * @module Chat
  */
 export class NameChangedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.NAME_CHANGED;

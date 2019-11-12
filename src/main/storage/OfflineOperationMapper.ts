@@ -45,6 +45,10 @@ import {BooleanSetOperation} from "../model/ot/ops/BooleanSetOperation";
 import {DateSetOperation} from "../model/ot/ops/DateSetOperation";
 import {CompoundOperation} from "../model/ot/ops/CompoundOperation";
 
+/**
+ * @hidden
+ * @internal
+ */
 export function toOfflineOperationData(op: Operation): IModelOperationData {
   if (op instanceof CompoundOperation) {
     const opData = op.ops.map(o => toOfflineOperationData(o)) as IModelDiscreteOperationData[];
@@ -169,6 +173,10 @@ export function toOfflineOperationData(op: Operation): IModelOperationData {
   }
 }
 
+/**
+ * @hidden
+ * @internal
+ */
 export function fromOfflineOperationData(op: IModelOperationData): Operation {
   switch (op.type) {
     case "array_insert":

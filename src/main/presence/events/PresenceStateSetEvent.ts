@@ -12,7 +12,7 @@ import {DomainUser} from "../../identity";
  * Emitted when one or more items of a particular [[DomainUser]]'s presence
  * [[UserPresence.state|state]] were [[PresenceService.setState|set]].
  *
- * @category Presence Subsystem
+ * @module Presence
  */
 export class PresenceStateSetEvent implements IPresenceEvent {
   public static readonly NAME = "state_set";

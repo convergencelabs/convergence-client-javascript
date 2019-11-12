@@ -19,7 +19,7 @@ import {HistoricalModel} from "./HistoricalModel";
 import {HistoricalContainerElement} from "./HistoricalContainerElement";
 
 /**
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export interface HistoricalElementEvents extends ObservableElementEvents {
 }
@@ -35,7 +35,7 @@ export interface HistoricalElementEvents extends ObservableElementEvents {
  * As [[HistoricalElement]]s represent a snapshot of a [[RealTimeElement]] in a given
  * moment in time, they are read-only.
  *
- * @category Real Time Data Subsystem
+ * @module Real Time Data
  */
 export abstract class HistoricalElement<T>
   extends ConvergenceEventEmitter<IConvergenceEvent> implements ObservableElement<T> {
