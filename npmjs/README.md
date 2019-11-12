@@ -71,3 +71,9 @@ There is also an AMD version:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.4.0/rxjs.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@convergence/convergence/convergence.amd.js"></script>
 ```
+
+## License
+The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](COPYING.LESSER) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3 assuming, they only use the client as a library and do not modify it. Refer to the [LICENSE](LICENSE) and [COPYING.LESSER](COPYING.LESSER) for the specific terms and conditions of the license.
+
+The Convergence Client is also available under a Commercial License. If you are interested in a non-open source license please contact us at [Convergence Labs](https://convergencelabs.com).
+

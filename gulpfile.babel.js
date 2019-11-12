@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2019 - Convergence Labs, Inc.
  *
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
+ * This file is subject to the terms and conditions defined in the files
+ * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
 import {series, src, dest} from "gulp";
@@ -56,7 +56,7 @@ const lint = () =>
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 
-const copyNpmJs = () => src(["./npmjs/**/*", "./LICENSE.txt"]).pipe(dest(distDir));
+const copyNpmJs = () => src(["./npmjs/**/*", "./LICENSE", "./COPYING.LESSER"]).pipe(dest(distDir));
 const bumpPackageVersion = (cb) => {
   const packageJson = readAndParse("./package.json");
   if (packageJson.version.endsWith("SNAPSHOT")) {
