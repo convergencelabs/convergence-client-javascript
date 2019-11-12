@@ -1,27 +1,25 @@
 {
-  "name": "@convergence-internal/convergence",
+  "name": "@convergence/convergence",
   "version": "1.0.0-SNAPSHOT",
+  "description": "Convergence JavaScript Client",
   "private": true,
-  "description": "Convergence JavaScript client library.",
   "keywords": [
-    "Convergence",
-    "Client",
-    "Collaboration",
-    "Real Time"
+    "convergence",
+    "client",
+    "collaboration",
+    "realtime"
   ],
   "author": {
     "name": "Convergence Labs, Inc.",
     "email": "info@convergencelabs.com",
-    "url": "https://convergence.io"
+    "url": "https://convergencelabs.com"
   },
   "homepage": "https://convergence.io",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.dev.convergencelabs.tech/client-libs/convergence-client-javascript.git"
+    "url": "https://github.com/convergencelabs/convergence-client-javascript.git"
   },
-  "main": "convergence.js",
-  "module": "convergence.esm.js",
-  "bugs": "https://gitlab.dev.convergencelabs.tech/company/convergence/issues",
+  "bugs": "https://github.com/convergencelabs/convergence-client-javascript/issues",
   "license": "LGPL-3.0-only",
   "scripts": {
     "dist": "gulp dist",
@@ -31,10 +29,6 @@
     "test:cover": "mocha --recursive src/**/*Spec.ts --compilers ts:ts-node/register -R spec",
     "typings": "gulp typings",
     "docs": "gulp docs"
-  },
-  "typings": "typings/index.d.ts",
-  "publishConfig": {
-    "registry": "https://nexus.dev.convergencelabs.tech/repository/npm-convergence/"
   },
   "dependencies": {
     "protobufjs": "6.8.8",
