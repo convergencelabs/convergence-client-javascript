@@ -1,3 +1,6 @@
+/**
+ * Indicates an error on the Convergence Server.
+ */
 export class ConvergenceServerError extends Error {
   /**
    * @internal

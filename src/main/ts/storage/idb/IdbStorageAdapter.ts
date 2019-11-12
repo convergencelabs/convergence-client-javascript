@@ -5,8 +5,10 @@ import {IdbSchemaManager} from "./IdbSchemaManager";
 import {IdbMetaStore} from "./IdbMetaStore";
 
 /**
- * @hidden
- * @internal
+ * The default implementation for data persistence in offline mode. Uses
+ * IndexedDB under the hood.
+ *
+ * @module Offline
  */
 export class IdbStorageAdapter implements IStorageAdapter {
   private static readonly _DATABASE_NAME = "convergence.offline.storage";

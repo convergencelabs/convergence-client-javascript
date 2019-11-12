@@ -2,8 +2,7 @@ import {ObjectValue} from "../../model/dataValue";
 import {ModelPermissions} from "../../model";
 
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
 export interface IModelCreationData {
   /**

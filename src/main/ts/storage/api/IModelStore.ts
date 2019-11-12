@@ -4,8 +4,7 @@ import {IModelCreationData} from "./IModelCreationData";
 import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
 export interface IModelStore {
   getSubscribedModels(): Promise<IOfflineModelSubscription[]>;

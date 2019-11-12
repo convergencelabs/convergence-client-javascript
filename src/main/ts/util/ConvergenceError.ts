@@ -1,3 +1,6 @@
+/**
+ * The superclass of all errors within Convergence.
+ */
 export class ConvergenceError extends Error {
 
   /**

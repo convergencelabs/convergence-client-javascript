@@ -1,3 +1,7 @@
+/**
+ * @hidden
+ * @internal
+ */
 export class RandomStringGenerator {
   public static UpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static LowerCaseLetters = RandomStringGenerator.UpperCaseLetters.toLowerCase();

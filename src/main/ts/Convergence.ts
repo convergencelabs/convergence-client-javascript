@@ -1,5 +1,10 @@
 /**
- * Cuz you gots to connect to use this stuff!
+ * Convergence is an engine for realtime collaboration, which implies
+ * connectivity to both a central service and likely other users. Similarly,
+ * authenticated usage is almost always desired for identification, authorization
+ * and consistency advantages.
+ *
+ * The [[Convergence]] class is the entrance point for most usages.
  *
  * @moduledefinition Connection and Authentication
  */
@@ -18,8 +23,6 @@ import {Logging} from "./util/log/Logging";
  *
  * See the [Developer Guide](https://docs.convergence.io/guide/authentication/overview.html)
  * for more information about authentication options.
- *
- * @module Connection and Authentication
  */
 export class Convergence {
   /**
