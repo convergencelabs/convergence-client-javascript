@@ -20,7 +20,7 @@
     "url": "https://github.com/convergencelabs/convergence-client-javascript.git"
   },
   "bugs": "https://github.com/convergencelabs/convergence-client-javascript/issues",
-  "license": "LGPL-3.0-only",
+  "license": "LGPL-3.0",
   "scripts": {
     "dist": "gulp dist",
     "clean": "gulp clean",
