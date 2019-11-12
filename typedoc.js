@@ -19,7 +19,7 @@ module.exports = {
   readme: "src/docs/README.md",
   json: "dist/docs.json",
 
-  theme: "node_modules/@convergence/typedoc-theme/bin/default",
+  theme: "node_modules/@convergencelabs/typedoc-theme/bin/default",
 
   gaId: "UA-84372428-3",
 

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in the files
+ * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
+ */
+
 const path = require('path');
 
 module.exports = {
@@ -6,7 +13,7 @@ module.exports = {
     minimize: false
   },
   devtool: "source-map",
-  entry: './src/main/ts/index.ts',
+  entry: './src/main/index.ts',
   module: {
     rules: [
       {

@@ -1,13 +1,8 @@
-bower.json
-downloads
-misc
 node_modules
-test
-tools
+test-pages
 .idea
-component.json
-gulpfile.babel.js
+.vscode
 .npmignore
 .gitignore
-*.zip
+gulpfile.babel.js
 npm-debug.log

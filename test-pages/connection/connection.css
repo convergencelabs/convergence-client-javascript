@@ -1,0 +1,52 @@
+body {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
+
+div.container {
+  width: 500px;
+}
+div.instructions {
+  border: 1px solid darkgray;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 2px;
+  background: #e1e1e1;
+}
+
+div.group {
+  margin-bottom: 10px;
+  border: 1px solid lightgray;
+  padding: 5px;
+}
+
+div.title {
+  text-align: center;
+  background: lightblue;
+  font-weight: bold;
+  padding: 4px;
+}
+
+button {
+  width: 200px;
+  height: 30px;
+}
+
+input {
+  width: 200px;
+  padding: 4px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12pt;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}

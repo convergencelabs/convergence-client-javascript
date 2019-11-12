@@ -1,5 +1,0 @@
-Convergence Labs Inc. ("Convergence Labs") with offices at 150 S State Street Ste 100 #24, Salt Lake City, UT 84111, United States, provides this Javascript client ("Client") for usage with an official version of the Convergence Realtime Collaboration Engine ("Convergence").  
-
-The terms of usage of the Client are governed by the particular edition of Convergence to which it connects.  For the Convergence Development Edition (convergence-de), the terms can be found at https://convergence.io/license/development-edition.  For the Convergence Enterprise Edition (convergence-ee), the terms will be provided along with access to a license to use the Enterprise Edition.  The "Programs" or "Software" definition in each license includes this Client.
-
-By downloading or using this Client, you agree to only use the Client to connect to an official version of Convergence as provided by Convergence Labs. 

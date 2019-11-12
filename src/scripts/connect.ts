@@ -14,9 +14,9 @@ import {
   InterruptedEvent,
   LogLevel,
   Convergence
-} from "../main/ts";
+} from "../main";
 import * as WebSocket from "ws";
-import {TypeChecker} from "../main/ts/util/TypeChecker";
+import {TypeChecker} from "../main/util/TypeChecker";
 
 Convergence.configureLogging({
   root: LogLevel.INFO,
