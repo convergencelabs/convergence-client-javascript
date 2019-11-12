@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {RealTimeDate, RealTimeModel, ModelEventCallbacks} from "../../main/model/rt";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {DateSetOperation} from "../../main/model/ot/ops/DateSetOperation";

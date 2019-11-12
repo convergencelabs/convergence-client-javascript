@@ -6,9 +6,9 @@
 
 This is the first (and only) client for the [Convergence Collaboration Engine](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
 
-The client is implemented in typescript.  The build system uses Rollup to bundle and transpile the typescript to a single minified ES5 file.  For testing, the typescript compiler is used to compile the code into ES5 and commonjs modules to support direct unit testing in node.
+The client is implemented in typescript.  The build system uses both Rollup and WebPack to bundle and transpile the typescript to single files using a variety of module systems.  For testing, the typescript compiler is used to compile the code into ES5 and commonjs modules to support direct unit testing in node.
 
-## Usage in your app
+## Usage
 
 ```
 npm install @convergence/convergence
@@ -42,11 +42,13 @@ Test coverage can be run using
 npm run test:cover
 ```
 
-### Examples
-Several examples are available in the examples folder.  An active server must be available to run the
-examples.  This allows for easy testing of certain functionality without needing to mess with `npm link`.
+### Test Pages and Scripts
+Several examples are available in the [test-pages](test-pages) folder. These allow you to open a browser window with the current compiled version of the client and test functionality. Similarly, the [src/scripts](src/scripts) directory contains several node scripts that leverage ts-node to execute the raw typescript codebase without compiling.
+
+In both cases, an active server must be available to run the examples or scripts.
 
 
-### Mock Convergence Server
-The src/test-e2e/mock-server directory contains a mock server infrastructure that allows end-to-end testing
-of the client without the need for a server.
+## License
+The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](LICENSE.txt) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3 assuming, they only use the client as a library and do not modify it. Refer to the [LICENSE.txt](LICENSE.txt) for the specific terms and conditions of the license.
+
+The Convergence Client is also available under a Commercial License. If you are interested in a non-open source license please contact us at [Convergence Labs](https://convergencelabs.com).

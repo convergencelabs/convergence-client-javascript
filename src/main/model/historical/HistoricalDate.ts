@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {HistoricalElement} from "./HistoricalElement";
 import {DateNode} from "../internal/DateNode";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";

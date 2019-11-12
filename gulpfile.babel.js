@@ -49,7 +49,7 @@ const lint = () =>
     .pipe(tsLint({formatter: "prose"}))
     .pipe(tsLint.report());
 
-const copyNpmJs = () => src(["./npmjs/**/*"]).pipe(dest(distDir));
+const copyNpmJs = () => src(["./npmjs/**/*", "./LICENSE.txt"]).pipe(dest(distDir));
 const bumpPackageVersion = (cb) => {
   const packageJson = readAndParse("./package.json");
   if (packageJson.version.endsWith("SNAPSHOT")) {

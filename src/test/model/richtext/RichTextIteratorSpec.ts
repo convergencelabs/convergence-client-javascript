@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {TestDocumentCreator} from "./documents/TestDocumentCreator";
 import {TWO_PARAGRAPHS} from "./documents/two_paragraphs";
 import {RichTextIterator, RichTextIteratorOptions} from "../../../main/model/rt/richtext/model/RichTextIterator";

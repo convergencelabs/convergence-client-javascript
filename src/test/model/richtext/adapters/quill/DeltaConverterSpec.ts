@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {expect} from "chai";
 import {QuillDeltaConverter} from "../../../../../main/model/rt/richtext/adapters/quill";
 import {RichTextDocument} from "../../../../../main/model/rt/richtext/model/RichTextDocument";

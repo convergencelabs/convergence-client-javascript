@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {StringSetOperation} from "../../main/model/ot/ops/StringSetOperation";
 import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";

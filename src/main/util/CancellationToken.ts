@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 /**
  * A [[CancellationToken]] is a utility class that allows the binding of a
  * cancel method to a method that returns a Promise. A CancellationToken must

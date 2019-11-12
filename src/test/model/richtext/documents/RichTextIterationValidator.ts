@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {RichTextContentType} from "../../../../main/model/rt/richtext/model/RichTextContentType";
 import {RichTextString} from "../../../../main/model/rt/richtext/model/RichTextString";
 import {RichTextStringFragment} from "../../../../main/model/rt/richtext/model/RichTextStringFragment";

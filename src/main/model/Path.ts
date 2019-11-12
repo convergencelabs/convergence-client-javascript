@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 /**
  * A PathElement is a particular desired node within a [[RealTimeModel]]'s contents,
  * which can be thought of as a JSON tree.

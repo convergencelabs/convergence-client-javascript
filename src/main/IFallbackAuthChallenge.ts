@@ -1,4 +1,11 @@
 
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 /**
  * Provides a few hooks for passing authentication information that can be
  * provided in [[IConvergenceOptions]].  The application-provided [[IConvergenceOptions.reconnect.fallbackAuth]]

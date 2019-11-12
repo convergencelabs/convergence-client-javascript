@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - Convergence Labs, Inc.
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+
 import {RealTimeElement} from "./RealTimeElement";
 import {NumberNode} from "../internal/NumberNode";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
