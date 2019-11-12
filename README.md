@@ -50,6 +50,6 @@ In both cases, an active server must be available to run the examples or scripts
 
 
 ## License
-The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](COPYING.LESSER) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3 assuming, they only use the client as a library and do not modify it. Refer to the [LICENSE](LICENSE) and [COPYING.LESSER](COPYING.LESSER) for the specific terms and conditions of the license.
+The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](COPYING.LESSER) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3, assuming they only use the client as a library and do not modify it. Refer to the [LICENSE](LICENSE) and [COPYING.LESSER](COPYING.LESSER) for the specific terms and conditions of the license.
 
 The Convergence Client is also available under a Commercial License. If you are interested in a non-open source license please contact us at [Convergence Labs](https://convergencelabs.com).
