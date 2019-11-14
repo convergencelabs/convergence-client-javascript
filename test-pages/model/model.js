@@ -70,23 +70,25 @@ function connectOnline() {
   domain
     .connectWithPassword({username, password})
     .then(() => {
-
       onConnect();
     })
     .catch(e => console.error())
 }
 
 function connectOffline() {
+  const username = usernameInput.value;
   domain
-    .connectOffline("test")
+    .connectOffline(username)
     .then(() => {
-
       onConnect();
     })
     .catch(e => console.error())
 }
 
 function onConnect() {
+  usernameInput.disabled = true;
+  passwordInput.disabled = true;
+
   connectOnlineButton.disabled = true;
   connectOfflineButton.disabled = true;
   disconnectButton.disabled = false;
@@ -102,6 +104,7 @@ function onConnect() {
 
 function disconnect() {
   domain.disconnect();
+  passwordInput.disabled = false;
   connectOnlineButton.disabled = false;
   connectOfflineButton.disabled = false;
   disconnectButton.disabled = true;
@@ -205,6 +208,10 @@ function closeModel() {
 
     while (arrayInput.firstChild) {
       arrayInput.removeChild(arrayInput.firstChild);
+    }
+
+    while (objectTable.tBodies[0].firstChild) {
+      objectTable.tBodies[0].removeChild(objectTable.tBodies[0].firstChild);
     }
 
     openButton.disabled = false;
