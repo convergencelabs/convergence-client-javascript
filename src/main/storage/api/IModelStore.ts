@@ -10,6 +10,7 @@ import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
 import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 import {IModelUpdate} from "./IModelUpdate";
+import {IModelData} from "./IModelData";
 
 /**
  * @module Offline
@@ -28,6 +29,8 @@ export interface IModelStore {
   getModelCreationData(modelId: string): Promise<IModelCreationData>;
 
   putModelState(model: IModelState): Promise<void>;
+
+  snapshotModel(model: IModelData): Promise<void>;
 
   updateOfflineModel(update: IModelUpdate): Promise<void>;
 

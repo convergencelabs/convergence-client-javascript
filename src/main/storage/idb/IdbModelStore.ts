@@ -117,7 +117,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public updateOfflineModel(update: IModelUpdate): Promise<void> {
-    return this._withWriteStore(IdbSchema.ModelData.Store, async (modelStore) => {
+    const stores = [
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelSubscriptions.Store
+    ];
+    return this._withWriteStores(stores, async ([modelStore, subscriptionStore]) => {
       const {modelId, dataUpdate, permissionsUpdate} = update;
       const model: IModelData = await toPromise(modelStore.get(modelId));
 
@@ -128,6 +132,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         model.version = dataUpdate.version;
         model.createdTime = dataUpdate.createdTime;
         model.modifiedTime = dataUpdate.modifiedTime;
+
+        // Update the subscription table to indicate we have a new version.
+        await toVoidPromise(subscriptionStore.put({modelId, version: model.version}));
       }
 
       if (permissionsUpdate) {
@@ -150,7 +157,15 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
-    return this.add(IdbSchema.ModelServerOperation.Store, serverOp);
+    const stores = [
+      IdbSchema.ModelServerOperation.Store,
+      IdbSchema.ModelSubscriptions.Store
+    ];
+
+    return this._withWriteStores(stores, async ([serverOpStore, subscriptionsStore]) => {
+      serverOpStore.add(serverOp);
+      subscriptionsStore.put({modelId: serverOp.modelId, version: serverOp.version});
+    });
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
@@ -161,10 +176,16 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                              sessionId: string,
                              seqNo: number,
                              serverOp: IServerOperationData): Promise<void> {
-    const stores = [IdbSchema.ModelLocalOperation.Store, IdbSchema.ModelServerOperation.Store];
-    return this._withWriteStores(stores, async ([localOpStore, serverOpStore]) => {
+    const stores = [
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store,
+      IdbSchema.ModelSubscriptions.Store
+    ];
+
+    return this._withWriteStores(stores, async ([localOpStore, serverOpStore, subscriptionsStore]) => {
       localOpStore.delete([modelId, sessionId, seqNo]);
       serverOpStore.add(serverOp);
+      subscriptionsStore.put({modelId, version: serverOp.version});
     });
   }
 
@@ -247,6 +268,16 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       modelStore.delete(modelId);
       IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
       IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
+    });
+  }
+
+  public snapshotModel(model: IModelData): Promise<void> {
+    const stores = [
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelServerOperation.Store];
+    return this._withWriteStores(stores, async ([modelStore, serverOpStore]) => {
+      modelStore.put(model);
+      IdbModelStore.deleteServerOperationsForModel(serverOpStore, model.modelId);
     });
   }
 }

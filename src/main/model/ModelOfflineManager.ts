@@ -47,12 +47,13 @@ export class ModelOfflineManager {
     };
   }
 
-  private readonly _subscribedModels: Map<string, number>;
+  private readonly _subscribedModels: Map<string, ISubscribedModelRecord>;
   private readonly _openModels: Map<string, RealTimeModel>;
   private readonly _syncInterval: number;
   private readonly _storage: StorageEngine;
   private readonly _connection: ConvergenceConnection;
   private readonly _ready: Deferred<void>;
+  private readonly _snapshotInterval: number;
 
   constructor(connection: ConvergenceConnection,
               syncInterval: number,
@@ -64,6 +65,7 @@ export class ModelOfflineManager {
     this._subscribedModels = new Map();
     this._openModels = new Map();
     this._ready = new Deferred<void>();
+    this._snapshotInterval = snapshotInterval;
 
     this._connection
       .messages()
@@ -78,7 +80,7 @@ export class ModelOfflineManager {
   public init(): void {
     this._storage.modelStore().getSubscribedModels().then(modelSubscriptions => {
       modelSubscriptions.forEach(subs => {
-        this._subscribedModels.set(subs.modelId, subs.version);
+        this._subscribedModels.set(subs.modelId, {version: subs.version, opsSinceSnapshot: 0});
       });
       this._ready.resolve();
     }).catch(e => {
@@ -148,8 +150,8 @@ export class ModelOfflineManager {
 
     // Iterate over what is now set, and send that over.
     const subscriptions: IOfflineModelSubscription[] = [];
-    this._subscribedModels.forEach((version, modelId) => {
-      subscriptions.push({modelId, version});
+    this._subscribedModels.forEach((record, modelId) => {
+      subscriptions.push({modelId, version: record.version});
     });
 
     this._storage
@@ -191,14 +193,18 @@ export class ModelOfflineManager {
 
   public processLocalOperation(modelId: string, clientEvent: ClientOperationEvent): Promise<void> {
     const localOpData = ModelOfflineManager._mapClientOperationEvent(modelId, clientEvent);
-    return this._storage.modelStore().processLocalOperation(localOpData);
+    return this._storage.modelStore()
+      .processLocalOperation(localOpData)
+      .then(() => this._handleOperation(modelId, false, false));
   }
 
   public processOperationAck(modelId: string,
                              sessionId: string,
                              seqNo: number,
                              serverOp: IServerOperationData): Promise<void> {
-    return this._storage.modelStore().processOperationAck(modelId, sessionId, seqNo, serverOp);
+    return this._storage.modelStore()
+      .processOperationAck(modelId, sessionId, seqNo, serverOp)
+      .then(() => this._handleOperation(modelId, false, true));
   }
 
   public processServerOperationEvent(modelId: string,
@@ -216,11 +222,13 @@ export class ModelOfflineManager {
     const currentLocalOps = transformedLocalOps
       .map(clientEvent => ModelOfflineManager._mapClientOperationEvent(modelId, clientEvent));
 
-    return this._storage.modelStore().processServerOperation(serverOp, currentLocalOps);
+    return this._storage.modelStore()
+      .processServerOperation(serverOp, currentLocalOps)
+      .then(() => this._handleOperation(modelId, true, false));
   }
 
   private _handleNewSubscriptions(modelId: string): void {
-    this._subscribedModels.set(modelId, 0);
+    this._subscribedModels.set(modelId, {version: 0, opsSinceSnapshot: 0});
     if (this._openModels.has(modelId)) {
       this._initOpenModelForOffline(this._openModels.get(modelId))
         .catch(e => {
@@ -310,8 +318,46 @@ export class ModelOfflineManager {
 
         this._storage.modelStore().updateOfflineModel(update).catch(e => {
           ModelOfflineManager._log.error("Error synchronizing subscribed model from server", e);
+        }).then(() => {
+          if (dataUpdate) {
+            this._subscribedModels.set(modelId, {
+              version: getOrDefaultNumber(model.version),
+              opsSinceSnapshot: 0
+            });
+          }
         });
       }
     }
   }
+
+  private _handleOperation(modelId: string, serverOp: boolean, ack: boolean): void {
+    let {version, opsSinceSnapshot} = this._subscribedModels.get(modelId);
+    if (serverOp || ack) {
+      version++;
+    }
+
+    if (!ack) {
+      opsSinceSnapshot++;
+    }
+
+    if (opsSinceSnapshot >= this._snapshotInterval) {
+      const model = this._openModels.get(modelId);
+      const snapshot = model._getCurrentStateSnapshot();
+      this._storage.modelStore()
+        .snapshotModel(snapshot)
+        .catch(e => ModelOfflineManager._log.error("Error snapshotting model", e));
+      opsSinceSnapshot = 0;
+    }
+
+    this._subscribedModels.set(modelId, {version, opsSinceSnapshot});
+  }
+}
+
+/**
+ * @hidden
+ * @internal
+ */
+interface ISubscribedModelRecord {
+  version: number;
+  opsSinceSnapshot: number;
 }
