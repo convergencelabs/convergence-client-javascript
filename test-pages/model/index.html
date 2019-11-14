@@ -3,92 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <title>Convergence - Basic (offline)</title>
-  <link rel="stylesheet" href="model.css"/>
+  <link rel="stylesheet" href="./model.css"/>
   <script src="../config.js"></script>
   <script src="../../node_modules/rxjs/bundles/rxjs.umd.js"></script>
   <script src="../../dist/convergence.global.js"></script>
   <script src="binding-helpers.js"></script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+          integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+          crossorigin="anonymous"></script>
+
 </head>
 <body>
 
-<h2>Basic Real Time Data Example</h2>
-<div class="directions">
-  Copy the url in the address bar and paste it in another browser window to test collaboration.
-</div>
+<div id="main">
+  <h2>Basic Real Time Data Example</h2>
+  <div class="directions">
+    Copy the url in the address bar and paste it in another browser window to test collaboration.
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Connection Control</h5>
+      <div class="mb-3">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend"><span class="input-group-text">Username</span></div>
+          <input id="username" type="text" class="form-control" value="test"/>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend"><span class="input-group-text">Password</span></div>
+          <input id="password" type="text" class="form-control" value="password"/>
+        </div>
+      </div>
+      <div class="mb-3">
+        <button class="btn btn-secondary" disabled="disabled" id="disconnect" onclick="disconnect()">Disconnect</button>
+        <button class="btn btn-primary" id="connectOnline" onclick="connectOnline()">Connect Online</button>
+        <button class="btn btn-primary" id="connectOffline" onclick="connectOffline()">Connect Offline</button>
+      </div>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend"><span class="input-group-text">Connection Status</span></div>
+        <input id="connectionStatus" type="text" class="form-control" readonly="readonly">
+      </div>
+    </div>
+  </div>
 
-<div class="connection">
-  <span>Connection Status: </span>
-  <span id="connectionStatus"></span><br/>
-  <button id="disconnect" onclick="disconnect()">Disconnect</button>
-  <button id="connectOnline" onclick="connectOnline()">Connect Online</button>
-  <button id="connectOffline" onclick="connectOffline()">Connect Offline</button>
-</div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Model Control</h5>
+      <button class="btn btn-primary" id="open" disabled="disabled" onclick="openModel()">Open Model</button>
+      <button class="btn btn-primary" id="close" disabled="disabled" onclick="closeModel()">Close Model</button>
+    </div>
+  </div>
 
-<button id="create" onclick="openModel()">Open Model</button>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">String Data</h5>
+      <textarea class="string" id="stringVal" disabled="disabled"></textarea>
+    </div>
+  </div>
 
-<div class="dt">
-  <label>String</label>
-  <textarea class="string" id="stringVal"></textarea>
-</div>
-<div class="dt">
-  <label>Boolean</label>
-  <input type="checkbox" id="booleanVal">
-</div>
-<div class="dt">
-  <label>Number</label>
-  <input type="number" id="numberVal">
-  <button onclick="numberIncrement()">Increment</button><button onclick="numberDecrement()">Decrement</button>
-</div>
-<div class="dt">
-  <label>Array</label>
-  <select size="10" id="arrayVal">
-  </select>
-  <div>
-    <button id="arrayRemoveButton">Remove Item</button>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Boolean Data</h5>
+      <input type="checkbox" id="booleanVal" disabled="disabled"/>
+    </div>
   </div>
-  <div>
-    <button id="arrayAddButton">Add Item</button>
-    Value: <input id="arrayAddValue" type="text"/>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Number Data</h5>
+      <input type="number" id="numberVal" disabled="disabled">
+      <button class="btn btn-primary" id="numberIncrement" onclick="numberIncrement()" disabled="disabled">Increment</button>
+      <button class="btn btn-primary" id="numberDecrement" onclick="numberDecrement()" disabled="disabled">Decrement</button>
+    </div>
   </div>
-  <div>
-    <button id="arraySetButton">Set Value</button>
-    Value: <input id="arraySetValue" type="text"/>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Array Data</h5>
+      <select size="10" id="arrayVal">
+      </select>
+      <div class="input-group mb-3">
+        <button class="btn btn-danger array-button" id="arrayRemoveButton" disabled="disabled">Remove Item</button>
+      </div>
+      <div class="input-group mb-3">
+        <button class="btn btn-primary array-button" id="arrayAddButton" disabled="disabled">Add Item</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Value</span>
+        </div>
+        <input id="arrayAddValue" type="text" class="form-control">
+      </div>
+      <div class="input-group mb-3">
+        <button class="btn btn-primary array-button" id="arraySetButton" disabled="disabled">Set Value</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Value</span>
+        </div>
+        <input id="arraySetValue" type="text" class="form-control">
+      </div>
+      <div class="input-group mb-3">
+        <button class="btn btn-primary array-button" id="arrayReorderButton" disabled="disabled">Reorder</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">New Position</span>
+        </div>
+        <input id="arrayReorderValue" type="number" class="form-control">
+      </div>
+    </div>
   </div>
-  <div>
-    <button id="arrayReorderButton">Reorder</button>
-    Value: <input id="arrayReorderValue" type="number"/>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Object Data</h5>
+      <label>Object</label>
+      <table id="objectVal">
+        <thead>
+        <th>Property</th>
+        <th>Value</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class="input-group mb-3">
+        <button class="btn btn-danger array-button" id="objectRemoveButton" disabled="disabled">Remove Property</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Property</span>
+        </div>
+        <input id="objectRemoveProp" type="text" class="form-control">
+      </div>
+      <div class="input-group mb-3">
+        <button class="btn btn-primary array-button" id="objectSetButton" disabled="disabled">Set Property</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Prop</span>
+        </div>
+        <input id="objectSetProp" type="text" class="form-control">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Value</span>
+        </div>
+        <input id="objectSetValue" type="text" class="form-control">
+      </div>
+      <div class="input-group mb-3">
+        <button class="btn btn-primary array-button" id="objectRenameButton" disabled="disabled">Rename Property</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Old Prop</span>
+        </div>
+        <input id="objectRenameOldProp" type="text" class="form-control">
+        <div class="input-group-prepend">
+          <span class="input-group-text">New Prop</span>
+        </div>
+        <input id="objectRenameNewProp" type="text" class="form-control">
+      </div>
+    </div>
   </div>
-</div>
-<div class="dt">
-  <label>Object</label>
-  <table id="objectVal">
-    <thead>
-    <th>Property</th>
-    <th>Value</th>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
-  <div>
-    <button id="objectRemoveButton">Remove Property</button>
-    Property: <input id="objectRemoveProp" type="text"/>
-  </div>
-  <div>
-    <button id="objectSetButton">Set Property</button>
-    Property: <input id="objectSetProp" type="text"/>
-    Value: <input id="objectSetValue" type="text"/>
-  </div>
-  <div>
-    <button id="objectRenameButton">Rename Property (Compound)</button>
-    Old Property: <input id="objectRenameOldProp" type="text"/>
-    New Property: <input id="objectRenameNewProp" type="text"/>
-  </div>
-</div>
-<div class="dt">
-  <label>Date</label>
-  <div>
-    <button onclick="setDate()">Set Date To Now</button>
-    Date: <input id="currentDate" type="text" disabled="disabled"/>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Date Data</h5>
+      <div class="input-group mb-3">
+        <button id="currentDateButton" onclick="setDate()" class="btn btn-primary array-button" id="dateSetButton" disabled="disabled">Set Date To Now</button>
+        <div class="input-group-prepend">
+          <span class="input-group-text">Date</span>
+        </div>
+        <input id="currentDate" type="text" class="form-control">
+      </div>
+    </div>
   </div>
 </div>
 <script src="model.js"></script>

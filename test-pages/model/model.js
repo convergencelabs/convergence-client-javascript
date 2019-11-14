@@ -1,13 +1,28 @@
 const status = document.getElementById("connectionStatus");
-status.innerHTML = "Disconnected";
+status.value = "Disconnected";
 
 // These are the various inputs in the example page.
 const stringInput = document.getElementById("stringVal");
 const booleanInput = document.getElementById("booleanVal");
 const numberInput = document.getElementById("numberVal");
+const numberIncrementInput = document.getElementById("numberIncrement");
+const numberDecrementInput = document.getElementById("numberDecrement");
+
 const arrayInput = document.getElementById("arrayVal");
 const objectTable = document.getElementById("objectVal");
 const dateInput = document.getElementById("currentDate");
+const currentDateButton = document.getElementById("currentDateButton");
+
+const openButton = document.getElementById("open");
+const closeButton = document.getElementById("close");
+
+const connectOnlineButton = document.getElementById("connectOnline");
+const connectOfflineButton = document.getElementById("connectOffline");
+const disconnectButton = document.getElementById("disconnect");
+
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
 
 // The realTimeModel.
 let model;
@@ -38,34 +53,64 @@ const domain = new Convergence.ConvergenceDomain(DOMAIN_URL, options);
 domain.events().subscribe(e => {
   switch (e.name) {
     case "connecting":
-      status.innerHTML = "Connecting";
+      status.value = "Connecting";
       break;
     case "connected":
-      status.innerHTML = "Connected";
+      status.value = "Connected";
       break;
     case "disconnected":
-      status.innerHTML = "Disconnected";
+      status.value = "Disconnected";
       break;
   }
 });
 
 function connectOnline() {
+  const username = usernameInput.value;
+  const password = passwordInput.value;
   domain
-    .connectWithPassword({username: "test", password: "password"})
+    .connectWithPassword({username, password})
+    .then(() => {
+
+      onConnect();
+    })
     .catch(e => console.error())
 }
 
 function connectOffline() {
   domain
     .connectOffline("test")
+    .then(() => {
+
+      onConnect();
+    })
     .catch(e => console.error())
+}
+
+function onConnect() {
+  connectOnlineButton.disabled = true;
+  connectOfflineButton.disabled = true;
+  disconnectButton.disabled = false;
+
+  if (model) {
+    openButton.disabled = true;
+    closeButton.disabled = false;
+  } else {
+    openButton.disabled = false;
+    closeButton.disabled = true;
+  }
 }
 
 function disconnect() {
   domain.disconnect();
+  connectOnlineButton.disabled = false;
+  connectOfflineButton.disabled = false;
+  disconnectButton.disabled = true;
+  openButton.disabled = true;
+  closeButton.disabled = true;
 }
 
 function openModel() {
+  openButton.disabled = true;
   domain.models().openAutoCreate({
     collection: "test",
     id: modelId,
@@ -96,6 +141,25 @@ function openModel() {
     window.history.pushState(modelId, modelId, url);
     model.subscribeOffline();
     bindToModel(model);
+    closeButton.disabled = false;
+
+    stringInput.disabled = false;
+    booleanInput.disabled = false;
+
+    numberInput.disabled = false;
+    numberIncrementInput.disabled = false;
+    numberDecrementInput.disabled = false;
+
+    arrayAddButton.disabled = false;
+    arrayRemoveButton.disabled = false;
+    arraySetButton.disabled = false;
+    arrayReorderButton.disabled = false;
+
+    objectRemoveButton.disabled = false;
+    objectSetButton.disabled = false;
+    objectRenameButton.disabled = false;
+
+    currentDateButton.disabled = false;
   }).catch(e => console.error(e));
 }
 
@@ -105,7 +169,8 @@ function bindToModel(realTimeModel) {
 
   model.on(Convergence.ModelDeletedEvent.NAME, function(event) {
     console.log('model deleted', event.src.modelId(), 'remotely?', !event.local);
-  })
+  });
+
   model.on(Convergence.ModelPermissionsChangedEvent.NAME, function (event) {
     console.log('permissions changed', event.permissions, event.changed);
   });
@@ -126,6 +191,45 @@ function bindToModel(realTimeModel) {
   bindTableButtons();
   bindTableEvents();
   bindDateEvents();
+}
+
+function closeModel() {
+  if (model) {
+    model.close();
+
+    numberInput.value = "";
+    numberInput.disabled = true;
+
+    stringInput.value = "";
+    booleanInput.checked = false;
+
+    while (arrayInput.firstChild) {
+      arrayInput.removeChild(arrayInput.firstChild);
+    }
+
+    openButton.disabled = false;
+    closeButton.disabled = true;
+
+    stringInput.disabled = true;
+    booleanInput.disabled = true;
+
+    numberInput.disabled = true;
+    numberIncrementInput.disabled = true;
+    numberDecrementInput.disabled = true;
+
+    arrayAddButton.disabled = true;
+    arrayRemoveButton.disabled = true;
+    arraySetButton.disabled = true;
+    arrayReorderButton.disabled = true;
+
+    objectRemoveButton.disabled = true;
+    objectSetButton.disabled = true;
+    objectRenameButton.disabled = true;
+
+    currentDateButton.disabled = true;
+
+    model = undefined;
+  }
 }
 
 //

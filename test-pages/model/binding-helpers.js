@@ -2,11 +2,11 @@
 // elements.
 
 function bindToTextInput(textArea, rtString) {
-  var events = ['input'];
+  const events = ['input'];
   textArea.value = rtString.value();
 
-  for (var i = 0; i < events.length; i++) {
-    var event = events[i];
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
     textArea.addEventListener(event, handleTextAreaEvent, false);
   }
 
@@ -15,8 +15,8 @@ function bindToTextInput(textArea, rtString) {
   }
 
   function processEvent(oldval, newval) {
-    var commonEnd;
-    var commonStart;
+    let commonEnd;
+    let commonStart;
 
     if (oldval === newval) {
       return;
@@ -43,14 +43,14 @@ function bindToTextInput(textArea, rtString) {
   }
 
   rtString.on("insert", function (event) {
-    var oldVal = textArea.value;
+    const oldVal = textArea.value;
     textArea.value = oldVal.substring(0, event.index) +
       event.value +
       oldVal.substring(event.index, oldVal.length);
   });
 
   rtString.on("remove", function (event) {
-    var oldVal = textArea.value;
+    const oldVal = textArea.value;
     textArea.value = oldVal.substring(0, event.index) +
       oldVal.substring(event.index + event.value.length, oldVal.length);
   });
@@ -62,7 +62,7 @@ function bindToTextInput(textArea, rtString) {
 
 function bindNumberInput(numberInput, numberModel) {
   numberInput.value = numberModel.value();
-  numberInput.onchange = function (e) {
+  numberInput.onchange = function () {
     numberModel.value(Number(numberInput.value));
   };
 
@@ -77,7 +77,7 @@ function bindNumberInput(numberInput, numberModel) {
 
 function bindCheckboxInput(checkboxInput, booleanModel) {
   booleanInput.checked = booleanModel.value();
-  booleanInput.onchange = function (e) {
+  booleanInput.onchange = function () {
     booleanModel.value(booleanInput.checked);
   };
 

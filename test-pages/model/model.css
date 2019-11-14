@@ -1,19 +1,15 @@
-div.connection {
-  margin-bottom: 20px;
+#main {
+  padding: 10px;
+}
+
+div.card {
+  margin-bottom: 10px;
+  width: 600px;
 }
 
 div.directions {
   margin-bottom: 20px;
   border-bottom: 1px solid darkblue;
-}
-
-div.dt {
-  margin-bottom: 15px;
-}
-
-div.dt label {
-  display: block;
-  font-weight: bold;
 }
 
 textarea.string {
@@ -23,6 +19,11 @@ textarea.string {
 
 select#arrayVal {
   width: 300px;
+}
+
+button.array-button {
+  width: 150px;
+  margin-right: 10px;
 }
 
 #objectVal {
