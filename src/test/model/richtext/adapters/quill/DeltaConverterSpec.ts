@@ -11,7 +11,7 @@ import {RichTextDocument} from "../../../../../main/model/rt/richtext/model/Rich
 import {RichTextRootElement} from "../../../../../main/model/rt/richtext/model/RichTextRootElement";
 import * as Delta from "quill-delta";
 import {RichTextString} from "../../../../../main/model/rt/richtext/model/RichTextString";
-import {StringMap} from "../../../../../main/util";
+import {StringMap} from "../../../../../main/util/StringMap";
 import {RichTextElement} from "../../../../../main/model/rt/richtext/model/RichTextElement";
 import {TestDocumentCreator} from "../../documents/TestDocumentCreator";
 

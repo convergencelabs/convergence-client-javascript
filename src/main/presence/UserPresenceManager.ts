@@ -5,7 +5,8 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
-import {ConvergenceEventEmitter, StringMap} from "../util";
+import {ConvergenceEventEmitter} from "../util";
+import {StringMap} from "../util/StringMap";
 import {UserPresence} from "./UserPresence";
 import {Observable, Subscription, BehaviorSubject} from "rxjs";
 import {UserPresenceSubscription} from "./UserPresenceSubscription";

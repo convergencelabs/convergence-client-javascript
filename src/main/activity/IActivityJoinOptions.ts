@@ -5,7 +5,7 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
-import {StringMapLike} from "../util";
+import {StringMapLike} from "../util/StringMap";
 
 /**
  * Represents the options that can be set when Joining an activity.

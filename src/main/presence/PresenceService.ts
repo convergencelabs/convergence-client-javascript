@@ -7,7 +7,8 @@
 
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
-import {ConvergenceEventEmitter, StringMap, StringMapLike} from "../util";
+import {ConvergenceEventEmitter} from "../util";
+import {StringMap, StringMapLike} from "../util/StringMap";
 import {UserPresence} from "./UserPresence";
 import {Observable} from "rxjs/";
 import {filter, share} from "rxjs/operators";

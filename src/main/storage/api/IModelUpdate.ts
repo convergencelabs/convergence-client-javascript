@@ -9,7 +9,7 @@
  * @hidden
  * @internal
  */
-import {ModelPermissions} from "../../model";
+import {ModelPermissions} from "../../model/ModelPermissions";
 import {ObjectValue} from "../../model/dataValue";
 
 export interface IModelUpdate {

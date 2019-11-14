@@ -20,7 +20,7 @@ import {ActivityService} from "./activity";
 import {IdentityService} from "./identity";
 import {PresenceService} from "./presence";
 import {ChatService} from "./chat";
-import {ConvergenceEventEmitter, StringMap} from "./util";
+import {ConvergenceEventEmitter} from "./util";
 import {
   AuthenticatedEvent,
   AuthenticatingEvent,
@@ -43,6 +43,7 @@ import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
 import {ModelOfflineManager} from "./model/ModelOfflineManager";
+import {StringMap} from "./util/StringMap";
 
 /**
  * This represents a single connection to a specific Domain in

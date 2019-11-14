@@ -16,7 +16,6 @@ import {
   ConvergenceSession,
   DomainUser,
   DomainUserType,
-  StringMap
 } from "../../main";
 import {ConvergenceConnection, IConnectionEvent, MessageEvent} from "../../main/connection/ConvergenceConnection";
 import {Subject} from "rxjs";
@@ -24,6 +23,7 @@ import {Deferred} from "../../main/util/Deferred";
 import {ActivityLeftEvent} from "../../main/activity/events/ActivityLeftEvent";
 import {mapObjectValues} from "../../main/util/ObjectUtils";
 import {jsonToProtoValue} from "../../main/connection/ProtocolUtil";
+import { StringMap } from "../../main/util/StringMap";
 import {expect, assert} from "chai";
 import {createStubInstance, SinonStub, match} from "sinon";
 

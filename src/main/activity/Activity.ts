@@ -15,7 +15,6 @@ import {
   ActivityStateSetEvent,
   IActivityEvent
 } from "./events";
-import {ConvergenceEventEmitter, StringMap, StringMapLike} from "../util";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {BehaviorSubject, Observable, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
@@ -33,10 +32,12 @@ import {IdentityCache} from "../identity/IdentityCache";
 import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
 import {Deferred} from "../util/Deferred";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
+import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
 import {TypeChecker} from "../util/TypeChecker";
 import {EqualsUtil} from "../util/EqualsUtil";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
+import { StringMapLike, StringMap } from "../util/StringMap";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;

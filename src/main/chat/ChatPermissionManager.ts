@@ -6,7 +6,7 @@
  */
 
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {StringMap} from "../util";
+import {StringMap} from "../util/StringMap";
 import {domainUserIdToProto, domainUserTypeToProto, getOrDefaultArray} from "../connection/ProtocolUtil";
 import {DomainUserId, DomainUserType} from "../identity";
 import {mapObjectValues} from "../util/ObjectUtils";

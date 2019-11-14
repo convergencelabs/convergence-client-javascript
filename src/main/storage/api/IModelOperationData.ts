@@ -7,10 +7,6 @@
 
 import {DataValue} from "../../model/dataValue";
 
-/**
- * @hidden
- * @internal
- */
 export interface IServerOperationData {
   modelId: string;
   sessionId: string;
@@ -19,10 +15,6 @@ export interface IServerOperationData {
   operation: IModelOperationData;
 }
 
-/**
- * @hidden
- * @internal
- */
 export interface ILocalOperationData {
   modelId: string;
   sessionId: string;
@@ -32,10 +24,6 @@ export interface ILocalOperationData {
   operation: IModelOperationData;
 }
 
-/**
- * @hidden
- * @internal
- */
 export interface IModelOperationData {
   type: "string_insert" | "string_remove" | "string_set" |
     "array_insert" | "array_remove" | "array_replace" | "array_move" | "array_set" |

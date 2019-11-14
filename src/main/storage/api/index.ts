@@ -19,6 +19,7 @@
 
 export * from "./IModelData";
 export * from "./IModelOperationData";
+export * from "./IModelState";
 export * from "./IModelStore";
 export * from "./IMetaStore";
 export * from "./IDomainUserIdData";

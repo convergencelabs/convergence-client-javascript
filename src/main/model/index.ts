@@ -23,7 +23,6 @@
  */
 
 export * from "./ModelService";
-export * from "./ModelElementType";
 export * from "./Path";
 
 export * from "./events";
@@ -32,6 +31,7 @@ export * from "./query";
 export * from "./reference";
 export * from "./rt";
 
+export * from "./dataValue";
 export * from "./ModelPermissionManager";
 export * from "./ModelPermissions";
 

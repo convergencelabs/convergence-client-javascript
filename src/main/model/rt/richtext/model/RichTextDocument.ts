@@ -100,8 +100,6 @@ import {RichTextMutator} from "./RichTextMutator";
 import {RichTextLocation} from "./RichTextLocation";
 import {RichTextRange} from "./RichTextRange";
 import {RichTextNode} from "./RichTextNode";
-import {
-  StringMapLike,
-  StringMap,
-  ConvergenceError} from "../../../../util";
+import {ConvergenceError} from "../../../../util";
+import {StringMapLike, StringMap} from "../../../../util/StringMap";
 import { Validation } from "../../../../util/Validation";

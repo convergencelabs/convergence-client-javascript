@@ -7,7 +7,7 @@
 
 import {ModelPermissions} from "./ModelPermissions";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {StringMap} from "../util";
+import {StringMap} from "../util/StringMap";
 import {
   modelUserPermissionMapToProto,
   protoToModelUserPermissionMap,

@@ -7,7 +7,7 @@
 
 import {IdbModelStore} from "./IdbModelStore";
 import {toPromise} from "./promise";
-import {IMetaStore, IStorageAdapter} from "../api";
+import {IMetaStore, IModelStore, IStorageAdapter} from "../api";
 import {IdbSchemaManager} from "./IdbSchemaManager";
 import {IdbMetaStore} from "./IdbMetaStore";
 
@@ -69,7 +69,7 @@ export class IdbStorageAdapter implements IStorageAdapter {
     return this._db !== null;
   }
 
-  public modelStore(): IdbModelStore {
+  public modelStore(): IModelStore {
     return this._modelStore;
   }
 

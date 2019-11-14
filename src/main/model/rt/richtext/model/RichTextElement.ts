@@ -148,5 +148,6 @@ export class RichTextElement extends RichTextNode {
 
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextPath} from "./RichTextLocation";
-import {ConvergenceError, StringMap} from "../../../../util";
+import {ConvergenceError} from "../../../../util";
+import {StringMap} from "../../../../util/StringMap";
 import {RichTextContentType} from "./RichTextContentType";

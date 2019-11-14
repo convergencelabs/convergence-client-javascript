@@ -64,10 +64,6 @@ export interface BooleanValue extends DataValue {
   value: boolean;
 }
 
-/**
- * @hidden
- * @internal
- */
 export interface ObjectValue extends DataValue {
   children: {[key: string]: DataValue};
 }
