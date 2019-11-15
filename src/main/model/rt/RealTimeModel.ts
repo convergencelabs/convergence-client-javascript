@@ -5,9 +5,16 @@
  * 'LICENSE' and 'COPYING.LESSER', which are part of this source code package.
  */
 
-import {ConvergenceError, ConvergenceEventEmitter} from "../../util";
+import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
-import {ModelReference} from "../reference";
+import {
+  ElementReference,
+  LocalElementReference,
+  LocalModelReference,
+  ModelReference,
+  ModelReferenceCallbacks,
+  ReferenceFilter
+} from "../reference";
 import {RealTimeElement} from "./RealTimeElement";
 import {OnRemoteReference, ReferenceManager} from "../reference/ReferenceManager";
 import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
@@ -15,13 +22,6 @@ import {ObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
-import {
-  ElementReference,
-  LocalElementReference,
-  LocalModelReference,
-  ModelReferenceCallbacks,
-  ReferenceFilter
-} from "../reference";
 import {ModelReferenceData} from "../ot/xform/ReferenceTransformer";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ClientOperationEvent} from "../ot/ClientOperationEvent";
@@ -49,7 +49,6 @@ import {
   ResyncStartedEvent,
   VersionChangedEvent
 } from "../events";
-import {IConvergenceEvent} from "../../util";
 import {ModelCollaborator} from "./ModelCollaborator";
 import {BehaviorSubject, Observable} from "rxjs";
 import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
@@ -1405,7 +1404,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handleLocalOperation(opEvent: ClientOperationEvent): void {
-    if (this._offlineManager.isOfflineEnabled()) {
+    if (this._storeOffline) {
       this._offlineManager.processLocalOperation(this._modelId, opEvent)
         .catch(e => RealTimeModel._log.error(`model persistence error: ${this._modelId}`, e));
     }
