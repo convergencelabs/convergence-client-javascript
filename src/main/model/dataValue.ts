@@ -23,10 +23,7 @@ Object.freeze(types);
  */
 export const DataValueType: any = types;
 
-/**
- * @hidden
- * @internal
- */
+
 export interface DataValue {
   id: string;
   type: string;

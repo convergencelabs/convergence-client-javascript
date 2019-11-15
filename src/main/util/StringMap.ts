@@ -6,8 +6,7 @@
  */
 
 /**
- * @hidden
- * @internal
+ * Represents a Javascript Map or Object literal.
  */
 export type StringMapLike = Map<string, any> | {[key: string]: any};
 
