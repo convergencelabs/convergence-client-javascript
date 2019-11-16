@@ -6,7 +6,7 @@
  * (LGPLv3), which is a refinement of the GNU Lesser General Public License
  * version 3 (GPLv3).  A copy of the both the GPLv3 and the LGPLv3 should have
  * been provided along with this file, typically located in the "LICENSE" and
- * "LICENSE.LGPL" files (respectively), which are part of this source code 
+ * "COPYING.LESSER" files (respectively), which are part of this source code
  * package. Alternatively, see <https://www.gnu.org/licenses/gpl-3.0.html> and
  * <https://www.gnu.org/licenses/lgpl-3.0.html> for the full text of the GPLv3 
  * and LGPLv3 licenses, if they were not provided.
