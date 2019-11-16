@@ -18,16 +18,12 @@ npm install @convergence/convergence
 See our [developer guide](https://docs.convergence.io/guide/getting-started.html) for a quick overview and some getting started code snippets.
 
 ## Versioning
-The Convergence Client follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) with two notable exceptions:
+The Convergence JavaScript Client follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) with two notable exceptions:
 
 1. API introduced in a MAJOR or MINOR pre-release version (e.g. 1.1.0-alpha.1) is considered unstable and subject to breaking changes until that MAJOR or MINOR version is released.
 2. API marked with an `@experimental` tag is considered unstable and subject to breaking changes in a future release.
 
 These deviations from strict Semantic Versioning are intended to get potential new functionality to the community as fast as possible in order to get rapid feedback before the API is finalized. If you do not want to be an early adopter, then you should refrain from using pre-release versions or API marked as `@experimental`.
-
-```
-npm install @convergence/convergence
-```
 
 ## Support
 
