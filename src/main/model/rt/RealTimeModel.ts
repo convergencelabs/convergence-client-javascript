@@ -45,6 +45,8 @@ import {
   ModelPermissionsChangedEvent,
   ModelReconnectingEvent,
   RemoteReferenceCreatedEvent,
+  RemoteResyncCompletedEvent,
+  RemoteResyncStartedEvent,
   ResyncCompletedEvent,
   ResyncStartedEvent,
   VersionChangedEvent
@@ -90,8 +92,10 @@ import IModelForceCloseMessage = com.convergencelabs.convergence.proto.model.IMo
 import IOperationAcknowledgementMessage = com.convergencelabs.convergence.proto.model.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = com.convergencelabs.convergence.proto.model.IRemoteOperationMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
-import {RemoteResyncStartedEvent} from "../events/RemoteResyncStartedEvent";
-import {RemoteResyncCompletedEvent} from "../events/RemoteResyncCompletedEvent";
+import IRemoteClientResyncStartedMessage =
+  com.convergencelabs.convergence.proto.model.IRemoteClientResyncStartedMessage;
+import IRemoteClientResyncCompletedMessage =
+  com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -296,6 +300,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
+  private _resyncingSessions: string[];
+
+  /**
+   * @internal
+   */
   private readonly _wrapperFactory: RealTimeWrapperFactory;
 
   /**
@@ -311,7 +320,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _model: Model;
+  private readonly _model: Model;
 
   /**
    * @internal
@@ -366,7 +375,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
+  private readonly _collaboratorsSubject: BehaviorSubject<ModelCollaborator[]>;
 
   /**
    * @internal
@@ -410,6 +419,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               local: boolean,
               resyncOnly: boolean,
               sessions: string[],
+              resyncingSessions: string[],
               references: IReferenceData[],
               permissions: ModelPermissions,
               version: number,
@@ -447,7 +457,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     // when a session disconnects.  It might be possible to do this by walking the
     // model as well.
     this._referencesBySession = new Map();
-    this._sessions = sessions.slice(0);
+    this._sessions = [...sessions];
+
+    this._resyncingSessions = [...resyncingSessions];
 
     this._collaboratorsSubject = new BehaviorSubject<ModelCollaborator[]>(this.collaborators());
 
@@ -546,6 +558,22 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public collaborators(): ModelCollaborator[] {
     return this._sessions.map((sessionId: string) => {
+      const user = this._identityCache.getUserForSession(sessionId);
+      return new ModelCollaborator(
+        user,
+        sessionId
+      );
+    });
+  }
+
+  /**
+   * Returns an array of collaborators, or other users who currently have this model
+   * open.
+   *
+   * @returns an array of collaborators
+   */
+  public resynchronizingCollaborators(): ModelCollaborator[] {
+    return this._resyncingSessions.map((sessionId: string) => {
       const user = this._identityCache.getUserForSession(sessionId);
       return new ModelCollaborator(
         user,
@@ -1000,7 +1028,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       operationAck,
       remoteClientOpenedModel,
       remoteClientClosedModel,
-      modelPermissionsChanged
+      modelPermissionsChanged,
+      remoteClientResyncStarted,
+      remoteClientResyncCompleted,
     } = event.message;
 
     if (forceCloseRealTimeModel) {
@@ -1020,6 +1050,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._handleClientClosed(getOrDefaultString(remoteClientClosedModel.sessionId));
     } else if (modelPermissionsChanged) {
       this._handleModelPermissionsChanged(modelPermissionsChanged);
+    } else if (remoteClientResyncStarted) {
+      this._handleRemoteClientResyncStarted(remoteClientResyncStarted);
+    } else if (remoteClientResyncCompleted) {
+      this._handleRemoteClientResyncCompleted(remoteClientResyncCompleted);
     } else {
       throw new Error("Unexpected message" + JSON.stringify(event.message));
     }
@@ -1128,6 +1162,34 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
 
     const event = new ModelPermissionsChangedEvent(this, this._permissions, changes);
+    this._emitEvent(event);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _handleRemoteClientResyncStarted(message: IRemoteClientResyncStartedMessage): void {
+    const sessionId = getOrDefaultString(message.sessionId);
+    this._resyncingSessions.push(sessionId);
+    const user = this._identityCache.getUserForSession(sessionId);
+    const event = new RemoteResyncStartedEvent(this, sessionId, user);
+    this._emitEvent(event);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _handleRemoteClientResyncCompleted(message: IRemoteClientResyncCompletedMessage): void {
+    const sessionId = getOrDefaultString(message.sessionId);
+    this._resyncingSessions.push(sessionId);
+    const index = this._resyncingSessions.indexOf(sessionId);
+    if (index >= 0) {
+      this._resyncingSessions.splice(index, 1);
+    }
+    const user = this._identityCache.getUserForSession(sessionId);
+    const event = new RemoteResyncCompletedEvent(this, sessionId, user);
     this._emitEvent(event);
   }
 

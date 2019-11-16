@@ -43,6 +43,9 @@ export * from "./ResyncStartedEvent";
 export * from "./ResyncCompletedEvent";
 export * from "./RemoteReferenceCreatedEvent";
 
+export * from "./RemoteResyncStartedEvent";
+export * from "./RemoteResyncCompletedEvent";
+
 export * from "./CollaboratorOpenedEvent";
 export * from "./CollaboratorClosedEvent";
 

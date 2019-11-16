@@ -240,6 +240,6 @@ function toModelMessage(message: IConvergenceMessage): ModelMessage {
     message.remoteClientOpenedModel ||
     message.remoteClientClosedModel ||
     message.modelPermissionsChanged ||
-    message.remoteClientResyncStartedMessage ||
-    message.remoteClientResyncCompletedMessage;
+    message.remoteClientResyncStarted ||
+    message.remoteClientResyncCompleted;
 }

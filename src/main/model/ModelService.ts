@@ -657,6 +657,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           timestampToDate(openRealTimeModelResponse.modifiedTime),
           getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
           getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+          getOrDefaultArray(openRealTimeModelResponse.resyncingClients),
           getOrDefaultArray(openRealTimeModelResponse.references),
           toModelPermissions(openRealTimeModelResponse.permissions),
           data
@@ -726,6 +727,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       valueIdPrefix,
       [],
       [],
+      [],
       state.model.permissions,
       state.model.data
     );
@@ -765,6 +767,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       valueIdPrefix,
       [],
       [],
+      [],
       permissions,
       dataValue
     );
@@ -789,6 +792,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     modifiedTime: Date,
     valueIdPrefix: string,
     connectedClients: string[],
+    resyncingClients: string[],
     references: IReferenceData[],
     permissions: ModelPermissions,
     data: ObjectValue): RealTimeModel {
@@ -810,6 +814,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       local,
       resyncModel,
       connectedClients,
+      resyncingClients,
       references,
       permissions,
       version,
