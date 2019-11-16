@@ -49,7 +49,11 @@ import IOperationAcknowledgementMessage = com.convergencelabs.convergence.proto.
 import IRemoteClientOpenedMessage = com.convergencelabs.convergence.proto.model.IRemoteClientOpenedMessage;
 import IRemoteClientClosedMessage = com.convergencelabs.convergence.proto.model.IRemoteClientClosedMessage;
 import IModelPermissionsChangedMessage = com.convergencelabs.convergence.proto.model.IModelPermissionsChangedMessage;
-import IModelReconnectCompleteMessage = com.convergencelabs.convergence.proto.model.IModelReconnectCompleteMessage;
+import IRemoteClientResyncStartedMessage =
+  com.convergencelabs.convergence.proto.model.IRemoteClientResyncStartedMessage;
+import IRemoteClientResyncCompletedMessage =
+  com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
+import {TypeChecker} from "../util/TypeChecker";
 
 /**
  * @hidden
@@ -194,7 +198,7 @@ export function modelUserPermissionMapToProto(
  */
 export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]): Map<string, ModelPermissions> {
   const map = new Map();
-  if (perms !== undefined || perms !== null) {
+  if (TypeChecker.isArray(perms)) {
     perms.forEach(entry => {
       map.set(entry.user.username, toModelPermissions(entry.permissions));
     });
@@ -215,14 +219,15 @@ type ModelMessage =
   IModelForceCloseMessage |
   IRemoteOperationMessage |
   IRemoteReferenceSharedMessage |
-  IRemoteReferenceUnsharedMessage  |
+  IRemoteReferenceUnsharedMessage |
   IRemoteReferenceSetMessage |
   IRemoteReferenceClearedMessage |
   IOperationAcknowledgementMessage |
   IRemoteClientOpenedMessage |
   IRemoteClientClosedMessage |
   IModelPermissionsChangedMessage |
-  IModelReconnectCompleteMessage;
+  IRemoteClientResyncStartedMessage |
+  IRemoteClientResyncCompletedMessage;
 
 function toModelMessage(message: IConvergenceMessage): ModelMessage {
   return message.forceCloseRealTimeModel ||
@@ -235,5 +240,6 @@ function toModelMessage(message: IConvergenceMessage): ModelMessage {
     message.remoteClientOpenedModel ||
     message.remoteClientClosedModel ||
     message.modelPermissionsChanged ||
-    message.modelReconnectComplete;
+    message.remoteClientResyncStartedMessage ||
+    message.remoteClientResyncCompletedMessage;
 }

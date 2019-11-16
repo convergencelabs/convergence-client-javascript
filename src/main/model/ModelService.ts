@@ -45,7 +45,7 @@ import {Validation} from "../util/Validation";
 import {ModelOfflineManager} from "./ModelOfflineManager";
 import {ModelDeletedEvent} from "./events";
 import {ModelPermissions} from "./ModelPermissions";
-import {IModelState} from "../storage/api/IModelState";
+import {IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 import {IModelCreationData} from "../storage/api/IModelCreationData";
@@ -71,32 +71,36 @@ export interface ModelServiceEvents {
 
   /**
    * Emitted when a model is initially downloaded after it was first subscribed
-   * to offline.
+   * to offline. The event emitted will be an [[OfflineModelAvailableEvent]]
    *
-   * @event
+   * @event [[OfflineModelAvailableEvent]]
    */
   readonly OFFLINE_MODEL_AVAILABLE: "offline_model_available";
+
   /**
    * Emitted whenever a model that is subscribed to offline is updated via the
-   * periodic synchronization.
+   * periodic background synchronization process. the event emitted will be
+   * an [[OfflineModelUpdatedEvent]]
    *
-   * @event
+   * @event [[OfflineModelUpdatedEvent]]
    */
   readonly OFFLINE_MODEL_UPDATED: "offline_model_updated";
 
   /**
    * Emitted whenever a change to the set of subscribed models results in new
-   * models needing to be downloaded.
+   * models needing to be downloaded. The event emitted will be an
+   * [[OfflineModelSyncPendingEvent]].
    *
-   * @event
+   * @event [[OfflineModelSyncPendingEvent]]
    */
   readonly OFFLINE_MODEL_SYNC_PENDING: "offline_model_sync_pending";
 
   /**
    * Emitted when all models have been downloaded after a subscription change
-   * that required additional models to be downloaded.
+   * that required additional models to be downloaded. The event emitted
+   * will be an [[OfflineModelSyncCompleteEvent]]
    *
-   * @event
+   * @event [[OfflineModelSyncCompleteEvent]]
    */
   readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
 }
@@ -495,13 +499,23 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * Sets the total set of models that will be proactively downloaded and
    * made available offline. Any models currently subscribed to that do
-   * not appear in the supplied list of id's will be unsubscribe and
+   * not appear in the supplied list of ids will be unsubscribe and
    * immediately removed from the offline store.
    *
    * @param modelIds
    */
   public setOfflineSubscription(modelIds: string[]): void {
     this._modelOfflineManager.setSubscriptions(modelIds);
+  }
+
+  /**
+   * Gets the list of model ids that are are currently subscribed to, to be
+   * available offline.
+   *
+   * @returns The list of currently subscribed models.
+   */
+  public getOfflineSubscriptions(): string[] {
+    return this._modelOfflineManager.getSubscribedModelIds();
   }
 
   /**
@@ -550,7 +564,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       throw new Error("Internal error, id or options must be defined.");
     }
 
-    // todo validate options, specifically the model initializer.
+    // TODO validate options, specifically the model initializer.
 
     if (TypeChecker.isNotSet(id)) {
       id = options.id;
@@ -590,31 +604,30 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openOffline(id, autoRequestId);
 
     open.then(model => {
-      // Todo this code id duplicated
-      if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-        this._openRequestsByModelId.delete(id);
-      }
-
-      if (autoRequestId !== undefined) {
-        this._autoCreateRequests.delete(autoRequestId);
-      }
-
+      this._clearOpenRecord(id, autoRequestId);
       this._openModelsByModelId.set(model.modelId(), model);
     }).catch((error: Error) => {
-      if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
-        this._openRequestsByModelId.delete(id);
-      }
-
-      if (autoRequestId !== undefined) {
-        this._autoCreateRequests.delete(autoRequestId);
-      }
-
+      this._clearOpenRecord(id, autoRequestId);
       return Promise.reject(error);
     });
 
     deferred.resolveFromPromise(open);
 
     return deferred.promise();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _clearOpenRecord(id: string, autoRequestId: number): void {
+    if (id !== undefined !== undefined && this._openRequestsByModelId.has(id)) {
+      this._openRequestsByModelId.delete(id);
+    }
+
+    if (autoRequestId !== undefined) {
+      this._autoCreateRequests.delete(autoRequestId);
+    }
   }
 
   /**
@@ -637,6 +650,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           getOrDefaultString(openRealTimeModelResponse.resourceId),
           getOrDefaultString(openRealTimeModelResponse.modelId),
           getOrDefaultString(openRealTimeModelResponse.collection),
+          false,
           false,
           getOrDefaultNumber(openRealTimeModelResponse.version),
           timestampToDate(openRealTimeModelResponse.createdTime),
@@ -705,6 +719,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.model.modelId,
       state.model.collection,
       state.model.local,
+      false,
       state.model.version,
       state.model.createdTime,
       state.model.modifiedTime,
@@ -736,12 +751,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const permissions = new ModelPermissions(true, true, true, true);
     const version = 1;
     const local = true;
+    const resyncOnly = false;
 
     const model = this._createModel(
       resourceId,
       id,
       options.collection,
       local,
+      resyncOnly,
       version,
       currentTime,
       currentTime,
@@ -766,6 +783,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     modelId: string,
     collection: string,
     local: boolean,
+    resyncModel: boolean,
     version: number,
     createdTime: Date,
     modifiedTime: Date,
@@ -790,6 +808,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       valueIdPrefix,
       data,
       local,
+      resyncModel,
       connectedClients,
       references,
       permissions,

@@ -86,11 +86,12 @@ import {ICreateModelOptions} from "../ICreateModelOptions";
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = com.convergencelabs.convergence.proto.model.IModelPermissionsChangedMessage;
-import IModelReconnectCompleteMessage = com.convergencelabs.convergence.proto.model.IModelReconnectCompleteMessage;
 import IModelForceCloseMessage = com.convergencelabs.convergence.proto.model.IModelForceCloseMessage;
 import IOperationAcknowledgementMessage = com.convergencelabs.convergence.proto.model.IOperationAcknowledgementMessage;
 import IRemoteOperationMessage = com.convergencelabs.convergence.proto.model.IRemoteOperationMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
+import {RemoteResyncStartedEvent} from "../events/RemoteResyncStartedEvent";
+import {RemoteResyncCompletedEvent} from "../events/RemoteResyncCompletedEvent";
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -110,11 +111,28 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly RESYNC_STARTED: string;
 
   /**
-   * Emitted when the resync process ends. The actual emitted event is a [[ResyncCompletedEvent]].
+   * Emitted when the resync process ends. The actual emitted event is a
+   * [[ResyncCompletedEvent]].
    *
    * @event [[ResyncCompletedEvent]]
    */
   readonly RESYNC_COMPLETED: string;
+
+  /**
+   * Emitted when a remote client has started a resync . The actual emitted
+   * event is a [[RemoteResyncStartedEvent]].
+   *
+   * @event [[RemoteResyncStartedEvent]]
+   */
+  readonly REMOTE_RESYNC_STARTED: string;
+
+  /**
+   * Emitted when a remote client has started a resync . The actual emitted
+   * event is a [[RemoteResyncCompletedEvent]].
+   *
+   * @event [[RemoteResyncCompletedEvent]]
+   */
+  readonly REMOTE_RESYNC_COMPLETED: string;
 
   /**
    * Emitted when this model goes offline. The actual emitted event is a [[ModelOfflineEvent]].
@@ -198,6 +216,8 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   COMMITTED: ModelCommittedEvent.NAME,
   RESYNC_STARTED: ResyncStartedEvent.NAME,
   RESYNC_COMPLETED: ResyncCompletedEvent.NAME,
+  REMOTE_RESYNC_STARTED: RemoteResyncStartedEvent.NAME,
+  REMOTE_RESYNC_COMPLETED: RemoteResyncCompletedEvent.NAME,
   OFFLINE: ModelOfflineEvent.NAME,
   ONLINE: ModelOnlineEvent.NAME,
   RECONNECTING: ModelReconnectingEvent.NAME,
@@ -356,15 +376,27 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _reconnectData: IReconnectData | null;
+  private _resyncData: IResyncData | null;
 
   /**
    * @internal
    */
   private readonly _offlineManager: ModelOfflineManager;
 
+  /**
+   * @internal
+   */
   private _storeOffline: boolean;
+
+  /**
+   * @internal
+   */
   private _local: boolean;
+
+  /**
+   * @internal
+   */
+  private _resyncOnly: boolean;
 
   /**
    * @hidden
@@ -376,6 +408,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               valueIdPrefix: string,
               data: ObjectValue,
               local: boolean,
+              resyncOnly: boolean,
               sessions: string[],
               references: IReferenceData[],
               permissions: ModelPermissions,
@@ -404,8 +437,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._permissions = permissions;
     this._identityCache = identityCache;
     this._offlineManager = modelOfflineManager;
+    this._resyncOnly = resyncOnly;
 
-    this._reconnectData = null;
+    this._resyncData = null;
 
     this._model = new Model(this.session(), valueIdPrefix, data);
 
@@ -635,32 +669,38 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public close(): Promise<void> {
     if (this._open) {
-      // We need to cache the connection here because the _close method sets it to null.
-      const connection = this._connection;
+      if (this._resyncData) {
+        // We are resyncing, so we just need to set the flag
+        // that we don't want to open.
+        this._resyncOnly = true;
+      } else {
+        // We need to cache the connection here because the _close method sets it to null.
+        const connection = this._connection;
 
-      // Close the model and emit the appropriate events.
-      const event: ModelClosedEvent = new ModelClosedEvent(this, true);
-      this._close(event);
+        // Close the model and emit the appropriate events.
+        const event: ModelClosedEvent = new ModelClosedEvent(this, true);
+        this._close(event);
 
-      // Inform the model service that we are closed.
-      this._modelService._close(this._resourceId);
+        // Inform the model service that we are closed.
+        this._modelService._close(this._resourceId);
 
-      // Inform the server that we are closed.
-      const request: IConvergenceMessage = {
-        closeRealTimeModelRequest: {
-          resourceId: this._resourceId
-        }
-      };
+        // Inform the server that we are closed.
+        const request: IConvergenceMessage = {
+          closeRealTimeModelRequest: {
+            resourceId: this._resourceId
+          }
+        };
 
-      return connection
-        .request(request)
-        .then(() => {
-          return Promise.resolve();
-        })
-        .catch(err => {
-          console.warn(`Unexpected error closing a model: ${this._modelId}`, err);
-          return Promise.resolve();
-        });
+        return connection
+          .request(request)
+          .then(() => {
+            return Promise.resolve();
+          })
+          .catch(err => {
+            console.warn(`Unexpected error closing a model: ${this._modelId}`, err);
+            return Promise.resolve();
+          });
+      }
     } else {
       return Promise.reject(new ConvergenceError(`The model has already been closed: ${this._modelId}`));
     }
@@ -821,6 +861,26 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
+  public _openAfterResync(): void {
+    if (this._resyncData) {
+      this._resyncOnly = false;
+    }
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _isResyncOnly(): boolean {
+    return this._resyncOnly;
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
   public _getCurrentStateSnapshot(): IModelData {
     return {
       modelId: this._modelId,
@@ -940,8 +1000,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       operationAck,
       remoteClientOpenedModel,
       remoteClientClosedModel,
-      modelPermissionsChanged,
-      modelReconnectComplete,
+      modelPermissionsChanged
     } = event.message;
 
     if (forceCloseRealTimeModel) {
@@ -961,8 +1020,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._handleClientClosed(getOrDefaultString(remoteClientClosedModel.sessionId));
     } else if (modelPermissionsChanged) {
       this._handleModelPermissionsChanged(modelPermissionsChanged);
-    } else if (modelReconnectComplete) {
-      this._handleReconnectCompleted(modelReconnectComplete);
     } else {
       throw new Error("Unexpected message" + JSON.stringify(event.message));
     }
@@ -981,8 +1038,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._sessions = [];
 
-    this._reconnectData = {
-      bufferedOperations: []
+    this._resyncData = {
+      bufferedOperations: [],
+      upToDate: false
     };
   }
 
@@ -1004,9 +1062,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         };
         return this._modelService._create(creation.initialData, options);
       }).then(() => {
+        this._local = false;
         return this._offlineManager.modelCreated(this._modelId);
       }).then(() => {
-        this._local = false;
         this._reconnect();
       }).catch(e => {
         RealTimeModel._log.error("Error creating offline model on reconnect.", e);
@@ -1016,12 +1074,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _reconnect(): void {
     RealTimeModel._log.debug(`remote model reconnecting: ${this._modelId}`);
     this._emitEvent(new ModelReconnectingEvent(this));
 
     const request: IConvergenceMessage = {
-      modelReconnectRequest: {
+      modelResyncRequest: {
         modelId: this._modelId,
         contextVersion: this._concurrencyControl.contextVersion()
       }
@@ -1031,16 +1093,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       RealTimeModel._log.debug(`model resynchronization started: ${this._modelId}`);
       this._emitEvent(new ResyncStartedEvent(this));
 
-      const {modelReconnectResponse} = response;
-      this._reconnectData.reconnectVersion = getOrDefaultNumber(modelReconnectResponse.currentVersion) as number;
+      const {modelResyncResponse} = response;
+      this._permissions = toModelPermissions(modelResyncResponse.permissions);
+      this._resyncData.reconnectVersion = getOrDefaultNumber(modelResyncResponse.currentVersion) as number;
       const oldResourceId = this._resourceId;
-      this._resourceId = getOrDefaultString(modelReconnectResponse.resourceId);
+      this._resourceId = getOrDefaultString(modelResyncResponse.resourceId);
       this._modelService._resourceIdChanged(this._modelId, oldResourceId, this._resourceId);
     });
   }
 
   /**
-   * @private
    * @hidden
    * @internal
    */
@@ -1258,10 +1320,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _handleRemoteOperation(message: IRemoteOperationMessage): void {
     // FIXME need sequenceNumber
-    if (this._reconnectData !== null) {
-      if (getOrDefaultNumber(message.contextVersion) > this._reconnectData.reconnectVersion) {
-        // new message buffer it for later.
-        this._reconnectData.bufferedOperations.push(message);
+    if (this._resyncData !== null) {
+      if (getOrDefaultNumber(message.contextVersion) > this._resyncData.reconnectVersion) {
+        // new message from a connected client buffer it because we don't have all
+        // of the previous operations yet..
+        this._resyncData.bufferedOperations.push(message);
       } else if (this._concurrencyControl.hasInflightOperation() &&
         this._concurrencyControl.firstInFlightOperation().sessionId === message.sessionId) {
         const syntheticAck = {
@@ -1270,8 +1333,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           timestamp: message.timestamp
         };
         this._handelOperationAck(syntheticAck);
+        this._checkForReconnectUpToDate();
       } else {
         this._processRemoteOperation(message);
+        this._checkForReconnectUpToDate();
       }
     } else {
       this._processRemoteOperation(message);
@@ -1358,35 +1423,57 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _handleReconnectCompleted(message: IModelReconnectCompleteMessage): void {
-    // TODO when we get to offline mode we may have to rethink value id prefixes a bit
-    //   two clients can not be re-initialized with the same vid prefix.
+  private _checkForReconnectUpToDate(): void {
+    if (this._resyncData &&
+      !this._resyncData.upToDate &&
+      this._resyncData.reconnectVersion === this._version) {
+      this._resyncData.upToDate = true;
+      // TODO when we get to offline mode we may have to rethink value id prefixes a bit
+      //   two clients can not be re-initialized with the same vid prefix.
 
-    // fixme this could be heavy weight and block the UI a bit.
-    this._reconnectData.bufferedOperations.forEach(m => {
-      this._processRemoteOperation(m);
-    });
+      this._concurrencyControl.resetSequenceNumber();
 
-    const sessions = getOrDefaultArray(message.connectedClients);
-    sessions.forEach(sessionId => this._handleClientOpen(sessionId));
-    this._permissions = toModelPermissions(message.permissions);
+      const resend = this._concurrencyControl.getInFlightOperations();
+      resend.forEach(op => this._sendOperation(op));
 
-    this._initializeReferences(getOrDefaultArray(message.references));
+      // FIXME this could be heavy weight and block the UI a bit.
+      this._resyncData.bufferedOperations.forEach(m => {
+        this._processRemoteOperation(m);
+      });
 
-    this._reconnectData = null;
+      RealTimeModel._log.debug(`model resynchronization completed: ${this._modelId}`);
+      this._emitEvent(new ResyncCompletedEvent(this));
 
-    this._concurrencyControl.resetSequenceNumber();
+      const openAfterSync = !this._resyncOnly;
 
-    const resend = this._concurrencyControl.getInFlightOperations();
-    resend.forEach(op => this._sendOperation(op));
+      const completeRequest: IConvergenceMessage = {
+        modelResyncCompleteRequest: {
+          resourceId: this._resourceId,
+          open: openAfterSync
+        }
+      };
 
-    this._referenceManager.reshare();
+      this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
+        const {modelResyncCompleteResponse} = response;
 
-    RealTimeModel._log.debug(`model resynchronization completed: ${this._modelId}`);
-    this._emitEvent(new ResyncCompletedEvent(this));
+        if (openAfterSync) {
+          const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
+          sessions.forEach(sessionId => this._handleClientOpen(sessionId));
 
-    RealTimeModel._log.debug(`model online: ${this._modelId}`);
-    this._emitEvent(new ModelOnlineEvent(this));
+          this._initializeReferences(getOrDefaultArray(modelResyncCompleteResponse.references));
+
+          this._resyncData = null;
+          this._referenceManager.reshare();
+
+          RealTimeModel._log.debug(`model online: ${this._modelId}`);
+          this._emitEvent(new ModelOnlineEvent(this));
+        }
+      });
+
+      if (!openAfterSync) {
+        this._modelService._close(this._resourceId);
+      }
+    }
   }
 
   /**
@@ -1614,7 +1701,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _sendEvents(): boolean {
-    return this._connection.isOnline() && this._reconnectData === null;
+    return this._connection.isOnline() && this._resyncData === null;
   }
 }
 
@@ -1630,7 +1717,8 @@ export interface ModelEventCallbacks {
   referenceEventCallbacks: ModelReferenceCallbacks;
 }
 
-interface IReconnectData {
+interface IResyncData {
   bufferedOperations: IRemoteOperationMessage[];
   reconnectVersion?: number;
+  upToDate: boolean;
 }

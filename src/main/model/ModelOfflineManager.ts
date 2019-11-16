@@ -6,7 +6,7 @@
  */
 
 import {StorageEngine} from "../storage/StorageEngine";
-import {IModelState} from "../storage/api/IModelState";
+import {IModelState} from "../storage/api/";
 import {ILocalOperationData, IServerOperationData} from "../storage/api";
 import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 import {ServerOperationEvent} from "./ot/ServerOperationEvent";
@@ -105,11 +105,11 @@ export class ModelOfflineManager {
     return this._subscribedModels.has(modelId);
   }
 
-  public getOfflineModelIds(): string[] {
+  public getSubscribedModelIds(): string[] {
     return Array.from(this._subscribedModels.keys());
   }
 
-  public isOfflineEnabled(): boolean {
+  public isEnabled(): boolean {
     return this._storage.isEnabled();
   }
 
