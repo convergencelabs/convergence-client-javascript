@@ -9,6 +9,9 @@ This is the first (and only) client for the [Convergence Collaboration Engine](h
 
 The client is implemented in typescript.  The build system uses both Rollup and WebPack to bundle and transpile the typescript to single files using a variety of module systems.  For testing, the typescript compiler is used to compile the code into ES5 and commonjs modules to support direct unit testing in node.
 
+## Issue Reporting
+The core Convergence capability is composed of multiple individual projects that are released together. To simplify things, there is a central project that is used for issues, project planning, and road mapping.  To report an issue please use the [convergence-project](https://github.com/convergencelabs/convergence-project) repository.
+
 ## Usage
 
 ```
