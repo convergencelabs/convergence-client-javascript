@@ -5,7 +5,7 @@
 # Convergence Javascript Client
 ![Build Status](https://travis-ci.org/convergencelabs/convergence-client-javascriipt.svg?branch=master)
 
-This is the first (and only) client for the [Convergence Collaboration Engine](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
+This is the first (and only) client for the [Convergence Collaboration Framework](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
 
 The client is implemented in typescript.  The build system uses both Rollup and WebPack to bundle and transpile the typescript to single files using a variety of module systems.  For testing, the typescript compiler is used to compile the code into ES5 and commonjs modules to support direct unit testing in node.
 

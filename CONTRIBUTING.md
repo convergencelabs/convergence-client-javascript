@@ -12,7 +12,7 @@ Here are some important resources:
 Please help us out by writing tests, if possible for your new functionality.  Make sure all current tests pass by running `npm run test` before committing.
 
 ## Submitting changes
-Please create a [GitHub Pull Request](pull/new/master) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)).
+Please create a [GitHub Pull Request](https://github.com/convergencelabs/convergence-client-javascriiptt/pull/new/master) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)).
 
 Always write a clear log message for your commits. One-line messages are fine for small changes, but bigger changes should look like this:
 
