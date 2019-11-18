@@ -7,30 +7,67 @@
   <script src="../config.js"></script>
   <script src="../../node_modules/rxjs/bundles/rxjs.umd.js"></script>
   <script src="../../dist/convergence.global.js"></script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+          integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+          crossorigin="anonymous"></script>
 </head>
 <body>
-<h2>Convergence Console Util</h2>
-<div class="container">
+<div id="main">
+  <h2>Convergence Console Utility</h2>
   <div class="instructions">Select a connection method, then open the console to work with the domain.</div>
-  <div class="title">Anonymous Authentication</div>
-  <div class="group">
-    <label for="displayName">Display Name:</label>
-    <input id="displayName" type="text" value="Test User">
-    <button id="anonymousConnect" onclick="connectAnonymously()">Connect</button>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Anonymous Authentication</h5>
+      <div class="mb-3">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend"><span class="input-group-text">Display Name</span></div>
+          <input id="displayName" type="text" value="Test User">
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="anonymousConnect" onclick="connectAnonymously()">Connect</button>
+      </div>
+    </div>
   </div>
 
-  <div class="title">Password Authentication</div>
-  <div class="group">
-    <label for="username">Username:</label><input id="username" type="text" value="test"/>
-    <label for="password">Password:</label><input id="password" type="text" value="password"/>
-    <button id="passwordConnect" onclick="connectPassword()">Connect</button>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Password Authentication</h5>
+      <div class="mb-3">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend"><span class="input-group-text">Username</span></div>
+          <input id="username" type="text" value="test"/>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend"><span class="input-group-text">Password</span></div>
+          <input id="password" type="text" value="password"/>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="passwordConnect" onclick="connectPassword()">Connect</button>
+      </div>
+    </div>
   </div>
 
-  <div class="title">JWT Authentication</div>
-  <div class="group">
-    <label for="jwt">JWT</label>
-    <textarea id="jwt" type="text" rows="4"></textarea>
-    <button id="jwtConnect" onclick="connectJwt()">Connect</button>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">JWT Authentication</h5>
+      <div class="mb-3">
+        <label for="jwt">JWT</label>
+        <textarea id="jwt" type="text" rows="4"></textarea>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="jwtConnect" onclick="connectJwt()">Connect</button>
+      </div>
+    </div>
   </div>
 </div>
 <script src="connection.js"></script>

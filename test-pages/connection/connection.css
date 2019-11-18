@@ -1,10 +1,8 @@
-body {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+#main {
+  width: 600px;
+  padding: 10px;
 }
 
-div.container {
-  width: 500px;
-}
 div.instructions {
   border: 1px solid darkgray;
   margin-bottom: 10px;
@@ -28,7 +26,6 @@ div.title {
 
 button {
   width: 200px;
-  height: 30px;
 }
 
 input {
@@ -48,5 +45,9 @@ textarea {
   display: block;
   width: 100%;
   box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+div.card {
   margin-bottom: 10px;
 }
