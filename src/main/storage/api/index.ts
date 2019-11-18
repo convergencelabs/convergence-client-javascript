@@ -31,3 +31,7 @@ export * from "./IModelStore";
 export * from "./IMetaStore";
 export * from "./IDomainUserIdData";
 export * from "./IStorageAdapter";
+export * from "./IModelSnapshot";
+export * from "./IModelCreationData";
+export * from "./IModelUpdate";
+export * from "./IModelMetaData";

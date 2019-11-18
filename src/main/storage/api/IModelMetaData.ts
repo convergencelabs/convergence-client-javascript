@@ -12,14 +12,19 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ClientOperationEvent} from "./ot/ClientOperationEvent";
-import {IModelData} from "../storage/api";
+import {ModelPermissions} from "../../model";
 
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
-export interface IModelSnapshot {
-  model: IModelData;
-  localOps: ClientOperationEvent[];
+export interface IModelMetaData {
+  modelId: string;
+  local: boolean;
+  dirty: boolean;
+  collection: string;
+  version: number;
+  seqNo: number;
+  createdTime: Date;
+  modifiedTime: Date;
+  permissions: ModelPermissions;
 }

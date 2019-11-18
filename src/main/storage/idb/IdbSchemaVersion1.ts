@@ -34,7 +34,7 @@ export class IdbSchemaVersion1 {
       {unique: true});
 
     //
-    // Local Model Store
+    // Model Creation Store
     //
     const localModelStore = db.createObjectStore(
       IdbSchema.ModelCreation.Store,
@@ -46,15 +46,27 @@ export class IdbSchemaVersion1 {
       {unique: true});
 
     //
-    // Model Snapshot Store
+    // Model Data Store
     //
-    const modelSnapshotStore = db.createObjectStore(
+    const modelData = db.createObjectStore(
       IdbSchema.ModelData.Store,
       {keyPath: IdbSchema.ModelData.Fields.ModelId});
 
-    modelSnapshotStore.createIndex(
+    modelData.createIndex(
       IdbSchema.ModelData.Indices.ModelId,
       IdbSchema.ModelData.Fields.ModelId,
+      {unique: true});
+
+    //
+    // Model Meta Data Store
+    //
+    const modelMetaData = db.createObjectStore(
+      IdbSchema.ModelMetaData.Store,
+      {keyPath: IdbSchema.ModelMetaData.Fields.ModelId});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.ModelId,
+      IdbSchema.ModelMetaData.Fields.ModelId,
       {unique: true});
 
     //

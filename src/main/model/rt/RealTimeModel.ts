@@ -82,15 +82,14 @@ import {
   RemoteReferenceUnshared
 } from "../reference/RemoteReferenceEvent";
 import {extractValueAndType, toIReferenceValues, toRemoteReferenceEvent} from "../reference/ReferenceMessageUtils";
-
 import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
-import {ILocalOperationData, IModelData, IServerOperationData} from "../../storage/api";
-import {IModelSnapshot} from "../IModelSnapshot";
+import {ILocalOperationData, IServerOperationData} from "../../storage/api";
 import {DomainUser} from "../../identity";
 import {ICreateModelOptions} from "../ICreateModelOptions";
+import {IModelStateSnapshot} from "../IModeStateSnapshot";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -916,17 +915,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
-  public _getCurrentStateSnapshot(): IModelData {
+  public _getModelStateSnapshot(): IModelStateSnapshot {
     return {
-      modelId: this._modelId,
-      collection: this._collectionId,
       local: this._local,
-      version: this.version(),
+      dirty: this._committed,
       seqNo: this._concurrencyControl.sequenceNumber(),
-      createdTime: this._createdTime,
-      modifiedTime: this.maxTime(),
-      data: this._model.root().dataValue(),
-      permissions: this._permissions
+      data: this._model.root().dataValue()
     };
   }
 
@@ -935,11 +929,17 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
-  public _enableOffline(): IModelSnapshot {
+  public _getUncommittedOperations(): ClientOperationEvent[] {
+    return [...this._concurrencyControl.getInFlightOperations()];
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _enableOffline(): void {
     this._storeOffline = true;
-    const snapshot = this._getCurrentStateSnapshot();
-    const localOps = this._concurrencyControl.getInFlightOperations();
-    return {model: snapshot, localOps};
   }
 
   /**
@@ -1521,6 +1521,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           open: openAfterSync
         }
       };
+
+      this._modelService._resyncComplete(this._modelId);
 
       this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
         const {modelResyncCompleteResponse} = response;

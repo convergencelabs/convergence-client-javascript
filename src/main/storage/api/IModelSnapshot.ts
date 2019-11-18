@@ -12,12 +12,20 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ObjectValue} from "../../model/";
+import {ModelPermissions, ObjectValue} from "../../model/";
 
 /**
  * @module Offline
  */
-export interface IModelData {
+export interface IModelSnapshot {
   modelId: string;
+  local: boolean;
+  dirty: boolean;
+  collection: string;
+  version: number;
+  seqNo: number;
+  createdTime: Date;
+  modifiedTime: Date;
+  permissions: ModelPermissions;
   data: ObjectValue;
 }

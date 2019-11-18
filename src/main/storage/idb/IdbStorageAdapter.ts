@@ -57,12 +57,8 @@ export class IdbStorageAdapter implements IStorageAdapter {
       IdbSchemaManager.upgrade(db, version);
     };
 
-    if (!exists) {
-      // fixme make random string?
-      this._storageKey = "some key that needs to be generate";
-    } else {
-      this._storageKey = storageKey;
-    }
+    // FIXME hard coded.
+    this._storageKey = exists ? storageKey : "some key that needs to be generate";
 
     return toPromise(openRequest).then((db: IDBDatabase) => {
       this._db = db;

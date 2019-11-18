@@ -35,6 +35,15 @@ export const IdbSchema = {
       ModelId: "ModelCreation.modelId"
     }
   },
+  ModelMetaData: {
+    Store: "ModelMetaData",
+    Fields: {
+      ModelId: "modelId"
+    },
+    Indices: {
+      ModelId: "ModelMetaData.modelId"
+    }
+  },
   ModelData: {
     Store: "ModelData",
     Fields: {

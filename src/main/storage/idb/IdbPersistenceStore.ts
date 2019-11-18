@@ -84,4 +84,30 @@ export class IdbPersistenceStore {
       return toVoidPromise(store.add(data));
     });
   }
+
+  protected _readIterator(storeName: string,
+                          onNext: (value: any) => void,
+                          query?: IDBValidKey | IDBKeyRange | null,
+                          direction?: IDBCursorDirection): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const tx = this._db.transaction(storeName, READONLY);
+      const objectStore = tx.objectStore(storeName);
+      const request: IDBRequest<IDBCursorWithValue | null> = objectStore.openCursor();
+      request.onsuccess = (event) => {
+        // For some reason the typings don't have the result on the target.
+        const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result;
+        if (cursor) {
+          onNext(cursor.value);
+          cursor.continue();
+        } else {
+          resolve();
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+
+  }
 }

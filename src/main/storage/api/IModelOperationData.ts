@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../model/dataValue";
+import {DataValue} from "../../model/";
 
 export interface IServerOperationData {
   modelId: string;

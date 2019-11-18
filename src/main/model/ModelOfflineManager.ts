@@ -13,13 +13,18 @@
  */
 
 import {StorageEngine} from "../storage/StorageEngine";
-import {IModelState} from "../storage/api/";
-import {ILocalOperationData, IServerOperationData} from "../storage/api";
 import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 import {ServerOperationEvent} from "./ot/ServerOperationEvent";
 import {toOfflineOperationData} from "../storage/OfflineOperationMapper";
 import {RealTimeModel} from "./rt";
-import {IModelCreationData} from "../storage/api/IModelCreationData";
+import {
+  IModelCreationData,
+  IModelUpdate,
+  IModelSnapshot,
+  ILocalOperationData,
+  IServerOperationData,
+  IModelState
+} from "../storage/api/";
 import {Logging} from "../util/log/Logging";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {IOfflineModelSubscription} from "../storage/api/IOfflineModelSubscription";
@@ -27,7 +32,6 @@ import {Deferred} from "../util/Deferred";
 import {ModelPermissions} from "./ModelPermissions";
 import {getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
 import {toObjectValue} from "./ModelMessageConverter";
-import {IModelUpdate} from "../storage/api/IModelUpdate";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -51,6 +55,22 @@ export class ModelOfflineManager {
       contextVersion: opEvent.contextVersion,
       timestamp: opEvent.timestamp,
       operation: opData
+    };
+  }
+
+  private static _getSnapshot(model: RealTimeModel): IModelSnapshot {
+    const modelStateSnapshot = model._getModelStateSnapshot();
+    return {
+      modelId: model.modelId(),
+      collection: model.collectionId(),
+      local: modelStateSnapshot.local,
+      dirty: modelStateSnapshot.dirty,
+      version: model.version(),
+      seqNo: modelStateSnapshot.seqNo,
+      createdTime: model.createdTime(),
+      modifiedTime: model.time(),
+      permissions: model.permissions(),
+      data: modelStateSnapshot.data
     };
   }
 
@@ -116,8 +136,8 @@ export class ModelOfflineManager {
     return Array.from(this._subscribedModels.keys());
   }
 
-  public isEnabled(): boolean {
-    return this._storage.isEnabled();
+  public getDirtyModelIds(): Promise<string[]> {
+    return this._storage.modelStore().getDirtyModelIds();
   }
 
   public subscribe(modelIds: string[]): Promise<void> {
@@ -135,9 +155,9 @@ export class ModelOfflineManager {
       });
   }
 
-  public unsubscribe(modelIds: string[]): void {
+  public unsubscribe(modelIds: string[]): Promise<void> {
     const subscribed = modelIds.filter(id => this._subscribedModels.has(id));
-    this._storage
+    return this._storage
       .modelStore()
       .removeSubscription(modelIds)
       .then(() => {
@@ -146,7 +166,7 @@ export class ModelOfflineManager {
       });
   }
 
-  public setSubscriptions(modelIds: string[]): void {
+  public setSubscriptions(modelIds: string[]): Promise<void> {
     // process model ids that need to be subscribed.
     const subscribe = modelIds.filter(id => !this._subscribedModels.has(id));
     subscribe.forEach(modelId => this._handleNewSubscriptions(modelId));
@@ -161,7 +181,7 @@ export class ModelOfflineManager {
       subscriptions.push({modelId, version: record.version});
     });
 
-    this._storage
+    return this._storage
       .modelStore()
       .setModelSubscriptions(subscriptions)
       .then(() => {
@@ -192,10 +212,14 @@ export class ModelOfflineManager {
       .createLocalModel(creationData);
   }
 
+  public getModelDataIfDirty(modelId: string): Promise<IModelState | undefined> {
+    return Promise.resolve(undefined);
+  }
+
   public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
     return this._storage
       .modelStore()
-      .getModel(modelId);
+      .getModelState(modelId);
   }
 
   public processLocalOperation(modelId: string, clientEvent: ClientOperationEvent): Promise<void> {
@@ -253,12 +277,17 @@ export class ModelOfflineManager {
   }
 
   private _initOpenModelForOffline(rtModel: RealTimeModel): Promise<void> {
-    const offlineState = rtModel._enableOffline();
-    const model = offlineState.model;
-    const localOperations = offlineState.localOps
+    rtModel._enableOffline();
+
+    const localOps = rtModel._getUncommittedOperations();
+    const localOperations = localOps
       .map(op => ModelOfflineManager._mapClientOperationEvent(rtModel.modelId(), op));
     const serverOperations: IServerOperationData [] = [];
-    return this._storage.modelStore().putModelState({model, localOperations, serverOperations});
+
+    const snapshot = ModelOfflineManager._getSnapshot(rtModel);
+
+    const state: IModelState = {snapshot, localOperations, serverOperations};
+    return this._storage.modelStore().putModelState(state);
   }
 
   private _sendSubscriptionRequest(subscribe: IOfflineModelSubscription[],
@@ -290,13 +319,13 @@ export class ModelOfflineManager {
     if (!this._openModels.has(modelId)) {
       if (getOrDefaultBoolean(message.deleted)) {
         // TODO emmit a deleted event.
-        this._storage.modelStore().deleteModel(modelId).catch(e => {
+        this._storage.modelStore().removeSubscription([modelId]).catch(e => {
           // TODO emmit error event.
           ModelOfflineManager._log.error("Could not delete offline model.", e);
         });
       } else if (getOrDefaultBoolean(message.permissionRevoked)) {
         // TODO emmit a permissions revoked event.
-        this._storage.modelStore().deleteModel(modelId).catch(e => {
+        this._storage.modelStore().removeSubscription([modelId]).catch(e => {
           // TODO emmit error event.
           ModelOfflineManager._log.error("Could not delete offline model.", e);
         });
@@ -349,7 +378,7 @@ export class ModelOfflineManager {
 
     if (opsSinceSnapshot >= this._snapshotInterval) {
       const model = this._openModels.get(modelId);
-      const snapshot = model._getCurrentStateSnapshot();
+      const snapshot = ModelOfflineManager._getSnapshot(model);
       this._storage.modelStore()
         .snapshotModel(snapshot)
         .catch(e => ModelOfflineManager._log.error("Error snapshotting model", e));

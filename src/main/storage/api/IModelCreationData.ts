@@ -12,8 +12,8 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ObjectValue} from "../../model/dataValue";
-import {ModelPermissions} from "../../model";
+
+import {ModelPermissions, ObjectValue} from "../../model";
 
 /**
  * @module Offline
