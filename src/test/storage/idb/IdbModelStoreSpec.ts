@@ -13,7 +13,7 @@
  */
 
 import {IdbStorageAdapter} from "../../../main/storage/idb";
-import {IModelState} from "../../../main/storage/api/IModelState";
+import {IModelState} from "../../../main/storage/api/";
 
 import {expect} from "chai";
 import "fake-indexeddb/auto";
@@ -23,7 +23,7 @@ describe("IdbModelStore", () => {
     it("returns false for a model that does not exist", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
-        const exists = await modelStore.modelExists(modelState.model.modelId);
+        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(exists).to.be.false;
       })
     );
@@ -32,7 +32,7 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const exists = await modelStore.modelExists(modelState.model.modelId);
+        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(exists).to.be.true;
       })
     );
@@ -43,7 +43,7 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const retrieved = await modelStore.getModel(modelState.model.modelId);
+        const retrieved = await modelStore.getModel(modelState.snapshot.modelId);
         expect(retrieved).to.deep.equal(modelState);
       })
     );
@@ -54,11 +54,11 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const exists = await modelStore.modelExists(modelState.model.modelId);
+        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(exists).to.be.true;
 
-        await modelStore.deleteModel(modelState.model.modelId);
-        const afterDelete = await modelStore.modelExists(modelState.model.modelId);
+        await modelStore.deleteModel(modelState.snapshot.modelId);
+        const afterDelete = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(afterDelete).to.be.false;
       })
     );
@@ -69,10 +69,11 @@ let modelCounter = 1;
 
 function createModelState(): IModelState {
   return {
-    model: {
+    snapshot: {
       modelId: "modelId" + modelCounter++,
       collection: "collection",
       local: false,
+      dirty: false,
       version: 10,
       seqNo: 0,
       createdTime: new Date(),

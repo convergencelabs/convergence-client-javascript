@@ -689,21 +689,38 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isString(id)) {
       if (this._resyncingModels.has(id)) {
+        // This model is already resyncing so we just return that and
+        // let the model know to stay open after resync.
         const model = this._resyncingModels.get(id);
         model._openAfterResync();
         return Promise.resolve(model);
       } else {
-        this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
+        // The model is not already syncing. We see if it is one that needs
+        // to be resynced.
+        return this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
           if (TypeChecker.isUndefined(modelState)) {
+            // Not a dirty model, se we can directly open from the server.
             return this._requestOpenFromServer(id, autoRequestId);
           } else {
-            const model = this._creteModelFromOfflineState(modelState);
-            model._setOnline();
+            // This model has local changes, so open it locally and
+            // start a resync.
+            const index = this._modelResyncQueue.indexOf(id);
+            if (index >= 0) {
+              this._modelResyncQueue.splice(index, 1);
+            }
+
+            const model = this._createAndSyncModel(modelState);
+
+            // Need to open it after the sync.
+            model._openAfterResync();
+
             return Promise.resolve(model);
           }
         });
       }
     } else {
+      // We don't have an explicit id, thus this could not be an existing model
+      // the might bee offline.
       return this._requestOpenFromServer(id, autoRequestId);
     }
   }
@@ -1023,9 +1040,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._syncDeferred = new Deferred<void>();
 
+    const promise = this._syncDeferred.promise();
+
     this._checkResyncQueue();
 
-    await this._syncDeferred.promise();
+    return promise;
   }
 
   /**
