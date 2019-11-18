@@ -43,7 +43,7 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const retrieved = await modelStore.getModel(modelState.snapshot.modelId);
+        const retrieved = await modelStore.getModelState(modelState.snapshot.modelId);
         expect(retrieved).to.deep.equal(modelState);
       })
     );
@@ -57,7 +57,7 @@ describe("IdbModelStore", () => {
         const exists = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(exists).to.be.true;
 
-        await modelStore.deleteModel(modelState.snapshot.modelId);
+        await modelStore.removeSubscriptions([modelState.snapshot.modelId]);
         const afterDelete = await modelStore.modelExists(modelState.snapshot.modelId);
         expect(afterDelete).to.be.false;
       })

@@ -25,9 +25,9 @@ import {IModelSnapshot} from "./IModelSnapshot";
 export interface IModelStore {
   getSubscribedModels(): Promise<IOfflineModelSubscription[]>;
 
-  addSubscription(modelIds: string[]): Promise<void>;
+  addSubscriptions(modelIds: string[]): Promise<void>;
 
-  removeSubscription(modelId: string[]): Promise<void>;
+  removeSubscriptions(modelId: string[]): Promise<void>;
 
   setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void>;
 

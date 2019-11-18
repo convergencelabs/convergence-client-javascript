@@ -318,7 +318,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public addSubscription(modelIds: string[]): Promise<void> {
+  public addSubscriptions(modelIds: string[]): Promise<void> {
     const storeName = IdbSchema.ModelSubscriptions.Store;
     return this._withWriteStore(storeName, async (store) => {
       modelIds.forEach(modelId => {
@@ -328,7 +328,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public removeSubscription(modelIds: string[]): Promise<void> {
+  public removeSubscriptions(modelIds: string[]): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,

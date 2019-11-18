@@ -144,7 +144,7 @@ export class ModelOfflineManager {
     const notSubscribed = modelIds.filter(id => !this._subscribedModels.has(id));
     return this._storage
       .modelStore()
-      .addSubscription(notSubscribed)
+      .addSubscriptions(notSubscribed)
       .then(() => {
         notSubscribed.forEach((modelId) => this._handleNewSubscriptions(modelId));
         return this._sendSubscriptionRequest(
@@ -159,7 +159,7 @@ export class ModelOfflineManager {
     const subscribed = modelIds.filter(id => this._subscribedModels.has(id));
     return this._storage
       .modelStore()
-      .removeSubscription(modelIds)
+      .removeSubscriptions(modelIds)
       .then(() => {
         subscribed.forEach(modelId => this._handleUnsubscribed(modelId));
         return this._sendSubscriptionRequest([], subscribed, false);
@@ -319,13 +319,13 @@ export class ModelOfflineManager {
     if (!this._openModels.has(modelId)) {
       if (getOrDefaultBoolean(message.deleted)) {
         // TODO emmit a deleted event.
-        this._storage.modelStore().removeSubscription([modelId]).catch(e => {
+        this._storage.modelStore().removeSubscriptions([modelId]).catch(e => {
           // TODO emmit error event.
           ModelOfflineManager._log.error("Could not delete offline model.", e);
         });
       } else if (getOrDefaultBoolean(message.permissionRevoked)) {
         // TODO emmit a permissions revoked event.
-        this._storage.modelStore().removeSubscription([modelId]).catch(e => {
+        this._storage.modelStore().removeSubscriptions([modelId]).catch(e => {
           // TODO emmit error event.
           ModelOfflineManager._log.error("Could not delete offline model.", e);
         });
