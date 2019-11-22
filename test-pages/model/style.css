@@ -26,6 +26,14 @@ button.array-button {
   margin-right: 10px;
 }
 
+input[readonly].form-control {
+  background-color: transparent;
+}
+
+input[readonly].form-control:focus {
+  outline: none;
+}
+
 #objectVal {
   width: 300px;
   border: 1px solid black;
