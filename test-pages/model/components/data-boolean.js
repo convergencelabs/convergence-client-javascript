@@ -23,7 +23,7 @@ Vue.component('boolean-data', {
   watch: {
     model: function (newModel) {
       if (newModel) {
-        this.rtBoolean = newModel.elementAt("number");
+        this.rtBoolean = newModel.elementAt("boolean");
       } else {
         this.rtBoolean = null;
         this.$refs["input"].checked = false;

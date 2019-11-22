@@ -86,7 +86,7 @@ Vue.component('array-data', {
         const value = this.data[evt.fromIndex];
         this.data.splice(evt.fromIndex, 1);
         this.data.splice(evt.toIndex, 0, value);
-      }
+      };
       rtArray.on("reorder",  onReorder);
 
       return {
