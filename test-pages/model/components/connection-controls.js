@@ -43,11 +43,11 @@ Vue.component('connection-controls', {
         .then(() => {
           this.onConnect();
         })
-        .catch(e => console.error())
+        .catch(e => console.error(e))
     },
     connectOffline() {
       this.domain
-        .connectOffline(username)
+        .connectOffline(this.username)
         .then(() => {
           this.onConnect();
         })
