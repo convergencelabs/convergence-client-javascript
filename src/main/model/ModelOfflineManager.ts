@@ -213,7 +213,13 @@ export class ModelOfflineManager {
   }
 
   public getModelDataIfDirty(modelId: string): Promise<IModelState | undefined> {
-    return Promise.resolve(undefined);
+    return this.getOfflineModelData(modelId).then(m => {
+      if (m.snapshot.dirty) {
+        return m;
+      } else {
+        return;
+      }
+    });
   }
 
   public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
