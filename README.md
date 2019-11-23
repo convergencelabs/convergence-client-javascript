@@ -2,7 +2,7 @@
   <img  alt="Convergence Logo" height="80" src="assets/convergence-logo.png" >
 </div>
 
-# Convergence Javascript Client
+# Convergence JavaScript Client
 ![Build Status](https://travis-ci.org/convergencelabs/convergence-client-javascriipt.svg?branch=master)
 
 This is the first (and only) client for the [Convergence Collaboration Framework](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).

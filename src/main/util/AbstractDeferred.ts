@@ -12,37 +12,45 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {AbstractDeferred} from "./AbstractDeferred";
-
 /**
  * @hidden
  * @internal
  */
-export class Deferred<R> extends AbstractDeferred<R> {
+export abstract class AbstractDeferred<R> {
 
-  private readonly _promise: Promise<R>;
-  private _resolve: (value?: R | PromiseLike<R>) => any;
-  private _reject: (error: Error) => void;
+  private _rejected: boolean;
+  private _resolved: boolean;
 
-  constructor() {
-    super();
-    this._promise = new Promise((resolve: (value?: R | PromiseLike<R>) => any, reject: (error: Error) => void) => {
-      this._resolve = resolve;
-      this._reject = reject;
-    });
+  protected constructor() {
+    this._rejected = false;
+    this._resolved = false;
+  }
+
+  public isPending(): boolean {
+    return !this._resolved && !this._rejected;
+  }
+
+  public isRejected(): boolean {
+    return this._rejected;
+  }
+
+  public isResolved(): boolean {
+    return this._resolved;
   }
 
   public resolve(value?: R | PromiseLike<R>): void {
-    super.resolve(value);
-    this._resolve(value);
+    this._rejected = false;
+    this._resolved = true;
   }
 
   public reject(error: Error): void {
-    super.reject(error);
-    this._reject(error);
+    this._rejected = true;
+    this._resolved = false;
   }
 
-  public promise(): Promise<R> {
-    return this._promise;
+  public resolveFromPromise(p: Promise<R>): void {
+    p.then((r: R) => this.resolve(r)).catch((e: Error) => this.reject(e));
   }
+
+  public abstract promise(): Promise<R> ;
 }

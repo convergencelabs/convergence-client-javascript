@@ -110,7 +110,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   serverOpStore]) => {
       creationStore.put(modelCreation);
 
-      const version = 0;
+      const version = 1;
       const seqNo = 0;
       const now = new Date();
       const permissions = new ModelPermissions(true, true, true, true);

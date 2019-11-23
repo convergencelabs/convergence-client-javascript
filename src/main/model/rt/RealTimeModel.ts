@@ -987,15 +987,24 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     let contextVersion = this._concurrencyControl.contextVersion();
     let seqNo = this._concurrencyControl.sequenceNumber();
     let inFlight: ClientOperationEvent[] = [];
-    while (serverEvents.length > 0 || clientEvents.length > 0) {
-      while (serverEvents.length > 0 &&
-      (clientEvents.length === 0 || serverEvents[0].version <= clientEvents[0].contextVersion)) {
+
+    const canApplyServerEvent = () => {
+      return serverEvents.length > 0 &&
+        (clientEvents.length === 0 || serverEvents[0].version <= clientEvents[0].contextVersion);
+    };
+
+    const canApplyClientEvent = () => {
+      return clientEvents.length > 0 && clientEvents[0].contextVersion === contextVersion;
+    };
+
+    while (canApplyServerEvent() || canApplyClientEvent()) {
+      while (canApplyServerEvent()) {
         const serverEvent = serverEvents.shift();
         this._applyOperation(serverEvent.operation, serverEvent.clientId, serverEvent.version, serverEvent.timestamp);
         contextVersion++;
       }
 
-      while (clientEvents.length > 0 && clientEvents[0].contextVersion === contextVersion) {
+      while (canApplyClientEvent()) {
         const clientEvent = clientEvents.shift();
         this._applyOperation(
           clientEvent.operation,
@@ -1005,6 +1014,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         seqNo = clientEvent.seqNo + 1;
         inFlight.push(clientEvent);
       }
+    }
+
+    if (serverEvents.length > 0 || clientEvents.length > 0) {
+      throw new Error(`Unable to apply all events while rehydrating model '${this._modelId}' from offline state.`);
     }
 
     this._concurrencyControl.setState(contextVersion, seqNo, inFlight);

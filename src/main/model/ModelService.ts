@@ -500,14 +500,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @param modelId
    *   A string or string array containing the unique ids of the models to
    *   be added to the current offline subscription list.
+   *
+   * @returns
+   *   An empty Promise that will be resolved upon successful
+   *   subscription.
    */
-  public subscribeOffline(modelId: string | string[]): void {
+  public subscribeOffline(modelId: string | string[]): Promise<void> {
     const modelIds = TypeChecker.isArray(modelId) ? modelId : [modelId];
-    this._modelOfflineManager
-      .subscribe(modelIds)
-      .catch(e => {
-        this._log.error("Error subscribing for offline models", e);
-      });
+    return this._modelOfflineManager.subscribe(modelIds);
   }
 
   /**
@@ -519,14 +519,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @param modelId
    *   A string or string array containing the unique ids of the models to
    *   be removed from the current offline subscription list.
+   *
+   * @returns
+   *   An empty Promise that will be resolved upon successful
+   *   unsubscription.
    */
-  public unsubscribeOffline(modelId: string | string[]): void {
+  public unsubscribeOffline(modelId: string | string[]): Promise<void> {
     const modelIds = TypeChecker.isArray(modelId) ? modelId : [modelId];
-    this._modelOfflineManager
-      .unsubscribe(modelIds)
-      .catch(e => {
-        this._log.error("Error unsubscribing for offline models", e);
-      });
+    return this._modelOfflineManager.unsubscribe(modelIds);
   }
 
   /**
@@ -536,13 +536,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * immediately removed from the offline store.
    *
    * @param modelIds
+   *
+   * @returns
+   *   An empty Promise that will be resolved upon successful
+   *   subscription.
    */
-  public setOfflineSubscription(modelIds: string[]): void {
-    this._modelOfflineManager
-      .setSubscriptions(modelIds)
-      .catch(e => {
-        this._log.error("Error setting offline model subscriptions", e);
-      });
+  public setOfflineSubscription(modelIds: string[]): Promise<void> {
+    return this._modelOfflineManager.setSubscriptions(modelIds);
   }
 
   /**
@@ -551,8 +551,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *
    * @returns The list of currently subscribed models.
    */
-  public getOfflineSubscriptions(): string[] {
-    return this._modelOfflineManager.getSubscribedModelIds();
+  public getOfflineSubscriptions(): Promise<string[]> {
+    return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getSubscribedModelIds());
   }
 
   /**

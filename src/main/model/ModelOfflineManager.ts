@@ -28,7 +28,7 @@ import {
 import {Logging} from "../util/log/Logging";
 import {ConvergenceConnection, MessageEvent} from "../connection/ConvergenceConnection";
 import {IOfflineModelSubscription} from "../storage/api/IOfflineModelSubscription";
-import {Deferred} from "../util/Deferred";
+import {ReplayDeferred} from "../util/ReplayDeferred";
 import {ModelPermissions} from "./ModelPermissions";
 import {getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
 import {toObjectValue} from "./ModelMessageConverter";
@@ -79,7 +79,7 @@ export class ModelOfflineManager {
   private readonly _syncInterval: number;
   private readonly _storage: StorageEngine;
   private readonly _connection: ConvergenceConnection;
-  private readonly _ready: Deferred<void>;
+  private readonly _ready: ReplayDeferred<void>;
   private readonly _snapshotInterval: number;
 
   constructor(connection: ConvergenceConnection,
@@ -91,7 +91,7 @@ export class ModelOfflineManager {
     this._storage = storage;
     this._subscribedModels = new Map();
     this._openModels = new Map();
-    this._ready = new Deferred<void>();
+    this._ready = new ReplayDeferred<void>();
     this._snapshotInterval = snapshotInterval;
 
     this._connection

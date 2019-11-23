@@ -12,37 +12,52 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+import {Deferred} from "./Deferred";
 import {AbstractDeferred} from "./AbstractDeferred";
 
 /**
  * @hidden
  * @internal
  */
-export class Deferred<R> extends AbstractDeferred<R> {
+export class ReplayDeferred<R> extends AbstractDeferred<R> {
 
-  private readonly _promise: Promise<R>;
-  private _resolve: (value?: R | PromiseLike<R>) => any;
-  private _reject: (error: Error) => void;
+  private readonly _deferreds: Array<Deferred<R>>;
+
+  private _value: R | PromiseLike<R> | undefined;
+  private _error: Error | undefined;
 
   constructor() {
     super();
-    this._promise = new Promise((resolve: (value?: R | PromiseLike<R>) => any, reject: (error: Error) => void) => {
-      this._resolve = resolve;
-      this._reject = reject;
-    });
+    this._deferreds = [];
+    this._value = undefined;
+    this._error = undefined;
   }
 
   public resolve(value?: R | PromiseLike<R>): void {
+    this._value = value;
     super.resolve(value);
-    this._resolve(value);
+    this._deferreds.forEach(d => d.resolve(value));
   }
 
   public reject(error: Error): void {
-    super.reject(error);
-    this._reject(error);
+    this.reject(error);
+    this._error = error;
+    this._deferreds.forEach(d => d.reject(error));
+  }
+
+  public resolveFromPromise(p: Promise<R>): void {
+    p.then((r: R) => this.resolve(r)).catch((e: Error) => this.reject(e));
   }
 
   public promise(): Promise<R> {
-    return this._promise;
+    if (this.isPending()) {
+      const d = new Deferred<R>();
+      this._deferreds.push(d);
+      return d.promise();
+    } else if (this.isRejected()) {
+      return Promise.reject(this._error);
+    } else {
+      return Promise.resolve(this._value);
+    }
   }
 }
