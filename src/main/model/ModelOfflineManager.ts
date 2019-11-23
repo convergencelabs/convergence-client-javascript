@@ -367,25 +367,29 @@ export class ModelOfflineManager {
   }
 
   private _handleOperation(modelId: string, serverOp: boolean, ack: boolean): void {
-    let {version, opsSinceSnapshot} = this._subscribedModels.get(modelId);
-    if (serverOp || ack) {
-      version++;
-    }
+    // Check to make sue we are subscribe. We may not be for a locally
+    // created model that is just waiting to bee pushed up.
+    if (this._subscribedModels.has(modelId)) {
+      let {version, opsSinceSnapshot} = this._subscribedModels.get(modelId);
+      if (serverOp || ack) {
+        version++;
+      }
 
-    if (!ack) {
-      opsSinceSnapshot++;
-    }
+      if (!ack) {
+        opsSinceSnapshot++;
+      }
 
-    if (opsSinceSnapshot >= this._snapshotInterval) {
-      const model = this._openModels.get(modelId);
-      const snapshot = ModelOfflineManager._getSnapshot(model);
-      this._storage.modelStore()
-        .snapshotModel(snapshot)
-        .catch(e => ModelOfflineManager._log.error("Error snapshotting model", e));
-      opsSinceSnapshot = 0;
-    }
+      if (opsSinceSnapshot >= this._snapshotInterval) {
+        const model = this._openModels.get(modelId);
+        const snapshot = ModelOfflineManager._getSnapshot(model);
+        this._storage.modelStore()
+          .snapshotModel(snapshot)
+          .catch(e => ModelOfflineManager._log.error("Error snapshotting model", e));
+        opsSinceSnapshot = 0;
+      }
 
-    this._subscribedModels.set(modelId, {version, opsSinceSnapshot});
+      this._subscribedModels.set(modelId, {version, opsSinceSnapshot});
+    }
   }
 }
 
