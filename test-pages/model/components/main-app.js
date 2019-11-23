@@ -69,6 +69,10 @@ Vue.component('main-app', {
       v-on:modelOpened="onOpenModel"
       v-on:modelClosed="onCloseModel"
     />
+    <model-subscription-controls 
+      v-bind:connected="connected"
+      v-bind:modelService="domain.models()"
+    />
   </div>
   <div class="col-6">
    <string-data v-bind:model="model" />

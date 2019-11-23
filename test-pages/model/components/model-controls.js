@@ -47,8 +47,9 @@ Vue.component('model-controls', {
         ephemeral: false
       }).then((model) => {
         this.$emit("modelOpened", model);
-        model.subscribeOffline();
-      }).catch(e => console.error(e));
+      }).catch(e => {
+        console.error(e);
+      });
     },
     closeModel() {
       this.model.close();
