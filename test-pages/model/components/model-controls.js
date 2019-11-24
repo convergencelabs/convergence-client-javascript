@@ -22,7 +22,7 @@ Vue.component('model-controls', {
   methods: {
     openModel() {
       domain.models().openAutoCreate({
-        collection: "test",
+        collection: "model-test-page",
         id: this.modelId,
         data: {
           "string": "String data to edit",
@@ -55,7 +55,6 @@ Vue.component('model-controls', {
       this.model.close();
       this.$emit("modelClosed");
     }
-
   },
   template: `
 <div class="card">
@@ -63,7 +62,7 @@ Vue.component('model-controls', {
     <h5 class="card-title">Model Control</h5>
     <div class="input-group mb-3">
       <div class="input-group-prepend"><span class="input-group-text">Model Id</span></div>
-      <input type="text" class="form-control" v-model="modelId" readonly="readonly">
+      <input type="text" class="form-control" v-model="modelId" v-bind:disabled="!connected || model">
     </div>
     <button class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="openModel">Open Model</button>
     <button class="btn btn-primary" :disabled="!connected || model === null" v-on:click="closeModel">Close Model</button>

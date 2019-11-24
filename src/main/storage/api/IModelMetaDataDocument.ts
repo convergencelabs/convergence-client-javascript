@@ -12,44 +12,18 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ModelPermissions} from "../../model";
-
 /**
  * @module Offline
  */
-export interface IModelMetaData {
-  /**
-   * The unique id of the model.
-   */
+export interface IModelMetaDataDocument {
+
   modelId: string;
 
-  /**
-   * Whether the model has been marked for offline availability.
-   */
-  subscribed: boolean;
-
-  /**
-   * Whether the model has been downloaded and is available locally.
-   */
-  available: boolean;
-
-  /**
-   * If the offline model was deleted, and should be deleted on the sever
-   * once the client connects.
-   */
-  deleted: boolean;
-
-  /**
-   * If the model was created offline and needs to be created at the server
-   * when the client connects.
-   */
-  created: boolean;
-
-  /**
-   * If the model has uncommitted local operations that need to be sent to the
-   * server when the client connects.
-   */
-  dirty: boolean;
+  subscribed?: number;
+  available?: number;
+  deleted?: number;
+  created?: number;
+  dirty?: number;
 
   details?: {
     collection: string;
@@ -58,6 +32,11 @@ export interface IModelMetaData {
     seqNo: number;
     createdTime: Date;
     modifiedTime: Date;
-    permissions: ModelPermissions;
+    permissions: {
+      read: boolean;
+      write: boolean;
+      remove: boolean;
+      manage: boolean;
+    };
   };
 }

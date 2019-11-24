@@ -4,17 +4,21 @@
 
 div.card {
   margin-bottom: 10px;
-  width: 600px;
 }
 
 div.directions {
   margin-bottom: 20px;
-  border-bottom: 1px solid darkblue;
+  border: 1px solid lightgray;
+  max-width: 500px;
+  background: #eaeaea;
+  border-radius: 4px;
+  padding: 4px;
+  text-align: justify;
 }
 
 textarea.string {
   height: 100px;
-  width: 300px;
+  /*width: 100%;*/
 }
 
 select#arrayVal {
@@ -38,4 +42,8 @@ input[readonly].form-control:focus {
   width: 300px;
   border: 1px solid black;
   margin-bottom: 15px;
+}
+
+tr.selected {
+  background: #bee4ff;
 }

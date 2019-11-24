@@ -62,7 +62,7 @@ Vue.component('date-data', {
   <div class="card-body">
     <h5 class="card-title">Date Data</h5>
     <div class="input-group mb-3">
-      <button id="currentDateButton" v-on:click="setDate" class="btn btn-primary array-button" :disabled="!rtDate">Set Date To Now</button>
+      <button v-on:click="setDate" class="btn btn-primary array-button" :disabled="!rtDate">Set Date To Now</button>
       <div class="input-group-prepend">
         <span class="input-group-text">Date</span>
       </div>

@@ -28,6 +28,7 @@ import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {ModelPermissions} from "../../model";
 import {IOfflineModelSubscription} from "../api/IOfflineModelSubscription";
+import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
 
 /**
  * @hidden
@@ -54,25 +55,78 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     operations.forEach(op => store.add(op));
   }
 
-  private static _toDataAndMetaData(snapshot: IModelSnapshot): { data: IModelData, meta: IModelMetaData } {
+  private static _snapshotToDataAndMetaData(snapshot: IModelSnapshot):
+    { data: IModelData, meta: IModelMetaDataDocument } {
     const data: IModelData = {
       modelId: snapshot.modelId,
       data: snapshot.data
     };
 
-    const meta: IModelMetaData = {
+    const meta: IModelMetaDataDocument = {
       modelId: snapshot.modelId,
-      collection: snapshot.collection,
-      local: snapshot.local,
-      dirty: snapshot.local,
-      createdTime: snapshot.createdTime,
-      modifiedTime: snapshot.modifiedTime,
-      permissions: snapshot.permissions,
-      seqNo: snapshot.seqNo,
-      version: snapshot.version
+
+      available: 1,
+
+      details: {
+        collection: snapshot.collection,
+        createdTime: snapshot.createdTime,
+        modifiedTime: snapshot.modifiedTime,
+        permissions: {
+          read: snapshot.permissions.read,
+          write: snapshot.permissions.write,
+          remove: snapshot.permissions.remove,
+          manage: snapshot.permissions.manage,
+        },
+        seqNo: snapshot.seqNo,
+        version: snapshot.version,
+        dataVersion: snapshot.version
+      }
     };
 
+    if (snapshot.local) {
+      meta.created = 1;
+    }
+
+    if (snapshot.dirty) {
+      meta.dirty = 1;
+    }
+
+    if (snapshot.subscribed) {
+      meta.subscribed = 1;
+    }
+
     return {data, meta};
+  }
+
+  private static _metaDataDocToMetaData(doc: IModelMetaDataDocument): IModelMetaData {
+    const metaData: IModelMetaData = {
+      modelId: doc.modelId,
+
+      subscribed: doc.subscribed === 1,
+      available: doc.available === 1,
+      deleted: doc.deleted === 1,
+      created: doc.created === 1,
+      dirty: doc.dirty === 1
+    };
+
+    if (doc.details) {
+      metaData.details = {
+        collection: doc.details.collection,
+        version: doc.details.version,
+        dataVersion: doc.details.dataVersion,
+        seqNo: doc.details.seqNo,
+        createdTime: doc.details.createdTime,
+        modifiedTime: doc.details.modifiedTime,
+        permissions: new ModelPermissions(
+          doc.details.permissions.read,
+          doc.details.permissions.write,
+          doc.details.permissions.remove,
+          doc.details.permissions.manage,
+        )
+      };
+    }
+
+    return metaData;
   }
 
   private static _putModelState(
@@ -83,7 +137,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     serverOpStore: IDBObjectStore): void {
     const {snapshot, localOperations, serverOperations} = modelState;
 
-    const {data, meta} = IdbModelStore._toDataAndMetaData(snapshot);
+    const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot);
     modelDataStore.put(data);
     modelMetaDataStore.put(meta);
 
@@ -91,6 +145,57 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     IdbModelStore.deleteLocalOperationsForModel(localOpStore, meta.modelId);
     IdbModelStore.putLocalOperationsForModel(localOpStore, localOperations);
     IdbModelStore.putServerOperationsForModel(serverOpStore, serverOperations);
+  }
+
+  private static async _removeSubscriptions(
+    modelIds: string[],
+    modelMetaDataStore: IDBObjectStore,
+    modelDataStore: IDBObjectStore,
+    localOpStore: IDBObjectStore,
+    serverOpStore: IDBObjectStore): Promise<void> {
+
+    for (const modelId of modelIds) {
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+      delete metaData.subscribed;
+
+      // If we don't have changes to go up to the server we can remove.
+      if (!metaData.created && !metaData.dirty) {
+        await this._deleteModel(modelId, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
+      } else {
+        await modelMetaDataStore.put(metaData);
+      }
+    }
+  }
+
+  private static async _deleteModel(
+    modelId: string,
+    modelMetaDataStore: IDBObjectStore,
+    modelDataStore: IDBObjectStore,
+    localOpStore: IDBObjectStore,
+    serverOpStore: IDBObjectStore): Promise<void> {
+
+    await modelMetaDataStore.delete(modelId);
+    await modelDataStore.delete(modelId);
+    await IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
+    await IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
+  }
+
+  private static async _addSubscriptions(modelIds: string[], metaDataStore: IDBObjectStore): Promise<void> {
+    for (const modelId of modelIds) {
+      const current = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
+      let updated: IModelMetaDataDocument;
+      if (current !== undefined) {
+        updated = current;
+        updated.subscribed = 1;
+      } else {
+        updated = {
+          modelId,
+          subscribed: 1,
+        };
+      }
+
+      await toVoidPromise(metaDataStore.put(updated));
+    }
   }
 
   public createLocalModel(modelCreation: IModelCreationData): Promise<void> {
@@ -119,6 +224,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           modelId: modelCreation.modelId,
           local: true,
           dirty: true,
+          subscribed: false,
           collection: modelCreation.collection,
           version,
           seqNo,
@@ -143,10 +249,34 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
     return this._withWriteStores(stores, async ([creationStore, modelMetaDataStore]) => {
       creationStore.delete(modelId);
-      const metaData: IModelMetaData = await toPromise(modelMetaDataStore.get(modelId));
-      metaData.local = false;
-      metaData.dirty = false;
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+      metaData.available = 1;
+      delete metaData.created;
+      delete metaData.dirty;
       return toVoidPromise(modelMetaDataStore.put(metaData));
+    });
+  }
+
+  public deleteIfNotNeeded(modelId: string): Promise<void> {
+    return this._withReadStore(IdbSchema.ModelMetaData.Store, async (modelMetaDataStore) => {
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+      return metaData !== undefined && !metaData.created && !metaData.dirty && !metaData.subscribed;
+    }).then(remove => {
+      if (remove) {
+        const storeNames = [
+          IdbSchema.ModelMetaData.Store,
+          IdbSchema.ModelData.Store,
+          IdbSchema.ModelLocalOperation.Store,
+          IdbSchema.ModelServerOperation.Store
+        ];
+        return this._withWriteStores(
+          storeNames,
+          async ([metaDataStore, dataStore, localOpStore, serverOpStore]) => {
+            await IdbModelStore._deleteModel(modelId, metaDataStore, dataStore, localOpStore, serverOpStore);
+          });
+      } else {
+        return;
+      }
     });
   }
 
@@ -171,32 +301,33 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   public updateOfflineModel(update: IModelUpdate): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelData.Store,
-      IdbSchema.ModelSubscriptions.Store
+      IdbSchema.ModelData.Store
     ];
-    return this._withWriteStores(stores, async ([modelMetaDataStore, modelDataStore, subscriptionStore]) => {
+
+    return this._withWriteStores(stores, async ([modelMetaDataStore, modelDataStore]) => {
       const {modelId, dataUpdate, permissionsUpdate} = update;
       const modelMetaData: IModelMetaData = await toPromise(modelMetaDataStore.get(modelId));
+
+      if (modelMetaData === undefined) {
+        throw Error("Received an update for a non-existent local model");
+      }
 
       // TODO we should check to see if the model is locally modified.
 
       if (dataUpdate) {
-        modelMetaData.version = dataUpdate.version;
-        modelMetaData.createdTime = dataUpdate.createdTime;
-        modelMetaData.modifiedTime = dataUpdate.modifiedTime;
+        modelMetaData.details.version = dataUpdate.version;
+        modelMetaData.details.createdTime = dataUpdate.createdTime;
+        modelMetaData.details.modifiedTime = dataUpdate.modifiedTime;
 
         const data: IModelData = {
           modelId,
           data: dataUpdate.data
         };
         await toVoidPromise(modelDataStore.put(data));
-
-        // Update the subscription table to indicate we have a new version.
-        await toVoidPromise(subscriptionStore.put({modelId, version: modelMetaData.version}));
       }
 
       if (permissionsUpdate) {
-        modelMetaData.permissions = permissionsUpdate;
+        modelMetaData.details.permissions = permissionsUpdate;
       }
 
       return toVoidPromise(modelMetaDataStore.put(modelMetaData));
@@ -214,32 +345,42 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public async getDirtyModelIds(): Promise<string[]> {
-    const ids: string[] = [];
-    await this._readIterator(IdbSchema.ModelMetaData.Store,
-      (value: IModelMetaData) => {
-        if (value.dirty) {
-          ids.push(value.modelId);
-        }
-      });
-
-    return ids;
+  public getDirtyModelIds(): Promise<string[]> {
+    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
+      const idx = store.index(IdbSchema.ModelMetaData.Indices.Dirty);
+      return toPromise(idx.getAllKeys()) as Promise<string[]>;
+    });
   }
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
     const stores = [
-      IdbSchema.ModelServerOperation.Store,
-      IdbSchema.ModelSubscriptions.Store
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelServerOperation.Store
     ];
 
-    return this._withWriteStores(stores, async ([serverOpStore, subscriptionsStore]) => {
-      serverOpStore.add(serverOp);
-      subscriptionsStore.put({modelId: serverOp.modelId, version: serverOp.version});
+    return this._withWriteStores(stores, async ([modelMetaDataStore, serverOpStore]) => {
+      await toVoidPromise(serverOpStore.add(serverOp));
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(serverOp.modelId));
+      metaData.details.version = serverOp.version;
+      metaData.details.modifiedTime = serverOp.timestamp;
+
+      await toVoidPromise(modelMetaDataStore.put(metaData));
     });
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
-    return this.add(IdbSchema.ModelLocalOperation.Store, localOp);
+    const stores = [
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelLocalOperation.Store
+    ];
+
+    return this._withWriteStores(stores, async ([modelMetaDataStore, localOpStore]) => {
+      await toVoidPromise(localOpStore.add(localOp));
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(localOp.modelId));
+      metaData.dirty = 1;
+      metaData.details.seqNo = localOp.sequenceNumber;
+      await toVoidPromise(modelMetaDataStore.put(metaData));
+    });
   }
 
   public processOperationAck(modelId: string,
@@ -249,13 +390,27 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     const stores = [
       IdbSchema.ModelLocalOperation.Store,
       IdbSchema.ModelServerOperation.Store,
-      IdbSchema.ModelSubscriptions.Store
+      IdbSchema.ModelMetaData.Store
     ];
 
-    return this._withWriteStores(stores, async ([localOpStore, serverOpStore, subscriptionsStore]) => {
-      localOpStore.delete([modelId, sessionId, seqNo]);
-      serverOpStore.add(serverOp);
-      subscriptionsStore.put({modelId, version: serverOp.version});
+    return this._withWriteStores(stores, async ([localOpStore, serverOpStore, modelMetaDataStore]) => {
+      await toVoidPromise(localOpStore.delete([modelId, sessionId, seqNo]));
+      await toVoidPromise(serverOpStore.add(serverOp));
+
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+
+      metaData.details.version = serverOp.version;
+      metaData.details.modifiedTime = serverOp.timestamp;
+
+      const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
+      const dirty = await toPromise(idx.count(modelId)).then((count => count > 0));
+      if (dirty) {
+        metaData.dirty = 1;
+      } else {
+        delete metaData.dirty;
+      }
+
+      await toVoidPromise(modelMetaDataStore.put(metaData));
     });
   }
 
@@ -272,7 +427,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
     return this._withReadStores(stores,
       async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
-        const meta: IModelMetaData = await toPromise(modelMetaDataStore.get(modelId));
+        const meta: IModelMetaDataDocument = await toPromise(modelMetaDataStore.get(modelId));
         const data: IModelData = await toPromise(modelDataStore.get(modelId));
         if (meta && data) {
           const localOpsIndex = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
@@ -282,14 +437,20 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           const serverOperations = await toPromise(serverOpsIndex.getAll(modelId));
           const snapshot: IModelSnapshot = {
             modelId: meta.modelId,
-            collection: meta.collection,
-            local: meta.local,
-            dirty: meta.dirty,
-            version: meta.version,
-            seqNo: meta.seqNo,
-            createdTime: meta.createdTime,
-            modifiedTime: meta.modifiedTime,
-            permissions: meta.permissions,
+            collection: meta.details.collection,
+            local: meta.created === 1,
+            dirty: meta.dirty === 1,
+            subscribed: meta.subscribed === 1,
+            version: meta.details.version,
+            seqNo: meta.details.seqNo,
+            createdTime: meta.details.createdTime,
+            modifiedTime: meta.details.modifiedTime,
+            permissions: new ModelPermissions(
+              meta.details.permissions.read,
+              meta.details.permissions.write,
+              meta.details.permissions.remove,
+              meta.details.permissions.manage,
+            ),
             data: data.data
           };
 
@@ -300,32 +461,50 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       });
   }
 
+  public getAllModelMetaData(): Promise<IModelMetaData[]> {
+    return this._getAll(IdbSchema.ModelMetaData.Store)
+      .then(results => results.map(IdbModelStore._metaDataDocToMetaData));
+  }
+
   public setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void> {
-    const storeName = IdbSchema.ModelSubscriptions.Store;
-    return this._withWriteStore(storeName, async (store) => {
-      return toPromise(store.clear()).then(() => {
-        subscriptions.forEach(subscription => {
-          store.put(subscription);
-        });
+    const modelIds = subscriptions.map(s => s.modelId);
+    const storeNames = [
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store
+    ];
+    return this._withWriteStores(
+      storeNames,
+      async ([metaDataStore, dataStore, localOpStore, serverOpStore]) => {
+        const index = metaDataStore.index(IdbSchema.ModelMetaData.Indices.Subscribed);
+        const subscribed = await toPromise<IModelMetaDataDocument[]>(index.getAll());
+        const subscribedModelIds = subscribed.map(s => s.modelId);
+        const toAdd = modelIds.filter(id => !subscribedModelIds.includes(id));
+        const toRemove = subscribedModelIds.filter(id => !modelIds.includes(id));
+
+        await IdbModelStore._removeSubscriptions(toRemove, metaDataStore, dataStore, localOpStore, serverOpStore);
+        await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
       });
-    });
   }
 
   public getSubscribedModels(): Promise<IOfflineModelSubscription[]> {
-    const storeName = IdbSchema.ModelSubscriptions.Store;
+    const storeName = IdbSchema.ModelMetaData.Store;
     return this._withReadStore(storeName, async (store) => {
-      return toPromise(store.getAll());
+      const index = store.index(IdbSchema.ModelMetaData.Indices.Subscribed);
+      const subscribed = await toPromise<IModelMetaData[]>(index.getAll());
+      return subscribed.map(s => {
+        return {
+          version: s.details ? s.details.version : 0,
+          modelId: s.modelId
+        };
+      });
     });
   }
 
   public addSubscriptions(modelIds: string[]): Promise<void> {
-    const storeName = IdbSchema.ModelSubscriptions.Store;
-    return this._withWriteStore(storeName, async (store) => {
-      modelIds.forEach(modelId => {
-        const data: IOfflineModelSubscription = {modelId, version: 0};
-        store.put(data);
-      });
-    });
+    const storeName = IdbSchema.ModelMetaData.Store;
+    return this._withWriteStore(storeName, (store) => IdbModelStore._addSubscriptions(modelIds, store));
   }
 
   public removeSubscriptions(modelIds: string[]): Promise<void> {
@@ -334,18 +513,16 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       IdbSchema.ModelData.Store,
       IdbSchema.ModelLocalOperation.Store,
       IdbSchema.ModelServerOperation.Store,
-      IdbSchema.ModelSubscriptions.Store
     ];
 
     return this._withWriteStores(stores,
-      async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore, subStore]) => {
-        modelIds.forEach(modelId => {
-          modelMetaDataStore.delete(modelId);
-          modelDataStore.delete(modelId);
-          IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
-          IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
-          subStore.delete(modelId);
-        });
+      async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
+        return IdbModelStore._removeSubscriptions(
+          modelIds,
+          modelMetaDataStore,
+          modelDataStore,
+          localOpStore,
+          serverOpStore);
       });
   }
 
@@ -357,7 +534,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
     return this._withWriteStores(stores,
       async ([modelMetaDataStore, modelDataStore, serverOpStore]) => {
-        const {data, meta} = IdbModelStore._toDataAndMetaData(snapshot);
+        const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot);
         modelMetaDataStore.put(meta);
         modelDataStore.put(data);
         IdbModelStore.deleteServerOperationsForModel(serverOpStore, meta.modelId);

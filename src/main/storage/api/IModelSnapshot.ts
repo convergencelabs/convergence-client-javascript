@@ -21,6 +21,7 @@ export interface IModelSnapshot {
   modelId: string;
   local: boolean;
   dirty: boolean;
+  subscribed: boolean;
   collection: string;
   version: number;
   seqNo: number;

@@ -53,9 +53,16 @@ Vue.component('number-data', {
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Number Data</h5>
-    <input type="number" ref="input" disabled="disabled">
-    <button class="btn btn-primary" id="numberIncrement" v-on:click="numberIncrement" :disabled="!rtNumber">Increment</button>
-    <button class="btn btn-primary" id="numberDecrement" v-on:onclick="numberDecrement" :disabled="!rtNumber">Decrement</button>
+    <div class="input-group mb-3">
+      <button class="btn btn-primary mr-3" v-on:click="numberIncrement" :disabled="!rtNumber">Increment</button>
+      <button class="btn btn-primary mr-3" v-on:onclick="numberDecrement" :disabled="!rtNumber">Decrement</button>
+      
+      <div class="input-group-prepend">
+        <span class="input-group-text">Value</span>
+      </div>
+      
+      <input type="number" ref="input" class="form-control" :disabled="!rtNumber">
+    </div>
   </div>
 </div>
 `

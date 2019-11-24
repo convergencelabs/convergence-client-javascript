@@ -20,19 +20,6 @@ import {IdbSchema} from "./IdbSchema";
  */
 export class IdbSchemaVersion1 {
   public static upgrade(db: IDBDatabase) {
-
-    //
-    // Model Subscription Store
-    //
-    const modelSubscriptionStore = db.createObjectStore(
-      IdbSchema.ModelSubscriptions.Store,
-      {keyPath: IdbSchema.ModelSubscriptions.Fields.ModelId});
-
-    modelSubscriptionStore.createIndex(
-      IdbSchema.ModelSubscriptions.Indices.ModelId,
-      IdbSchema.ModelSubscriptions.Fields.ModelId,
-      {unique: true});
-
     //
     // Model Creation Store
     //
@@ -46,18 +33,6 @@ export class IdbSchemaVersion1 {
       {unique: true});
 
     //
-    // Model Data Store
-    //
-    const modelData = db.createObjectStore(
-      IdbSchema.ModelData.Store,
-      {keyPath: IdbSchema.ModelData.Fields.ModelId});
-
-    modelData.createIndex(
-      IdbSchema.ModelData.Indices.ModelId,
-      IdbSchema.ModelData.Fields.ModelId,
-      {unique: true});
-
-    //
     // Model Meta Data Store
     //
     const modelMetaData = db.createObjectStore(
@@ -67,6 +42,38 @@ export class IdbSchemaVersion1 {
     modelMetaData.createIndex(
       IdbSchema.ModelMetaData.Indices.ModelId,
       IdbSchema.ModelMetaData.Fields.ModelId,
+      {unique: true});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.Created,
+      IdbSchema.ModelMetaData.Fields.Created,
+      {unique: false});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.Deleted,
+      IdbSchema.ModelMetaData.Fields.Deleted,
+      {unique: false});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.Dirty,
+      IdbSchema.ModelMetaData.Fields.Dirty,
+      {unique: false});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.Subscribed,
+      IdbSchema.ModelMetaData.Fields.Subscribed,
+      {unique: false});
+
+    //
+    // Model Data Store
+    //
+    const modelData = db.createObjectStore(
+      IdbSchema.ModelData.Store,
+      {keyPath: IdbSchema.ModelData.Fields.ModelId});
+
+    modelData.createIndex(
+      IdbSchema.ModelData.Indices.ModelId,
+      IdbSchema.ModelData.Fields.ModelId,
       {unique: true});
 
     //

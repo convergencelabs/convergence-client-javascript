@@ -34,19 +34,15 @@ export class ReplayDeferred<R> extends AbstractDeferred<R> {
   }
 
   public resolve(value?: R | PromiseLike<R>): void {
-    this._value = value;
     super.resolve(value);
+    this._value = value;
     this._deferreds.forEach(d => d.resolve(value));
   }
 
   public reject(error: Error): void {
-    this.reject(error);
+    super.reject(error);
     this._error = error;
     this._deferreds.forEach(d => d.reject(error));
-  }
-
-  public resolveFromPromise(p: Promise<R>): void {
-    p.then((r: R) => this.resolve(r)).catch((e: Error) => this.reject(e));
   }
 
   public promise(): Promise<R> {

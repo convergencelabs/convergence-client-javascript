@@ -18,6 +18,7 @@ import {IModelCreationData} from "./IModelCreationData";
 import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 import {IModelUpdate} from "./IModelUpdate";
 import {IModelSnapshot} from "./IModelSnapshot";
+import {IModelMetaData} from "./IModelMetaData";
 
 /**
  * @module Offline
@@ -37,6 +38,8 @@ export interface IModelStore {
 
   getModelState(modelId: string): Promise<IModelState | undefined>;
 
+  getAllModelMetaData(): Promise<IModelMetaData[]>;
+
   putModelState(model: IModelState): Promise<void>;
 
   snapshotModel(model: IModelSnapshot): Promise<void>;
@@ -54,4 +57,6 @@ export interface IModelStore {
   processOperationAck(modelId: string, sessionId: string, seqNo: number, serverOp: IServerOperationData): Promise<void>;
 
   modelCreated(modelId: string): Promise<void>;
+
+  deleteIfNotNeeded(modelId: string): Promise<void>;
 }

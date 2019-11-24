@@ -17,15 +17,6 @@
  * @internal
  */
 export const IdbSchema = {
-  ModelSubscriptions: {
-    Store: "ModelSubscription",
-    Indices: {
-      ModelId: "ModelSubscription.modelId"
-    },
-    Fields: {
-      ModelId: "modelId"
-    }
-  },
   ModelCreation: {
     Store: "ModelCreation",
     Fields: {
@@ -38,10 +29,18 @@ export const IdbSchema = {
   ModelMetaData: {
     Store: "ModelMetaData",
     Fields: {
-      ModelId: "modelId"
+      ModelId: "modelId",
+      Subscribed: "subscribed",
+      Created: "created",
+      Deleted: "deleted",
+      Dirty: "dirty"
     },
     Indices: {
-      ModelId: "ModelMetaData.modelId"
+      ModelId: "ModelMetaData.modelId",
+      Created: "ModelMetaData.created",
+      Deleted: "ModelMetaData.deleted",
+      Dirty: "ModelMetaData.dirty",
+      Subscribed: "ModelMetaData.subscribed"
     }
   },
   ModelData: {

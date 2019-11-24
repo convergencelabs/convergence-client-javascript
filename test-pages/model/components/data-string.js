@@ -41,7 +41,7 @@ Vue.component('string-data', {
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">String Data</h5>
-    <textarea class="string" :disabled="!rtString" ref="input"></textarea>
+    <textarea class="string form-control" :disabled="!rtString" ref="input"></textarea>
   </div>
 </div>
 `

@@ -13,6 +13,7 @@
  */
 
 import {toPromise, toVoidPromise, txToPromise} from "./promise";
+import {IModelMetaData} from "../api";
 
 const READONLY = "readonly";
 const READWRITE = "readwrite";
@@ -83,6 +84,13 @@ export class IdbPersistenceStore {
     return this._withWriteStore(storeName, (store) => {
       return toVoidPromise(store.add(data));
     });
+  }
+
+  protected _getAll(storeName: string, query?: IDBValidKey | IDBKeyRange | null): Promise<any[]> {
+    const results: string[] = [];
+    return this._readIterator(storeName, (value: any) => {
+      results.push(value);
+    }, query).then(() => results);
   }
 
   protected _readIterator(storeName: string,

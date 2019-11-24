@@ -122,7 +122,7 @@ Vue.component('array-data', {
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Array Data</h5>
-    <select size="10" id="arrayVal" v-on:change="selectItem">
+    <select size="10" id="arrayVal" class="form-control mb-3" v-on:change="selectItem">
     <option v-for="item in data">{{ item }}</option>
     </select>
     <div class="input-group mb-3">

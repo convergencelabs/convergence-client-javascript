@@ -154,12 +154,14 @@ export function toOfflineOperationData(op: Operation): IModelOperationData {
   } else if (op instanceof NumberDeltaOperation) {
     return {
       type: "number_delta",
+      id: op.id,
       noOp: op.noOp,
       value: op.delta
     } as INumberDeltaOperationData;
   } else if (op instanceof NumberSetOperation) {
     return {
       type: "number_set",
+      id: op.id,
       noOp: op.noOp,
       value: op.value
     } as INumberSetOperationData;

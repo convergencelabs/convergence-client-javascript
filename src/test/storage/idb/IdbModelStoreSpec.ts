@@ -74,6 +74,7 @@ function createModelState(): IModelState {
       collection: "collection",
       local: false,
       dirty: false,
+      subscribed: false,
       version: 10,
       seqNo: 0,
       createdTime: new Date(),

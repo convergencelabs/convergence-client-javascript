@@ -16,7 +16,8 @@ Vue.component('model-subscription-controls', {
   props: ["connected", "modelService"],
   data: () => {
     return {
-      subscriptions: [],
+      offlineModels: [],
+      selected: null,
       newSubscription: ""
     };
   },
@@ -24,20 +25,39 @@ Vue.component('model-subscription-controls', {
     this.loadSubscriptions();
   },
   methods: {
-    subscribe() {
+    selectRow(modelId) {
+      this.selected = modelId;
+    },
+    isSelectedSubscribed() {
+      const record = this.offlineModels.find(v => v.modelId === this.selected);
+      return record && record.subscribed;
+    },
+    subscribeNewModel() {
       this.modelService.subscribeOffline(this.newSubscription).then(() => {
         this.newSubscription = "";
         this.loadSubscriptions();
       });
     },
-    unsubscribe(modelId) {
-      this.modelService.unsubscribeOffline(modelId).then(() => this.loadSubscriptions());
+    subscribeSelectedModel() {
+      this.modelService.subscribeOffline(this.selected).then(() => this.loadSubscriptions());
+    },
+    unsubscribeSelectedModel() {
+      this.modelService.unsubscribeOffline(this.selected).then(() => this.loadSubscriptions());
+    },
+    openSelectedModel() {
+
+    },
+    deleteSelectedModel() {
+
     },
     loadSubscriptions() {
       this.modelService
-        .getOfflineSubscriptions()
+        .getOfflineModelMetaData()
         .then(subs => {
-          this.subscriptions = subs;
+          this.offlineModels = subs;
+          if (this.offlineModels.find(m => m.modelId === this.selected) === undefined) {
+            this.selected = null;
+          }
         })
         .catch(e => {
           console.error(e);
@@ -47,25 +67,47 @@ Vue.component('model-subscription-controls', {
   template: `
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Model Subscriptions</h5>
-    <table class="table">
-      <thead>
+    <h5 class="card-title">Offline Models</h5>
+    <div class="input-group mb-3">
+      <button class="btn btn-primary array-button" 
+              v-on:click="subscribeNewModel" 
+              :disabled="!newSubscription || offlineModels.find(sub => sub.modelId === newSubscription)"
+      >Subscribe</button>
+      <div class="input-group-prepend">
+        <span class="input-group-text">Model Id</span>
+      </div>
+      <input v-model="newSubscription" type="text" class="form-control" :disabled="!connected">
+    </div>
+    
+    <div class="text-right mb-3">
+      <button class="btn btn-primary btn-sm" v-on:click="openSelectedModel" :disabled="!selected">Open</button>
+      <button v-if="isSelectedSubscribed()" 
+              class="btn btn-warning btn-sm"
+              v-on:click="unsubscribeSelectedModel"
+              :disabled="!selected"
+       >Unsubscribe</button>
+      <button v-else class="btn btn-primary btn-sm" v-on:click="subscribeSelectedModel" :disabled="!selected">Subscribe</button>
+      <button class="btn btn-danger btn-sm" v-on:click="deleteSelectedModel" :disabled="!selected">Delete</button>
+    </div>
+    
+    <table class="table table-bordered table-hover table-sm">
+      <thead class="thead-light">
         <th scope="col">Model Id</th>
-        <th scope="col">Action</th></thead>
+        <th scope="col">Dirty</th>
+        <th scope="col">Local</th>
+        <th scope="col">Subscribed</th>
+        <th scope="col">Downloaded</th>
+      </thead>
       <tbody>
-        <tr v-for="sub in subscriptions">
-          <td>{{sub}}</td>
-          <td><button class="btn btn-danger" v-on:click="unsubscribe(sub)">Unsubscribe</button></td>
+        <tr v-for="model in offlineModels" v-on:click="selectRow(model.modelId)" v-bind:class="{ selected: selected === model.modelId }">
+          <td>{{model.modelId}}</td>
+          <td>{{model.dirty}}</td>
+          <td>{{model.created}}</td>
+          <td>{{model.subscribed}}</td>
+          <td>{{model.available}}</td>
         </tr>
       </tbody>
     </table>
-    <div class="input-group mb-3">
-      <button class="btn btn-primary array-button" v-on:click="subscribe" :disabled="!newSubscription || subscriptions.indexOf(newSubscription) >= 0">Subscribe</button>
-      <div class="input-group-prepend">
-        <span class="input-group-text">Value</span>
-      </div>
-      <input v-model="newSubscription" type="text" class="form-control" :disabled="false">
-    </div>
   </div>
 </div>
   `

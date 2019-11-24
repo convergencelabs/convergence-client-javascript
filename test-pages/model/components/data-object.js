@@ -103,7 +103,7 @@ Vue.component('object-data', {
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Object Data</h5>
-    <table class="table">
+    <table class="table table-sm">
       <thead>
         <th scope="col">Property</th>
         <th scope="col">Value</th></thead>
