@@ -55,12 +55,14 @@ import {ModelPermissions} from "./ModelPermissions";
 import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
+import {RandomStringGenerator} from "../util/RandomStringGenerator";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
+
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -207,6 +209,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _log: Logger;
 
   /**
+   * @internal
+   */
+  private readonly _modelIdGenerator: RandomStringGenerator;
+
+  /**
    * @hidden
    * @internal
    */
@@ -232,6 +239,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._modelOfflineManager = modelOfflineManager;
 
+    this._modelIdGenerator = new RandomStringGenerator(32, RandomStringGenerator.AlphaNumeric);
     this._log = Logging.logger("models");
   }
 
@@ -373,32 +381,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
     }
 
-    const data = (TypeChecker.isNull(options.data) || TypeChecker.isUndefined(options.data)) ?
-      {} :
-      {...options.data};
-
-    const idGen: InitialIdGenerator = new InitialIdGenerator();
-    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return idGen.id();
-    });
-    const dataValue: ObjectValue = dataValueFactory.createDataValue(data) as ObjectValue;
-
-    return this._create(dataValue, options);
+    return this._create(options);
   }
 
   /**
-   *
-   * @param dataValue
-   * @param options
    * @hidden
    * @internal
    * @private
    */
-  public _create(dataValue: ObjectValue, options: ICreateModelOptions): Promise<string> {
+  public _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
     const collection = options.collection;
 
     if (this._connection.isOnline()) {
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
+      const dataValue = data || this._getDataFromCreateOptions(options);
       const request: IConvergenceMessage = {
         createRealTimeModelRequest: {
           collectionId: collection,
@@ -415,8 +411,25 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         return createRealTimeModelResponse.modelId;
       });
     } else {
-      // TODO create the model locally offline
-      throw new Error("Not implemented yet.");
+      const id = options.id || this._modelIdGenerator.nextString();
+      return this._modelOfflineManager
+        .getOfflineModelData(id)
+        .then(modelState => {
+          if (TypeChecker.isSet(modelState)) {
+            return Promise.reject(new Error(`An offline model with the specified id already exists: ${id}`));
+          } else {
+            const dataValue = data || this._getDataFromCreateOptions(options);
+            const creationData: IModelCreationData = {
+              modelId: id,
+              collection: options.collection,
+              initialData: dataValue,
+              overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
+              worldPermissions: options.worldPermissions,
+              userPermissions: options.userPermissions
+            };
+            return this._modelOfflineManager.createOfflineModel(creationData).then(() => id);
+          }
+        });
     }
   }
 
@@ -605,7 +618,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public _resyncComplete(modelId: string): void {
     this._resyncingModels.delete(modelId);
-    this._modelOfflineManager.modelSyncedToServer(modelId);
     this._checkResyncQueue();
   }
 
@@ -863,9 +875,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _createNewModelOffline(id: string, options: IAutoCreateModelOptions): RealTimeModel {
+  private _createNewModelOffline(id: string, options: ICreateModelOptions): RealTimeModel {
     this._log.debug(`Creating new offline model model '${id}' using auto-create options.`);
-    const dataValue = this._getDataFromAutoCreate(options);
+    const dataValue = this._getDataFromCreateOptions(options);
 
     // FIXME what should these be?
     const resourceId = "fake";
@@ -990,7 +1002,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const options: IAutoCreateModelOptions = this._autoCreateRequests.get(autoCreateId);
       this._autoCreateRequests.delete(autoCreateId);
 
-      const dataValue: ObjectValue = this._getDataFromAutoCreate(options);
+      const dataValue: ObjectValue = this._getDataFromCreateOptions(options);
 
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
       const response: IConvergenceMessage = {
@@ -1007,7 +1019,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
   }
 
-  private _getDataFromAutoCreate(options: IAutoCreateModelOptions): ObjectValue {
+  /**
+   * @internal
+   * @hidden
+   */
+  private _getDataFromCreateOptions(options: ICreateModelOptions): ObjectValue {
     let data: ModelDataInitializer = options.data;
     if (TypeChecker.isFunction(data)) {
       data = (data as ModelDataCallback)();

@@ -1114,7 +1114,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           worldPermissions: creation.worldPermissions,
           userPermissions: creation.userPermissions
         };
-        return this._modelService._create(creation.initialData, options);
+        return this._modelService._create(options, creation.initialData);
       }).then(() => {
         this._local = false;
         return this._offlineManager.modelCreated(this._modelId);
@@ -1525,12 +1525,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._processRemoteOperation(m);
       });
 
-      this._resyncData.upToDate = true;
+      RealTimeModel._log.debug(`All server operations applied during resynchronization: ${this._modelId}`);
 
       const resend = this._concurrencyControl.getInFlightOperations();
       resend.forEach(op => this._sendOperation(op));
 
-      RealTimeModel._log.debug(`model resynchronization completed: ${this._modelId}`);
+      RealTimeModel._log.debug(`All local operations resent during resynchronization: ${this._modelId}`);
+
+      this._resyncData.upToDate = true;
       this._emitEvent(new ResyncCompletedEvent(this));
 
       const openAfterSync = !this._resyncOnly;
@@ -1546,6 +1548,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
         const {modelResyncCompleteResponse} = response;
+
+        RealTimeModel._log.debug(`Model resynchronization completed: ${this._modelId}`);
+        this._emitEvent(new ResyncCompletedEvent(this));
 
         if (openAfterSync) {
           const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);

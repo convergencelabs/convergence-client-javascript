@@ -193,10 +193,6 @@ export class ModelOfflineManager {
     return this._storage.modelStore().modelCreated(modelId);
   }
 
-  public modelSyncedToServer(modelId: string): Promise<void> {
-    return this._storage.modelStore().modelCreated(modelId);
-  }
-
   public createOfflineModel(creationData: IModelCreationData): Promise<void> {
     return this._storage
       .modelStore()

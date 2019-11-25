@@ -27,9 +27,7 @@ export class RandomStringGenerator {
   private readonly _symbols: string;
   private readonly _length: number;
 
-  constructor(
-    length: number,
-    symbols: string) {
+  constructor(length: number, symbols: string) {
 
     if (length < 1) {
       throw new Error();
