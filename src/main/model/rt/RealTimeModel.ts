@@ -276,7 +276,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private static readonly _log: Logger = Logging.logger("models");
+  private readonly _log: Logger = Logging.logger("models");
 
   /**
    * @internal
@@ -731,7 +731,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
             return Promise.resolve();
           })
           .catch(err => {
-            RealTimeModel._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
+            this._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
             return Promise.resolve();
           });
       }
@@ -1085,7 +1085,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOffline(): void {
-    RealTimeModel._log.debug(`model offline: ${this._modelId}`);
+    this._debug("Offline");
     this._emitEvent(new ModelOfflineEvent(this));
 
     this._sessions.forEach(sessionId => this._handleClientClosed(sessionId));
@@ -1105,7 +1105,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _setOnline(): void {
     if (this._local) {
-      RealTimeModel._log.debug(`sending locally created model to the server: ${this._modelId}`);
+      this._debug("Sending locally created model to the server");
       this._offlineManager.getModelCreationData(this._modelId).then(creation => {
         const options: ICreateModelOptions = {
           id: creation.modelId,
@@ -1121,7 +1121,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }).then(() => {
         this._reconnect();
       }).catch(e => {
-        RealTimeModel._log.error("Error creating offline model on reconnect.", e);
+        this._log.error("Error creating offline model on reconnect.", e);
       });
     } else {
       this._reconnect();
@@ -1133,7 +1133,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _reconnect(): void {
-    RealTimeModel._log.debug(`remote model reconnecting: ${this._modelId}`);
+    this._debug("Initiating model resynchronization");
     this._emitEvent(new ModelReconnectingEvent(this));
 
     const request: IConvergenceMessage = {
@@ -1144,7 +1144,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     };
 
     this._connection.request(request).then((response: IConvergenceMessage) => {
-      RealTimeModel._log.debug(`model resynchronization started: ${this._modelId}`);
+      this._debug("Starting model resynchronization");
+
       this._emitEvent(new ResyncStartedEvent(this));
 
       const {modelResyncResponse} = response;
@@ -1291,7 +1292,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       } else if (event instanceof RemoteReferenceSet) {
         const reference = value.reference(event.sessionId, event.key);
         if (!reference) {
-          RealTimeModel._log.warn("received an update for a non-existent reference.");
+          this._log.warn("received an update for a non-existent reference.");
           return;
         }
         const type = reference.type();
@@ -1335,7 +1336,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handleForceClose(message: IModelForceCloseMessage): void {
-    RealTimeModel._log.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
+    this._log.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
 
     const event: ModelClosedEvent = {
       src: this,
@@ -1397,7 +1398,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       // fixme handle error.
       this._offlineManager
         .processOperationAck(this.modelId(), this._connection.session().sessionId(), sequenceNumber, serverOp)
-        .catch(e => RealTimeModel._log.error(e));
+        .catch(e => this._log.error(e));
     }
   }
 
@@ -1463,7 +1464,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const inflight = this._concurrencyControl.getInFlightOperations();
       this._offlineManager
         .processServerOperationEvent(this._modelId, processed, inflight)
-        .catch(e => RealTimeModel._log.error(e));
+        .catch(e => this._log.error(e));
       // FIXME handle this error
     }
   }
@@ -1525,14 +1526,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._processRemoteOperation(m);
       });
 
-      RealTimeModel._log.debug(`All server operations applied during resynchronization: ${this._modelId}`);
+      this._resyncData.upToDate = true;
+
+      this._debug("All server operations applied during resynchronization");
 
       const resend = this._concurrencyControl.getInFlightOperations();
       resend.forEach(op => this._sendOperation(op));
 
-      RealTimeModel._log.debug(`All local operations resent during resynchronization: ${this._modelId}`);
+      this._debug("All local operations resent during resynchronization");
 
-      this._resyncData.upToDate = true;
       this._emitEvent(new ResyncCompletedEvent(this));
 
       const openAfterSync = !this._resyncOnly;
@@ -1549,7 +1551,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
         const {modelResyncCompleteResponse} = response;
 
-        RealTimeModel._log.debug(`Model resynchronization completed: ${this._modelId}`);
+        this._debug("Resynchronization completed");
         this._emitEvent(new ResyncCompletedEvent(this));
 
         if (openAfterSync) {
@@ -1560,7 +1562,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
           this._referenceManager.reshare();
 
-          RealTimeModel._log.debug(`model online: ${this._modelId}`);
+          this._debug(`Online`);
           this._emitEvent(new ModelOnlineEvent(this));
         }
       });
@@ -1572,6 +1574,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._close();
       }
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _debug(message: string): void {
+    this._log.debug(`Model("${this._modelId}"): ${message}`);
   }
 
   /**
@@ -1591,7 +1601,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleLocalOperation(opEvent: ClientOperationEvent): void {
     if (this._storeOffline) {
       this._offlineManager.processLocalOperation(this._modelId, opEvent)
-        .catch(e => RealTimeModel._log.error(`model persistence error: ${this._modelId}`, e));
+        .catch(e => this._log.error(`model persistence error: ${this._modelId}`, e));
     }
     this._sendOperation(opEvent);
   }

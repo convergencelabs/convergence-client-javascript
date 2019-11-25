@@ -63,7 +63,6 @@ import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
 
-
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
  *
