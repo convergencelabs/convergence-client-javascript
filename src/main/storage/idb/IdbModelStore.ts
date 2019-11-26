@@ -384,7 +384,6 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public processOperationAck(modelId: string,
-                             sessionId: string,
                              seqNo: number,
                              serverOp: IServerOperationData): Promise<void> {
     const stores = [
@@ -394,7 +393,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
 
     return this._withWriteStores(stores, async ([localOpStore, serverOpStore, modelMetaDataStore]) => {
-      await toVoidPromise(localOpStore.delete([modelId, sessionId, seqNo]));
+      await toVoidPromise(localOpStore.delete([modelId, seqNo]));
       await toVoidPromise(serverOpStore.add(serverOp));
 
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));

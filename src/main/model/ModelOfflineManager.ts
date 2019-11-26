@@ -225,11 +225,10 @@ export class ModelOfflineManager {
   }
 
   public processOperationAck(modelId: string,
-                             sessionId: string,
                              seqNo: number,
                              serverOp: IServerOperationData): Promise<void> {
     return this._storage.modelStore()
-      .processOperationAck(modelId, sessionId, seqNo, serverOp)
+      .processOperationAck(modelId, seqNo, serverOp)
       .then(() => this._handleOperation(modelId, false, true));
   }
 

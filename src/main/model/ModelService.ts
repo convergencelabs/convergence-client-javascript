@@ -332,7 +332,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public open(id: string): Promise<RealTimeModel> {
     Validation.assertNonEmptyString(id, "id");
-    return this._open(id);
+    return this._checkAndOpen(id);
   }
 
   /**
@@ -358,7 +358,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
 
-    return this._open(undefined, options);
+    return this._checkAndOpen(undefined, options);
   }
 
   /**
@@ -607,6 +607,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const modelId = this._resourceIdToModelId.get(resourceId);
       this._resourceIdToModelId.delete(resourceId);
       this._openModels.delete(modelId);
+
+      if (this._resyncingModels.has(modelId)) {
+        this._resyncComplete(modelId);
+      }
     }
   }
 
@@ -626,8 +630,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _resourceIdChanged(modelId: string, oldResourceId: string, newResourceId: string): void {
-    if (this._openModels.has(modelId)) {
-      this._resourceIdToModelId.delete(oldResourceId);
+    if (this._openModels.has(modelId) || this._resyncingModels.has(modelId)) {
+      if (oldResourceId !== null) {
+        this._resourceIdToModelId.delete(oldResourceId);
+      }
       this._resourceIdToModelId.set(newResourceId, modelId);
     }
   }
@@ -647,7 +653,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _open(id?: string, options?: IAutoCreateModelOptions): Promise<RealTimeModel> {
+  private _checkAndOpen(id?: string, options?: IAutoCreateModelOptions): Promise<RealTimeModel> {
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
     }
@@ -661,7 +667,25 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // Opening by a known model id, and this model is already open.
     // return it.
     if (id && this._openModels.has(id)) {
-      return Promise.resolve(this._openModels.get(id));
+      const model = this._openModels.get(id);
+      if (model.isClosing()) {
+        // Wait for the model to close, then open it.
+        return model.whenClosed().then(() => this._open(id, options));
+      } else {
+        return Promise.resolve(model);
+      }
+    }
+
+    // This model is already resyncing so we just return that and
+    // let the model know to stay open after resync.
+    if (this._resyncingModels.has(id)) {
+      const model = this._resyncingModels.get(id);
+      if (model.isClosing()) {
+        return model.whenClosed().then(() => this._open(id, options));
+      } else {
+        model._openAfterResync();
+        return Promise.resolve(model);
+      }
     }
 
     // Opening by a known model id and we are already opening it.
@@ -674,6 +698,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // already opening it, possible because we are creating a new model with
     // an new id.
 
+    return this._open(id, options);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _open(id?: string, options?: IAutoCreateModelOptions): Promise<RealTimeModel> {
     const autoRequestId: number = options ? this._autoRequestId++ : undefined;
     if (options !== undefined) {
       this._autoCreateRequests.set(autoRequestId, options);
@@ -724,36 +756,28 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isString(id)) {
-      if (this._resyncingModels.has(id)) {
-        // This model is already resyncing so we just return that and
-        // let the model know to stay open after resync.
-        const model = this._resyncingModels.get(id);
-        model._openAfterResync();
-        return Promise.resolve(model);
-      } else {
-        // The model is not already syncing. We see if it is one that needs
-        // to be resynced.
-        return this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
-          if (TypeChecker.isUndefined(modelState)) {
-            // Not a dirty model, se we can directly open from the server.
-            return this._requestOpenFromServer(id, autoRequestId);
-          } else {
-            // This model has local changes, so open it locally and
-            // start a resync.
-            const index = this._modelResyncQueue.indexOf(id);
-            if (index >= 0) {
-              this._modelResyncQueue.splice(index, 1);
-            }
-
-            const model = this._createAndSyncModel(modelState);
-
-            // Need to open it after the sync.
-            model._openAfterResync();
-
-            return Promise.resolve(model);
+      // The model is not already syncing. We see if it is one that needs
+      // to be resynced.
+      return this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
+        if (TypeChecker.isUndefined(modelState)) {
+          // Not a dirty model, se we can directly open from the server.
+          return this._requestOpenFromServer(id, autoRequestId);
+        } else {
+          // This model has local changes, so open it locally and
+          // start a resync.
+          const index = this._modelResyncQueue.indexOf(id);
+          if (index >= 0) {
+            this._modelResyncQueue.splice(index, 1);
           }
-        });
-      }
+
+          const model = this._createAndSyncModel(modelState);
+
+          // Need to open it after the sync.
+          model._openAfterResync();
+
+          return Promise.resolve(model);
+        }
+      });
     } else {
       // We don't have an explicit id, thus this could not be an existing model
       // the might bee offline.
@@ -843,7 +867,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._log.debug(`Creating model '${state.snapshot.modelId}' from offline state`);
 
     // FIXME what should these be?
-    const resourceId = "fake";
+    const resourceId = null;
     const valueIdPrefix = "fake2";
 
     const model = this._createModel(
@@ -977,7 +1001,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       if (model !== undefined) {
         model._handleMessage(messageEvent);
       } else {
-        // todo error.
+        this._log.warn("Received a message for a model that is not open: " + JSON.stringify(message));
       }
     } else if (message.modelAutoCreateConfigRequest) {
       this._handleModelDataRequest(
@@ -1126,7 +1150,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._log.debug(`Synchronizing model: ${modelState.snapshot.modelId}`);
 
     const model = this._creteModelFromOfflineState(modelState, true);
-    this._resyncingModels.set(model.modelId(), model);
     this._resyncingModels.set(model.modelId(), model);
 
     // The model will be in an offline state.  So we can actually trigger

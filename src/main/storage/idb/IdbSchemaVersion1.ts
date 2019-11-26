@@ -101,7 +101,6 @@ export class IdbSchemaVersion1 {
       {
         keyPath: [
           IdbSchema.ModelLocalOperation.Fields.ModelId,
-          IdbSchema.ModelLocalOperation.Fields.SessionId,
           IdbSchema.ModelLocalOperation.Fields.SequenceNumber
         ]
       });
@@ -112,10 +111,9 @@ export class IdbSchemaVersion1 {
       {unique: false});
 
     localOperationStore.createIndex(
-      IdbSchema.ModelLocalOperation.Indices.ModelId_SessionId_SequenceNumber,
+      IdbSchema.ModelLocalOperation.Indices.ModelId_SequenceNumber,
       [
         IdbSchema.ModelLocalOperation.Fields.ModelId,
-        IdbSchema.ModelLocalOperation.Fields.SessionId,
         IdbSchema.ModelLocalOperation.Fields.SequenceNumber
       ],
       {unique: true});

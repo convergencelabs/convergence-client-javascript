@@ -90,6 +90,7 @@ import {ILocalOperationData, IServerOperationData} from "../../storage/api";
 import {DomainUser} from "../../identity";
 import {ICreateModelOptions} from "../ICreateModelOptions";
 import {IModelStateSnapshot} from "../IModeStateSnapshot";
+import {ReplayDeferred} from "../../util/ReplayDeferred";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -411,6 +412,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
+  private readonly _closingData: {
+    deferred: ReplayDeferred<void>;
+    closing: boolean;
+    event?: ModelClosedEvent;
+  };
+
+  /**
+   * @internal
+   */
   private _resyncOnly: boolean;
 
   /**
@@ -456,6 +466,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._resyncOnly = resyncOnly;
 
     this._resyncData = null;
+    this._closingData = {
+      deferred: new ReplayDeferred<void>(),
+      closing: false
+    };
 
     this._model = new Model(this.session(), valueIdPrefix, data);
 
@@ -702,41 +716,77 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * and cleaning up any opened resources.
    */
   public close(): Promise<void> {
-    if (this._open) {
-      if (this._resyncData) {
-        // We are resyncing, so we just need to set the flag
-        // that we don't want to open.
-        this._resyncOnly = true;
-      } else {
-        // We need to cache the connection here because the _close method sets it to null.
-        const connection = this._connection;
+    if (this._closingData.closing) {
+      return Promise.reject(new ConvergenceError(`The model is already closing ${this._modelId}`));
+    }
 
-        // Close the model and emit the appropriate events.
-        const event: ModelClosedEvent = new ModelClosedEvent(this, true);
-        this._close(event);
-
-        // Inform the model service that we are closed.
-        this._modelService._close(this._resourceId);
-
-        // Inform the server that we are closed.
-        const request: IConvergenceMessage = {
-          closeRealTimeModelRequest: {
-            resourceId: this._resourceId
-          }
-        };
-
-        return connection
-          .request(request)
-          .then(() => {
-            return Promise.resolve();
-          })
-          .catch(err => {
-            this._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
-            return Promise.resolve();
-          });
-      }
-    } else {
+    if (!this._open) {
       return Promise.reject(new ConvergenceError(`The model has already been closed: ${this._modelId}`));
+    }
+
+    if (this._resyncData) {
+      // We are resyncing, so we just need to set the flag
+      // that we don't want to open.
+      this._resyncOnly = true;
+      return Promise.resolve();
+    } else {
+      // Close the model and emit the appropriate events.
+      const event: ModelClosedEvent = new ModelClosedEvent(this, true);
+      this._initiateClose(event);
+      return this._closingData.deferred.promise();
+    }
+  }
+
+  /**
+   * Informs clients if the model is closing.
+   *
+   * @returns True if the model is closing.
+   */
+  public isClosing(): boolean {
+    return this._closingData.closing;
+  }
+
+  /**
+   * @returns A promise the will be resolved when the model is closed. If
+   * the model is already closed, the promise will be immediately resolved.
+   */
+  public whenClosed(): Promise<void> {
+    return this._closingData.deferred.promise();
+  }
+
+  public _initiateClose(event?: ModelClosedEvent): void {
+    if (this._closingData.closing) {
+      throw new ConvergenceError("Model already closing.");
+    }
+
+    this._closingData.closing = true;
+    this._closingData.event = event;
+
+    if (this._connection.isOnline() && !this._resyncOnly) {
+      // Inform the server that we are closed.
+      const request: IConvergenceMessage = {
+        closeRealTimeModelRequest: {
+          resourceId: this._resourceId
+        }
+      };
+
+      this._connection
+        .request(request)
+        .then(() => {
+          this._checkIfCanClose();
+        })
+        .catch(err => {
+          this._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
+          this._closingData.deferred.reject(err);
+        });
+    } else {
+      this._checkIfCanClose();
+    }
+  }
+
+  public _checkIfCanClose(): void {
+    if (this._closingData.closing && this._concurrencyControl.isCommitted()) {
+      this._close();
     }
   }
 
@@ -1344,7 +1394,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       local: false,
       reason: message.reason
     };
-    this._close(event);
+    this._initiateClose(event);
 
     if (message.reasonCode === ModelForcedCloseReasonCodes.DELETED) {
       const deletedEvent: ModelDeletedEvent = {
@@ -1362,11 +1412,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _close(event?: ModelClosedEvent): void {
+  private _close(): void {
+    const {deferred, event} = this._closingData;
+    this._modelService._close(this._resourceId);
     this._offlineManager.modelClosed(this);
     this._model.root()._detach(false);
     this._open = false;
     this._connection = null;
+
+    deferred.resolve();
+
     if (event) {
       this._emitEvent(event);
     }
@@ -1397,9 +1452,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       // fixme handle error.
       this._offlineManager
-        .processOperationAck(this.modelId(), this._connection.session().sessionId(), sequenceNumber, serverOp)
+        .processOperationAck(this.modelId(), sequenceNumber, serverOp)
         .catch(e => this._log.error(e));
     }
+
+    // If we are closing and waiting for remote operations, we might be able to close.
+    this._checkIfCanClose();
   }
 
   /**
@@ -1535,8 +1593,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._debug("All local operations resent during resynchronization");
 
-      this._emitEvent(new ResyncCompletedEvent(this));
-
       const openAfterSync = !this._resyncOnly;
 
       const completeRequest: IConvergenceMessage = {
@@ -1545,8 +1601,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           open: openAfterSync
         }
       };
-
-      this._modelService._resyncComplete(this._modelId);
 
       this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
         const {modelResyncCompleteResponse} = response;
@@ -1570,8 +1624,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._resyncData = null;
 
       if (!openAfterSync) {
-        this._modelService._close(this._resourceId);
-        this._close();
+        this._initiateClose();
+      } else {
+        this._modelService._resyncComplete(this._modelId);
       }
     }
   }

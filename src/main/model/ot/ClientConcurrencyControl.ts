@@ -100,6 +100,10 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     return this._contextVersion;
   }
 
+  public isCommitted(): boolean {
+    return !this.hasInflightOperation();
+  }
+
   public hasInflightOperation(): boolean {
     return this._inflightOperations.length > 0;
   }

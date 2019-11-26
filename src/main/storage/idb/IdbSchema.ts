@@ -56,7 +56,6 @@ export const IdbSchema = {
     Store: "ModelServerOperation",
     Fields: {
       ModelId: "modelId",
-      SessionId: "sessionId",
       Version: "version"
     },
     Indices: {
@@ -68,12 +67,11 @@ export const IdbSchema = {
     Store: "ModelLocalOperation",
     Fields: {
       ModelId: "modelId",
-      SessionId: "sessionId",
       SequenceNumber: "sequenceNumber"
     },
     Indices: {
       ModelId: "ModelLocalOperation.modelId",
-      ModelId_SessionId_SequenceNumber: "ModelLocalOperation.modelId_sessionId_sequenceNumber"
+      ModelId_SequenceNumber: "ModelLocalOperation.modelId_sequenceNumber"
     },
   }
 };

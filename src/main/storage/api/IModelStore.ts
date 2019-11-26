@@ -54,7 +54,7 @@ export interface IModelStore {
 
   processLocalOperation(localOp: ILocalOperationData): Promise<void>;
 
-  processOperationAck(modelId: string, sessionId: string, seqNo: number, serverOp: IServerOperationData): Promise<void>;
+  processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void>;
 
   modelCreated(modelId: string): Promise<void>;
 
