@@ -1146,6 +1146,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       bufferedOperations: [],
       upToDate: false
     };
+
+    if (this._closingData.closing) {
+      this._close();
+    }
   }
 
   /**
@@ -1183,7 +1187,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _reconnect(): void {
-    this._debug("Initiating model resynchronization");
+    this._debug("Requesting model resynchronization");
     this._emitEvent(new ModelReconnectingEvent(this));
 
     const request: IConvergenceMessage = {
