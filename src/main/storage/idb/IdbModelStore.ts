@@ -55,7 +55,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     operations.forEach(op => store.add(op));
   }
 
-  private static _snapshotToDataAndMetaData(snapshot: IModelSnapshot):
+  private static _snapshotToDataAndMetaData(version: number, snapshot: IModelSnapshot):
     { data: IModelData, meta: IModelMetaDataDocument } {
     const data: IModelData = {
       modelId: snapshot.modelId,
@@ -78,8 +78,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           manage: snapshot.permissions.manage,
         },
         seqNo: snapshot.seqNo,
-        version: snapshot.version,
-        dataVersion: snapshot.version
+        version,
+        dataVersion: snapshot.dataVersion
       }
     };
 
@@ -135,9 +135,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     modelDataStore: IDBObjectStore,
     localOpStore: IDBObjectStore,
     serverOpStore: IDBObjectStore): void {
-    const {snapshot, localOperations, serverOperations} = modelState;
+    const {version, snapshot, localOperations, serverOperations} = modelState;
 
-    const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot);
+    const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(version, snapshot);
     modelDataStore.put(data);
     modelMetaDataStore.put(meta);
 
@@ -215,18 +215,20 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   serverOpStore]) => {
       creationStore.put(modelCreation);
 
-      const version = 1;
+      const dataVersion = 1;
+      const version = dataVersion;
       const seqNo = 0;
       const now = new Date();
       const permissions = new ModelPermissions(true, true, true, true);
       const modelState: IModelState = {
+        version,
         snapshot: {
           modelId: modelCreation.modelId,
           local: true,
           dirty: true,
           subscribed: false,
           collection: modelCreation.collection,
-          version,
+          dataVersion,
           seqNo,
           createdTime: now,
           modifiedTime: now,
@@ -316,6 +318,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       if (dataUpdate) {
         modelMetaData.details.version = dataUpdate.version;
+        modelMetaData.details.dataVersion = dataUpdate.version;
         modelMetaData.details.createdTime = dataUpdate.createdTime;
         modelMetaData.details.modifiedTime = dataUpdate.modifiedTime;
 
@@ -361,7 +364,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return this._withWriteStores(stores, async ([modelMetaDataStore, serverOpStore]) => {
       await toVoidPromise(serverOpStore.add(serverOp));
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(serverOp.modelId));
-      metaData.details.version = serverOp.version;
+      metaData.details.version = serverOp.version + 1;
       metaData.details.modifiedTime = serverOp.timestamp;
 
       await toVoidPromise(modelMetaDataStore.put(metaData));
@@ -398,7 +401,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
 
-      metaData.details.version = serverOp.version;
+      metaData.details.version = serverOp.version + 1;
       metaData.details.modifiedTime = serverOp.timestamp;
 
       const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
@@ -440,7 +443,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
             local: meta.created === 1,
             dirty: meta.dirty === 1,
             subscribed: meta.subscribed === 1,
-            version: meta.details.version,
+            dataVersion: meta.details.dataVersion,
             seqNo: meta.details.seqNo,
             createdTime: meta.details.createdTime,
             modifiedTime: meta.details.modifiedTime,
@@ -453,7 +456,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
             data: data.data
           };
 
-          return {snapshot, localOperations, serverOperations} as IModelState;
+          const version = meta.details.version;
+
+          return {version, snapshot, localOperations, serverOperations} as IModelState;
         } else {
           return;
         }
@@ -533,7 +538,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
     return this._withWriteStores(stores,
       async ([modelMetaDataStore, modelDataStore, serverOpStore]) => {
-        const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot);
+        const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot.dataVersion, snapshot);
         modelMetaDataStore.put(meta);
         modelDataStore.put(data);
         IdbModelStore.deleteServerOperationsForModel(serverOpStore, meta.modelId);

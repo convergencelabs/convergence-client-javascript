@@ -23,7 +23,7 @@ export interface IModelSnapshot {
   dirty: boolean;
   subscribed: boolean;
   collection: string;
-  version: number;
+  dataVersion: number;
   seqNo: number;
   createdTime: Date;
   modifiedTime: Date;

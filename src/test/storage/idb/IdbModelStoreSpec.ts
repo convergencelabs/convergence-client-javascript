@@ -69,13 +69,14 @@ let modelCounter = 1;
 
 function createModelState(): IModelState {
   return {
+    version: 10,
     snapshot: {
       modelId: "modelId" + modelCounter++,
       collection: "collection",
       local: false,
       dirty: false,
       subscribed: false,
-      version: 10,
+      dataVersion: 10,
       seqNo: 0,
       createdTime: new Date(),
       modifiedTime: new Date(),

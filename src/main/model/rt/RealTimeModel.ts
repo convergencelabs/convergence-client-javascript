@@ -337,11 +337,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _version: number;
-
-  /**
-   * @internal
-   */
   private readonly _createdTime: Date;
 
   /**
@@ -438,7 +433,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               resyncingSessions: string[],
               references: IReferenceData[],
               permissions: ModelPermissions,
-              version: number,
               createdTime: Date,
               modifiedTime: Date,
               modelId: string,
@@ -451,7 +445,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     super();
 
     this._resourceId = resourceId;
-    this._version = version;
     this._local = local;
     this._createdTime = createdTime;
     this._time = modifiedTime;
@@ -660,7 +653,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * The current version of the model.
    */
   public version(): number {
-    return this._version;
+    return this._concurrencyControl.contextVersion();
   }
 
   /**
@@ -1006,7 +999,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  public _rehydrateFromOfflineState(serverOps: IServerOperationData[], localOps: ILocalOperationData[]): void {
+  public _rehydrateFromOfflineState(targetVersion: number,
+                                    serverOps: IServerOperationData[],
+                                    localOps: ILocalOperationData[]): void {
     const serverEvents = serverOps.map(serverOp => {
       const op = fromOfflineOperationData(serverOp.operation);
       return new ServerOperationEvent(
@@ -1068,6 +1063,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     if (serverEvents.length > 0 || clientEvents.length > 0) {
       throw new Error(`Unable to apply all events while rehydrating model '${this._modelId}' from offline state.`);
+    }
+
+    if (contextVersion !== targetVersion) {
+      throw new Error(
+        `Did not arrive at the proper version (${targetVersion}) when rehydrating model: ${contextVersion}`);
     }
 
     this._concurrencyControl.setState(contextVersion, seqNo, inFlight);
@@ -1440,7 +1440,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const version = getOrDefaultNumber(message.version);
     const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
     const acknowledgedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
-    this._version = version + 1;
     this._time = timestampToDate(message.timestamp);
 
     if (this._storeOffline) {
@@ -1517,7 +1516,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     const contextVersion: number = processed.version;
     const timestamp: Date = processed.timestamp;
 
-    this._version = contextVersion + 1;
     this._time = new Date(timestamp);
 
     this._applyOperation(operation, clientId, contextVersion, timestamp);
@@ -1576,7 +1574,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _checkForReconnectUpToDate(): void {
     if (this._resyncData &&
       !this._resyncData.upToDate &&
-      this._resyncData.reconnectVersion === this._version) {
+      this._resyncData.reconnectVersion === this._concurrencyControl.contextVersion()) {
 
       // TODO when we get to offline mode we may have to rethink value id prefixes a bit
       //   two clients can not be re-initialized with the same vid prefix.
@@ -1690,7 +1688,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _emitVersionChanged(): void {
-    const event = new VersionChangedEvent(this, this._version);
+    const event = new VersionChangedEvent(this, this._concurrencyControl.contextVersion());
     this._emitEvent(event);
   }
 

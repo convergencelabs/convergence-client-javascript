@@ -16,6 +16,7 @@ import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelSnapshot} from "./IModelSnapshot";
 
 export interface IModelState {
+  version: number;
   snapshot: IModelSnapshot;
   serverOperations: IServerOperationData[];
   localOperations: ILocalOperationData[];

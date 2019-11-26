@@ -870,13 +870,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const resourceId = null;
     const valueIdPrefix = "fake2";
 
+    // Note we initialize the model with the dataVersion. The rehydration
+    // process will then take us to the current version.
     const model = this._createModel(
       resourceId,
       state.snapshot.modelId,
       state.snapshot.collection,
       state.snapshot.local,
       resyncOnly,
-      state.snapshot.version,
+      state.snapshot.dataVersion,
       state.snapshot.createdTime,
       state.snapshot.modifiedTime,
       valueIdPrefix,
@@ -889,7 +891,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     model._setOffline();
     model._enableOffline();
-    model._rehydrateFromOfflineState(state.serverOperations, state.localOperations);
+    model._rehydrateFromOfflineState(state.version, state.serverOperations, state.localOperations);
 
     return model;
   }
@@ -973,7 +975,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       resyncingClients,
       references,
       permissions,
-      version,
       createdTime,
       modifiedTime,
       modelId,

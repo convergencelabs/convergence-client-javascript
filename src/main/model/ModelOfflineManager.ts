@@ -279,8 +279,9 @@ export class ModelOfflineManager {
     const serverOperations: IServerOperationData [] = [];
 
     const snapshot = this._getSnapshot(rtModel);
+    const version = rtModel.version();
 
-    const state: IModelState = {snapshot, localOperations, serverOperations};
+    const state: IModelState = {version, snapshot, localOperations, serverOperations};
     return this._storage.modelStore().putModelState(state);
   }
 
@@ -329,13 +330,14 @@ export class ModelOfflineManager {
           const {read, write, remove, manage} = toModelPermissions(permissions);
 
           const modelState: IModelState = {
+            version: getOrDefaultNumber(model.version),
             snapshot: {
               modelId,
               local: false,
               dirty: false,
               subscribed: true,
               collection,
-              version: getOrDefaultNumber(model.version),
+              dataVersion: getOrDefaultNumber(model.version),
               seqNo: 0,
               createdTime: timestampToDate(model.createdTime),
               modifiedTime: timestampToDate(model.modifiedTime),
@@ -350,7 +352,7 @@ export class ModelOfflineManager {
             ModelOfflineManager._log.error("Error synchronizing subscribed model from server", e);
           }).then(() => {
               this._subscribedModels.set(modelId, {
-                version: getOrDefaultNumber(modelState.snapshot.version),
+                version: getOrDefaultNumber(modelState.version),
                 opsSinceSnapshot: 0
               });
           });
@@ -420,7 +422,7 @@ export class ModelOfflineManager {
       local: modelStateSnapshot.local,
       dirty: modelStateSnapshot.dirty,
       subscribed: this._subscribedModels.has(model.modelId()),
-      version: model.version(),
+      dataVersion: model.version(),
       seqNo: modelStateSnapshot.seqNo,
       createdTime: model.createdTime(),
       modifiedTime: model.time(),
