@@ -500,7 +500,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       return subscribed.map(s => {
         return {
           version: s.details ? s.details.version : 0,
-          modelId: s.modelId
+          modelId: s.modelId,
+          permissions: s.details ? s.details.permissions : undefined
         };
       });
     });

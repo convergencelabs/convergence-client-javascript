@@ -290,8 +290,8 @@ export class ModelOfflineManager {
                                    all: boolean): Promise<void> {
     const change = all || subscribe.length > 0 || unsubscribe.length > 0;
     if (this._connection.isOnline() && change) {
-      const subs: IModelOfflineSubscriptionData[] = subscribe.map(({modelId, version}) => {
-        return {modelId, currentVersion: version};
+      const subs: IModelOfflineSubscriptionData[] = subscribe.map(({modelId, version, permissions}) => {
+        return {modelId, currentVersion: version, currentPermissions: permissions};
       });
       const message: IConvergenceMessage = {
         modelOfflineSubscriptionChange: {

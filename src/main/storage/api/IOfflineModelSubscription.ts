@@ -18,4 +18,5 @@
 export interface IOfflineModelSubscription {
   modelId: string;
   version: number;
+  permissions?: { read: boolean; write: boolean; remove: boolean; manage; }
 }
