@@ -22,7 +22,6 @@
   "bugs": "https://github.com/convergencelabs/convergence-client-javascript/issues",
   "license": "LGPL-3.0",
   "scripts": {
-    "build": "tsc src/main/**/*.ts",
     "dist": "gulp dist",
     "clean": "gulp clean",
     "lint": "gulp lint",
