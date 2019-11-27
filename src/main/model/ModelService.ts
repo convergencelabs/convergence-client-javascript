@@ -404,6 +404,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     if (this._connection.isOnline()) {
       return this._connection.request(request).then(() => {
+        if (this._modelOfflineManager.isOfflineEnabled()) {
+          this._modelOfflineManager.modelDeleted(id).catch(e => {
+            // TODO emit an error event.
+            this._log.error("Error removing model from offline store");
+          });
+        }
+
         const model = this._openModels[id];
         const deletedEvent: ModelDeletedEvent = {
           src: model,
@@ -412,9 +419,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         };
         this._emitEvent(deletedEvent);
       });
+    } else if (this._modelOfflineManager.isOfflineEnabled()) {
+      return this._modelOfflineManager.markModelForDeletion(id).catch(e => {
+        this._log.error("Could not mark model for deletion", e);
+      });
     } else {
-      // TODO delete the model offline, if it is local.
-      throw new Error("Not implemented yet.");
+      throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
     }
   }
 
@@ -575,7 +585,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         const {createRealTimeModelResponse} = response;
         return createRealTimeModelResponse.modelId;
       });
-    } else {
+    } else if (this._modelOfflineManager.isOfflineEnabled()) {
       const id = options.id || this._modelIdGenerator.nextString();
       return this._modelOfflineManager
         .getOfflineModelData(id)
@@ -595,6 +605,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
             return this._modelOfflineManager.createOfflineModel(creationData).then(() => id);
           }
         });
+    } else {
+      throw new ConvergenceError("Can not create a model while not connected and without offline support enabled.");
     }
   }
 
@@ -1079,6 +1091,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._modelOfflineManager
       .ready()
+      .then(() => this._deleteMarkedModels())
       .then(() => this._syncDirtyModelsToServer())
       .then(() => {
         // We might have gone offline.
@@ -1111,6 +1124,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._checkResyncQueue();
 
     return promise;
+  }
+
+  private async _deleteMarkedModels(): Promise<void> {
+    const deletedModels = await this._modelOfflineManager.getDeletedModelIds();
+    for (const modelId of deletedModels) {
+      await this.remove(modelId);
+    }
   }
 
   /**

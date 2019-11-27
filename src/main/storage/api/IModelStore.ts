@@ -33,7 +33,15 @@ export interface IModelStore {
 
   createLocalModel(model: IModelCreationData): Promise<void>;
 
+  modelCreated(modelId: string): Promise<void>;
+
   getModelCreationData(modelId: string): Promise<IModelCreationData>;
+
+  markModelForDeletion(modelId: string): Promise<void>;
+
+  modelDeleted(modelId: string): Promise<void>;
+
+  getDeletedModelIds(): Promise<string[]>;
 
   getModelState(modelId: string): Promise<IModelState | undefined>;
 
@@ -49,13 +57,11 @@ export interface IModelStore {
 
   getDirtyModelIds(): Promise<string[]>;
 
+  deleteIfNotNeeded(modelId: string): Promise<void>;
+
   processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void>;
 
   processLocalOperation(localOp: ILocalOperationData): Promise<void>;
 
   processOperationAck(modelId: string, seqNo: number, serverOp: IServerOperationData): Promise<void>;
-
-  modelCreated(modelId: string): Promise<void>;
-
-  deleteIfNotNeeded(modelId: string): Promise<void>;
 }

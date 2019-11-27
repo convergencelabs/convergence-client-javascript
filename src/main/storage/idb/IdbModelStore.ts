@@ -154,6 +154,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   private static async _removeSubscriptions(
     modelIds: string[],
+    createStore: IDBObjectStore,
     modelMetaDataStore: IDBObjectStore,
     modelDataStore: IDBObjectStore,
     localOpStore: IDBObjectStore,
@@ -165,7 +166,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       // If we don't have changes to go up to the server we can remove.
       if (!metaData.created && !metaData.dirty) {
-        await this._deleteModel(modelId, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
+        await this._deleteModel(modelId, createStore, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
       } else {
         await modelMetaDataStore.put(metaData);
       }
@@ -174,11 +175,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   private static async _deleteModel(
     modelId: string,
+    modelCreateStore: IDBObjectStore,
     modelMetaDataStore: IDBObjectStore,
     modelDataStore: IDBObjectStore,
     localOpStore: IDBObjectStore,
     serverOpStore: IDBObjectStore): Promise<void> {
 
+    await modelCreateStore.delete(modelId);
     await modelMetaDataStore.delete(modelId);
     await modelDataStore.delete(modelId);
     await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
@@ -248,6 +251,63 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
+  public markModelForDeletion(modelId: string): Promise<void> {
+    const stores = [
+      IdbSchema.ModelCreation.Store,
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store
+    ];
+
+    return this._withWriteStores(stores, async ([
+                                                  creationStore,
+                                                  modelMetaDataStore,
+                                                  modelDataStore,
+                                                  localOpStore,
+                                                  serverOpStore]) => {
+      await toVoidPromise(creationStore.delete(modelId));
+      await IdbModelStore._deleteLocalOperationsForModel(localOpStore, modelId);
+      await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
+      await toVoidPromise(modelDataStore.delete(modelId));
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+      delete metaData.details;
+      delete metaData.subscribed;
+      delete metaData.dirty;
+      delete metaData.available;
+      metaData.deleted = 1;
+
+      await toVoidPromise(modelMetaDataStore.put(metaData));
+    });
+  }
+
+  public modelDeleted(modelId: string): Promise<void> {
+    const stores = [
+      IdbSchema.ModelCreation.Store,
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store
+    ];
+
+    return this._withWriteStores(stores, async ([
+                                                  creationStore,
+                                                  modelMetaDataStore,
+                                                  modelDataStore,
+                                                  localOpStore,
+                                                  serverOpStore]) => {
+      await IdbModelStore._deleteModel(
+        modelId, creationStore, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
+    });
+  }
+
+  public getDeletedModelIds(): Promise<string[]> {
+    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
+      const idx = store.index(IdbSchema.ModelMetaData.Indices.Deleted);
+      return toPromise(idx.getAllKeys()) as Promise<string[]>;
+    });
+  }
+
   public modelCreated(modelId: string): Promise<void> {
     const stores = [
       IdbSchema.ModelCreation.Store,
@@ -271,6 +331,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     }).then(remove => {
       if (remove) {
         const storeNames = [
+          IdbSchema.ModelCreation.Store,
           IdbSchema.ModelMetaData.Store,
           IdbSchema.ModelData.Store,
           IdbSchema.ModelLocalOperation.Store,
@@ -278,8 +339,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         ];
         return this._withWriteStores(
           storeNames,
-          async ([metaDataStore, dataStore, localOpStore, serverOpStore]) => {
-            await IdbModelStore._deleteModel(modelId, metaDataStore, dataStore, localOpStore, serverOpStore);
+          async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
+            await IdbModelStore._deleteModel(
+              modelId, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
           });
       } else {
         return;
@@ -477,6 +539,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public setModelSubscriptions(modelIds: string[]): Promise<void> {
     const storeNames = [
+      IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
       IdbSchema.ModelLocalOperation.Store,
@@ -484,14 +547,15 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
     return this._withWriteStores(
       storeNames,
-      async ([metaDataStore, dataStore, localOpStore, serverOpStore]) => {
+      async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
         const index = metaDataStore.index(IdbSchema.ModelMetaData.Indices.Subscribed);
         const subscribed = await toPromise<IModelMetaDataDocument[]>(index.getAll());
         const subscribedModelIds = subscribed.map(s => s.modelId);
         const toAdd = modelIds.filter(id => !subscribedModelIds.includes(id));
         const toRemove = subscribedModelIds.filter(id => !modelIds.includes(id));
 
-        await IdbModelStore._removeSubscriptions(toRemove, metaDataStore, dataStore, localOpStore, serverOpStore);
+        await IdbModelStore._removeSubscriptions(
+          toRemove, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
         await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
       });
   }
@@ -512,6 +576,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public removeSubscriptions(modelIds: string[]): Promise<void> {
     const stores = [
+      IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
       IdbSchema.ModelLocalOperation.Store,
@@ -519,9 +584,10 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
 
     return this._withWriteStores(stores,
-      async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
+      async ([createStore, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
         return IdbModelStore._removeSubscriptions(
           modelIds,
+          createStore,
           modelMetaDataStore,
           modelDataStore,
           localOpStore,

@@ -108,6 +108,10 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     });
   }
 
+  public isOfflineEnabled(): boolean {
+    return this._storage.isEnabled();
+  }
+
   public ready(): Promise<void> {
     return this._ready.promise();
   }
@@ -238,6 +242,18 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       .then(() => {
         this._subscribedModels.set(creationData.modelId, {opsSinceSnapshot: 0, dirty: true, version: 0});
       });
+  }
+
+  public markModelForDeletion(modelId: string): Promise<void> {
+    return this._storage.modelStore().markModelForDeletion(modelId);
+  }
+
+  public modelDeleted(modelId: string): Promise<void> {
+    return this._storage.modelStore().modelDeleted(modelId);
+  }
+
+  public getDeletedModelIds(): Promise<string[]> {
+    return this._storage.modelStore().getDeletedModelIds();
   }
 
   public getModelDataIfDirty(modelId: string): Promise<IModelState | undefined> {
