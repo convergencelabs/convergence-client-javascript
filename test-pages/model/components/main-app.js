@@ -73,6 +73,10 @@ Vue.component('main-app', {
       v-bind:connected="connected"
       v-bind:modelService="domain.models()"
     />
+    <online-models 
+      v-bind:connected="connected"
+      v-bind:modelService="domain.models()"
+    />
   </div>
   <div class="col-6">
    <string-data v-bind:model="model" />
