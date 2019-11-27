@@ -180,6 +180,17 @@ export class Convergence {
    * });
    * ```
    *
+   * The available loggers (and where / how they are used) are:
+   *
+   * - "connection" (Connection and authentication messages)
+   * - "protocol.messages" (All messages to/from the server)
+   * - "protocol.ping" (All ping/pong messages to/from the server)
+   * - "heartbeat" (Heartbeat messages)
+   * - "activities.activity" ([[Activity]])
+   * - "activities.service" ([[ActivityService]])
+   * - "models" ([[ModelService]], [[RealTimeModel]])
+   * - "storage" (Offline store)
+   *
    * @param config the log levels for the root logger and any other loggers.
    */
   public static configureLogging(config: ILoggingConfigData): void {
