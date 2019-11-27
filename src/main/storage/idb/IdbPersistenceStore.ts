@@ -24,9 +24,9 @@ const READWRITE = "readwrite";
  */
 export class IdbPersistenceStore {
 
-  protected static deleteFromIndex(store: IDBObjectStore, index: string, range: IDBKeyRange): void {
+  protected static deleteFromIndex(store: IDBObjectStore, index: string, range: IDBKeyRange): Promise<void> {
     const idx = store.index(index);
-    toPromise(idx.openCursor(range)).then(cursor => {
+    return toPromise(idx.openCursor(range)).then(cursor => {
       if (cursor) {
         cursor.delete();
         cursor.continue();

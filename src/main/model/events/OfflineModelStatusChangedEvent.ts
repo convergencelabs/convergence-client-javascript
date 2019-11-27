@@ -12,22 +12,24 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IModelEvent} from "./IModelEvent";
-import {RealTimeModel} from "../rt";
+import {IConvergenceEvent} from "../../util";
+import {ModelPermissions} from "../ModelPermissions";
 
 /**
  * Emitted when a [[RealTimeModel]] is subscribed to for offline availability
- * and becomes available for the first time.
+ * and a new version has been downloaded.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
-export class OfflineModelAvailableEvent implements IModelEvent {
-  public static readonly NAME = "offline_model_available";
+export class OfflineModelStatusChangedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_model_status_changed";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelAvailableEvent.NAME;
+  public readonly name: string = OfflineModelStatusChangedEvent.NAME;
 
   /**
    * @hidden
@@ -35,9 +37,13 @@ export class OfflineModelAvailableEvent implements IModelEvent {
    */
   constructor(
     /**
-     * The [[RealTimeModel]] that just went offline.
+     * The id of the model that was updated.
      */
-    public readonly src: RealTimeModel
+    public readonly id: string,
+    public readonly subscribed: boolean,
+    public readonly available: boolean,
+    public readonly dirty: boolean,
+    public readonly local: boolean
   ) {
     Object.freeze(this);
   }

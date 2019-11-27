@@ -15,7 +15,6 @@
 import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
-import {IOfflineModelSubscription} from "./IOfflineModelSubscription";
 import {IModelUpdate} from "./IModelUpdate";
 import {IModelSnapshot} from "./IModelSnapshot";
 import {IModelMetaData} from "./IModelMetaData";
@@ -24,13 +23,13 @@ import {IModelMetaData} from "./IModelMetaData";
  * @module Offline
  */
 export interface IModelStore {
-  getSubscribedModels(): Promise<IOfflineModelSubscription[]>;
+  getSubscribedModels(): Promise<IModelMetaData[]>;
 
   addSubscriptions(modelIds: string[]): Promise<void>;
 
   removeSubscriptions(modelId: string[]): Promise<void>;
 
-  setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void>;
+  setModelSubscriptions(subscriptions: string[]): Promise<void>;
 
   createLocalModel(model: IModelCreationData): Promise<void>;
 

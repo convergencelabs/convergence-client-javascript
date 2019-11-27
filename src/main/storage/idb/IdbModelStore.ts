@@ -27,7 +27,6 @@ import {
 import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {ModelPermissions} from "../../model";
-import {IOfflineModelSubscription} from "../api/IOfflineModelSubscription";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
 
 /**
@@ -35,24 +34,30 @@ import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
  * @internal
  */
 export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
-  private static deleteServerOperationsForModel(store: IDBObjectStore, modelId: string): void {
-    IdbPersistenceStore.deleteFromIndex(store,
+  private static _deleteServerOperationsForModel(store: IDBObjectStore, modelId: string): Promise<void> {
+    return IdbPersistenceStore.deleteFromIndex(store,
       IdbSchema.ModelServerOperation.Indices.ModelId,
       IDBKeyRange.only(modelId));
   }
 
-  private static deleteLocalOperationsForModel(store: IDBObjectStore, modelId: string): void {
-    IdbPersistenceStore.deleteFromIndex(store,
+  private static _deleteLocalOperationsForModel(store: IDBObjectStore, modelId: string): Promise<void> {
+    return IdbPersistenceStore.deleteFromIndex(store,
       IdbSchema.ModelLocalOperation.Indices.ModelId,
       IDBKeyRange.only(modelId));
   }
 
-  private static putLocalOperationsForModel(store: IDBObjectStore, operations: ILocalOperationData[]): void {
-    operations.forEach(op => store.add(op));
+  private static async _putLocalOperationsForModel(store: IDBObjectStore,
+                                                   operations: ILocalOperationData[]): Promise<void> {
+    for (const op of operations) {
+      await toVoidPromise(store.add(op));
+    }
   }
 
-  private static putServerOperationsForModel(store: IDBObjectStore, operations: IServerOperationData[]): void {
-    operations.forEach(op => store.add(op));
+  private static async _putServerOperationsForModel(store: IDBObjectStore,
+                                                    operations: IServerOperationData[]): Promise<void> {
+    for (const op of operations) {
+      await toVoidPromise(store.add(op));
+    }
   }
 
   private static _snapshotToDataAndMetaData(version: number, snapshot: IModelSnapshot):
@@ -129,22 +134,22 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return metaData;
   }
 
-  private static _putModelState(
+  private static async _putModelState(
     modelState: IModelState,
     modelMetaDataStore: IDBObjectStore,
     modelDataStore: IDBObjectStore,
     localOpStore: IDBObjectStore,
-    serverOpStore: IDBObjectStore): void {
+    serverOpStore: IDBObjectStore): Promise<void> {
     const {version, snapshot, localOperations, serverOperations} = modelState;
 
     const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(version, snapshot);
     modelDataStore.put(data);
     modelMetaDataStore.put(meta);
 
-    IdbModelStore.deleteServerOperationsForModel(serverOpStore, meta.modelId);
-    IdbModelStore.deleteLocalOperationsForModel(localOpStore, meta.modelId);
-    IdbModelStore.putLocalOperationsForModel(localOpStore, localOperations);
-    IdbModelStore.putServerOperationsForModel(serverOpStore, serverOperations);
+    await IdbModelStore._deleteServerOperationsForModel(serverOpStore, meta.modelId);
+    await IdbModelStore._deleteLocalOperationsForModel(localOpStore, meta.modelId);
+    await IdbModelStore._putLocalOperationsForModel(localOpStore, localOperations);
+    await IdbModelStore._putServerOperationsForModel(serverOpStore, serverOperations);
   }
 
   private static async _removeSubscriptions(
@@ -176,8 +181,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
     await modelMetaDataStore.delete(modelId);
     await modelDataStore.delete(modelId);
-    await IdbModelStore.deleteServerOperationsForModel(serverOpStore, modelId);
-    await IdbModelStore.deleteLocalOperationsForModel(localOpStore, modelId);
+    await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
+    await IdbModelStore._deleteLocalOperationsForModel(localOpStore, modelId);
   }
 
   private static async _addSubscriptions(modelIds: string[], metaDataStore: IDBObjectStore): Promise<void> {
@@ -213,7 +218,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   modelDataStore,
                                                   localOpStore,
                                                   serverOpStore]) => {
-      creationStore.put(modelCreation);
+      await toVoidPromise(creationStore.put(modelCreation));
 
       const dataVersion = 1;
       const version = dataVersion;
@@ -239,7 +244,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         serverOperations: []
       };
 
-      IdbModelStore._putModelState(modelState, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
+      await IdbModelStore._putModelState(modelState, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
     });
   }
 
@@ -470,8 +475,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       .then(results => results.map(IdbModelStore._metaDataDocToMetaData));
   }
 
-  public setModelSubscriptions(subscriptions: IOfflineModelSubscription[]): Promise<void> {
-    const modelIds = subscriptions.map(s => s.modelId);
+  public setModelSubscriptions(modelIds: string[]): Promise<void> {
     const storeNames = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
@@ -492,18 +496,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       });
   }
 
-  public getSubscribedModels(): Promise<IOfflineModelSubscription[]> {
+  public getSubscribedModels(): Promise<IModelMetaData[]> {
     const storeName = IdbSchema.ModelMetaData.Store;
     return this._withReadStore(storeName, async (store) => {
       const index = store.index(IdbSchema.ModelMetaData.Indices.Subscribed);
-      const subscribed = await toPromise<IModelMetaData[]>(index.getAll());
-      return subscribed.map(s => {
-        return {
-          version: s.details ? s.details.version : 0,
-          modelId: s.modelId,
-          permissions: s.details ? s.details.permissions : undefined
-        };
-      });
+      const subscribed = await toPromise<IModelMetaDataDocument[]>(index.getAll());
+      return subscribed.map(IdbModelStore._metaDataDocToMetaData);
     });
   }
 
@@ -542,7 +540,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         const {data, meta} = IdbModelStore._snapshotToDataAndMetaData(snapshot.dataVersion, snapshot);
         modelMetaDataStore.put(meta);
         modelDataStore.put(data);
-        IdbModelStore.deleteServerOperationsForModel(serverOpStore, meta.modelId);
+        IdbModelStore._deleteServerOperationsForModel(serverOpStore, meta.modelId);
       });
   }
 }

@@ -17,7 +17,19 @@
  *
  * @module Real Time Data
  */
-export class ModelPermissions  {
+export class ModelPermissions {
+
+  /**
+   * Creates a new ModelPermissions class from a JSON representation.
+   *
+   * @param json The JSON representations of the ModelPermissions.
+   *
+   * @returns A ModelPermissions instance initialized from the JSON Object.
+   */
+  public static fromJSON(json: { read: boolean; write: boolean; remove: boolean; manage: boolean; }): ModelPermissions {
+    return new ModelPermissions(json.read, json.write, json.remove, json.manage);
+  }
+
   /**
    * @hidden
    * @internal
@@ -27,17 +39,14 @@ export class ModelPermissions  {
      * Set to true to allow read access to a model.
      */
     public readonly read: boolean,
-
     /**
      * Set to true to allow write access to a model.
      */
     public readonly write: boolean,
-
     /**
      * Set to true to permit deleting a model.
      */
     public readonly remove: boolean,
-
     /**
      * Set to true to permit managing the permissions on a model.
      */

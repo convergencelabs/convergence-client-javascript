@@ -12,24 +12,24 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ModelPermissions} from "../ModelPermissions";
 import {IConvergenceEvent} from "../../util";
+import {ModelPermissions} from "../ModelPermissions";
 
 /**
  * Emitted when a [[RealTimeModel]] is subscribed to for offline availability
- * and a new version has been downloaded.
+ * and the user no longer has permissions to read the model.
  *
  * @module Real Time Data
  *
  * @experimental
  */
-export class OfflineModelUpdatedEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_updated";
+export class OfflineModelPermissionsRevokedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_model_permissions_revoked";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelUpdatedEvent.NAME;
+  public readonly name: string = OfflineModelPermissionsRevokedEvent.NAME;
 
   /**
    * @hidden
@@ -37,11 +37,9 @@ export class OfflineModelUpdatedEvent implements IConvergenceEvent {
    */
   constructor(
     /**
-     * The id of the model that was updated.
+     * The id of the model from which permissions were revoked.
      */
-    public readonly id: string,
-    public readonly version: number | null,
-    public readonly permissions: ModelPermissions | null
+    public readonly id: string
   ) {
     Object.freeze(this);
   }

@@ -671,6 +671,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
+   * Determines if all local changes (if any) have been committed by the
+   * server.
+   *
+   * @returns true if the model has no unacknowledged changes, false otherwise.
+   */
+  public isCommitted(): boolean {
+    return this._concurrencyControl.isCommitted();
+  }
+
+  /**
    * Returns a [[RealTimeObject]] wrapping the root node of this model's data.  From here
    * one can view or modify all or any part of the subtree at any level of granularity.
    */
@@ -774,12 +784,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         });
     } else {
       this._checkIfCanClose();
-    }
-  }
-
-  public _checkIfCanClose(): void {
-    if (this._closingData.closing && this._concurrencyControl.isCommitted()) {
-      this._close();
     }
   }
 
@@ -932,6 +936,17 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   //
   // Private API
   //
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
+  public _checkIfCanClose(): void {
+    if (this._closingData.closing && this._concurrencyControl.isCommitted()) {
+      this._close();
+    }
+  }
 
   /**
    * @private

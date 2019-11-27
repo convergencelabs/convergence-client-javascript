@@ -12,11 +12,35 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+import {IConvergenceEvent} from "../../util";
+import {ModelPermissions} from "../ModelPermissions";
+
 /**
- * @module Offline
+ * Emitted when a [[RealTimeModel]] is subscribed to for offline availability
+ * has been deleted.
+ *
+ * @module Real Time Data
+ *
+ * @experimental
  */
-export interface IOfflineModelSubscription {
-  modelId: string;
-  version: number;
-  permissions?: { read: boolean; write: boolean; remove: boolean; manage; }
+export class OfflineModelDeletedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_model_deleted";
+
+  /**
+   * @inheritdoc
+   */
+  public readonly name: string = OfflineModelDeletedEvent.NAME;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  constructor(
+    /**
+     * The id of the model that was deleted.
+     */
+    public readonly id: string
+  ) {
+    Object.freeze(this);
+  }
 }

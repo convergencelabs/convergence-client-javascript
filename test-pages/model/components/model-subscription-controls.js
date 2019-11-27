@@ -17,17 +17,19 @@ Vue.component('model-subscription-controls', {
   data: () => {
     return {
       offlineModels: [],
-      selected: null,
       newSubscription: ""
     };
   },
   created() {
     this.loadSubscriptions();
+    this.modelService.events().subscribe(event => {
+      if (event.name.startsWith("offline_model")) {
+        console.log(event);
+        this.loadSubscriptions();
+      }
+    });
   },
   methods: {
-    selectRow(modelId) {
-      this.selected = modelId;
-    },
     isSelectedSubscribed() {
       const record = this.offlineModels.find(v => v.modelId === this.selected);
       return record && record.subscribed;
@@ -38,17 +40,11 @@ Vue.component('model-subscription-controls', {
         this.loadSubscriptions();
       });
     },
-    subscribeSelectedModel() {
-      this.modelService.subscribeOffline(this.selected).then(() => this.loadSubscriptions());
+    subscribe(id) {
+      this.modelService.subscribeOffline(id).then(() => this.loadSubscriptions());
     },
-    unsubscribeSelectedModel() {
-      this.modelService.unsubscribeOffline(this.selected).then(() => this.loadSubscriptions());
-    },
-    openSelectedModel() {
-
-    },
-    deleteSelectedModel() {
-
+    unsubscribe(id) {
+      this.modelService.unsubscribeOffline(id).then(() => this.loadSubscriptions());
     },
     loadSubscriptions() {
       this.modelService
@@ -80,14 +76,12 @@ Vue.component('model-subscription-controls', {
     </div>
     
     <div class="text-right mb-3">
-      <button class="btn btn-primary btn-sm" v-on:click="openSelectedModel" :disabled="!selected">Open</button>
       <button v-if="isSelectedSubscribed()" 
               class="btn btn-warning btn-sm"
               v-on:click="unsubscribeSelectedModel"
               :disabled="!selected"
        >Unsubscribe</button>
-      <button v-else class="btn btn-primary btn-sm" v-on:click="subscribeSelectedModel" :disabled="!selected">Subscribe</button>
-      <button class="btn btn-danger btn-sm" v-on:click="deleteSelectedModel" :disabled="!selected">Delete</button>
+      
     </div>
     
     <table class="table table-bordered table-hover table-sm">
@@ -97,14 +91,19 @@ Vue.component('model-subscription-controls', {
         <th scope="col">Local</th>
         <th scope="col">Subscribed</th>
         <th scope="col">Downloaded</th>
+        <th scope="col" class="text-right">Action</th>
       </thead>
       <tbody>
-        <tr v-for="model in offlineModels" v-on:click="selectRow(model.modelId)" v-bind:class="{ selected: selected === model.modelId }">
+        <tr v-for="model in offlineModels">
           <td>{{model.modelId}}</td>
           <td>{{model.dirty}}</td>
           <td>{{model.created}}</td>
           <td>{{model.subscribed}}</td>
           <td>{{model.available}}</td>
+          <td class="text-right">
+            <button v-if="!model.subscribed" class="btn btn-primary btn-sm" v-on:click="subscribe(model.modelId)">Subscribe</button>
+            <button v-else class="btn btn-danger btn-sm" v-on:click="unsubscribe(model.modelId)">Unsubscribe</button>
+          </td>
         </tr>
       </tbody>
     </table>

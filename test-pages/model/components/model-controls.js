@@ -16,14 +16,45 @@ Vue.component('model-controls', {
   props: ["connected", "model"],
   data: () => {
     return {
-      modelId: getModelId()
+      openModelId: getModelId(),
+      createModelId: "",
+      deleteModelId: ""
     };
   },
   methods: {
+    createModel() {
+      const options = this.buildCreateOptions(this.createModelId);
+      domain.models().create(options)
+        .then((model) => {
+          this.$emit("modelCreated", model);
+        }).catch(e => {
+        console.error(e);
+      });
+    },
+    deleteModel() {
+      domain.models().remove(this.deleteModelId)
+        .then((model) => {
+          this.$emit("modelDeleted", model);
+        }).catch(e => {
+        console.error(e);
+      });
+    },
     openModel() {
-      domain.models().openAutoCreate({
+      const options = this.buildCreateOptions(this.openModelId);
+      domain.models().openAutoCreate(options).then((model) => {
+        this.$emit("modelOpened", model);
+      }).catch(e => {
+        console.error(e);
+      });
+    },
+    closeModel() {
+      this.model.close();
+      this.$emit("modelClosed");
+    },
+    buildCreateOptions(id) {
+      return {
         collection: "model-test-page",
-        id: this.modelId,
+        id: id,
         data: {
           "string": "String data to edit",
           "number": 10,
@@ -43,17 +74,8 @@ Vue.component('model-controls', {
           "date": new Date()
         },
         overrideWorld: true,
-        worldPermissions: {read: true, write: true, remove: false, manage: false},
-        ephemeral: false
-      }).then((model) => {
-        this.$emit("modelOpened", model);
-      }).catch(e => {
-        console.error(e);
-      });
-    },
-    closeModel() {
-      this.model.close();
-      this.$emit("modelClosed");
+        worldPermissions: {read: true, write: true, remove: false, manage: false}
+      }
     }
   },
   template: `
@@ -61,11 +83,23 @@ Vue.component('model-controls', {
   <div class="card-body">
     <h5 class="card-title">Model Control</h5>
     <div class="input-group mb-3">
-      <div class="input-group-prepend"><span class="input-group-text">Model Id</span></div>
-      <input type="text" class="form-control" v-model="modelId" v-bind:disabled="!connected || model">
+      <button v-if="model === null" class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="openModel">Open Model</button>
+      <button v-else class="btn btn-primary" :disabled="!connected || model === null" v-on:click="closeModel">Close Model</button>
+      <div class="input-group-prepend ml-3"><span class="input-group-text">Model Id</span></div>
+      <input type="text" class="form-control" v-model="openModelId" v-bind:disabled="!connected || model">
     </div>
-    <button class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="openModel">Open Model</button>
-    <button class="btn btn-primary" :disabled="!connected || model === null" v-on:click="closeModel">Close Model</button>
+    
+    <div class="input-group mb-3">
+      <button class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="createModel">Create Model</button>
+      <div class="input-group-prepend ml-3"><span class="input-group-text">Model Id</span></div>
+      <input type="text" class="form-control" v-model="createModelId" v-bind:disabled="!connected || model">
+    </div>
+   
+    <div class="input-group mb-3">
+      <button class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="deleteModel">Delete Model</button>
+      <div class="input-group-prepend ml-3"><span class="input-group-text">Model Id</span></div>
+      <input type="text" class="form-control" v-model="deleteModelId" v-bind:disabled="!connected || model">
+    </div>
   </div>
 </div>
   `

@@ -20,6 +20,8 @@ import {IConvergenceEvent} from "../../util";
  * all required models have been initially downloaded.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
 export class OfflineModelSyncCompleteEvent implements IConvergenceEvent {
   public static readonly NAME = "offline_model_sync_complete";

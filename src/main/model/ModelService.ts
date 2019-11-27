@@ -237,6 +237,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._syncDeferred = null;
 
     this._modelOfflineManager = modelOfflineManager;
+    this._emitFrom(modelOfflineManager.events());
 
     this._modelIdGenerator = new RandomStringGenerator(32, RandomStringGenerator.AlphaNumeric);
     this._log = Logging.logger("models");
@@ -381,55 +382,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
 
     return this._create(options);
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
-    const collection = options.collection;
-
-    if (this._connection.isOnline()) {
-      const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
-      const dataValue = data || this._getDataFromCreateOptions(options);
-      const request: IConvergenceMessage = {
-        createRealTimeModelRequest: {
-          collectionId: collection,
-          modelId: toOptional(options.id),
-          data: toIObjectValue(dataValue),
-          overrideWorldPermissions: options.overrideCollectionWorldPermissions,
-          worldPermissions: options.worldPermissions,
-          userPermissions
-        }
-      };
-
-      return this._connection.request(request).then((response: IConvergenceMessage) => {
-        const {createRealTimeModelResponse} = response;
-        return createRealTimeModelResponse.modelId;
-      });
-    } else {
-      const id = options.id || this._modelIdGenerator.nextString();
-      return this._modelOfflineManager
-        .getOfflineModelData(id)
-        .then(modelState => {
-          if (TypeChecker.isSet(modelState)) {
-            return Promise.reject(new Error(`An offline model with the specified id already exists: ${id}`));
-          } else {
-            const dataValue = data || this._getDataFromCreateOptions(options);
-            const creationData: IModelCreationData = {
-              modelId: id,
-              collection: options.collection,
-              initialData: dataValue,
-              overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
-              worldPermissions: options.worldPermissions,
-              userPermissions: options.userPermissions
-            };
-            return this._modelOfflineManager.createOfflineModel(creationData).then(() => id);
-          }
-        });
-    }
   }
 
   /**
@@ -595,6 +547,55 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public getOfflineModelMetaData(): Promise<IModelMetaData[]> {
     return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getAllModelMetaData());
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
+    const collection = options.collection;
+
+    if (this._connection.isOnline()) {
+      const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
+      const dataValue = data || this._getDataFromCreateOptions(options);
+      const request: IConvergenceMessage = {
+        createRealTimeModelRequest: {
+          collectionId: collection,
+          modelId: toOptional(options.id),
+          data: toIObjectValue(dataValue),
+          overrideWorldPermissions: options.overrideCollectionWorldPermissions,
+          worldPermissions: options.worldPermissions,
+          userPermissions
+        }
+      };
+
+      return this._connection.request(request).then((response: IConvergenceMessage) => {
+        const {createRealTimeModelResponse} = response;
+        return createRealTimeModelResponse.modelId;
+      });
+    } else {
+      const id = options.id || this._modelIdGenerator.nextString();
+      return this._modelOfflineManager
+        .getOfflineModelData(id)
+        .then(modelState => {
+          if (TypeChecker.isSet(modelState)) {
+            return Promise.reject(new Error(`An offline model with the specified id already exists: ${id}`));
+          } else {
+            const dataValue = data || this._getDataFromCreateOptions(options);
+            const creationData: IModelCreationData = {
+              modelId: id,
+              collection: options.collection,
+              initialData: dataValue,
+              overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
+              worldPermissions: options.worldPermissions,
+              userPermissions: options.userPermissions
+            };
+            return this._modelOfflineManager.createOfflineModel(creationData).then(() => id);
+          }
+        });
+    }
   }
 
   /**

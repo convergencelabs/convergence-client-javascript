@@ -19,6 +19,8 @@ import {IConvergenceEvent} from "../../util";
  * the change results in new models needing to be downloaded.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
 export class OfflineModelSyncPendingEvent implements IConvergenceEvent {
   public static readonly NAME = "offline_model_sync_pending";
