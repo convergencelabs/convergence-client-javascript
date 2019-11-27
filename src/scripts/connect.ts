@@ -44,8 +44,11 @@ const OPTIONS: IConvergenceOptions = {
   }
 };
 
-export function createDomain(): ConvergenceDomain {
-  const domain = new ConvergenceDomain(DOMAIN_URL, OPTIONS);
+export function createDomain(options?: IConvergenceOptions): ConvergenceDomain {
+  options = options || {};
+  Object.assign(options, OPTIONS);
+
+  const domain = new ConvergenceDomain(DOMAIN_URL, options);
   domain.events().subscribe((event) => {
       if (event instanceof ConnectionScheduledEvent) {
         console.log(`Connection scheduled in ${event.delay} seconds`);
