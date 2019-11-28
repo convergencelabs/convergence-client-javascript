@@ -34,10 +34,12 @@ import {ConvergenceEventEmitter, IConvergenceEvent} from "../util";
 import {OfflineModelUpdatedEvent} from "./events/OfflineModelUpdatedEvent";
 import {ModelPermissions} from "./ModelPermissions";
 import {OfflineModelStatusChangedEvent} from "./events/OfflineModelStatusChangedEvent";
-import {OfflineModelDeletedEvent} from "./events/OfflineModelDeletedEvent";
-import {OfflineModelPermissionsRevokedEvent} from "./events/OfflineModelPermissionsRevokedEvent";
-import {OfflineModelSyncCompleteEvent} from "./events/OfflineModelSyncPendingEvent";
-import {OfflineModelSyncPendingEvent} from "./events/OfflineModelSyncCompleteEvent";
+import {
+  OfflineModelDeletedEvent,
+  OfflineModelPermissionsRevokedEvent,
+  OfflineModelDownloadCompletedEvent,
+  OfflineModelDownloadPendingEvent
+} from "./events/";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -143,7 +145,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   public subscribe(modelIds: string[]): Promise<void> {
     const notSubscribed = modelIds.filter(id => !this._subscribedModels.has(id));
     if (notSubscribed.length > 0) {
-      const event = new OfflineModelSyncPendingEvent();
+      const event = new OfflineModelDownloadPendingEvent();
       this._emitEvent(event);
     }
 
@@ -172,7 +174,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
         // If we weren't done before, but are now. Fire the event.
         if (!allBeforeUnsubscribe && this._allDownloaded()) {
-          this._emitEvent(new OfflineModelSyncCompleteEvent());
+          this._emitEvent(new OfflineModelDownloadCompletedEvent());
         }
         return this._sendSubscriptionRequest([], subscribed, false);
       });
@@ -201,12 +203,12 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     });
 
     if (subscribe.length > 0) {
-      const event = new OfflineModelSyncPendingEvent();
+      const event = new OfflineModelDownloadPendingEvent();
       this._emitEvent(event);
     } else {
       // If we weren't done before, but are now. Fire the event.
       if (!allBeforeUnsubscribe && this._allDownloaded()) {
-        this._emitEvent(new OfflineModelSyncCompleteEvent());
+        this._emitEvent(new OfflineModelDownloadCompletedEvent());
       }
     }
 
@@ -439,7 +441,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
             this._emitEvent(updateEvent);
 
             if (this._allDownloaded()) {
-              const event = new OfflineModelSyncCompleteEvent();
+              const event = new OfflineModelDownloadCompletedEvent();
               this._emitEvent(event);
             }
           });

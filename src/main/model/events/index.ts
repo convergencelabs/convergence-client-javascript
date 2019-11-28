@@ -58,3 +58,10 @@ export * from "./CollaboratorClosedEvent";
 
 export * from "./ModelCommittedEvent";
 export * from "./ModelModifiedEvent";
+
+export * from "./OfflineModelDownloadPendingEvent";
+export * from "./OfflineModelDownloadCompletedEvent";
+export * from "./OfflineModelSyncStartedEvent";
+export * from "./OfflineModelSyncCompletedEvent";
+export * from "./OfflineModelDeletedEvent";
+export * from "./OfflineModelPermissionsRevokedEvent";

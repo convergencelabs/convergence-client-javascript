@@ -1,14 +1,8 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {createDomain} from "../connect";
-import { IdbStorageAdapter } from "../../main/storage/idb/IdbStorageAdapter";
-import { OfflineModelSyncCompleteEvent } from "../../main/model/events/OfflineModelSyncPendingEvent";
-
-/**
- * This requires an IndexedDB implementation:
- *
- * npm install --no-save fake-indexeddb
- */
+import { IdbStorageAdapter } from "../../main/storage/idb/";
+import { OfflineModelSyncCompletedEvent } from "../../main/model/events/";
 
 // tslint:disable-next-line
 require("fake-indexeddb/auto");
@@ -22,7 +16,7 @@ const domain = createDomain({
 });
 
 async function createModels(): Promise<void> {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     let id = `created-offline-${i}`;
     await createModel(id);
     modelIds.push(id);
@@ -52,7 +46,7 @@ domain.connectOffline("test")
   .then(createModels)
   .then(() => {
     console.log("going online");
-    domain.models().on(OfflineModelSyncCompleteEvent.NAME, async () => {
+      domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
       console.log("model sync completed");
       await cleanupModels();
       process.exit();

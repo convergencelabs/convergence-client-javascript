@@ -62,6 +62,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
+import {OfflineModelSyncStartedEvent, OfflineModelSyncCompletedEvent} from "./events/";
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -80,9 +81,26 @@ export interface ModelServiceEvents {
    * Emitted when a model is initially downloaded after it was first subscribed
    * to offline. The event emitted will be an [[OfflineModelAvailableEvent]]
    *
-   * @event [[OfflineModelAvailableEvent]]
+   * @event [[OfflineModelStatusChangedEvent]]
    */
-  readonly OFFLINE_MODEL_AVAILABLE: "offline_model_available";
+  readonly OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed";
+
+  /**
+   * Emitted when an already downloaded offline model is deleted. The event
+   * emitted will be an [[OfflineModelDeleted]].
+   *
+   * @event [[OfflineModelDeleted]]
+   */
+  readonly OFFLINE_MODEL_DELETED: "offline_model_deleted";
+
+  /**
+   * Emitted when an already downloaded offline model's permissions are
+   * updated and the local user no longer has read permissions. The event
+   * emitted will be an [[OfflineModelPermissionsRevoked]].
+   *
+   * @event [[OfflineModelPermissionsRevoked]]
+   */
+  readonly OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked";
 
   /**
    * Emitted whenever a model that is subscribed to offline is updated via the
@@ -96,18 +114,34 @@ export interface ModelServiceEvents {
   /**
    * Emitted whenever a change to the set of subscribed models results in new
    * models needing to be downloaded. The event emitted will be an
-   * [[OfflineModelSyncPendingEvent]].
+   * [[OfflineModelDownloadPendingEvent]].
    *
-   * @event [[OfflineModelSyncPendingEvent]]
+   * @event [[OfflineModelDownloadPendingEvent]]
    */
-  readonly OFFLINE_MODEL_SYNC_PENDING: "offline_model_sync_pending";
+  readonly OFFLINE_MODEL_DOWNLOAD_PENDING: "offline_model_download_pending";
 
   /**
    * Emitted when all models have been downloaded after a subscription change
    * that required additional models to be downloaded. The event emitted
-   * will be an [[OfflineModelSyncCompleteEvent]]
+   * will be an [[OfflineModelDownloadCompletedEvent]]
    *
-   * @event [[OfflineModelSyncCompleteEvent]]
+   * @event [[OfflineModelDownloadCompletedEvent]]
+   */
+  readonly OFFLINE_MODEL_DOWNLOAD_COMPLETED: "offline_model_download_completed";
+
+  /**
+   * Emitted local offline changes to models are being synchronized with the
+   * server. The event emitted will be an [[OfflineModelSyncStartedEvent]].
+   *
+   * @event [[OfflineModelSyncStartedEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started";
+
+  /**
+   * Emitted when all local offline changes have been synchronized with the.
+   * server The event emitted will be an [[OfflineModelSyncCompletedEvent]]
+   *
+   * @event [[OfflineModelSyncCompletedEvent]]
    */
   readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
 }
@@ -117,10 +151,14 @@ export interface ModelServiceEvents {
  */
 export const ModelServiceEventConstants: ModelServiceEvents = {
   MODEL_DELETED: ModelDeletedEvent.NAME,
-  OFFLINE_MODEL_AVAILABLE: "offline_model_available",
+  OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed",
   OFFLINE_MODEL_UPDATED: "offline_model_updated",
-  OFFLINE_MODEL_SYNC_PENDING: "offline_model_sync_pending",
+  OFFLINE_MODEL_DOWNLOAD_PENDING: "offline_model_download_pending",
+  OFFLINE_MODEL_DOWNLOAD_COMPLETED: "offline_model_download_completed",
+  OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started",
   OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed",
+  OFFLINE_MODEL_DELETED: "offline_model_deleted",
+  OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked"
 };
 Object.freeze(ModelServiceEventConstants);
 
@@ -732,9 +770,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openModelRequests.set(id, deferred);
     }
 
-    const open = this._connection.isOnline() ?
-      this._openOnline(id, autoRequestId) :
-      this._openOffline(id, autoRequestId);
+    let open: Promise<RealTimeModel>;
+
+    if (this._connection.isOnline()) {
+      open = this._openOnline(id, autoRequestId);
+    } else if (this._modelOfflineManager.isOfflineEnabled()) {
+      open = this._openOffline(id, autoRequestId);
+    } else {
+      open = Promise.reject(
+        new ConvergenceError("Can not open a model while not online and without offline enabled."));
+    }
 
     open.then(model => {
       this._clearOpenRecord(id, autoRequestId);
@@ -753,8 +798,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _clearOpenRecord(id: string, autoRequestId: number): void {
-    if (id !== undefined !== undefined && this._openModelRequests.has(id)) {
+  private _clearOpenRecord(id?: string, autoRequestId?: number): void {
+    if (id !== undefined) {
       this._openModelRequests.delete(id);
     }
 
@@ -768,7 +813,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
-    if (TypeChecker.isString(id)) {
+    if (TypeChecker.isString(id) && this._modelOfflineManager.isOfflineEnabled()) {
       // The model is not already syncing. We see if it is one that needs
       // to be resynced.
       return this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
@@ -778,6 +823,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         } else {
           // This model has local changes, so open it locally and
           // start a resync.
+
           const index = this._modelResyncQueue.indexOf(id);
           if (index >= 0) {
             this._modelResyncQueue.splice(index, 1);
@@ -1091,9 +1137,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._modelOfflineManager
       .ready()
-      .then(() => this._deleteMarkedModels())
+      .then(() => {
+        this._emitEvent(new OfflineModelSyncStartedEvent());
+        return this._deleteMarkedModels();
+      })
       .then(() => this._syncDirtyModelsToServer())
       .then(() => {
+        this._emitEvent(new OfflineModelSyncCompletedEvent());
         // We might have gone offline.
         if (this._connection.isOnline()) {
           return this._modelOfflineManager.resubscribe();
