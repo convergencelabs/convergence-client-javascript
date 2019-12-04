@@ -51,6 +51,8 @@ import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
 import {ModelOfflineManager} from "./model/ModelOfflineManager";
 import {StringMap} from "./util/StringMap";
+import {Logger} from "./util/log/Logger";
+import {Logging} from "./util/log/Logging";
 
 /**
  * This represents a single connection to a specific Domain in
@@ -243,6 +245,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    */
   private _disposed: boolean;
+
+  /**
+   * @internal
+   */
+  private readonly _log: Logger = Logging.logger("domain");
 
   /**
    * Constructs a new ConvergenceDomain using the default options.
@@ -642,9 +649,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _init(username: string): Promise<void> {
+    this._log.debug("Initializing domain");
+
     // FIXME perhaps this should take a user so we can tell the user type
     if (this._options.storageAdapter) {
       // FIXME do we need to make sure we are not an anonymous user here?
+      this._log.debug("options.offline.storageAdapter is set, initializing offline storage");
       this._storage.configure(this._options.storageAdapter);
       return this._storage.openStore(this._namespace, this._domainId, username, this._options.offlineKey)
         .then(() => {

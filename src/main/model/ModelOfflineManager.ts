@@ -52,8 +52,6 @@ import IModelOfflineSubscriptionData = com.convergencelabs.convergence.proto
  * @internal
  */
 export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEvent> {
-  private static readonly _log = Logging.logger("models.offline");
-
   private static _mapClientOperationEvent(modelId: string, opEvent: ClientOperationEvent): ILocalOperationData {
     const opData = toOfflineOperationData(opEvent.operation);
     return {
@@ -73,6 +71,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   private readonly _connection: ConvergenceConnection;
   private readonly _ready: ReplayDeferred<void>;
   private readonly _snapshotInterval: number;
+  private readonly _log = Logging.logger("models.offline");
 
   constructor(connection: ConvergenceConnection,
               syncInterval: number,
@@ -98,14 +97,15 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public init(): void {
-    this._storage.modelStore().getAllModelMetaData().then(modelSubscriptions => {
+    this._log.debug("Initializing offline model manager");
+    this._storage.modelStore().getSubscribedModels().then(modelSubscriptions => {
       modelSubscriptions.forEach(modelMetaData => {
         const version = modelMetaData.details ? modelMetaData.details.version : 0;
         this._subscribedModels.set(modelMetaData.modelId, {version, opsSinceSnapshot: 0, dirty: modelMetaData.dirty});
       });
       this._ready.resolve();
     }).catch(e => {
-      ModelOfflineManager._log.error("Error initializing offline model manager.", e);
+      this._log.error("Error initializing offline model manager", e);
       this._ready.reject(e);
     });
   }
@@ -127,7 +127,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     this._storage
       .modelStore()
       .deleteIfNotNeeded(model.modelId())
-      .catch(e => ModelOfflineManager._log.error("Error cleaning up model after close", e));
+      .catch(e => this._log.error("Error cleaning up model after close", e));
   }
 
   public isModelSubscribed(modelId: string): boolean {
@@ -138,8 +138,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     return Array.from(this._subscribedModels.keys());
   }
 
-  public getDirtyModelIds(): Promise<string[]> {
-    return this._storage.modelStore().getDirtyModelIds();
+  public getDirtyModelMetaData(): Promise<IModelMetaData[]> {
+    return this._storage.modelStore().getDirtyModelMetaData();
   }
 
   public subscribe(modelIds: string[]): Promise<void> {
@@ -224,6 +224,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     return this._storage
       .modelStore()
       .getSubscribedModels()
+      .then(subscriptions => subscriptions.map(metaData => {
+        return {
+          modelId: metaData.modelId,
+          currentPermissions: metaData.details ? metaData.details.permissions.toJSON() : undefined,
+          currentVersion: metaData.details ? metaData.details.version : 0
+        };
+      }))
       .then((subscriptions) => {
         return this._sendSubscriptionRequest(subscriptions, [], true);
       });
@@ -251,25 +258,16 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public modelDeleted(modelId: string): Promise<void> {
+    this._subscribedModels.delete(modelId);
     return this._storage.modelStore().modelDeleted(modelId);
-  }
-
-  public getDeletedModelIds(): Promise<string[]> {
-    return this._storage.modelStore().getDeletedModelIds();
-  }
-
-  public getModelDataIfDirty(modelId: string): Promise<IModelState | undefined> {
-    return this.getOfflineModelData(modelId).then(m => {
-      if (m && m.snapshot && m.snapshot.dirty) {
-        return m;
-      } else {
-        return;
-      }
-    });
   }
 
   public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
     return this._storage.modelStore().getModelState(modelId);
+  }
+
+  public getModelMetaData(modelId: string): Promise<IModelMetaData> {
+    return this._storage.modelStore().getModelMetaData(modelId);
   }
 
   public getAllModelMetaData(): Promise<IModelMetaData[]> {
@@ -332,18 +330,25 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     }
   }
 
-  private _initOpenModelForOffline(rtModel: RealTimeModel): Promise<void> {
-    rtModel._enableOffline();
+  private _initOpenModelForOffline(model: RealTimeModel): Promise<void> {
+    model._enableOffline();
 
-    const localOps = rtModel._getUncommittedOperations();
-    const localOperations = localOps
-      .map(op => ModelOfflineManager._mapClientOperationEvent(rtModel.modelId(), op));
-    const serverOperations: IServerOperationData [] = [];
+    const snapshot = this._getSnapshot(model);
+    const version = model.version();
 
-    const snapshot = this._getSnapshot(rtModel);
-    const version = rtModel.version();
+    const state: IModelState = {
+      modelId: model.modelId(),
+      collection: model.collectionId(),
 
-    const state: IModelState = {version, snapshot, localOperations, serverOperations};
+      version,
+      createdTime: model.createdTime(),
+      modifiedTime: model.time(),
+
+      local: model.isLocal(),
+
+      permissions: model.permissions(),
+      snapshot
+    };
     return this._storage.modelStore().putModelState(state);
   }
 
@@ -385,7 +390,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           })
           .catch(e => {
             // TODO emmit error event.
-            ModelOfflineManager._log.error("Could not delete offline model.", e);
+            this._log.error("Could not delete offline model.", e);
           });
       } else if (getOrDefaultBoolean(message.permissionRevoked)) {
         // TODO emmit a permissions revoked event.
@@ -402,7 +407,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           })
           .catch(e => {
             // TODO emmit error event.
-            ModelOfflineManager._log.error("Could not delete offline model after permissions revoked.", e);
+            this._log.error("Could not delete offline model after permissions revoked.", e);
           });
       } else if (message.initial) {
         if (this._subscribedModels.has(modelId)) {
@@ -410,26 +415,29 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           const {read, write, remove, manage} = toModelPermissions(permissions);
           const version = getOrDefaultNumber(model.version);
           const modelState: IModelState = {
+            modelId,
+            collection,
+
             version,
+            createdTime: timestampToDate(model.createdTime),
+            modifiedTime: timestampToDate(model.modifiedTime),
+
+            local: false,
+
+            permissions: new ModelPermissions(read, write, remove, manage),
+
             snapshot: {
-              modelId,
-              local: false,
-              dirty: false,
-              subscribed: true,
-              collection,
               dataVersion: getOrDefaultNumber(model.version),
               seqNo: 0,
-              createdTime: timestampToDate(model.createdTime),
-              modifiedTime: timestampToDate(model.modifiedTime),
+
               data: toObjectValue(model.data),
-              permissions: {read, write, remove, manage}
-            },
-            serverOperations: [],
-            localOperations: []
+              serverOperations: [],
+              localOperations: []
+            }
           };
 
           this._storage.modelStore().putModelState(modelState).catch(e => {
-            ModelOfflineManager._log.error("Error synchronizing subscribed model from server", e);
+            this._log.error("Error synchronizing subscribed model from server", e);
           }).then(() => {
             this._subscribedModels.set(modelId, {version, opsSinceSnapshot: 0, dirty: false});
 
@@ -464,7 +472,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         };
 
         this._storage.modelStore().updateOfflineModel(update).catch(e => {
-          ModelOfflineManager._log.error("Error synchronizing subscribed model from server", e);
+          this._log.error("Error synchronizing subscribed model from server", e);
         }).then(() => {
           if (dataUpdate) {
             this._subscribedModels.set(modelId, {
@@ -500,8 +508,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         const model = this._openModels.get(modelId);
         const snapshot = this._getSnapshot(model);
         this._storage.modelStore()
-          .snapshotModel(snapshot)
-          .catch(e => ModelOfflineManager._log.error("Error snapshotting model", e));
+          .snapshotModel(modelId, snapshot.dataVersion, snapshot.data)
+          .catch(e => this._log.error("Error snapshotting model", e));
         opsSinceSnapshot = 0;
       }
 
@@ -510,19 +518,17 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _getSnapshot(model: RealTimeModel): IModelSnapshot {
-    const modelStateSnapshot = model._getModelStateSnapshot();
+    const modelStateSnapshot = model._getConcurrencyControlStateSnapshot();
+    const localOperations = modelStateSnapshot.uncommittedOperations
+      .map(op => ModelOfflineManager._mapClientOperationEvent(model.modelId(), op));
+    const serverOperations: IServerOperationData [] = [];
+
     return {
-      modelId: model.modelId(),
-      collection: model.collectionId(),
-      local: modelStateSnapshot.local,
-      dirty: modelStateSnapshot.dirty,
-      subscribed: this._subscribedModels.has(model.modelId()),
       dataVersion: model.version(),
       seqNo: modelStateSnapshot.seqNo,
-      createdTime: model.createdTime(),
-      modifiedTime: model.time(),
-      permissions: model.permissions(),
-      data: modelStateSnapshot.data
+      data: modelStateSnapshot.data,
+      localOperations,
+      serverOperations
     };
   }
 

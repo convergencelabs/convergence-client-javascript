@@ -28,7 +28,6 @@ export interface IModelMetaDataDocument {
   details?: {
     collection: string;
     version: number;
-    dataVersion: number;
     seqNo: number;
     createdTime: Date;
     modifiedTime: Date;

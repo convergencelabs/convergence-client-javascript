@@ -13,3 +13,5 @@
  */
 
 export * from "./IdbStorageAdapter";
+export * from "./IdbModelStore";
+export * from "./IdbIdentityStore";

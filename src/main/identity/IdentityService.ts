@@ -78,8 +78,8 @@ export class IdentityService {
   }
 
   public userExists(userId: DomainUserId): Promise<boolean> {
-    // todo add a specific message for this, to avoid sending unnessesary data.
-    // also we could use our identity cache to answer this.
+    // todo add a specific message for this, to avoid sending unnecessary data.
+    //   also we could use our identity cache to answer this.
     return this.user(userId).then((user) => user !== undefined);
   }
 

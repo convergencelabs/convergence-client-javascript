@@ -17,7 +17,7 @@ import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperati
 import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {RealTimeModel, RealTimeString, ModelEventCallbacks} from "../../main/model/rt";
-import {StringValue} from "../../main/model/dataValue";
+import {StringValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {Model} from "../../main/model/internal/Model";
@@ -31,7 +31,7 @@ import {
 } from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession} from "../../main";
+import {ConvergenceSession, ModelPermissions} from "../../main";
 
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
@@ -59,12 +59,7 @@ describe("RealTimeString", () => {
     return false;
   };
   rtModel.permissions = () => {
-    return  {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return  new ModelPermissions(true, true, true, true);
   };
 
   let callbacks: ModelEventCallbacks;

@@ -14,20 +14,20 @@
 
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {BooleanSetOperation} from "../../main/model/ot/ops/BooleanSetOperation";
-import {RealTimeModel, ModelEventCallbacks, RealTimeBoolean} from "../../main/model/rt";
+import {ModelEventCallbacks, RealTimeBoolean, RealTimeModel} from "../../main/model/rt";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {BooleanValue} from "../../main/model/dataValue";
+import {BooleanValue, ModelPermissions} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
 import {BooleanNode} from "../../main/model/internal/BooleanNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
-import {ModelChangedEvent, BooleanSetValueEvent} from "../../main/model/events";
+import {BooleanSetValueEvent, ModelChangedEvent} from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
 import {ConvergenceSession} from "../../main";
 
 import {expect} from "chai";
-import {SinonSpy, spy, createStubInstance} from "sinon";
+import {createStubInstance, SinonSpy, spy} from "sinon";
 
 describe("RealTimeBoolean", () => {
 
@@ -51,12 +51,7 @@ describe("RealTimeBoolean", () => {
     return false;
   };
   rtModel.permissions = () => {
-    return  {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return  new ModelPermissions(true, true, true, true);
   };
 
   const initialValue: BooleanValue = dataValueFactory.createDataValue(true) as BooleanValue;

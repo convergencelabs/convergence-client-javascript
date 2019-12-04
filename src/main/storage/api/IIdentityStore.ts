@@ -12,15 +12,9 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IdbPersistenceStore} from "./IdbPersistenceStore";
-import {IDomainUserIdData, IMetaStore} from "../api";
-
 /**
- * @hidden
- * @internal
+ * @module Offline
  */
-export class IdbMetaStore extends IdbPersistenceStore implements IMetaStore {
-  public getDomainUserId(): Promise<IDomainUserIdData> {
-    return undefined;
-  }
+export interface IIdentityStore {
+
 }

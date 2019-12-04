@@ -16,7 +16,7 @@ import {RealTimeDate, RealTimeModel, ModelEventCallbacks} from "../../main/model
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {DateSetOperation} from "../../main/model/ot/ops/DateSetOperation";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {DateValue} from "../../main/model/dataValue";
+import {DateValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
 import {DateNode} from "../../main/model/internal/DateNode";
@@ -24,7 +24,7 @@ import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory
 import {ModelChangedEvent, DateSetValueEvent} from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession} from "../../main";
+import {ConvergenceSession, ModelPermissions} from "../../main";
 
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
@@ -51,12 +51,7 @@ describe("RealTimeDate", () => {
     return false;
   };
   rtModel.permissions = () => {
-    return  {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return  new ModelPermissions(true, true, true, true);
   };
 
   const testDate = new Date();

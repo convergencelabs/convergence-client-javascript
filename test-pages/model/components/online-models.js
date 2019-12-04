@@ -13,59 +13,33 @@
  */
 
 Vue.component('online-models', {
-  props: ["connected", "modelService"],
+  props: ["connected", "onlineModels"],
   data: () => {
     return {
       models: []
     };
   },
-  created() {
-    this.loadModels();
-    this.modelService.events().subscribe(event => {
-      if (event.name.startsWith("offline_model")) {
-        console.log(event);
-        this.loadSubscriptions();
-      }
-    });
-  },
-  watch: {
-    connected(connected) {
-      if (!connected) {
-        this.models = [];
-      } else {
-        this.loadModels();
-      }
-    }
-  },
   methods: {
-    loadModels() {
-      this.models = [];
-
-      if (this.connected && this.modelService.session().isConnected()) {
-        const query = "SELECT * FROM model-test-page";
-        this.modelService
-          .query(query)
-          .then(results => {
-            results.data.forEach(model => {
-              this.models.push({modelId: model.modelId, version: model.version});
-            })
-          })
-          .catch(e => {
-            console.error(e);
-          });
-      }
+    subscribe(id) {
+      this.$emit("subscribe", id);
     },
     openModel(id) {
-
+      this.$emit("openModel", id);
     },
     deleteModel(id) {
-
-    }
+      this.$emit("deleteModel", id);
+    },
+    refresh() {
+      this.$emit("refresh");
+    },
   },
   template: `
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Online Models</h5>
+    <div class="text-right mb-3">
+      <button class="btn btn-primary btn-sm" :disabled="!connected" v-on:click="refresh">Refresh</button>
+    </div>
     <table class="table table-bordered table-hover table-sm">
       <thead class="thead-light">
         <th scope="col">Model Id</th>
@@ -73,12 +47,13 @@ Vue.component('online-models', {
         <th scope="col">Actions</th>
       </thead>
       <tbody>
-        <tr v-for="model in models">
+        <tr v-for="model in onlineModels">
           <td>{{model.modelId}}</td>
           <td>{{model.version}}</td>
           <td class="text-right">
-            <button class="btn btn-primary btn-sm" v-on:click="deleteModel(model.modelId)">Open</button>
-            <button class="btn btn-danger btn-sm" v-on:click="openModel(model.modelId)">Delete</button>
+            <button class="btn btn-primary btn-sm" v-on:click="subscribe(model.modelId)">Subscribe</button>
+            <button class="btn btn-primary btn-sm" v-on:click="openModel(model.modelId)">Open</button>
+            <button class="btn btn-danger btn-sm" v-on:click="deleteModel(model.modelId)">Delete</button>
           </td>
         </tr>
       </tbody>

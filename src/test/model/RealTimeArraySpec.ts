@@ -18,31 +18,25 @@ import {ArrayRemoveOperation} from "../../main/model/ot/ops/ArrayRemoveOperation
 import {ArrayReplaceOperation} from "../../main/model/ot/ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../main/model/ot/ops/ArrayMoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
+import {ArrayValue, DataValue, DataValueType, ModelPermissions, StringValue} from "../../main/model/";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
-import {DataValue, StringValue, DataValueType, ArrayValue} from "../../main/model/dataValue";
 import {Model} from "../../main/model/internal/Model";
 import {ArrayNode} from "../../main/model/internal/ArrayNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {
-  ArraySetValueEvent,
   ArrayInsertEvent,
   ArrayRemoveEvent,
+  ArrayReorderEvent,
   ArraySetEvent,
-  ArrayReorderEvent
+  ArraySetValueEvent
 } from "../../main/model/events";
-import {
-  RealTimeElement,
-  RealTimeArray,
-  RealTimeString,
-  RealTimeModel,
-  ModelEventCallbacks
-} from "../../main/model/rt";
+import {ModelEventCallbacks, RealTimeArray, RealTimeElement, RealTimeModel, RealTimeString} from "../../main/model/rt";
 import {StringNode} from "../../main/model/internal/StringNode";
 import {IdentityCache} from "../../main/identity/IdentityCache";
 import {ConvergenceSession, DomainUser, DomainUserType} from "../../main";
 import {expect} from "chai";
-import {SinonSpy, spy, createStubInstance} from "sinon";
+import {createStubInstance, SinonSpy, spy} from "sinon";
 
 describe("RealTimeArray", () => {
 
@@ -63,12 +57,7 @@ describe("RealTimeArray", () => {
   const session = createStubInstance(ConvergenceSession) as any as ConvergenceSession;
   const rtModel = createStubInstance(RealTimeModel) as any as RealTimeModel;
   rtModel.permissions = () => {
-    return {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return new ModelPermissions(true, true, true, true);
   };
   rtModel.emitLocalEvents = () => {
     return false;

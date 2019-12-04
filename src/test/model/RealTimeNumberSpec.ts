@@ -25,7 +25,7 @@ import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory
 import {ModelChangedEvent, NumberDeltaEvent, NumberSetValueEvent} from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession} from "../../main";
+import {ConvergenceSession, ModelPermissions} from "../../main";
 
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
@@ -52,12 +52,7 @@ describe("RealTimeNumber", () => {
     return false;
   };
   rtModel.permissions = () => {
-    return {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return  new ModelPermissions(true, true, true, true);
   };
 
   const initialValue: NumberValue = dataValueFactory.createDataValue(10) as NumberValue;

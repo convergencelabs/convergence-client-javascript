@@ -24,7 +24,7 @@ import {ObjectNode} from "../../main/model/internal/ObjectNode";
 import {ObjectSetValueEvent} from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession} from "../../main";
+import {ConvergenceSession, ModelPermissions} from "../../main";
 
 import {expect} from "chai";
 import {SinonSpy, spy, createStubInstance} from "sinon";
@@ -54,12 +54,7 @@ describe("RealTimeObject", () => {
     return false;
   };
   rtModel.permissions = () => {
-    return {
-      read: true,
-      write: true,
-      remove: true,
-      manage: true
-    };
+    return  new ModelPermissions(true, true, true, true);
   };
 
   const initialValue = dataValueFactory.createDataValue({num: 5}) as ObjectValue;

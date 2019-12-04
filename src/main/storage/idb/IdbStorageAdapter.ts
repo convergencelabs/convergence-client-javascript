@@ -14,9 +14,9 @@
 
 import {IdbModelStore} from "./IdbModelStore";
 import {toPromise} from "./promise";
-import {IMetaStore, IModelStore, IStorageAdapter} from "../api";
+import {IIdentityStore, IModelStore, IStorageAdapter} from "../api";
 import {IdbSchemaManager} from "./IdbSchemaManager";
-import {IdbMetaStore} from "./IdbMetaStore";
+import {IdbIdentityStore} from "./IdbIdentityStore";
 
 /**
  * The default implementation for data persistence in offline mode. Uses
@@ -31,8 +31,12 @@ export class IdbStorageAdapter implements IStorageAdapter {
   private _disposed: boolean = false;
 
   private _modelStore: IdbModelStore;
-  private _metaStore: IMetaStore;
+  private _identityStore: IdbIdentityStore;
   private _storageKey: string;
+
+  public adapterId(): string {
+    return "Indexed DB Storage";
+  }
 
   public openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string> {
     if (!namespace) {
@@ -63,7 +67,7 @@ export class IdbStorageAdapter implements IStorageAdapter {
     return toPromise(openRequest).then((db: IDBDatabase) => {
       this._db = db;
       this._modelStore = new IdbModelStore(this._db);
-      this._metaStore = new IdbMetaStore(this._db);
+      this._identityStore = new IdbIdentityStore(this._db);
       return this._storageKey;
     });
   }
@@ -76,8 +80,8 @@ export class IdbStorageAdapter implements IStorageAdapter {
     return this._modelStore;
   }
 
-  public metaStore(): IMetaStore {
-    return this._metaStore;
+  public identityStore(): IIdentityStore {
+    return this._identityStore;
   }
 
   public destroy(): void {

@@ -12,12 +12,20 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelSnapshot} from "./IModelSnapshot";
+import {ModelPermissions} from "../../model";
 
 export interface IModelState {
+  modelId: string;
+  collection: string;
+
   version: number;
+  createdTime: Date;
+  modifiedTime: Date;
+
+  local: boolean;
+
+  permissions: ModelPermissions;
+
   snapshot: IModelSnapshot;
-  serverOperations: IServerOperationData[];
-  localOperations: ILocalOperationData[];
 }

@@ -13,14 +13,14 @@
  */
 
 import {ObjectValue} from "./dataValue";
+import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 
 /**
  * @hidden
  * @internal
  */
-export interface IModelStateSnapshot {
-  local: boolean;
-  dirty: boolean;
+export interface IConcurrencyControlState {
   seqNo: number;
   data: ObjectValue;
+  uncommittedOperations: ClientOperationEvent[];
 }

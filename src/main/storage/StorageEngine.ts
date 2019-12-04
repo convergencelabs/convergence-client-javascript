@@ -21,11 +21,13 @@ import {Logging} from "../util/log/Logging";
  * @internal
  */
 export class StorageEngine {
-  private static _log: Logger = Logging.logger("storage");
+  private readonly _log: Logger = Logging.logger("storage");
   private _storage: IStorageAdapter | null = null;
   private _storageKey: string | null;
 
   public configure(storage: IStorageAdapter): void {
+    this._log.debug("Initializing storage engine: " + storage.adapterId());
+
     if (!storage) {
       throw new Error("storage must be specified");
     }

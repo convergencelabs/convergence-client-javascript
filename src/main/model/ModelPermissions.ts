@@ -54,4 +54,8 @@ export class ModelPermissions {
   ) {
     Object.freeze(this);
   }
+
+  public toJSON(): { read: boolean; write: boolean; remove: boolean; manage: boolean; } {
+    return {read: this.read, write: this.write, remove: this.remove, manage: this.manage};
+  }
 }

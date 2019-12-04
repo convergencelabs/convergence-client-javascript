@@ -13,12 +13,14 @@
  */
 
 import {IModelStore} from "./IModelStore";
-import {IMetaStore} from "./IMetaStore";
+import {IIdentityStore} from "./IIdentityStore";
 
 /**
  * @module Offline
  */
 export interface IStorageAdapter {
+  adapterId(): string;
+
   openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string>;
 
   isInitialized(): boolean;
@@ -31,5 +33,5 @@ export interface IStorageAdapter {
 
   modelStore(): IModelStore;
 
-  metaStore(): IMetaStore;
+  identityStore(): IIdentityStore;
 }

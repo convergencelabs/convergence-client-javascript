@@ -19,5 +19,6 @@ import {ObjectValue} from "../../model/";
  */
 export interface IModelData {
   modelId: string;
+  version: number;
   data: ObjectValue;
 }

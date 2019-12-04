@@ -56,13 +56,13 @@ import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 import {RandomStringGenerator} from "../util/RandomStringGenerator";
+import {OfflineModelSyncStartedEvent, OfflineModelSyncCompletedEvent} from "./events/";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
-import {OfflineModelSyncStartedEvent, OfflineModelSyncCompletedEvent} from "./events/";
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -203,12 +203,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private readonly _resyncingModels: Map<string, RealTimeModel> = new Map();
+  private readonly _resyncingModels: Map<string, IResyncEntry> = new Map();
 
   /**
    * @internal
    */
-  private readonly _modelResyncQueue: string[];
+  private readonly _modelResyncQueue: IResyncEntry[];
 
   /**
    * @internal
@@ -433,30 +433,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
-
-    const request: IConvergenceMessage = {
-      deleteRealtimeModelRequest: {
-        modelId: id
-      }
-    };
-
     if (this._connection.isOnline()) {
-      return this._connection.request(request).then(() => {
-        if (this._modelOfflineManager.isOfflineEnabled()) {
-          this._modelOfflineManager.modelDeleted(id).catch(e => {
-            // TODO emit an error event.
-            this._log.error("Error removing model from offline store");
-          });
-        }
-
-        const model = this._openModels[id];
-        const deletedEvent: ModelDeletedEvent = {
-          src: model,
-          name: RealTimeModel.Events.DELETED,
-          local: true,
-        };
-        this._emitEvent(deletedEvent);
-      });
+      return this._removeOnline(id);
     } else if (this._modelOfflineManager.isOfflineEnabled()) {
       return this._modelOfflineManager.markModelForDeletion(id).catch(e => {
         this._log.error("Could not mark model for deletion", e);
@@ -626,9 +604,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     } else if (this._modelOfflineManager.isOfflineEnabled()) {
       const id = options.id || this._modelIdGenerator.nextString();
       return this._modelOfflineManager
-        .getOfflineModelData(id)
-        .then(modelState => {
-          if (TypeChecker.isSet(modelState)) {
+        .getModelMetaData(id)
+        .then(metaData => {
+          if (TypeChecker.isSet(metaData) && metaData.available) {
             return Promise.reject(new Error(`An offline model with the specified id already exists: ${id}`));
           } else {
             const dataValue = data || this._getDataFromCreateOptions(options);
@@ -730,7 +708,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // This model is already resyncing so we just return that and
     // let the model know to stay open after resync.
     if (this._resyncingModels.has(id)) {
-      const model = this._resyncingModels.get(id);
+      const model = this._resyncingModels.get(id).model;
       if (model.isClosing()) {
         return model.whenClosed().then(() => this._open(id, options));
       } else {
@@ -814,32 +792,40 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isString(id) && this._modelOfflineManager.isOfflineEnabled()) {
-      // The model is not already syncing. We see if it is one that needs
-      // to be resynced.
-      return this._modelOfflineManager.getModelDataIfDirty(id).then((modelState) => {
-        if (TypeChecker.isUndefined(modelState)) {
-          // Not a dirty model, se we can directly open from the server.
-          return this._requestOpenFromServer(id, autoRequestId);
-        } else {
-          // This model has local changes, so open it locally and
-          // start a resync.
-
-          const index = this._modelResyncQueue.indexOf(id);
-          if (index >= 0) {
-            this._modelResyncQueue.splice(index, 1);
-          }
-
-          const model = this._createAndSyncModel(modelState);
-
-          // Need to open it after the sync.
-          model._openAfterResync();
-
-          return Promise.resolve(model);
-        }
-      });
+      return this._openOnlineWithOfflineEnabled(id, autoRequestId);
     } else {
       // We don't have an explicit id, thus this could not be an existing model
       // the might bee offline.
+      return this._requestOpenFromServer(id, autoRequestId);
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _openOnlineWithOfflineEnabled(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
+    // See if this model is one that needs resyncing.
+    const index = this._modelResyncQueue.findIndex(entry => entry.modelId === id);
+    if (index >= 0) {
+      // This model is one that needs to be resync'ed.
+      const [entry] = this._modelResyncQueue.splice(index, 1);
+      this._resyncingModels.set(id, entry);
+      if (entry.action === "resync") {
+        // Model is available, so we want to open it locally, and let the model
+        // do a resync.  We don't need to check the resync queue here because we
+        // just put it in the map.
+        return this._modelOfflineManager.getOfflineModelData(id).then(modelState => {
+          const model = this._createAndSyncModel(modelState, entry);
+          model._openAfterResync();
+          return model;
+        });
+      } else {
+        // model is not available, thus we must be processing a delete
+        this._deleteResyncModel(entry).then(() => this._requestOpenFromServer(id, autoRequestId));
+      }
+    } else {
+      // not pending a resync so we can directly open from the server.
       return this._requestOpenFromServer(id, autoRequestId);
     }
   }
@@ -901,7 +887,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
             const options = this._autoCreateRequests.get(autoRequestId);
             const model = this._createNewModelOffline(id, options);
             model._enableOffline();
-            const snapshot = model._getModelStateSnapshot();
+            const snapshot = model._getConcurrencyControlStateSnapshot();
             const creationData: IModelCreationData = {
               modelId: id,
               collection: options.collection,
@@ -923,7 +909,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _creteModelFromOfflineState(state: IModelState, resyncOnly: boolean): RealTimeModel {
-    this._log.debug(`Creating model '${state.snapshot.modelId}' from offline state`);
+    this._log.debug(`Creating model '${state.modelId}' from offline state`);
 
     // FIXME what should these be?
     const resourceId = null;
@@ -933,26 +919,57 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // process will then take us to the current version.
     const model = this._createModel(
       resourceId,
-      state.snapshot.modelId,
-      state.snapshot.collection,
-      state.snapshot.local,
+      state.modelId,
+      state.collection,
+      state.local,
       resyncOnly,
       state.snapshot.dataVersion,
-      state.snapshot.createdTime,
-      state.snapshot.modifiedTime,
+      state.createdTime,
+      state.modifiedTime,
       valueIdPrefix,
       [],
       [],
       [],
-      state.snapshot.permissions,
+      state.permissions,
       state.snapshot.data
     );
 
     model._setOffline();
     model._enableOffline();
-    model._rehydrateFromOfflineState(state.version, state.serverOperations, state.localOperations);
+    model._rehydrateFromOfflineState(
+      state.version,
+      state.snapshot.serverOperations,
+      state.snapshot.localOperations);
 
     return model;
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _removeOnline(id: string): Promise<void> {
+    const request: IConvergenceMessage = {
+      deleteRealtimeModelRequest: {
+        modelId: id
+      }
+    };
+
+    return this._connection.request(request).then(() => {
+      if (this._modelOfflineManager.isOfflineEnabled()) {
+        this._modelOfflineManager.modelDeleted(id).catch(e => {
+          // TODO emit an error event.
+          this._log.error("Error removing model from offline store");
+        });
+      }
+
+      const model = this._openModels.get(id);
+      if (model) {
+        model._handleLocallyDeleted();
+        const deletedEvent = new ModelDeletedEvent(model, true);
+        this._emitEvent(deletedEvent);
+      }
+    });
   }
 
   /**
@@ -1057,7 +1074,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     if (resourceId) {
       const modelId = this._resourceIdToModelId.get(resourceId);
-      const model: RealTimeModel = this._openModels.get(modelId) || this._resyncingModels.get(modelId);
+      const model: RealTimeModel = this._openModels.get(modelId) || this._resyncingModels.get(modelId).model;
       if (model !== undefined) {
         model._handleMessage(messageEvent);
       } else {
@@ -1130,28 +1147,35 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private _setOnline = () => {
     this._openModels.forEach((model) => {
-      model._setOnline();
+      this._resyncingModels.set(model.modelId(), {
+        modelId: model.modelId(),
+        model,
+        action: "resync"
+      });
+
       // The open models will automatically start to sync.
-      this._resyncingModels.set(model.modelId(), model);
+      model._setOnline();
     });
 
     this._modelOfflineManager
       .ready()
       .then(() => {
-        this._emitEvent(new OfflineModelSyncStartedEvent());
-        return this._deleteMarkedModels();
+        if (this._connection.isOnline()) {
+          this._emitEvent(new OfflineModelSyncStartedEvent());
+          return this._syncDirtyModelsToServer();
+        }
       })
-      .then(() => this._syncDirtyModelsToServer())
       .then(() => {
-        this._emitEvent(new OfflineModelSyncCompletedEvent());
         // We might have gone offline.
         if (this._connection.isOnline()) {
+          this._emitEvent(new OfflineModelSyncCompletedEvent());
           return this._modelOfflineManager.resubscribe();
         } else {
           return Promise.resolve();
         }
       })
-      .catch(e => console.error(e));
+      .catch((e) => this._log.error("Error resynchronizing models after reconnect", e));
+
   }
 
   /**
@@ -1160,11 +1184,18 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private async _syncDirtyModelsToServer(): Promise<void> {
     this._modelResyncQueue.length = 0;
-    const dirtyModelIds = await this._modelOfflineManager.getDirtyModelIds();
+    const dirtyModelIds = await this._modelOfflineManager.getDirtyModelMetaData();
 
-    const noOpen = dirtyModelIds.filter(modelId => !this._resyncingModels.has(modelId));
+    const notOpen: IResyncEntry[] = dirtyModelIds
+      .filter(metaData => !this._resyncingModels.has(metaData.modelId))
+      .map(metaData => {
+        return {
+          modelId: metaData.modelId,
+          action: metaData.available ? "resync" : "delete"
+        };
+      });
     if (this._connection.isOnline()) {
-      this._modelResyncQueue.push(...noOpen);
+      this._modelResyncQueue.push(...notOpen);
     }
 
     this._syncDeferred = new Deferred<void>();
@@ -1174,13 +1205,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._checkResyncQueue();
 
     return promise;
-  }
-
-  private async _deleteMarkedModels(): Promise<void> {
-    const deletedModels = await this._modelOfflineManager.getDeletedModelIds();
-    for (const modelId of deletedModels) {
-      await this.remove(modelId);
-    }
   }
 
   /**
@@ -1194,18 +1218,22 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       if (this._modelResyncQueue.length === 0) {
         this._syncDeferred.resolve();
         this._syncDeferred = null;
-        // TODO do we need to fire an event here?
       } else {
-        const modelId = this._modelResyncQueue.pop();
-        this._modelOfflineManager.getOfflineModelData(modelId).then(modelState => {
+        const entry = this._modelResyncQueue.pop();
+        this._modelOfflineManager.getOfflineModelData(entry.modelId).then(modelState => {
           // Here we make sure that some other process has not already initiated
           // a process that will sync the model anyway.
           if (TypeChecker.isSet(modelState) &&
-            !this._resyncingModels.has(modelId) &&
-            !this._openModels.has(modelId) &&
-            !this._openModelRequests.has(modelId)) {
-            this._createAndSyncModel(modelState);
+            !this._resyncingModels.has(entry.modelId) &&
+            !this._openModels.has(entry.modelId) &&
+            !this._openModelRequests.has(entry.modelId)) {
+            if (entry.action === "resync") {
+              this._createAndSyncModel(modelState, entry);
+            } else {
+              this._deleteResyncModel(entry);
+            }
           } else {
+            // The model does not need to be
             // Try the next one.
             this._checkResyncQueue();
           }
@@ -1214,15 +1242,26 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
   }
 
+  private _deleteResyncModel(entry: IResyncEntry): Promise<void> {
+    return this._removeOnline(entry.modelId)
+      .then(() => this._resyncComplete(entry.modelId))
+      .catch((e) => {
+        // TODO check for model_not_found, and emit an error
+        // otherwise.
+        this._resyncComplete(entry.modelId);
+      });
+  }
+
   /**
    * @internal
    * @hidden
    */
-  private _createAndSyncModel(modelState: IModelState): RealTimeModel {
-    this._log.debug(`Synchronizing model: ${modelState.snapshot.modelId}`);
+  private _createAndSyncModel(modelState: IModelState, resyncEntry: IResyncEntry): RealTimeModel {
+    this._log.debug(`Synchronizing model: ${modelState.modelId}`);
 
     const model = this._creteModelFromOfflineState(modelState, true);
-    this._resyncingModels.set(model.modelId(), model);
+    resyncEntry.model = model;
+    this._resyncingModels.set(model.modelId(), resyncEntry);
 
     // The model will be in an offline state.  So we can actually trigger
     // it to go online which will do the normal sync process.
@@ -1257,4 +1296,10 @@ class InitialIdGenerator {
   public id(): string {
     return this._prefix + ":" + this._id++;
   }
+}
+
+interface IResyncEntry {
+  modelId: string;
+  model?: RealTimeModel;
+  action: "resync" | "delete";
 }

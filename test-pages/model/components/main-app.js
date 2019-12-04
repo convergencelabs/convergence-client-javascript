@@ -30,28 +30,140 @@ Vue.component('main-app', {
     return {
       connected: false,
       model: null,
-      domain: domain
+      domain: domain,
+      offlineModels: [],
+      onlineModels: []
     };
   },
+  created() {
+    this.domain.models().events().subscribe(e => {
+      console.log(e);
+      if (e.name.startsWith("offline_model")) {
+        this.refreshOfflineModels();
+        if (e.name === "offline_model_sync_completed") {
+          this.refreshOnlineModels();
+        }
+      }
+    })
+  },
   methods: {
+    refreshAll() {
+      this.refreshOfflineModels();
+      this.refreshOnlineModels();
+    },
     onConnected() {
       this.connected = true;
+      this.refreshAll()
     },
     onDisconnected() {
       this.connected = false;
+      this.offlineModels = [];
+      this.onlineModels = [];
     },
-    onOpenModel(model) {
-      this.model = model;
-      model.on(Convergence.ModelDeletedEvent.NAME, function (event) {
-        console.log('model deleted', model.modelId(), 'remotely?', !event.local);
-      });
-
-      model.on(Convergence.ModelPermissionsChangedEvent.NAME, function (event) {
-        console.log('permissions changed', event.permissions, event.changed);
-      });
+    onOpenModel(id) {
+      this.onCloseModel();
+      const options = this.buildCreateOptions(id);
+      this.domain
+        .models()
+        .openAutoCreate(options)
+        .then((model) => {
+          this.model = model;
+        })
+        .catch(e => console.error(e));
     },
     onCloseModel() {
-      this.model = null;
+      if (this.model) {
+        this.model.close().catch(e => console.error(e));
+        this.model = null;
+      }
+    },
+    onCreateModel(id) {
+      const options = this.buildCreateOptions(id);
+      this.domain
+        .models()
+        .create(options)
+        .then((model) => {
+          this.refreshAll();
+        })
+        .catch(e => console.error(e));
+      ;
+    },
+    onDeleteModel(id) {
+      domain
+        .models()
+        .remove(id)
+        .then(() => {
+          this.refreshAll()
+        })
+        .catch(e => console.error(e));
+    },
+    onSubscribe(id) {
+      this.domain
+        .models()
+        .subscribeOffline(id)
+        .then(() => this.refreshOfflineModels())
+        .catch(e => console.error(e));
+    },
+    onUnsubscribe(id) {
+      this.domain
+        .models()
+        .unsubscribeOffline(id)
+        .then(() => this.refreshOfflineModels())
+        .catch(e => console.error(e));
+    },
+    refreshOnlineModels() {
+      this.onlineModels = [];
+
+      if (this.connected && this.domain.session().isConnected()) {
+        const query = "SELECT * FROM model-test-page";
+        this.domain
+          .models()
+          .query(query)
+          .then(results => {
+            this.onlineModels = [];
+            results.data.forEach(model => {
+              this.onlineModels.push({modelId: model.modelId, version: model.version});
+            })
+          })
+          .catch(e => console.error(e));
+      }
+    },
+    refreshOfflineModels() {
+      this.domain
+        .models()
+        .getOfflineModelMetaData()
+        .then(subs => {
+          this.offlineModels = subs;
+        })
+        .catch(e => {
+          console.error(e);
+        });
+    },
+    buildCreateOptions(id) {
+      return {
+        collection: "model-test-page",
+        id: id,
+        data: {
+          "string": "String data to edit",
+          "number": 10,
+          "boolean": true,
+          "array": [
+            "Apples",
+            "Bananas",
+            "Pears",
+            "Orange"
+          ],
+          "object": {
+            "key1": "value1",
+            "key2": "value2",
+            "key3": "value3",
+            "key4": "value4"
+          },
+          "date": new Date()
+        },
+        overrideWorld: true,
+        worldPermissions: {read: true, write: true, remove: false, manage: false}
+      }
     }
   },
   template: `
@@ -66,16 +178,26 @@ Vue.component('main-app', {
     <model-controls 
       v-bind:connected="connected"
       v-bind:model="model"
-      v-on:modelOpened="onOpenModel"
-      v-on:modelClosed="onCloseModel"
+      v-on:deleteModel="onDeleteModel"
+      v-on:createModel="onCreateModel"
+      v-on:openModel="onOpenModel"
+      v-on:closeModel="onCloseModel"
     />
-    <model-subscription-controls 
+    <offline-models
       v-bind:connected="connected"
-      v-bind:modelService="domain.models()"
+      v-bind:model="model"
+      v-bind:offlineModels="offlineModels"
+      v-on:openModel="onOpenModel"
+      v-on:subscribe="onSubscribe"
+      v-on:unsubscribe="onUnsubscribe"
     />
     <online-models 
       v-bind:connected="connected"
-      v-bind:modelService="domain.models()"
+      v-bind:onlineModels="onlineModels"
+      v-on:deleteModel="onDeleteModel"
+      v-on:openModel="onOpenModel"
+      v-on:subscribe="onSubscribe"
+      v-on:refresh="refreshOnlineModels"
     />
   </div>
   <div class="col-6">

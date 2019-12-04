@@ -14,6 +14,7 @@
 
 import {IdbStorageAdapter} from "../../../main/storage/idb";
 import {IModelState} from "../../../main/storage/api/";
+import {ModelPermissions} from "../../../main/model/";
 
 import {expect} from "chai";
 import "fake-indexeddb/auto";
@@ -23,7 +24,7 @@ describe("IdbModelStore", () => {
     it("returns false for a model that does not exist", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
-        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
+        const exists = await modelStore.modelExists(modelState.modelId);
         expect(exists).to.be.false;
       })
     );
@@ -32,7 +33,7 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
+        const exists = await modelStore.modelExists(modelState.modelId);
         expect(exists).to.be.true;
       })
     );
@@ -43,7 +44,7 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const retrieved = await modelStore.getModelState(modelState.snapshot.modelId);
+        const retrieved = await modelStore.getModelState(modelState.modelId);
         expect(retrieved).to.deep.equal(modelState);
       })
     );
@@ -54,11 +55,11 @@ describe("IdbModelStore", () => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
-        const exists = await modelStore.modelExists(modelState.snapshot.modelId);
+        const exists = await modelStore.modelExists(modelState.modelId);
         expect(exists).to.be.true;
 
-        await modelStore.removeSubscriptions([modelState.snapshot.modelId]);
-        const afterDelete = await modelStore.modelExists(modelState.snapshot.modelId);
+        await modelStore.removeSubscriptions([modelState.modelId]);
+        const afterDelete = await modelStore.modelExists(modelState.modelId);
         expect(afterDelete).to.be.false;
       })
     );
@@ -69,26 +70,24 @@ let modelCounter = 1;
 
 function createModelState(): IModelState {
   return {
+    modelId: "modelId" + modelCounter++,
+    collection: "collection",
+    local: false,
     version: 10,
+    createdTime: new Date(),
+    modifiedTime: new Date(),
+    permissions: new ModelPermissions(true, true, true, true),
     snapshot: {
-      modelId: "modelId" + modelCounter++,
-      collection: "collection",
-      local: false,
-      dirty: false,
-      subscribed: false,
       dataVersion: 10,
       seqNo: 0,
-      createdTime: new Date(),
-      modifiedTime: new Date(),
       data: {
         type: "object",
         id: "1:0",
         children: {}
       },
-      permissions: {read: true, write: true, remove: true, manage: true}
-    },
-    localOperations: [],
-    serverOperations: []
+      localOperations: [],
+      serverOperations: []
+    }
   };
 }
 

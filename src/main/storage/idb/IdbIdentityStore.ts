@@ -12,11 +12,13 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IDomainUserIdData} from "./IDomainUserIdData";
+import {IdbPersistenceStore} from "./IdbPersistenceStore";
+import {IIdentityStore} from "../api";
 
 /**
- * @module Offline
+ * @hidden
+ * @internal
  */
-export interface IMetaStore {
-  getDomainUserId(): Promise<IDomainUserIdData>;
+export class IdbIdentityStore extends IdbPersistenceStore implements IIdentityStore {
+
 }

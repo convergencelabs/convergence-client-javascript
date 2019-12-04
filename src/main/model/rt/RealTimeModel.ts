@@ -89,7 +89,7 @@ import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/Of
 import {ILocalOperationData, IServerOperationData} from "../../storage/api";
 import {DomainUser} from "../../identity";
 import {ICreateModelOptions} from "../ICreateModelOptions";
-import {IModelStateSnapshot} from "../IModeStateSnapshot";
+import {IConcurrencyControlState} from "../IModeStateSnapshot";
 import {ReplayDeferred} from "../../util/ReplayDeferred";
 
 import {com} from "@convergence/convergence-proto";
@@ -715,6 +715,20 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
+   * Determines is this model is a model that was created offline,
+   * and has not been synced to the server yet.
+   *
+   * @returns
+   *   True if the model was created locally and has not synced to the server,
+   *   false otherwise.
+   *
+   * @experimental
+   */
+  public isLocal(): boolean {
+    return this._local;
+  }
+
+  /**
    * Closes the model, emitting the appropriate events to any other participants
    * and cleaning up any opened resources.
    */
@@ -973,22 +987,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
-  public _getModelStateSnapshot(): IModelStateSnapshot {
+  public _getConcurrencyControlStateSnapshot(): IConcurrencyControlState {
     return {
-      local: this._local,
-      dirty: this._committed,
+      data: this._model.root().dataValue(),
       seqNo: this._concurrencyControl.sequenceNumber(),
-      data: this._model.root().dataValue()
+      uncommittedOperations: [...this._concurrencyControl.getInFlightOperations()]
     };
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _getUncommittedOperations(): ClientOperationEvent[] {
-    return [...this._concurrencyControl.getInFlightOperations()];
   }
 
   /**
@@ -1174,8 +1178,27 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _setOnline(): void {
     if (this._local) {
-      this._debug("Sending locally created model to the server");
-      this._offlineManager.getModelCreationData(this._modelId).then(creation => {
+      // If the model is not local, its possible that it was deleted offline
+      // If it wasn't local and its open.. the that means the local user did not
+      // deleted it and recreate it.  Thus we only need to check for deletion
+      // if we are local.
+      this._offlineManager.getModelMetaData(this._modelId).then(metaData => {
+        if (metaData.deleted) {
+          return this._modelService.remove(this._modelId)
+            .catch((e) => {
+              // TODO we should explicitly check for model_not_found and only
+              // ignore that.
+              console.log(e);
+            }).then(() => {
+              return this._offlineManager.modelDeleted(this._modelId);
+            });
+        } else {
+          return Promise.resolve();
+        }
+      }).then(() => {
+        return this._offlineManager.getModelCreationData(this._modelId);
+      }).then(creation => {
+        this._debug("Sending locally created model to the server");
         const options: ICreateModelOptions = {
           id: creation.modelId,
           collection: creation.collection,
@@ -1195,6 +1218,20 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     } else {
       this._reconnect();
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _handleLocallyDeleted(): void {
+    const message = `The model with id '${this._modelId}' was locally deleted.`;
+    const event = new ModelClosedEvent(this, true, message);
+    this._initiateClose(event);
+
+    const deletedEvent = new ModelDeletedEvent(this, true, message);
+    this._emitEvent(deletedEvent);
   }
 
   /**
@@ -1407,21 +1444,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleForceClose(message: IModelForceCloseMessage): void {
     this._log.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
 
-    const event: ModelClosedEvent = {
-      src: this,
-      name: RealTimeModel.Events.CLOSED,
-      local: false,
-      reason: message.reason
-    };
+    const event = new ModelClosedEvent(this, false, message.reason);
     this._initiateClose(event);
 
     if (message.reasonCode === ModelForcedCloseReasonCodes.DELETED) {
-      const deletedEvent: ModelDeletedEvent = {
-        src: this,
-        name: RealTimeModel.Events.DELETED,
-        local: false,
-        reason: message.reason
-      };
+      const deletedEvent = new ModelDeletedEvent(this, false, message.reason);
       this._emitEvent(deletedEvent);
     }
   }

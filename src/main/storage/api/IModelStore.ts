@@ -16,8 +16,8 @@ import {IModelState} from "./IModelState";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
 import {IModelUpdate} from "./IModelUpdate";
-import {IModelSnapshot} from "./IModelSnapshot";
 import {IModelMetaData} from "./IModelMetaData";
+import {ObjectValue} from "../../model";
 
 /**
  * @module Offline
@@ -45,17 +45,19 @@ export interface IModelStore {
 
   getModelState(modelId: string): Promise<IModelState | undefined>;
 
-  getAllModelMetaData(): Promise<IModelMetaData[]>;
-
   putModelState(model: IModelState): Promise<void>;
 
-  snapshotModel(model: IModelSnapshot): Promise<void>;
+  snapshotModel(modelId: string, version: number, modelData: ObjectValue): Promise<void>;
+
+  getModelMetaData(modelId: string): Promise<IModelMetaData | undefined>;
+
+  getAllModelMetaData(): Promise<IModelMetaData[]>;
 
   updateOfflineModel(update: IModelUpdate): Promise<void>;
 
   modelExists(modelId: string): Promise<boolean>;
 
-  getDirtyModelIds(): Promise<string[]>;
+  getDirtyModelMetaData(): Promise<IModelMetaData[]>;
 
   deleteIfNotNeeded(modelId: string): Promise<void>;
 

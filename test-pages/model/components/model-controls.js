@@ -16,72 +16,36 @@ Vue.component('model-controls', {
   props: ["connected", "model"],
   data: () => {
     return {
-      openModelId: getModelId(),
+      openModelId: "",
       createModelId: "",
       deleteModelId: ""
     };
   },
+  watch: {
+    model() {
+      if (this.model) {
+        this.openModelId = this.model.modelId();
+      }
+    }
+  },
   methods: {
     createModel() {
-      const options = this.buildCreateOptions(this.createModelId);
-      domain.models().create(options)
-        .then((model) => {
-          this.$emit("modelCreated", model);
-        }).catch(e => {
-        console.error(e);
-      });
+      this.$emit("createModel", this.createModelId);
     },
     deleteModel() {
-      domain.models().remove(this.deleteModelId)
-        .then((model) => {
-          this.$emit("modelDeleted", model);
-        }).catch(e => {
-        console.error(e);
-      });
+      this.$emit("deleteModel", this.deleteModelId);
     },
     openModel() {
-      const options = this.buildCreateOptions(this.openModelId);
-      domain.models().openAutoCreate(options).then((model) => {
-        this.$emit("modelOpened", model);
-      }).catch(e => {
-        console.error(e);
-      });
+      this.$emit("openModel", this.openModelId);
     },
     closeModel() {
-      this.model.close();
-      this.$emit("modelClosed");
-    },
-    buildCreateOptions(id) {
-      return {
-        collection: "model-test-page",
-        id: id,
-        data: {
-          "string": "String data to edit",
-          "number": 10,
-          "boolean": true,
-          "array": [
-            "Apples",
-            "Bananas",
-            "Pears",
-            "Orange"
-          ],
-          "object": {
-            "key1": "value1",
-            "key2": "value2",
-            "key3": "value3",
-            "key4": "value4"
-          },
-          "date": new Date()
-        },
-        overrideWorld: true,
-        worldPermissions: {read: true, write: true, remove: false, manage: false}
-      }
+      this.$emit("closeModel");
     }
   },
   template: `
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Model Control</h5>
+    <h5 class="card-title">Model Controls</h5>
     <div class="input-group mb-3">
       <button class="btn btn-primary" :disabled="!connected || model !== null" v-on:click="openModel">Open Model</button>
       <button class="btn btn-primary ml-3" :disabled="!connected || model === null" v-on:click="closeModel">Close Model</button>
@@ -104,24 +68,3 @@ Vue.component('model-controls', {
 </div>
   `
 });
-
-function getModelId() {
-  const urlParams = new URLSearchParams(location.search);
-  if (urlParams.has("modelId")) {
-    return urlParams.get("modelId");
-  } else {
-    const modelId = createUUID();
-    urlParams.set("modelId", modelId);
-    window.history.replaceState({}, "", decodeURIComponent(`${location.pathname}?${urlParams}`));
-  }
-}
-
-function createUUID() {
-  let dt = new Date().getTime();
-  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (dt + Math.random() * 16) % 16 | 0;
-    dt = Math.floor(dt / 16);
-    return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-  return uuid;
-}
