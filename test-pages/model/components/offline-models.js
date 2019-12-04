@@ -52,6 +52,7 @@ Vue.component('offline-models', {
       <thead class="thead-light">
         <th scope="col">Model Id</th>
         <th scope="col">Dirty</th>
+        <th scope="col">Deleted</th>
         <th scope="col">Local</th>
         <th scope="col">Subed</th>
         <th scope="col">Avail</th>
@@ -61,6 +62,7 @@ Vue.component('offline-models', {
         <tr v-for="offlineModel in offlineModels">
           <td>{{offlineModel.modelId}}</td>
           <td>{{offlineModel.dirty}}</td>
+          <td>{{offlineModel.deleted}}</td>
           <td>{{offlineModel.created}}</td>
           <td>{{offlineModel.subscribed}}</td>
           <td>{{offlineModel.available}}</td>

@@ -128,7 +128,6 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     const currentMetaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelState.modelId));
     if (currentMetaData) {
       meta.subscribed = currentMetaData.subscribed;
-      meta.created = currentMetaData.created;
       meta.deleted = currentMetaData.deleted;
     }
 

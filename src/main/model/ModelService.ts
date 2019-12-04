@@ -1220,24 +1220,25 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         this._syncDeferred = null;
       } else {
         const entry = this._modelResyncQueue.pop();
-        this._modelOfflineManager.getOfflineModelData(entry.modelId).then(modelState => {
-          // Here we make sure that some other process has not already initiated
-          // a process that will sync the model anyway.
-          if (TypeChecker.isSet(modelState) &&
-            !this._resyncingModels.has(entry.modelId) &&
-            !this._openModels.has(entry.modelId) &&
-            !this._openModelRequests.has(entry.modelId)) {
-            if (entry.action === "resync") {
+        if (entry.action === "resync") {
+          this._modelOfflineManager.getOfflineModelData(entry.modelId).then(modelState => {
+            // Here we make sure that some other process has not already initiated
+            // a process that will sync the model anyway.
+            if (TypeChecker.isSet(modelState) &&
+              !this._resyncingModels.has(entry.modelId) &&
+              !this._openModels.has(entry.modelId) &&
+              !this._openModelRequests.has(entry.modelId)) {
               this._createAndSyncModel(modelState, entry);
             } else {
-              this._deleteResyncModel(entry);
+              // The model does not need to be
+              // Try the next one.
+              this._checkResyncQueue();
             }
-          } else {
-            // The model does not need to be
-            // Try the next one.
-            this._checkResyncQueue();
-          }
-        });
+          });
+        } else {
+          this._deleteResyncModel(entry)
+            .catch(e => this._log.error("error deleting model during resync", e));
+        }
       }
     }
   }
