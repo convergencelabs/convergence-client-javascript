@@ -31,13 +31,13 @@ export interface IModelStore {
 
   setModelSubscriptions(subscriptions: string[]): Promise<void>;
 
-  createLocalModel(model: IModelCreationData): Promise<void>;
+  createModelOffline(model: IModelCreationData): Promise<void>;
 
   modelCreated(modelId: string): Promise<void>;
 
   getModelCreationData(modelId: string): Promise<IModelCreationData>;
 
-  markModelForDeletion(modelId: string): Promise<void>;
+  deleteModel(modelId: string): Promise<void>;
 
   modelDeleted(modelId: string): Promise<void>;
 
@@ -57,9 +57,9 @@ export interface IModelStore {
 
   modelExists(modelId: string): Promise<boolean>;
 
-  getDirtyModelMetaData(): Promise<IModelMetaData[]>;
+  getModelsRequiringSync(): Promise<IModelMetaData[]>;
 
-  deleteIfNotNeeded(modelId: string): Promise<void>;
+  deleteIfNotNeeded(modelId: string): Promise<boolean>;
 
   processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void>;
 

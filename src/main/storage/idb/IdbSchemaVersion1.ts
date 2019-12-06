@@ -55,8 +55,13 @@ export class IdbSchemaVersion1 {
       {unique: false});
 
     modelMetaData.createIndex(
-      IdbSchema.ModelMetaData.Indices.Dirty,
-      IdbSchema.ModelMetaData.Fields.Dirty,
+      IdbSchema.ModelMetaData.Indices.Uncommitted,
+      IdbSchema.ModelMetaData.Fields.Uncommitted,
+      {unique: false});
+
+    modelMetaData.createIndex(
+      IdbSchema.ModelMetaData.Indices.SyncRequired,
+      IdbSchema.ModelMetaData.Fields.SyncRequired,
       {unique: false});
 
     modelMetaData.createIndex(

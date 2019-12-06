@@ -188,6 +188,7 @@ Vue.component('main-app', {
       v-bind:model="model"
       v-bind:offlineModels="offlineModels"
       v-on:openModel="onOpenModel"
+      v-on:deleteModel="onDeleteModel"
       v-on:subscribe="onSubscribe"
       v-on:unsubscribe="onUnsubscribe"
     />

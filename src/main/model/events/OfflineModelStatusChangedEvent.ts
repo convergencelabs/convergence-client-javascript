@@ -42,7 +42,7 @@ export class OfflineModelStatusChangedEvent implements IConvergenceEvent {
     public readonly id: string,
     public readonly subscribed: boolean,
     public readonly available: boolean,
-    public readonly dirty: boolean,
+    public readonly uncommitted: boolean,
     public readonly local: boolean
   ) {
     Object.freeze(this);

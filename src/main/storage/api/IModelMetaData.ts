@@ -49,7 +49,12 @@ export interface IModelMetaData {
    * If the model has uncommitted local operations that need to be sent to the
    * server when the client connects.
    */
-  dirty: boolean;
+  uncommitted: boolean;
+
+  /**
+   * If this record requires synchronization to the server for any reason.
+   */
+  syncRequired: boolean;
 
   details?: {
     collection: string;

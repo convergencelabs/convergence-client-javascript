@@ -33,13 +33,15 @@ export const IdbSchema = {
       Subscribed: "subscribed",
       Created: "created",
       Deleted: "deleted",
-      Dirty: "dirty"
+      SyncRequired: "syncRequired",
+      Uncommitted: "uncommitted"
     },
     Indices: {
       ModelId: "ModelMetaData.modelId",
       Created: "ModelMetaData.created",
       Deleted: "ModelMetaData.deleted",
-      Dirty: "ModelMetaData.dirty",
+      Uncommitted: "ModelMetaData.uncommitted",
+      SyncRequired: "ModelMetaData.syncRequired",
       Subscribed: "ModelMetaData.subscribed"
     }
   },

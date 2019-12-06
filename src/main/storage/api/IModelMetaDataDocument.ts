@@ -22,8 +22,9 @@ export interface IModelMetaDataDocument {
   subscribed?: number;
   available?: number;
   deleted?: number;
+  uncommitted?: number;
   created?: number;
-  dirty?: number;
+  syncRequired?: number;
 
   details?: {
     collection: string;

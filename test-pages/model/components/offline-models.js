@@ -26,6 +26,9 @@ Vue.component('offline-models', {
     open(id) {
       this.$emit("openModel", id);
     },
+    remove(id) {
+      this.$emit("deleteModel", id);
+    },
     subscribe(id) {
       this.$emit("subscribe", id);
     },
@@ -51,27 +54,28 @@ Vue.component('offline-models', {
     <table class="table table-bordered table-hover table-sm">
       <thead class="thead-light">
         <th scope="col">Model Id</th>
-        <th scope="col">Dirty</th>
-        <th scope="col">Deleted</th>
-        <th scope="col">Local</th>
-        <th scope="col">Subed</th>
-        <th scope="col">Avail</th>
+        <th scope="col">State</th>
         <th scope="col" class="text-right">Action</th>
       </thead>
       <tbody>
         <tr v-for="offlineModel in offlineModels">
           <td>{{offlineModel.modelId}}</td>
-          <td>{{offlineModel.dirty}}</td>
-          <td>{{offlineModel.deleted}}</td>
-          <td>{{offlineModel.created}}</td>
-          <td>{{offlineModel.subscribed}}</td>
-          <td>{{offlineModel.available}}</td>
+          <td>
+            <span v-if="offlineModel.subscribed" class="badge badge-secondary">Subscribed</span>
+            <span v-if="offlineModel.available" class="badge badge-secondary">Available</span>
+            <span v-if="offlineModel.uncommitted" class="badge badge-secondary">Uncommitted</span>
+            <span v-if="offlineModel.deleted" class="badge badge-secondary">Deleted</span>
+            <span v-if="offlineModel.created" class="badge badge-secondary">Created</span>
+          </td>
           <td class="text-right">
             <button class="btn btn-primary btn-sm" 
                     v-on:click="open(offlineModel.modelId)" 
                     :disabled="!offlineModel.available || (model && model.modelId() === offlineModel.modelId)">Open</button>
-            <button v-if="!offlineModel.subscribed" class="btn btn-primary btn-sm" v-on:click="subscribe(offlineModel.modelId)">Subscribe</button>
-            <button v-else class="btn btn-danger btn-sm" v-on:click="unsubscribe(offlineModel.modelId)">Unsubscribe</button>
+            <button class="btn btn-danger btn-sm" 
+                    v-on:click="remove(offlineModel.modelId)" 
+                    :disabled="!offlineModel.available || (model && model.modelId() === offlineModel.modelId)">Del</button>
+            <button v-if="!offlineModel.subscribed" class="btn btn-primary btn-sm" v-on:click="subscribe(offlineModel.modelId)">Sub</button>
+            <button v-else class="btn btn-danger btn-sm" v-on:click="unsubscribe(offlineModel.modelId)">UnSub</button>
           </td>
         </tr>
       </tbody>
