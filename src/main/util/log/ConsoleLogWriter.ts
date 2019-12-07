@@ -40,7 +40,11 @@ export class ConsoleLogWriter extends PatternLogWriter {
         console.warn(this._formatMessage(event));
         break;
       case LogLevel.ERROR:
-        console.error(this._formatMessage(event), event.error);
+        if (event.error) {
+          console.error(this._formatMessage(event) + "\n", event.error);
+        } else {
+          console.error(this._formatMessage(event));
+        }
         break;
       default:
       // no-op
