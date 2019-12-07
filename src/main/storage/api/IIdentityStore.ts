@@ -12,9 +12,17 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+import {DomainUser, DomainUserId} from "../../identity";
+
 /**
  * @module Offline
  */
 export interface IIdentityStore {
+  putUser(user: DomainUser): Promise<void>;
 
+  getUsers(): Promise<DomainUser[]>;
+
+  putSession(sessionId: string, userId: DomainUserId): Promise<void>;
+
+  getSessions(): Promise<Map<string, DomainUserId>>;
 }

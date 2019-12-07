@@ -74,6 +74,28 @@ export const IdbSchema = {
     Indices: {
       ModelId: "ModelLocalOperation.modelId",
       ModelId_SequenceNumber: "ModelLocalOperation.modelId_sequenceNumber"
+    }
+  },
+  DomainUser: {
+    Store: "DomainUser",
+    Fields: {
+      Username: "username",
+      UserType: "userType"
     },
+    Indices: {
+      UserType_Username: "DomainUser.userType_username"
+    }
+  },
+  Session: {
+    Store: "Session",
+    Fields: {
+      SessionId: "sessionId",
+      Username: "username",
+      UserType: "userType"
+    },
+    Indices: {
+      UserType_Username: "DomainUser.userType_username",
+      SessionId: "Session.sessionId"
+    }
   }
 };

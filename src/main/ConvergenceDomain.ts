@@ -50,7 +50,7 @@ import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
 import {ModelOfflineManager} from "./model/ModelOfflineManager";
-import {StringMap} from "./util/StringMap";
+import {StringMap} from "./util/";
 import {Logger} from "./util/log/Logger";
 import {Logging} from "./util/log/Logging";
 
@@ -283,7 +283,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
     this._storage = new StorageEngine();
 
-    this._identityCache = new IdentityCache(this._connection);
+    this._identityCache = new IdentityCache(this._connection, this._storage);
     this._modelOfflineManager = new ModelOfflineManager(
       this._connection,
       10 * 60 * 1000,
@@ -657,9 +657,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       this._log.debug("options.offline.storageAdapter is set, initializing offline storage");
       this._storage.configure(this._options.storageAdapter);
       return this._storage.openStore(this._namespace, this._domainId, username, this._options.offlineKey)
-        .then(() => {
+        .then(async () => {
           this._initialized = true;
-          return this._modelOfflineManager.init();
+          await this._modelOfflineManager.init();
+          await this._identityCache.init();
         });
     } else {
       this._initialized = true;

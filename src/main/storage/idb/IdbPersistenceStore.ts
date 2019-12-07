@@ -86,17 +86,17 @@ export class IdbPersistenceStore {
     });
   }
 
-  protected _getAll(storeName: string, query?: IDBValidKey | IDBKeyRange | null): Promise<any[]> {
-    const results: string[] = [];
-    return this._readIterator(storeName, (value: any) => {
+  protected _getAll<T extends any>(storeName: string, query?: IDBValidKey | IDBKeyRange | null): Promise<T[]> {
+    const results: T[] = [];
+    return this._readIterator<T>(storeName, (value: T) => {
       results.push(value);
     }, query).then(() => results);
   }
 
-  protected _readIterator(storeName: string,
-                          onNext: (value: any) => void,
-                          query?: IDBValidKey | IDBKeyRange | null,
-                          direction?: IDBCursorDirection): Promise<void> {
+  protected _readIterator<T extends any>(storeName: string,
+                                         onNext: (value: T) => void,
+                                         query?: IDBValidKey | IDBKeyRange | null,
+                                         direction?: IDBCursorDirection): Promise<void> {
     return new Promise((resolve, reject) => {
       const tx = this._db.transaction(storeName, READONLY);
       const objectStore = tx.objectStore(storeName);

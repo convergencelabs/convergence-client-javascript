@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IModelStore, IStorageAdapter} from "./api";
+import {IIdentityStore, IModelStore, IStorageAdapter} from "./api";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 
@@ -69,5 +69,9 @@ export class StorageEngine {
 
   public modelStore(): IModelStore {
     return this._storage.modelStore();
+  }
+
+  public identityStore(): IIdentityStore {
+    return this._storage.identityStore();
   }
 }

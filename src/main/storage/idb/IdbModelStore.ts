@@ -356,7 +356,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       storeNames,
       async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
         const metaData = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
-        if (!IdbModelStore._isMetaDataNeeded(metaData)) {
+        if (metaData && !IdbModelStore._isMetaDataNeeded(metaData)) {
           await IdbModelStore._deleteModel(
             modelId, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
           return true;

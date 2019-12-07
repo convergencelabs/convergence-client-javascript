@@ -122,5 +122,52 @@ export class IdbSchemaVersion1 {
         IdbSchema.ModelLocalOperation.Fields.SequenceNumber
       ],
       {unique: true});
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Identity Schema
+    ///////////////////////////////////////////////////////////////////////////
+
+    //
+    // Domain User Store
+    //
+    const userStore = db.createObjectStore(
+      IdbSchema.DomainUser.Store,
+      {
+        keyPath: [
+          IdbSchema.DomainUser.Fields.UserType,
+          IdbSchema.DomainUser.Fields.Username,
+        ]
+      });
+
+    userStore.createIndex(
+      IdbSchema.DomainUser.Indices.UserType_Username,
+      [
+        IdbSchema.DomainUser.Fields.UserType,
+        IdbSchema.DomainUser.Fields.Username,
+      ],
+      {unique: true});
+
+    const sessionStore = db.createObjectStore(
+      IdbSchema.Session.Store,
+      {
+        keyPath: [
+          IdbSchema.Session.Fields.SessionId
+        ]
+      });
+
+    sessionStore.createIndex(
+      IdbSchema.Session.Indices.UserType_Username,
+      [
+        IdbSchema.Session.Fields.UserType,
+        IdbSchema.Session.Fields.Username,
+      ],
+      {unique: false});
+
+    sessionStore.createIndex(
+      IdbSchema.Session.Indices.SessionId,
+      [
+        IdbSchema.Session.Fields.SessionId
+      ],
+      {unique: true});
   }
 }

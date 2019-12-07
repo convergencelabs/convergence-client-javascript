@@ -23,9 +23,12 @@ import {
 import {toDomainUser} from "./IdentityMessageUtils";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {DomainUserId} from "./DomainUserId";
+import {StorageEngine} from "../storage/StorageEngine";
 
 import {com} from "@convergence/convergence-proto";
 import IIdentityCacheUpdateMessage = com.convergencelabs.convergence.proto.identity.IIdentityCacheUpdateMessage;
+import {Logger} from "../util/log/Logger";
+import {Logging} from "../util/log/Logging";
 
 /**
  * @hidden
@@ -34,8 +37,10 @@ import IIdentityCacheUpdateMessage = com.convergencelabs.convergence.proto.ident
 export class IdentityCache {
   private readonly _users: Map<string, DomainUser>;
   private readonly _sessions: Map<string, DomainUser>;
+  private readonly _storage: StorageEngine;
+  private readonly _log: Logger;
 
-  constructor(connection: ConvergenceConnection) {
+  constructor(connection: ConvergenceConnection, storage: StorageEngine) {
     this._users = new Map();
     this._sessions = new Map();
     connection.messages().subscribe((event) => {
@@ -43,6 +48,25 @@ export class IdentityCache {
         this._processIdentityUpdate(event.message.identityCacheUpdate);
       }
     });
+
+    this._storage = storage;
+
+    this._log = Logging.logger("identity");
+  }
+
+  public async init(): Promise<void> {
+    if (this._storage.isEnabled()) {
+      const users = await this._storage.identityStore().getUsers();
+      users.forEach(user => {
+        this._users.set(user.userId.toGuid(), user);
+      });
+
+      const sessions = await this._storage.identityStore().getSessions();
+      sessions.forEach((userId, sessionId) => {
+        const user = this._users.get(userId.toGuid());
+        this._sessions.set(sessionId, user);
+      });
+    }
   }
 
   public getUserForSession(sessionId: string): DomainUser | undefined {
@@ -57,6 +81,10 @@ export class IdentityCache {
     getOrDefaultArray(message.users).forEach(userData => {
       const domainUser = toDomainUser(userData);
       this._users.set(domainUser.userId.toGuid(), domainUser);
+      if (this._storage.isEnabled()) {
+        this._storage.identityStore().putUser(domainUser)
+          .catch(e => this._log.error("Error storing user", e));
+      }
     });
 
     objectForEach(getOrDefaultObject(message.sessions), (sessionId, user) => {
@@ -64,6 +92,10 @@ export class IdentityCache {
       const username = getOrDefaultString(user.username);
       const domainUser = this._users.get(DomainUserId.guid(userType, username));
       this._sessions.set(sessionId, domainUser);
+      if (this._storage.isEnabled()) {
+        this._storage.identityStore().putSession(sessionId, domainUser.userId)
+          .catch(e => this._log.error("Error storing session", e));
+      }
     });
   }
 }
