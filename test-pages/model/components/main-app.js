@@ -43,8 +43,6 @@ Vue.component('main-app', {
         if (e.name === "offline_model_sync_completed") {
           this.refreshOnlineModels();
         }
-      } else if (e.name === "deleted" && this.model && this.model.modelId() === e.src.modelId()) {
-        this.onCloseModel();
       }
     })
   },
@@ -70,16 +68,18 @@ Vue.component('main-app', {
         .openAutoCreate(options)
         .then((model) => {
           this.model = model;
+          this.model.on("deleted", () => {
+            this.model = null;
+          });
           this.refreshAll();
         })
         .catch(e => console.error(e));
     },
     onCloseModel() {
-      if (this.model && !this.model.isClosing()) {
+      if (this.model) {
+        this.model = null;
         this.model.close().catch(e => console.error(e));
       }
-
-      this.model = null;
     },
     onCreateModel(id) {
       const options = this.buildCreateOptions(id);

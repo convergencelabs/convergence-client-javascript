@@ -72,13 +72,6 @@ import {ErrorEvent} from "../events";
  */
 export interface ModelServiceEvents {
   /**
-   * Emitted when a model is deleted. The actual event emitted is a [[ModelDeletedEvent]].
-   *
-   * @event [[ModelDeletedEvent]]
-   */
-  readonly MODEL_DELETED: "deleted";
-
-  /**
    * Emitted when a model is initially downloaded after it was first subscribed
    * to offline. The event emitted will be an [[OfflineModelAvailableEvent]]
    *
@@ -151,7 +144,6 @@ export interface ModelServiceEvents {
  * @module Real Time Data
  */
 export const ModelServiceEventConstants: ModelServiceEvents = {
-  MODEL_DELETED: ModelDeletedEvent.NAME,
   OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed",
   OFFLINE_MODEL_UPDATED: "offline_model_updated",
   OFFLINE_MODEL_DOWNLOAD_PENDING: "offline_model_download_pending",
@@ -434,34 +426,18 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
-
     const model = this._openModels.get(id);
-    let maybeClose: Promise<void>;
     if (model !== undefined) {
-      // tslint:disable-next-line:prefer-conditional-expression
-      if (!model.isClosing()) {
-        maybeClose = model.close();
-      } else {
-        maybeClose = model.whenClosed();
-      }
-    } else {
-      maybeClose = Promise.resolve();
+      model._handleLocallyDeleted();
     }
 
-    return maybeClose.then(() => {
-      if (this._connection.isOnline()) {
-        return this._removeOnline(id);
-      } else if (this._modelOfflineManager.isOfflineEnabled()) {
-        return this._removeOffline(id);
-      } else {
-        throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
-      }
-    }).then(() => {
-      if (model) {
-        const deletedEvent = new ModelDeletedEvent(model, true);
-        this._emitEvent(deletedEvent);
-      }
-    });
+    if (this._connection.isOnline()) {
+      return this._removeOnline(id);
+    } else if (this._modelOfflineManager.isOfflineEnabled()) {
+      return this._removeOffline(id);
+    } else {
+      throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
+    }
   }
 
   /**

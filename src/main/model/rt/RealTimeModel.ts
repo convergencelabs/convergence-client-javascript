@@ -749,7 +749,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     } else {
       // Close the model and emit the appropriate events.
       const event: ModelClosedEvent = new ModelClosedEvent(this, true);
-      this._initiateClose(event);
+      this._initiateClose(true, event);
       return this._closingData.deferred.promise();
     }
   }
@@ -771,7 +771,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     return this._closingData.deferred.promise();
   }
 
-  public _initiateClose(event?: ModelClosedEvent): void {
+  public _initiateClose(closeWithServer: boolean, event?: ModelClosedEvent): void {
     if (this._closingData.closing) {
       throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
     }
@@ -779,7 +779,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._closingData.closing = true;
     this._closingData.event = event;
 
-    if (this._connection.isOnline() && !this._resyncOnly) {
+    if (this._connection.isOnline() && closeWithServer) {
       // Inform the server that we are closed.
       const request: IConvergenceMessage = {
         closeRealTimeModelRequest: {
@@ -1226,7 +1226,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @private
    */
   public _handleLocallyDeleted(): void {
-    const message = `The model with id '${this._modelId}' was locally deleted.`;
+    const event = new ModelClosedEvent(this, true, "The model was locally deleted");
+    this._initiateClose(true, event);
+
+    const message = `The model with id '${this._modelId}' was locally deleted while offline.`;
     const deletedEvent = new ModelDeletedEvent(this, true, message);
     this._emitEvent(deletedEvent);
   }
@@ -1439,14 +1442,18 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handleForceClose(message: IModelForceCloseMessage): void {
-    this._log.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
+    if (this.isClosing()) {
+      return;
+    }
 
     const event = new ModelClosedEvent(this, false, message.reason);
-    this._initiateClose(event);
+    this._initiateClose(false, event);
 
     if (message.reasonCode === ModelForcedCloseReasonCodes.DELETED) {
       const deletedEvent = new ModelDeletedEvent(this, false, message.reason);
       this._emitEvent(deletedEvent);
+    } else {
+      this._log.error(`The model with id '${this._modelId}' was forcefully closed by the server: ${message.reason}`);
     }
   }
 
@@ -1668,7 +1675,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._resyncData = null;
 
       if (!openAfterSync) {
-        this._initiateClose();
+        this._initiateClose(false);
       } else {
         this._modelService._resyncComplete(this._modelId);
       }
