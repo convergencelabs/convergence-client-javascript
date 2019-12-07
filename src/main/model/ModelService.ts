@@ -63,6 +63,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
+import {ErrorEvent} from "../events";
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -433,15 +434,34 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
-    if (this._connection.isOnline()) {
-      return this._removeOnline(id);
-    } else if (this._modelOfflineManager.isOfflineEnabled()) {
-      return this._modelOfflineManager.markModelForDeletion(id).catch(e => {
-        this._log.error("Could not mark model for deletion", e);
-      });
+
+    const model = this._openModels.get(id);
+    let maybeClose: Promise<void>;
+    if (model !== undefined) {
+      // tslint:disable-next-line:prefer-conditional-expression
+      if (!model.isClosing()) {
+        maybeClose = model.close();
+      } else {
+        maybeClose = model.whenClosed();
+      }
     } else {
-      throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
+      maybeClose = Promise.resolve();
     }
+
+    return maybeClose.then(() => {
+      if (this._connection.isOnline()) {
+        return this._removeOnline(id);
+      } else if (this._modelOfflineManager.isOfflineEnabled()) {
+        return this._removeOffline(id);
+      } else {
+        throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
+      }
+    }).then(() => {
+      if (model) {
+        const deletedEvent = new ModelDeletedEvent(model, true);
+        this._emitEvent(deletedEvent);
+      }
+    });
   }
 
   /**
@@ -957,18 +977,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     return this._connection.request(request).then(() => {
       if (this._modelOfflineManager.isOfflineEnabled()) {
-        this._modelOfflineManager.modelDeleted(id).catch(e => {
-          // TODO emit an error event.
-          this._log.error("Error removing model from offline store");
+        this._modelOfflineManager.modelDeleted(id).catch((e: Error) => {
+          this._emitEvent(new ErrorEvent(
+            this._connection.session().domain(),
+            `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
+          );
+          this._log.error("Error removing model from offline store.", e);
         });
       }
+    });
+  }
 
-      const model = this._openModels.get(id);
-      if (model) {
-        model._handleLocallyDeleted();
-        const deletedEvent = new ModelDeletedEvent(model, true);
-        this._emitEvent(deletedEvent);
-      }
+  private _removeOffline(id: string): Promise<void> {
+    return this._modelOfflineManager.markModelForDeletion(id).catch(e => {
+      this._log.error("Could not mark model for deletion", e);
     });
   }
 

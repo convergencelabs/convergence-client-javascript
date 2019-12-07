@@ -734,11 +734,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public close(): Promise<void> {
     if (this._closingData.closing) {
-      return Promise.reject(new ConvergenceError(`The model is already closing ${this._modelId}`));
+      return Promise.reject(new ConvergenceError(`The model '${this._modelId}' is already closing`));
     }
 
     if (!this._open) {
-      return Promise.reject(new ConvergenceError(`The model has already been closed: ${this._modelId}`));
+      return Promise.reject(new ConvergenceError(`The model '${this._modelId}' has already been closed`));
     }
 
     if (this._resyncData) {
@@ -773,7 +773,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
   public _initiateClose(event?: ModelClosedEvent): void {
     if (this._closingData.closing) {
-      throw new ConvergenceError("Model already closing.");
+      throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
     }
 
     this._closingData.closing = true;
@@ -1227,9 +1227,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _handleLocallyDeleted(): void {
     const message = `The model with id '${this._modelId}' was locally deleted.`;
-    const event = new ModelClosedEvent(this, true, message);
-    this._initiateClose(event);
-
     const deletedEvent = new ModelDeletedEvent(this, true, message);
     this._emitEvent(deletedEvent);
   }
@@ -1465,6 +1462,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._model.root()._detach(false);
     this._open = false;
     this._connection = null;
+
+    this._closingData.closing = false;
+    this._closingData.deferred = null;
 
     deferred.resolve();
 

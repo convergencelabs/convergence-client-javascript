@@ -41,8 +41,6 @@ export interface IModelStore {
 
   modelDeleted(modelId: string): Promise<void>;
 
-  getDeletedModelIds(): Promise<string[]>;
-
   getModelState(modelId: string): Promise<IModelState | undefined>;
 
   putModelState(model: IModelState): Promise<void>;

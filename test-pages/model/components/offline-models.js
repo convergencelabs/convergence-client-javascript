@@ -73,7 +73,7 @@ Vue.component('offline-models', {
                     :disabled="!offlineModel.available || (model && model.modelId() === offlineModel.modelId)">Open</button>
             <button class="btn btn-danger btn-sm" 
                     v-on:click="remove(offlineModel.modelId)" 
-                    :disabled="!offlineModel.available || (model && model.modelId() === offlineModel.modelId)">Del</button>
+                    :disabled="!offlineModel.available">Del</button>
             <button v-if="!offlineModel.subscribed" class="btn btn-primary btn-sm" v-on:click="subscribe(offlineModel.modelId)">Sub</button>
             <button v-else class="btn btn-danger btn-sm" v-on:click="unsubscribe(offlineModel.modelId)">UnSub</button>
           </td>

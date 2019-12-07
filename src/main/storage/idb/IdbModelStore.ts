@@ -315,16 +315,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
     return this._withWriteStores(stores, async ([modelMetaDataStore]) => {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
-      delete metaData.deleted;
-      IdbModelStore._setSyncRequired(metaData);
-      await toVoidPromise(modelMetaDataStore.put(metaData));
-    });
-  }
-
-  public getDeletedModelIds(): Promise<string[]> {
-    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
-      const idx = store.index(IdbSchema.ModelMetaData.Indices.Deleted);
-      return toPromise(idx.getAllKeys()) as Promise<string[]>;
+      if (metaData) {
+        delete metaData.deleted;
+        IdbModelStore._setSyncRequired(metaData);
+        await toVoidPromise(modelMetaDataStore.put(metaData));
+      }
     });
   }
 
