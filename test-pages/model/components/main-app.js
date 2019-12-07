@@ -68,6 +68,7 @@ Vue.component('main-app', {
         .openAutoCreate(options)
         .then((model) => {
           this.model = model;
+          this.refreshAll();
         })
         .catch(e => console.error(e));
     },
@@ -82,19 +83,14 @@ Vue.component('main-app', {
       this.domain
         .models()
         .create(options)
-        .then((model) => {
-          this.refreshAll();
-        })
+        .then(() => this.refreshAll())
         .catch(e => console.error(e));
-      ;
     },
     onDeleteModel(id) {
       domain
         .models()
         .remove(id)
-        .then(() => {
-          this.refreshAll()
-        })
+        .then(() => this.refreshAll())
         .catch(e => console.error(e));
     },
     onSubscribe(id) {
