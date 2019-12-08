@@ -49,6 +49,7 @@ import IReconnectTokenAuthRequestData =
   com.convergencelabs.convergence.proto.core.AuthenticationRequestMessage.IReconnectTokenAuthRequestData;
 import IAnonymousAuthRequestData =
   com.convergencelabs.convergence.proto.core.AuthenticationRequestMessage.IAnonymousAuthRequestData;
+import {RandomStringGenerator} from "../util/RandomStringGenerator";
 
 /**
  * @hidden
@@ -73,6 +74,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     ERROR: "error"
   };
 
+  private static readonly _SessionIdGenerator = new RandomStringGenerator(32, RandomStringGenerator.AlphaNumeric);
+
   private readonly _options: ConvergenceOptions;
   private readonly _session: ConvergenceSession;
   private readonly _logger: Logger = Logging.logger("connection");
@@ -86,11 +89,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _connectionState: ConnectionState;
   private _protocolConnection: ProtocolConnection;
 
-  /**
-   *
-   * @param url
-   * @param domain
-   */
   constructor(url: string, domain: ConvergenceDomain, options: ConvergenceOptions) {
     super();
 
@@ -110,8 +108,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
 
-    // TODO create a random string.
-    const initialSessionId = "local:";
+    const initialSessionId = "offline:" + ConvergenceConnection._SessionIdGenerator.nextString();
     this._session = new ConvergenceSession(domain, this, null, initialSessionId, null);
 
     if (typeof window !== "undefined") {
@@ -466,7 +463,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
             return Promise.reject(e);
           });
       })
-      .catch((reason: Error) => {
+      .catch((_: Error) => {
         clearTimeout(this._connectionTimeoutTask);
         this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
         this._scheduleConnection();
