@@ -12,29 +12,38 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IConvergenceEvent} from "../../util";
+import {IModelEvent} from "./IModelEvent";
+import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when local offline changes have successfully synchronized
- * with the Convergence Server.
+ * Emitted when a [[RealTimeModel]] reconnects to the server and when the
+ * resynchronization process starts.
  *
  * @module Real Time Data
- *
- * @experimental
  */
-export class OfflineModelSyncCompletedEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_sync_completed";
+export class ResyncErrorEvent implements IModelEvent {
+  public static readonly NAME = "resync_error";
 
   /**
-   * @inheritdoc
+   * The name of this event type.  This can be used to filter when using the
+   * [[ConvergenceEventEmitter.events]] stream.
    */
-  public readonly name: string = OfflineModelSyncCompletedEvent.NAME;
+  public readonly name: string = ResyncErrorEvent.NAME;
 
   /**
    * @hidden
    * @internal
    */
-  constructor() {
+  constructor(
+    /**
+     * The [[RealTimeModel]] that encountered the resync error.
+     */
+    public readonly src: RealTimeModel,
+    /**
+     * A message describing the error.
+     */
+    public readonly message: string
+  ) {
     Object.freeze(this);
   }
 }

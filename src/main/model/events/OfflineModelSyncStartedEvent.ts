@@ -15,7 +15,7 @@
 import {IConvergenceEvent} from "../../util";
 
 /**
- * Emitted when when local offline have started to sync up to the
+ * Emitted when local offline changes have started to sync up to the
  * Convergence Server.
  *
  * @module Real Time Data

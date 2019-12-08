@@ -50,7 +50,7 @@ import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/PagedData";
 import {Validation} from "../util/Validation";
 import {ModelOfflineManager} from "./ModelOfflineManager";
-import {ModelDeletedEvent} from "./events";
+import {ModelDeletedEvent, OfflineModelSyncErrorEvent} from "./events";
 import {ModelPermissions} from "./ModelPermissions";
 import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
@@ -138,6 +138,14 @@ export interface ModelServiceEvents {
    * @event [[OfflineModelSyncCompletedEvent]]
    */
   readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
+
+  /**
+   * Emitted a particular model encounters an error during the resync
+   * process.
+   *
+   * @event [[OfflineModelSyncErrorEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error";
 }
 
 /**
@@ -151,7 +159,8 @@ export const ModelServiceEventConstants: ModelServiceEvents = {
   OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started",
   OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed",
   OFFLINE_MODEL_DELETED: "offline_model_deleted",
-  OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked"
+  OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked",
+  OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error"
 };
 Object.freeze(ModelServiceEventConstants);
 
@@ -650,6 +659,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
+   * @internal
+   * @hidden
+   */
+  public _resyncError(modelId: string, message: string): void {
+    const event = new OfflineModelSyncErrorEvent(modelId, message);
+    this._emitEvent(event);
+  }
+
+  /**
    * @hidden
    * @internal
    * @private
@@ -1143,6 +1161,24 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @hidden
    */
+  private _setOffline = () => {
+    this._openModels.forEach((model) => {
+      model._setOffline();
+    });
+
+    this._resourceIdToModelId.clear();
+    this._resyncingModels.clear();
+    this._modelResyncQueue.length = 0;
+
+    if (this._syncDeferred !== null) {
+      this._syncDeferred.resolve();
+    }
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
   private _setOnline = () => {
     this._openModels.forEach((model) => {
       this._resyncingModels.set(model.modelId(), {
@@ -1267,24 +1303,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     model._setOnline();
 
     return model;
-  }
-
-  /**
-   * @internal
-   * @hidden
-   */
-  private _setOffline = () => {
-    this._openModels.forEach((model) => {
-      model._setOffline();
-    });
-
-    this._resourceIdToModelId.clear();
-    this._resyncingModels.clear();
-    this._modelResyncQueue.length = 0;
-
-    if (this._syncDeferred !== null) {
-      this._syncDeferred.resolve();
-    }
   }
 }
 

@@ -54,7 +54,7 @@ import {
   RemoteReferenceCreatedEvent,
   RemoteResyncCompletedEvent,
   RemoteResyncStartedEvent,
-  ResyncCompletedEvent,
+  ResyncCompletedEvent, ResyncErrorEvent,
   ResyncStartedEvent,
   VersionChangedEvent
 } from "../events";
@@ -128,6 +128,14 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
    * @event [[ResyncCompletedEvent]]
    */
   readonly RESYNC_COMPLETED: string;
+
+  /**
+   * Emitted when the resync process encounters an error. The actual event
+   * is a [[ResyncErrorEvent]].
+   *
+   * @event [[ResyncErrorEvent]]
+   */
+  readonly RESYNC_ERROR: string;
 
   /**
    * Emitted when a remote client has started a resync . The actual emitted
@@ -227,6 +235,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
   COMMITTED: ModelCommittedEvent.NAME,
   RESYNC_STARTED: ResyncStartedEvent.NAME,
   RESYNC_COMPLETED: ResyncCompletedEvent.NAME,
+  RESYNC_ERROR: ResyncErrorEvent.NAME,
   REMOTE_RESYNC_STARTED: RemoteResyncStartedEvent.NAME,
   REMOTE_RESYNC_COMPLETED: RemoteResyncCompletedEvent.NAME,
   OFFLINE: ModelOfflineEvent.NAME,
@@ -1212,8 +1221,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         return this._offlineManager.modelCreated(this._modelId);
       }).then(() => {
         this._reconnect();
-      }).catch(e => {
-        this._log.error("Error creating offline model on reconnect.", e);
+      }).catch((e: Error) => {
+        this._resyncError(e.message);
+        this._log.error("Error synchronizing offline model on reconnect.", e);
       });
     } else {
       this._reconnect();
@@ -1263,7 +1273,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       // We do this because we might be up to date, version wise.
       this._checkForReconnectUpToDate();
-    });
+    }).catch((e: Error) => this._resyncError(e.message));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _resyncError(message: string): void {
+    this._emitEvent(new ResyncErrorEvent(this, message));
+    this._modelService._resyncError(this._modelId, message);
   }
 
   /**

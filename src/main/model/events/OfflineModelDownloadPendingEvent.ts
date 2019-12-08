@@ -38,4 +38,3 @@ export class OfflineModelDownloadPendingEvent implements IConvergenceEvent {
     Object.freeze(this);
   }
 }
-

@@ -48,6 +48,7 @@ export * from "./ModelOfflineEvent";
 export * from "./ModelReconnectingEvent";
 export * from "./ResyncStartedEvent";
 export * from "./ResyncCompletedEvent";
+export * from "./ResyncErrorEvent";
 export * from "./RemoteReferenceCreatedEvent";
 
 export * from "./RemoteResyncStartedEvent";
@@ -63,5 +64,6 @@ export * from "./OfflineModelDownloadPendingEvent";
 export * from "./OfflineModelDownloadCompletedEvent";
 export * from "./OfflineModelSyncStartedEvent";
 export * from "./OfflineModelSyncCompletedEvent";
+export * from "./OfflineModelSyncErrorEvent";
 export * from "./OfflineModelDeletedEvent";
 export * from "./OfflineModelPermissionsRevokedEvent";
