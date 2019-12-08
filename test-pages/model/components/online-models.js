@@ -13,7 +13,7 @@
  */
 
 Vue.component('online-models', {
-  props: ["connected", "onlineModels"],
+  props: ["enabled", "onlineModels"],
   data: () => {
     return {
       models: []
@@ -38,7 +38,7 @@ Vue.component('online-models', {
   <div class="card-body">
     <h5 class="card-title">Online Models</h5>
     <div class="text-right mb-3">
-      <button class="btn btn-primary btn-sm" :disabled="!connected" v-on:click="refresh">Refresh</button>
+      <button class="btn btn-primary btn-sm" :disabled="!enabled" v-on:click="refresh">Refresh</button>
     </div>
     <table class="table table-bordered table-hover table-sm">
       <thead class="thead-light">

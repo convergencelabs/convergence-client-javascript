@@ -93,18 +93,18 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     this._socket = socket;
 
     this._socket.on(ConvergenceSocket.Events.MESSAGE, (event: ISocketMessageEvent) => {
-      this.onSocketMessage(event.message);
+      this._onSocketMessage(event.message);
     });
 
     this._socket.on(ConvergenceSocket.Events.ERROR, (event: ISocketErrorEvent) => {
-      this.onSocketError(event.error);
+      this._onSocketError(event.error);
     });
 
     this._socket.on(ConvergenceSocket.Events.CLOSE, (event: ISocketClosedEvent) => {
       if (this._closeRequested) {
-        this.onSocketClosed(event.reason);
+        this._onSocketClosed(event.reason);
       } else {
-        this.onSocketDropped();
+        this._onSocketDropped();
       }
     });
 
@@ -171,7 +171,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       () => {
         const req: RequestRecord = this._requests.get(reqId);
         if (req) {
-          req.replyDeferred.reject(new Error("Response timeout"));
+          req.replyDeferred.reject(new Error("A request timeout occurred."));
         }
       },
       requestTimeout);
@@ -192,7 +192,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._socket.terminate(reason);
     }
 
-    this.onSocketDropped();
+    this._onSocketDropped();
   }
 
   public close(): void {
@@ -213,12 +213,12 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       const bytes = ConvergenceMessageIO.encode(message);
       this._socket.send(bytes);
     } catch (e) {
-      this.onSocketError(e);
+      this._onSocketError(e);
       throw e;
     }
   }
 
-  private onSocketMessage(data: Uint8Array): void {
+  private _onSocketMessage(data: Uint8Array): void {
     const convergenceMessage: IConvergenceMessage = ConvergenceMessageIO.decode(data);
 
     if (this._protocolConfig.heartbeatConfig.enabled && this._heartbeatHelper) {
@@ -229,19 +229,19 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     logger.debug(() => "RCV: " + JSON.stringify(convergenceMessage));
 
     if (convergenceMessage.ping) {
-      this.onPing();
+      this._onPing();
     } else if (convergenceMessage.pong) {
       // no-op
     } else if (convergenceMessage.requestId !== undefined) {
-      this.onRequest(convergenceMessage);
+      this._onRequest(convergenceMessage);
     } else if (convergenceMessage.responseId !== undefined) {
-      this.onReply(convergenceMessage);
+      this._onReply(convergenceMessage);
     } else {
-      this.onNormalMessage(convergenceMessage);
+      this._onNormalMessage(convergenceMessage);
     }
   }
 
-  private onSocketClosed(reason: string): void {
+  private _onSocketClosed(reason: string): void {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
@@ -249,19 +249,19 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     this._emitEvent(event);
   }
 
-  private onSocketDropped(): void {
+  private _onSocketDropped(): void {
     if (this._heartbeatHelper && this._heartbeatHelper.started) {
       this._heartbeatHelper.stop();
     }
     this._emitEvent({name: ProtocolConnection.Events.DROPPED});
   }
 
-  private onSocketError(error: Error): void {
+  private _onSocketError(error: Error): void {
     const event: IProtocolConnectionErrorEvent = {name: ProtocolConnection.Events.ERROR, error};
     this._emitEvent(event);
   }
 
-  private onNormalMessage(message: IConvergenceMessage): void {
+  private _onNormalMessage(message: IConvergenceMessage): void {
     Promise.resolve().then(() => {
       const event: IProtocolConnectionMessageEvent = {
         name: "message",
@@ -272,7 +272,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     });
   }
 
-  private onRequest(message: IConvergenceMessage): void {
+  private _onRequest(message: IConvergenceMessage): void {
     const requestId = message.requestId!.value || 0;
     const event: IProtocolConnectionMessageEvent = {
       name: "message",
@@ -283,7 +283,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     this._emitEvent(event);
   }
 
-  private onReply(message: IConvergenceMessage): void {
+  private _onReply(message: IConvergenceMessage): void {
     const requestId: number = message.responseId!.value || 0;
     const record: RequestRecord = this._requests.get(requestId);
     this._requests.delete(requestId);
@@ -300,7 +300,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     }
   }
 
-  private onPing(): void {
+  private _onPing(): void {
     this.sendMessage({pong: {}});
   }
 }

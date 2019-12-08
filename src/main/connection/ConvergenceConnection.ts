@@ -143,7 +143,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   public disconnect(): void {
-
     if (this._connectionTimeoutTask !== null) {
       clearTimeout(this._connectionTimeoutTask);
       this._connectionTimeoutTask = null;
@@ -191,6 +190,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
   public isConnected(): boolean {
     return this._connectionState === ConnectionState.CONNECTED;
+  }
+
+  public isDisconnected(): boolean {
+    return this._connectionState === ConnectionState.DISCONNECTED;
   }
 
   public isAuthenticated(): boolean {

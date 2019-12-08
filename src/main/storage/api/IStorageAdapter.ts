@@ -21,7 +21,7 @@ import {IIdentityStore} from "./IIdentityStore";
 export interface IStorageAdapter {
   adapterId(): string;
 
-  openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string>;
+  openStore(namespace: string, domainId: string, username: string): Promise<void>;
 
   isInitialized(): boolean;
 

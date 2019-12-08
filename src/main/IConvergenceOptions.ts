@@ -112,7 +112,6 @@ export interface IConvergenceOptions {
    * required to enable offline editing of data.
    */
   offline?: {
-    key?: string
     storage: IStorageAdapter
   };
 

@@ -13,7 +13,7 @@
  */
 
 Vue.component('connection-controls', {
-  props: ["connected", "domain"],
+  props: ["offlineInitialized", "connected", "domain"],
   data: () => {
     return {
       username: "test",
@@ -37,28 +37,14 @@ Vue.component('connection-controls', {
     });
   },
   methods: {
-    connectOnline() {
-      this.domain
-        .connectWithPassword({username: this.username, password: this.password})
-        .then(() => {
-          this.onConnect();
-        })
-        .catch(e => console.error(e))
+    connect() {
+      this.$emit("connect", this.username, this.password);
     },
-    connectOffline() {
-      this.domain
-        .connectOffline(this.username)
-        .then(() => {
-          this.onConnect();
-        })
-        .catch(e => console.error())
+    initOffline() {
+      this.$emit("initOffline", this.username);
     },
     disconnect() {
-      this.domain.disconnect();
-      this.$emit("disconnected");
-    },
-    onConnect() {
-      this.$emit("connected")
+      this.$emit("disconnect");
     }
   },
   template: `
@@ -68,17 +54,17 @@ Vue.component('connection-controls', {
     <div class="mb-3">
       <div class="input-group mb-3">
         <div class="input-group-prepend"><span class="input-group-text">Username</span></div>
-        <input type="text" class="form-control" v-model="username"/>
+        <input type="text" class="form-control" v-model="username" :disabled="offlineInitialized || connected"/>
       </div>
       <div class="input-group mb-3">
         <div class="input-group-prepend"><span class="input-group-text">Password</span></div>
-        <input type="text" class="form-control" v-model="password"/>
+        <input type="text" class="form-control" v-model="password"  :disabled="connected"/>
       </div>
     </div>
     <div class="mb-3">
-      <button class="btn btn-secondary" v-bind:disabled="!connected" v-on:click="disconnect">Disconnect</button>
-      <button class="btn btn-primary" v-bind:disabled="connected" v-on:click="connectOffline">Connect Offline</button>
-      <button class="btn btn-primary" v-bind:disabled="connected" v-on:click="connectOnline">Connect Online</button>
+      <button class="btn btn-primary" v-bind:disabled="offlineInitialized" v-on:click="initOffline">Init Offline</button>
+      <button class="btn btn-primary" v-bind:disabled="!connected" v-on:click="disconnect">Disconnect</button>
+      <button class="btn btn-primary" v-bind:disabled="connected" v-on:click="connect">Connect</button>
     </div>
     <div class="input-group mb-3">
       <div class="input-group-prepend"><span class="input-group-text">Connection Status</span></div>

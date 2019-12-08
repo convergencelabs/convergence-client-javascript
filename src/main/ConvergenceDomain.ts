@@ -546,21 +546,55 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     }
   }
 
-  public connectOffline(username?: string | (() => Promise<string>)): Promise<void> {
+  /**
+   * Initializes the domain without connecting to the server. The method must
+   * be provided the username of the normal domain user that will eventually
+   * connect as.
+   *
+   * @param username
+   *   The username of the domain user to connect offline as.
+   *
+   * @return A Promise that will be completed when the domain is ready to use.
+   */
+  public initializeOffline(username: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(username);
 
-    if (TypeChecker.isNotSet(username) && TypeChecker.isNotSet(this._options.offlineKey)) {
-      throw new Error("An offline key or username must be provided in the options to connect offline.");
+    if (TypeChecker.isNotSet(username)) {
+      throw new Error("An username must be provided to initialize the domain offline.");
+    }
+
+    if (TypeChecker.isNotSet(this._options.storageAdapter)) {
+      throw new Error("'options.offline.storage' must be set to initialize the domain offline.");
     }
 
     return promiseCallback().then(u => this._init(u));
   }
 
   /**
-   * Disconnects from the server.
+   * Disconnects from the server, if connected.
    */
   public disconnect(): void {
-    this._connection.disconnect();
+    if (!this._connection.isDisconnected()) {
+      this._connection.disconnect();
+    }
+  }
+
+  /**
+   * Determines if the domain is disconnected.
+   *
+   * @returns true if the domain is disconnected; false otherwise.
+   */
+  public isDisconnected(): boolean {
+    return this._connection.isDisconnected();
+  }
+
+  /**
+   * Determines if the domain is connected.
+   *
+   * @returns true if the domain is connected; false otherwise.
+   */
+  public isConnected(): boolean {
+    return this._connection.isConnected();
   }
 
   /**
@@ -654,9 +688,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     // FIXME perhaps this should take a user so we can tell the user type
     if (this._options.storageAdapter) {
       // FIXME do we need to make sure we are not an anonymous user here?
-      this._log.debug("options.offline.storageAdapter is set, initializing offline storage");
+      this._log.debug("options.offline.storage is set, initializing offline storage");
       this._storage.configure(this._options.storageAdapter);
-      return this._storage.openStore(this._namespace, this._domainId, username, this._options.offlineKey)
+      return this._storage.openStore(this._namespace, this._domainId, username)
         .then(async () => {
           this._initialized = true;
           await this._modelOfflineManager.init();

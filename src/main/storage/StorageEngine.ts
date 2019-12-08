@@ -23,7 +23,6 @@ import {Logging} from "../util/log/Logging";
 export class StorageEngine {
   private readonly _log: Logger = Logging.logger("storage");
   private _storage: IStorageAdapter | null = null;
-  private _storageKey: string | null;
 
   public configure(storage: IStorageAdapter): void {
     this._log.debug("Initializing storage engine: " + storage.adapterId());
@@ -35,12 +34,8 @@ export class StorageEngine {
     this._storage = storage;
   }
 
-  public openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string> {
-    return this._storage.openStore(namespace, domainId, username, storageKey);
-  }
-
-  public storageKey(): string | null {
-    return this._storageKey;
+  public openStore(namespace: string, domainId: string, username: string): Promise<void> {
+    return this._storage.openStore(namespace, domainId, username);
   }
 
   public isEnabled(): boolean {

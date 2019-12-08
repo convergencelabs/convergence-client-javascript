@@ -32,13 +32,12 @@ export class IdbStorageAdapter implements IStorageAdapter {
 
   private _modelStore: IdbModelStore;
   private _identityStore: IdbIdentityStore;
-  private _storageKey: string;
 
   public adapterId(): string {
     return "Indexed DB Storage";
   }
 
-  public openStore(namespace: string, domainId: string, username: string, storageKey?: string): Promise<string> {
+  public openStore(namespace: string, domainId: string, username: string): Promise<void> {
     if (!namespace) {
       throw new Error("namespace must be a non-empty string");
     }
@@ -61,14 +60,10 @@ export class IdbStorageAdapter implements IStorageAdapter {
       IdbSchemaManager.upgrade(db, version);
     };
 
-    // FIXME hard coded.
-    this._storageKey = exists ? storageKey : "some key that needs to be generate";
-
     return toPromise(openRequest).then((db: IDBDatabase) => {
       this._db = db;
       this._modelStore = new IdbModelStore(this._db);
       this._identityStore = new IdbIdentityStore(this._db);
-      return this._storageKey;
     });
   }
 

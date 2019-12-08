@@ -29,6 +29,7 @@ Vue.component('main-app', {
 
     return {
       connected: false,
+      offlineInitialized: false,
       model: null,
       domain: domain,
       offlineModels: [],
@@ -47,18 +48,34 @@ Vue.component('main-app', {
     })
   },
   methods: {
-    refreshAll() {
-      this.refreshOfflineModels();
-      this.refreshOnlineModels();
+    onConnect(username, password) {
+      console.log("connect");
+      this.domain
+        .connectWithPassword({username: username, password: password})
+        .then(() => {
+          this.connected = true;
+          this.refreshAll();
+        })
+        .catch(e => console.error(e))
     },
-    onConnected() {
-      this.connected = true;
-      this.refreshAll()
+    onInitOffline(username) {
+      this.domain
+        .initializeOffline(username)
+        .then(() => {
+          this.offlineInitialized = true;
+          this.refreshAll();
+        })
+        .catch(e => console.error())
     },
-    onDisconnected() {
+    onDisconnect() {
+      this.domain.disconnect();
       this.connected = false;
       this.offlineModels = [];
       this.onlineModels = [];
+    },
+    refreshAll() {
+      this.refreshOfflineModels();
+      this.refreshOnlineModels();
     },
     onOpenModel(id) {
       this.onCloseModel();
@@ -77,8 +94,8 @@ Vue.component('main-app', {
     },
     onCloseModel() {
       if (this.model) {
-        this.model = null;
         this.model.close().catch(e => console.error(e));
+        this.model = null;
       }
     },
     onCreateModel(id) {
@@ -113,7 +130,7 @@ Vue.component('main-app', {
     refreshOnlineModels() {
       this.onlineModels = [];
 
-      if (this.connected && this.domain.session().isConnected()) {
+      if (this.domain.session().isConnected()) {
         const query = "SELECT * FROM model-test-page";
         this.domain
           .models()
@@ -170,12 +187,14 @@ Vue.component('main-app', {
   <div class="col-6">
     <connection-controls
       v-bind:domain="domain"
+      v-bind:offlineInitialized="offlineInitialized"
       v-bind:connected="connected"
-      v-on:connected="onConnected"
-      v-on:disconnected="onDisconnected"
+      v-on:connect="onConnect"
+      v-on:disconnect="onDisconnect"
+      v-on:initOffline="onInitOffline" 
     />
     <model-controls 
-      v-bind:connected="connected"
+      v-bind:enabled="offlineInitialized || connected"
       v-bind:model="model"
       v-on:deleteModel="onDeleteModel"
       v-on:createModel="onCreateModel"
@@ -183,7 +202,7 @@ Vue.component('main-app', {
       v-on:closeModel="onCloseModel"
     />
     <offline-models
-      v-bind:connected="connected"
+      v-bind:enabled="offlineInitialized"
       v-bind:model="model"
       v-bind:offlineModels="offlineModels"
       v-on:openModel="onOpenModel"
@@ -192,7 +211,7 @@ Vue.component('main-app', {
       v-on:unsubscribe="onUnsubscribe"
     />
     <online-models 
-      v-bind:connected="connected"
+      v-bind:enabled="connected"
       v-bind:onlineModels="onlineModels"
       v-on:deleteModel="onDeleteModel"
       v-on:openModel="onOpenModel"

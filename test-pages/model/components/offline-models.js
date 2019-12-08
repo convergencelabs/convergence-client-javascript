@@ -13,7 +13,7 @@
  */
 
 Vue.component('offline-models', {
-  props: ["connected", "offlineModels", "model"],
+  props: ["enabled", "offlineModels", "model"],
   data: () => {
     return {
       newSubscription: ""
@@ -48,7 +48,7 @@ Vue.component('offline-models', {
       <div class="input-group-prepend">
         <span class="input-group-text">Model Id</span>
       </div>
-      <input v-model="newSubscription" type="text" class="form-control" :disabled="!connected">
+      <input v-model="newSubscription" type="text" class="form-control" :disabled="!enabled">
     </div>
     
     <table class="table table-bordered table-hover table-sm">
