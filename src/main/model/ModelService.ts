@@ -22,7 +22,7 @@ import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
 import {ObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util";
+import {ConvergenceError, ConvergenceEventEmitter, ConvergenceServerError, IConvergenceEvent} from "../util";
 import {RealTimeModel} from "./rt";
 import {HistoricalModel} from "./historical";
 import {ModelResult} from "./query";
@@ -662,9 +662,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @hidden
    */
-  public _resyncError(modelId: string, message: string): void {
-    const event = new OfflineModelSyncErrorEvent(modelId, message);
+  public _resyncError(modelId: string, message: string, model?: RealTimeModel): void {
+    const event = new OfflineModelSyncErrorEvent(modelId, message, model);
     this._emitEvent(event);
+
+    this._resyncComplete(modelId);
   }
 
   /**
@@ -1271,7 +1273,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           });
         } else {
           this._deleteResyncModel(entry)
-            .catch(e => this._log.error("error deleting model during resync", e));
+            .catch((e: Error) => {
+              this._resyncError(entry.modelId, e.message);
+            });
         }
       }
     }
@@ -1281,9 +1285,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._removeOnline(entry.modelId)
       .then(() => this._resyncComplete(entry.modelId))
       .catch((e) => {
-        // TODO check for model_not_found, and emit an error
-        // otherwise.
-        this._resyncComplete(entry.modelId);
+        if (e instanceof ConvergenceServerError && e.code === "model_not_found") {
+          this._resyncComplete(entry.modelId);
+        } else {
+          return Promise.reject(e);
+        }
       });
   }
 

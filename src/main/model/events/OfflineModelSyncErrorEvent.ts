@@ -13,6 +13,7 @@
  */
 
 import {IConvergenceEvent} from "../../util";
+import {RealTimeModel} from "../rt";
 
 /**
  * Emitted when there is an error synchronizing offline changes for
@@ -42,7 +43,14 @@ export class OfflineModelSyncErrorEvent implements IConvergenceEvent {
     /**
      * A message describing the error.
      */
-    public readonly message: string
+    public readonly message: string,
+
+    /**
+     * The model the error originated form, if it was resyncing.  This will be
+     * undefined, if the model was only being deleted. If present it can be
+     * used to capture the data from the model.
+     */
+    public readonly model?: RealTimeModel
   ) {
     Object.freeze(this);
   }

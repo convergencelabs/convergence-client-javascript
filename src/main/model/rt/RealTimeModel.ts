@@ -1282,7 +1282,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _resyncError(message: string): void {
     this._emitEvent(new ResyncErrorEvent(this, message));
-    this._modelService._resyncError(this._modelId, message);
+    this._modelService._resyncError(this._modelId, message, this);
   }
 
   /**
