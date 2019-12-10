@@ -21,6 +21,8 @@ import {DomainUser} from "../../identity";
  * started a resynchronization process after being offline.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
 export class RemoteResyncStartedEvent implements IConvergenceEvent {
   public static readonly NAME = "remote_resync_started";

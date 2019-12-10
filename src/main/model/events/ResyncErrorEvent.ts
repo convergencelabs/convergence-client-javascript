@@ -27,6 +27,8 @@ export class ResyncErrorEvent implements IModelEvent {
   /**
    * The name of this event type.  This can be used to filter when using the
    * [[ConvergenceEventEmitter.events]] stream.
+   *
+   * @experimental
    */
   public readonly name: string = ResyncErrorEvent.NAME;
 

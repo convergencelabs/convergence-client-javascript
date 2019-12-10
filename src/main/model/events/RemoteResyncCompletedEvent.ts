@@ -21,9 +21,11 @@ import {DomainUser} from "../../identity";
  * completed a resynchronization process after being offline.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
 export class RemoteResyncCompletedEvent implements IConvergenceEvent {
-  public static readonly NAME = "remote_resync_completd";
+  public static readonly NAME = "remote_resync_completed";
 
   /**
    * @inheritdoc
@@ -39,12 +41,10 @@ export class RemoteResyncCompletedEvent implements IConvergenceEvent {
      * The model for which the remote client has completed a resync.
      */
     public readonly model: RealTimeModel,
-
     /**
      * The session id of the remote client.
      */
     public readonly sessionId?: string,
-
     /**
      * The user of the remote client.
      */

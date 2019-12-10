@@ -27,6 +27,8 @@ export class ResyncStartedEvent implements IModelEvent {
   /**
    * The name of this event type.  This can be used to filter when using the
    * [[ConvergenceEventEmitter.events]] stream.
+   *
+   * @experimentals
    */
   public readonly name: string = ResyncStartedEvent.NAME;
 

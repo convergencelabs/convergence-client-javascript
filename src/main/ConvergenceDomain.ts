@@ -555,6 +555,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    *   The username of the domain user to connect offline as.
    *
    * @return A Promise that will be completed when the domain is ready to use.
+   *
+   * @experimental
    */
   public initializeOffline(username: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(username);

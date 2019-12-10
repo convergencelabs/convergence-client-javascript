@@ -20,6 +20,8 @@ import {RealTimeModel} from "../rt";
  * resynchronization process completes.
  *
  * @module Real Time Data
+ *
+ * @experimental
  */
 export class ResyncCompletedEvent implements IModelEvent {
   public static readonly NAME = "resync_completed";

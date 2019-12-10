@@ -934,16 +934,20 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
   /**
    * Marks this model to be available offline.
+   *
+   * @experimental
    */
-  public subscribeOffline(): void {
-    this._offlineManager.subscribe([this._modelId]);
+  public subscribeOffline(): Promise<void> {
+    return this._offlineManager.subscribe([this._modelId]);
   }
 
   /**
    * Marks this model no longer needs to be available offline.
+   *
+   * @experimental
    */
-  public unsubscribeOffline(): void {
-    this._offlineManager.unsubscribe([this._modelId]);
+  public unsubscribeOffline(): Promise<void> {
+    return this._offlineManager.unsubscribe([this._modelId]);
   }
 
   /**
@@ -951,6 +955,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * @returns True if the model is marked for offline availability,
    *   false otherwise.
+   *
+   * @experimental
    */
   public isSubscribedOffline(): boolean {
     return this._offlineManager.isModelSubscribed(this._modelId);

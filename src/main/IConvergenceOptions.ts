@@ -22,7 +22,6 @@ import {IStorageAdapter} from "./storage/api";
  * set within Convergence when connecting to a domain.
  *
  * @module Connection and Authentication
- * @module Connection and Authentication
  */
 export interface IConvergenceOptions {
 
@@ -110,8 +109,15 @@ export interface IConvergenceOptions {
   /**
    * Configures offline storage for Convergence. Several of these options are
    * required to enable offline editing of data.
+   *
+   * @experimental
    */
   offline?: {
+    /**
+     * The storage adapter to use for offline storage.
+     *
+     * @experimental
+     */
     storage: IStorageAdapter
   };
 
