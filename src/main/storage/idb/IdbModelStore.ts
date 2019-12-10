@@ -548,6 +548,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
             createdTime: meta.details.createdTime,
             modifiedTime: meta.details.modifiedTime,
             version,
+            valueIdPrefix: {...meta.details.valueIdPrefix},
             permissions: new ModelPermissions(
               meta.details.permissions.read,
               meta.details.permissions.write,
