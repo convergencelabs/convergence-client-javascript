@@ -74,6 +74,7 @@ function createModelState(): IModelState {
     collection: "collection",
     local: false,
     version: 10,
+    valueIdPrefix: {prefix: "vid", increment: 0},
     createdTime: new Date(),
     modifiedTime: new Date(),
     permissions: new ModelPermissions(true, true, true, true),

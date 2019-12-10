@@ -47,6 +47,8 @@ export interface IModelStore {
 
   snapshotModel(modelId: string, version: number, modelData: ObjectValue): Promise<void>;
 
+  claimValueIdPrefix(modelId: string): Promise<{ prefix: string, increment: number }>;
+
   getModelMetaData(modelId: string): Promise<IModelMetaData | undefined>;
 
   getAllModelMetaData(): Promise<IModelMetaData[]>;

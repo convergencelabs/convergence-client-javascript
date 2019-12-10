@@ -28,6 +28,8 @@ import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {ModelPermissions, ObjectValue} from "../../model";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
+import {ConvergenceErrorCodes} from "../../util/ConvergenceErrorCodes";
+import {ConvergenceError} from "../../util";
 
 /**
  * @hidden
@@ -75,6 +77,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     if (doc.details) {
       metaData.details = {
         collection: doc.details.collection,
+        valueIdPrefix: doc.details.valueIdPrefix,
         version: doc.details.version,
         seqNo: doc.details.seqNo,
         createdTime: doc.details.createdTime,
@@ -98,6 +101,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     localOpStore: IDBObjectStore,
     serverOpStore: IDBObjectStore): Promise<void> {
 
+    const currentMetaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelState.modelId));
+
+    const valueIdPrefix = {
+      prefix: modelState.valueIdPrefix.prefix,
+      increment: modelState.valueIdPrefix.increment || 0
+    };
+
     const meta: IModelMetaDataDocument = {
       modelId: modelState.modelId,
 
@@ -105,6 +115,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       details: {
         collection: modelState.collection,
+        valueIdPrefix,
         createdTime: modelState.createdTime,
         modifiedTime: modelState.modifiedTime,
         permissions: {
@@ -124,13 +135,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
     meta.available = 1;
 
-    IdbModelStore._setSyncRequired(meta);
-
-    const currentMetaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelState.modelId));
     if (currentMetaData) {
       meta.subscribed = currentMetaData.subscribed;
       meta.deleted = currentMetaData.deleted;
     }
+
+    IdbModelStore._setSyncRequired(meta);
 
     await toVoidPromise(modelMetaDataStore.put(meta));
 
@@ -244,6 +254,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const modelState: IModelState = {
         modelId: modelCreation.modelId,
         collection: modelCreation.collection,
+
+        valueIdPrefix: {prefix: "0", increment: 0},
 
         version,
         createdTime: now,
@@ -645,5 +657,23 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
         await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
       });
+  }
+
+  public claimValueIdPrefix(modelId: string): Promise<{ prefix: string, increment: number }> {
+    return this._withWriteStore(IdbSchema.ModelMetaData.Store, async (store) => {
+      const meta = await toPromise<IModelMetaDataDocument>(store.get(modelId));
+
+      if (!meta || !meta.details) {
+        throw new ConvergenceError("No such offline model available: " + modelId);
+      }
+
+      const result = {...meta.details.valueIdPrefix};
+
+      meta.details.valueIdPrefix.increment = meta.details.valueIdPrefix.increment + 1;
+
+      await toVoidPromise(store.put(meta));
+
+      return result;
+    });
   }
 }

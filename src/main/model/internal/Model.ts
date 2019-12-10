@@ -101,6 +101,10 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
       child._handleModelOperationEvent(modelEvent);
     }
   }
+
+  public valueIdPrefix(): string {
+    return this._valueIdPrefix;
+  }
 }
 
 Object.freeze(Model.Events);

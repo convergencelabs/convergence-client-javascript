@@ -965,6 +965,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    * @hidden
    */
+  public _valueIdPrefix(): string {
+    return this._model.valueIdPrefix();
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hidden
+   */
   public _checkIfCanClose(): void {
     if (this._closingData.closing && this._concurrencyControl.isCommitted()) {
       this._close();
@@ -1175,7 +1184,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       upToDate: false
     };
 
-    if (this._closingData.closing) {
+    if (this._closingData.closing || this._resyncOnly) {
       this._close();
     }
   }
@@ -1484,7 +1493,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _close(): void {
     const {deferred, event} = this._closingData;
     this._modelService._close(this._resourceId);
-    this._offlineManager.modelClosed(this);
+
+    if (this._offlineManager.isOfflineEnabled()) {
+      this._offlineManager.modelClosed(this);
+    }
+
     this._model.root()._detach(false);
     this._open = false;
     this._connection = null;

@@ -28,6 +28,7 @@ export interface IModelMetaDataDocument {
 
   details?: {
     collection: string;
+    valueIdPrefix: {prefix: string, increment: number};
     version: number;
     seqNo: number;
     createdTime: Date;

@@ -260,30 +260,12 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       });
   }
 
-  public markModelForDeletion(modelId: string): Promise<void> {
-    this._subscribedModels.delete(modelId);
-    // TODO should we unsubscribe here?
-    return this._storage.modelStore().deleteModel(modelId)
-      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
-      .then(removed => {
-        if (removed) {
-          this._subscribedModels.delete(modelId);
-        }
-      });
-  }
-
-  public modelDeleted(modelId: string): Promise<void> {
-    return this._storage.modelStore().modelDeleted(modelId)
-      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
-      .then(removed => {
-        if (removed) {
-          this._subscribedModels.delete(modelId);
-        }
-      });
-  }
-
-  public getOfflineModelData(modelId: string): Promise<IModelState | undefined> {
+  public getOfflineModelState(modelId: string): Promise<IModelState | undefined> {
     return this._storage.modelStore().getModelState(modelId);
+  }
+
+  public claimValueIdPrefix(modelId: string): Promise<{ prefix: string, increment: number }> {
+    return this._storage.modelStore().claimValueIdPrefix(modelId);
   }
 
   public getModelMetaData(modelId: string): Promise<IModelMetaData> {
@@ -332,6 +314,28 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       .then(() => this._handleOperation(modelId, true, false));
   }
 
+  public markModelForDeletion(modelId: string): Promise<void> {
+    this._subscribedModels.delete(modelId);
+    // TODO should we unsubscribe here?
+    return this._storage.modelStore().deleteModel(modelId)
+      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
+      .then(removed => {
+        if (removed) {
+          this._subscribedModels.delete(modelId);
+        }
+      });
+  }
+
+  public modelDeleted(modelId: string): Promise<void> {
+    return this._storage.modelStore().modelDeleted(modelId)
+      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
+      .then(removed => {
+        if (removed) {
+          this._subscribedModels.delete(modelId);
+        }
+      });
+  }
+
   private _handleNewSubscriptions(modelId: string): void {
     this._subscribedModels.set(modelId, {version: 0, opsSinceSnapshot: 0, uncommitted: false});
     if (this._openModels.has(modelId)) {
@@ -359,6 +363,11 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     const state: IModelState = {
       modelId: model.modelId(),
       collection: model.collectionId(),
+
+      valueIdPrefix: {
+        prefix: model._valueIdPrefix(),
+        increment: 0
+      },
 
       version,
       createdTime: model.createdTime(),
@@ -432,12 +441,14 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           });
       } else if (message.initial) {
         if (this._subscribedModels.has(modelId)) {
-          const {collection, model, permissions} = message.initial;
+          const {collection, model, permissions, valueIdPrefix} = message.initial;
           const {read, write, remove, manage} = toModelPermissions(permissions);
           const version = getOrDefaultNumber(model.version);
           const modelState: IModelState = {
             modelId,
             collection,
+
+            valueIdPrefix: {prefix: valueIdPrefix, increment: 0},
 
             version,
             createdTime: timestampToDate(model.createdTime),

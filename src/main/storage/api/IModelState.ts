@@ -19,6 +19,8 @@ export interface IModelState {
   modelId: string;
   collection: string;
 
+  valueIdPrefix: { prefix: string, increment?: number };
+
   version: number;
   createdTime: Date;
   modifiedTime: Date;
