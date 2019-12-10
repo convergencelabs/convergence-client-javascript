@@ -780,36 +780,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     return this._closingData.deferred.promise();
   }
 
-  public _initiateClose(closeWithServer: boolean, event?: ModelClosedEvent): void {
-    if (this._closingData.closing) {
-      throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
-    }
-
-    this._closingData.closing = true;
-    this._closingData.event = event;
-
-    if (this._connection.isOnline() && closeWithServer) {
-      // Inform the server that we are closed.
-      const request: IConvergenceMessage = {
-        closeRealTimeModelRequest: {
-          resourceId: this._resourceId
-        }
-      };
-
-      this._connection
-        .request(request)
-        .then(() => {
-          this._checkIfCanClose();
-        })
-        .catch(err => {
-          this._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
-          this._closingData.deferred.reject(err);
-        });
-    } else {
-      this._checkIfCanClose();
-    }
-  }
-
   /**
    * Sets a flag on this model to indicate that any subsequent changes will be batched into
    * one atomic operation.  See [Batch Changes](https://docs.convergence.io/guide/models/batch-changes.html)
@@ -967,6 +937,41 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   //
 
   /**
+   * @internal
+   * @hidden
+   * @private
+   */
+  public _initiateClose(closeWithServer: boolean, event?: ModelClosedEvent): void {
+    if (this._closingData.closing) {
+      throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
+    }
+
+    this._closingData.closing = true;
+    this._closingData.event = event;
+
+    if (this._connection.isOnline() && closeWithServer) {
+      // Inform the server that we are closed.
+      const request: IConvergenceMessage = {
+        closeRealTimeModelRequest: {
+          resourceId: this._resourceId
+        }
+      };
+
+      this._connection
+        .request(request)
+        .then(() => {
+          this._checkIfCanClose();
+        })
+        .catch(err => {
+          this._log.error(`Unexpected error closing a model: ${this._modelId}`, err);
+          this._closingData.deferred.reject(err);
+        });
+    } else {
+      this._checkIfCanClose();
+    }
+  }
+
+  /**
    * @private
    * @internal
    * @hidden
@@ -981,7 +986,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   public _checkIfCanClose(): void {
-    if (this._closingData.closing && this._concurrencyControl.isCommitted()) {
+    if (this._closingData.closing &&
+      (this._concurrencyControl.isCommitted() || !this._connection.isOnline())) {
       this._close();
     }
   }
@@ -1190,7 +1196,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       upToDate: false
     };
 
-    if (this._closingData.closing || this._resyncOnly) {
+    if (this._closingData.closing) {
       this._close();
     }
   }

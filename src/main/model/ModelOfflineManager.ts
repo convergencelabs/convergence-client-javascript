@@ -503,22 +503,29 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           permissionsUpdate
         };
 
-        this._storage.modelStore().updateOfflineModel(update).catch(e => {
-          this._log.error("Error synchronizing subscribed model from server", e);
-        }).then(() => {
-          if (dataUpdate) {
-            this._subscribedModels.set(modelId, {
-              version: getOrDefaultNumber(model.version),
-              opsSinceSnapshot: 0,
-              uncommitted: false
-            });
-          }
+        // We have already checked that the model is not open. We only
+        // subscribe after we have synced any models with outstanding
+        // changes.  So at this point, we have a model that is not open
+        // and has no local changes. So it is safe to update it.
+        this._storage.modelStore()
+          .updateOfflineModel(update)
+          .catch(e => {
+            this._log.error("Error synchronizing subscribed model from server", e);
+          })
+          .then(() => {
+            if (dataUpdate) {
+              this._subscribedModels.set(modelId, {
+                version: getOrDefaultNumber(model.version),
+                opsSinceSnapshot: 0,
+                uncommitted: false
+              });
+            }
 
-          const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
-          const version = dataUpdate ? dataUpdate.version : null;
-          const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
-          this._emitEvent(updateEvent);
-        });
+            const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
+            const version = dataUpdate ? dataUpdate.version : null;
+            const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
+            this._emitEvent(updateEvent);
+          });
       }
     }
   }

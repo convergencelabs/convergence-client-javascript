@@ -394,18 +394,26 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   public updateOfflineModel(update: IModelUpdate): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelData.Store
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelServerOperation.Store,
     ];
 
-    return this._withWriteStores(stores, async ([modelMetaDataStore, modelDataStore]) => {
+    return this._withWriteStores(stores, async ([modelMetaDataStore, modelDataStore, serverOpStore]) => {
       const {modelId, dataUpdate, permissionsUpdate} = update;
       const modelMetaData: IModelMetaData = await toPromise(modelMetaDataStore.get(modelId));
 
       if (modelMetaData === undefined) {
-        throw Error("Received an update for a non-existent local model");
+        // This could happen if we unsubscribed.
+        return;
       }
 
-      // TODO we should check to see if the model is locally modified.
+      if (modelMetaData.uncommitted) {
+        // If we allow this to go through the uncommitted local operations
+        // would no longer be compatible to the document state.
+        throw new Error(`A model update was received for an model ('${modelId}')with uncommitted operations.`);
+      }
+
+      await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
 
       if (dataUpdate) {
         modelMetaData.details.version = dataUpdate.version;

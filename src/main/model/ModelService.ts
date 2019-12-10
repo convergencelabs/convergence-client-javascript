@@ -1179,6 +1179,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._resyncingModels.forEach(entry => {
       if (entry.model) {
         entry.model._setOffline();
+        entry.model._initiateClose(false);
       }
     });
 
