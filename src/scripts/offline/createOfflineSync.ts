@@ -26,6 +26,7 @@ async function createModels(): Promise<void> {
     modelIds.push(id);
     console.log("Created offline model", id);
   }
+  await rtManifest.close();
 }
 
 async function createModel(id: string): Promise<string> {
@@ -59,6 +60,10 @@ async function cleanupModels(): Promise<void> {
 async function go() {
   domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
     console.log("model sync completed");
+
+    let rtManifest = await domain.models().open("manifest");
+    rtManifest.root().set("foo", "bar");
+
     await cleanupModels();
     process.exit();
   });
