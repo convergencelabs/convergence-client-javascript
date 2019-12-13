@@ -1233,7 +1233,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private async _syncDirtyModelsToServer(): Promise<void> {
     this._modelResyncQueue.length = 0;
-    const dirtyModelIds = await this._modelOfflineManager.getDirtyModelMetaData();
+    const dirtyModelIds = await this._modelOfflineManager.getModelsRequiringSync();
 
     const notOpen: IResyncEntry[] = dirtyModelIds
       .filter(metaData => !this._resyncingModels.has(metaData.modelId))

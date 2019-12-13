@@ -125,10 +125,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public modelClosed(model: RealTimeModel): void {
     this._openModels.delete(model.modelId());
-    this._storage
-      .modelStore()
-      .deleteIfNotNeeded(model.modelId())
+    this._deleteIfNotNeeded(model.modelId())
       .catch(e => this._log.error("Error cleaning up model after close", e));
+  }
+
+  public modelResynchronized(modelId): Promise<void> {
+    return this._deleteIfNotNeeded(modelId)
+      .catch(e => this._log.error("Error cleaning up model after resynchronization", e));
   }
 
   public isModelSubscribed(modelId: string): boolean {
@@ -139,7 +142,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     return Array.from(this._subscribedModels.keys());
   }
 
-  public getDirtyModelMetaData(): Promise<IModelMetaData[]> {
+  public getModelsRequiringSync(): Promise<IModelMetaData[]> {
     return this._storage.modelStore().getModelsRequiringSync();
   }
 
@@ -243,12 +246,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public modelCreated(modelId: string): Promise<void> {
     return this._storage.modelStore().modelCreated(modelId)
-      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
-      .then(removed => {
-        if (removed) {
-          this._subscribedModels.delete(modelId);
-        }
-      });
+      .then(() => this._deleteIfNotNeeded(modelId));
   }
 
   public createOfflineModel(creationData: IModelCreationData): Promise<void> {
@@ -316,24 +314,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public markModelForDeletion(modelId: string): Promise<void> {
     this._subscribedModels.delete(modelId);
-    // TODO should we unsubscribe here?
     return this._storage.modelStore().deleteModel(modelId)
-      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
-      .then(removed => {
-        if (removed) {
-          this._subscribedModels.delete(modelId);
-        }
-      });
+      .then(() => this._deleteIfNotNeeded(modelId));
   }
 
   public modelDeleted(modelId: string): Promise<void> {
     return this._storage.modelStore().modelDeleted(modelId)
-      .then(() => this._storage.modelStore().deleteIfNotNeeded(modelId))
-      .then(removed => {
-        if (removed) {
-          this._subscribedModels.delete(modelId);
-        }
-      });
+      .then(() => this._deleteIfNotNeeded(modelId));
   }
 
   private _handleNewSubscriptions(modelId: string): void {
@@ -531,7 +518,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _handleOperation(modelId: string, serverOp: boolean, ack: boolean): void {
-    // Check to make sue we are subscribe. We may not be for a locally
+    // Check to make sue we are subscribed. We may not be for a locally
     // created model that is just waiting to bee pushed up.
     if (this._subscribedModels.has(modelId)) {
       let {version, opsSinceSnapshot, uncommitted} = this._subscribedModels.get(modelId);
@@ -597,6 +584,15 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       this._emitEvent(event);
 
     }
+  }
+
+  private _deleteIfNotNeeded(modelId: string): Promise<void> {
+    return this._storage.modelStore().deleteIfNotNeeded(modelId)
+      .then(removed => {
+        if (removed) {
+          this._subscribedModels.delete(modelId);
+        }
+      });
   }
 }
 

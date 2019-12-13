@@ -1241,13 +1241,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._local = false;
         return this._offlineManager.modelCreated(this._modelId);
       }).then(() => {
-        this._reconnect();
+        this._resynchronize();
       }).catch((e: Error) => {
         this._resyncError(e.message);
         this._log.error("Error synchronizing offline model on reconnect.", e);
       });
     } else {
-      this._reconnect();
+      this._resynchronize();
     }
   }
 
@@ -1269,7 +1269,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _reconnect(): void {
+  private _resynchronize(): void {
     this._debug("Requesting model resynchronization");
     this._emitEvent(new ModelReconnectingEvent(this));
 
