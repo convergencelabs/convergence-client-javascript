@@ -1,5 +1,4 @@
 Convergence.configureLogging({
-
   loggers: {
     "protocol.messages": Convergence.LogLevel.DEBUG,
     "models": Convergence.LogLevel.DEBUG,

@@ -286,8 +286,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._identityCache = new IdentityCache(this._connection, this._storage);
     this._modelOfflineManager = new ModelOfflineManager(
       this._connection,
-      10 * 60 * 1000,
-      100,
+      this._options.offlineModelOperationSnapshotInterval,
       this._storage
     );
     this._modelService = new ModelService(this._connection, this._identityCache, this._modelOfflineManager);

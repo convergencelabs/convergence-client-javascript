@@ -49,7 +49,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     COMMIT_STATE_CHANGED: "commitStateChanged"
   };
 
-  private _seqNo: number;
+  private _lastSequenceNumber: number;
 
   private _compoundOpInProgress: boolean;
   private _pendingCompoundOperation: DiscreteOperation[];
@@ -57,19 +57,20 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
   private readonly _inflightOperations: ClientOperationEvent[];
   private readonly _unappliedOperations: ServerOperationEvent[];
 
-  private _sessionId: () => string;
+  private readonly _sessionId: () => string;
   private _contextVersion: number;
   private _transformer: OperationTransformer;
   private _referenceTransformer: ReferenceTransformer;
 
   constructor(sessionId: () => string,
               contextVersion: number,
+              lastSequenceNumber: number,
               transformer: OperationTransformer,
               referenceTransformer: ReferenceTransformer) {
     super();
 
     this._sessionId = sessionId;
-    this._seqNo = 0;
+    this._lastSequenceNumber = lastSequenceNumber;
     this._contextVersion = contextVersion;
     this._unappliedOperations = [];
     this._inflightOperations = [];
@@ -80,17 +81,17 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._pendingCompoundOperation = [];
   }
 
-  public sequenceNumber(): number {
-    return this._seqNo;
+  public lastSequenceNumber(): number {
+    return this._lastSequenceNumber;
   }
 
   public resetSequenceNumber(): void {
-    this._seqNo = 0;
+    this._lastSequenceNumber = 0;
   }
 
-  public setState(contextVersion: number, seqNo: number, inFlight: ClientOperationEvent[]): void {
+  public setState(contextVersion: number, lastSequenceNumber: number, inFlight: ClientOperationEvent[]): void {
     this._contextVersion = contextVersion;
-    this._seqNo = seqNo;
+    this._lastSequenceNumber = lastSequenceNumber;
 
     this._inflightOperations.length = 0;
     this._inflightOperations.push(...inFlight);
@@ -178,9 +179,11 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
 
     const compoundOp: CompoundOperation = new CompoundOperation(this._pendingCompoundOperation);
     this._pendingCompoundOperation = [];
+    // Notice we increment then get the value.
+    const seqNo = ++this._lastSequenceNumber;
     const outgoingOperation = new ClientOperationEvent(
       this._sessionId(),
-      this._seqNo++,
+      seqNo,
       this._contextVersion,
       new Date(),
       compoundOp);
@@ -220,7 +223,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     } else {
       const outgoingEvent = new ClientOperationEvent(
         this._sessionId(),
-        this._seqNo++,
+        ++this._lastSequenceNumber,
         this._contextVersion,
         new Date(),
         outgoingOperation);

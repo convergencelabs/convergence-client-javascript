@@ -8,7 +8,7 @@ import {RealTimeModel} from "../../main";
 // tslint:disable-next-line
 require("fake-indexeddb/auto");
 
-const MODELS_TO_CREATE = 6;
+const MODELS_TO_CREATE = 1;
 let modelIds: string[] = [];
 
 const domain = createDomain({
@@ -21,12 +21,13 @@ async function createModels(): Promise<void> {
   let rtManifest = await createManifest();
   for (let i = 0; i < MODELS_TO_CREATE; i++) {
     let id = `created-offline-${i}`;
-    await createModel(id);
+    // await createModel(id);
     rtManifest.root().set(id, new Date().getTime());
-    modelIds.push(id);
+    // modelIds.push(id);
     console.log("Created offline model", id);
   }
   await rtManifest.close();
+  console.log("Manifest closed after creating ");
 }
 
 async function createModel(id: string): Promise<string> {

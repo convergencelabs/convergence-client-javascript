@@ -22,6 +22,8 @@ export interface IModelState {
   valueIdPrefix: { prefix: string, increment?: number };
 
   version: number;
+  lastSequenceNumber: number;
+
   createdTime: Date;
   modifiedTime: Date;
 

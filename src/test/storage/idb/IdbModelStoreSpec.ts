@@ -74,13 +74,14 @@ function createModelState(): IModelState {
     collection: "collection",
     local: false,
     version: 10,
+    lastSequenceNumber: 0,
     valueIdPrefix: {prefix: "vid", increment: 0},
     createdTime: new Date(),
     modifiedTime: new Date(),
     permissions: new ModelPermissions(true, true, true, true),
     snapshot: {
-      dataVersion: 10,
-      seqNo: 0,
+      version: 10,
+      sequenceNumber: 0,
       data: {
         type: "object",
         id: "1:0",

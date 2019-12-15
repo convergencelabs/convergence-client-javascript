@@ -19,8 +19,8 @@ import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
  * @module Offline
  */
 export interface IModelSnapshot {
-  dataVersion: number;
-  seqNo: number;
+  version: number;
+  sequenceNumber: number;
   data: ObjectValue;
   serverOperations: IServerOperationData[];
   localOperations: ILocalOperationData[];

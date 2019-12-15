@@ -7,13 +7,13 @@ import {
   ConnectingEvent,
   ConnectionFailedEvent,
   ConnectionScheduledEvent,
+  Convergence,
   ConvergenceDomain,
   DisconnectedEvent,
   ErrorEvent,
   IConvergenceOptions,
   InterruptedEvent,
-  LogLevel,
-  Convergence
+  LogLevel
 } from "../main";
 import * as WebSocket from "ws";
 import {TypeChecker} from "../main/util/TypeChecker";
@@ -21,6 +21,7 @@ import {TypeChecker} from "../main/util/TypeChecker";
 Convergence.configureLogging({
   root: LogLevel.DEBUG,
   loggers: {
+    models: LogLevel.DEBUG
   }
 });
 

@@ -118,7 +118,15 @@ export interface IConvergenceOptions {
      *
      * @experimental
      */
-    storage: IStorageAdapter
+    storage: IStorageAdapter,
+
+    /**
+     * The number of operations after which a snapshot of local offline that is
+     * being edited should be taken. The default is 100.
+     *
+     * @experimental
+     */
+    modelSnapshotInterval?: number
   };
 
   /**

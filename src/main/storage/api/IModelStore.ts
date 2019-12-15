@@ -45,7 +45,7 @@ export interface IModelStore {
 
   putModelState(model: IModelState): Promise<void>;
 
-  snapshotModel(modelId: string, version: number, modelData: ObjectValue): Promise<void>;
+  snapshotModel(modelId: string, version: number, sequenceNumber: number, modelData: ObjectValue): Promise<void>;
 
   claimValueIdPrefix(modelId: string): Promise<{ prefix: string, increment: number }>;
 

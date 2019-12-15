@@ -28,7 +28,6 @@ import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
 import {ModelPermissions, ObjectValue} from "../../model";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
-import {ConvergenceErrorCodes} from "../../util/ConvergenceErrorCodes";
 import {ConvergenceError} from "../../util";
 
 /**
@@ -79,7 +78,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         collection: doc.details.collection,
         valueIdPrefix: doc.details.valueIdPrefix,
         version: doc.details.version,
-        seqNo: doc.details.seqNo,
+        lastSequenceNumber: doc.details.lastSequenceNumber,
         createdTime: doc.details.createdTime,
         modifiedTime: doc.details.modifiedTime,
         permissions: new ModelPermissions(
@@ -87,7 +86,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           doc.details.permissions.write,
           doc.details.permissions.remove,
           doc.details.permissions.manage,
-        )
+        ),
+        snapshotVersion: doc.details.snapshotVersion,
+        snapshotSequenceNumber: doc.details.snapshotSequenceNumber
       };
     }
 
@@ -124,8 +125,10 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           remove: modelState.permissions.remove,
           manage: modelState.permissions.manage,
         },
-        seqNo: modelState.snapshot.seqNo,
-        version: modelState.version
+        lastSequenceNumber: modelState.lastSequenceNumber,
+        version: modelState.version,
+        snapshotVersion: modelState.snapshot.version,
+        snapshotSequenceNumber: modelState.snapshot.sequenceNumber
       }
     };
 
@@ -147,7 +150,6 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     const data: IModelData = {
       modelId: modelState.modelId,
       data: modelState.snapshot.data,
-      version: modelState.snapshot.dataVersion
     };
     await toVoidPromise(modelDataStore.put(data));
 
@@ -246,9 +248,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   serverOpStore]) => {
       await toVoidPromise(creationStore.put(modelCreation));
 
-      const dataVersion = 1;
-      const version = dataVersion;
-      const seqNo = 0;
+      const version = 1;
+      const lastSequenceNumber = 0;
       const now = new Date();
       const permissions = new ModelPermissions(true, true, true, true);
       const modelState: IModelState = {
@@ -258,6 +259,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         valueIdPrefix: {prefix: "0", increment: 0},
 
         version,
+        lastSequenceNumber,
         createdTime: now,
         modifiedTime: now,
 
@@ -265,8 +267,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
         local: true,
         snapshot: {
-          dataVersion,
-          seqNo,
+          version,
+          sequenceNumber: lastSequenceNumber,
           data: modelCreation.initialData,
           localOperations: [],
           serverOperations: []
@@ -420,9 +422,14 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         modelMetaData.details.createdTime = dataUpdate.createdTime;
         modelMetaData.details.modifiedTime = dataUpdate.modifiedTime;
 
+        // We know the model does not have any uncommitted operations.
+        // thus the data we are about to store incorporates all the way
+        // up to the last sequence number.
+        modelMetaData.details.snapshotSequenceNumber = modelMetaData.details.lastSequenceNumber;
+        modelMetaData.details.snapshotVersion = dataUpdate.version;
+
         const data: IModelData = {
           modelId,
-          version: dataUpdate.version,
           data: dataUpdate.data
         };
         await toVoidPromise(modelDataStore.put(data));
@@ -481,7 +488,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       await toVoidPromise(localOpStore.add(localOp));
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(localOp.modelId));
       metaData.uncommitted = 1;
-      metaData.details.seqNo = localOp.sequenceNumber;
+      metaData.details.lastSequenceNumber = localOp.sequenceNumber;
       IdbModelStore._setSyncRequired(metaData);
       await toVoidPromise(modelMetaDataStore.put(metaData));
     });
@@ -541,14 +548,15 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
           const serverOpsIndex = serverOpStore.index(IdbSchema.ModelServerOperation.Indices.ModelId);
           const serverOperations = await toPromise(serverOpsIndex.getAll(modelId));
           const snapshot: IModelSnapshot = {
-            dataVersion: data.version,
-            seqNo: meta.details.seqNo,
+            version: meta.details.snapshotVersion,
+            sequenceNumber: meta.details.snapshotSequenceNumber,
             data: data.data,
             localOperations,
             serverOperations
           };
 
           const version = meta.details.version;
+          const lastSequenceNumber = meta.details.lastSequenceNumber;
 
           return {
             modelId: meta.modelId,
@@ -556,6 +564,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
             createdTime: meta.details.createdTime,
             modifiedTime: meta.details.modifiedTime,
             version,
+            lastSequenceNumber,
             valueIdPrefix: {...meta.details.valueIdPrefix},
             permissions: new ModelPermissions(
               meta.details.permissions.read,
@@ -649,17 +658,24 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public snapshotModel(modelId: string,
                        version: number,
+                       sequenceNumber: number,
                        modelData: ObjectValue): Promise<void> {
     const stores = [
+      IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
       IdbSchema.ModelServerOperation.Store
     ];
     return this._withWriteStores(stores,
-      async ([modelDataStore, serverOpStore]) => {
+      async ([metaDataStore, modelDataStore, serverOpStore]) => {
+
+        const meta = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
+        meta.details.snapshotVersion = version;
+        meta.details.snapshotSequenceNumber = sequenceNumber;
+
+        await toVoidPromise(metaDataStore.put(meta));
 
         const data: IModelData = {
           modelId,
-          version,
           data: modelData
         };
         await toVoidPromise(modelDataStore.put(data));

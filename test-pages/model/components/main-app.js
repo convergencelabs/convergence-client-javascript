@@ -21,7 +21,8 @@ Vue.component('main-app', {
         }
       },
       offline: {
-        storage: new Convergence.IdbStorageAdapter()
+        storage: new Convergence.IdbStorageAdapter(),
+        modelSnapshotInterval: 5
       }
     };
 

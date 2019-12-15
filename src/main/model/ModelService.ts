@@ -395,6 +395,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       throw new ConvergenceError("'options' is a required parameter");
     }
 
+    if (options.id === "") {
+      throw new ConvergenceError("'options.id' can not be an empty string");
+    }
+
     if (!Validation.nonEmptyString(options.collection)) {
       return Promise.reject<RealTimeModel>(new Error("options.collection must be a non-null, non empty string."));
     }
@@ -433,11 +437,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @returns
    *   A Promise that is resolved when the model is successfully removed.
    */
-  public remove(id: string): Promise<void> {
+  public async remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
     const model = this._openModels.get(id);
     if (model !== undefined) {
       model._handleLocallyDeleted();
+      await model.whenClosed();
     }
 
     if (this._connection.isOnline()) {
@@ -637,14 +642,18 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _close(resourceId: string): void {
+    this._log.debug("Model with resourceId closed: " + resourceId);
     if (this._resourceIdToModelId.has(resourceId)) {
       const modelId = this._resourceIdToModelId.get(resourceId);
       this._resourceIdToModelId.delete(resourceId);
       this._openModels.delete(modelId);
 
       if (this._resyncingModels.has(modelId)) {
+        this._log.warn("Completing resync: " + resourceId);
         this._resyncComplete(modelId);
       }
+    } else {
+      this._log.warn("Asked to close a model for unknown resource id: " + resourceId);
     }
   }
 
@@ -717,6 +726,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         // Wait for the model to close, then open it.
         return model.whenClosed().then(() => this._open(id, options));
       } else {
+        this._log.debug("opening already open model");
         return Promise.resolve(model);
       }
     }
@@ -870,6 +880,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           false,
           false,
           getOrDefaultNumber(openRealTimeModelResponse.version),
+          0,
           timestampToDate(openRealTimeModelResponse.createdTime),
           timestampToDate(openRealTimeModelResponse.modifiedTime),
           getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
@@ -931,7 +942,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // This is initially null, which is fine. During reconnect it will be set
     // prior to messages being sent or received.
-    const resourceId = null;
+    const resourceId = `offline:${state.modelId}`;
 
     // Note we initialize the model with the dataVersion. The rehydration
     // process will then take us to the current version.
@@ -941,7 +952,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.collection,
       state.local,
       resyncOnly,
-      state.snapshot.dataVersion,
+      state.snapshot.version,
+      state.snapshot.sequenceNumber,
       state.createdTime,
       state.modifiedTime,
       `${valueIdPrefix.prefix}-${valueIdPrefix.increment}`,
@@ -951,6 +963,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.permissions,
       state.snapshot.data
     );
+
+    this._resourceIdToModelId.set(resourceId, model.modelId());
 
     model._setOffline();
     model._enableOffline();
@@ -1000,9 +1014,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._log.debug(`Creating new offline model model '${id}' using auto-create options.`);
     const dataValue = this._getDataFromCreateOptions(options);
 
-    // FIXME what should these be?
-    const resourceId = "fake";
-    const valueIdPrefix = "fake2";
+    const resourceId = `offline:${id}`;
+
+    // FIXME we need to review this
+    const valueIdPrefix = "0.0";
     const currentTime = new Date();
     const permissions = new ModelPermissions(true, true, true, true);
     const version = 1;
@@ -1016,6 +1031,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       local,
       resyncOnly,
       version,
+      0,
       currentTime,
       currentTime,
       valueIdPrefix,
@@ -1025,6 +1041,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       permissions,
       dataValue
     );
+
+    this._resourceIdToModelId.set(resourceId, model.modelId());
 
     model._setOffline();
 
@@ -1042,6 +1060,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     local: boolean,
     resyncModel: boolean,
     version: number,
+    sequenceNumber: number,
     createdTime: Date,
     modifiedTime: Date,
     valueIdPrefix: string,
@@ -1058,10 +1077,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       new ClientConcurrencyControl(
         () => this._connection.session().sessionId(),
         version,
+        sequenceNumber,
         transformer,
         referenceTransformer);
 
-    return new RealTimeModel(
+    const model = new RealTimeModel(
       resourceId,
       valueIdPrefix,
       data,
@@ -1081,6 +1101,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this,
       this._modelOfflineManager
     );
+
+    this._modelOfflineManager.modelOpened(model);
+
+    return model;
   }
 
   /**

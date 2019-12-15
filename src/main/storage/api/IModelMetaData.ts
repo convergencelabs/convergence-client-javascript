@@ -58,11 +58,16 @@ export interface IModelMetaData {
 
   details?: {
     collection: string;
-    valueIdPrefix: {prefix: string, increment: number};
+    valueIdPrefix: { prefix: string, increment: number };
+
     version: number;
-    seqNo: number;
+    lastSequenceNumber: number;
+
     createdTime: Date;
     modifiedTime: Date;
     permissions: ModelPermissions;
+
+    snapshotVersion: number;
+    snapshotSequenceNumber: number;
   };
 }

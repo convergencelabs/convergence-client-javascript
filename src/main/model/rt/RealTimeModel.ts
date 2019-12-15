@@ -521,7 +521,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._initializeReferences(references);
 
-    this._offlineManager.modelOpened(this);
     this._storeOffline = this._offlineManager.isModelSubscribed(this._modelId);
   }
 
@@ -998,9 +997,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   public _openAfterResync(): void {
-    if (this._resyncData) {
-      this._resyncOnly = false;
-    }
+    this._resyncOnly = false;
   }
 
   /**
@@ -1020,7 +1017,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   public _getConcurrencyControlStateSnapshot(): IConcurrencyControlState {
     return {
       data: this._model.root().dataValue(),
-      seqNo: this._concurrencyControl.sequenceNumber(),
+      lastSequenceNumber: this._concurrencyControl.lastSequenceNumber(),
       uncommittedOperations: [...this._concurrencyControl.getInFlightOperations()]
     };
   }
@@ -1079,8 +1076,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     });
 
     let contextVersion = this._concurrencyControl.contextVersion();
-    let seqNo = this._concurrencyControl.sequenceNumber();
+    let lastSequenceNumber = this._concurrencyControl.lastSequenceNumber();
     let inFlight: ClientOperationEvent[] = [];
+
+    // we may have client events that are older than the last sequence number.
+    // this happens when we take a snapshot. Since the current snapshot already
+    // contains thee effects of the operation, we can discard them.
+    while (clientEvents.length > 0 && clientEvents[0].seqNo <= lastSequenceNumber) {
+      clientEvents.shift();
+    }
 
     const canApplyServerEvent = () => {
       return serverEvents.length > 0 &&
@@ -1105,7 +1109,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           this._connection.session().sessionId(),
           clientEvent.contextVersion,
           clientEvent.timestamp);
-        seqNo = clientEvent.seqNo + 1;
+        lastSequenceNumber = clientEvent.seqNo;
         inFlight.push(clientEvent);
       }
     }
@@ -1119,7 +1123,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         `Did not arrive at the proper version (${targetVersion}) when rehydrating model: ${contextVersion}`);
     }
 
-    this._concurrencyControl.setState(contextVersion, seqNo, inFlight);
+    this._concurrencyControl.setState(contextVersion, lastSequenceNumber, inFlight);
   }
 
   /**
@@ -1191,10 +1195,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._sessions = [];
 
-    this._resyncData = {
-      bufferedOperations: [],
-      upToDate: false
-    };
+    this._resyncData = null;
 
     if (this._closingData.closing) {
       this._close();
@@ -1207,6 +1208,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOnline(): void {
+    this._resyncData = {
+      bufferedOperations: [],
+      upToDate: false
+    };
+
     if (this._local) {
       // If the model is not local, its possible that it was deleted offline
       // If it wasn't local and its open.. the that means the local user did not
@@ -1515,7 +1521,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._connection = null;
 
     this._closingData.closing = false;
-    this._closingData.deferred = null;
 
     deferred.resolve();
 

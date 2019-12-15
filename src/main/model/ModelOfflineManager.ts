@@ -66,20 +66,15 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   private readonly _subscribedModels: Map<string, ISubscribedModelRecord>;
   private readonly _openModels: Map<string, RealTimeModel>;
-  private readonly _syncInterval: number;
   private readonly _storage: StorageEngine;
   private readonly _connection: ConvergenceConnection;
   private readonly _ready: ReplayDeferred<void>;
   private readonly _snapshotInterval: number;
   private readonly _log = Logging.logger("models.offline");
 
-  constructor(connection: ConvergenceConnection,
-              syncInterval: number,
-              snapshotInterval: number,
-              storage: StorageEngine) {
+  constructor(connection: ConvergenceConnection, snapshotInterval: number, storage: StorageEngine) {
     super();
     this._connection = connection;
-    this._syncInterval = syncInterval;
     this._storage = storage;
     this._subscribedModels = new Map();
     this._openModels = new Map();
@@ -98,11 +93,16 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public init(): void {
     this._log.debug("Initializing offline model manager");
-    this._storage.modelStore().getSubscribedModels().then(modelSubscriptions => {
+    this._storage.modelStore().getAllModelMetaData().then(modelSubscriptions => {
       modelSubscriptions.forEach(modelMetaData => {
         const version = modelMetaData.details ? modelMetaData.details.version : 0;
+        const opsSinceSnapshot = modelMetaData.details ?
+          (modelMetaData.details.version - modelMetaData.details.snapshotVersion) +
+          (modelMetaData.details.lastSequenceNumber - modelMetaData.details.snapshotSequenceNumber) :
+          0;
+
         this._subscribedModels.set(
-          modelMetaData.modelId, {version, opsSinceSnapshot: 0, uncommitted: modelMetaData.uncommitted});
+          modelMetaData.modelId, {version, opsSinceSnapshot, uncommitted: modelMetaData.uncommitted});
       });
       this._ready.resolve();
     }).catch(e => {
@@ -289,6 +289,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     this._checkIfDirtyChanged(modelId);
     return this._storage.modelStore()
       .processOperationAck(modelId, seqNo, serverOp)
+      .then(() => this._deleteIfNotNeeded(modelId))
       .then(() => this._handleOperation(modelId, false, true));
   }
 
@@ -357,6 +358,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       },
 
       version,
+      lastSequenceNumber: snapshot.sequenceNumber,
+
       createdTime: model.createdTime(),
       modifiedTime: model.time(),
 
@@ -438,6 +441,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
             valueIdPrefix: {prefix: valueIdPrefix, increment: 0},
 
             version,
+            lastSequenceNumber: 0,
+
             createdTime: timestampToDate(model.createdTime),
             modifiedTime: timestampToDate(model.modifiedTime),
 
@@ -446,8 +451,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
             permissions: new ModelPermissions(read, write, remove, manage),
 
             snapshot: {
-              dataVersion: getOrDefaultNumber(model.version),
-              seqNo: 0,
+              version: getOrDefaultNumber(model.version),
+              sequenceNumber: 0,
 
               data: toObjectValue(model.data),
               serverOperations: [],
@@ -517,7 +522,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     }
   }
 
-  private _handleOperation(modelId: string, serverOp: boolean, ack: boolean): void {
+  private async _handleOperation(modelId: string, serverOp: boolean, ack: boolean): Promise<void> {
     // Check to make sue we are subscribed. We may not be for a locally
     // created model that is just waiting to bee pushed up.
     if (this._subscribedModels.has(modelId)) {
@@ -533,10 +538,12 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       if (opsSinceSnapshot >= this._snapshotInterval) {
         const model = this._openModels.get(modelId);
         const snapshot = this._getSnapshot(model);
-        this._storage.modelStore()
-          .snapshotModel(modelId, snapshot.dataVersion, snapshot.data)
+        await this._storage.modelStore()
+          .snapshotModel(modelId, snapshot.version, snapshot.sequenceNumber, snapshot.data)
+          .then(() => {
+            opsSinceSnapshot = 0;
+          })
           .catch(e => this._log.error("Error snapshotting model", e));
-        opsSinceSnapshot = 0;
       }
 
       this._subscribedModels.set(modelId, {version, opsSinceSnapshot, uncommitted});
@@ -550,8 +557,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     const serverOperations: IServerOperationData [] = [];
 
     return {
-      dataVersion: model.version(),
-      seqNo: modelStateSnapshot.seqNo,
+      version: model.version(),
+      sequenceNumber: modelStateSnapshot.lastSequenceNumber,
       data: modelStateSnapshot.data,
       localOperations,
       serverOperations
@@ -582,7 +589,6 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         !committed,
         version === 0);
       this._emitEvent(event);
-
     }
   }
 
@@ -591,6 +597,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       .then(removed => {
         if (removed) {
           this._subscribedModels.delete(modelId);
+          const event = new OfflineModelStatusChangedEvent(
+            modelId,
+            false,
+            false,
+            false,
+            false);
+          this._emitEvent(event);
         }
       });
   }

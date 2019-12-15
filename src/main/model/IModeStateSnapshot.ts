@@ -20,7 +20,7 @@ import {ClientOperationEvent} from "./ot/ClientOperationEvent";
  * @internal
  */
 export interface IConcurrencyControlState {
-  seqNo: number;
+  lastSequenceNumber: number;
   data: ObjectValue;
   uncommittedOperations: ClientOperationEvent[];
 }

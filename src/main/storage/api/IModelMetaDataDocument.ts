@@ -30,7 +30,7 @@ export interface IModelMetaDataDocument {
     collection: string;
     valueIdPrefix: {prefix: string, increment: number};
     version: number;
-    seqNo: number;
+    lastSequenceNumber: number;
     createdTime: Date;
     modifiedTime: Date;
     permissions: {
@@ -39,5 +39,8 @@ export interface IModelMetaDataDocument {
       remove: boolean;
       manage: boolean;
     };
+
+    snapshotVersion: number;
+    snapshotSequenceNumber: number;
   };
 }
