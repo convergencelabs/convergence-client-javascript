@@ -61,7 +61,6 @@ async function go() {
   domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
     console.log("model sync completed");
 
-    let rtManifest = await domain.models().open("manifest");
     rtManifest.root().set("foo", "bar");
 
     await cleanupModels();
@@ -70,6 +69,8 @@ async function go() {
 
   await domain.initializeOffline("test");
   await createModels();
+
+  let rtManifest = await domain.models().open("manifest");
 
   console.log("going online");
 
