@@ -1017,8 +1017,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     const resourceId = `offline:${id}`;
 
-    // FIXME we need to review this
-    const valueIdPrefix = "0.0";
+    // 0 is a reserved value that will never be used by the server.
+    const valueIdPrefix = "0";
     const currentTime = new Date();
     const permissions = new ModelPermissions(true, true, true, true);
     const version = 1;
@@ -1357,7 +1357,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 }
 
 class InitialIdGenerator {
-  private _prefix: string = "0";
+  private _prefix: string = "@";
   private _id: number = 0;
 
   public id(): string {

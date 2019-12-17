@@ -296,13 +296,16 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   serverOpStore]) => {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
 
+      if (!metaData) {
+        throw new Error(`Can't delete model '${modelId}' because it doesn't exist.`);
+      }
+
       delete metaData.details;
       delete metaData.subscribed;
       delete metaData.available;
       delete metaData.uncommitted;
 
       if (metaData.created === 1) {
-
         // If it was created locally, we are now going to remove it,
         // and we don't need to delete it locally.
         delete metaData.created;
@@ -464,7 +467,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
     if (!serverOp) {
-      throw new Error("localOp was undefined.");
+      throw new Error("serverOp was undefined.");
     }
 
     const stores = [
@@ -478,6 +481,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       if (!metaData) {
         throw new Error(
           `Model meta data for model '${serverOp.modelId}' not found when processing a server operation.`);
+      }
+
+      if (!metaData.details) {
+        throw new Error(
+          `Can't store server operation for Model '${serverOp.modelId}' because the model details are missing from storage.`);
       }
 
       metaData.details.version = serverOp.version + 1;
@@ -504,6 +512,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         throw new Error(`Model meta data for model '${localOp.modelId}' not found when processing a local operation.`);
       }
 
+      if (!metaData.details) {
+        throw new Error(
+          `Can't store local operation for Model '${localOp.modelId}' because the model details are missing from storage.`);
+      }
+
       metaData.uncommitted = 1;
       metaData.details.lastSequenceNumber = localOp.sequenceNumber;
       IdbModelStore._setSyncRequired(metaData);
@@ -527,6 +540,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       if (!metaData) {
         throw new Error(`Model meta data for model '${modelId}' not found when processing a local operation acknowledgement.`);
+      }
+
+      if (!metaData.details) {
+        throw new Error(
+          `Can't store operation ack for Model '${modelId}' because the model details are missing from storage.`);
       }
 
       metaData.details.version = serverOp.version + 1;

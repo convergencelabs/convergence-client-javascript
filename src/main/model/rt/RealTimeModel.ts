@@ -1263,10 +1263,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @private
    */
   public _handleLocallyDeleted(): void {
+    // Prevent the model from trying to store anything locally.
+    this._storeOffline = false;
+
     const event = new ModelClosedEvent(this, true, "The model was locally deleted");
     this._initiateClose(true, event);
 
-    const message = `The model with id '${this._modelId}' was locally deleted while offline.`;
+    const message = `The model '${this._modelId}' was locally deleted while offline.`;
     const deletedEvent = new ModelDeletedEvent(this, true, message);
     this._emitEvent(deletedEvent);
   }
