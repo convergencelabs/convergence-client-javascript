@@ -13,11 +13,16 @@
  */
 
 import {IdbStorageAdapter} from "../../../main/storage/idb";
-import {IModelState} from "../../../main/storage/api/";
+import {ILocalOperationData, IModelState} from "../../../main/storage/api/";
 import {ModelPermissions} from "../../../main/model/";
 
 import {expect} from "chai";
+// tslint:disable-next-line:no-duplicate-imports
+import * as chai from "chai";
 import "fake-indexeddb/auto";
+import * as chaiAsPromised from "chai-as-promised";
+
+chai.use(chaiAsPromised);
 
 describe("IdbModelStore", () => {
   describe("modelExists()", () => {
@@ -64,6 +69,26 @@ describe("IdbModelStore", () => {
       })
     );
   });
+
+  describe("processLocalOperation()", () => {
+    it("Reject if the model does not exist", () => withStorage(async (adapter) => {
+        const modelStore = adapter.modelStore();
+        const localOp: ILocalOperationData = {
+          sequenceNumber: 0,
+          contextVersion: 1,
+          modelId: "does-not-exist",
+          sessionId: "none",
+          operation: {
+            type: "string_insert",
+          },
+          timestamp: new Date()
+        };
+
+        const result = modelStore.processLocalOperation(localOp);
+        return expect(result).to.eventually.be.rejected;
+      })
+    );
+  });
 });
 
 let modelCounter = 1;
@@ -99,9 +124,9 @@ function withStorage(body: (IdbStorageAdapter) => Promise<any>): Promise<any> {
   const adapter = new IdbStorageAdapter();
   return adapter.openStore("namespace", "domain" + counter++, "someuser")
     .then(() => body(adapter))
-    .then(() => {
+    .then((result) => {
       adapter.destroy();
-      return Promise.resolve();
+      return Promise.resolve(result);
     })
     .catch((e) => {
       adapter.destroy();

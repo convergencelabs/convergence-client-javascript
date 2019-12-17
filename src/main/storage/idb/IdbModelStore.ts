@@ -463,33 +463,52 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
+    if (!serverOp) {
+      throw new Error("localOp was undefined.");
+    }
+
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelServerOperation.Store
     ];
 
     return this._withWriteStores(stores, async ([modelMetaDataStore, serverOpStore]) => {
-      await toVoidPromise(serverOpStore.add(serverOp));
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(serverOp.modelId));
+
+      if (!metaData) {
+        throw new Error(
+          `Model meta data for model '${serverOp.modelId}' not found when processing a server operation.`);
+      }
+
       metaData.details.version = serverOp.version + 1;
       metaData.details.modifiedTime = serverOp.timestamp;
 
+      await toVoidPromise(serverOpStore.add(serverOp));
       await toVoidPromise(modelMetaDataStore.put(metaData));
     });
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
+    if (!localOp) {
+      throw new Error("localOp was undefined.");
+    }
+
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelLocalOperation.Store
     ];
 
     return this._withWriteStores(stores, async ([modelMetaDataStore, localOpStore]) => {
-      await toVoidPromise(localOpStore.add(localOp));
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(localOp.modelId));
+      if (!metaData) {
+        throw new Error(`Model meta data for model '${localOp.modelId}' not found when processing a local operation.`);
+      }
+
       metaData.uncommitted = 1;
       metaData.details.lastSequenceNumber = localOp.sequenceNumber;
       IdbModelStore._setSyncRequired(metaData);
+
+      await toVoidPromise(localOpStore.add(localOp));
       await toVoidPromise(modelMetaDataStore.put(metaData));
     });
   }
@@ -504,13 +523,17 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     ];
 
     return this._withWriteStores(stores, async ([localOpStore, serverOpStore, modelMetaDataStore]) => {
-      await toVoidPromise(localOpStore.delete([modelId, seqNo]));
-      await toVoidPromise(serverOpStore.add(serverOp));
-
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+
+      if (!metaData) {
+        throw new Error(`Model meta data for model '${modelId}' not found when processing a local operation acknowledgement.`);
+      }
 
       metaData.details.version = serverOp.version + 1;
       metaData.details.modifiedTime = serverOp.timestamp;
+
+      await toVoidPromise(localOpStore.delete([modelId, seqNo]));
+      await toVoidPromise(serverOpStore.add(serverOp));
 
       const idx = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
       const dirty = await toPromise(idx.count(modelId)).then((count => count > 0));

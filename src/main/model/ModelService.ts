@@ -642,9 +642,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _close(resourceId: string): void {
-    this._log.debug("Model with resourceId closed: " + resourceId);
     if (this._resourceIdToModelId.has(resourceId)) {
       const modelId = this._resourceIdToModelId.get(resourceId);
+      this._log.debug("Model closed: " + modelId);
       this._resourceIdToModelId.delete(resourceId);
       this._openModels.delete(modelId);
 
@@ -684,12 +684,13 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _resourceIdChanged(modelId: string, oldResourceId: string, newResourceId: string): void {
-    if (this._openModels.has(modelId) || this._resyncingModels.has(modelId)) {
-      if (oldResourceId !== null) {
-        this._resourceIdToModelId.delete(oldResourceId);
-      }
+    // If we don't know about the old one, we will just ignore this.
+    if (this._resourceIdToModelId.has(oldResourceId)) {
       this._resourceIdToModelId.set(newResourceId, modelId);
     }
+
+    // We delete the old one no matter what.
+    this._resourceIdToModelId.delete(oldResourceId);
   }
 
   /**

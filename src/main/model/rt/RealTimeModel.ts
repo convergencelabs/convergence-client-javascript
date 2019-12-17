@@ -521,7 +521,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._initializeReferences(references);
 
-    this._storeOffline = this._offlineManager.isModelSubscribed(this._modelId);
+    this._storeOffline = this._offlineManager.isModelStoredOffline(this._modelId);
   }
 
   /**
@@ -749,7 +749,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       return Promise.reject(new ConvergenceError(`The model '${this._modelId}' has already been closed`));
     }
 
-    if (this._resyncData) {
+    if (this._resyncData !== null) {
       // We are resyncing, so we just need to set the flag
       // that we don't want to open.
       this._resyncOnly = true;
@@ -928,7 +928,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @experimental
    */
   public isSubscribedOffline(): boolean {
-    return this._offlineManager.isModelSubscribed(this._modelId);
+    return this._offlineManager.isModelStoredOffline(this._modelId);
   }
 
   //
@@ -1554,6 +1554,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       // fixme handle error.
       this._offlineManager
         .processOperationAck(this.modelId(), sequenceNumber, serverOp)
+        .then(() => {
+          // We set this because if we are now done syncing, because we have
+          // acked all of the operations, then we might not need to be stored
+          // offline anymore.
+
+          // TODO there is probably a more elegant, event based way to handle this.
+          this._storeOffline = this._offlineManager.isModelStoredOffline(this.modelId());
+        })
         .catch(e => this._log.error(e));
     }
 
@@ -1677,8 +1685,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       // TODO when we get to offline mode we may have to rethink value id prefixes a bit
       //   two clients can not be re-initialized with the same vid prefix.
 
-      this._concurrencyControl.resetSequenceNumber();
-
       // FIXME this could be heavy weight and block the UI a bit.
       this._resyncData.bufferedOperations.forEach(m => {
         this._processRemoteOperation(m);
@@ -1756,7 +1762,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleLocalOperation(opEvent: ClientOperationEvent): void {
     if (this._storeOffline) {
       this._offlineManager.processLocalOperation(this._modelId, opEvent)
-        .catch(e => this._log.error(`model persistence error: ${this._modelId}`, e));
+        .catch(e => this._log.error(`Error storing local operation: ${this._modelId}`, e));
     }
     this._sendOperation(opEvent);
   }

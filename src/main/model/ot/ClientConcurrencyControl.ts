@@ -85,10 +85,6 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     return this._lastSequenceNumber;
   }
 
-  public resetSequenceNumber(): void {
-    this._lastSequenceNumber = 0;
-  }
-
   public setState(contextVersion: number, lastSequenceNumber: number, inFlight: ClientOperationEvent[]): void {
     this._contextVersion = contextVersion;
     this._lastSequenceNumber = lastSequenceNumber;

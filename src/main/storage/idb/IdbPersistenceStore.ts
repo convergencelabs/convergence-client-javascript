@@ -70,8 +70,14 @@ export class IdbPersistenceStore {
     body: (stores: IDBObjectStore[]) => Promise<T>): Promise<T> {
     const tx = this._db.transaction(stores, mode);
     const objectStores = stores.map(storeName => tx.objectStore(storeName));
-    const result = body(objectStores);
-    return txToPromise(tx).then(() => result);
+
+    const result: Promise<T> = body(objectStores)
+      .catch(e => {
+        tx.abort();
+        return Promise.reject(e);
+      });
+
+    return Promise.all([result, txToPromise(tx)]).then(([r, t]) => r);
   }
 
   protected put(storeName: string, data: any): Promise<void> {
