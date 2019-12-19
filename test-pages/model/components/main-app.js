@@ -55,6 +55,7 @@ Vue.component('main-app', {
         .connectWithPassword({username: username, password: password})
         .then(() => {
           this.connected = true;
+          this.offlineInitialized = true;
           this.refreshAll();
         })
         .catch(e => console.error(e))
@@ -71,7 +72,6 @@ Vue.component('main-app', {
     onDisconnect() {
       this.domain.disconnect();
       this.connected = false;
-      this.offlineModels = [];
       this.onlineModels = [];
     },
     refreshAll() {
@@ -212,6 +212,7 @@ Vue.component('main-app', {
       v-on:unsubscribe="onUnsubscribe"
     />
     <online-models 
+      v-bind:model="model"
       v-bind:enabled="connected"
       v-bind:onlineModels="onlineModels"
       v-on:deleteModel="onDeleteModel"

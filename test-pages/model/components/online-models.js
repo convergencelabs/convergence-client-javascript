@@ -13,7 +13,7 @@
  */
 
 Vue.component('online-models', {
-  props: ["enabled", "onlineModels"],
+  props: ["enabled", "onlineModels", "model"],
   data: () => {
     return {
       models: []
@@ -47,13 +47,16 @@ Vue.component('online-models', {
         <th scope="col">Actions</th>
       </thead>
       <tbody>
-        <tr v-for="model in onlineModels">
-          <td>{{model.modelId}}</td>
-          <td>{{model.version}}</td>
+        <tr v-for="onlineModel in onlineModels">
+          <td>{{onlineModel.modelId}}</td>
+          <td>{{onlineModel.version}}</td>
           <td class="text-right">
-            <button class="btn btn-primary btn-sm" v-on:click="subscribe(model.modelId)">Subscribe</button>
-            <button class="btn btn-primary btn-sm" v-on:click="openModel(model.modelId)">Open</button>
-            <button class="btn btn-danger btn-sm" v-on:click="deleteModel(model.modelId)">Delete</button>
+            <button class="btn btn-primary btn-sm" v-on:click="subscribe(onlineModel.modelId)">Subscribe</button>
+            <button
+              class="btn btn-primary btn-sm" 
+              v-on:click="openModel(onlineModel.modelId)"
+              :disabled="model && onlineModel.modelId === model.modelId()">Open</button>
+            <button class="btn btn-danger btn-sm" v-on:click="deleteModel(onlineModel.modelId)">Delete</button>
           </td>
         </tr>
       </tbody>
