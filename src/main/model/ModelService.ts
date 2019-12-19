@@ -1219,7 +1219,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     });
 
-    this._resourceIdToModelId.clear();
     this._resyncingModels.clear();
     this._modelResyncQueue.length = 0;
 
