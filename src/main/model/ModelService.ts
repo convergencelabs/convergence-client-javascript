@@ -47,7 +47,7 @@ import {
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {TypeChecker} from "../util/TypeChecker";
-import {PagedData} from "../util/PagedData";
+import {PagedData} from "../util/";
 import {Validation} from "../util/Validation";
 import {ModelOfflineManager} from "./ModelOfflineManager";
 import {OfflineModelSyncErrorEvent} from "./events";
@@ -892,7 +892,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         );
 
         this._resourceIdToModelId.set(openRealTimeModelResponse.resourceId, model.modelId());
-        return model;
+
+        if (this._modelOfflineManager.isOfflineEnabled()) {
+          return this._modelOfflineManager
+            .storeOpenModelOffline(model)
+            .then(() => {
+              this._modelOfflineManager.modelOpened(model, 0);
+              return model;
+            });
+        } else {
+          return model;
+        }
       });
   }
 
@@ -914,7 +924,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       } else if (this._autoCreateRequests.has(autoRequestId)) {
         const options = this._autoCreateRequests.get(autoRequestId);
         const model = this._createNewModelOffline(id, options);
-        model._enableOffline();
         const snapshot = model._getConcurrencyControlStateSnapshot();
         const creationData: IModelCreationData = {
           modelId: id,
@@ -967,11 +976,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._resourceIdToModelId.set(resourceId, model.modelId());
 
     model._setOffline();
-    model._enableOffline();
     model._rehydrateFromOfflineState(
       state.version,
       state.snapshot.serverOperations,
       state.snapshot.localOperations);
+
+    const opsSinceSnapshot =
+      (state.version - state.snapshot.version) + (state.lastSequenceNumber - state.snapshot.sequenceNumber);
+
+    this._modelOfflineManager.modelOpened(model, opsSinceSnapshot);
 
     return model;
   }
@@ -1046,6 +1059,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     model._setOffline();
 
+    this._modelOfflineManager.modelOpened(model, 0);
+
     return model;
   }
 
@@ -1101,8 +1116,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this,
       this._modelOfflineManager
     );
-
-    this._modelOfflineManager.modelOpened(model);
 
     return model;
   }

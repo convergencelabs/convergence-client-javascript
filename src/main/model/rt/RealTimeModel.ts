@@ -521,7 +521,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._initializeReferences(references);
 
-    this._storeOffline = this._offlineManager.isModelStoredOffline(this._modelId);
+    this._storeOffline = this._offlineManager.isOfflineEnabled();
   }
 
   /**
@@ -1020,24 +1020,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       lastSequenceNumber: this._concurrencyControl.lastSequenceNumber(),
       uncommittedOperations: [...this._concurrencyControl.getInFlightOperations()]
     };
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _enableOffline(): void {
-    this._storeOffline = true;
-  }
-
-  /**
-   * @private
-   * @internal
-   * @hidden
-   */
-  public _disableOffline(): void {
-    this._storeOffline = false;
   }
 
   /**
@@ -1554,18 +1536,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         operation
       };
 
-      // fixme handle error.
       this._offlineManager
         .processOperationAck(this.modelId(), sequenceNumber, serverOp)
-        .then(() => {
-          // We set this because if we are now done syncing, because we have
-          // acked all of the operations, then we might not need to be stored
-          // offline anymore.
-
-          // TODO there is probably a more elegant, event based way to handle this.
-          this._storeOffline = this._offlineManager.isModelStoredOffline(this.modelId());
-        })
-        .catch(e => this._log.error(e));
+        .catch(e => {
+          // FIXME handle error. Should we close the model? Just emit and error?
+          this._log.error(e);
+        });
     }
 
     // If we are closing and waiting for remote operations, we might be able to close.
