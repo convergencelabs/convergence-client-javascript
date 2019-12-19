@@ -578,7 +578,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       model.modelId(),
       this._subscribedModels.has(model.modelId()),
       true,
-      model.isCommitted(),
+      !model.isCommitted(),
       model.isLocal());
     this._emitEvent(e);
   }
