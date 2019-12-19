@@ -21,6 +21,9 @@ import {IStorageAdapter} from "./storage/api";
  * The [[IConvergenceOptions]] interface represents that options that can be
  * set within Convergence when connecting to a domain.
  *
+ * See the [ConvergenceOptions](https://github.com/convergencelabs/convergence-client-javascript/blob/master/src/main/ConvergenceOptions.ts)
+ * implementation for the default settings.
+ *
  * @module Connection and Authentication
  */
 export interface IConvergenceOptions {
@@ -47,7 +50,7 @@ export interface IConvergenceOptions {
    */
   protocol?: {
     /**
-     * The default timeout for a request to the server.
+     * The timeout for a request to the server, in seconds.  Defaults to 10.
      */
     defaultRequestTimeout: number;
 
@@ -62,15 +65,17 @@ export interface IConvergenceOptions {
 
       /**
        * Configures how long the client will wait, in seconds after the last
-       * message is received from the server before a ping will be sent.
+       * message is received from the server before a ping will be sent. Defaults
+       * to 5.
        */
-      pingInterval: number;
+      pingInterval?: number;
 
       /**
        * Specifies the time in seconds the client will wait for a response
-       * from the server to a ping before considering the connection dead.
+       * from the server to a ping before considering the connection dead. Defaults
+       * to 10.
        */
-      pongTimeout: number;
+      pongTimeout?: number;
     };
   };
 

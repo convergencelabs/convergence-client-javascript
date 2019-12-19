@@ -31,7 +31,7 @@ export class ConvergenceOptions {
   public static DEFAULT_AUTO_RECONNECT = true;
   public static DEFAULT_RECONNECT_INTERVALS = [0, 5, 10, 20, 30];
 
-  public static DEFAULT_DEFAULT_REQUEST_TIMEOUT = 10;
+  public static DEFAULT_REQUEST_TIMEOUT = 10;
   public static DEFAULT_HEARTBEAT_ENABLED = true;
   public static DEFAULT_PING_INTERVAL = 5;
   public static DEFAULT_PONG_TIMEOUT = 10;
@@ -108,7 +108,7 @@ export class ConvergenceOptions {
     }
 
     const defaultProtocolOptions = {
-      defaultRequestTimeout: ConvergenceOptions.DEFAULT_DEFAULT_REQUEST_TIMEOUT,
+      defaultRequestTimeout: ConvergenceOptions.DEFAULT_REQUEST_TIMEOUT,
       heartbeat: {
         enabled: ConvergenceOptions.DEFAULT_HEARTBEAT_ENABLED,
         pingInterval: ConvergenceOptions.DEFAULT_PING_INTERVAL,
