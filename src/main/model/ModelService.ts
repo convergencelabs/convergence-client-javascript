@@ -1001,21 +1001,35 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     return this._connection.request(request).then(() => {
       if (this._modelOfflineManager.isOfflineEnabled()) {
-        this._modelOfflineManager.modelDeleted(id).catch((e: Error) => {
-          this._emitEvent(new ErrorEvent(
-            this._connection.session().domain(),
-            `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
-          );
-          this._log.error("Error removing model from offline store.", e);
-        });
+        this._modelOfflineManager
+          .getModelMetaData(id)
+          .then(meta => {
+            if (meta) {
+              return this._modelOfflineManager.modelDeleted(id);
+            }
+          })
+          .catch((e: Error) => {
+            this._emitEvent(new ErrorEvent(
+              this._connection.session().domain(),
+              `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
+            );
+            this._log.error("Error removing model from offline store.", e);
+          });
       }
     });
   }
 
   private _removeOffline(id: string): Promise<void> {
-    return this._modelOfflineManager.markModelForDeletion(id).catch(e => {
-      this._log.error("Could not mark model for deletion", e);
-    });
+    return this._modelOfflineManager
+      .getModelMetaData(id)
+      .then(meta => {
+        if (meta) {
+          return this._modelOfflineManager.markModelForDeletion(id);
+        }
+      })
+      .catch(e => {
+        this._log.error("Could not mark model for deletion", e);
+      });
   }
 
   /**
