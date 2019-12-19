@@ -1205,7 +1205,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           return this._modelService.remove(this._modelId)
             .catch((e) => {
               // TODO we should explicitly check for model_not_found and only
-              // ignore that.
+              //  ignore that.
               console.log(e);
             }).then(() => {
               return this._offlineManager.modelDeleted(this._modelId);

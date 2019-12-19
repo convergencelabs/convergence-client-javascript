@@ -912,31 +912,30 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private async _openOffline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isUndefined(id)) {
-      // todo we could generate an uuid just like the server.
-      return Promise.reject(new Error("can not open an offline model without an id"));
-    } else {
-      const modelState = await this._modelOfflineManager.getOfflineModelState(id);
+      id = this._modelIdGenerator.nextString();
+    }
 
-      if (TypeChecker.isSet(modelState)) {
-        const vidPrefix = await this._modelOfflineManager.claimValueIdPrefix(id);
-        const model = this._creteModelFromOfflineState(modelState, vidPrefix, false);
-        return Promise.resolve(model);
-      } else if (this._autoCreateRequests.has(autoRequestId)) {
-        const options = this._autoCreateRequests.get(autoRequestId);
-        const model = this._createNewModelOffline(id, options);
-        const snapshot = model._getConcurrencyControlStateSnapshot();
-        const creationData: IModelCreationData = {
-          modelId: id,
-          collection: options.collection,
-          initialData: snapshot.data,
-          overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
-          worldPermissions: options.worldPermissions,
-          userPermissions: options.userPermissions
-        };
-        return this._modelOfflineManager.createOfflineModel(creationData).then(() => model);
-      } else {
-        return Promise.reject(new Error("Model not available offline, and not auto create options were provided"));
-      }
+    const modelState = await this._modelOfflineManager.getOfflineModelState(id);
+
+    if (TypeChecker.isSet(modelState)) {
+      const vidPrefix = await this._modelOfflineManager.claimValueIdPrefix(id);
+      const model = this._creteModelFromOfflineState(modelState, vidPrefix, false);
+      return Promise.resolve(model);
+    } else if (this._autoCreateRequests.has(autoRequestId)) {
+      const options = this._autoCreateRequests.get(autoRequestId);
+      const model = this._createNewModelOffline(id, options);
+      const snapshot = model._getConcurrencyControlStateSnapshot();
+      const creationData: IModelCreationData = {
+        modelId: id,
+        collection: options.collection,
+        initialData: snapshot.data,
+        overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
+        worldPermissions: options.worldPermissions,
+        userPermissions: options.userPermissions
+      };
+      return this._modelOfflineManager.createOfflineModel(creationData).then(() => model);
+    } else {
+      return Promise.reject(new Error("Model not available offline, and not auto create options were provided"));
     }
   }
 
