@@ -684,6 +684,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _init(username: string): Promise<void> {
+    if (this._initialized) {
+      return Promise.resolve();
+    }
+
     this._log.debug("Initializing domain");
 
     // FIXME perhaps this should take a user so we can tell the user type
