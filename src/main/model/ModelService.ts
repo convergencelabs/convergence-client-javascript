@@ -649,7 +649,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._openModels.delete(modelId);
 
       if (this._resyncingModels.has(modelId)) {
-        this._log.warn("Completing resync: " + resourceId);
         this._resyncComplete(modelId);
       }
     } else {
