@@ -21,6 +21,12 @@ import {AbstractDeferred} from "./AbstractDeferred";
  */
 export class ReplayDeferred<R> extends AbstractDeferred<R> {
 
+  public static resolved<T>(value?: T): ReplayDeferred<T> {
+    const d = new ReplayDeferred<T>();
+    d.resolve(value);
+    return d;
+  }
+
   private readonly _deferreds: Array<Deferred<R>>;
 
   private _value: R | PromiseLike<R> | undefined;

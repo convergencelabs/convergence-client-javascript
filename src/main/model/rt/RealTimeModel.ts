@@ -1216,7 +1216,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }).then(() => {
         return this._offlineManager.getModelCreationData(this._modelId);
       }).then(creation => {
-        this._debug("Sending locally created model to the server");
+        this._debug("Creating locally created model at the server");
         const options: ICreateModelOptions = {
           id: creation.modelId,
           collection: creation.collection,
