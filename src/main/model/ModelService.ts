@@ -221,7 +221,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private _syncStartedDeferred: ReplayDeferred<void> | null;
+  private _offlineSyncStartedDeferred: ReplayDeferred<void> | null;
 
   /**
    * @internal
@@ -281,6 +281,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._modelResyncQueue = [];
 
     this._syncCompletedDeferred = null;
+    this._offlineSyncStartedDeferred = null;
 
     this._modelOfflineManager = modelOfflineManager;
     this._emitFrom(modelOfflineManager.events());
@@ -295,6 +296,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public session(): ConvergenceSession {
     return this._connection.session();
+  }
+
+  public isResyncing(): boolean {
+    return this._syncCompletedDeferred !== null;
   }
 
   /**
@@ -431,7 +436,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return Promise.reject<string>(new Error("options.collection must be a non-null, non empty string."));
     }
 
-    return this._create(options);
+    return this._checkAndCreate(options);
   }
 
   /**
@@ -446,12 +451,30 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   public async remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
 
-    // FIXME handle the removal of a resyncing model
-
-    const model = this._openModels.get(id);
-    if (model !== undefined) {
+    if (this._openModels.get(id)) {
+      // The model is open. Let's close it. Wait for it to close and then
+      // delete it.
+      const model = this._openModels.get(id);
       model._handleLocallyDeleted();
       await model.whenClosed();
+    }
+
+    if (this._offlineSyncStartedDeferred !== null) {
+      // We are ini the process of starting to sync. Wait for it to start.
+      await this._offlineSyncStartedDeferred.promise();
+    }
+
+    if (this._resyncingModels.has(id)) {
+      // This is a resyncing model.  Let it start resyncing.  Then if it is a
+      // resync close the model, and wait for it to close. If it was a "delete"
+      // action when it is ready its already been deleted.
+      const entry = this._resyncingModels.get(id);
+      await entry.ready;
+      if (entry.action === "resync") {
+        const model = entry.resyncModel!;
+        model._handleLocallyDeleted();
+        await model.whenClosed();
+      }
     }
 
     if (this._connection.isOnline()) {
@@ -599,10 +622,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
+  public async _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
     const collection = options.collection;
-
-    // FIXME handle the removal of a resyncing model
 
     if (this._connection.isOnline()) {
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
@@ -1275,9 +1296,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       model._setOnline();
     });
 
-    if (this._modelOfflineManager.isOfflineEnabled()) {
-      this._syncStartedDeferred = new ReplayDeferred<void>();
+    if (this._resyncingModels.size !== 0) {
+      this._syncCompletedDeferred = new Deferred<void>();
+    }
 
+    if (this._modelOfflineManager.isOfflineEnabled()) {
+      this._offlineSyncStartedDeferred = new ReplayDeferred<void>();
       this._modelOfflineManager
         .ready()
         .then(() => {
@@ -1304,8 +1328,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _whenResyncStarted(): Promise<void> {
-    if (this._syncStartedDeferred) {
-      return this._syncStartedDeferred.promise();
+    if (this._offlineSyncStartedDeferred) {
+      return this._offlineSyncStartedDeferred.promise();
     } else {
       return Promise.resolve();
     }
@@ -1316,6 +1340,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private async _syncDirtyModelsToServer(): Promise<void> {
+    if (this._syncCompletedDeferred === null) {
+      this._syncCompletedDeferred = new Deferred<void>();
+    }
+
     const syncNeeded = await this._modelOfflineManager.getModelsRequiringSync();
 
     // If the model is open, it already was going to be resyncing
@@ -1333,12 +1361,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     });
 
-    this._syncCompletedDeferred = new Deferred<void>();
-
     const promise = this._syncCompletedDeferred.promise();
 
-    this._syncStartedDeferred.resolve();
-    this._syncStartedDeferred = null;
+    this._offlineSyncStartedDeferred.resolve();
+    this._offlineSyncStartedDeferred = null;
 
     this._checkResyncQueue();
 
@@ -1356,7 +1382,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       // No models are currently syncing. If there are none in the queue
       // we are done. Else we start syncing the next one.
       if (this._modelResyncQueue.length === 0) {
-        if (this._syncCompletedDeferred !== null) {
+        if (this._offlineSyncStartedDeferred !== null) {
+          // We might have sync'ed all of the open models, but we may not have
+          // started on the offline ones yet.
+          this._offlineSyncStartedDeferred.promise().then(() => this._checkResyncQueue());
+        } else if (this._syncCompletedDeferred !== null) {
           this._syncCompletedDeferred.resolve();
           this._syncCompletedDeferred = null;
         }
@@ -1432,6 +1462,36 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     model._setOnline();
 
     return model;
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  private async _checkAndCreate(options: ICreateModelOptions): Promise<string> {
+    if (this._openModels.has(options.id)) {
+      const message = `A model with id '${options.id}' is open locally.`;
+      return Promise.reject(new ConvergenceError(message));
+    }
+
+    if (this._offlineSyncStartedDeferred !== null) {
+      // We are ini the process of starting to sync. Wait for it to start.
+      await this._offlineSyncStartedDeferred.promise();
+    }
+
+    if (this._resyncingModels.has(options.id)) {
+      const entry = this._resyncingModels.get(options.id);
+      if (entry.action === "resync") {
+        const message = `A model with id '${options.id}' is resynchronizing.`;
+        return Promise.reject(new ConvergenceError(message));
+      } else {
+        // We are trying to delete an exiting one, let that happen first.
+        await entry.ready;
+      }
+    }
+
+    return this._create(options);
   }
 }
 
