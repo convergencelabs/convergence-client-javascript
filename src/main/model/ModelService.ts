@@ -1350,7 +1350,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private _checkResyncQueue(): void {
-    if (this._resyncingModels.size === 0) {
+    // TODO we could optimize this by just keeping a list of in progress entries.
+    const inProgress = Array.from(this._resyncingModels.values()).filter(m => m.inProgress);
+    if (inProgress.length === 0) {
       // No models are currently syncing. If there are none in the queue
       // we are done. Else we start syncing the next one.
       if (this._modelResyncQueue.length === 0) {
@@ -1360,8 +1362,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         }
       } else {
         const entry = this._modelResyncQueue.pop();
-        this._initiateModelResync(entry.modelId).catch(() => {
+        this._initiateModelResync(entry.modelId).catch((e) => {
           // No op here because this is handled in the method itself.
+          this._log.error("Error resyncing models", e);
         });
       }
     }

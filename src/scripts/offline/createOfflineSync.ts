@@ -10,6 +10,7 @@ require("fake-indexeddb/auto");
 
 const MODELS_TO_CREATE = 6;
 let modelIds: string[] = [];
+let rtManifest;
 
 const domain = createDomain({
   offline: {
@@ -18,7 +19,6 @@ const domain = createDomain({
 });
 
 async function createModels(): Promise<void> {
-  let rtManifest = await createManifest();
   for (let i = 0; i < MODELS_TO_CREATE; i++) {
     let id = `created-offline-${i}`;
     await createModel(id);
@@ -58,28 +58,54 @@ async function cleanupModels(): Promise<void> {
 }
 
 async function go() {
-  domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
-    console.log("model sync completed");
-
-    rtManifest.root().set("foo", "bar");
-
-    await cleanupModels();
-    process.exit();
-  });
-
-  await domain.initializeOffline("test");
-  await createModels();
-
-  let rtManifest = await domain.models().open("manifest");
-
-  console.log("going online");
+  console.log("connecting online");
 
   await domain.connectWithPassword({username: "test", password: "password"});
 
-  for (let id of modelIds) {
-    await domain.models().open(id);
-    console.log("opened model", id);
+  let result = await domain.models().query("select from test where id = 'manifest'");
+  if (result.totalResults === 0) {
+    domain.disconnect();
+    // await domain.initializeOffline("test");
+
+    domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
+      console.log("model sync completed");
+
+      // models[0].root().set("foo", "bar");
+
+      await cleanupModels();
+      process.exit();
+    });
+
+    rtManifest = await createManifest();
+    await createModels();
+
+    // let rtManifest = await domain.models().open("manifest");
+
+    await domain.connectWithPassword({username: "test", password: "password"});
+
+    let manifest = await domain.models().open("manifest");
+    manifest.root().set("foo", "bar");
+
+    // let models = [];
+    // for (let id of modelIds) {
+    //   let model = await domain.models().open(id);
+    //   models.push(model);
+    //   console.log("opened model", id);
+    // }
+
   }
+
 }
 
-go().catch(e => console.log(e));
+async function cleanUp() {
+  for (let i = 0; i < MODELS_TO_CREATE; i++) {
+    modelIds.push(`created-offline-${i}`);
+  }
+
+  await domain.connectWithPassword({username: "test", password: "password"});
+  await cleanupModels();
+  process.exit();
+}
+// cleanUp().catch(e => console.error(e));
+
+go().catch(e => console.error(e));
