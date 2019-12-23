@@ -1183,18 +1183,48 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const resourceId: string = getModelMessageResourceId(message);
 
     if (resourceId) {
-      const modelId = this._resourceIdToModelId.get(resourceId);
-      const model: RealTimeModel = this._openModels.get(modelId) || this._resyncingModels.get(modelId).resyncModel;
-      if (model !== undefined) {
+      const model = this._getModelForResourceId(resourceId);
+      if (model) {
         model._handleMessage(messageEvent);
       } else {
-        this._log.warn("Received a message for a model that is not open: " + JSON.stringify(message));
+        this._log.warn(
+          "Received a message for a model that is not open or resynchronizing: " + JSON.stringify(message));
       }
     } else if (message.modelAutoCreateConfigRequest) {
       this._handleModelDataRequest(
         message.modelAutoCreateConfigRequest,
         messageEvent.callback);
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _getModelForResourceId(resourceId: string): RealTimeModel | null {
+    const modelId = this._resourceIdToModelId.get(resourceId);
+
+    if (modelId === undefined) {
+      this._log.warn("Received a message for an unknown resourceId: " + resourceId);
+      return null;
+    }
+
+    const openModel = this._openModels.get(modelId);
+    if (openModel !== undefined) {
+      return openModel;
+    }
+
+    const resyncModel = this._resyncingModels.get(modelId);
+    if (resyncModel !== null) {
+      if (resyncModel.resyncModel) {
+        return resyncModel.resyncModel;
+      } else {
+        this._log.warn("Received a message for model that is resyncing but not ready: " + modelId);
+        return null;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -1355,7 +1385,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           modelId: metaData.modelId,
           action: metaData.available ? "resync" : "delete",
           inProgress: false,
-          ready: new ReplayDeferred<void>()
+          ready: new ReplayDeferred<void>(),
+          resyncModel: null
         };
 
         this._resyncingModels.set(metaData.modelId, entry);
@@ -1528,5 +1559,5 @@ interface IResyncEntry {
   action: "resync" | "delete";
   inProgress: boolean;
   ready: ReplayDeferred<void>;
-  resyncModel?: RealTimeModel;
+  resyncModel: RealTimeModel | null;
 }
