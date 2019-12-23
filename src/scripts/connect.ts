@@ -19,7 +19,7 @@ import * as WebSocket from "ws";
 import {TypeChecker} from "../main/util/TypeChecker";
 
 Convergence.configureLogging({
-  root: LogLevel.DEBUG,
+  root: LogLevel.INFO,
   loggers: {
     models: LogLevel.DEBUG
   }

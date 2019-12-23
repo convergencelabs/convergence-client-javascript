@@ -694,6 +694,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @private
    */
   public _resyncComplete(modelId: string): void {
+    this._log.debug(`Resync completed for model: "${modelId}"`);
     this._resyncingModels.delete(modelId);
     this._checkResyncQueue();
   }
@@ -703,6 +704,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   public _resyncError(modelId: string, message: string, model?: RealTimeModel): void {
+    this._log.debug(`Resync error for model: "${modelId}"... ${message}`);
     const event = new OfflineModelSyncErrorEvent(modelId, message, model);
     this._emitEvent(event);
 
@@ -1378,17 +1380,32 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _checkResyncQueue(): void {
     // TODO we could optimize this by just keeping a list of in progress entries.
     const inProgress = Array.from(this._resyncingModels.values()).filter(m => m.inProgress);
+
+    this._log.debug("Checking resync status");
+    this._log.debug(() => {
+      const modelIds = inProgress.map(e => e.modelId);
+      return `In Progress Resync Models (${inProgress.length}): ${JSON.stringify(modelIds)}`;
+    });
+    this._log.debug(() => {
+      const modelIds = this._modelResyncQueue.map(e => e.modelId);
+      return `Queued Resync Models (${this._modelResyncQueue.length}): ${JSON.stringify(modelIds)}`;
+    });
+
     if (inProgress.length === 0) {
       // No models are currently syncing. If there are none in the queue
       // we are done. Else we start syncing the next one.
       if (this._modelResyncQueue.length === 0) {
         if (this._offlineSyncStartedDeferred !== null) {
+          this._log.debug(`Resync queue is empty, but waiting for offline sync to start.`);
           // We might have sync'ed all of the open models, but we may not have
           // started on the offline ones yet.
           this._offlineSyncStartedDeferred.promise().then(() => this._checkResyncQueue());
         } else if (this._syncCompletedDeferred !== null) {
+          this._log.debug(`Resync queue is empty, completing resync process`);
           this._syncCompletedDeferred.resolve();
           this._syncCompletedDeferred = null;
+        } else {
+          this._log.warn(`Unexpected check of the resync queue.`);
         }
       } else {
         const entry = this._modelResyncQueue.pop();
@@ -1405,6 +1422,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private async _initiateModelResync(modelId: string): Promise<void> {
+    this._log.debug(`Initiating sync for model: "${modelId}"`);
     const entry = this._resyncingModels.get(modelId);
     if (entry.action === "resync") {
       const modelState = await this._modelOfflineManager.getOfflineModelState(entry.modelId);
@@ -1417,7 +1435,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         entry.resyncModel = model;
         entry.ready.resolve();
       } else {
-        const message = `The state for model '${modelId}' could not be found to resynchronize the model`;
+        const message = `The state for model "${modelId}" could not be found to resynchronize the model`;
         this._resyncError(modelId, message);
         return Promise.reject(new Error(message));
       }
@@ -1436,6 +1454,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _deleteResyncModel(modelId: string): Promise<void> {
+    this._log.debug(`Deleting resync model from the server: "${modelId}"`);
     return this._removeOnline(modelId)
       .then(() => this._resyncComplete(modelId))
       .catch((e) => {
@@ -1454,7 +1473,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private _createAndSyncModel(modelState: IModelState,
                               valueIdPrefix: { prefix: string, increment: number }): RealTimeModel {
-    this._log.debug(`Synchronizing model: ${modelState.modelId}`);
+    this._log.debug(`Creating and resynchronizing model: ${modelState.modelId}`);
     const model = this._creteModelFromOfflineState(modelState, valueIdPrefix, true);
 
     // The model will be in an offline state.  So we can actually trigger

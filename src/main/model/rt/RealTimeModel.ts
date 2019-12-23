@@ -1097,7 +1097,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
 
     if (serverEvents.length > 0 || clientEvents.length > 0) {
-      throw new Error(`Unable to apply all events while rehydrating model '${this._modelId}' from offline state.`);
+      throw new Error(`Unable to apply all events while rehydrating model "${this._modelId}" from offline state.`);
     }
 
     if (contextVersion !== targetVersion) {
@@ -1216,7 +1216,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       }).then(() => {
         return this._offlineManager.getModelCreationData(this._modelId);
       }).then(creation => {
-        this._debug("Creating locally created model at the server");
+        this._debug("Creating offline model at the server");
         const options: ICreateModelOptions = {
           id: creation.modelId,
           collection: creation.collection,
