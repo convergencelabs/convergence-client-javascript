@@ -779,8 +779,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       return this._openModelRequests.get(id).promise();
     }
 
-    await this._whenResyncStarted();
-
     // This model is already resyncing so we just return that and
     // let the model know to stay open after resync.
     const resyncEntry = this._resyncingModels.get(id);
@@ -829,15 +827,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         new ConvergenceError("Can not open a model while not online and without offline enabled."));
     }
 
-    open.then(model => {
-      this._clearOpenRecord(id, autoRequestId);
+    const result = open.then(model => {
+      this._clearOpenRequestRecords(id, autoRequestId);
       this._openModels.set(model.modelId(), model);
+      return model;
     }).catch((error: Error) => {
-      this._clearOpenRecord(id, autoRequestId);
+      this._clearOpenRequestRecords(id, autoRequestId);
       return Promise.reject(error);
     });
 
-    deferred.resolveFromPromise(open);
+    deferred.resolveFromPromise(result);
 
     return deferred.promise();
   }
@@ -846,7 +845,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _clearOpenRecord(id?: string, autoRequestId?: number): void {
+  private _clearOpenRequestRecords(id?: string, autoRequestId?: number): void {
     if (id !== undefined) {
       this._openModelRequests.delete(id);
     }
@@ -1085,7 +1084,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _createNewModelOffline(id: string, options: ICreateModelOptions): RealTimeModel {
-    this._log.debug(`Creating new offline model model '${id}' using auto-create options.`);
+    this._log.debug(`Creating new offline model '${id}' using auto-create options.`);
     const dataValue = this._getDataFromCreateOptions(options);
 
     const resourceId = `offline:${id}`;
@@ -1360,18 +1359,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           }
         })
         .catch((e) => this._log.error("Error resynchronizing models after reconnect", e));
-    }
-  }
-
-  /**
-   * @hidden
-   * @internal
-   */
-  private _whenResyncStarted(): Promise<void> {
-    if (this._offlineSyncStartedDeferred) {
-      return this._offlineSyncStartedDeferred.promise();
-    } else {
-      return Promise.resolve();
     }
   }
 
