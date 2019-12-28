@@ -1435,8 +1435,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           this._log.debug(`Resync queue is empty, completing resync process`);
           this._syncCompletedDeferred.resolve();
           this._syncCompletedDeferred = null;
-        } else {
-          this._log.warn(`Unexpected check of the resync queue.`);
         }
       } else {
         const entry = this._modelResyncQueue.pop();
