@@ -855,8 +855,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
+  private async _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isString(id) && this._modelOfflineManager.isOfflineEnabled()) {
+      if (this._offlineSyncStartedDeferred !== null) {
+        await this._offlineSyncStartedDeferred.promise();
+      }
+
       return this._openOnlineWithOfflineEnabled(id, autoRequestId);
     } else {
       // We don't have an explicit id, thus this could not be an existing model
