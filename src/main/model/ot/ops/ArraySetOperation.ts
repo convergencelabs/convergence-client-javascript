@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {ArraySet} from "./operationChanges";
 
 /**
@@ -26,7 +26,7 @@ export class ArraySetOperation extends DiscreteOperation implements ArraySet {
 
   constructor(id: string,
               noOp: boolean,
-              public readonly value: DataValue[]) {
+              public readonly value: IDataValue[]) {
     super(OperationType.ARRAY_VALUE, id, noOp);
     Object.freeze(this);
   }

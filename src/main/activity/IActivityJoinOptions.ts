@@ -17,7 +17,7 @@ import {StringMapLike} from "../util/StringMap";
 /**
  * Represents the options that can be set when Joining an activity.
  *
- * @module Collaboration Awareness
+ * @module Activities
  */
 export interface IActivityJoinOptions {
   /**

@@ -13,7 +13,7 @@
  */
 
 
-import {ModelPermissions, ObjectValue} from "../../model";
+import {ModelPermissions, IObjectValue} from "../../model";
 
 /**
  * @module Offline
@@ -32,7 +32,7 @@ export interface IModelCreationData {
   /**
    * The data the model was created with.
    */
-  initialData: ObjectValue;
+  initialData: IObjectValue;
 
   /**
    * Set to true if the permissions set in this object should override those set

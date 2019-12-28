@@ -17,7 +17,7 @@ import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperati
 import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {RealTimeModel, RealTimeString, ModelEventCallbacks} from "../../main/model/rt";
-import {StringValue} from "../../main/model/";
+import {IStringValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {Model} from "../../main/model/internal/Model";
@@ -49,7 +49,7 @@ describe("RealTimeString", () => {
     return gen.id();
   });
 
-  const initialValue = dataValueFactory.createDataValue("MyString") as StringValue;
+  const initialValue = dataValueFactory.createDataValue("MyString") as IStringValue;
 
   const model = createStubInstance(Model) as any as Model;
   const identityCache = createStubInstance(IdentityCache) as any as IdentityCache;

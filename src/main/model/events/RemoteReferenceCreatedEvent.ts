@@ -20,7 +20,7 @@ import {RealTimeElement, RealTimeModel} from "../rt";
  * The [[RemoteReferenceCreatedEvent]] is fired by an [[ObservableModel]] when
  * a remote reference is created.
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export class RemoteReferenceCreatedEvent implements IConvergenceEvent {
   public static readonly NAME = "reference";

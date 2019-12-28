@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {AppliedArrayInsertOperation} from "./AppliedArrayInsertOperation";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArrayRemove} from "../ops/operationChanges";
@@ -27,7 +27,7 @@ export class AppliedArrayRemoveOperation extends AppliedDiscreteOperation implem
   constructor(id: string,
               noOp: boolean,
               public readonly index: number,
-              public readonly oldValue: DataValue) {
+              public readonly oldValue: IDataValue) {
     super(OperationType.ARRAY_REMOVE, id, noOp);
     Object.freeze(this);
   }

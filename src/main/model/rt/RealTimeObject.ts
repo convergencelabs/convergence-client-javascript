@@ -287,7 +287,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
     if (event instanceof ObjectNodeSetValueEvent) {
       if (event.local) {
         this._sendOperation(new ObjectSetOperation(
-          this.id(), false, (this._delegate as ObjectNode).dataValue().children));
+          this.id(), false, (this._delegate as ObjectNode).dataValue().value));
       }
 
       this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {

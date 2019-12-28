@@ -35,7 +35,7 @@ export class StorageEngine {
   }
 
   public openStore(namespace: string, domainId: string, username: string): Promise<void> {
-    return this._storage.openStore(namespace, domainId, username);
+    return this._storage.initialize(namespace, domainId, username);
   }
 
   public isEnabled(): boolean {

@@ -16,7 +16,7 @@ import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {BooleanSetOperation} from "../../main/model/ot/ops/BooleanSetOperation";
 import {ModelEventCallbacks, RealTimeBoolean, RealTimeModel} from "../../main/model/rt";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {BooleanValue, ModelPermissions} from "../../main/model/";
+import {IBooleanValue, ModelPermissions} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
 import {BooleanNode} from "../../main/model/internal/BooleanNode";
@@ -54,7 +54,7 @@ describe("RealTimeBoolean", () => {
     return  new ModelPermissions(true, true, true, true);
   };
 
-  const initialValue: BooleanValue = dataValueFactory.createDataValue(true) as BooleanValue;
+  const initialValue: IBooleanValue = dataValueFactory.createDataValue(true) as IBooleanValue;
 
   let callbacks: ModelEventCallbacks;
 

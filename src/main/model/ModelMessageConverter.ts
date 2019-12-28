@@ -13,14 +13,14 @@
  */
 
 import {
-  ArrayValue,
-  BooleanValue,
-  DataValue,
-  DateValue,
-  NullValue,
-  NumberValue,
-  ObjectValue,
-  StringValue,
+  IArrayValue,
+  IBooleanValue,
+  IDataValue,
+  IDateValue,
+  INullValue,
+  INumberValue,
+  IObjectValue,
+  IStringValue,
 } from "./dataValue";
 import {
   dateToTimestamp,
@@ -41,8 +41,8 @@ import {ModelResult} from "./query";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
-import IDataValue = com.convergencelabs.convergence.proto.model.IDataValue;
-import IObjectValue = com.convergencelabs.convergence.proto.model.IObjectValue;
+import IDataValueData = com.convergencelabs.convergence.proto.model.IDataValue;
+import IObjectValueData = com.convergencelabs.convergence.proto.model.IObjectValue;
 import IModelPermissionsData = com.convergencelabs.convergence.proto.model.IModelPermissionsData;
 import IModelResult = com.convergencelabs.convergence.proto.model.ModelsQueryResponseMessage.IModelResult;
 import IUserModelPermissionsData = com.convergencelabs.convergence.proto.model.IUserModelPermissionsData;
@@ -66,31 +66,31 @@ import {TypeChecker} from "../util/TypeChecker";
  * @hidden
  * @internal
  */
-export function toDataValue(val: IDataValue): DataValue {
+export function toDataValue(val: IDataValueData): IDataValue {
   if (val.arrayValue) {
     const {id, children} = val.arrayValue;
     return {
       type: "array",
       id,
-      children: getOrDefaultArray(children).map(toDataValue)
-    } as ArrayValue;
+      value: getOrDefaultArray(children).map(toDataValue)
+    } as IArrayValue;
   } else if (val.objectValue) {
     return toObjectValue(val.objectValue);
   } else if (val.booleanValue) {
     const {id, value} = val.booleanValue;
-    return {type: "boolean", id, value: getOrDefaultBoolean(value)} as BooleanValue;
+    return {type: "boolean", id, value: getOrDefaultBoolean(value)} as IBooleanValue;
   } else if (val.dateValue) {
     const {id, value} = val.dateValue;
-    return {type: "date", id, value: timestampToDate(value)} as DateValue;
+    return {type: "date", id, value: timestampToDate(value)} as IDateValue;
   } else if (val.doubleValue) {
     const {id, value} = val.doubleValue;
-    return {type: "number", id, value: getOrDefaultNumber(value)} as NumberValue;
+    return {type: "number", id, value: getOrDefaultNumber(value)} as INumberValue;
   } else if (val.stringValue) {
     const {id, value} = val.stringValue;
-    return {type: "string", id, value: getOrDefaultString(value)} as StringValue;
+    return {type: "string", id, value: getOrDefaultString(value)} as IStringValue;
   } else if (val.nullValue) {
     const {id} = val.nullValue;
-    return {type: "null", id, value: null} as NullValue;
+    return {type: "null", id, value: null} as INullValue;
   } else {
     throw new ConvergenceError("Invalid data delta type: " + JSON.stringify(val));
   }
@@ -100,27 +100,27 @@ export function toDataValue(val: IDataValue): DataValue {
  * @hidden
  * @internal
  */
-export function toIDataValue(val: DataValue): IDataValue {
+export function toIDataValue(val: IDataValue): IDataValueData {
   if (val.type === "array") {
-    const {id, children} = val as ArrayValue;
-    return {arrayValue: {id, children: children.map(toIDataValue)}};
+    const {id, value} = val as IArrayValue;
+    return {arrayValue: {id, children: value.map(toIDataValue)}};
   } else if (val.type === "object") {
-    const {id, children} = val as ObjectValue;
-    return {objectValue: {id, children: mapObjectValues(children, toIDataValue)}};
+    const {id, value} = val as IObjectValue;
+    return {objectValue: {id, children: mapObjectValues(value, toIDataValue)}};
   } else if (val.type === "boolean") {
-    const {id, value} = val as BooleanValue;
+    const {id, value} = val as IBooleanValue;
     return {booleanValue: {id, value}};
   } else if (val.type === "date") {
-    const {id, value} = val as DateValue;
+    const {id, value} = val as IDateValue;
     return {dateValue: {id, value: dateToTimestamp(value)}};
   } else if (val.type === "number") {
-    const {id, value} = val as NumberValue;
+    const {id, value} = val as INumberValue;
     return {doubleValue: {id, value}};
   } else if (val.type === "null") {
-    const {id} = val as NullValue;
+    const {id} = val as INullValue;
     return {nullValue: {id}};
   } else if (val.type === "string") {
-    const {id, value} = val as StringValue;
+    const {id, value} = val as IStringValue;
     return {stringValue: {id, value}};
   } else {
     throw new ConvergenceError("Invalid data delta type: " + JSON.stringify(val));
@@ -131,10 +131,10 @@ export function toIDataValue(val: DataValue): IDataValue {
  * @hidden
  * @internal
  */
-export function toIObjectValue(objectValue: ObjectValue): IObjectValue {
+export function toIObjectValue(objectValue: IObjectValue): IObjectValueData {
   return {
     id: objectValue.id,
-    children: mapObjectValues(objectValue.children, toIDataValue)
+    children: mapObjectValues(objectValue.value, toIDataValue)
   };
 }
 
@@ -142,11 +142,11 @@ export function toIObjectValue(objectValue: ObjectValue): IObjectValue {
  * @hidden
  * @internal
  */
-export function toObjectValue(objectValue: IObjectValue): ObjectValue {
+export function toObjectValue(objectValue: IObjectValueData): IObjectValue {
   return {
     type: "object",
     id: objectValue.id,
-    children: mapObjectValues(getOrDefaultObject(objectValue.children), toDataValue)
+    value: mapObjectValues(getOrDefaultObject(objectValue.children), toDataValue)
   };
 }
 

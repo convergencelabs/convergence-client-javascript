@@ -16,7 +16,7 @@ import {ConvergenceSession} from "../../ConvergenceSession";
 import {HistoricalObject} from "./HistoricalObject";
 import {HistoricalElement} from "./HistoricalElement";
 import {Model} from "../internal/Model";
-import {ObjectValue} from "../dataValue";
+import {IObjectValue} from "../dataValue";
 import {HistoricalWrapperFactory} from "./HistoricalWrapperFactory";
 import {ConvergenceConnection} from "../../connection/ConvergenceConnection";
 import {ModelOperation} from "../ot/applied/ModelOperation";
@@ -153,7 +153,7 @@ export class HistoricalModel implements ObservableModel {
    * @hidden
    * @internal
    */
-  constructor(data: ObjectValue,
+  constructor(data: IObjectValue,
               version: number,
               modifiedTime: Date,
               createdTime: Date,

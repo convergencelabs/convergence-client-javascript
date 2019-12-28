@@ -22,7 +22,7 @@
  * Great real-time apps go the extra mile to prevent conflicts. That's what
  * this API is all about.
  *
- * @moduledefinition Collaboration Awareness
+ * @moduledefinition Activities
  */
 export * from "./ActivityParticipant";
 export * from "./Activity";

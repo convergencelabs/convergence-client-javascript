@@ -17,7 +17,7 @@ import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Model} from "./Model";
 import {Path} from "../Path";
-import {NullValue, DataValueType} from "../dataValue";
+import {INullValue} from "../dataValue";
 import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
@@ -40,12 +40,12 @@ export class NullNode extends ModelNode<void> {
     super(ModelElementType.NULL, id, path, model, session);
   }
 
-  public dataValue(): NullValue {
+  public dataValue(): INullValue {
     return {
       id: this.id(),
-      type: DataValueType.NULL,
+      type: "null",
       value: this.data()
-    } as NullValue;
+    } as INullValue;
   }
 
   public toJson(): any {

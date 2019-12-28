@@ -18,7 +18,7 @@ import {ArrayRemoveOperation} from "../../main/model/ot/ops/ArrayRemoveOperation
 import {ArrayReplaceOperation} from "../../main/model/ot/ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../main/model/ot/ops/ArrayMoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {ArrayValue, DataValue, DataValueType, ModelPermissions, StringValue} from "../../main/model/";
+import {IArrayValue, IDataValue, ModelPermissions, IStringValue} from "../../main/model/";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
@@ -65,9 +65,9 @@ describe("RealTimeArray", () => {
 
   const primitiveValue: any[] = ["A", "B", "C"];
 
-  const arrayValue: ArrayValue = dataValueFactory.createDataValue(primitiveValue) as ArrayValue;
+  const arrayValue: IArrayValue = dataValueFactory.createDataValue(primitiveValue) as IArrayValue;
 
-  const newArray: DataValue[] = [
+  const newArray: IDataValue[] = [
     dataValueFactory.createDataValue("X"),
     dataValueFactory.createDataValue("Y"),
     dataValueFactory.createDataValue("Z")
@@ -152,10 +152,10 @@ describe("RealTimeArray", () => {
     const myArray: RealTimeArray = wrapperFactory.wrap(delegate) as RealTimeArray;
     myArray.value(["X", "Y", "Z"]);
 
-    const expectedDataValue: DataValue[] = [
-      {id: myArray.get(0).id(), type: DataValueType.STRING, value: "X"} as StringValue,
-      {id: myArray.get(1).id(), type: DataValueType.STRING, value: "Y"} as StringValue,
-      {id: myArray.get(2).id(), type: DataValueType.STRING, value: "Z"} as StringValue,
+    const expectedDataValue: IDataValue[] = [
+      {id: myArray.get(0).id(), type: "string", value: "X"} as IStringValue,
+      {id: myArray.get(1).id(), type: "string", value: "Y"} as IStringValue,
+      {id: myArray.get(2).id(), type: "string", value: "Z"} as IStringValue,
     ];
 
     const opSpy: SinonSpy = callbacks.sendOperationCallback as SinonSpy;
@@ -170,9 +170,9 @@ describe("RealTimeArray", () => {
       new ArrayNode(arrayValue, () => [], model, session, dataValueFactory);
     const myArray: RealTimeArray = wrapperFactory.wrap(delegate) as RealTimeArray;
     const value: RealTimeElement<any> = myArray.insert(2, "X");
-    const expectedDataValue: StringValue = {
+    const expectedDataValue: IStringValue = {
       id: value.id(),
-      type: DataValueType.STRING,
+      type: "string",
       value: "X"
     };
 
@@ -202,9 +202,9 @@ describe("RealTimeArray", () => {
     const myArray: RealTimeArray = wrapperFactory.wrap(delegate) as RealTimeArray;
     const value: RealTimeElement<any> = myArray.set(1, "X");
 
-    const expectedDataValue: StringValue = {
+    const expectedDataValue: IStringValue = {
       id: value.id(),
-      type: DataValueType.STRING,
+      type: "string",
       value: "X"
     };
 
@@ -247,7 +247,7 @@ describe("RealTimeArray", () => {
       new ArrayNode(arrayValue, () => [], model, session, dataValueFactory);
     const myArray: RealTimeArray = wrapperFactory.wrap(delegate) as RealTimeArray;
 
-    const newValue: DataValue = dataValueFactory.createDataValue("X");
+    const newValue: IDataValue = dataValueFactory.createDataValue("X");
 
     const incomingOp: ArrayInsertOperation = new ArrayInsertOperation(arrayValue.id, false, 2, newValue);
     const incomingEvent: ModelOperationEvent =
@@ -326,7 +326,7 @@ describe("RealTimeArray", () => {
     const myArray: RealTimeArray = wrapperFactory.wrap(delegate) as RealTimeArray;
     myArray.on(RealTimeArray.Events.INSERT, lastEventCallback);
 
-    const newValue: DataValue = dataValueFactory.createDataValue("X");
+    const newValue: IDataValue = dataValueFactory.createDataValue("X");
     const incomingOp: ArrayInsertOperation = new ArrayInsertOperation(arrayValue.id, false, 2, newValue);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
@@ -370,14 +370,14 @@ describe("RealTimeArray", () => {
     myArray.on(RealTimeArray.Events.SET, lastEventCallback);
     const oldElement = myArray.get(1);
 
-    const newValue: DataValue = dataValueFactory.createDataValue("X");
+    const newValue: IDataValue = dataValueFactory.createDataValue("X");
     const incomingOp: ArrayReplaceOperation = new ArrayReplaceOperation(arrayValue.id, false, 1, newValue);
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
     const valueDelegate: StringNode =
-      new StringNode(newValue as StringValue, () => [], model, session);
+      new StringNode(newValue as IStringValue, () => [], model, session);
 
     const stringElement: RealTimeString = wrapperFactory.wrap(valueDelegate) as RealTimeString;
     const expectedEvent: ArraySetEvent =

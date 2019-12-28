@@ -17,7 +17,7 @@ import {Path, PathElement} from "../Path";
 import {ModelNode} from "./ModelNode";
 import {DataValueFactory} from "../DataValueFactory";
 import {ObjectNode} from "./ObjectNode";
-import {ObjectValue} from "../dataValue";
+import {IObjectValue} from "../dataValue";
 import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util";
 import {ConvergenceSession} from "../../ConvergenceSession";
 
@@ -47,7 +47,7 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   constructor(session: ConvergenceSession,
               valueIdPrefix: string,
-              data: ObjectValue) {
+              data: IObjectValue) {
     super();
 
     this._session = session;

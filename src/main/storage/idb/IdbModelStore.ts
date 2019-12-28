@@ -26,7 +26,7 @@ import {
 } from "../api";
 import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
-import {ModelPermissions, ObjectValue} from "../../model";
+import {ModelPermissions, IObjectValue} from "../../model";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
 import {ConvergenceError} from "../../util";
 
@@ -700,7 +700,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   public snapshotModel(modelId: string,
                        version: number,
                        sequenceNumber: number,
-                       modelData: ObjectValue): Promise<void> {
+                       modelData: IObjectValue): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,

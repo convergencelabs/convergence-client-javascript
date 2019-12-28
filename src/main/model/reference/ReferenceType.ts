@@ -15,6 +15,6 @@
 /**
  * A unified type representing any type of reference.
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export type ReferenceType = "index" | "range" | "element" | "property";

@@ -15,7 +15,7 @@
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {RealTimeObject, ModelEventCallbacks, RealTimeModel} from "../../main/model/rt";
 import {ObjectSetOperation} from "../../main/model/ot/ops/ObjectSetOperation";
-import {DataValue, ObjectValue, StringValue, DataValueType} from "../../main/model/dataValue";
+import {IDataValue, IObjectValue, IStringValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
@@ -57,9 +57,9 @@ describe("RealTimeObject", () => {
     return  new ModelPermissions(true, true, true, true);
   };
 
-  const initialValue = dataValueFactory.createDataValue({num: 5}) as ObjectValue;
+  const initialValue = dataValueFactory.createDataValue({num: 5}) as IObjectValue;
 
-  const setValue: { [key: string]: DataValue } = {
+  const setValue: { [key: string]: IDataValue } = {
     string: dataValueFactory.createDataValue("test")
   };
 
@@ -111,8 +111,8 @@ describe("RealTimeObject", () => {
     const myObject: RealTimeObject = wrapperFactory.wrap(delegate) as RealTimeObject;
     myObject.value({string: "test"});
 
-    const expectedDataValue: { [key: string]: DataValue } = {
-      string: {id: myObject.get("string").id(), type: DataValueType.STRING, value: "test"} as StringValue
+    const expectedDataValue: { [key: string]: IDataValue } = {
+      string: {id: myObject.get("string").id(), type: "string", value: "test"} as IStringValue
     };
 
     const opSpy  = callbacks.sendOperationCallback as SinonSpy;

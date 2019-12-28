@@ -15,7 +15,7 @@
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelNode} from "./ModelNode";
-import {ObjectValue, DataValueType, DataValue} from "../dataValue";
+import {IObjectValue, IDataValue} from "../dataValue";
 import {Validation} from "../../util/Validation";
 import {Path} from "../Path";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -53,7 +53,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   /**
    * Constructs a new RealTimeObject.
    */
-  constructor(data: ObjectValue,
+  constructor(data: IObjectValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession,
@@ -62,8 +62,8 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
 
     this._children = new Map<string, ModelNode<any>>();
 
-    Object.getOwnPropertyNames(data.children).forEach((prop: string) => {
-      const child: DataValue = data.children[prop];
+    Object.getOwnPropertyNames(data.value).forEach((prop: string) => {
+      const child: IDataValue = data.value[prop];
       this._idToPathElement.set(child.id, prop);
       this._children.set(prop, ModelNodeFactory.create(child, this._pathCB(child.id), model,
         this._session, this.dataValueFactory));
@@ -74,17 +74,17 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
     });
   }
 
-  public dataValue(): ObjectValue {
-    const values: { [key: string]: DataValue } = {};
+  public dataValue(): IObjectValue {
+    const values: { [key: string]: IDataValue } = {};
     this._children.forEach((value, key) => {
       values[key] = value.dataValue();
     });
 
     return {
       id: this.id(),
-      type: DataValueType.OBJECT,
-      children: values
-    } as ObjectValue;
+      type: "object",
+      value: values
+    } as IObjectValue;
   }
 
   public toJson(): any {
@@ -101,7 +101,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   public set(key: string, value: any): ModelNode<any> {
-    const dataValue: DataValue = this.dataValueFactory.createDataValue(value);
+    const dataValue: IDataValue = this.dataValueFactory.createDataValue(value);
     this._applySet(key, dataValue, true, this._session.sessionId(), this._session.user());
     return this.get(key);
   }
@@ -162,7 +162,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   protected _setData(data?: { [key: string]: any }): void {
-    const values: { [key: string]: DataValue } = {};
+    const values: { [key: string]: IDataValue } = {};
 
     for (const prop in data) {
       if (data.hasOwnProperty(prop)) {
@@ -211,7 +211,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
     };
   }
 
-  private _applySet(key: string, value: DataValue, local: boolean, sessionId: string, user: DomainUser): void {
+  private _applySet(key: string, value: IDataValue, local: boolean, sessionId: string, user: DomainUser): void {
     Validation.assertString(key, "key");
 
     const oldValue = this._valueAt([key]);
@@ -251,14 +251,14 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
   }
 
   private _applySetValue(
-    values: { [key: string]: DataValue }, local: boolean, sessionId: string, user: DomainUser): void {
+    values: { [key: string]: IDataValue }, local: boolean, sessionId: string, user: DomainUser): void {
     this._detachChildren(local);
 
     this._children = new Map<string, ModelNode<any>>();
 
     for (const prop in values) {
       if (values.hasOwnProperty(prop)) {
-        const dataValue: DataValue = values[prop];
+        const dataValue: IDataValue = values[prop];
         this._idToPathElement.set(dataValue.id, prop);
         this._children.set(prop,
           ModelNodeFactory.create(

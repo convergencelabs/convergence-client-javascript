@@ -33,7 +33,7 @@ export interface ModelReferenceCallbacks {
  * The parent class for a
  * [local reference](https://docs.convergence.io/guide/models/references/local-references.html).
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export abstract class LocalModelReference<V, R extends ModelReference<V>>
 extends ConvergenceEventEmitter<IConvergenceEvent> {

@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 
 /**
  * @hidden
@@ -44,7 +44,7 @@ export interface BatchChange extends Change {
  */
 export interface ArrayInsert extends DiscreteChange {
   index: number;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface ArrayRemove extends DiscreteChange {
  */
 export interface ArrayReplace extends DiscreteChange {
   index: number;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -78,7 +78,7 @@ export interface ArrayReplace extends DiscreteChange {
  * @internal
  */
 export interface ArraySet extends DiscreteChange {
-  value: DataValue[];
+  value: IDataValue[];
 }
 
 /**
@@ -111,7 +111,7 @@ export interface NumberSet extends DiscreteChange {
  */
 export interface ObjectAddProperty extends DiscreteChange {
   prop: string;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -128,7 +128,7 @@ export interface ObjectRemoveProperty extends DiscreteChange {
  */
 export interface ObjectSetProperty extends DiscreteChange {
   prop: string;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -136,7 +136,7 @@ export interface ObjectSetProperty extends DiscreteChange {
  * @internal
  */
 export interface ObjectSet extends DiscreteChange {
-  value: {[key: string]: DataValue};
+  value: {[key: string]: IDataValue};
 }
 
 /**

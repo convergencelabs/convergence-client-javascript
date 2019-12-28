@@ -13,7 +13,7 @@
  */
 
 import {ModelNode} from "./ModelNode";
-import {StringValue, DataValueType} from "../dataValue";
+import {IStringValue} from "../dataValue";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
@@ -46,7 +46,7 @@ export class StringNode extends ModelNode<string> {
   /**
    * Constructs a new RealTimeString.
    */
-  constructor(data: StringValue,
+  constructor(data: IStringValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession) {
@@ -55,12 +55,12 @@ export class StringNode extends ModelNode<string> {
     this._data = data.value;
   }
 
-  public dataValue(): StringValue {
+  public dataValue(): IStringValue {
     return {
       id: this.id(),
-      type: DataValueType.STRING,
+      type: "string",
       value: this.data()
-    } as StringValue;
+    } as IStringValue;
   }
 
   public toJson(): any {

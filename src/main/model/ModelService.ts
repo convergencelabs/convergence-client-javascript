@@ -20,7 +20,7 @@ import {ClientConcurrencyControl} from "./ot/ClientConcurrencyControl";
 import {Deferred} from "../util/Deferred";
 import {ReplyCallback} from "../connection/ProtocolConnection";
 import {ReferenceTransformer} from "./ot/xform/ReferenceTransformer";
-import {ObjectValue} from "./dataValue";
+import {IObjectValue} from "./dataValue";
 import {DataValueFactory} from "./DataValueFactory";
 import {ConvergenceError, ConvergenceEventEmitter, ConvergenceServerError, IConvergenceEvent} from "../util";
 import {RealTimeModel} from "./rt";
@@ -622,7 +622,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public async _create(options: ICreateModelOptions, data?: ObjectValue): Promise<string> {
+  public async _create(options: ICreateModelOptions, data?: IObjectValue): Promise<string> {
     const collection = options.collection;
 
     if (this._connection.isOnline()) {
@@ -1144,7 +1144,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     resyncingClients: string[],
     references: IReferenceData[],
     permissions: ModelPermissions,
-    data: ObjectValue): RealTimeModel {
+    data: IObjectValue): RealTimeModel {
 
     const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
     const referenceTransformer: ReferenceTransformer =
@@ -1250,7 +1250,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       const options: IAutoCreateModelOptions = this._autoCreateRequests.get(autoCreateId);
       this._autoCreateRequests.delete(autoCreateId);
 
-      const dataValue: ObjectValue = this._getDataFromCreateOptions(options);
+      const dataValue: IObjectValue = this._getDataFromCreateOptions(options);
 
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
       const response: IConvergenceMessage = {
@@ -1271,7 +1271,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @hidden
    */
-  private _getDataFromCreateOptions(options: ICreateModelOptions): ObjectValue {
+  private _getDataFromCreateOptions(options: ICreateModelOptions): IObjectValue {
     let data: ModelDataInitializer = options.data;
     if (TypeChecker.isFunction(data)) {
       data = (data as ModelDataCallback)();
@@ -1286,7 +1286,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
       return idGen.id();
     });
-    return dataValueFactory.createDataValue(data) as ObjectValue;
+    return dataValueFactory.createDataValue(data) as IObjectValue;
   }
 
   /**

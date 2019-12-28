@@ -17,7 +17,7 @@ import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 import {IModelCreationData} from "./IModelCreationData";
 import {IModelUpdate} from "./IModelUpdate";
 import {IModelMetaData} from "./IModelMetaData";
-import {ObjectValue} from "../../model";
+import {IObjectValue} from "../../model";
 
 /**
  * @module Offline
@@ -45,7 +45,7 @@ export interface IModelStore {
 
   putModelState(model: IModelState): Promise<void>;
 
-  snapshotModel(modelId: string, version: number, sequenceNumber: number, modelData: ObjectValue): Promise<void>;
+  snapshotModel(modelId: string, version: number, sequenceNumber: number, modelData: IObjectValue): Promise<void>;
 
   claimValueIdPrefix(modelId: string): Promise<{ prefix: string, increment: number }>;
 

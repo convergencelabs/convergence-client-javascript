@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ArraySet} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
@@ -25,8 +25,8 @@ export class AppliedArraySetOperation extends AppliedDiscreteOperation implement
 
   constructor(id: string,
               noOp: boolean,
-              public readonly value: DataValue[],
-              public readonly oldValue: DataValue[]) {
+              public readonly value: IDataValue[],
+              public readonly oldValue: IDataValue[]) {
     super(OperationType.ARRAY_VALUE, id, noOp);
     Object.freeze(this);
   }

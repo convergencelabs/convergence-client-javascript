@@ -13,7 +13,7 @@
  */
 
 import {ModelNode} from "./ModelNode";
-import {DataValue, ArrayValue, DataValueType} from "../dataValue";
+import {IDataValue, IArrayValue} from "../dataValue";
 import {ContainerNode} from "./ContainerNode";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
@@ -62,7 +62,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   /**
    * Constructs a new RealTimeArray.
    */
-  constructor(data: ArrayValue,
+  constructor(data: IArrayValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession,
@@ -72,8 +72,8 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._children = [];
     this._dataValueFactory = dataValueFactory;
 
-    for (let i: number = 0; i < data.children.length; i++) {
-      const child: DataValue = data.children[i];
+    for (let i: number = 0; i < data.value.length; i++) {
+      const child: IDataValue = data.value[i];
       this._idToPathElement.set(child.id, i);
       this._children.push(ModelNodeFactory.create(child,
         this._pathCB(child.id), model, session, dataValueFactory));
@@ -84,16 +84,16 @@ export class ArrayNode extends ContainerNode<any[]> {
     });
   }
 
-  public dataValue(): ArrayValue {
-    const values: DataValue[] = this._children.map((node: ModelNode<any>) => {
+  public dataValue(): IArrayValue {
+    const values: IDataValue[] = this._children.map((node: ModelNode<any>) => {
       return node.dataValue();
     });
 
     return {
       id: this.id(),
-      type: DataValueType.ARRAY,
-      children: values
-    } as ArrayValue;
+      type: "array",
+      value: values
+    } as IArrayValue;
   }
 
   public toJson(): any {
@@ -111,14 +111,14 @@ export class ArrayNode extends ContainerNode<any[]> {
 
   public set(index: number, value: any): ModelNode<any> {
     this._validateIndex(index, false);
-    const dataValue: DataValue = this._dataValueFactory.createDataValue(value);
+    const dataValue: IDataValue = this._dataValueFactory.createDataValue(value);
     this._applySet(index, dataValue, true, this._session.sessionId(), this._session.user());
     return this.get(index);
   }
 
   public insert(index: number, value: any): ModelNode<any> {
     this._validateIndex(index, true);
-    const dataValue: DataValue = this._dataValueFactory.createDataValue(value);
+    const dataValue: IDataValue = this._dataValueFactory.createDataValue(value);
     this._applyInsert(index, dataValue, true, this._session.sessionId(), this._session.user());
     return this.get(index);
   }
@@ -206,7 +206,7 @@ export class ArrayNode extends ContainerNode<any[]> {
   }
 
   protected _setData(data: any[]): void {
-    const dataValues: DataValue[] = data.map((value: any) => {
+    const dataValues: IDataValue[] = data.map((value: any) => {
       return this._dataValueFactory.createDataValue(value);
     });
 
@@ -259,7 +259,7 @@ export class ArrayNode extends ContainerNode<any[]> {
 
   // Handlers for incoming operations
 
-  private _applyInsert(index: number, value: DataValue, local: boolean, sessionId: string, user: DomainUser): void {
+  private _applyInsert(index: number, value: IDataValue, local: boolean, sessionId: string, user: DomainUser): void {
     this._validateInsert(index, value);
 
     this._idToPathElement.set(value.id, index);
@@ -277,7 +277,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._emitValueEvent(event);
   }
 
-  private _applySet(index: number, value: DataValue, local: boolean, sessionId: string, user: DomainUser): void {
+  private _applySet(index: number, value: IDataValue, local: boolean, sessionId: string, user: DomainUser): void {
     this._validateReplace(index, value);
 
     const oldChild: ModelNode<any> = this._valueAt([index]);
@@ -315,7 +315,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     this._emitValueEvent(event);
   }
 
-  private _applySetValue(data: DataValue[], local: boolean, sessionId: string, user: DomainUser): void {
+  private _applySetValue(data: IDataValue[], local: boolean, sessionId: string, user: DomainUser): void {
     Validation.assertArray(data, "data");
 
     this._detachChildren(local);

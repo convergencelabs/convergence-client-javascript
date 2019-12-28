@@ -12,8 +12,11 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../model/";
+import {IDataValue} from "../../model/";
 
+/**
+ * @module Offline
+ */
 export interface IServerOperationData {
   modelId: string;
   sessionId: string;
@@ -22,6 +25,9 @@ export interface IServerOperationData {
   operation: IModelOperationData;
 }
 
+/**
+ * @module Offline
+ */
 export interface ILocalOperationData {
   modelId: string;
   sessionId: string;
@@ -31,6 +37,9 @@ export interface ILocalOperationData {
   operation: IModelOperationData;
 }
 
+/**
+ * @module Offline
+ */
 export interface IModelOperationData {
   type: "string_insert" | "string_remove" | "string_set" |
     "array_insert" | "array_remove" | "array_replace" | "array_move" | "array_set" |
@@ -109,7 +118,7 @@ export interface IStringSetOperationData extends IModelDiscreteOperationData {
 export interface IArrayInsertOperationData extends IModelDiscreteOperationData {
   type: "array_insert";
   index: number;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -119,7 +128,7 @@ export interface IArrayInsertOperationData extends IModelDiscreteOperationData {
 export interface IArrayReplaceOperationData extends IModelDiscreteOperationData {
   type: "array_replace";
   index: number;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -147,7 +156,7 @@ export interface IArrayMoveOperationData extends IModelDiscreteOperationData {
  */
 export interface IArraySetOperationData extends IModelDiscreteOperationData {
   type: "array_set";
-  value: DataValue[];
+  value: IDataValue[];
 }
 
 //
@@ -161,7 +170,7 @@ export interface IArraySetOperationData extends IModelDiscreteOperationData {
 export interface IObjectAddPropertyOperationData extends IModelDiscreteOperationData {
   type: "object_add_property";
   key: string;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -171,7 +180,7 @@ export interface IObjectAddPropertyOperationData extends IModelDiscreteOperation
 export interface IObjectSetPropertyOperationData extends IModelDiscreteOperationData {
   type: "object_set_property";
   key: string;
-  value: DataValue;
+  value: IDataValue;
 }
 
 /**
@@ -189,7 +198,7 @@ export interface IObjectRemovePropertyOperationData extends IModelDiscreteOperat
  */
 export interface IObjectSetOperationData extends IModelDiscreteOperationData {
   type: "object_set";
-  value: {[key: string]: DataValue};
+  value: {[key: string]: IDataValue};
 }
 
 //

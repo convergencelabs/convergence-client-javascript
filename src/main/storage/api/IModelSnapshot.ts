@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ObjectValue} from "../../model/";
+import {IObjectValue} from "../../model/";
 import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 
 /**
@@ -21,7 +21,7 @@ import {ILocalOperationData, IServerOperationData} from "./IModelOperationData";
 export interface IModelSnapshot {
   version: number;
   sequenceNumber: number;
-  data: ObjectValue;
+  data: IObjectValue;
   serverOperations: IServerOperationData[];
   localOperations: ILocalOperationData[];
 }

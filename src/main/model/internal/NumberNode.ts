@@ -13,7 +13,7 @@
  */
 
 import {ModelNode} from "./ModelNode";
-import {NumberValue, DataValueType} from "../dataValue";
+import {INumberValue} from "../dataValue";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -42,7 +42,7 @@ export class NumberNode extends ModelNode<number> {
   /**
    * Constructs a new RealTimeNumber.
    */
-  constructor(data: NumberValue,
+  constructor(data: INumberValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession) {
@@ -51,12 +51,12 @@ export class NumberNode extends ModelNode<number> {
     this._data = data.value;
   }
 
-  public dataValue(): NumberValue {
+  public dataValue(): INumberValue {
     return {
       id: this.id(),
-      type: DataValueType.NUMBER,
+      type: "number",
       value: this.data()
-    } as NumberValue;
+    } as INumberValue;
   }
 
   public toJson(): any {

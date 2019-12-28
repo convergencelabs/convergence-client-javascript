@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {ObjectAddProperty} from "./operationChanges";
 
 /**
@@ -27,7 +27,7 @@ export class ObjectAddPropertyOperation extends DiscreteOperation implements Obj
   constructor(id: string,
               noOp: boolean,
               public readonly prop: string,
-              public readonly value: DataValue) {
+              public readonly value: IDataValue) {
     super(OperationType.OBJECT_ADD, id, noOp);
     Object.freeze(this);
   }

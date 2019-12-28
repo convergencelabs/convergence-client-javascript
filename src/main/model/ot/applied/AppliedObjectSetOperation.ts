@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ObjectSet} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
@@ -25,8 +25,8 @@ export class AppliedObjectSetOperation extends AppliedDiscreteOperation implemen
 
   constructor(id: string,
               noOp: boolean,
-              public readonly value: {[key: string]: DataValue},
-              public readonly oldValue: {[key: string]: DataValue}) {
+              public readonly value: {[key: string]: IDataValue},
+              public readonly oldValue: {[key: string]: IDataValue}) {
     super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }

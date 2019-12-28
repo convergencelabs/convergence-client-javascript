@@ -110,7 +110,7 @@ function createModelState(): IModelState {
       data: {
         type: "object",
         id: "1:0",
-        children: {}
+        value: {}
       },
       localOperations: [],
       serverOperations: []
@@ -122,7 +122,7 @@ let counter = 1;
 
 function withStorage(body: (IdbStorageAdapter) => Promise<any>): Promise<any> {
   const adapter = new IdbStorageAdapter();
-  return adapter.openStore("namespace", "domain" + counter++, "someuser")
+  return adapter.initialize("namespace", "domain" + counter++, "someuser")
     .then(() => body(adapter))
     .then((result) => {
       adapter.destroy();

@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {ObjectSet} from "./operationChanges";
 
 /**
@@ -26,7 +26,7 @@ export class ObjectSetOperation extends DiscreteOperation implements ObjectSet {
 
   constructor(id: string,
               noOp: boolean,
-              public readonly value: { [key: string]: DataValue }) {
+              public readonly value: { [key: string]: IDataValue }) {
     super(OperationType.OBJECT_VALUE, id, noOp);
     Object.freeze(this);
   }

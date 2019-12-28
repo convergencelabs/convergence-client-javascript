@@ -23,7 +23,7 @@ import {DomainUser} from "../../identity";
  * [developer guide](https://docs.convergence.io/guide/models/references/realtimeobject.html)
  * for some examples.
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export class PropertyReference extends ModelReference<string> {
 

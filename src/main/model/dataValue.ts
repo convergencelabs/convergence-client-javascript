@@ -12,78 +12,144 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-const types: {[key: string]: string}  = {
-  OBJECT: "object",
-  ARRAY: "array",
-  STRING: "string",
-  NUMBER: "number",
-  BOOLEAN: "boolean",
-  NULL: "null",
-  DATE: "date"
-};
-
-Object.freeze(types);
-
 /**
- * @hidden
- * @internal
+ * Represents a value in a real time model.
+ *
+ * @module Real Time Data
  */
-export const DataValueType: any = types;
-
-
-export interface DataValue {
+export interface IDataValue {
+  /**
+   * The unique identifier of this object within the model.
+   */
   id: string;
-  type: string;
+
+  /**
+   * The type of this data value.
+   */
+  type: "object" | "array" | "string" | "number" | "boolean" | "null" | "date";
+
+  /**
+   * The underlying value of this element of the model.
+   */
+  value: any;
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a null value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface NullValue extends DataValue {
+export interface INullValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "null";
 
+  /**
+   * @inheritdoc
+   */
+  value: null;
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a string value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface StringValue extends DataValue {
+export interface IStringValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "string";
+
+  /**
+   * @inheritdoc
+   */
   value: string;
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a number value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface NumberValue extends DataValue {
+export interface INumberValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "number";
+
+  /**
+   * @inheritdoc
+   */
   value: number;
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a boolean value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface BooleanValue extends DataValue {
+export interface IBooleanValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "boolean";
+
+  /**
+   * @inheritdoc
+   */
   value: boolean;
 }
 
-export interface ObjectValue extends DataValue {
-  children: {[key: string]: DataValue};
+/**
+ * Represents a object value within a RealTimeModel.
+ *
+ * @module Real Time Data
+ */
+export interface IObjectValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "object";
+
+  /**
+   * @inheritdoc
+   */
+  value: { [key: string]: IDataValue };
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a array value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface ArrayValue extends DataValue {
-  children: DataValue[];
+export interface IArrayValue extends IDataValue {
+  /**
+   * @inheritdoc
+   */
+  type: "array";
+
+  /**
+   * @inheritdoc
+   */
+  value: IDataValue[];
 }
 
 /**
- * @hidden
- * @internal
+ * Represents a date value within a RealTimeModel.
+ *
+ * @module Real Time Data
  */
-export interface DateValue extends DataValue {
+export interface IDateValue extends IDataValue {
+
+  /**
+   * @inheritdoc
+   */
+  type: "date";
+
+  /**
+   * @inheritdoc
+   */
   value: Date;
 }

@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {ArrayInsert} from "./operationChanges";
 
 /**
@@ -28,7 +28,7 @@ export class ArrayInsertOperation extends DiscreteOperation implements ArrayInse
     id: string,
     noOp: boolean,
     public readonly index: number,
-    public readonly value: DataValue) {
+    public readonly value: IDataValue) {
     super(OperationType.ARRAY_INSERT, id, noOp);
     Object.freeze(this);
   }

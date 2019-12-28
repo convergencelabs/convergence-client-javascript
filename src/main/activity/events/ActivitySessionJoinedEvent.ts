@@ -21,7 +21,7 @@ import {DomainUser} from "../../identity";
  * The ActivitySessionJoinedEvent is fired when a remote session joins an
  * [[Activity]].
  *
- * @module Collaboration Awareness
+ * @module Activities
  */
 export class ActivitySessionJoinedEvent implements IActivityEvent {
   /**

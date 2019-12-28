@@ -107,7 +107,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
           const index: number = event.index;
           this._sendOperation(new ArrayReplaceOperation(this.id(), false, index, event.src.get(index).dataValue()));
         } else if (event instanceof ArrayNodeSetValueEvent) {
-          this._sendOperation(new ArraySetOperation(this.id(), false, event.src.dataValue().children));
+          this._sendOperation(new ArraySetOperation(this.id(), false, event.src.dataValue().value));
         }
       }
     });

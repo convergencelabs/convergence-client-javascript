@@ -13,14 +13,14 @@
  */
 
 import {
-  DataValue,
-  DateValue,
-  NullValue,
-  StringValue,
-  ArrayValue,
-  ObjectValue,
-  NumberValue,
-  BooleanValue
+  IDataValue,
+  IDateValue,
+  INullValue,
+  IStringValue,
+  IArrayValue,
+  IObjectValue,
+  INumberValue,
+  IBooleanValue
 } from "./dataValue";
 
 /**
@@ -31,30 +31,30 @@ export class DataValueFactory {
   constructor(private idGenerator: () => string) {
   }
 
-  public createDataValue(data: any): DataValue {
+  public createDataValue(data: any): IDataValue {
     const id: string = this.idGenerator();
     const type: string = typeof data;
     if (data === null) {
-      const nullValue: NullValue = {id, type: "null"};
+      const nullValue: INullValue = {id, type: "null", value: null};
       return nullValue;
     } else if (type === "string") {
-      const stringValue: StringValue = {id, type, value: data};
+      const stringValue: IStringValue = {id, type, value: data};
       return stringValue;
     } else if (data instanceof Date) {
-      const dateValue: DateValue = {id, type: "date", value: data};
+      const dateValue: IDateValue = {id, type: "date", value: data};
       return dateValue;
     } else if (Array.isArray(data)) {
-      const list: DataValue[] = data.map((child: any) => {
+      const list: IDataValue[] = data.map((child: any) => {
         return this.createDataValue(child);
       });
-      const arrayValue: ArrayValue = {id, type: "array", children: list};
+      const arrayValue: IArrayValue = {id, type: "array", value: list};
       return arrayValue;
     } else if (type === "object") {
       if (data.hasOwnProperty("$convergenceType")) {
         const convergenceType: string = data["$convergenceType"];
         if (convergenceType === "date") {
           if (data.hasOwnProperty("value")) {
-            const dateValue: DateValue = {id, type: "date", value: new Date(data["delta"])};
+            const dateValue: IDateValue = {id, type: "date", value: new Date(data["delta"])};
             return dateValue;
           } else {
             throw new Error("Invalid convergence data type: " + type + " delta field missing.");
@@ -63,18 +63,18 @@ export class DataValueFactory {
           throw new Error("Invalid convergence data type: " + type + " supported types are [date].");
         }
       } else {
-        const props: { [key: string]: DataValue } = {};
+        const props: { [key: string]: IDataValue } = {};
         Object.getOwnPropertyNames(data).forEach((prop: string) => {
           props[prop] = this.createDataValue(data[prop]);
         });
-        const objectValue: ObjectValue = {id, type, children: props};
+        const objectValue: IObjectValue = {id, type, value: props};
         return objectValue;
       }
     } else if (type === "number") {
-      const numberValue: NumberValue = {id, type, value: data};
+      const numberValue: INumberValue = {id, type, value: data};
       return numberValue;
     } else if (type === "boolean") {
-      const booleanValue: BooleanValue = {id, type, value: data};
+      const booleanValue: IBooleanValue = {id, type, value: data};
       return booleanValue;
     } else {
       throw new Error("Invalid data type: " + type);

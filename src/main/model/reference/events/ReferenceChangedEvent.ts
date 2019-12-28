@@ -18,7 +18,7 @@ import {ModelReference} from "../ModelReference";
 /**
  * Emitted when a [[ModelReference]]'s value is set.
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export class ReferenceChangedEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "set";

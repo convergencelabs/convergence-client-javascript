@@ -19,13 +19,13 @@ import {NullNode} from "./NullNode";
 import {StringNode} from "./StringNode";
 import {ArrayNode} from "./ArrayNode";
 import {
-  DataValue,
-  DateValue,
-  ArrayValue,
-  StringValue,
-  ObjectValue,
-  NumberValue,
-  BooleanValue} from "../dataValue";
+  IDataValue,
+  IDateValue,
+  IArrayValue,
+  IStringValue,
+  IObjectValue,
+  INumberValue,
+  IBooleanValue} from "../dataValue";
 import {ObjectNode} from "./ObjectNode";
 import {NumberNode} from "./NumberNode";
 import {BooleanNode} from "./BooleanNode";
@@ -40,7 +40,7 @@ import {ConvergenceSession} from "../../ConvergenceSession";
  */
 export class ModelNodeFactory {
 
-  public static create(data: DataValue,
+  public static create(data: IDataValue,
                        path: () => Path,
                        model: Model,
                        session: ConvergenceSession,
@@ -54,17 +54,17 @@ export class ModelNodeFactory {
     if (type === "null") {
       return new NullNode(data.id, path, model, session);
     } else if (type === "string") {
-      return new StringNode(data as StringValue, path, model, session);
+      return new StringNode(data as IStringValue, path, model, session);
     } else if (type === "array") {
-      return new ArrayNode(data as ArrayValue, path, model, session, dataValueFactory);
+      return new ArrayNode(data as IArrayValue, path, model, session, dataValueFactory);
     } else if (type === "object") {
-      return new ObjectNode(data as ObjectValue, path, model, session, dataValueFactory);
+      return new ObjectNode(data as IObjectValue, path, model, session, dataValueFactory);
     } else if (type === "number") {
-      return new NumberNode(data as NumberValue, path, model, session);
+      return new NumberNode(data as INumberValue, path, model, session);
     } else if (type === "boolean") {
-      return new BooleanNode(data as BooleanValue, path, model, session);
+      return new BooleanNode(data as IBooleanValue, path, model, session);
     } else if (type === "date") {
-      return new DateNode(data as DateValue, path, model, session);
+      return new DateNode(data as IDateValue, path, model, session);
     } else {
       throw new Error("Invalid data type: " + type);
     }

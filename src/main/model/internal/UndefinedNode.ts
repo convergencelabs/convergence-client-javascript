@@ -16,7 +16,7 @@ import {ModelNode} from "./ModelNode";
 import {ModelElementType} from "../ModelElementType";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {Path} from "../Path";
-import {DataValue} from "../dataValue";
+import {IDataValue} from "../dataValue";
 import {ConvergenceSession} from "../../ConvergenceSession";
 
 /**
@@ -38,7 +38,7 @@ export class UndefinedNode extends ModelNode<void> {
     super(ModelElementType.UNDEFINED, id, path, undefined, session);
   }
 
-  public dataValue(): DataValue {
+  public dataValue(): IDataValue {
     return undefined;
   }
 

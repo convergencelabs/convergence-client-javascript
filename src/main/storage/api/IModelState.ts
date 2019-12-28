@@ -15,6 +15,9 @@
 import {IModelSnapshot} from "./IModelSnapshot";
 import {ModelPermissions} from "../../model";
 
+/**
+ * @module Offline
+ */
 export interface IModelState {
   modelId: string;
   collection: string;

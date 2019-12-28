@@ -25,7 +25,7 @@ import {
 import {RealTimeElement} from "./RealTimeElement";
 import {OnRemoteReference, ReferenceManager} from "../reference/ReferenceManager";
 import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
-import {ObjectValue} from "../dataValue";
+import {IObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
 import {ModelService} from "../ModelService";
@@ -440,7 +440,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   constructor(resourceId: string,
               valueIdPrefix: string,
-              data: ObjectValue,
+              data: IObjectValue,
               local: boolean,
               resyncOnly: boolean,
               sessions: string[],

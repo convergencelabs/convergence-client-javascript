@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ObjectValue} from "./dataValue";
+import {IObjectValue} from "./dataValue";
 import {ClientOperationEvent} from "./ot/ClientOperationEvent";
 
 /**
@@ -21,6 +21,6 @@ import {ClientOperationEvent} from "./ot/ClientOperationEvent";
  */
 export interface IConcurrencyControlState {
   lastSequenceNumber: number;
-  data: ObjectValue;
+  data: IObjectValue;
   uncommittedOperations: ClientOperationEvent[];
 }

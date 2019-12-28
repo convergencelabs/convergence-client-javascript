@@ -13,7 +13,7 @@
  */
 
 import {ModelNode} from "./ModelNode";
-import {BooleanValue, DataValueType} from "../dataValue";
+import {IBooleanValue} from "../dataValue";
 import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -42,7 +42,7 @@ export class BooleanNode extends ModelNode<boolean> {
   /**
    * Constructs a new RealTimeBoolean.
    */
-  constructor(data: BooleanValue,
+  constructor(data: IBooleanValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession) {
@@ -50,12 +50,12 @@ export class BooleanNode extends ModelNode<boolean> {
     this._data = data.value;
   }
 
-  public dataValue(): BooleanValue {
+  public dataValue(): IBooleanValue {
     return {
       id: this.id(),
-      type: DataValueType.BOOLEAN,
+      type: "boolean",
       value: this.data()
-    } as BooleanValue;
+    } as IBooleanValue;
   }
 
   public toJson(): any {

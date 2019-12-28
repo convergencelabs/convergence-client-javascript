@@ -16,7 +16,7 @@ import {RealTimeDate, RealTimeModel, ModelEventCallbacks} from "../../main/model
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {DateSetOperation} from "../../main/model/ot/ops/DateSetOperation";
 import {TestIdGenerator} from "./TestIdGenerator";
-import {DateValue} from "../../main/model/";
+import {IDateValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
 import {DateNode} from "../../main/model/internal/DateNode";
@@ -56,7 +56,7 @@ describe("RealTimeDate", () => {
 
   const testDate = new Date();
 
-  const initialValue: DateValue = dataValueFactory.createDataValue(testDate) as DateValue;
+  const initialValue: IDateValue = dataValueFactory.createDataValue(testDate) as IDateValue;
 
   let callbacks: ModelEventCallbacks;
 

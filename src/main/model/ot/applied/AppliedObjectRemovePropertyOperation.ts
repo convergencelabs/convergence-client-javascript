@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {AppliedObjectAddPropertyOperation} from "./AppliedObjectAddPropertyOperation";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
 import {ObjectRemoveProperty} from "../ops/operationChanges";
@@ -29,7 +29,7 @@ export class AppliedObjectRemovePropertyOperation extends AppliedDiscreteOperati
   constructor(id: string,
               noOp: boolean,
               public readonly prop: string,
-              public readonly oldValue: DataValue) {
+              public readonly oldValue: IDataValue) {
     super(OperationType.OBJECT_REMOVE, id, noOp);
     Object.freeze(this);
   }

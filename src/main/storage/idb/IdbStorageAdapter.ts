@@ -19,8 +19,8 @@ import {IdbSchemaManager} from "./IdbSchemaManager";
 import {IdbIdentityStore} from "./IdbIdentityStore";
 
 /**
- * The default implementation for data persistence in offline mode. Uses
- * IndexedDB under the hood.
+ * The default implementation for data persistence in offline mode. This
+ * storage adapter uses IndexedDB under the hood to store all data.
  *
  * @module Offline
  */
@@ -33,11 +33,17 @@ export class IdbStorageAdapter implements IStorageAdapter {
   private _modelStore: IdbModelStore;
   private _identityStore: IdbIdentityStore;
 
+  /**
+   * @inheritDoc
+   */
   public adapterId(): string {
     return "Indexed DB Storage";
   }
 
-  public openStore(namespace: string, domainId: string, username: string): Promise<void> {
+  /**
+   * @inheritDoc
+   */
+  public initialize(namespace: string, domainId: string, username: string): Promise<void> {
     if (!namespace) {
       throw new Error("namespace must be a non-empty string");
     }
@@ -67,24 +73,39 @@ export class IdbStorageAdapter implements IStorageAdapter {
     });
   }
 
+  /**
+   * @inheritDoc
+   */
   public isInitialized(): boolean {
     return this._db !== null;
   }
 
+  /**
+   * @inheritDoc
+   */
   public modelStore(): IModelStore {
     return this._modelStore;
   }
 
+  /**
+   * @inheritDoc
+   */
   public identityStore(): IIdentityStore {
     return this._identityStore;
   }
 
+  /**
+   * @inheritDoc
+   */
   public destroy(): void {
     const name = this._db.name;
     this.dispose();
     indexedDB.deleteDatabase(name);
   }
 
+  /**
+   * @inheritDoc
+   */
   public dispose(): void {
     if (!this.isInitialized()) {
       throw new Error("Can not disposed a storage adapter that is not initialized");
@@ -99,6 +120,9 @@ export class IdbStorageAdapter implements IStorageAdapter {
     this._disposed = true;
   }
 
+  /**
+   * @inheritDoc
+   */
   public isDisposed(): boolean {
     return this._disposed;
   }

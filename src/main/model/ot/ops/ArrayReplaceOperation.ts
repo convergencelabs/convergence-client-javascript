@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {DataValue} from "../../dataValue";
+import {IDataValue} from "../../dataValue";
 import {ArrayReplace} from "./operationChanges";
 
 /**
@@ -27,7 +27,7 @@ export class ArrayReplaceOperation extends DiscreteOperation implements ArrayRep
   constructor(id: string,
               noOp: boolean,
               public readonly index: number,
-              public readonly value: DataValue) {
+              public readonly value: IDataValue) {
     super(OperationType.ARRAY_SET, id, noOp);
     Object.freeze(this);
   }

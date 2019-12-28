@@ -16,7 +16,7 @@ import {RealTimeNumber, RealTimeModel, ModelEventCallbacks} from "../../main/mod
 import {NumberDeltaOperation} from "../../main/model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../main/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {NumberValue} from "../../main/model/dataValue";
+import {INumberValue} from "../../main/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
@@ -55,7 +55,7 @@ describe("RealTimeNumber", () => {
     return  new ModelPermissions(true, true, true, true);
   };
 
-  const initialValue: NumberValue = dataValueFactory.createDataValue(10) as NumberValue;
+  const initialValue: INumberValue = dataValueFactory.createDataValue(10) as INumberValue;
 
   let callbacks: ModelEventCallbacks;
   beforeEach(() => {

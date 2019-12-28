@@ -21,7 +21,7 @@ import {
   NodeDetachedEvent,
   ModelNodeEvent
 } from "./events";
-import {DataValue} from "../dataValue";
+import {IDataValue} from "../dataValue";
 import {ConvergenceEventEmitter} from "../../util";
 import {ConvergenceSession} from "../../ConvergenceSession";
 
@@ -107,7 +107,7 @@ export abstract class ModelNode<T> extends ConvergenceEventEmitter<ModelNodeEven
     }
   }
 
-  public abstract dataValue(): DataValue;
+  public abstract dataValue(): IDataValue;
 
   public abstract toJson(): any;
 

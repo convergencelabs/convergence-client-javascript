@@ -16,7 +16,7 @@ import {expect} from "chai";
 import {createStubInstance} from "sinon";
 import {TestIdGenerator} from "../TestIdGenerator";
 import {DataValueFactory} from "../../../main/model/DataValueFactory";
-import {ArrayValue} from "../../../main/model/dataValue";
+import {IArrayValue} from "../../../main/model/dataValue";
 import {ArrayNode} from "../../../main/model/internal/ArrayNode";
 import {Model} from "../../../main/model/internal/Model";
 import {ConvergenceSession} from "../../../main";
@@ -32,7 +32,7 @@ describe("ArrayNode", () => {
   const model = createStubInstance(Model) as any as Model;
   const primitiveValue: any[] = ["A", "B", "C"];
 
-  const arrayValue: ArrayValue = dataValueFactory.createDataValue(primitiveValue) as ArrayValue;
+  const arrayValue: IArrayValue = dataValueFactory.createDataValue(primitiveValue) as IArrayValue;
 
   it("data() is correct after creation", () => {
     const arrayNode: ArrayNode = createArrayNode(arrayValue);
@@ -46,7 +46,7 @@ describe("ArrayNode", () => {
 
   it("length() is correct after creation", () => {
     const arrayNode: ArrayNode = createArrayNode(arrayValue);
-    expect(arrayNode.length()).to.deep.equal(arrayValue.children.length);
+    expect(arrayNode.length()).to.deep.equal(arrayValue.value.length);
   });
 
   it("get() returns correct value", () => {
@@ -137,7 +137,7 @@ describe("ArrayNode", () => {
     expect(() => arrayNode.set(4, false)).to.throw(Error);
   });
 
-  function createArrayNode(value: ArrayValue): ArrayNode {
+  function createArrayNode(value: IArrayValue): ArrayNode {
     return new ArrayNode(value, () => [], model, session, dataValueFactory);
   }
 });

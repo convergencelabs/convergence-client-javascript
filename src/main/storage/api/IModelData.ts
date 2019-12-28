@@ -12,12 +12,12 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ObjectValue} from "../../model/";
+import {IObjectValue} from "../../model/";
 
 /**
  * @module Offline
  */
 export interface IModelData {
   modelId: string;
-  data: ObjectValue;
+  data: IObjectValue;
 }

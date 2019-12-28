@@ -61,7 +61,7 @@ import IActivityStateUpdatedMessage = com.convergencelabs.convergence.proto.acti
  * can share state which indicates what they are doing within the
  * [[Activity]].
  *
- * @module Collaboration Awareness
+ * @module Activities
  */
 export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 

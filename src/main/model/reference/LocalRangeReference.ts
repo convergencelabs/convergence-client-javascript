@@ -18,7 +18,7 @@ import {RangeReference, IndexRange} from "./RangeReference";
 /**
  * A [[RangeReference]] that was created locally. See [[RealTimeString.rangeReference]]
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export class LocalRangeReference extends LocalModelReference<IndexRange, RangeReference> {
 

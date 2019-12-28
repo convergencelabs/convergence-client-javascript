@@ -18,7 +18,7 @@ import {IndexReference} from "./IndexReference";
 /**
  * An [[IndexReference]] that was created locally. See [[RealTimeString.indexReference]]
  *
- * @module Collaboration Awareness
+ * @module Real Time Data
  */
 export class LocalIndexReference extends LocalModelReference<number, IndexReference> {
   /**

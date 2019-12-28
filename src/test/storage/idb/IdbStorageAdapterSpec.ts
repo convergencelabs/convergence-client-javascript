@@ -32,17 +32,17 @@ describe("IdbStorageAdapter", () => {
   describe("openStore()", () => {
     it("throws if namespace is not defined", () => {
       const adapter = new IdbStorageAdapter();
-      expect(() => adapter.openStore("", "domainId", "username")).to.throw();
+      expect(() => adapter.initialize("", "domainId", "username")).to.throw();
     });
 
     it("throws if domainId is not defined", () => {
       const adapter = new IdbStorageAdapter();
-      expect(() => adapter.openStore("namespace", "", "username")).to.throw();
+      expect(() => adapter.initialize("namespace", "", "username")).to.throw();
     });
 
     it("isInitialized() returns true after init() called", async () => {
       const adapter = new IdbStorageAdapter();
-      await adapter.openStore("namespace", "domainId", "username");
+      await adapter.initialize("namespace", "domainId", "username");
       expect(adapter.isInitialized()).to.be.true;
     });
   });
@@ -55,27 +55,27 @@ describe("IdbStorageAdapter", () => {
 
     it("throws if already disposed", async () => {
       const adapter = new IdbStorageAdapter();
-      await adapter.openStore("namespace", "domainId", "username");
+      await adapter.initialize("namespace", "domainId", "username");
       adapter.dispose();
       expect(() => adapter.dispose()).to.throw;
     });
 
     it("does not throw if initialized()", async () => {
       const adapter = new IdbStorageAdapter();
-      await adapter.openStore("namespace", "domainId", "username");
+      await adapter.initialize("namespace", "domainId", "username");
       adapter.dispose();
     });
 
     it("isDisposed() returns true after dispose() called", async () => {
       const adapter = new IdbStorageAdapter();
-      await adapter.openStore("namespace", "domainId", "username");
+      await adapter.initialize("namespace", "domainId", "username");
       adapter.dispose();
       expect(adapter.isDisposed()).to.be.true;
     });
 
     it("isInitialized() returns false after dispose() called", async () => {
       const adapter = new IdbStorageAdapter();
-      await adapter.openStore("namespace", "domainId", "username");
+      await adapter.initialize("namespace", "domainId", "username");
       adapter.dispose();
       expect(adapter.isInitialized()).to.be.false;
     });

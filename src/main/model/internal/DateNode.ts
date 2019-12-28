@@ -13,7 +13,7 @@
  */
 
 import {ModelNode} from "./ModelNode";
-import {DateValue, DataValueType} from "../dataValue";
+import {IDateValue} from "../dataValue";
 import {ModelElementType} from "../ModelElementType";
 import {Model} from "./Model";
 import {ModelOperationEvent} from "../ModelOperationEvent";
@@ -42,7 +42,7 @@ export class DateNode extends ModelNode<Date> {
   /**
    * Constructs a new RealTimeDate.
    */
-  constructor(data: DateValue,
+  constructor(data: IDateValue,
               path: () => Path,
               model: Model,
               session: ConvergenceSession) {
@@ -50,12 +50,12 @@ export class DateNode extends ModelNode<Date> {
     this._data = data.value;
   }
 
-  public dataValue(): DateValue {
+  public dataValue(): IDateValue {
     return {
       id: this.id(),
-      type: DataValueType.DATE,
+      type: "date",
       value: this.data()
-    } as DateValue;
+    } as IDateValue;
   }
 
   public toJson(): any {
