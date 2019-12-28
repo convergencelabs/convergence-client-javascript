@@ -20,9 +20,10 @@ import {RichTextElement} from "./RichTextElement";
  */
 export interface RichTextContent {
   document(): RichTextDocument;
-  root(): RichTextRootElement;
-  parent(): RichTextElement;
-  path(): RichTextPath;
+  root(): RichTextRootElement | null;
+  parent(): RichTextElement | null;
+  path(): RichTextPath | null;
+  location(): RichTextLocation | null;
 
   attributes(): Map<string, any>;
   getAttribute(key: string): any;
@@ -36,4 +37,4 @@ export interface RichTextContent {
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextContentType} from "./RichTextContentType";
-import {RichTextPath} from "./RichTextLocation";
+import {RichTextLocation, RichTextPath} from "./RichTextLocation";

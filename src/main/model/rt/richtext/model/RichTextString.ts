@@ -13,6 +13,10 @@
  */
 
 import {RichTextNode} from "./RichTextNode";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextContentType} from "./RichTextContentType";
+import {StringMap} from "../../../../util/";
 
 /**
  * @hidden
@@ -21,7 +25,7 @@ import {RichTextNode} from "./RichTextNode";
 export class RichTextString extends RichTextNode {
   private _data: string;
 
-  constructor(document: RichTextDocument, parent: RichTextElement, data: string, attributes?: Map<string, any>) {
+  constructor(document: RichTextDocument, parent: RichTextElement | null, data: string, attributes?: Map<string, any>) {
     super(document, parent, attributes);
     this._data = data;
   }
@@ -68,8 +72,3 @@ export class RichTextString extends RichTextNode {
       `path: ${JSON.stringify((this.path()))} ]`;
   }
 }
-
-import {RichTextElement} from "./RichTextElement";
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextContentType} from "./RichTextContentType";
-import {StringMap} from "../../../../util/StringMap";

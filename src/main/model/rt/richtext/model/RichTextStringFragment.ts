@@ -45,6 +45,10 @@ export class RichTextStringFragment implements RichTextContent {
     return this._str.path();
   }
 
+  public location(): RichTextLocation | null {
+    return this._str.location();
+  }
+
   public index(): number {
     return this._index;
   }
@@ -112,5 +116,5 @@ import {RichTextContentType} from "./RichTextContentType";
 import {RichTextRootElement} from "./RichTextRootElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextElement} from "./RichTextElement";
-import {RichTextPath} from "./RichTextLocation";
+import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {StringMap} from "../../../../util/StringMap";

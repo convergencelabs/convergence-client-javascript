@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2019 - Convergence Labs, Inc.
  *
@@ -26,8 +25,13 @@ export class RichTextMutator {
     this._document = document;
   }
 
-  public insertText(location: RichTextLocation, text: string, attributes?: Map<string, any>): RichTextMutator {
-    const str = new RichTextString(this._document, null, text, attributes);
+  public getDocument(): RichTextDocument {
+    return this._document;
+  }
+
+  public insertText(location: RichTextLocation, text: string, attributes?: StringMapLike): RichTextMutator {
+    const atts = StringMap.coerceToMap(attributes);
+    const str = new RichTextString(this._document, null, text, atts);
     this.insert(location, str);
     return this;
   }
@@ -49,10 +53,10 @@ export class RichTextMutator {
         const parent = node.parent();
         const nodeIndex = node.index();
 
-        this._splitStingNode(node, index);
+        this._splitStringNode(node, index);
         parent.insertChild(nodeIndex + 1, content);
       }
-    } else if (node instanceof RichTextElement) {
+    } else if (node instanceof RichTextElement || node instanceof RichTextRootElement) {
       node.insertChild(index, content);
     } else {
       throw new Error("Invalid insert location");
@@ -76,8 +80,8 @@ export class RichTextMutator {
     return this;
   }
 
-  // fixme the logic in here probable is needed for remove attribute as well. We should find a way to abstract
-  // it.
+  // fixme the logic in here probable is needed for remove attribute as well.
+  //   We should find a way to abstract it.
   public setAttribute(range: RichTextRange, key: string, value: any): RichTextMutator {
     let currentRangeStart: RichTextLocation = null;
 
@@ -115,11 +119,11 @@ export class RichTextMutator {
     return this;
   }
 
-  private _splitStingNode(node: RichTextString, index: number): void {
+  private _splitStringNode(node: RichTextString, index: number): void {
     const parent: RichTextElement = node.parent();
     node.removeFromParent();
-    const leftNode = new RichTextString(this._document, parent, node.getData().substr(0, index), parent.attributes());
-    const rightNode = new RichTextString(this._document, parent, node.getData().substr(index), parent.attributes());
+    const leftNode = new RichTextString(this._document, parent, node.getData().substr(0, index), node.attributes());
+    const rightNode = new RichTextString(this._document, parent, node.getData().substr(index), node.attributes());
     parent.insertChildren(index, [leftNode, rightNode]);
   }
 
@@ -167,7 +171,6 @@ export class RichTextMutator {
 
     // Continue merging next level.
     this._mergeSubtrees(start, end);
-
   }
 
   private _merge(left: RichTextElement, right: RichTextElement): void {
@@ -188,3 +191,5 @@ import {RichTextRange} from "./RichTextRange";
 import {RichTextFragment} from "./RichTextFragement";
 import {RichTextContent} from "./RichTextContent";
 import {RichTextStringFragment} from "./RichTextStringFragment";
+import {RichTextRootElement} from "./RichTextRootElement";
+import {StringMap, StringMapLike} from "../../../../util";

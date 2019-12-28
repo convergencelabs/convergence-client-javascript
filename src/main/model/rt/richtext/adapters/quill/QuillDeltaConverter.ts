@@ -12,14 +12,8 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {
-  RichTextDocument,
-  RichTextRootElement,
-  RichTextString,
-  RichTextElement,
-  RichTextNode
-} from "../../model";
-import {StringMap} from "../../../../../util/StringMap";
+import {RichTextDocument, RichTextElement, RichTextNode, RichTextRootElement, RichTextString} from "../../model";
+import {StringMap} from "../../../../../util/";
 import {QuillDelta, QuillDeltaOperation} from "./QuillDelta";
 
 const ROOT_NAME: string = "quill";

@@ -27,6 +27,10 @@ export class RichTextLocationTransformer {
   }
 
   public static transformRemove(location: RichTextLocation, range: RichTextRange): RichTextLocation {
+
+    const start = [0, 1, 2, 1];
+    const end = [0, 2, 4, 7];
+    const loc = [0, 2, 5, 3];
     return location;
   }
 }

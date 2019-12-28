@@ -35,7 +35,9 @@ export class StringMap {
   }
 
   public static coerceToObject<T>(map: StringMapLike): {[key: string]: T} {
-    if (map instanceof Map) {
+    if (map === undefined) {
+      return {};
+    } else if (map instanceof Map) {
       return StringMap.mapToObject(map);
     } else {
       return map;
@@ -43,7 +45,9 @@ export class StringMap {
   }
 
   public static coerceToMap<T>(map: StringMapLike): Map<string, T> {
-    if (map instanceof Map) {
+    if (map === undefined) {
+      return new Map<string, T>();
+    } else if (map instanceof Map) {
       return map;
     } else {
       return StringMap.objectToMap(map);

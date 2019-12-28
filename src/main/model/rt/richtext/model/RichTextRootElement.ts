@@ -15,7 +15,7 @@
 import {RichTextElement} from "./RichTextElement";
 import {RichTextDocument} from "./RichTextDocument";
 import {RichTextContentType} from "./RichTextContentType";
-import {RichTextPath} from "./RichTextLocation";
+import {RichTextLocation, RichTextPath} from "./RichTextLocation";
 import {StringMap} from "../../../../util/StringMap";
 
 /**
@@ -39,6 +39,10 @@ export class RichTextRootElement extends RichTextElement {
 
   public path(): RichTextPath {
     return [];
+  }
+
+  public location(): RichTextLocation | null {
+    return RichTextLocation.ofRoot(this);
   }
 
   public type(): RichTextContentType {

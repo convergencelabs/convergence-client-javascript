@@ -19,7 +19,7 @@ import {RichTextContent} from "./RichTextContent";
 import {RichTextString} from "./RichTextString";
 import {ConvergenceError} from "../../../../util";
 import {RichTextContentType} from "./RichTextContentType";
-import { Validation } from "../../../../util/Validation";
+import {Validation} from "../../../../util/Validation";
 
 /**
  * @hidden
@@ -56,11 +56,17 @@ export class RichTextLocation {
 
   public static ofTextOffset(root: RichTextRootElement, offset: number): RichTextLocation {
     const pao = RichTextLocation.findPathAndOffset(root, offset);
-
     return new RichTextLocation(root, pao.path, pao.offset);
   }
 
   private static findPathAndOffset(element: RichTextElement, offset: number): PathAndOffset {
+    if (offset === 0 && element.childCount() === 0) {
+      return {
+        path: [],
+        offset: 0
+      };
+    }
+
     let currentOffset = 0;
 
     for (let i = 0; i < element.childCount() && currentOffset <= offset; i++) {
@@ -84,7 +90,8 @@ export class RichTextLocation {
         }
       } else if (currentOffset + childLength === offset) {
         return {
-          path: [i + 1]
+          path: [i],
+          offset: childLength
         };
       } else {
         currentOffset = currentOffset + childLength;
@@ -140,13 +147,17 @@ export class RichTextLocation {
     }
   }
 
-  public getChild(index: number): RichTextLocation {
+  public withChild(index: number): RichTextLocation {
     if (index < 0) {
       throw new ConvergenceError(`index must be >= 0: ${index}`);
     }
     const childPath = this._path.slice(0);
     childPath.push(index);
     return RichTextLocation.ofPath(this._root, childPath);
+  }
+
+  public withSubPath(index: number): RichTextLocation {
+    return new RichTextLocation(this._root, this._path, index);
   }
 
   public getNearestCommonAncestor(other: RichTextLocation): RichTextLocation {
@@ -175,11 +186,25 @@ export class RichTextLocation {
     return RichTextLocation.ofPath(this._root, commonPath);
   }
 
-  /**
-   * @hidden
-   * @internal
-   */
-  public _transform(): RichTextLocation {
-    return null;
+  public isBefore(other: RichTextLocation): boolean {
+    return this.compare(other) === RichTextLocationRelationship.BEFORE;
   }
+
+  public isAfter(other: RichTextLocation): boolean {
+    return this.compare(other) === RichTextLocationRelationship.AFTER;
+  }
+
+  public isEqual(other: RichTextLocation): boolean {
+    return this.compare(other) === RichTextLocationRelationship.EQUAL;
+  }
+
+  public compare(other: RichTextLocation): RichTextLocationRelationship {
+    return RichTextLocationRelationship.EQUAL;
+  }
+}
+
+export enum RichTextLocationRelationship {
+  AFTER = "after",
+  BEFORE = "before",
+  EQUAL = "equal"
 }

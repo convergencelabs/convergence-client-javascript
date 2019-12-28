@@ -13,11 +13,7 @@
  */
 
 import {expect} from "chai";
-import {RichTextElement} from "../../../main/model/rt/richtext/model/RichTextElement";
-import {RichTextDocument} from "../../../main/model/rt/richtext/model/RichTextDocument";
-import {RichTextRootElement} from "../../../main/model/rt/richtext/model/RichTextRootElement";
-import {AttributeUtils} from "../../../main/model/rt/richtext/model/AttributeUtils";
-import {RichTextLocation} from "../../../main/model/rt/richtext/model/RichTextLocation";
+import {RichTextDocument, RichTextLocation, RichTextRootElement} from "../../../main/model/rt/richtext/model/";
 import {TestDocumentCreator} from "./documents/TestDocumentCreator";
 import {TWO_PARAGRAPHS_WITH_OBJECT} from "./documents/two_paragraphs_with_object";
 
@@ -92,7 +88,7 @@ describe("RichTextLocation", () => {
       const root = new RichTextRootElement(document, "main", "root");
       document.addRoot(root);
       const location = new RichTextLocation(root, []);
-      expect(() => location.getChild(-1)).to.throw();
+      expect(() => location.withChild(-1)).to.throw();
     });
 
     it("returns the same root", () => {
@@ -100,7 +96,7 @@ describe("RichTextLocation", () => {
       const root = new RichTextRootElement(document, "main", "root");
       document.addRoot(root);
       const location = new RichTextLocation(root, [2, 1]);
-      expect(location.getChild(1).root()).to.eq(root);
+      expect(location.withChild(1).root()).to.eq(root);
     });
 
     it("returns the correct child path", () => {
@@ -108,7 +104,7 @@ describe("RichTextLocation", () => {
       const root = new RichTextRootElement(document, "main", "root");
       document.addRoot(root);
       const location = new RichTextLocation(root, [2, 1]);
-      expect(location.getChild(3).path()).to.deep.eq([2, 1, 3]);
+      expect(location.withChild(3).path()).to.deep.eq([2, 1, 3]);
     });
   });
 
@@ -179,11 +175,15 @@ describe("RichTextLocation", () => {
       const location = new RichTextLocation(root, [0, 2, 2, 4]);
       expect(() => location.getNearestCommonAncestor(null)).to.throw();
     });
+  });
 
+  describe("ofTextOffset", () => {
     it("getting offset location", () => {
       const document = TestDocumentCreator.createDocument(TWO_PARAGRAPHS_WITH_OBJECT);
       const root = document.getRoot("main");
-      const location = RichTextLocation.ofTextOffset(root, 2);
+      const location = RichTextLocation.ofTextOffset(root, 4);
+      expect(location.path()).to.deep.equal([0, 1]);
+      expect(location.getSubPath()).to.deep.equal(1);
     });
   });
 });

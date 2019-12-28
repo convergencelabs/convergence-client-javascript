@@ -13,17 +13,24 @@
  */
 
 import {RichTextContent} from "./RichTextContent";
+import {RichTextElement} from "./RichTextElement";
+import {RichTextRootElement} from "./RichTextRootElement";
+import {RichTextDocument} from "./RichTextDocument";
+import {RichTextLocation, RichTextPath} from "./RichTextLocation";
+import {RichTextContentType} from "./RichTextContentType";
+import {ConvergenceError} from "../../../../util";
+import {Validation} from "../../../../util/Validation";
 
 /**
  * @hidden
  * @internal
  */
 export abstract class RichTextNode implements RichTextContent {
-  private _parent: RichTextElement;
+  private _parent: RichTextElement | null;
   private readonly _document: RichTextDocument;
   private _attributes: Map<string, any>;
 
-  protected constructor(document: RichTextDocument, parent: RichTextElement, attributes?: Map<string, any>) {
+  protected constructor(document: RichTextDocument, parent: RichTextElement | null, attributes?: Map<string, any>) {
     if (Validation.isNotSet(document)) {
       throw new ConvergenceError("The document must be set.", "rich-text-node-document-not-set");
     }
@@ -33,7 +40,7 @@ export abstract class RichTextNode implements RichTextContent {
     this._attributes = attributes || new Map<string, any>();
   }
 
-  public parent(): RichTextElement {
+  public parent(): RichTextElement | null {
     return this._parent;
   }
 
@@ -57,7 +64,7 @@ export abstract class RichTextNode implements RichTextContent {
     }
   }
 
-  public path(): RichTextPath {
+  public path(): RichTextPath | null {
     if (Validation.isNotSet(this._parent)) {
       return null;
     }
@@ -79,6 +86,14 @@ export abstract class RichTextNode implements RichTextContent {
     path.push(index);
 
     return path;
+  }
+
+  public location(): RichTextLocation | null {
+    if (this._parent !== null) {
+      return RichTextLocation.ofPath(this.parent().root(), this.path());
+    } else {
+      return null;
+    }
   }
 
   public root(): RichTextRootElement {
@@ -142,7 +157,7 @@ export abstract class RichTextNode implements RichTextContent {
   }
 
   public attributes(): Map<string, any> {
-    return new Map(this._attributes.entries());
+    return new Map(this._attributes);
   }
 
   public setAttribute(key: string, value: any): void {
@@ -169,12 +184,3 @@ export abstract class RichTextNode implements RichTextContent {
 
   public abstract isLeaf(): boolean;
 }
-
-// Note: These import have to be down here for the circular dependency to work.
-import {RichTextElement} from "./RichTextElement";
-import {RichTextRootElement} from "./RichTextRootElement";
-import {RichTextDocument} from "./RichTextDocument";
-import {RichTextLocation, RichTextPath} from "./RichTextLocation";
-import {RichTextContentType} from "./RichTextContentType";
-import {ConvergenceError} from "../../../../util";
-import { Validation } from "../../../../util/Validation";

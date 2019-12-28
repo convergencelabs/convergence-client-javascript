@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {RichTextDocument, RichTextRootElement, RichTextRange, RichTextLocation} from "../../model";
+import {RichTextDocument, RichTextLocation, RichTextRange, RichTextRootElement} from "../../model";
 import {QuillDeltaConverter} from "./QuillDeltaConverter";
 import {QuillDelta} from "./QuillDelta";
 

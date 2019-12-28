@@ -12,57 +12,133 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {expect} from "chai";
+import {
+  RichTextDocument,
+  RichTextLocation,
+  RichTextMutator,
+  RichTextRootElement,
+  RichTextString
+} from "../../../main/model/rt/richtext/model/";
 
-import {RichTextDocument} from "../../../main/model/rt/richtext/model/RichTextDocument";
-import {RichTextRootElement} from "../../../main/model/rt/richtext/model/RichTextRootElement";
+import {expect} from "chai";
+import {StringMap} from "../../../main/util";
 
 describe("RichTextMutator", () => {
-  describe("constructor", () => {
-    it("Initial document has not roots", () => {
+  describe("insert", () => {
+    it("Insert", () => {
       const doc = new RichTextDocument();
-      expect(doc.getRoots().size).to.eq(0);
+      const root = new RichTextRootElement(doc, "default", "doc");
+      doc.addRoot(root);
+      const mutator = new RichTextMutator(doc);
+
+      const str = new RichTextString(doc, null, "test");
+      const insertLoc = root.location().withSubPath(0);
+      mutator.insert(insertLoc, str);
+
+      expect(root.childCount()).to.eq(1);
+      expect(root.getChild(0)).to.be.an.instanceOf(RichTextString);
+    });
+
+    it("Insert string into existing string", () => {
+      const doc = new RichTextDocument();
+      const root = new RichTextRootElement(doc, "default", "doc");
+      doc.addRoot(root);
+      const mutator = new RichTextMutator(doc);
+
+      root.appendChild(new RichTextString(doc, null, "some text"));
+
+      const insertLoc = root.location().withChild(0).withSubPath(4);
+      mutator.insert(insertLoc, new RichTextString(doc, null, " more"));
+
+      expect(root.childCount()).to.eq(1);
+      const child = root.getChild(0) as RichTextString;
+      expect(child).to.be.an.instanceOf(RichTextString);
+      expect(child.getData()).to.eq("some more text");
     });
   });
 
-  describe("#addRoot()", () => {
-    it("Initial document has not roots", () => {
-      const doc = new RichTextDocument();
-      const root = new RichTextRootElement(doc, "main", "doc");
-      doc.addRoot(root);
-      expect(doc.getRoots().get(root.getRootName())).to.eq(root);
+  describe("insertText", () => {
+    it("Insert in empty root element", () => {
+      const {mutator, root} = emptyTestData();
+
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "some text");
+
+      expect(root.childCount()).to.eq(1);
+      const child = root.getChild(0) as RichTextString;
+      expect(child).to.be.an.instanceOf(RichTextString);
+      expect(child.getData()).to.eq("some text");
     });
 
-    it("Adding a null root throws and error", () => {
-      const doc = new RichTextDocument();
-      expect(() => doc.addRoot(null)).to.throw();
+    it("Insert in existing string with no attributes", () => {
+      const {mutator, root} = emptyTestData();
+
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "some text");
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 4), " more");
+
+      expect(root.childCount()).to.eq(1);
+      const child = root.getChild(0) as RichTextString;
+      expect(child).to.be.an.instanceOf(RichTextString);
+      expect(child.getData()).to.eq("some more text");
     });
 
-    it("Adding an undefined root throws and error", () => {
-      const doc = new RichTextDocument();
-      expect(() => doc.addRoot(undefined)).to.throw();
+    it("Insert at end of existing string", () => {
+      const {mutator, root} = emptyTestData();
+
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "0123");
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 4), "4");
+
+      expect(root.childCount()).to.eq(1);
+      const child = root.getChild(0) as RichTextString;
+      expect(child).to.be.an.instanceOf(RichTextString);
+      expect(child.getData()).to.eq("01234");
     });
 
-    it("Adding a duplicate root name throws an error", () => {
-      const doc = new RichTextDocument();
-      const root = new RichTextRootElement(doc, "main", "doc");
-      const root2 = new RichTextRootElement(doc, "main", "doc");
-      doc.addRoot(root);
-      expect(() => doc.addRoot(root2)).to.throw();
-    });
-  });
+    it("Insert at beginning of existing string", () => {
+      const {mutator, root} = emptyTestData();
 
-  describe("#getRoots()", () => {
-    it("Returns all and only added roots", () => {
-      const doc = new RichTextDocument();
-      const root1 = new RichTextRootElement(doc, "root1", "doc");
-      const root2 = new RichTextRootElement(doc, "root2", "doc");
-      doc.addRoot(root1);
-      doc.addRoot(root2);
-      const roots = doc.getRoots();
-      expect(roots.size).to.eq(2);
-      expect(roots.get(root1.getRootName())).to.equal(root1);
-      expect(roots.get(root2.getRootName())).to.equal(root2);
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "1234");
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "0");
+
+      expect(root.childCount()).to.eq(1);
+      const child = root.getChild(0) as RichTextString;
+      expect(child).to.be.an.instanceOf(RichTextString);
+      expect(child.getData()).to.eq("01234");
+    });
+
+    it("Insert in existing string with different attributes", () => {
+      const {mutator, root} = emptyTestData();
+
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 0), "1234", {bold: false});
+      mutator.insertText(RichTextLocation.ofTextOffset(root, 2), "X", {bold: true});
+
+      expect(root.childCount()).to.eq(3);
+
+      const child1 = root.getChild(0) as RichTextString;
+      expect(child1).to.be.an.instanceOf(RichTextString);
+      expect(child1.getData()).to.eq("12");
+      expect(child1.attributes()).to.deep.equal(StringMap.toStringMap({bold: false}));
+
+      const child2 = root.getChild(1) as RichTextString;
+      expect(child2).to.be.an.instanceOf(RichTextString);
+      expect(child2.getData()).to.eq("X");
+      expect(child2.attributes()).to.deep.equal(StringMap.toStringMap({bold: true}));
+
+      const child3 = root.getChild(2) as RichTextString;
+      expect(child3).to.be.an.instanceOf(RichTextString);
+      expect(child3.getData()).to.eq("34");
+      expect(child3.attributes()).to.deep.equal(StringMap.toStringMap({bold: false}));
     });
   });
 });
+
+function emptyTestData(): {
+  doc: RichTextDocument,
+  mutator: RichTextMutator,
+  root: RichTextRootElement
+} {
+  const doc = new RichTextDocument();
+  const root = new RichTextRootElement(doc, "default", "doc");
+  doc.addRoot(root);
+  const mutator = new RichTextMutator(doc);
+  return {doc, mutator, root};
+}
