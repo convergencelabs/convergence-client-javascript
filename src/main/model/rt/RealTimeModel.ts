@@ -416,6 +416,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
+  private _offline: boolean;
+
+  /**
+   * @internal
+   */
   private readonly _closingData: {
     deferred: ReplayDeferred<void>;
     closing: boolean;
@@ -467,6 +472,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._offlineManager = modelOfflineManager;
     this._resyncOnly = resyncOnly;
 
+    this._offline = false;
     this._resyncData = null;
     this._closingData = {
       deferred: new ReplayDeferred<void>(),
@@ -1171,6 +1177,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _setOffline(): void {
     this._debug("Offline");
+
+    this._offline = true;
     this._emitEvent(new ModelOfflineEvent(this));
 
     this._sessions.forEach(sessionId => this._handleClientClosed(sessionId));
@@ -1190,6 +1198,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   public _setOnline(): void {
+    this._offline = false;
+
     this._resyncData = {
       bufferedOperations: [],
       upToDate: false
@@ -1949,7 +1959,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _sendEvents(): boolean {
-    return this._connection.isOnline() && (this._resyncData === null || this._resyncData.upToDate);
+    return this._connection.isOnline() && !this._offline && (this._resyncData === null || this._resyncData.upToDate);
   }
 }
 
