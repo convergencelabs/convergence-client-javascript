@@ -460,7 +460,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
 
     if (this._offlineSyncStartedDeferred !== null) {
-      // We are ini the process of starting to sync. Wait for it to start.
+      // We are in the process of starting to sync. Wait for it to start.
       await this._offlineSyncStartedDeferred.promise();
     }
 
@@ -745,11 +745,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private async _checkAndOpen(id?: string, options?: IAutoCreateModelOptions): Promise<RealTimeModel> {
+    // TODO validate options, specifically the model initializer.
+
     if (id === undefined && options === undefined) {
       throw new Error("Internal error, id or options must be defined.");
     }
 
-    // TODO validate options, specifically the model initializer.
+    // We are in the process of starting to resync. Wait until that has started.
+    if (this._offlineSyncStartedDeferred !== null) {
+      await this._offlineSyncStartedDeferred.promise();
+    }
 
     if (TypeChecker.isNotSet(id)) {
       id = options.id;
@@ -855,12 +860,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private async _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
+  private _openOnline(id?: string, autoRequestId?: number): Promise<RealTimeModel> {
     if (TypeChecker.isString(id) && this._modelOfflineManager.isOfflineEnabled()) {
-      if (this._offlineSyncStartedDeferred !== null) {
-        await this._offlineSyncStartedDeferred.promise();
-      }
-
+      this._log.debug(`Opening model '${id}' while online`);
       return this._openOnlineWithOfflineEnabled(id, autoRequestId);
     } else {
       // We don't have an explicit id, thus this could not be an existing model
@@ -958,6 +960,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     if (TypeChecker.isUndefined(id)) {
       id = this._modelIdGenerator.nextString();
     }
+
+    this._log.debug(`Opening model '${id}' while offline`);
 
     const modelState = await this._modelOfflineManager.getOfflineModelState(id);
 
