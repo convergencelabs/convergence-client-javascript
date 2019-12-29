@@ -1,5 +1,5 @@
 # Overview
-This package provides a npm distribution of the Convergence JavaScript API, for use with the [Convergence Collaboration Engine](https://convergence.io).
+This package provides a npm distribution of the Convergence JavaScript API, for use with the [Convergence Collaboration Framework](https://convergence.io).
 
 Convergence is an engine for rapidly developing real-time collaborative applications. At the heart of Convergence is its collaborative real time data store. Where other frameworks stop at attempting to provide real time data, Convergence goes further by providing **all** the features a developer needs to build an **effective** and **intuitive** collaborative application. Some of the feature highlights include:
 
@@ -77,7 +77,7 @@ There is also an AMD version:
 ```
 
 ## License
-The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](COPYING.LESSER) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3, assuming they only use the client as a library and do not modify it. Refer to the [LICENSE](LICENSE) and [COPYING.LESSER](COPYING.LESSER) for the specific terms and conditions of the license.
+The Convergence JavaScript client is licensed under the [Lesser GNU Public License v3](COPYING.LESSER) (LGPLv3). This allows developers to use the client without having to release their code under the LGPLv3, assuming they only use the client as a library and do not modify it. Refer to the [COPYING](COPYING) and [COPYING.LESSER](COPYING.LESSER) for the specific terms and conditions of the license.
 
 The Convergence Client is also available under a Commercial License. If you are interested in a non-open source license please contact us at [Convergence Labs](https://convergencelabs.com).
 
