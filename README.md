@@ -3,7 +3,7 @@
 </div>
 
 # Convergence JavaScript Client
-![Build Status](https://travis-ci.org/convergencelabs/convergence-client-javascript.svg?branch=master)
+[![Build Status](https://travis-ci.org/convergencelabs/convergence-client-javascript.svg?branch=master)](https://travis-ci.org/convergencelabs/convergence-client-javascript)
 
 This is the first (and only) client for the [Convergence Collaboration Framework](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
 
