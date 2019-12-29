@@ -19,7 +19,11 @@ npm install --save @convergence/convergence
 # Example Usage
 ```javascript
 const Convergence = require("@convergence/convergence").Convergence;
-Convergence.connect("<domain-url>", "username", "password").then(domain => {
+
+const url = "https://convergence-server.myhost.com/mynamespace/mydomain";
+const credentials = { username: "myuser", password: "mypassword" };
+
+Convergence.connectWithPassword(url, credentials).then(domain => {
   // open an employee data model.
   return domain.models().open("employees", "doe.john");
 }).then(model => {
