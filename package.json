@@ -45,7 +45,7 @@
     "@babel/preset-env": "7.7.1",
     "@babel/preset-typescript": "7.7.2",
     "@babel/register": "7.7.0",
-    "@convergence/convergence-proto": "^1.0.0-SNAPSHOT",
+    "@convergence/convergence-proto": "1.0.0-rc.1",
     "@convergencelabs/typedoc-plugin-custom-modules": "^0.1.2",
     "@convergencelabs/typedoc-theme": "^1.1.0",
     "@types/chai": "4.2.4",
