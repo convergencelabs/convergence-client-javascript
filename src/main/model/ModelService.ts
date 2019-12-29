@@ -768,7 +768,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         // Wait for the model to close, then open it.
         return model.whenClosed().then(() => this._open(id, options));
       } else {
-        this._log.debug("opening already open model");
+        this._log.debug(`Opening model '${id}' that is already open`);
         return Promise.resolve(model);
       }
     }
@@ -776,6 +776,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // Opening by a known model id and we are already opening it.
     // return the promise for the open request.
     if (id && this._openModelRequests.has(id)) {
+      this._log.debug(`Opening model '${id}' that is already opening`);
       return this._openModelRequests.get(id).promise();
     }
 
@@ -783,6 +784,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // let the model know to stay open after resync.
     const resyncEntry = this._resyncingModels.get(id);
     if (resyncEntry && resyncEntry.resyncModel) {
+      this._log.debug(`Opening model '${id}' that is resyncing`);
       if (resyncEntry.resyncModel.isClosing()) {
         return resyncEntry.resyncModel.whenClosed().then(() => this._open(id, options));
       } else {
@@ -830,6 +832,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const result = open.then(model => {
       this._clearOpenRequestRecords(id, autoRequestId);
       this._openModels.set(model.modelId(), model);
+      if (model._isOffline() && this._connection.isOnline()) {
+        // in case this was an offline open, and we are now online. So
+        // we start this model syncing.
+        this._resyncOpenModel(model);
+      }
       return model;
     }).catch((error: Error) => {
       this._clearOpenRequestRecords(id, autoRequestId);
@@ -839,6 +846,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     deferred.resolveFromPromise(result);
 
     return deferred.promise();
+  }
+
+  private _resyncOpenModel(model: RealTimeModel): void {
+    this._resyncingModels.set(model.modelId(), {
+      action: "resync",
+      inProgress: true,
+      modelId: model.modelId(),
+      ready: ReplayDeferred.resolved(),
+      resyncModel: model
+    });
+    model._setOnline();
   }
 
   /**
@@ -1040,6 +1058,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private _removeOnline(id: string): Promise<void> {
+    this._log.debug(`Removing model online: "${id}"`);
+
     const request: IConvergenceMessage = {
       deleteRealtimeModelRequest: {
         modelId: id
@@ -1067,6 +1087,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   private _removeOffline(id: string): Promise<void> {
+    this._log.debug(`Removing model offline: "${id}"`);
+
     return this._modelOfflineManager
       .getModelMetaData(id)
       .then(meta => {
@@ -1323,16 +1345,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _setOnline = () => {
     // Even if offline is not enabled we will still sync open models.
     this._openModels.forEach((model) => {
-      this._resyncingModels.set(model.modelId(), {
-        modelId: model.modelId(),
-        action: "resync",
-        inProgress: true,
-        ready: ReplayDeferred.resolved(),
-        resyncModel: model
-      });
-
-      // The open models will automatically start to sync.
-      model._setOnline();
+      this._resyncOpenModel(model);
     });
 
     if (this._resyncingModels.size !== 0) {
@@ -1375,7 +1388,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // If the model is open, it already was going to be resyncing
     syncNeeded.forEach(metaData => {
-      if (!this._resyncingModels.has(metaData.modelId)) {
+      // If a model is already open, opening, or resyncing, then we
+      // don't need to add it again because it will be handled.
+      if (!this._openModels.has(metaData.modelId) &&
+        !this._openModelRequests.has(metaData.modelId) &&
+        !this._resyncingModels.has(metaData.modelId)) {
         const entry: IResyncEntry = {
           modelId: metaData.modelId,
           action: metaData.available ? "resync" : "delete",

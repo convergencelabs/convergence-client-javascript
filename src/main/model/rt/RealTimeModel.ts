@@ -1175,6 +1175,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
+  public _isOffline(): boolean {
+    return this._offline;
+  }
+
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _setOffline(): void {
     this._debug("Offline");
 
