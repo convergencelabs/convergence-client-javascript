@@ -66,13 +66,13 @@ const lint = () =>
 const copyNpmJs = () => src(["./npmjs/**/*", "./COPYING", "./COPYING.LESSER"]).pipe(dest(distDir));
 const bumpPackageVersion = (cb) => {
   const packageJson = readAndParse("./package.json");
-  if (packageJson.version.endsWith("SNAPSHOT")) {
-    return src(`${distDir}/package.json`)
-      .pipe(bump({version: packageJson.version + "." + new Date().getTime()}))
+  const version = packageJson.version.endsWith("SNAPSHOT") ?
+      packageJson.version + "." + new Date().getTime() :
+      packageJson.version;
+
+  return src(`${distDir}/package.json`)
+      .pipe(bump({version }))
       .pipe(dest(distDir));
-  } else {
-    cb();
-  }
 };
 
 const docsClean = () => del([`${distDir}/docs`]);
