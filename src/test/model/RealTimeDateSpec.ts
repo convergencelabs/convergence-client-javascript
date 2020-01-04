@@ -12,13 +12,14 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {RealTimeDate, RealTimeModel, ModelEventCallbacks} from "../../main/model/rt";
+import {RealTimeDate, RealTimeModel} from "../../main/model/rt";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {DateSetOperation} from "../../main/model/ot/ops/DateSetOperation";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {IDateValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
+import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {DateNode} from "../../main/model/internal/DateNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {ModelChangedEvent, DateSetValueEvent} from "../../main/model/events";

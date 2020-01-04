@@ -22,6 +22,7 @@ import {IArrayValue, IDataValue, ModelPermissions, IStringValue} from "../../mai
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
+import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {ArrayNode} from "../../main/model/internal/ArrayNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {
@@ -31,7 +32,7 @@ import {
   ArraySetEvent,
   ArraySetValueEvent
 } from "../../main/model/events";
-import {ModelEventCallbacks, RealTimeArray, RealTimeElement, RealTimeModel, RealTimeString} from "../../main/model/rt";
+import {RealTimeArray, RealTimeElement, RealTimeModel, RealTimeString} from "../../main/model/rt";
 import {StringNode} from "../../main/model/internal/StringNode";
 import {IdentityCache} from "../../main/identity/IdentityCache";
 import {ConvergenceSession, DomainUser, DomainUserType} from "../../main";

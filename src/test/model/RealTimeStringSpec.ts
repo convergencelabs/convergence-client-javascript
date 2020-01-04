@@ -16,11 +16,12 @@ import {StringSetOperation} from "../../main/model/ot/ops/StringSetOperation";
 import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {RealTimeModel, RealTimeString, ModelEventCallbacks} from "../../main/model/rt";
+import {RealTimeModel, RealTimeString} from "../../main/model/rt";
 import {IStringValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {Model} from "../../main/model/internal/Model";
+import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {StringNode} from "../../main/model/internal/StringNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {

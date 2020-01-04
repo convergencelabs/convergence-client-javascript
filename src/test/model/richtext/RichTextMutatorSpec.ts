@@ -21,7 +21,7 @@ import {
 } from "../../../main/model/rt/richtext/model/";
 
 import {expect} from "chai";
-import {StringMap} from "../../../main/util";
+import {StringMap} from "../../../main/util/StringMap";
 
 describe("RichTextMutator", () => {
   describe("insert", () => {

@@ -192,4 +192,4 @@ import {RichTextFragment} from "./RichTextFragement";
 import {RichTextContent} from "./RichTextContent";
 import {RichTextStringFragment} from "./RichTextStringFragment";
 import {RichTextRootElement} from "./RichTextRootElement";
-import {StringMap, StringMapLike} from "../../../../util";
+import {StringMap, StringMapLike} from "../../../../util/StringMap";

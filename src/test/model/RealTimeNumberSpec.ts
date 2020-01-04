@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {RealTimeNumber, RealTimeModel, ModelEventCallbacks} from "../../main/model/rt";
+import {RealTimeNumber, RealTimeModel} from "../../main/model/rt";
 import {NumberDeltaOperation} from "../../main/model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../../main/model/ot/ops/NumberSetOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
@@ -20,6 +20,7 @@ import {INumberValue} from "../../main/model/dataValue";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
+import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {NumberNode} from "../../main/model/internal/NumberNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {ModelChangedEvent, NumberDeltaEvent, NumberSetValueEvent} from "../../main/model/events";
