@@ -17,11 +17,12 @@ import {ModelNode} from "../internal/ModelNode";
 import {Path, PathElement} from "../Path";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ModelReference, ReferenceFilter} from "../reference";
-import {ModelEventCallbacks, RealTimeModel} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {RemoteReferenceCreatedEvent} from "../events";
 import {ModelEventConverter} from "../ModelEventConverter";
 import {NodeDetachedEvent} from "../internal/events";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {ReferenceManager, OnRemoteReference} from "../reference/ReferenceManager";
 import {
   ObservableElement,

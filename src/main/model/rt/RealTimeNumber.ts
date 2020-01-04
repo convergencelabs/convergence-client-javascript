@@ -15,8 +15,9 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {NumberNode} from "../internal/NumberNode";
 import {NumberSetOperation} from "../ot/ops/NumberSetOperation";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {ModelNodeEvent, NumberNodeSetValueEvent, NumberNodeDeltaEvent} from "../internal/events";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {NumberDeltaOperation} from "../ot/ops/NumberDeltaOperation";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ObservableNumber, ObservableNumberEvents, ObservableNumberEventConstants} from "../observable/ObservableNumber";

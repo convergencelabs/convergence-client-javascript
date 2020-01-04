@@ -19,6 +19,5 @@ export * from "./CancellationToken";
 export * from "./IConvergenceEvent";
 export * from "./OrderBy";
 export * from "./PagedData";
-export * from "./StringMap";
 
 export * from "./log";

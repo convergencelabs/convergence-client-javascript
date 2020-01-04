@@ -15,8 +15,9 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {BooleanNode} from "../internal/BooleanNode";
 import {BooleanSetOperation} from "../ot/ops/BooleanSetOperation";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {ModelNodeEvent, BooleanNodeSetValueEvent} from "../internal/events";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {
   ObservableBoolean,

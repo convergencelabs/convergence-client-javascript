@@ -15,8 +15,9 @@
 import {RealTimeElement} from "./RealTimeElement";
 import {DateNode} from "../internal/DateNode";
 import {DateSetOperation} from "../ot/ops/DateSetOperation";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {ModelNodeEvent, DateNodeSetValueEvent} from "../internal/events";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {
   ObservableDate,

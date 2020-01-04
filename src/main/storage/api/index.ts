@@ -25,7 +25,7 @@
  */
 
 export * from "./IModelData";
-export * from "./IModelOperationData";
+export {ILocalOperationData, IModelOperationData, IServerOperationData} from "./IModelOperationData";
 export * from "./IModelState";
 export * from "./IModelStore";
 export * from "./IIdentityStore";

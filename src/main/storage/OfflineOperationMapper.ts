@@ -33,7 +33,7 @@ import {
   IStringInsertOperationData,
   IStringRemoveOperationData,
   IStringSetOperationData
-} from "./api";
+} from "./api/IModelOperationData";
 import {ArrayInsertOperation} from "../model/ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../model/ot/ops/ArrayRemoveOperation";
 import {ArrayReplaceOperation} from "../model/ot/ops/ArrayReplaceOperation";
