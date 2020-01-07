@@ -16,7 +16,7 @@ import {RealTimeElement} from "./RealTimeElement";
 import {RealTimeContainerElement} from "./RealTimeContainerElement";
 import {ObjectNode} from "../internal/ObjectNode";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {
   ModelReference,
   LocalModelReference,
@@ -29,6 +29,7 @@ import {
   ObjectNodeSetEvent
 } from "../internal/events";
 import {ModelNode} from "../internal/ModelNode";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {DiscreteOperation} from "../ot/ops/DiscreteOperation";
 import {ObjectSetPropertyOperation} from "../ot/ops/ObjectSetPropertyOperation";
 import {ObjectAddPropertyOperation} from "../ot/ops/ObjectAddPropertyOperation";

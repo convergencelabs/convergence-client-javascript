@@ -14,8 +14,9 @@
 
 import {RealTimeElement} from "./RealTimeElement";
 import {UndefinedNode} from "../internal/UndefinedNode";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {
   ObservableUndefined,
   ObservableUndefinedEvents,

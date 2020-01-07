@@ -14,9 +14,10 @@
 
 import {RealTimeElement} from "./RealTimeElement";
 import {NullNode} from "../internal/NullNode";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {ObservableNull, ObservableNullEvents, ObservableNullEventConstants} from "../observable/ObservableNull";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {RemoteReferenceEvent} from "../reference/RemoteReferenceEvent";
 import {IdentityCache} from "../../identity/IdentityCache";
 

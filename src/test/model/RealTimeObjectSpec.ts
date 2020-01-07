@@ -13,13 +13,14 @@
  */
 
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {RealTimeObject, ModelEventCallbacks, RealTimeModel} from "../../main/model/rt";
+import {RealTimeObject, RealTimeModel} from "../../main/model/rt";
 import {ObjectSetOperation} from "../../main/model/ot/ops/ObjectSetOperation";
 import {IDataValue, IObjectValue, IStringValue} from "../../main/model/";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
 import {Model} from "../../main/model/internal/Model";
+import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {ObjectNode} from "../../main/model/internal/ObjectNode";
 import {ObjectSetValueEvent} from "../../main/model/events";
 import {DomainUser, DomainUserType} from "../../main/identity";

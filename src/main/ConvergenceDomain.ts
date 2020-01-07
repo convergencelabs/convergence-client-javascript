@@ -50,9 +50,9 @@ import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
 import {ModelOfflineManager} from "./model/ModelOfflineManager";
-import {StringMap} from "./util/";
 import {Logger} from "./util/log/Logger";
 import {Logging} from "./util/log/Logging";
+import {StringMap} from "./util/StringMap";
 
 /**
  * This represents a single connection to a specific Domain in

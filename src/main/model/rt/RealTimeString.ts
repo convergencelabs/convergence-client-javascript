@@ -14,7 +14,7 @@
 
 import {RealTimeElement} from "./RealTimeElement";
 import {StringNode} from "../internal/StringNode";
-import {RealTimeModel, ModelEventCallbacks} from "./RealTimeModel";
+import {RealTimeModel} from "./RealTimeModel";
 import {
   LocalModelReference,
   ModelReference,
@@ -32,6 +32,7 @@ import {
   StringNodeSetValueEvent,
   ModelNodeEvent
 } from "../internal/events";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
 import {
   ObservableString,

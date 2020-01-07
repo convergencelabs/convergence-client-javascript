@@ -13,7 +13,7 @@
  */
 
 import {RichTextDocument, RichTextElement, RichTextNode, RichTextRootElement, RichTextString} from "../../model";
-import {StringMap} from "../../../../../util/";
+import {StringMap} from "../../../../../util/StringMap";
 import {QuillDelta, QuillDeltaOperation} from "./QuillDelta";
 
 const ROOT_NAME: string = "quill";

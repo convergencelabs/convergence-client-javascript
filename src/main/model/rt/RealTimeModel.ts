@@ -25,6 +25,7 @@ import {
 import {RealTimeElement} from "./RealTimeElement";
 import {OnRemoteReference, ReferenceManager} from "../reference/ReferenceManager";
 import {Model, ModelForcedCloseReasonCodes} from "../internal/Model";
+import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {IObjectValue} from "../dataValue";
 import {ClientConcurrencyControl, ICommitStatusChanged} from "../ot/ClientConcurrencyControl";
 import {ConvergenceConnection, MessageEvent} from "../../connection/ConvergenceConnection";
@@ -329,6 +330,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private readonly _referenceManager: ReferenceManager;
 
   /**
+   * @hidden
    * @internal
    */
   private readonly _callbacks: ModelEventCallbacks;
@@ -1973,16 +1975,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 }
 
 Object.freeze(RealTimeModel.Events);
-
-/**
- * @private
- * @hidden
- * @internal
- */
-export interface ModelEventCallbacks {
-  sendOperationCallback: (operation: DiscreteOperation) => void;
-  referenceEventCallbacks: ModelReferenceCallbacks;
-}
 
 interface IResyncData {
   bufferedOperations: IRemoteOperationMessage[];
