@@ -245,11 +245,11 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     this._checkAndSetAllDownloaded();
     const subscriptionRequest: IModelOfflineSubscriptionData[] = [];
     this._subscribedModels.forEach((record, modelId) => {
-      return {
+      subscriptionRequest.push({
         modelId,
         currentPermissions: record.permissions ? record.permissions.toJSON() : undefined,
         currentVersion: record.version ? record.version : 0
-      };
+      });
     });
 
     return this._sendSubscriptionRequest(subscriptionRequest, [], true);

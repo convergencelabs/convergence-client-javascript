@@ -297,6 +297,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     this._chatService = new ChatService(this._connection, this._identityCache);
 
     this._bindConnectionEvents();
+
+    if (this._options.storageAdapter) {
+      this._log.debug("options.offline.storage is set, configuring offline storage");
+      this._storage.configure(this._options.storageAdapter);
+    }
   }
 
   /**
@@ -693,8 +698,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     // FIXME perhaps this should take a user so we can tell the user type
     if (this._options.storageAdapter) {
       // FIXME do we need to make sure we are not an anonymous user here?
-      this._log.debug("options.offline.storage is set, initializing offline storage");
-      this._storage.configure(this._options.storageAdapter);
+      this._log.debug("options.offline.storage is set, opening offline storage");
       return this._storage.openStore(this._namespace, this._domainId, username)
         .then(async () => {
           this._initialized = true;
