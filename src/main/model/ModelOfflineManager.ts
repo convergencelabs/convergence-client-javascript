@@ -359,9 +359,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _handleNewSubscriptions(modelId: string): void {
+    if (this._subscribedModels.has(modelId)) {
+      throw new Error(`Model is already subscribed: ${modelId}`);
+    }
+
     this._subscribedModels.set(modelId, {
       version: 0,
-      available: false
+      available: this._openModels.has(modelId)
     });
   }
 
