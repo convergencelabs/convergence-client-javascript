@@ -657,24 +657,35 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       });
     } else if (this._modelOfflineManager.isOfflineEnabled()) {
       const id = options.id || this._modelIdGenerator.nextString();
-      return this._modelOfflineManager
-        .getModelMetaData(id)
-        .then(metaData => {
-          if (TypeChecker.isSet(metaData) && metaData.available) {
-            return Promise.reject(new Error(`An offline model with the specified id already exists: ${id}`));
-          } else {
-            const dataValue = data || this._getDataFromCreateOptions(options);
-            const creationData: IModelCreationData = {
-              modelId: id,
-              collection: options.collection,
-              initialData: dataValue,
-              overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
-              worldPermissions: options.worldPermissions,
-              userPermissions: options.userPermissions
-            };
-            return this._modelOfflineManager.createOfflineModel(creationData).then(() => id);
-          }
-        });
+
+      const dataValue = data || this._getDataFromCreateOptions(options);
+      const creationData: IModelCreationData = {
+        modelId: id,
+        collection: options.collection,
+        initialData: dataValue,
+        overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
+        worldPermissions: options.worldPermissions,
+        userPermissions: options.userPermissions
+      };
+
+      await this._modelOfflineManager.createOfflineModel(creationData);
+
+      if (this._connection.isOnline()) {
+        // we went online between when we started to create this model and now.
+        // we need to see if we are still resyncing. If so, just add to the queue
+        // else, we need to start another sync.
+        const presentlySyncing = this._resyncingModels.size > 0 || this._modelResyncQueue.length > 0;
+
+        this._addResyncModel(id, "resync");
+
+        if (!presentlySyncing) {
+          // Force a check of the resync queue. The one we just added should be the only
+          // one there.
+          this._checkResyncQueue();
+        }
+      }
+
+      return id;
     } else {
       throw new ConvergenceError("Can not create a model while not connected and without offline support enabled.");
     }
@@ -860,15 +871,32 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return deferred.promise();
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   private _resyncOpenModel(model: RealTimeModel): void {
-    this._resyncingModels.set(model.modelId(), {
-      action: "resync",
-      inProgress: true,
-      modelId: model.modelId(),
-      ready: ReplayDeferred.resolved(),
-      resyncModel: model
-    });
+    this._addResyncModel(model.modelId(), "resync", model);
     model._setOnline();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _addResyncModel(modelId: string, action: "resync" | "delete", model?: RealTimeModel): void {
+    const entry: IResyncEntry = {
+      modelId,
+      action,
+      inProgress: model !== undefined,
+      ready: model !== undefined ? ReplayDeferred.resolved() : new ReplayDeferred<void>(),
+      resyncModel: model || null
+    };
+
+    this._resyncingModels.set(modelId, entry);
+    if (!entry.inProgress) {
+      this._modelResyncQueue.push(entry);
+    }
   }
 
   /**
@@ -1373,22 +1401,27 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._offlineSyncStartedDeferred = new ReplayDeferred<void>();
       this._modelOfflineManager
         .ready()
-        .then(() => {
-          if (this._connection.isOnline()) {
-            this._emitEvent(new OfflineModelSyncStartedEvent());
-            return this._syncDirtyModelsToServer();
-          }
-        })
-        .then(() => {
-          // We might have gone offline.
-          if (this._connection.isOnline()) {
-            this._emitEvent(new OfflineModelSyncCompletedEvent());
-            return this._modelOfflineManager.resubscribe();
-          } else {
-            return Promise.resolve();
-          }
-        })
+        .then(() => this._initiateOfflineModelSync())
         .catch((e) => this._log.error("Error resynchronizing models after reconnect", e));
+    }
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private async _initiateOfflineModelSync(): Promise<void> {
+    if (this._connection.isOnline()) {
+      this._emitEvent(new OfflineModelSyncStartedEvent());
+      await this._syncDirtyModelsToServer();
+    }
+
+    // We might have gone offline.
+    if (this._connection.isOnline()) {
+      this._emitEvent(new OfflineModelSyncCompletedEvent());
+      return this._modelOfflineManager.resubscribe();
+    } else {
+      return Promise.resolve();
     }
   }
 
@@ -1410,23 +1443,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       if (!this._openModels.has(metaData.modelId) &&
         !this._openModelRequests.has(metaData.modelId) &&
         !this._resyncingModels.has(metaData.modelId)) {
-        const entry: IResyncEntry = {
-          modelId: metaData.modelId,
-          action: metaData.available ? "resync" : "delete",
-          inProgress: false,
-          ready: new ReplayDeferred<void>(),
-          resyncModel: null
-        };
-
-        this._resyncingModels.set(metaData.modelId, entry);
-        this._modelResyncQueue.push(entry);
+        this._addResyncModel(metaData.modelId, metaData.available ? "resync" : "delete");
       }
     });
 
     const promise = this._syncCompletedDeferred.promise();
 
-    this._offlineSyncStartedDeferred.resolve();
-    this._offlineSyncStartedDeferred = null;
+    if (this._offlineSyncStartedDeferred !== null) {
+      this._offlineSyncStartedDeferred.resolve();
+      this._offlineSyncStartedDeferred = null;
+    }
 
     this._checkResyncQueue();
 

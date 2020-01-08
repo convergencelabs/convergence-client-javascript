@@ -29,6 +29,7 @@ import {IdbSchema} from "./IdbSchema";
 import {ModelPermissions, IObjectValue} from "../../model";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
 import {ConvergenceError} from "../../util";
+import {TypeChecker} from "../../util/TypeChecker";
 
 /**
  * @hidden
@@ -246,6 +247,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
                                                   modelDataStore,
                                                   localOpStore,
                                                   serverOpStore]) => {
+      const modelId = modelCreation.modelId;
+
+      const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
+      if (TypeChecker.isSet(metaData) && metaData.available) {
+        return Promise.reject(new Error(`An offline model with the specified id already exists: ${modelId}`));
+      }
+
       await toVoidPromise(creationStore.put(modelCreation));
 
       const version = 1;
@@ -253,7 +261,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const now = new Date();
       const permissions = new ModelPermissions(true, true, true, true);
       const modelState: IModelState = {
-        modelId: modelCreation.modelId,
+        modelId,
         collection: modelCreation.collection,
 
         valueIdPrefix: {prefix: "0", increment: 0},
