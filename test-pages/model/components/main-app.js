@@ -50,7 +50,6 @@ Vue.component('main-app', {
   },
   methods: {
     onConnect(username, password) {
-      console.log("connect");
       this.domain
         .connectWithPassword({username: username, password: password})
         .then(() => {
