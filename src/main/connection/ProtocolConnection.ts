@@ -15,7 +15,7 @@
 import {HeartbeatHandler, HeartbeatHelper} from "./HeartbeatHelper";
 import ConvergenceSocket, {ISocketClosedEvent, ISocketErrorEvent, ISocketMessageEvent} from "./ConvergenceSocket";
 import {ProtocolConfiguration} from "./ProtocolConfiguration";
-import {ConvergenceEventEmitter, ConvergenceServerError, IConvergenceEvent} from "../util";
+import {ConvergenceError, ConvergenceEventEmitter, ConvergenceServerError, IConvergenceEvent} from "../util";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceMessageIO} from "./ConvergenceMessageIO";
 import {Logging} from "../util/log/Logging";
@@ -25,6 +25,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import IErrorMessage = com.convergencelabs.convergence.proto.core.IErrorMessage;
 import IHandshakeResponseMessage = com.convergencelabs.convergence.proto.core.IHandshakeResponseMessage;
 import IHandshakeRequestMessage = com.convergencelabs.convergence.proto.core.IHandshakeRequestMessage;
+import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 
 /**
  * @hidden
@@ -171,7 +172,10 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       () => {
         const req: RequestRecord = this._requests.get(reqId);
         if (req) {
-          req.replyDeferred.reject(new Error("A request timeout occurred."));
+          req.replyDeferred.reject(new ConvergenceError(
+            "A request timeout occurred.",
+            ConvergenceErrorCodes.REQUEST_TIMEOUT,
+            {message}));
         }
       },
       requestTimeout);

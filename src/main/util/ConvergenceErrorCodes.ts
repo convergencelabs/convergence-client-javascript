@@ -18,6 +18,8 @@ import {Immutable} from "./Immutable";
  * Some potential error codes in Convergence.
  */
 export const ConvergenceErrorCodes = {
+  REQUEST_TIMEOUT: "request_timeout",
+
   AUTHENTICATION_FAILED: "authentication_failed",
 
   OFFLINE: "offline",

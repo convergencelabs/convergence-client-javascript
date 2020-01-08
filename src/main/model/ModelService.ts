@@ -60,11 +60,12 @@ import {OfflineModelSyncCompletedEvent, OfflineModelSyncStartedEvent} from "./ev
 
 import {com} from "@convergence/convergence-proto";
 import {ErrorEvent} from "../events";
+import {ReplayDeferred} from "../util/ReplayDeferred";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
-import {ReplayDeferred} from "../util/ReplayDeferred";
+import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -477,12 +478,23 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     }
 
-    if (this._connection.isOnline()) {
-      return this._removeOnline(id);
-    } else if (this._modelOfflineManager.isOfflineEnabled()) {
-      return this._removeOffline(id);
-    } else {
+    if (this._modelOfflineManager.isOfflineEnabled()) {
+      await this._modelOfflineManager
+        .getModelMetaData(id)
+        .then(meta => {
+          if (meta) {
+            return this._modelOfflineManager.markModelForDeletion(id);
+          }
+        })
+        .catch(e => {
+          this._log.error("Could not mark model for deletion", e);
+        });
+    }
+
+    if (!this._connection.isOnline() && !this._modelOfflineManager.isOfflineEnabled()) {
       throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
+    } else {
+      return this._removeOnline(id);
     }
   }
 
@@ -1066,39 +1078,44 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     };
 
-    return this._connection.request(request).then(() => {
-      if (this._modelOfflineManager.isOfflineEnabled()) {
-        this._modelOfflineManager
-          .getModelMetaData(id)
-          .then(meta => {
-            if (meta) {
-              return this._modelOfflineManager.modelDeleted(id);
-            }
-          })
-          .catch((e: Error) => {
-            this._emitEvent(new ErrorEvent(
-              this._connection.session().domain(),
-              `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
-            );
-            this._log.error("Error removing model from offline store.", e);
-          });
-      }
-    });
-  }
-
-  private _removeOffline(id: string): Promise<void> {
-    this._log.debug(`Removing model offline: "${id}"`);
-
-    return this._modelOfflineManager
-      .getModelMetaData(id)
-      .then(meta => {
-        if (meta) {
-          return this._modelOfflineManager.markModelForDeletion(id);
-        }
+    return this._connection
+      .request(request)
+      .then(() => {
+        this._handleOnlineDeletion(id);
       })
       .catch(e => {
-        this._log.error("Could not mark model for deletion", e);
+        // We want to handle the delete as long as it wasn't a request timeout.
+        // if it was a request timeout, then its possible the server did
+        // not get our request.
+        if (!(e instanceof ConvergenceError && e.code === ConvergenceErrorCodes.REQUEST_TIMEOUT)) {
+          this._handleOnlineDeletion(id);
+        }
+
+        return Promise.reject(e);
       });
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _handleOnlineDeletion(id: string): void {
+    if (this._modelOfflineManager.isOfflineEnabled()) {
+      this._modelOfflineManager
+        .getModelMetaData(id)
+        .then(meta => {
+          if (meta) {
+            return this._modelOfflineManager.modelDeleted(id);
+          }
+        })
+        .catch((e: Error) => {
+          this._emitEvent(new ErrorEvent(
+            this._connection.session().domain(),
+            `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
+          );
+          this._log.error("Error removing model from offline store.", e);
+        });
+    }
   }
 
   /**
