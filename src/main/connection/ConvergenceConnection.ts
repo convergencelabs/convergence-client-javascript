@@ -214,12 +214,21 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       username: credentials.username,
       password: credentials.password
     };
-    return this._authenticate({password: message});
+    return this._authenticate({password: message})
+      .catch(e => {
+        this.disconnect();
+        return Promise.reject(e);
+      });
   }
 
   public authenticateWithJwt(jwt: string): Promise<void> {
     const message: IJwtAuthRequestData = {jwt};
-    return this._authenticate({jwt: message});
+    return this._authenticate({jwt: message})
+      .catch(e => {
+        this.disconnect();
+        return Promise.reject(e);
+      });
+    ;
   }
 
   public authenticateWithReconnectToken(token: string): Promise<void> {
@@ -257,6 +266,9 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
         } else {
           return Promise.resolve(e);
         }
+      }).catch(e => {
+        this.disconnect();
+        return Promise.reject(e);
       });
   }
 
@@ -264,7 +276,11 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     const message: IAnonymousAuthRequestData = {
       displayName: toOptional(displayName)
     };
-    return this._authenticate({anonymous: message});
+    return this._authenticate({anonymous: message})
+      .catch(e => {
+        this.disconnect();
+        return Promise.reject(e);
+      });
   }
 
   public messages(): Observable<MessageEvent> {
@@ -483,8 +499,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _handleDisconnected(): void {
-    this._connectionState = ConnectionState.DISCONNECTED;
-    this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
+    if (this._connectionState !== ConnectionState.DISCONNECTED) {
+      this._connectionState = ConnectionState.DISCONNECTED;
+      this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
+    }
   }
 
   private _handleInterrupted(): void {
