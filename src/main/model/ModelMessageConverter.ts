@@ -169,8 +169,9 @@ export function toModelPermissions(permissionsData: IModelPermissionsData): Mode
  * @internal
  */
 export function toModelResult(result: IModelResult): ModelResult {
+  const fields = getOrDefaultObject(result.data.fields);
   return new ModelResult(
-    mapObjectValues(result.data.fields, protoValueToJson),
+    mapObjectValues(fields, protoValueToJson),
     result.collectionId,
     result.modelId,
     timestampToDate(result.createdTime),
