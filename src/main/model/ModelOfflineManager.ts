@@ -97,23 +97,34 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       });
   }
 
-  public init(): void {
+  public async init(): Promise<void> {
     this._log.debug("Initializing offline model manager");
-    this._storage.modelStore().getSubscribedModels().then(modelSubscriptions => {
-      modelSubscriptions.forEach(modelMetaData => {
-        this._subscribedModels.set(
-          modelMetaData.modelId, {
-            version: modelMetaData.details ? modelMetaData.details.version : 0,
-            permissions: modelMetaData.details ?
-              ModelPermissions.fromJSON(modelMetaData.details.permissions) : undefined,
-            available: modelMetaData.available
-          });
-      });
+    try {
+      const models = await this._storage.modelStore().getAllModelMetaData();
+
+      for (const modelMetaData of models) {
+        // If we are subscribed we know we need the model and we add it
+        // to the subscribed models.
+        if (modelMetaData.subscribed) {
+          this._subscribedModels.set(
+            modelMetaData.modelId, {
+              version: modelMetaData.details ? modelMetaData.details.version : 0,
+              permissions: modelMetaData.details ?
+                ModelPermissions.fromJSON(modelMetaData.details.permissions) : undefined,
+              available: modelMetaData.available
+            });
+        } else {
+          // We are not subscribe, purge this model if it was not here
+          // because it was not cleanly closed.
+          await this._storage.modelStore().deleteIfNotNeeded(modelMetaData.modelId);
+        }
+      }
+
       this._ready.resolve();
-    }).catch(e => {
+    } catch (e) {
       this._log.error("Error initializing offline model manager", e);
       this._ready.reject(e);
-    });
+    }
   }
 
   public isOfflineEnabled(): boolean {
