@@ -1005,6 +1005,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   public _openAfterResync(): void {
+    if (this._closingData.closing) {
+      throw new ConvergenceError("Can't open after resynchronization if the mode is closing: " + this._modelId);
+    }
     this._resyncOnly = false;
   }
 
@@ -1699,12 +1702,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._debug("All local operations resent during resynchronization");
 
-      const openAfterSync = !this._resyncOnly;
-
       const completeRequest: IConvergenceMessage = {
         modelResyncCompleteRequest: {
           resourceId: this._resourceId,
-          open: openAfterSync
+          open: !this._resyncOnly
         }
       };
 
@@ -1714,7 +1715,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._debug("Resynchronization completed");
         this._emitEvent(new ResyncCompletedEvent(this));
 
-        if (openAfterSync) {
+        if (this._closingData.closing) {
+          // We are closing already so we don't need to do anything else.
+          return;
+        }
+
+        if (!this._resyncOnly) {
+          // We need to open.
+          this._modelService._resyncComplete(this._modelId);
+
           const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
           sessions.forEach(sessionId => this._handleClientOpen(sessionId));
 
@@ -1724,15 +1733,16 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
           this._debug(`Online`);
           this._emitEvent(new ModelOnlineEvent(this));
+        } else {
+          // we no longer need to be open.
+          this._initiateClose(true);
         }
       });
 
       this._resyncData = null;
 
-      if (!openAfterSync) {
+      if (this._resyncOnly) {
         this._initiateClose(false);
-      } else {
-        this._modelService._resyncComplete(this._modelId);
       }
     }
   }
