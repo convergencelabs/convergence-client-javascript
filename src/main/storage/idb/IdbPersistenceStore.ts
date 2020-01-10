@@ -12,8 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {toPromise, toVoidPromise, txToPromise} from "./promise";
-import {IModelMetaData} from "../api";
+import {toVoidPromise, txToPromise} from "./promise";
 
 const READONLY = "readonly";
 const READWRITE = "readwrite";
@@ -25,12 +24,42 @@ const READWRITE = "readwrite";
 export class IdbPersistenceStore {
 
   protected static deleteFromIndex(store: IDBObjectStore, index: string, range: IDBKeyRange): Promise<void> {
-    const idx = store.index(index);
-    return toPromise(idx.openCursor(range)).then(cursor => {
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
+    const onNext = (cursor: IDBCursorWithValue) => {
+      cursor.delete();
+    };
+
+    return this._cursorIterator(store, index, onNext, range);
+  }
+
+  protected static _cursorIterator(objectStore: IDBObjectStore,
+                                   indexName: string | null,
+                                   onNext: (cursor: IDBCursorWithValue) => void,
+                                   query?: IDBValidKey | IDBKeyRange | null,
+                                   direction?: IDBCursorDirection): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let request: IDBRequest<IDBCursorWithValue | null> = null;
+
+      if (indexName === null) {
+        request = objectStore.openCursor();
+      } else {
+        const index = objectStore.index(indexName);
+        request = index.openCursor(query, direction);
       }
+
+      request.onsuccess = (event) => {
+        // For some reason the typings don't have the result on the target.
+        const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result;
+        if (cursor) {
+          onNext(cursor);
+          cursor.continue();
+        } else {
+          resolve();
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
     });
   }
 
@@ -42,13 +71,13 @@ export class IdbPersistenceStore {
 
   protected _withWriteStore<T>(
     store: string,
-    body: (tx: IDBObjectStore) => Promise<T>): Promise<T> {
+    body: (store: IDBObjectStore) => Promise<T>): Promise<T> {
     return this._withStores([store], READWRITE, (stores) => body(stores[0]));
   }
 
   protected _withReadStore<T>(
     store: string,
-    body: (tx: IDBObjectStore) => Promise<T>): Promise<T> {
+    body: (store: IDBObjectStore) => Promise<T>): Promise<T> {
     return this._withStores([store], READONLY, (stores) => body(stores[0]));
   }
 
@@ -77,7 +106,7 @@ export class IdbPersistenceStore {
         return Promise.reject(e);
       });
 
-    return Promise.all([result, txToPromise(tx)]).then(([r, t]) => r);
+    return Promise.all([result, txToPromise(tx)]).then(([r, _]) => r);
   }
 
   protected put(storeName: string, data: any): Promise<void> {
@@ -94,34 +123,43 @@ export class IdbPersistenceStore {
 
   protected _getAll<T extends any>(storeName: string, query?: IDBValidKey | IDBKeyRange | null): Promise<T[]> {
     const results: T[] = [];
-    return this._readIterator<T>(storeName, (value: T) => {
+    return this._readIterator<T>(storeName, null, (value: T) => {
       results.push(value);
     }, query).then(() => results);
   }
 
   protected _readIterator<T extends any>(storeName: string,
+                                         indexName: string | null,
                                          onNext: (value: T) => void,
                                          query?: IDBValidKey | IDBKeyRange | null,
                                          direction?: IDBCursorDirection): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(storeName, READONLY);
-      const objectStore = tx.objectStore(storeName);
-      const request: IDBRequest<IDBCursorWithValue | null> = objectStore.openCursor();
-      request.onsuccess = (event) => {
-        // For some reason the typings don't have the result on the target.
-        const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result;
-        if (cursor) {
-          onNext(cursor.value);
-          cursor.continue();
-        } else {
-          resolve();
-        }
-      };
+    const nextValue = (cursor: IDBCursorWithValue) => {
+      onNext(cursor.value);
+    };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+    return this._withReadStore(storeName, objectStore => {
+      return IdbPersistenceStore._cursorIterator(objectStore, indexName, nextValue, query, direction);
     });
+  }
 
+  protected _deleteIterator<T extends any>(storeName: string,
+                                           indexName: string | null,
+                                           query?: IDBValidKey | IDBKeyRange | null,
+                                           direction?: IDBCursorDirection): Promise<void> {
+    const onNext = (cursor: IDBCursorWithValue) => {
+      cursor.delete();
+    };
+
+    return this._writeIterator(storeName, indexName, onNext, query, direction);
+  }
+
+  protected _writeIterator<T extends any>(storeName: string,
+                                          indexName: string | null,
+                                          onNext: (cursor: IDBCursorWithValue) => void,
+                                          query?: IDBValidKey | IDBKeyRange | null,
+                                          direction?: IDBCursorDirection): Promise<void> {
+    return this._withWriteStore(storeName, objectStore => {
+      return IdbPersistenceStore._cursorIterator(objectStore, indexName, onNext, query, direction);
+    });
   }
 }
