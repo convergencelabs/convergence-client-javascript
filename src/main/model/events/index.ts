@@ -64,6 +64,7 @@ export * from "./OfflineModelDownloadPendingEvent";
 export * from "./OfflineModelDownloadCompletedEvent";
 export * from "./OfflineModelSyncStartedEvent";
 export * from "./OfflineModelSyncCompletedEvent";
+export * from "./OfflineModelSyncAbortedEvent";
 export * from "./OfflineModelSyncErrorEvent";
 export * from "./OfflineModelDeletedEvent";
 export * from "./OfflineModelPermissionsRevokedEvent";

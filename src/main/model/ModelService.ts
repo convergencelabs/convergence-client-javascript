@@ -50,7 +50,7 @@ import {TypeChecker} from "../util/TypeChecker";
 import {PagedData} from "../util/";
 import {Validation} from "../util/Validation";
 import {ModelOfflineManager} from "./ModelOfflineManager";
-import {OfflineModelSyncErrorEvent} from "./events";
+import {OfflineModelSyncAbortedEvent, OfflineModelSyncErrorEvent} from "./events";
 import {ModelPermissions} from "./ModelPermissions";
 import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
@@ -135,11 +135,19 @@ export interface ModelServiceEvents {
 
   /**
    * Emitted when all local offline changes have been synchronized with the.
-   * server The event emitted will be an [[OfflineModelSyncCompletedEvent]]
+   * server. The event emitted will be an [[OfflineModelSyncCompletedEvent]]
    *
    * @event [[OfflineModelSyncCompletedEvent]]
    */
   readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
+
+  /**
+   * Emitted when the offline model synchronization process aborts. The
+   * event emitted will be an [[OfflineModelSyncAbortedEvent]]
+   *
+   * @event [[OfflineModelSyncAbortedEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_ABORTED: "offline_model_sync_aborted";
 
   /**
    * Emitted a particular model encounters an error during the resync
@@ -160,6 +168,7 @@ export const ModelServiceEventConstants: ModelServiceEvents = {
   OFFLINE_MODEL_DOWNLOAD_COMPLETED: "offline_model_download_completed",
   OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started",
   OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed",
+  OFFLINE_MODEL_SYNC_ABORTED: "offline_model_sync_aborted",
   OFFLINE_MODEL_DELETED: "offline_model_deleted",
   OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked",
   OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error"
@@ -1380,6 +1389,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._resyncingModels.clear();
     this._modelResyncQueue.length = 0;
 
+    if (this._offlineSyncStartedDeferred !== null) {
+      this._offlineSyncStartedDeferred.resolve();
+      this._offlineSyncStartedDeferred = null;
+    }
+
+    if (this._syncCompletedDeferred !== null) {
+      this._emitEvent(new OfflineModelSyncAbortedEvent("Convergence went offline during the sync", "offline"));
+      this._syncCompletedDeferred.resolve();
+      this._syncCompletedDeferred = null;
+    }
+
     this._checkResyncQueue();
   }
 
@@ -1418,10 +1438,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // We might have gone offline.
     if (this._connection.isOnline()) {
-      this._emitEvent(new OfflineModelSyncCompletedEvent());
-      return this._modelOfflineManager.resubscribe();
-    } else {
-      return Promise.resolve();
+      await this._modelOfflineManager.resubscribe();
     }
   }
 
@@ -1464,6 +1481,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private _checkResyncQueue(): void {
+    if (!this._connection.isOnline()) {
+      return;
+    }
+
     // TODO we could optimize this by just keeping a list of in progress entries.
     const inProgress = Array.from(this._resyncingModels.values()).filter(m => m.inProgress);
 
@@ -1488,6 +1509,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           this._offlineSyncStartedDeferred.promise().then(() => this._checkResyncQueue());
         } else if (this._syncCompletedDeferred !== null) {
           this._log.debug(`Resync queue is empty, completing resync process`);
+          this._emitEvent(new OfflineModelSyncCompletedEvent());
           this._syncCompletedDeferred.resolve();
           this._syncCompletedDeferred = null;
         }
@@ -1579,7 +1601,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
 
     if (this._offlineSyncStartedDeferred !== null) {
-      // We are ini the process of starting to sync. Wait for it to start.
+      // We are in the process of starting to sync. Wait for it to start.
       await this._offlineSyncStartedDeferred.promise();
     }
 
