@@ -776,7 +776,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @returns True if the model is closing.
    */
   public isClosing(): boolean {
-    return this._closingData.closing;
+    return this._closingData.closing || this._mustCloseAfterResync();
   }
 
   /**
@@ -959,8 +959,10 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   public _initiateClose(closeWithServer: boolean, event?: ModelClosedEvent): void {
     if (this._closingData.closing) {
-      throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
+      throw new ConvergenceError(`The model '${this._modelId}' is already closing.`, "already_closing");
     }
+
+    this._debug("Initiating close");
 
     this._closingData.closing = true;
     this._closingData.event = event;
@@ -1227,6 +1229,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._resyncData = {
       bufferedOperations: [],
+      resyncCompleted: false,
       upToDate: false
     };
 
@@ -1530,7 +1533,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _close(): void {
     const {deferred, event} = this._closingData;
-    this._modelService._close(this._modelId);
+    this._modelService._close(this);
 
     if (this._offlineManager.isOfflineEnabled()) {
       this._offlineManager.modelClosed(this);
@@ -1590,7 +1593,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _handleRemoteOperation(message: IRemoteOperationMessage): void {
     // FIXME need sequenceNumber
-    if (this._resyncData !== null) {
+    if (this._resyncData !== null && !this._resyncData.upToDate) {
       if (getOrDefaultNumber(message.contextVersion) > this._resyncData.reconnectVersion) {
         // new message from a connected client buffer it because we don't have all
         // of the previous operations yet..
@@ -1693,19 +1696,19 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _checkForReconnectUpToDate(): void {
-    if (this._resyncData &&
+    if (this._resyncData !== null &&
       !this._resyncData.upToDate &&
       this._resyncData.reconnectVersion === this._concurrencyControl.contextVersion()) {
 
       // TODO when we get to offline mode we may have to rethink value id prefixes a bit
       //   two clients can not be re-initialized with the same vid prefix.
 
+      this._resyncData.upToDate = true;
+
       // FIXME this could be heavy weight and block the UI a bit.
       this._resyncData.bufferedOperations.forEach(m => {
         this._processRemoteOperation(m);
       });
-
-      this._resyncData.upToDate = true;
 
       this._debug("All server operations applied during resynchronization");
 
@@ -1714,51 +1717,71 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._debug("All local operations resent during resynchronization");
 
-      const completeRequest: IConvergenceMessage = {
-        modelResyncCompleteRequest: {
-          resourceId: this._resourceId,
-          open: !this._resyncOnly
-        }
-      };
+      this._completeReconnect();
+    }
+  }
 
-      this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
-        const {modelResyncCompleteResponse} = response;
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
+  private _completeReconnect(): void {
+    this._debug("Requesting resynchronization completion");
 
-        this._debug("Resynchronization completed");
-        this._emitEvent(new ResyncCompletedEvent(this));
+    this._resyncData.resyncCompleted = true;
+    this._resyncData.openAfterComplete = !this._resyncOnly;
 
-        if (this._closingData.closing || !this._open) {
-          // We are closing or closed already so we don't need to do anything else.
-          return;
-        }
+    const completeRequest: IConvergenceMessage = {
+      modelResyncCompleteRequest: {
+        resourceId: this._resourceId,
+        open: this._resyncData.openAfterComplete
+      }
+    };
 
-        if (!this._resyncOnly) {
-          // We need to open.
-          this._modelService._resyncCompleted(this._modelId);
+    this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
+      this._debug("Resynchronization completed");
+      const {modelResyncCompleteResponse} = response;
 
-          const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
-          sessions.forEach(sessionId => this._handleClientOpen(sessionId));
+      // We will be setting the reconnect data to null, so we need to
+      // grab this now.
+      const openAfterComplete = this._resyncData.openAfterComplete;
 
-          this._initializeReferences(getOrDefaultArray(modelResyncCompleteResponse.references));
-
-          this._referenceManager.reshare();
-
-          this._debug(`Online`);
-          this._emitEvent(new ModelOnlineEvent(this));
-        } else {
-          // we no longer need to be open.
-          this._initiateClose(true);
-        }
-      });
+      // If we requested to stay open and we still need to be, open the model.
+      // otherwise we will close id.
+      const open = openAfterComplete && !this._resyncOnly;
 
       this._resyncData = null;
+      this._emitEvent(new ResyncCompletedEvent(this));
+      this._modelService._resyncCompleted(this._modelId);
 
-      // We need to initiate close here so the model service knows this is a
-      // closing model, in case some one tries to reopen it.
-      if (this._resyncOnly) {
-        this._initiateClose(false);
+      if (open) {
+        this._debug("Opening after reconnect");
+        const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
+        sessions.forEach(sessionId => this._handleClientOpen(sessionId));
+
+        this._initializeReferences(getOrDefaultArray(modelResyncCompleteResponse.references));
+
+        this._referenceManager.reshare();
+
+        this._debug(`Online`);
+        this._emitEvent(new ModelOnlineEvent(this));
+      } else {
+        // we only need to close with the server if we requested it to be
+        // open when we completed the reconnect
+        this._initiateClose(openAfterComplete);
       }
-    }
+    });
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _mustCloseAfterResync(): boolean {
+    return this._resyncData !== null &&
+      this._resyncData.resyncCompleted &&
+      !this._resyncData.openAfterComplete;
   }
 
   /**
@@ -1994,7 +2017,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _sendEvents(): boolean {
-    return this._connection.isOnline() && !this._offline && (this._resyncData === null || this._resyncData.upToDate);
+    return this._connection.isOnline() &&
+      !this._offline &&
+      (this._resyncData === null || this._resyncData.upToDate);
   }
 }
 
@@ -2002,6 +2027,8 @@ Object.freeze(RealTimeModel.Events);
 
 interface IResyncData {
   bufferedOperations: IRemoteOperationMessage[];
-  upToDate: boolean;
   reconnectVersion?: number;
+  upToDate: boolean;
+  resyncCompleted: boolean;
+  openAfterComplete?: boolean;
 }

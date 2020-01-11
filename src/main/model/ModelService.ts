@@ -705,28 +705,17 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _close(modelId: string): void {
-    this._log.debug("Model closed: " + modelId);
-
-    let model: RealTimeModel = null;
+  public _close(model: RealTimeModel): void {
+    const modelId = model.modelId();
+    this._log.debug("Model closed: " + model.modelId());
 
     if (this._openModels.has(modelId)) {
-      model = this._openModels.get(modelId);
       this._openModels.delete(modelId);
     }
 
-    if (this._resyncingModels.has(modelId)) {
-      model = this._resyncingModels.get(modelId).resyncModel;
-      this._resyncCompleted(modelId);
-    }
-
-    if (model) {
-      const resourceId = model._getResourceId();
-      if (resourceId !== null) {
-        this._resourceIdToModelId.delete(resourceId);
-      }
-    } else {
-      this._log.warn("Tried to close model that was not open and not resyncing: " + modelId);
+    const resourceId = model._getResourceId();
+    if (resourceId !== null) {
+      this._resourceIdToModelId.delete(resourceId);
     }
   }
 
