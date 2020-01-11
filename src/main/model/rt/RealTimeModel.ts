@@ -292,7 +292,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _resourceId: string;
+  private _resourceId: string | null;
 
   /**
    * @internal
@@ -440,7 +440,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * Constructs a new RealTimeModel.
    */
-  constructor(resourceId: string,
+  constructor(resourceId: string | null,
               valueIdPrefix: string,
               data: IObjectValue,
               local: boolean,
@@ -948,6 +948,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @private
    */
+  public _getResourceId(): string | null {
+    return this._resourceId;
+  }
+
+  /**
+   * @internal
+   * @hidden
+   * @private
+   */
   public _initiateClose(closeWithServer: boolean, event?: ModelClosedEvent): void {
     if (this._closingData.closing) {
       throw new ConvergenceError(`The model '${this._modelId}' is already closing.`);
@@ -1201,6 +1210,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._resyncData = null;
 
+    this._resourceId = null;
+
     if (this._closingData.closing) {
       this._close();
     }
@@ -1303,9 +1314,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const {modelResyncResponse} = response;
       this._permissions = toModelPermissions(modelResyncResponse.permissions);
       this._resyncData.reconnectVersion = getOrDefaultNumber(modelResyncResponse.currentVersion) as number;
-      const oldResourceId = this._resourceId;
       this._resourceId = getOrDefaultString(modelResyncResponse.resourceId);
-      this._modelService._resourceIdChanged(this._modelId, oldResourceId, this._resourceId);
+
+      this._modelService._resyncStarted(this._modelId, this._resourceId);
 
       // We do this because we might be up to date, version wise.
       this._checkForReconnectUpToDate();
@@ -1519,7 +1530,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _close(): void {
     const {deferred, event} = this._closingData;
-    this._modelService._close(this._resourceId);
+    this._modelService._close(this._modelId);
 
     if (this._offlineManager.isOfflineEnabled()) {
       this._offlineManager.modelClosed(this);
@@ -1528,6 +1539,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._model.root()._detach(false);
     this._open = false;
     this._connection = null;
+    this._resourceId = null;
 
     this._closingData.closing = false;
 
@@ -1715,14 +1727,14 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         this._debug("Resynchronization completed");
         this._emitEvent(new ResyncCompletedEvent(this));
 
-        if (this._closingData.closing) {
-          // We are closing already so we don't need to do anything else.
+        if (this._closingData.closing || !this._open) {
+          // We are closing or closed already so we don't need to do anything else.
           return;
         }
 
         if (!this._resyncOnly) {
           // We need to open.
-          this._modelService._resyncComplete(this._modelId);
+          this._modelService._resyncCompleted(this._modelId);
 
           const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
           sessions.forEach(sessionId => this._handleClientOpen(sessionId));
@@ -1741,6 +1753,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._resyncData = null;
 
+      // We need to initiate close here so the model service knows this is a
+      // closing model, in case some one tries to reopen it.
       if (this._resyncOnly) {
         this._initiateClose(false);
       }

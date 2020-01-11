@@ -705,18 +705,28 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _close(resourceId: string): void {
-    if (this._resourceIdToModelId.has(resourceId)) {
-      const modelId = this._resourceIdToModelId.get(resourceId);
-      this._log.debug("Model closed: " + modelId);
-      this._resourceIdToModelId.delete(resourceId);
-      this._openModels.delete(modelId);
+  public _close(modelId: string): void {
+    this._log.debug("Model closed: " + modelId);
 
-      if (this._resyncingModels.has(modelId)) {
-        this._resyncComplete(modelId);
+    let model: RealTimeModel = null;
+
+    if (this._openModels.has(modelId)) {
+      model = this._openModels.get(modelId);
+      this._openModels.delete(modelId);
+    }
+
+    if (this._resyncingModels.has(modelId)) {
+      model = this._resyncingModels.get(modelId).resyncModel;
+      this._resyncCompleted(modelId);
+    }
+
+    if (model) {
+      const resourceId = model._getResourceId();
+      if (resourceId !== null) {
+        this._resourceIdToModelId.delete(resourceId);
       }
     } else {
-      this._log.warn("Asked to close a model for unknown resource id: " + resourceId);
+      this._log.warn("Tried to close model that was not open and not resyncing: " + modelId);
     }
   }
 
@@ -725,7 +735,16 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _resyncComplete(modelId: string): void {
+  public _resyncStarted(modelId: string, resourceId: string): void {
+    this._registerResourceId(modelId, resourceId);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
+  public _resyncCompleted(modelId: string): void {
     this._log.debug(`Resync completed for model: "${modelId}"`);
     this._resyncingModels.delete(modelId);
     this._checkResyncQueue();
@@ -743,22 +762,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const entry = this._resyncingModels.get(modelId);
     entry.ready.reject(new Error(message));
 
-    this._resyncComplete(modelId);
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _resourceIdChanged(modelId: string, oldResourceId: string, newResourceId: string): void {
-    // If we don't know about the old one, we will just ignore this.
-    if (this._resourceIdToModelId.has(oldResourceId)) {
-      this._resourceIdToModelId.set(newResourceId, modelId);
-    }
-
-    // We delete the old one no matter what.
-    this._resourceIdToModelId.delete(oldResourceId);
+    this._resyncCompleted(modelId);
   }
 
   /**
@@ -770,6 +774,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._openModels.forEach(model => model
       .close()
       .catch(err => this._log.error(err)));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _registerResourceId(modelId: string, resourceId: string): void {
+    this._log.debug(`Registering resource id: {modelId: "${modelId}", resourceId: ${resourceId}}`);
+    this._resourceIdToModelId.set(resourceId, modelId);
   }
 
   /**
@@ -1003,7 +1016,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           data
         );
 
-        this._resourceIdToModelId.set(openRealTimeModelResponse.resourceId, model.modelId());
+        this._registerResourceId(model.modelId(), getOrDefaultString(openRealTimeModelResponse.resourceId));
 
         if (this._modelOfflineManager.isOfflineEnabled()) {
           return this._modelOfflineManager
@@ -1064,7 +1077,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // This is initially null, which is fine. During reconnect it will be set
     // prior to messages being sent or received.
-    const resourceId = `offline:${state.modelId}`;
+    const resourceId = null;
 
     // Note we initialize the model with the dataVersion. The rehydration
     // process will then take us to the current version.
@@ -1085,8 +1098,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       state.permissions,
       state.snapshot.data
     );
-
-    this._resourceIdToModelId.set(resourceId, model.modelId());
 
     model._setOffline();
     model._rehydrateFromOfflineState(
@@ -1163,7 +1174,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._log.debug(`Creating new offline model '${id}' using auto-create options.`);
     const dataValue = this._getDataFromCreateOptions(options);
 
-    const resourceId = `offline:${id}`;
+    const resourceId = null;
 
     // 0 is a reserved value that will never be used by the server.
     const valueIdPrefix = "0";
@@ -1190,8 +1201,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       permissions,
       dataValue
     );
-
-    this._resourceIdToModelId.set(resourceId, model.modelId());
 
     model._setOffline();
 
@@ -1400,6 +1409,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._syncCompletedDeferred = null;
     }
 
+    this._resourceIdToModelId.clear();
+
     this._checkResyncQueue();
   }
 
@@ -1562,10 +1573,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _deleteResyncModel(modelId: string): Promise<void> {
     this._log.debug(`Deleting resync model from the server: "${modelId}"`);
     return this._removeOnline(modelId)
-      .then(() => this._resyncComplete(modelId))
+      .then(() => this._resyncCompleted(modelId))
       .catch((e) => {
         if (e instanceof ConvergenceServerError && e.code === "model_not_found") {
-          this._resyncComplete(modelId);
+          this._resyncCompleted(modelId);
           return Promise.resolve();
         } else {
           return Promise.reject(e);
