@@ -1,5 +1,5 @@
 <div align="center">
-  <img  alt="Convergence Logo" height="80" src="assets/convergence-logo.png" >
+  <img  alt="Convergence Logo" height="80" src="https://convergence.io/assets/img/convergence-logo.png" >
 </div>
 
 # Convergence JavaScript Client
