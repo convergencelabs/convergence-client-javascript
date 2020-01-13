@@ -1296,7 +1296,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     }
 
     const resyncModel = this._resyncingModels.get(modelId);
-    if (resyncModel !== null) {
+    if (resyncModel !== undefined) {
       if (resyncModel.resyncModel) {
         return resyncModel.resyncModel;
       } else {
