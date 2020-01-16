@@ -23,6 +23,5 @@ module.exports = {
 
   gaId: "UA-84372428-3",
 
-  verbose: true,
   hideGenerator: true
 };
