@@ -38,6 +38,7 @@ import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 import {ModelPermissions} from "./ModelPermissions";
 import {DomainUserId} from "../identity";
 import {ModelResult} from "./query";
+import {TypeChecker} from "../util/TypeChecker";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -60,7 +61,8 @@ import IRemoteClientResyncStartedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncStartedMessage;
 import IRemoteClientResyncCompletedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
-import {TypeChecker} from "../util/TypeChecker";
+import IModelResyncServerCompleteMessage =
+  com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
 
 /**
  * @hidden
@@ -235,7 +237,8 @@ type ModelMessage =
   IRemoteClientClosedMessage |
   IModelPermissionsChangedMessage |
   IRemoteClientResyncStartedMessage |
-  IRemoteClientResyncCompletedMessage;
+  IRemoteClientResyncCompletedMessage |
+  IModelResyncServerCompleteMessage;
 
 function toModelMessage(message: IConvergenceMessage): ModelMessage {
   return message.forceCloseRealTimeModel ||
@@ -249,5 +252,6 @@ function toModelMessage(message: IConvergenceMessage): ModelMessage {
     message.remoteClientClosedModel ||
     message.modelPermissionsChanged ||
     message.remoteClientResyncStarted ||
-    message.remoteClientResyncCompleted;
+    message.remoteClientResyncCompleted ||
+    message.modelResyncServerComplete;
 }

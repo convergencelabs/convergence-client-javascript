@@ -104,6 +104,8 @@ import IRemoteClientResyncStartedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncStartedMessage;
 import IRemoteClientResyncCompletedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
+import IModelResyncServerCompleteMessage =
+  com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
 
 /**
  * The complete list of events that could be emitted by a [[RealTimeModel]].
@@ -1158,6 +1160,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       modelPermissionsChanged,
       remoteClientResyncStarted,
       remoteClientResyncCompleted,
+      modelResyncServerComplete
     } = event.message;
 
     if (forceCloseRealTimeModel) {
@@ -1181,6 +1184,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._handleRemoteClientResyncStarted(remoteClientResyncStarted);
     } else if (remoteClientResyncCompleted) {
       this._handleRemoteClientResyncCompleted(remoteClientResyncCompleted);
+    } else if (modelResyncServerComplete) {
+      this._handleModelResyncServerComplete(modelResyncServerComplete);
     } else {
       throw new Error("Unexpected message" + JSON.stringify(event.message));
     }
@@ -1733,45 +1738,45 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._resyncData.openAfterComplete = !this._resyncOnly;
 
     const completeRequest: IConvergenceMessage = {
-      modelResyncCompleteRequest: {
+      modelResyncClientComplete: {
         resourceId: this._resourceId,
         open: this._resyncData.openAfterComplete
       }
     };
 
-    this._connection.request(completeRequest).then((response: IConvergenceMessage) => {
-      this._debug("Resynchronization completed");
-      const {modelResyncCompleteResponse} = response;
+    this._connection.send(completeRequest);
+  }
 
-      // We will be setting the reconnect data to null, so we need to
-      // grab this now.
-      const openAfterComplete = this._resyncData.openAfterComplete;
+  private _handleModelResyncServerComplete(message: IModelResyncServerCompleteMessage) {
+    this._debug("Resynchronization completed");
+    // We will be setting the reconnect data to null, so we need to
+    // grab this now.
+    const openAfterComplete = this._resyncData.openAfterComplete;
 
-      // If we requested to stay open and we still need to be, open the model.
-      // otherwise we will close id.
-      const open = openAfterComplete && !this._resyncOnly;
+    // If we requested to stay open and we still need to be, open the model.
+    // otherwise we will close id.
+    const open = openAfterComplete && !this._resyncOnly;
 
-      this._resyncData = null;
-      this._emitEvent(new ResyncCompletedEvent(this));
-      this._modelService._resyncCompleted(this._modelId);
+    this._resyncData = null;
+    this._emitEvent(new ResyncCompletedEvent(this));
+    this._modelService._resyncCompleted(this._modelId);
 
-      if (open) {
-        this._debug("Opening after reconnect");
-        const sessions = getOrDefaultArray(modelResyncCompleteResponse.connectedClients);
-        sessions.forEach(sessionId => this._handleClientOpen(sessionId));
+    if (open) {
+      this._debug("Opening after reconnect");
+      const sessions = getOrDefaultArray(message.connectedClients);
+      sessions.forEach(sessionId => this._handleClientOpen(sessionId));
 
-        this._initializeReferences(getOrDefaultArray(modelResyncCompleteResponse.references));
+      this._initializeReferences(getOrDefaultArray(message.references));
 
-        this._referenceManager.reshare();
+      this._referenceManager.reshare();
 
-        this._debug(`Online`);
-        this._emitEvent(new ModelOnlineEvent(this));
-      } else {
-        // we only need to close with the server if we requested it to be
-        // open when we completed the reconnect
-        this._initiateClose(openAfterComplete);
-      }
-    });
+      this._debug(`Online`);
+      this._emitEvent(new ModelOnlineEvent(this));
+    } else {
+      // we only need to close with the server if we requested it to be
+      // open when we completed the reconnect
+      this._initiateClose(openAfterComplete);
+    }
   }
 
   /**
