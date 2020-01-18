@@ -25,11 +25,12 @@ Convergence.configureLogging({
   }
 });
 
+// const DOMAIN_URL = "ws://localhost:8000/api/realtime/convergence/default";
 const DOMAIN_URL = "ws://localhost:8080/convergence/default";
 const DOMAIN_USERNAME = "test";
 const DOMAIN_PASSWORD = "password";
 
-const ANONYMOUS = false;
+const ANONYMOUS = true;
 const DISPLAY_NAME = "test user";
 
 const OPTIONS: IConvergenceOptions = {
