@@ -53,7 +53,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
   /**
    * @internal
    */
-  private readonly _listeners: { [key: string]: Array<EventRegistration<T>> };
+  private readonly _listeners: Map<string, Array<EventRegistration<T>>>;
 
   /**
    * @internal
@@ -72,7 +72,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
   protected constructor() {
     this._defaultSubject = new Subject<T>();
     this._observable = this._defaultSubject.asObservable().pipe(share());
-    this._listeners = {};
+    this._listeners = new Map();
   }
 
   /**
@@ -92,10 +92,10 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     }
 
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    let listeners: Array<EventRegistration<T>> = this._listeners[event];
+    let listeners: Array<EventRegistration<T>> = this._listeners.get(event);
     if (listeners === undefined) {
       listeners = [];
-      this._listeners[event] = listeners;
+      this._listeners.set(event, listeners);
     } else if (listeners.find(r => r.listener === listener) !== undefined) {
       // we don't add duplicates, so return early.
       return this;
@@ -157,7 +157,9 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
    *   This object, in support of a fluent API.
    */
   public removeAllListeners(): ConvergenceEventEmitter<T> {
-    Object.keys(this._listeners).forEach(event => this.removeListeners(event));
+    Array
+      .from(this._listeners.keys())
+      .forEach(event => this.removeListeners(event));
     return this;
   }
 
@@ -171,9 +173,11 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
    */
   public removeListeners(event: string): ConvergenceEventEmitter<T> {
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    const registrations: Array<EventRegistration<T>> = this._listeners[event];
-    registrations.forEach(r => r.subscription.unsubscribe());
-    delete this._listeners[event];
+    if (this._listeners.has(event)) {
+      const registrations: Array<EventRegistration<T>> = this._listeners.get(event);
+      registrations.forEach(r => r.subscription.unsubscribe());
+      this._listeners.delete(event);
+    }
     return this;
   }
 
@@ -189,14 +193,17 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
    */
   public removeListener(event: string, listener: ConvergenceEventListener<T>): ConvergenceEventEmitter<T> {
     event = ConvergenceEventEmitter._resolveEventKey(event);
-    const listeners: Array<EventRegistration<T>> = this._listeners[event];
-
-    if (listeners !== undefined) {
+    if (this._listeners.has(event)) {
+      const listeners: Array<EventRegistration<T>> = this._listeners.get(event);
       const index: number = listeners.findIndex(r => r.listener === listener);
       if (index !== -1) {
         const r: EventRegistration<T> = listeners[index];
         listeners.splice(index, 1);
         r.subscription.unsubscribe();
+      }
+
+      if (listeners.length === 0) {
+        this._listeners.delete(event);
       }
     }
 
