@@ -14,7 +14,7 @@
 
 import {series, src, dest} from "gulp";
 import bump from "gulp-bump";
-import del from "del";
+import fs from "fs-extra";
 import rename from "gulp-rename";
 import replace from "gulp-replace";
 import ts from "gulp-typescript";
@@ -22,7 +22,6 @@ import tsLint from "gulp-tslint";
 import mocha from "gulp-mocha";
 import sourceMaps from "gulp-sourcemaps";
 import uglify from 'gulp-uglify-es';
-import fs from "fs";
 import typescript from "typescript";
 import header from 'gulp-header';
 import shell from "gulp-shell";
@@ -64,7 +63,7 @@ const lint = () =>
     .pipe(tsLint.report());
 
 const copyNpmJs = () => src(["./npmjs/**/*", "./COPYING", "./COPYING.LESSER"]).pipe(dest(distDir));
-const bumpPackageVersion = (cb) => {
+const bumpPackageVersion = () => {
   const packageJson = readAndParse("./package.json");
   const version = packageJson.version.endsWith("SNAPSHOT") ?
       packageJson.version + "." + new Date().getTime() :
@@ -75,7 +74,11 @@ const bumpPackageVersion = (cb) => {
       .pipe(dest(distDir));
 };
 
-const docsClean = () => del([`${distDir}/docs`]);
+const docsClean = (cb) => {
+  fs.removeSync(`${distDir}/docs`);
+  cb();
+};
+
 const docsBuild = shell.task(['typedoc --options typedoc.js src/main']);
 const docsMarkup = () => {
   const packageJson = readAndParse(`${distDir}/package.json`);
@@ -149,7 +152,10 @@ const test = () => {
     }));
 };
 
-const clean = () => del([distDir, "coverage", ".nyc_output"]);
+const clean = (cb) => {
+  [distDir, "coverage", ".nyc_output"].forEach(file => fs.removeSync(file));
+  cb();
+};
 
 const dist = series(
   copyNpmJs,
@@ -169,4 +175,4 @@ export {
   clean,
   dist,
   docs,
-}
+};
