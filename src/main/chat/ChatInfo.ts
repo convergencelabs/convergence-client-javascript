@@ -14,7 +14,13 @@
 
 import {IdentityCache} from "../identity/IdentityCache";
 import {ChatMembership} from "./MembershipChat";
-import {getOrDefaultNumber, protoToDomainUserId, timestampToDate} from "../connection/ProtocolUtil";
+import {
+  getOrDefaultArray,
+  getOrDefaultNumber,
+  getOrDefaultString,
+  protoToDomainUserId,
+  timestampToDate
+} from "../connection/ProtocolUtil";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {DomainUser} from "../identity";
 
@@ -127,7 +133,8 @@ export function createChatInfo(session: ConvergenceSession,
                                chatData: IChatInfoData): ChatInfo {
   let maxEvent = -1;
   const localUserId = session.user().userId;
-  const members = chatData.members.map(member => {
+
+  const members = getOrDefaultArray(chatData.members).map(member => {
     const userId = protoToDomainUserId(member.user);
     if (userId.equals(localUserId)) {
       maxEvent = getOrDefaultNumber(member.maxSeenEventNumber);
@@ -141,8 +148,8 @@ export function createChatInfo(session: ConvergenceSession,
     chatId: chatData.id,
     chatType: chatData.chatType as ChatType,
     membership: chatData.membership as ChatMembership,
-    name: chatData.name,
-    topic: chatData.topic,
+    name: getOrDefaultString(chatData.name),
+    topic: getOrDefaultString(chatData.topic),
     createdTime: timestampToDate(chatData.createdTime),
     lastEventTime: timestampToDate(chatData.lastEventTime),
     lastEventNumber: getOrDefaultNumber(chatData.lastEventNumber),
