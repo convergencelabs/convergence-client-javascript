@@ -21,7 +21,7 @@ import { Immutable } from "../../util/Immutable";
  *
  * @module Chat
  */
-export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
+export class CreatedChatHistoryEntry extends ChatHistoryEntry {
   public static readonly TYPE = ChatHistoryEntry.TYPES.CREATED;
 
   /**
@@ -49,7 +49,7 @@ export class ChannelCreatedHistoryEntry extends ChatHistoryEntry {
      */
     public readonly members: DomainUser[]
   ) {
-    super(ChannelCreatedHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
+    super(CreatedChatHistoryEntry.TYPE, chatId, eventNumber, timestamp, user);
     Immutable.make(this);
   }
 }
