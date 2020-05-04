@@ -155,6 +155,8 @@ export function jsonToProtoValue(value: any): IValue {
     return {listValue: {values: value.map(jsonToProtoValue)}};
   } else if (value !== undefined && value.constructor === Object) {
     return {structValue: {fields: mapObjectValues(value, jsonToProtoValue)}};
+  } else if (value === undefined) {
+    return undefined;
   } else {
     throw new ConvergenceError("Can not serialize unknown data type: " + value);
   }

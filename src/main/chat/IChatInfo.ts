@@ -22,9 +22,8 @@ import {
   timestampToDate
 } from "../connection/ProtocolUtil";
 import {ConvergenceSession} from "../ConvergenceSession";
-import {DomainUser} from "../identity";
-
 import {com} from "@convergence/convergence-proto";
+import {IChatMember} from "./IChatMember";
 import IChatInfoData = com.convergencelabs.convergence.proto.chat.IChatInfoData;
 
 /**
@@ -32,7 +31,7 @@ import IChatInfoData = com.convergencelabs.convergence.proto.chat.IChatInfoData;
  *
  * @module Chat
  */
-export interface ChatInfo {
+export interface IChatInfo {
 
   /**
    * The type of chat: [[ChatRoom]], [[ChatChannel]] or [[DirectChat]].
@@ -84,26 +83,12 @@ export interface ChatInfo {
   /**
    * An array of the current members of this chat.
    */
-  readonly members: ChatMember[];
-}
-
-/**
- * A member, or participant, of a Chat.  Has slightly different semantics depending on the
- * type of [[Chat]].
- *
- * @module Chat
- */
-export interface ChatMember {
-  /**
-   * The chat member's underlying user.
-   */
-  readonly user: DomainUser;
+  readonly members: IChatMember[];
 
   /**
-   * The number of the most recent event which this member has received.  This is useful
-   * for e.g. querying ([[Chat.getHistory]]) for events that a member hasn't yet seen.
+   * True if the local user is joined to this Chat.
    */
-  readonly maxSeenEventNumber: number;
+  readonly joined: boolean;
 }
 
 /**
@@ -130,7 +115,7 @@ export type ChatType = ChatTypes.DIRECT | ChatTypes.CHANNEL | ChatTypes.ROOM;
  */
 export function createChatInfo(session: ConvergenceSession,
                                identityCache: IdentityCache,
-                               chatData: IChatInfoData): ChatInfo {
+                               chatData: IChatInfoData): IChatInfo {
   let maxEvent = -1;
   const localUserId = session.user().userId;
 
@@ -144,6 +129,7 @@ export function createChatInfo(session: ConvergenceSession,
 
     return {user, maxSeenEventNumber: getOrDefaultNumber(member.maxSeenEventNumber)};
   });
+
   return {
     chatId: chatData.id,
     chatType: chatData.chatType as ChatType,
@@ -154,6 +140,7 @@ export function createChatInfo(session: ConvergenceSession,
     lastEventTime: timestampToDate(chatData.lastEventTime),
     lastEventNumber: getOrDefaultNumber(chatData.lastEventNumber),
     maxSeenEventNumber: maxEvent,
-    members
+    members,
+    joined: members.find(m => m.user.userId.equals(localUserId)) !== undefined
   };
 }

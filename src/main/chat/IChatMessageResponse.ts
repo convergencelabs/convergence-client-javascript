@@ -12,28 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {RichTextLocation} from "./RichTextLocation";
-import {RichTextOperation} from "../operations/RichTextOperation";
-import {RichTextRange} from "./RichTextRange";
-
-/**
- * @internal
- * @hidden
- */
-export class RichTextLocationTransformer {
-
-  public static transform(location: RichTextLocation, operation: RichTextOperation): RichTextLocation {
-    return null;
-  }
-
-  public static transformRemove(location: RichTextLocation, range: RichTextRange): RichTextLocation {
-
-    // case 1: before.. no chagne
-    // case 2: between or at end... goes to start position.
-    // case 3: after... shift.
-    const start = [0, 1, 2, 1];
-    const end = [0, 2, 4, 7];
-    const loc = [0, 2, 5, 3];
-    return location;
-  }
+export interface IChatMessageResponse {
+  eventNumber: number;
+  timestamp: Date;
 }

@@ -22,14 +22,14 @@ import {
 } from "../../connection/ProtocolUtil";
 import {ConvergenceError} from "../../util";
 import {IdentityCache} from "../../identity/IdentityCache";
-import { ChannelCreatedHistoryEntry } from "./ChannelCreatedHistoryEntry";
-import { MessageChatHistoryEntry } from "./MessageChatHistoryEntry";
-import { UserAddedChatHistoryEntry } from "./UserAddedChatHistoryEntry";
-import { UserRemovedChatHistoryEntry } from "./UserRemovedChatHistoryEntry";
-import { UserJoinedChatHistoryEntry } from "./UserJoinedChatHistoryEntry";
-import { UserLeftChatHistoryEntry } from "./UserLeftChatHistoryEntry";
-import { NameChangedChatHistoryEntry } from "./NameChangedChatHistoryEntry";
-import { TopicChangedChatHistoryEntry } from "./TopicChangedChatHistoryEntry";
+import {CreatedChatHistoryEntry} from "./CreatedChatHistoryEntry";
+import {MessageChatHistoryEntry} from "./MessageChatHistoryEntry";
+import {UserAddedChatHistoryEntry} from "./UserAddedChatHistoryEntry";
+import {UserRemovedChatHistoryEntry} from "./UserRemovedChatHistoryEntry";
+import {UserJoinedChatHistoryEntry} from "./UserJoinedChatHistoryEntry";
+import {UserLeftChatHistoryEntry} from "./UserLeftChatHistoryEntry";
+import {NameChangedChatHistoryEntry} from "./NameChangedChatHistoryEntry";
+import {TopicChangedChatHistoryEntry} from "./TopicChangedChatHistoryEntry";
 
 import {com} from "@convergence/convergence-proto";
 import IChatChannelEventData = com.convergencelabs.convergence.proto.chat.IChatEventData;
@@ -43,7 +43,7 @@ export class ChatHistoryEventMapper {
     if (data.created) {
       const {chatId, eventNumber, timestamp, user, name, topic, members} = data.created;
       const memberUsers = getOrDefaultArray(members).map(userId => identityCache.getUser(protoToDomainUserId(userId)));
-      return new ChannelCreatedHistoryEntry(
+      return new CreatedChatHistoryEntry(
         chatId,
         getOrDefaultNumber(eventNumber),
         timestampToDate(timestamp),

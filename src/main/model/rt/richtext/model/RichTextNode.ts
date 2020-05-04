@@ -28,7 +28,7 @@ import {Validation} from "../../../../util/Validation";
 export abstract class RichTextNode implements RichTextContent {
   private _parent: RichTextElement | null;
   private readonly _document: RichTextDocument;
-  private _attributes: Map<string, any>;
+  private readonly _attributes: Map<string, any>;
 
   protected constructor(document: RichTextDocument, parent: RichTextElement | null, attributes?: Map<string, any>) {
     if (Validation.isNotSet(document)) {
@@ -96,7 +96,7 @@ export abstract class RichTextNode implements RichTextContent {
     }
   }
 
-  public root(): RichTextRootElement {
+  public root(): RichTextRootElement | null {
     if (!Validation.isSet(this._parent)) {
       return null;
     } else {

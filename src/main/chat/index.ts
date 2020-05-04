@@ -25,11 +25,17 @@
 export * from "./ChatService";
 export * from "./Chat";
 export * from "./ChatChannel";
-export {ChatInfo, ChatMember, ChatType, ChatTypes } from "./ChatInfo";
+export {IChatInfo, ChatType, ChatTypes } from "./IChatInfo";
 export * from "./ChatPermissionManager";
 export * from "./ChatRoom";
 export * from "./DirectChat";
 export * from "./MembershipChat";
 
+export * from "./ICreateChatChannelOptions";
+export * from "./IChatMessageResponse";
+export * from "./IChatMember";
+export * from "./IChatHistorySearchOptions";
+
 export * from "./history/";
 export * from "./events/";
+

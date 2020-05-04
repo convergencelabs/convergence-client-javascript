@@ -17,7 +17,8 @@ import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {Observable} from "rxjs";
 import {IChatEvent} from "./events";
 import {IdentityCache} from "../identity/IdentityCache";
-import {ChatInfo, ChatMember} from "./ChatInfo";
+import {IChatInfo} from "./IChatInfo";
+import {IChatMember} from "./IChatMember";
 
 /**
  * A [[DirectChat]] represents a Chat construct that is defined by a specific
@@ -36,7 +37,7 @@ export class DirectChat extends Chat {
   constructor(connection: ConvergenceConnection,
               identityCache: IdentityCache,
               messageStream: Observable<IChatEvent>,
-              info: ChatInfo) {
+              info: IChatInfo) {
     super(connection, identityCache, messageStream, info);
   }
 
@@ -53,6 +54,6 @@ export class DirectChat extends Chat {
  *
  * @module Chat
  */
-export interface DirectChatInfo extends ChatInfo {
-  readonly otherUsers: ChatMember[];
+export interface DirectChatInfo extends IChatInfo {
+  readonly otherUsers: IChatMember[];
 }

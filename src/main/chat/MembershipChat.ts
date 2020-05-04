@@ -19,7 +19,7 @@ import {Observable} from "rxjs";
 import {IdentityCache} from "../identity/IdentityCache";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {DomainUserIdentifier, DomainUserId} from "../identity";
-import {ChatInfo} from "./ChatInfo";
+import {IChatInfo} from "./IChatInfo";
 
 /**
  * A [[MembershipChat]] chat is a chat construct that has a specific set of
@@ -95,6 +95,6 @@ export type ChatMembership = "public" | "private";
  *
  * @module Chat
  */
-export interface MembershipChatInfo extends ChatInfo {
+export interface MembershipChatInfo extends IChatInfo {
   readonly membership: ChatMembership;
 }

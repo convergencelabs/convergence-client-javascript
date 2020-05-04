@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ConvergenceError, ConvergenceEventEmitter} from "../util";
+import {ConvergenceError, ConvergenceEventEmitter, PagedData} from "../util";
 import {
   ChatEvent,
   ChatMessageEvent,
@@ -26,16 +26,18 @@ import {
 } from "./events";
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ChatHistoryEntry} from "./history/ChatHistoryEntry";
+import {ChatHistoryEntry} from "./history/";
 import {Observable} from "rxjs";
 import {ChatHistoryEventMapper} from "./history/ChatHistoryEventMapper";
-import {getOrDefaultArray, toOptional} from "../connection/ProtocolUtil";
+import {getOrDefaultArray, getOrDefaultNumber, timestampToDate, toOptional} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {Immutable} from "../util/Immutable";
-import {ChatInfo, createChatInfo} from "./ChatInfo";
+import {createChatInfo, IChatInfo} from "./IChatInfo";
 
 import {com} from "@convergence/convergence-proto";
+import {IChatHistorySearchOptions} from "./IChatHistorySearchOptions";
+import {IChatMessageResponse} from "./IChatMessageResponse";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IChatInfoData = com.convergencelabs.convergence.proto.chat.IChatInfoData;
 
@@ -79,7 +81,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
-  protected _info: ChatInfo;
+  protected _info: IChatInfo;
 
   /**
    * @internal
@@ -97,7 +99,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   protected constructor(connection: ConvergenceConnection,
                         identityCache: IdentityCache,
                         messageStream: Observable<IChatEvent>,
-                        chatInfo: ChatInfo) {
+                        chatInfo: IChatInfo) {
     super();
     this._connection = connection;
     this._identityCache = identityCache;
@@ -125,7 +127,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   Information which describes the Chat. Subclasses may provide a more
    *   specific subclass of ChatInfo.
    */
-  public info(): ChatInfo {
+  public info(): IChatInfo {
     return {...this._info};
   }
 
@@ -149,7 +151,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise acknowledging that the message has been received by the
    *   server.
    */
-  public send(message: string): Promise<void> {
+  public send(message: string): Promise<IChatMessageResponse> {
     this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
@@ -157,7 +159,12 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         message
       }
-    }).then(() => undefined);
+    }).then((response: IConvergenceMessage) => {
+      const {publishChatMessageResponse} = response;
+      const eventNumber = getOrDefaultNumber(publishChatMessageResponse.eventNumber);
+      const timestamp = timestampToDate(publishChatMessageResponse.timestamp);
+      return {eventNumber, timestamp};
+    });
   }
 
   /**
@@ -234,7 +241,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise that will be resolved with an array of Chat events that match
    *   the specified search options.
    */
-  public getHistory(options?: ChatHistorySearchOptions): Promise<ChatHistoryEntry[]> {
+  public getHistory(options?: IChatHistorySearchOptions): Promise<PagedData<ChatHistoryEntry>> {
     this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
@@ -247,8 +254,9 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((message: IConvergenceMessage) => {
       const response = message.getChatHistoryResponse;
-      return getOrDefaultArray(response.eventData)
-        .map(data => ChatHistoryEventMapper.toChatHistoryEntry(data, this._identityCache));
+      const data = getOrDefaultArray(response.data)
+        .map(d => ChatHistoryEventMapper.toChatHistoryEntry(d, this._identityCache));
+      return new PagedData(data, getOrDefaultNumber(response.startIndex), getOrDefaultNumber(response.totalResults));
     });
   }
 
@@ -334,52 +342,4 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       .map(m => m.user.userId)
       .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
   }
-}
-
-/**
- * An object containing some options for fetching chat history. By default, all
- * events in this chat are returned, not just the actual messages.  Also, by default
- * events are returned in descending order, starting from the end.
- *
- * To return the last 25 messages:
- * ```
- * chat.getHistory({
- *   limit: 25,
- *   eventFilter: [ChatMessageEvent.NAME]
- * })
- * ```
- *
- * To return the first 10 events:
- * ```
- * chat.getHistory({
- *   startEvent: 0,
- *   limit: 10,
- *   forward: true
- * })
- * ```
- *
- * @module Chat
- */
-export interface ChatHistorySearchOptions {
-  /**
-   * The sequential event number at which to start the query.
-   *
-   * [[ChatInfo.lastEventNumber]] could be a useful piece of information here.
-   */
-  startEvent?: number;
-
-  /**
-   * The maximum number of query results
-   */
-  limit?: number;
-
-  /**
-   * Set to true to return events in ascending order
-   */
-  forward?: boolean;
-
-  /**
-   * An array of [[ChatHistoryEntry]] types to which the results will be limited
-   */
-  eventFilter?: string[];
 }

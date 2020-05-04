@@ -14,7 +14,7 @@
 
 import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {ConvergenceEventEmitter, ConvergenceServerError} from "../util";
+import {ConvergenceError, ConvergenceEventEmitter, ConvergenceServerError, PagedData} from "../util";
 import {
   ChatJoinedEvent,
   ChatLeftEvent,
@@ -33,13 +33,23 @@ import {filter, map, share, tap} from "rxjs/operators";
 import {ChatChannel} from "./ChatChannel";
 import {ChatRoom} from "./ChatRoom";
 import {ChatPermissionManager} from "./ChatPermissionManager";
-import {domainUserIdToProto, toOptional} from "../connection/ProtocolUtil";
+import {
+  domainUserIdToProto,
+  getOrDefaultArray,
+  getOrDefaultNumber,
+  jsonToProtoValue,
+  toOptional
+} from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
-import {DomainUserId, DomainUserIdentifier} from "../identity";
-import {ChatInfo, ChatTypes, createChatInfo} from "./ChatInfo";
+import {DomainUserId} from "../identity";
+import {IChatInfo, ChatTypes, createChatInfo} from "./IChatInfo";
 import {Validation} from "../util/Validation";
 
 import {com} from "@convergence/convergence-proto";
+import {IChatSearchCriteria} from "./ChatSearchCriteria";
+import {INumberValue} from "../model";
+import {TypeChecker} from "../util/TypeChecker";
+import {ICreateChatChannelOptions} from "./ICreateChatChannelOptions";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 
 /**
@@ -47,7 +57,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
  *
  * @module Chat
  */
-export declare interface ChatServiceEvents {
+export declare interface IChatServiceEvents {
   readonly MESSAGE: string;
   readonly USER_JOINED: string;
   readonly USER_LEFT: string;
@@ -57,7 +67,7 @@ export declare interface ChatServiceEvents {
   readonly CHANNEL_LEFT: string;
 }
 
-const Events: ChatServiceEvents = {
+const Events: IChatServiceEvents = {
   MESSAGE: ChatMessageEvent.NAME,
   USER_JOINED: UserJoinedEvent.NAME,
   USER_LEFT: UserLeftEvent.NAME,
@@ -80,7 +90,21 @@ Object.freeze(Events);
  */
 export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
-  public static readonly Events: ChatServiceEvents = Events;
+  public static readonly Events: IChatServiceEvents = Events;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private static _toChatIdsArray(chatIds: string | string[]): string[] {
+    if (TypeChecker.isString(chatIds)) {
+      return [chatIds];
+    } else if (TypeChecker.isArray(chatIds)) {
+      return chatIds;
+    } else {
+      throw new ConvergenceError("chatIds must be a string or string array: " + chatIds);
+    }
+  }
 
   /**
    * @internal
@@ -133,14 +157,38 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
     return this._connection.session();
   }
 
-  // FIXME implement
-  // public search(criteria: ChatSearchCriteria): Promise<ChatInfo[]> {
-  //   return this._connection.request({
-  //     type: MessageType.SEARCH_CHAT_CHANNELS_REQUEST
-  //   } as SearchChatChannelsRequestMessage).then((message: GetChatChannelsResponseMessage) => {
-  //     return message.channels.map(channel => this._createChatInfo(channel));
-  //   });
-  // }
+  /**
+   * Searches for existing chats.
+   *
+   * @param criteria
+   *   The criteria to search for chats with.
+   *
+   * @returns
+   *   Chat info objects for matching results.
+   */
+  public search(criteria: IChatSearchCriteria): Promise<PagedData<IChatInfo>> {
+    this.session().assertOnline();
+    return this._connection.request({
+      chatsSearchRequest: {
+        searchTerm: criteria.searchTerm,
+        searchFields: criteria.searchFields,
+        types: criteria.types,
+        membership: criteria.membership,
+        limit: jsonToProtoValue(criteria.limit) as INumberValue,
+        offset: jsonToProtoValue(criteria.offset) as INumberValue
+      }
+    }).then((response: IConvergenceMessage) => {
+      const {chatsSearchResponse} = response;
+      const data = getOrDefaultArray(chatsSearchResponse.data).map(chatInfoData => {
+        return createChatInfo(this._connection.session(), this._identityCache, chatInfoData);
+      });
+
+      return new PagedData<IChatInfo>(
+        data,
+        getOrDefaultNumber(chatsSearchResponse.startIndex),
+        getOrDefaultNumber(chatsSearchResponse.totalResults));
+    });
+  }
 
   /**
    * Determines if a Chat with the specified id exists.
@@ -150,18 +198,48 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @returns
    *   A promise resolved with true if the specified chat exists, or false otherwise.
    */
-  public exists(chatId: string): Promise<boolean> {
-    Validation.assertNonEmptyString(chatId, "chatId");
+  public exists(chatId: string): Promise<boolean>;
+
+  /**
+   * Determines if a set of Chats with the specified ids exist.
+   *
+   * @param chatIds
+   *   The chat id to check.
+   * @returns
+   *   A promise resolved with a map of chat id's to booleans that indicate of
+   *   the chat exists.
+   */
+  public exists(chatIds: string[]): Promise<Map<string, boolean>>;
+
+  public exists(chatIds: string | string[]): Promise<boolean | Map<string, boolean>> {
+    let ids = ChatService._toChatIdsArray(chatIds);
     this.session().assertOnline();
     return this._connection.request({
       chatsExistRequest: {
-        chatIds: [chatId]
+        chatIds: ids
       }
     }).then((response: IConvergenceMessage) => {
       const {chatsExistResponse} = response;
-      return chatsExistResponse.exists[0];
+      const exists = getOrDefaultArray(chatsExistResponse.exists);
+      if (TypeChecker.isString(chatIds)) {
+        return exists[0];
+      } else if (TypeChecker.isArray(chatIds)) {
+        return new Map(chatIds.map((chatId: string, index: number) => [chatId, exists[index]]));
+      }
     });
   }
+
+  /**
+   * Gets a [[Chat]] object for the specified id. The exact subclass returned
+   * will depend on the type of [[Chat]] the id refers to.
+   *
+   * @param chatIds
+   *   The and array of the [[Chat]] ids to get.
+   *
+   * @returns
+   *   A Promise that will be resolved with the specified Chat, if it exists.
+   */
+  public get(chatIds: string[]): Promise<Map<string, Chat>>;
 
   /**
    * Gets a [[Chat]] object for the specified id. The exact subclass returned
@@ -171,22 +249,33 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    *   The id of the [[Chat]] to get.
    *
    * @returns
-   *   A Promise that will be resolved with the specified Chat, if it exists.
+   *   A Promise that will be resolved with the specified Chats, if they exists.
    */
-  public get(chatId: string): Promise<Chat> {
-    Validation.assertNonEmptyString(chatId, "chatId");
+  public get(chatId: string): Promise<Chat>;
+
+  public get(chatIds: string | string[]): Promise<Chat | Map<string, Chat>> {
+    let ids = ChatService._toChatIdsArray(chatIds);
     this.session().assertOnline();
     return this._connection
       .request({
         getChatsRequest: {
-          chatIds: [chatId]
+          chatIds: ids
         }
       })
       .then((response: IConvergenceMessage) => {
         const {getChatsResponse} = response;
-        const chatData = getChatsResponse.chatInfo[0];
-        const chatInfo = createChatInfo(this._connection.session(), this._identityCache, chatData);
-        return this._createChat(chatInfo);
+        const chatData = getOrDefaultArray(getChatsResponse.chatInfo);
+        const chats = chatData
+          .map(d => {
+            const c = createChatInfo(this._connection.session(), this._identityCache, d);
+            return this._createChat(c);
+          });
+
+        if (TypeChecker.isString(chatIds)) {
+          return chats[0];
+        } else if (TypeChecker.isArray(chatIds)) {
+          return new Map(chats.map(chat => [chat.info().chatId, chat]));
+        }
       });
   }
 
@@ -200,7 +289,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @returns
    *   A promise that is resolved with the joined chats.
    */
-  public joined(): Promise<ChatInfo[]> {
+  public joined(): Promise<IChatInfo[]> {
     if (!this.session().isAuthenticated()) {
       return Promise.resolve([]);
     }
@@ -227,7 +316,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise that will be resolved with the id of the successfully created
    *   [[Chat]].
    */
-  public create(options: CreateChatChannelOptions): Promise<string> {
+  public create(options: ICreateChatChannelOptions): Promise<string> {
     if (!options) {
       throw new Error("create options must be supplied");
     }
@@ -322,7 +411,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
     this.session().assertOnline();
 
-    // todo extract message send / handle respnose into external method
+    // todo extract message send / handle response into external method
     return this._connection.request({
       joinChatRequest: {
         chatId
@@ -377,9 +466,9 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @returns
    *   A Promise resolved with the specified DirectChat.
    */
-  public direct(users: Array<string | DomainUserId>): Promise<DirectChat>;
+  public direct(users: (string | DomainUserId)[]): Promise<DirectChat>;
 
-  public direct(users: string | DomainUserId | Array<string | DomainUserId>): Promise<DirectChat> {
+  public direct(users: string | DomainUserId | (string | DomainUserId)[]): Promise<DirectChat> {
     this.session().assertOnline();
 
     if (typeof users === "string" || users instanceof DomainUserId) {
@@ -419,7 +508,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    * @hidden
    * @internal
    */
-  private _createChat(chatInfo: ChatInfo): Chat {
+  private _createChat(chatInfo: IChatInfo): Chat {
     const messageStream = this._messageStream.pipe(
       filter(msg => msg.chatId === chatInfo.chatId)
     );
@@ -434,58 +523,4 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
         throw new Error(`Invalid chat chat type: ${chatInfo.chatType}`);
     }
   }
-
-}
-
-//
-// export interface ChatSearchCriteria {
-//   type?: string;
-//   name?: string;
-//   topic?: string;
-// }
-
-/**
- * A set of options when creating a [[ChatChannel]] or [[ChatRoom]].
- *
- * @module Chat
- */
-export interface CreateChatChannelOptions {
-  /**
-   * The type of chat.  Must be "channel" or "room".
-   */
-  type: "channel" | "room";
-
-  /**
-   * The visibility of the chat room.  Must be "public" or "private".
-   *
-   * Private chats cannot be joined by a user, but rather added ([[ChatChannel.add]])
-   * by another member with the appropriate permissions
-   */
-  membership: "public" | "private";
-
-  /**
-   * The ID which the new chat should have.  Returns an error if a chat with this
-   * ID already exists AND `ignoreExistsError` is not true.
-   */
-  id?: string;
-
-  /**
-   * An optional name for the chat.
-   */
-  name?: string;
-
-  /**
-   * An optional topic for the chat.
-   */
-  topic?: string;
-
-  /**
-   * An array of [[DomainUser]]s to which this chat is available.
-   */
-  members?: DomainUserIdentifier[];
-
-  /**
-   * Set to true to ignore an error in the case of an existing desired Chat ID
-   */
-  ignoreExistsError?: boolean;
 }

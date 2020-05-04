@@ -13,7 +13,7 @@
  */
 
 export * from "./ChatHistoryEntry";
-export * from "./ChannelCreatedHistoryEntry";
+export * from "./CreatedChatHistoryEntry";
 export * from "./MessageChatHistoryEntry";
 export * from "./NameChangedChatHistoryEntry";
 export * from "./TopicChangedChatHistoryEntry";
