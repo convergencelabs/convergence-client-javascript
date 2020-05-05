@@ -35,7 +35,7 @@ import {ChatRoom} from "./ChatRoom";
 import {ChatPermissionManager} from "./ChatPermissionManager";
 import {
   domainUserIdToProto,
-  getOrDefaultArray,
+  getOrDefaultArray, getOrDefaultBoolean,
   getOrDefaultNumber,
   jsonToProtoValue,
   toOptional
@@ -220,11 +220,11 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       }
     }).then((response: IConvergenceMessage) => {
       const {chatsExistResponse} = response;
-      const exists = getOrDefaultArray(chatsExistResponse.exists);
+      const exists: boolean[] = getOrDefaultArray(chatsExistResponse.exists);
       if (TypeChecker.isString(chatIds)) {
-        return exists[0];
+        return getOrDefaultBoolean(exists[0]);
       } else if (TypeChecker.isArray(chatIds)) {
-        return new Map(chatIds.map((chatId: string, index: number) => [chatId, exists[index]]));
+        return new Map(chatIds.map((chatId: string, index: number) => [chatId, getOrDefaultBoolean(exists[index])]));
       }
     });
   }
@@ -299,7 +299,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       })
       .then((response: IConvergenceMessage) => {
         const {getJoinedChatsResponse} = response;
-        return getJoinedChatsResponse.chatInfo.map(chatInfo => {
+        return getOrDefaultArray(getJoinedChatsResponse.chatInfo).map(chatInfo => {
           return createChatInfo(this._connection.session(), this._identityCache, chatInfo);
         });
       });
