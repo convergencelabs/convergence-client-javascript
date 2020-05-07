@@ -140,11 +140,11 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
 
   private _doClose(clean: boolean, reason?: string): void {
     if (!this._socket || this._socket.readyState === this._webSocketClass.CLOSED) {
-      this._logger.debug("Can't close a closed WebSocket.");
-      throw new Error("Can not close on a WebSocket in the CLOSED state.");
+      this._logger.debug("Attempted to close a WebSocket that is in the CLOSED state.");
+      throw new Error("Can not call close on a WebSocket in the CLOSED state.");
     } else if (this._socket.readyState === this._webSocketClass.CLOSING) {
-      this._logger.debug("Attempted to close a WebSocket that was already closing.");
-      throw new Error("Connection is already closing.");
+      this._logger.debug("Attempted to close a WebSocket that is in the CLOSING state.");
+      throw new Error("Can not call close on a WebSocket in the CLOSING state.");
     } else {
       this._logger.debug("Closing a connecting Web Socket.");
 

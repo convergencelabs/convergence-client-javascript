@@ -48,26 +48,10 @@ export class HeartbeatHelper {
     this._logger = Logging.logger("heartbeat");
   }
 
-  public setPingInterval(pingInterval: number): void {
-    this._pingInterval = pingInterval;
-  }
-
-  public getPingInterval(): number {
-    return this._pingInterval;
-  }
-
-  public setPongTimeout(pongTimeout: number): void {
-    this._pongTimeout = pongTimeout;
-  }
-
-  public getPongTimeout(): number {
-    return this._pongTimeout;
-  }
-
   public messageReceived(): void {
     if (this._started) {
-      this.cancelPongTimeout();
-      this.restartPingTimeout();
+      this._cancelPongTimeout();
+      this._restartPingTimeout();
     }
   }
 
@@ -86,8 +70,8 @@ export class HeartbeatHelper {
 
   public stop(): void {
     this._started = false;
-    this.stopPingTimer();
-    this.cancelPongTimeout();
+    this._stopPingTimer();
+    this._cancelPongTimeout();
 
     this._logger.debug(() => "HeartbeatHelper stopped.");
   }
@@ -96,47 +80,43 @@ export class HeartbeatHelper {
     return this._started;
   }
 
-  get stopped(): boolean {
-    return !this._started;
-  }
-
   public dispose(): void {
     this.stop();
   }
 
-  private sendPing(): void {
+  private _sendPing = () => {
     this._handler.sendPing();
-    this.schedulePongTimeout();
+    this._schedulePongTimeout();
+  };
+
+  private _schedulePongTimeout(): void {
+    this._cancelPongTimeout();
+    const timeoutMillis = this._pongTimeout * 1000;
+    this._timeoutFuture = setTimeout(this._onTimeout, timeoutMillis);
   }
 
-  private schedulePongTimeout(): void {
-    this._timeoutFuture = setTimeout(
-      () => {
-        this._handler.onTimeout();
-      },
-      this._pongTimeout * 1000);
-  }
-
-  private cancelPongTimeout(): void {
-    if (this._timeoutFuture != null) {
+  private _cancelPongTimeout(): void {
+    if (this._timeoutFuture !== null) {
       clearTimeout(this._timeoutFuture);
       this._timeoutFuture = null;
     }
   }
 
-  private stopPingTimer(): void {
-    if (this._pingFuture != null) {
+  private _stopPingTimer(): void {
+    if (this._pingFuture !== null) {
       clearTimeout(this._pingFuture);
       this._pingFuture = null;
     }
   }
 
-  private restartPingTimeout(): void {
-    this.stopPingTimer();
-    this._pingFuture = setTimeout(
-      () => {
-        this.sendPing();
-      },
-      this._pingInterval * 1000);
+  private _restartPingTimeout(): void {
+    this._stopPingTimer();
+    const pingIntervalMillis = this._pingInterval * 1000;
+    this._pingFuture = setTimeout(this._sendPing, pingIntervalMillis);
+  }
+
+  private _onTimeout = () => {
+    this._logger.debug(() => "A pong timeout occurred");
+    this._handler.onTimeout();
   }
 }

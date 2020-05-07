@@ -37,6 +37,7 @@ import {Logger} from "../util/log/Logger";
 import {AuthenticationMethod, AuthenticationMethods} from "./AuthenticationMethod";
 
 import {com} from "@convergence/convergence-proto";
+import {RandomStringGenerator} from "../util/RandomStringGenerator";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IHandshakeResponseMessage = com.convergencelabs.convergence.proto.core.IHandshakeResponseMessage;
 import IAuthenticationRequestMessage = com.convergencelabs.convergence.proto.core.IAuthenticationRequestMessage;
@@ -49,7 +50,6 @@ import IReconnectTokenAuthRequestData =
   com.convergencelabs.convergence.proto.core.AuthenticationRequestMessage.IReconnectTokenAuthRequestData;
 import IAnonymousAuthRequestData =
   com.convergencelabs.convergence.proto.core.AuthenticationRequestMessage.IAnonymousAuthRequestData;
-import {RandomStringGenerator} from "../util/RandomStringGenerator";
 
 /**
  * @hidden
@@ -107,6 +107,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
     this._connectionAttempts = 0;
     this._connectionState = ConnectionState.DISCONNECTED;
+    this._connectionTimeoutTask = null;
+    this._connectionAttemptTask = null;
 
     const initialSessionId = "offline:" + ConvergenceConnection._SessionIdGenerator.nextString();
     this._session = new ConvergenceSession(domain, this, null, initialSessionId, null);
@@ -228,7 +230,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
         this.disconnect();
         return Promise.reject(e);
       });
-    ;
   }
 
   public authenticateWithReconnectToken(token: string): Promise<void> {
@@ -360,7 +361,25 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       this._connectionAttempts = 0;
       this._attemptConnection();
     }
-  }
+  };
+
+  private _scheduleConnectionTimeout = () => {
+    // Clear any previous timout
+    this._clearConnectionTimeout();
+    const timeout = this._options.connectionTimeout * 1000;
+    this._connectionTimeoutTask = setTimeout(this._onConnectionTimeout, timeout);
+  };
+
+  private _clearConnectionTimeout = () => {
+    if (this._connectionTimeoutTask !== null) {
+      clearTimeout(this._connectionTimeoutTask);
+      this._connectionTimeoutTask = null;
+    }
+  };
+
+  private _onConnectionTimeout = () => {
+    this._protocolConnection.abort("connection timeout exceeded");
+  };
 
   private _attemptConnection(): void {
     if (this._connectionAttemptTask !== null) {
@@ -371,12 +390,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionAttempts++;
     this._logger.debug(() => `Attempting to open web socket connection to: ${this._url}`);
 
-    const timeoutTask = () => {
-      this._protocolConnection.abort("connection timeout exceeded");
-    };
-
-    const timeout = this._options.connectionTimeout * 1000;
-    this._connectionTimeoutTask = setTimeout(timeoutTask, timeout);
+    this._scheduleConnectionTimeout();
 
     this._emitEvent({name: ConvergenceConnection.Events.CONNECTING});
 
@@ -480,7 +494,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           });
       })
       .catch((_: Error) => {
-        clearTimeout(this._connectionTimeoutTask);
+        this._clearConnectionTimeout();
         this._emitEvent({name: ConvergenceConnection.Events.CONNECTION_FAILED});
         this._scheduleConnection();
       });

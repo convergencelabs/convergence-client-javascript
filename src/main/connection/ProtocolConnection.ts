@@ -131,7 +131,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
           this.sendMessage({ping: {}});
         },
         onTimeout: () => {
-          this.abort("pong timeout");
+          this.abort("heartbeat pong timeout");
         }
       };
 
