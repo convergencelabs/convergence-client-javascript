@@ -837,9 +837,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         }
 
         this._localParticipant = participants.get(localSessionId);
+        this._participants.next(participants);
 
         participants.forEach(p => this._emitParticipantJoined(p));
-        this._participants.next(participants);
 
         deferred.resolve();
       })
