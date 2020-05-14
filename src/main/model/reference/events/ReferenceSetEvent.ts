@@ -20,13 +20,13 @@ import {ModelReference} from "../ModelReference";
  *
  * @module Real Time Data
  */
-export class ReferenceChangedEvent<T> implements IConvergenceEvent {
+export class ReferenceSetEvent<T> implements IConvergenceEvent {
   public static readonly NAME = "set";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = ReferenceChangedEvent.NAME;
+  public readonly name: string = ReferenceSetEvent.NAME;
 
   /**
    * The first (if there were multiple) previous value of the reference.

@@ -17,7 +17,7 @@ import {EqualsUtil} from "../../util/EqualsUtil";
 import {ReferenceManager} from "./ReferenceManager";
 import {
   ReferenceDisposedEvent,
-  ReferenceChangedEvent,
+  ReferenceSetEvent,
   ReferenceClearedEvent
 } from "./events";
 import {ReferenceType} from "./ReferenceType";
@@ -83,7 +83,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
    * ```
    */
   public static readonly Events: ModelReferenceEvents = {
-    SET: ReferenceChangedEvent.NAME,
+    SET: ReferenceSetEvent.NAME,
     CLEARED: ReferenceClearedEvent.NAME,
     DISPOSED: ReferenceDisposedEvent.NAME
   };
@@ -260,7 +260,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
     const added = this._values.filter(v => !oldValues.includes(v));
     const removed = oldValues.filter(v => !this._values.includes(v));
 
-    const event: ReferenceChangedEvent<V> = new ReferenceChangedEvent(this, oldValues, added, removed, synthetic);
+    const event: ReferenceSetEvent<V> = new ReferenceSetEvent(this, oldValues, added, removed, synthetic);
     this._emitEvent(event);
   }
 

@@ -12,6 +12,6 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-export * from "./ReferenceChangedEvent";
+export * from "./ReferenceSetEvent";
 export * from "./ReferenceClearedEvent";
 export * from "./ReferenceDisposedEvent";
