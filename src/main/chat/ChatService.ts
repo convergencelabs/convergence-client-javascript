@@ -78,6 +78,11 @@ const Events: IChatServiceEvents = {
 };
 Object.freeze(Events);
 
+interface IChatRecord {
+  chat: Chat;
+  references: number;
+}
+
 /**
  * The `ChatService` is the entry point for chat functionality.  Chat is defined
  * as textual communication limited to either a fixed set of participants, or a
@@ -398,7 +403,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
 
   /**
    * Joins a [[Chat]] with the specified id.  The [[Chat]] must already exist.
-   * The type of Chat returned will vary depdning on what type of Chat the
+   * The type of Chat returned will vary depending on what type of Chat the
    * id refers to.
    *
    * @param chatId

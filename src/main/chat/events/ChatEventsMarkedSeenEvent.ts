@@ -12,16 +12,29 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-export * from "./ChatEvent";
-export * from "./ChatJoinedEvent";
-export * from "./ChatLeftEvent";
-export * from "./ChatMessageEvent";
-export * from "./ChatNameChangedEvent";
-export * from "./ChatRemovedEvent";
-export * from "./ChatTopicChangedEvent";
-export * from "./IChatEvent";
-export * from "./UserAddedEvent";
-export * from "./UserJoinedEvent";
-export * from "./UserLeftEvent";
-export * from "./UserRemovedEvent";
-export * from "./ChatEventsMarkedSeenEvent"
+import {DomainUser} from "../../identity";
+import {IChatEvent} from "./IChatEvent";
+
+/**
+ * Emitted when a [[DomainUser]] marks chat events as being seen in a [[Chat]].
+ *
+ * @module Chat
+ */
+export class ChatEventsMarkedSeenEvent implements IChatEvent {
+  public static readonly NAME = "events_seen";
+
+  /**
+   * @inheritdoc
+   */
+  public readonly name: string = ChatEventsMarkedSeenEvent.NAME;
+
+  /**
+   * @hidden
+   * @internal
+   */
+  constructor(public chatId: string,
+              public maxSeenEventNumber: number,
+              public user: DomainUser) {
+    Object.freeze(this);
+  }
+}

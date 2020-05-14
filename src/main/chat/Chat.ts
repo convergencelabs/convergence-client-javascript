@@ -17,7 +17,7 @@ import {
   ChatEvent,
   ChatMessageEvent,
   ChatNameChangedEvent,
-  ChatTopicChangedEvent,
+  ChatTopicChangedEvent, ChatEventsMarkedSeenEvent,
   IChatEvent,
   UserAddedEvent,
   UserJoinedEvent,
@@ -226,7 +226,9 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
         chatId: this._info.chatId,
         eventNumber
       }
-    }).then(() => undefined);
+    }).then(() => {
+      return;
+    });
   }
 
   /**
@@ -328,6 +330,21 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       this._info = {...this._info, name: event.chatName};
     } else if (event instanceof ChatTopicChangedEvent) {
       this._info = {...this._info, topic: event.topic};
+    } else if (event instanceof ChatEventsMarkedSeenEvent) {
+      const members = this._info.members.slice(0);
+      const index = members.findIndex(m => m.user.userId.equals(event.user.userId));
+      if (index >= 0) {
+        const member = members[index];
+        if (member) {
+          const newMember = {...member, eventNumber: event.maxSeenEventNumber};
+          members[index] = newMember;
+          this._info = {...this._info, members};
+
+          if (this.session().user().userId.equals(member.user.userId)) {
+            this._info = {...this._info, maxSeenEventNumber:  event.maxSeenEventNumber};
+          }
+        }
+      }
     }
 
     Immutable.make(this._info);

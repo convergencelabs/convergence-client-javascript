@@ -16,7 +16,7 @@ import {
   ChatMessageEvent,
   ChatNameChangedEvent,
   ChatRemovedEvent,
-  ChatTopicChangedEvent,
+  ChatTopicChangedEvent, ChatEventsMarkedSeenEvent,
   IChatEvent,
   UserAddedEvent,
   UserJoinedEvent,
@@ -42,7 +42,8 @@ export function isChatMessage(message: IConvergenceMessage): boolean {
     !!message.userRemovedFromChatChannel ||
     !!message.chatRemoved ||
     !!message.chatNameChanged ||
-    !!message.chatTopicChanged;
+    !!message.chatTopicChanged ||
+    !!message.chatEventsMarkedSeen;
 }
 
 /**
@@ -114,6 +115,13 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       identityCache.getUserForSession(chatMsg.sessionId),
       chatMsg.sessionId,
       getOrDefaultString(chatMsg.message)
+    );
+  } else if (message.chatEventsMarkedSeen) {
+    const chatMsg = message.chatEventsMarkedSeen;
+    return new ChatEventsMarkedSeenEvent(
+      chatMsg.chatId,
+      getOrDefaultNumber(chatMsg.eventNumber),
+      identityCache.getUser(protoToDomainUserId(chatMsg.user))
     );
   } else {
     throw new ConvergenceError("Invalid chat event");
