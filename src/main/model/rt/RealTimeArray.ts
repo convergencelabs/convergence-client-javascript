@@ -120,7 +120,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @param index the 0-based index of the desired element.
    */
-  public get(index: number): RealTimeElement<any> {
+  public get(index: number): RealTimeElement {
     return this._wrapperFactory.wrap(this._delegate.get(index));
   }
 
@@ -147,7 +147,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a [[RealTimeElement]] wrapping the newly-set `value`
    */
-  public set(index: number, value: any): RealTimeElement<any> {
+  public set(index: number, value: any): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.set(index, value));
   }
@@ -175,7 +175,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a [[RealTimeElement]] wrapping the just-inserted `value`
    */
-  public insert(index: number, value: any): RealTimeElement<any> {
+  public insert(index: number, value: any): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.insert(index, value));
   }
@@ -198,7 +198,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns The RealTimeElement that *was* at `index`, in detached mode.
    */
-  public remove(index: number): RealTimeElement<any> {
+  public remove(index: number): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.remove(index));
   }
@@ -242,7 +242,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a `RealTimeElement` wrapping the newly-inserted value.
    */
-  public push(value: any): RealTimeElement<any> {
+  public push(value: any): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.push(value));
   }
@@ -264,7 +264,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a `RealTimeElement` wrapping the just-removed value, in detached mode.
    */
-  public pop(): RealTimeElement<any> {
+  public pop(): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.pop());
   }
@@ -285,7 +285,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a `RealTimeElement` wrapping the just-inserted value
    */
-  public unshift(value: any): RealTimeElement<any> {
+  public unshift(value: any): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.unshift(value));
   }
@@ -307,7 +307,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns a `RealTimeElement` wrapping the just-removed value, in detached mode.
    */
-  public shift(): RealTimeElement<any> {
+  public shift(): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap(this._delegate.shift());
   }
@@ -342,7 +342,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * @returns true if there was at least item in this array for which the given function
    * test passed.
    */
-  public some(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean {
+  public some(callback: (element: RealTimeElement, index: number) => boolean): boolean {
     return this._delegate.some((modelNode, index) => {
       return callback(this._wrapperFactory.wrap(modelNode), index);
     });
@@ -370,7 +370,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns true if every item in the array passes the provided test function
    */
-  public every(callback: (element: RealTimeElement<any>, index?: number) => boolean): boolean {
+  public every(callback: (element: RealTimeElement, index: number) => boolean): boolean {
     return this._delegate.every((modelNode, index) => {
       return callback(this._wrapperFactory.wrap(modelNode), index);
     });
@@ -399,7 +399,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * @returns a [[RealTimeElement]] wrapping the first item that passed the provided
    * test function, or `undefined` if there were no matches.
    */
-  public find(callback: (element: RealTimeElement<any>, index?: number) => boolean): RealTimeElement<any> {
+  public find(callback: (element: RealTimeElement, index: number) => boolean): RealTimeElement {
     const node = this._delegate.find((modelNode, index) => {
       return callback(this._wrapperFactory.wrap(modelNode), index);
     });
@@ -435,7 +435,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    * @returns the index of the first item in this array which passes the given
    * test function, or `-1` if there were no matches.
    */
-  public findIndex(callback: (element: RealTimeElement<any>, index?: number) => boolean): number {
+  public findIndex(callback: (element: RealTimeElement, index: number) => boolean): number {
     return this._delegate.findIndex((modelNode, index) => {
       return callback(this._wrapperFactory.wrap(modelNode), index);
     });
@@ -458,7 +458,7 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @param callback a function to be called for each item in this array
    */
-  public forEach(callback: (value: RealTimeElement<any>, index?: number) => void): void {
+  public forEach(callback: (value: RealTimeElement, index: number) => void): void {
     this._delegate.forEach((modelNode, index) => {
       callback(this._wrapperFactory.wrap(modelNode), index);
     });
@@ -473,9 +473,9 @@ export class RealTimeArray extends RealTimeElement<any[]> implements ObservableA
    *
    * @returns The [[RealTimeElement]] at the given path, or null if no such element exists
    */
-  public elementAt(path: Path): RealTimeElement<any>;
-  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
-  public elementAt(...path: any[]): RealTimeElement<any> {
+  public elementAt(path: Path): RealTimeElement;
+  public elementAt(...elements: PathElement[]): RealTimeElement;
+  public elementAt(...path: any[]): RealTimeElement {
     return this._wrapperFactory.wrap(this._delegate.valueAt(...path));
   }
 

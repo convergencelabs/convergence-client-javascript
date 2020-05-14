@@ -309,7 +309,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private readonly _referencesBySession: Map<string, Array<ModelReference<any>>>;
+  private readonly _referencesBySession: Map<string, ModelReference<any>[]>;
 
   /**
    * @internal
@@ -712,7 +712,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * @param path the search path for accessing a node within this model's data
    */
-  public elementAt(path: Path): RealTimeElement<any>;
+  public elementAt(path: Path): RealTimeElement;
 
   /**
    * Given an array of search path elements, returns the [[RealTimeElement]] at
@@ -720,8 +720,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * @param path an array of search path elements (which in totality are a [[Path]])
    */
-  public elementAt(...path: PathElement[]): RealTimeElement<any>;
-  public elementAt(...path: any[]): RealTimeElement<any> {
+  public elementAt(...path: PathElement[]): RealTimeElement;
+  public elementAt(...path: any[]): RealTimeElement {
     return this._wrapperFactory.wrap(this._model.valueAt(...path));
   }
 
@@ -907,7 +907,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @returns An array of remote [[ModelReference]]s, or an empty array if there
    * were no matches.
    */
-  public references(filter?: ReferenceFilter): Array<ModelReference<any>> {
+  public references(filter?: ReferenceFilter): ModelReference<any>[] {
     return this._referenceManager.getAll(filter);
   }
 
@@ -1137,7 +1137,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  public _getRegisteredValue(id: string): RealTimeElement<any> {
+  public _getRegisteredValue(id: string): RealTimeElement {
     return this._wrapperFactory.wrap(this._model._getRegisteredValue(id));
   }
 
@@ -1421,7 +1421,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private _handleClientClosed(sessionId: string): void {
     this._sessions = this._sessions.filter(s => s !== sessionId);
 
-    const refs: Array<ModelReference<any>> = this._referencesBySession.get(sessionId);
+    const refs: ModelReference<any>[] = this._referencesBySession.get(sessionId);
     this._referencesBySession.delete(sessionId);
 
     refs.forEach((ref: ModelReference<any>) => {
@@ -1447,7 +1447,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     if (event.valueId === null) {
       this._modelReferenceEvent(event);
     } else {
-      const value: RealTimeElement<any> = this._getRegisteredValue(event.valueId);
+      const value: RealTimeElement = this._getRegisteredValue(event.valueId);
       if (!value) {
         return;
       }
@@ -1880,7 +1880,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     });
 
     references.forEach((ref: IReferenceData) => {
-      let element: RealTimeElement<any>;
+      let element: RealTimeElement;
       const valueId = fromOptional<string>(ref.valueId);
       if (valueId !== null) {
         element = this._wrapperFactory.wrap(this._model._getRegisteredValue(valueId));

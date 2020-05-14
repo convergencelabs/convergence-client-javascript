@@ -96,7 +96,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @param key the key whose value is desired
    */
-  public get(key: string): RealTimeElement<any> {
+  public get(key: string): RealTimeElement {
     return this._wrapperFactory.wrap((this._delegate as ObjectNode).get(key));
   }
 
@@ -120,7 +120,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @returns a [[RealTimeElement]] wrapping the newly-set `value`
    */
-  public set(key: string, value: any): RealTimeElement<any> {
+  public set(key: string, value: any): RealTimeElement {
     this._assertWritable();
     const propSet: boolean = (this._delegate as ObjectNode).hasKey(key);
     const delegateChild: ModelNode<any> = (this._delegate as ObjectNode).set(key, value);
@@ -151,7 +151,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    * @returns The RealTimeElement that *was* at `key`, in detached mode. If no `key` was
    * found, returns a [[RealTimeUndefined]].
    */
-  public remove(key: string): RealTimeElement<any> {
+  public remove(key: string): RealTimeElement {
     this._assertWritable();
     return this._wrapperFactory.wrap((this._delegate as ObjectNode).remove(key));
   }
@@ -210,7 +210,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @param callback a function to be called for each key-value pair in this object
    */
-  public forEach(callback: (model: RealTimeElement<any>, key?: string) => void): void {
+  public forEach(callback: (model: RealTimeElement, key: string) => void): void {
     (this._delegate as ObjectNode).forEach((modelNode, key) => {
       callback(this._wrapperFactory.wrap(modelNode), key);
     });
@@ -225,9 +225,9 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    *
    * @returns The [[RealTimeElement]] at the given path, or null if no such element exists
    */
-  public elementAt(path: Path): RealTimeElement<any>;
-  public elementAt(...elements: PathElement[]): RealTimeElement<any>;
-  public elementAt(...path: any[]): RealTimeElement<any> {
+  public elementAt(path: Path): RealTimeElement;
+  public elementAt(...elements: PathElement[]): RealTimeElement;
+  public elementAt(...path: any[]): RealTimeElement {
     return this._wrapperFactory.wrap((this._delegate as ObjectNode).valueAt(...path));
   }
 
