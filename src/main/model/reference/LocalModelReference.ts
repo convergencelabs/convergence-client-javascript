@@ -222,7 +222,9 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public dispose(): void {
     this._ensureAttached();
-    this.unshare();
+    if (this.isShared()) {
+      this.unshare();
+    }
     this._reference._dispose();
     this._callbacks = null;
   }
