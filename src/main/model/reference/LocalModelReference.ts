@@ -16,7 +16,7 @@ import {ModelReference, ModelReferenceEvents} from "./ModelReference";
 import {RealTimeElement, RealTimeModel} from "../rt";
 import {IConvergenceEvent, ConvergenceEventEmitter} from "../../util";
 import {DomainUser} from "../../identity";
-import { ReferenceType } from "./ReferenceType";
+import {ReferenceType} from "./ReferenceType";
 
 /**
  * @hidden
@@ -36,7 +36,7 @@ export interface ModelReferenceCallbacks {
  * @module Real Time Data
  */
 export abstract class LocalModelReference<V, R extends ModelReference<V>>
-extends ConvergenceEventEmitter<IConvergenceEvent> {
+  extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * A mapping of the events this model reference could emit to each event's unique name.
@@ -154,21 +154,27 @@ extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * Publishes the reference, such that other users with access to the attached
-   * model can access this reference and its underlying value(s).
+   * model can access this reference and its underlying value(s). If the
+   * reference is already shared, the call will simply be ignored.
    */
   public share(): void {
     this._ensureAttached();
-    this._shared = true;
-    this._callbacks.onShare(this);
+    if (!this.isShared()) {
+      this._callbacks.onShare(this);
+      this._shared = true;
+    }
   }
 
   /**
-   * Unpublishes the reference, essentially making it private.
+   * Unpublishes the reference, essentially making it private. If the reference
+   * is not currently shared, the call will simply be ignored.
    */
   public unshare(): void {
     this._ensureAttached();
-    this._shared = false;
-    this._callbacks.onUnShare(this);
+    if (this.isShared()) {
+      this._callbacks.onUnShare(this);
+      this._shared = false;
+    }
   }
 
   /**
