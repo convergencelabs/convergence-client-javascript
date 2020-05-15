@@ -106,7 +106,9 @@ export class Logger {
   }
 
   private _log(event: LogEvent) {
-    this._logWriters.forEach(writer => writer.writeLog(event));
+    if (this._levelPriority !== LogLevelPriority.SILENT) {
+      this._logWriters.forEach(writer => writer.writeLog(event));
+    }
   }
 
   private _resolveLogMessage(message: LogMessage): string {
