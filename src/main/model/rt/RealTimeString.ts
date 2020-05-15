@@ -251,9 +251,6 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       if (event.local) {
         this._sendOperation(new StringSetOperation(this.id(), false, event.value));
       }
-      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
-        ref._dispose();
-      });
       this._referenceManager.removeAll();
     }
   }

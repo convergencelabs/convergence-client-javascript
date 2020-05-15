@@ -119,16 +119,21 @@ export abstract class RealTimeElement<T = any>
     this._wrapperFactory = wrapperFactory;
     this._model = model;
 
-    const onRemoteReference: OnRemoteReference = (ref) => {
+    const onRemoteReference: OnRemoteReference = (ref: ModelReference) => {
       this._fireReferenceCreated(ref);
     };
 
     this._referenceManager = new ReferenceManager(this, referenceTypes, onRemoteReference, identityCache);
 
     this._delegate.events().pipe(filter(event => {
-      return this._model.emitLocalEvents() || !event.local ||
-        event instanceof NodeDetachedEvent;
+      return this._model.emitLocalEvents() || !event.local || event instanceof NodeDetachedEvent;
     })).subscribe(event => {
+      // Specifically watch for this event so that we can dispose of all the
+      // references.
+      if (event instanceof NodeDetachedEvent) {
+        this._referenceManager.removeAll();
+      }
+
       const convertedEvent: IConvergenceEvent = ModelEventConverter.convertEvent(event, this._wrapperFactory);
       this._emitEvent(convertedEvent);
     });
@@ -181,11 +186,11 @@ export abstract class RealTimeElement<T = any>
    *
    * @returns the parent of this element, or `this` if this is the root element
    */
-  public parent(): RealTimeContainerElement<any> {
+  public parent(): RealTimeContainerElement {
     const parentPath = this._delegate.path().slice(0);
     parentPath.pop();
     const parent = this._model.elementAt(parentPath);
-    return parent as any as RealTimeContainerElement<any>;
+    return parent as any as RealTimeContainerElement;
   }
 
   /**
@@ -236,7 +241,7 @@ export abstract class RealTimeElement<T = any>
     }
 
     const relPath = parentPath.pop();
-    const parent = this._model.elementAt(parentPath) as any as RealTimeContainerElement<any>;
+    const parent = this._model.elementAt(parentPath) as any as RealTimeContainerElement;
     parent._removeChild(relPath);
   }
 
@@ -307,7 +312,7 @@ export abstract class RealTimeElement<T = any>
    * @param sessionId The session ID that created the reference
    * @param key the reference's unique key
    */
-  public reference(sessionId: string, key: string): ModelReference<any> {
+  public reference(sessionId: string, key: string): ModelReference {
     return this._referenceManager.get(sessionId, key);
   }
 
@@ -317,12 +322,12 @@ export abstract class RealTimeElement<T = any>
    * which would return all of a particular user session's references, or both,
    * which is really just the same as using the [[reference]] method.
    *
-   * @param filter an object containing either a `sessionId`, `key`, or both
+   * @param referenceFilter an object containing either a `sessionId`, `key`, or both
    *
    * @returns An array of remote [[ModelReference]]s, or an empty array if there
    * were no matches.
    */
-  public references(referenceFilter?: ReferenceFilter): Array<ModelReference<any>> {
+  public references(referenceFilter?: ReferenceFilter): ModelReference[] {
     return this._referenceManager.getAll(referenceFilter);
   }
 
@@ -367,7 +372,7 @@ export abstract class RealTimeElement<T = any>
    * @hidden
    * @internal
    */
-  private _fireReferenceCreated(reference: ModelReference<any>): void {
+  private _fireReferenceCreated(reference: ModelReference): void {
     this._emitEvent(new RemoteReferenceCreatedEvent(reference, this.model(), this));
   }
 }

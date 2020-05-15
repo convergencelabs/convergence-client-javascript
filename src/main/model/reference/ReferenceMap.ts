@@ -25,13 +25,13 @@ export class ReferenceMap {
   /**
    * Contains references mapped first by sessionId and then by reference key.
    */
-  private _referencesBySessionId: Map<string, Map<string, ModelReference<any>>>;
+  private _referencesBySessionId: Map<string, Map<string, ModelReference>>;
 
   constructor() {
     this._referencesBySessionId = new Map();
   }
 
-  public put(reference: ModelReference<any>): void {
+  public put(reference: ModelReference): void {
     const sessionId = reference.sessionId();
     const key = reference.key();
 
@@ -48,7 +48,7 @@ export class ReferenceMap {
     sessionReferences.set(key, reference);
   }
 
-  public get(sessionId: string, key: string): ModelReference<any> {
+  public get(sessionId: string, key: string): ModelReference {
     const sessionReferences = this._referencesBySessionId.get(sessionId);
     if (!TypeChecker.isUndefined(sessionReferences)) {
       return sessionReferences.get(key);
@@ -57,12 +57,12 @@ export class ReferenceMap {
     }
   }
 
-  public getAll(filter?: ReferenceFilter): Array<ModelReference<any>> {
+  public getAll(filter?: ReferenceFilter): ModelReference[] {
     if (TypeChecker.isUndefined(filter)) {
       filter = {};
     }
 
-    const refs: Array<ModelReference<any>> = [];
+    const refs: ModelReference[] = [];
 
     const sessionIds: string[] = TypeChecker.isSet(filter.sessionId) ?
       [filter.sessionId] :
@@ -72,7 +72,7 @@ export class ReferenceMap {
       const sessionRefs = this._referencesBySessionId.get(sid);
       const keys: string[] = TypeChecker.isSet(filter.key) ? [filter.key] : Array.from(sessionRefs.keys());
       keys.forEach((k: string) => {
-        const r: ModelReference<any> = sessionRefs.get(k);
+        const r: ModelReference = sessionRefs.get(k);
         if (!TypeChecker.isUndefined(r)) {
           refs.push(r);
         }
@@ -86,7 +86,7 @@ export class ReferenceMap {
     this._referencesBySessionId.clear();
   }
 
-  public remove(sessionId: string, key: string): ModelReference<any> {
+  public remove(sessionId: string, key: string): ModelReference {
     const sessionReferences = this._referencesBySessionId.get(sessionId);
     if (sessionReferences !== undefined) {
       const current = sessionReferences.get(key);

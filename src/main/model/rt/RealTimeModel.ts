@@ -1768,7 +1768,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._initializeReferences(getOrDefaultArray(message.references));
 
-      this._referenceManager.reshare();
+      this._referenceManager.reShare();
 
       this._debug(`Online`);
       this._emitEvent(new ModelOnlineEvent(this));

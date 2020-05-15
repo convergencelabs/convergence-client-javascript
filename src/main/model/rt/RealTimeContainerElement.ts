@@ -21,9 +21,9 @@ import {Path, PathElement} from "../Path";
  *
  * @module Real Time Data
  */
-export interface RealTimeContainerElement<T> extends ObservableContainerElement<T> {
-  elementAt(path: Path): RealTimeElement<any>;
-  elementAt(...elements: PathElement[]): RealTimeElement<any>;
+export interface RealTimeContainerElement<T = any> extends ObservableContainerElement<T> {
+  elementAt(path: Path): RealTimeElement;
+  elementAt(...elements: PathElement[]): RealTimeElement;
 
   /**
    * @param relPath

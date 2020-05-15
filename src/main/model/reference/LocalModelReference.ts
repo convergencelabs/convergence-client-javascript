@@ -228,11 +228,7 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>>
    */
   public dispose(): void {
     this._ensureAttached();
-    if (this.isShared()) {
-      this.unshare();
-    }
-    this._reference._dispose();
-    this._callbacks = null;
+    this._dispose();
   }
 
   /**
@@ -245,5 +241,20 @@ export abstract class LocalModelReference<V, R extends ModelReference<V>>
         throw new Error("The source model is detached");
       }
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  public _dispose(): void {
+    const source = this.source();
+    const needToUnshare = (source instanceof RealTimeElement && source.isAttached()) ||
+      (source instanceof RealTimeModel && source.isOpen())
+    if (needToUnshare) {
+      this.unshare();
+    }
+    this._reference._dispose();
+    this._callbacks = null;
   }
 }

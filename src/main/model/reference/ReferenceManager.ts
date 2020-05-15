@@ -17,7 +17,6 @@ import {LocalModelReference} from "./LocalModelReference";
 import {ModelReference} from "./ModelReference";
 import {IndexReference} from "./IndexReference";
 import {RealTimeElement, RealTimeModel} from "../rt";
-import {Immutable} from "../../util/Immutable";
 import {RangeReference} from "./RangeReference";
 import {ElementReference} from "./ElementReference";
 import {PropertyReference} from "./PropertyReference";
@@ -37,7 +36,7 @@ import {IdentityCache} from "../../identity/IdentityCache";
  * @hidden
  * @internal
  */
-export type OnRemoteReference = (reference: ModelReference<any>) => void;
+export type OnRemoteReference = (reference: ModelReference) => void;
 
 /**
  * @hidden
@@ -63,15 +62,16 @@ export class ReferenceManager {
     this._identityCache = identityCache;
   }
 
-  public get(sessionId: string, key: string): ModelReference<any> {
+  public get(sessionId: string, key: string): ModelReference {
     return this._referenceMap.get(sessionId, key);
   }
 
-  public getAll(filter?: ReferenceFilter): Array<ModelReference<any>> {
+  public getAll(filter?: ReferenceFilter): ModelReference[] {
     return this._referenceMap.getAll(filter);
   }
 
   public removeAll(): void {
+    this.removeAllLocalReferences();
     this.getAll().forEach(ref => ref._dispose());
   }
 
@@ -87,22 +87,18 @@ export class ReferenceManager {
   public removeLocalReference(key: string): void {
     const current: LocalModelReference<any, any> = this._localReferences.get(key);
     if (current !== undefined) {
-      current.dispose();
+      current._dispose();
     }
   }
 
   public removeAllLocalReferences(): void {
-    this._localReferences.forEach((reference, key) => {
+    this._localReferences.forEach((reference: LocalModelReference<any, any>, key: string) => {
       this.removeLocalReference(key);
     });
   }
 
   public getLocalReference(key: string): LocalModelReference<any, any> {
     return this._localReferences.get(key);
-  }
-
-  public localReferences(): Map<string, LocalModelReference<any, any>> {
-    return new Map(this._localReferences);
   }
 
   public handleRemoteReferenceEvent(event: RemoteReferenceEvent): void {
@@ -119,7 +115,7 @@ export class ReferenceManager {
     }
   }
 
-  public reshare(): void {
+  public reShare(): void {
     this._localReferences.forEach(reference => {
       if (reference.isShared()) {
         reference.share();
@@ -130,7 +126,7 @@ export class ReferenceManager {
   /**
    * @private
    */
-  public _handleReferenceDisposed(reference: ModelReference<any>): void {
+  public _handleReferenceDisposed(reference: ModelReference): void {
     this._referenceMap.remove(reference.sessionId(), reference.key());
     if (reference.isLocal()) {
       this._localReferences.delete(reference.key());
@@ -139,7 +135,7 @@ export class ReferenceManager {
 
   private _handleRemoteReferenceShared(event: RemoteReferenceShared): void {
     const user = this._identityCache.getUserForSession(event.sessionId);
-    let reference: ModelReference<any>;
+    let reference: ModelReference;
 
     const values = event.values;
     this._assertValidType(event.referenceType);
@@ -171,26 +167,26 @@ export class ReferenceManager {
   }
 
   private _handleRemoteReferenceUnshared(event: RemoteReferenceUnshared): void {
-    const reference: ModelReference<any> = this._referenceMap.remove(event.sessionId, event.key);
+    const reference: ModelReference = this._referenceMap.remove(event.sessionId, event.key);
     reference._dispose();
   }
 
   private _handleRemoteReferenceCleared(event: RemoteReferenceCleared): void {
-    const reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
+    const reference: ModelReference = this._referenceMap.get(event.sessionId, event.key);
     reference._clear();
   }
 
   private _handleRemoteReferenceSet(event: RemoteReferenceSet): void {
-    const reference: ModelReference<any> = this._referenceMap.get(event.sessionId, event.key);
+    const reference: ModelReference = this._referenceMap.get(event.sessionId, event.key);
     this._setReferenceValues(reference, event.values);
   }
 
-  private _setReferenceValues(reference: ModelReference<any>, values: any): void {
+  private _setReferenceValues(reference: ModelReference, values: any): void {
     // Translate vids to RealTimeElements
     if (reference.type() === ModelReference.Types.ELEMENT) {
-      const rtvs: Array<RealTimeElement<any>> = [];
+      const rtvs: RealTimeElement[] = [];
       for (const id of values) {
-        const value: RealTimeElement<any> = (this._source as RealTimeModel)._getRegisteredValue(id);
+        const value: RealTimeElement = (this._source as RealTimeModel)._getRegisteredValue(id);
         if (value !== undefined) {
           rtvs.push(value);
         }

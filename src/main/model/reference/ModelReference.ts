@@ -70,7 +70,7 @@ export interface ModelReferenceEvents {
  *
  * @module Real Time Data
  */
-export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConvergenceEvent> {
+export abstract class ModelReference<V = any> extends ConvergenceEventEmitter<IConvergenceEvent> {
 
   /**
    * A mapping of the events this instance could emit to each event's unique name.
@@ -151,7 +151,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   protected constructor(referenceManager: ReferenceManager,
                         type: ReferenceType,
                         key: string,
-                        source: RealTimeElement<any> | RealTimeModel,
+                        source: RealTimeElement | RealTimeModel,
                         user: DomainUser,
                         sessionId: string,
                         local: boolean) {
@@ -184,7 +184,7 @@ export abstract class ModelReference<V> extends ConvergenceEventEmitter<IConverg
   /**
    * Returns the element or model on which this reference was created.
    */
-  public source(): RealTimeElement<any> | RealTimeModel {
+  public source(): RealTimeElement | RealTimeModel {
     return this._source;
   }
 

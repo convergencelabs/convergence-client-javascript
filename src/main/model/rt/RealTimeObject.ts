@@ -290,12 +290,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
         this._sendOperation(new ObjectSetOperation(
           this.id(), false, (this._delegate as ObjectNode).dataValue().value));
       }
-
-      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
-        ref._dispose();
-      });
       this._referenceManager.removeAll();
-      this._referenceManager.removeAllLocalReferences();
     } else if (event instanceof ObjectNodeRemoveEvent) {
       if (event.local) {
         this._sendOperation(new ObjectRemovePropertyOperation(this.id(), false, event.key));
