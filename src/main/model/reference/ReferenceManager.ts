@@ -149,7 +149,7 @@ export class ReferenceManager {
     } else if (event.referenceType === "property") {
       reference = new PropertyReference(this, event.key, this._source, user, event.sessionId, false);
     } else {
-      throw new ConvergenceError("Invalid reference message: " + event);
+      throw new ConvergenceError("Invalid reference type: " + event);
     }
 
     if (values !== null) {
