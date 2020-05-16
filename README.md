@@ -34,6 +34,7 @@ These deviations from strict Semantic Versioning are intended to get potential n
 
 - Please use the [Discourse Forum](https://forum.convergence.io) for general and technical questions, so the whole community can benefit.
 - For paid dedicated support, integration assistance, or other custom development services, [contact us](https://convergence.io/contact-sales/) directly.
+- Chat with us on the [Convergence Public Slack](https://slack.convergence.io).
 - Email <support@convergencelabs.com> for all other inquiries.
 
 
