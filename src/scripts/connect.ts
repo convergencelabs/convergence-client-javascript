@@ -30,7 +30,6 @@ const DOMAIN_URL = "ws://localhost:8080/convergence/default";
 const DOMAIN_USERNAME = "test";
 const DOMAIN_PASSWORD = "password";
 
-const ANONYMOUS = true;
 const DISPLAY_NAME = "test user";
 
 const OPTIONS: IConvergenceOptions = {
@@ -79,7 +78,7 @@ export function createDomain(options?: IConvergenceOptions): ConvergenceDomain {
   return domain;
 }
 
-export function connect(cancellationToken?: CancellationToken): Promise<ConvergenceDomain> {
+export function connect(cancellationToken?: CancellationToken, anonymous: boolean = true): Promise<ConvergenceDomain> {
   const domain = createDomain();
 
   if (TypeChecker.isSet(cancellationToken)) {
@@ -88,7 +87,7 @@ export function connect(cancellationToken?: CancellationToken): Promise<Converge
     });
   }
 
-  if (ANONYMOUS) {
+  if (anonymous) {
     return domain.connectAnonymously(() => Promise.resolve(DISPLAY_NAME)).then(() => domain);
   } else {
     return domain

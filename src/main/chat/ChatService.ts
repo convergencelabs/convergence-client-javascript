@@ -35,14 +35,15 @@ import {ChatRoom} from "./ChatRoom";
 import {ChatPermissionManager} from "./ChatPermissionManager";
 import {
   domainUserIdToProto,
-  getOrDefaultArray, getOrDefaultBoolean,
+  getOrDefaultArray,
+  getOrDefaultBoolean,
   getOrDefaultNumber,
   jsonToProtoValue,
   toOptional
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {DomainUserId} from "../identity";
-import {IChatInfo, ChatTypes, createChatInfo} from "./IChatInfo";
+import {ChatTypes, createChatInfo, IChatInfo} from "./IChatInfo";
 import {Validation} from "../util/Validation";
 
 import {com} from "@convergence/convergence-proto";
@@ -457,6 +458,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    *
    * @param user
    *   The other user to get the DirectChat for.
+   *
    * @returns
    *   A Promise resolved with the specified DirectChat.
    */
@@ -468,34 +470,58 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    *
    * @param users
    *   The other users to get the DirectChat for.
+   *
    * @returns
    *   A Promise resolved with the specified DirectChat.
    */
   public direct(users: (string | DomainUserId)[]): Promise<DirectChat>;
 
-  public direct(users: string | DomainUserId | (string | DomainUserId)[]): Promise<DirectChat> {
+  /**
+   * Get multiple [[DirectChat]]s for the communication between the local user and
+   * a sets of users.
+   *
+   * @param userLists
+   *   The lists of users that specify the direct chats to get.
+   *
+   * @returns
+   *   A Promise resolved with the specified DirectChat.
+   */
+  public direct(userLists: (string | DomainUserId)[][]): Promise<DirectChat[]>;
+
+  public direct(users: (string | DomainUserId) | (string | DomainUserId)[] | (string | DomainUserId)[][]): Promise<DirectChat | DirectChat[]> {
+
     this.session().assertOnline();
 
-    if (typeof users === "string" || users instanceof DomainUserId) {
-      users = [users];
-    }
+    const {directIds, single} = this.processDirectChatArgs(users);
+    const userLists = directIds.map(userList => {
+      const values = userList.map(user => {
+        if (user instanceof DomainUserId) {
+          return domainUserIdToProto(user);
+        } else {
+          return domainUserIdToProto(DomainUserId.normal(user));
+        }
+      });
 
-    const userIds = users.map(user => {
-      if (user instanceof DomainUserId) {
-        return domainUserIdToProto(user);
-      } else {
-        return domainUserIdToProto(DomainUserId.normal(user));
-      }
+      return {values};
     });
+
     return this._connection.request({
       getDirectChatsRequest: {
-        userLists: [{values: userIds}]
+        userLists
       }
     }).then((response: IConvergenceMessage) => {
       const {getDirectChatsResponse} = response;
-      const chatData = getDirectChatsResponse.chatInfo[0];
-      const chatInfo = createChatInfo(this._connection.session(), this._identityCache, chatData);
-      return this._createChat(chatInfo) as DirectChat;
+
+      const results = getOrDefaultArray(getDirectChatsResponse.chatInfo).map(chatInfoData => {
+        const chatInfo = createChatInfo(this._connection.session(), this._identityCache, chatInfoData);
+        return this._createChat(chatInfo) as DirectChat;
+      });
+
+      if (single) {
+        return results[0];
+      } else {
+        return results;
+      }
     });
   }
 
@@ -507,6 +533,48 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    */
   public permissions(chatId: string): ChatPermissionManager {
     return new ChatPermissionManager(chatId, this._connection);
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private processDirectChatArgs(users: (string | DomainUserId) | (string | DomainUserId)[] | (string | DomainUserId)[][]): { single: boolean, directIds: (string | DomainUserId)[][] } {
+    let directIds: (string | DomainUserId)[][];
+    let single = true;
+    if (typeof users === "string" || users instanceof DomainUserId) {
+      // We have a single user, so we turn it into a single user list.
+      directIds = [[users]];
+    } else if (Array.isArray(users)) {
+      if (users.length === 0) {
+        throw new ConvergenceError("users can not be an empty array")
+      }
+
+      // We have an array. We need to see if the first element is an Array or not.
+      // whatever the first one is, they all have to be that.
+      const firstIsArray = Array.isArray(users[0]);
+      const allArrays = users.every(u => Array.isArray(u));
+
+      if (firstIsArray !== allArrays) {
+        throw new ConvergenceError(
+          "When passing an array, all elements must be single usernames / DomainUserIds or they must all be arrays.");
+      }
+
+      // tslint:disable-next-line:prefer-conditional-expression
+      if (firstIsArray) {
+        // Here we have multiple direct channels.
+        directIds = users as [][];
+        single = false;
+      } else {
+        // we we have a single multi user channel.
+        directIds = [users as []]
+      }
+    } else {
+      // We didn't have a single user or an array.
+      throw new ConvergenceError("users must be a string, DomainUserId, or an Array");
+    }
+
+    return {directIds, single};
   }
 
   /**
