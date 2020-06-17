@@ -31,21 +31,35 @@ export class IdbPersistenceStore {
     return this._cursorIterator(store, index, onNext, range);
   }
 
+  protected static _getAllFromOpenIndex<T extends any>(index: IDBIndex,
+                                                       query?: IDBValidKey | IDBKeyRange | null,
+                                                       direction?: IDBCursorDirection): Promise<T[]> {
+    const results: T[] = [];
+    const request = index.openCursor(query, direction);
+    const onNext = (cursor: IDBCursorWithValue) => results.push(cursor.value);
+    return IdbPersistenceStore._iterateOverCursor(request, onNext).then(() => results);
+  }
+
   protected static _cursorIterator(objectStore: IDBObjectStore,
                                    indexName: string | null,
                                    onNext: (cursor: IDBCursorWithValue) => void,
                                    query?: IDBValidKey | IDBKeyRange | null,
                                    direction?: IDBCursorDirection): Promise<void> {
+    let request: IDBRequest<IDBCursorWithValue | null>;
+
+    if (indexName === null) {
+      request = objectStore.openCursor(query, direction);
+    } else {
+      const index = objectStore.index(indexName);
+      request = index.openCursor(query, direction);
+    }
+
+    return IdbPersistenceStore._iterateOverCursor(request, onNext)
+  }
+
+  protected static _iterateOverCursor(request: IDBRequest<IDBCursorWithValue | null>,
+                                      onNext: (cursor: IDBCursorWithValue) => void): Promise<void> {
     return new Promise((resolve, reject) => {
-      let request: IDBRequest<IDBCursorWithValue | null> = null;
-
-      if (indexName === null) {
-        request = objectStore.openCursor();
-      } else {
-        const index = objectStore.index(indexName);
-        request = index.openCursor(query, direction);
-      }
-
       request.onsuccess = (event) => {
         // For some reason the typings don't have the result on the target.
         const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result;
@@ -124,6 +138,13 @@ export class IdbPersistenceStore {
   protected _getAll<T extends any>(storeName: string, query?: IDBValidKey | IDBKeyRange | null): Promise<T[]> {
     const results: T[] = [];
     return this._readIterator<T>(storeName, null, (value: T) => {
+      results.push(value);
+    }, query).then(() => results);
+  }
+
+  protected _getAllFromIndex<T extends any>(storeName: string, index: string, query?: IDBValidKey | IDBKeyRange | null): Promise<T[]> {
+    const results: T[] = [];
+    return this._readIterator<T>(storeName, index, (value: T) => {
       results.push(value);
     }, query).then(() => results);
   }

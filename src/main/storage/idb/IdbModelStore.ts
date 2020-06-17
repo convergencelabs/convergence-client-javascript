@@ -466,12 +466,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
   }
 
   public getModelsRequiringSync(): Promise<IModelMetaData[]> {
-    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
-      const idx = store.index(IdbSchema.ModelMetaData.Indices.SyncRequired);
-      return toPromise(idx.getAll()).then((docs: IModelMetaDataDocument[]) =>
-        docs.map(IdbModelStore._metaDataDocToMetaData));
-    });
+    return this
+      ._getAllFromIndex(IdbSchema.ModelMetaData.Store, IdbSchema.ModelMetaData.Indices.SyncRequired)
+      .then((docs: IModelMetaDataDocument[]) => docs.map(IdbModelStore._metaDataDocToMetaData));
   }
+
 
   public processServerOperation(serverOp: IServerOperationData): Promise<void> {
     if (!serverOp) {
@@ -592,10 +591,11 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         const data: IModelData = await toPromise(modelDataStore.get(modelId));
         if (meta && data) {
           const localOpsIndex = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
-          const localOperations = await toPromise(localOpsIndex.getAll(modelId));
+          const localOperations = await IdbPersistenceStore._getAllFromOpenIndex<ILocalOperationData>(localOpsIndex, modelId);
 
           const serverOpsIndex = serverOpStore.index(IdbSchema.ModelServerOperation.Indices.ModelId);
-          const serverOperations = await toPromise(serverOpsIndex.getAll(modelId));
+          const serverOperations = await IdbPersistenceStore._getAllFromOpenIndex<IServerOperationData>(serverOpsIndex, modelId);
+
           const snapshot: IModelSnapshot = {
             version: meta.details.snapshotVersion,
             sequenceNumber: meta.details.snapshotSequenceNumber,
@@ -659,7 +659,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       storeNames,
       async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
         const index = metaDataStore.index(IdbSchema.ModelMetaData.Indices.Subscribed);
-        const subscribed = await toPromise<IModelMetaDataDocument[]>(index.getAll());
+        const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
         const subscribedModelIds = subscribed.map(s => s.modelId);
         const toAdd = modelIds.filter(id => !subscribedModelIds.includes(id));
         const toRemove = subscribedModelIds.filter(id => !modelIds.includes(id));
@@ -674,7 +674,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     const storeName = IdbSchema.ModelMetaData.Store;
     return this._withReadStore(storeName, async (store) => {
       const index = store.index(IdbSchema.ModelMetaData.Indices.Subscribed);
-      const subscribed = await toPromise<IModelMetaDataDocument[]>(index.getAll());
+      const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
       return subscribed.map(IdbModelStore._metaDataDocToMetaData);
     });
   }
