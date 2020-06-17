@@ -39,14 +39,15 @@ import {IdentityCache} from "../identity/IdentityCache";
 import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
 import {Deferred} from "../util/Deferred";
 import {IActivityJoinOptions} from "./IActivityJoinOptions";
-import {ConvergenceEventEmitter} from "../util/ConvergenceEventEmitter";
+import {ConvergenceEventEmitter} from "../util/";
 import {TypeChecker} from "../util/TypeChecker";
 import {EqualsUtil} from "../util/EqualsUtil";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
-import { StringMapLike, StringMap } from "../util/StringMap";
+import {StringMap, StringMapLike} from "../util/StringMap";
 
 import {com} from "@convergence/convergence-proto";
+import {ConvergenceError} from "../util";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IActivitySessionJoinedMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionLeftMessage;
@@ -240,18 +241,25 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * user can rejoin the activity from the [[ActivityService]] but will
    * receive a new [[Activity]] object.
    */
-  public leave(): void {
+  public leave(): Promise<void> {
     if (this.isJoined()) {
       this._joined = false;
-      this._connection.send({
-        activityLeaveRequest: {activityId: this._id}
-      } as IConvergenceMessage);
-      const user = this._connection.session().user();
-      const sessionId = this._connection.session().sessionId();
-      const event = new ActivityLeftEvent(this, user, sessionId, true);
-      this._emitEvent(event);
-      this._connectionMessageSubscription.unsubscribe();
-      this._completeEventStream();
+      return this._connection
+        .request({
+          activityLeaveRequest: {activityId: this._id}
+        })
+        .then(() => {
+          const user = this._connection.session().user();
+          const sessionId = this._connection.session().sessionId();
+          const event = new ActivityLeftEvent(this, user, sessionId, true);
+          this._emitEvent(event);
+          this._connectionMessageSubscription.unsubscribe();
+          this._completeEventStream();
+
+          return;
+        });
+    } else {
+      return Promise.reject(new ConvergenceError(`The activity was not joined: $this._id`));
     }
   }
 
