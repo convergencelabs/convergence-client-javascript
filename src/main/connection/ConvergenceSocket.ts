@@ -124,7 +124,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
   }
 
   public isConnecting(): boolean {
-    return this._socket === null || this._socket.readyState === this._webSocketClass.CONNECTING;
+    return this._socket !== null && this._socket.readyState === this._webSocketClass.CONNECTING;
   }
 
   public isClosed(): boolean {
