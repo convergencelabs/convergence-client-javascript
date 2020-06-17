@@ -39,11 +39,6 @@ export class ChatMessageEvent extends ChatEvent {
     user: DomainUser,
 
     /**
-     * The session ID of the user that sent the message
-     */
-    public readonly sessionId: string,
-
-    /**
      * The text of the message
      */
     public readonly message: string

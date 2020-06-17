@@ -112,8 +112,7 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       chatMsg.chatId,
       getOrDefaultNumber(chatMsg.eventNumber),
       timestampToDate(chatMsg.timestamp),
-      identityCache.getUserForSession(chatMsg.sessionId),
-      chatMsg.sessionId,
+      identityCache.getUser(protoToDomainUserId(chatMsg.user)),
       getOrDefaultString(chatMsg.message)
     );
   } else if (message.chatEventsMarkedSeen) {
