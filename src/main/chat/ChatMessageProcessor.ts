@@ -38,8 +38,8 @@ export function isChatMessage(message: IConvergenceMessage): boolean {
   return !!message.remoteChatMessage ||
     !!message.userJoinedChat ||
     !!message.userLeftChat ||
-    !!message.userAddedToChatChannel ||
-    !!message.userRemovedFromChatChannel ||
+    !!message.userAddedToChat ||
+    !!message.userRemovedFromChat ||
     !!message.chatRemoved ||
     !!message.chatNameChanged ||
     !!message.chatTopicChanged ||
@@ -67,8 +67,8 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       timestampToDate(userLeft.timestamp),
       identityCache.getUser(protoToDomainUserId(userLeft.user))
     );
-  } else if (message.userAddedToChatChannel) {
-    const userAdded = message.userAddedToChatChannel;
+  } else if (message.userAddedToChat) {
+    const userAdded = message.userAddedToChat;
     return new UserAddedEvent(
       userAdded.chatId,
       getOrDefaultNumber(userAdded.eventNumber),
@@ -76,8 +76,8 @@ export function processChatMessage(message: IConvergenceMessage, identityCache: 
       identityCache.getUser(protoToDomainUserId(userAdded.user)),
       identityCache.getUser(protoToDomainUserId(userAdded.addedUser))
     );
-  } else if (message.userRemovedFromChatChannel) {
-    const userRemoved = message.userRemovedFromChatChannel;
+  } else if (message.userRemovedFromChat) {
+    const userRemoved = message.userRemovedFromChat;
     return new UserRemovedEvent(
       userRemoved.chatId,
       getOrDefaultNumber(userRemoved.eventNumber),

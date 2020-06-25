@@ -75,7 +75,7 @@ export abstract class MembershipChat extends Chat {
     this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
-      removeUserFromChatChannelRequest: {
+      removeUserFromChatRequest: {
         chatId: this._info.chatId,
         userToRemove: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }

@@ -32,7 +32,7 @@
   "module": "convergence.esm.js",
   "typings": "typings/index.d.ts",
   "dependencies": {
-    "rxjs": "^6.3.3",
-    "protobufjs": "^6.8.8"
+    "rxjs": "^6.5.5",
+    "protobufjs": "^6.9.0"
   }
 }

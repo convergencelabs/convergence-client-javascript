@@ -52,7 +52,7 @@ export class ChatChannel extends MembershipChat {
     this._connection.session().assertOnline();
     this._assertJoined();
     return this._connection.request({
-      addUserToChatChannelRequest: {
+      addUserToChatRequest: {
         chatId: this._info.chatId,
         userToAdd: domainUserIdToProto(DomainUserId.toDomainUserId(user))
       }
