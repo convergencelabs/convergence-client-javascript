@@ -272,7 +272,7 @@ export abstract class RealTimeElement<T = any>
    * Sets the value of this element, whose type must be the underlying type of this
    * object.
    *
-   * On a succesful `value` call, the appropriate [[IValueChangedEvent]] will be emitted
+   * On a successful `value` call, the appropriate [[IValueChangedEvent]] will be emitted
    * to any remote users. This will be one of:
    *
    * * [[ArraySetValueEvent]]

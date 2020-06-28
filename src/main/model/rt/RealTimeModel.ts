@@ -55,7 +55,8 @@ import {
   RemoteReferenceCreatedEvent,
   RemoteResyncCompletedEvent,
   RemoteResyncStartedEvent,
-  ResyncCompletedEvent, ResyncErrorEvent,
+  ResyncCompletedEvent,
+  ResyncErrorEvent,
   ResyncStartedEvent,
   VersionChangedEvent
 } from "../events";
@@ -94,6 +95,7 @@ import {IConcurrencyControlState} from "../IModeStateSnapshot";
 import {ReplayDeferred} from "../../util/ReplayDeferred";
 
 import {com} from "@convergence/convergence-proto";
+import {ErrorEvent} from "../../events";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = com.convergencelabs.convergence.proto.model.IModelPermissionsChangedMessage;
 import IModelForceCloseMessage = com.convergencelabs.convergence.proto.model.IModelForceCloseMessage;
@@ -309,7 +311,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private readonly _referencesBySession: Map<string, ModelReference<any>[]>;
+  private readonly _referencesBySession: Map<string, ModelReference[]>;
 
   /**
    * @internal
@@ -1167,10 +1169,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._handleForceClose(forceCloseRealTimeModel);
     } else if (remoteOperation) {
       this._handleRemoteOperation(remoteOperation);
-      this._emitVersionChanged();
     } else if (operationAck) {
       this._handelOperationAck(operationAck);
-      this._emitVersionChanged();
     } else if (referenceShared || referenceSet || referenceCleared || referenceUnshared) {
       const remoteRefEvent = toRemoteReferenceEvent(event.message);
       this._handleRemoteReferenceEvent(remoteRefEvent);
@@ -1564,9 +1564,18 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
+
     const version = getOrDefaultNumber(message.version);
     const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
-    const acknowledgedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
+    let acknowledgedOperation;
+
+    try {
+      acknowledgedOperation = this._concurrencyControl.processAcknowledgement(version, sequenceNumber);
+    } catch (e) {
+      this._handleConcurrencyControlError(e)
+      return;
+    }
+
     this._time = timestampToDate(message.timestamp);
 
     if (this._storeOffline) {
@@ -1590,6 +1599,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     // If we are closing and waiting for remote operations, we might be able to close.
     this._checkIfCanClose();
+
+    this._emitVersionChanged();
+
   }
 
   /**
@@ -1637,7 +1649,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   private _processServerOperationEvent(unprocessed: ServerOperationEvent): void {
-    this._concurrencyControl.processRemoteOperation(unprocessed);
+    try {
+      this._concurrencyControl.processRemoteOperation(unprocessed);
+    } catch (e) {
+      this._handleConcurrencyControlError(e);
+      return;
+    }
+
     const processed: ServerOperationEvent = this._concurrencyControl.getNextIncomingOperation();
 
     const operation: Operation = processed.operation;
@@ -1649,6 +1667,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._applyOperation(operation, clientId, contextVersion, timestamp);
 
+    this._emitVersionChanged();
+
     if (this._storeOffline) {
       const inflight = this._concurrencyControl.getInFlightOperations();
       this._offlineManager
@@ -1656,6 +1676,23 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
         .catch(e => this._log.error(e));
       // FIXME handle this error
     }
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
+  private _handleConcurrencyControlError(e: Error): void {
+    const message = `A concurrency control error occurred within model "${this._modelId}".`
+    this._log.error(message, e);
+
+    const errorEvent = new ErrorEvent(this._connection.session().domain(), message, e);
+    this._emitEvent(errorEvent);
+
+    this._modelService._emitError(errorEvent);
+
+    const closedEvent = new ModelClosedEvent(this, false, "A concurrency control error occurred.");
+    this._initiateClose(true, closedEvent);
   }
 
   /**

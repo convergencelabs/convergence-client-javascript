@@ -608,6 +608,15 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
+  public _emitError(error: ErrorEvent): void {
+    this._emitEvent(error);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   * @private
+   */
   public _authenticateWithPassword(credentials: IUsernameAndPassword): Promise<void> {
     return this._connection
       .authenticateWithPassword(credentials)

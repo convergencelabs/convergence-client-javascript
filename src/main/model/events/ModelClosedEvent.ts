@@ -44,12 +44,12 @@ export class ModelClosedEvent implements IModelEvent {
     public readonly src: ObservableModel,
 
     /**
-     * True if this change occurred locally (in the current session)
+     * True if this event was triggered locally.
      */
     public readonly local: boolean,
 
     /**
-     * In the event that the model was closed by the server, a reason may be provided.
+     * In the event that the model was closed unexpectedly, a reason may be provided.
      */
     public readonly reason?: string
   ) {

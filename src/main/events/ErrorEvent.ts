@@ -39,7 +39,12 @@ export class ErrorEvent implements IConvergenceDomainEvent {
     /**
      * A message describing the error.
      */
-    public readonly error: string
+    public readonly message: string,
+
+    /**
+     * A message describing the error.
+     */
+    public readonly cause?: Error
   ) {
     Object.freeze(this);
   }

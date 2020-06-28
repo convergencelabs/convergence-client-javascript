@@ -755,6 +755,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
+   * @internal
+   * @hidden
+   */
+  public _emitError(errorEvent: ErrorEvent): void {
+    this._emitEvent(errorEvent);
+    this._connection.session().domain()._emitError(errorEvent);
+  }
+
+  /**
    * @hidden
    * @internal
    * @private

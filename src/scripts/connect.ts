@@ -70,7 +70,7 @@ export function createDomain(options?: IConvergenceOptions): ConvergenceDomain {
       } else if (event instanceof InterruptedEvent) {
         console.log(`Interrupted`);
       } else if (event instanceof ErrorEvent) {
-        console.log(`Error: ${event.error}`);
+        console.error(`Error: ${event.message}`, event.cause);
       }
     }
   );
