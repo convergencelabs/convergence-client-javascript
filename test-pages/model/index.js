@@ -1,9 +1,9 @@
 Convergence.configureLogging({
   loggers: {
-    "protocol.messages": Convergence.LogLevel.DEBUG,
-    "models": Convergence.LogLevel.DEBUG,
-    "domain": Convergence.LogLevel.DEBUG,
-    "storage": Convergence.LogLevel.DEBUG
+    "protocol.messages": Convergence.LogLevel.INFO,
+    "models": Convergence.LogLevel.INFO,
+    "domain": Convergence.LogLevel.INFO,
+    "storage": Convergence.LogLevel.INFO
   }
 });
 

@@ -2,7 +2,7 @@
 
 import {createDomain} from "../connect";
 import {IdbStorageAdapter} from "../../main/storage/idb/";
-import {OfflineModelSyncCompletedEvent} from "../../main/model/events/";
+import {OfflineModelsSyncCompletedEvent} from "../../main/model/events/";
 import {RealTimeModel} from "../../main";
 
 // tslint:disable-next-line
@@ -67,7 +67,7 @@ async function go() {
     domain.disconnect();
     // await domain.initializeOffline("test");
 
-    domain.models().on(OfflineModelSyncCompletedEvent.NAME, async () => {
+    domain.models().on(OfflineModelsSyncCompletedEvent.NAME, async () => {
       console.log("model sync completed");
 
       // models[0].root().set("foo", "bar");

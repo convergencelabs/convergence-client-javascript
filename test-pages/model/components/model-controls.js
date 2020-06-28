@@ -18,13 +18,15 @@ Vue.component('model-controls', {
     return {
       openModelId: "",
       createModelId: "",
-      deleteModelId: ""
+      deleteModelId: "",
+      subscription: null
     };
   },
   watch: {
     model() {
       if (this.model) {
         this.openModelId = this.model.modelId();
+        this.subscription = this.model.events().subscribe(e => console.log(e));
       }
     }
   },
@@ -39,6 +41,9 @@ Vue.component('model-controls', {
       this.$emit("openModel", this.openModelId);
     },
     closeModel() {
+      if (this.subscription !== null) {
+        this.subscription.unsubscribe();
+      }
       this.$emit("closeModel");
     }
   },

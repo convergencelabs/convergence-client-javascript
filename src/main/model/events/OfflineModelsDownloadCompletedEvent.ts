@@ -13,38 +13,29 @@
  */
 
 import {IConvergenceEvent} from "../../util";
-import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when the synchronizing of offline changes for
- * models is aborted.
+ * Emitted when a change to the subscription for offline models changes,
+ * the change results in new models needing to be downloaded, and then
+ * all required models have been initially downloaded.
  *
  * @module Real Time Data
  *
  * @experimental
  */
-export class OfflineModelSyncAbortedEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_sync_aborted";
+export class OfflineModelsDownloadCompletedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_models_download_completed";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelSyncAbortedEvent.NAME;
+  public readonly name: string = OfflineModelsDownloadCompletedEvent.NAME;
 
   /**
    * @hidden
    * @internal
    */
-  constructor(
-    /**
-     * The reason the process was aborted.
-     */
-    public readonly reason: string,
-    /**
-     * A machine readable code.
-     */
-    public readonly code: string,
-  ) {
+  constructor() {
     Object.freeze(this);
   }
 }

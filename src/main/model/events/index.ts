@@ -60,11 +60,11 @@ export * from "./CollaboratorClosedEvent";
 export * from "./ModelCommittedEvent";
 export * from "./ModelModifiedEvent";
 
-export * from "./OfflineModelDownloadPendingEvent";
-export * from "./OfflineModelDownloadCompletedEvent";
-export * from "./OfflineModelSyncStartedEvent";
-export * from "./OfflineModelSyncCompletedEvent";
-export * from "./OfflineModelSyncAbortedEvent";
+export * from "./OfflineModelsDownloadPendingEvent";
+export * from "./OfflineModelsDownloadCompletedEvent";
+export * from "./OfflineModelsSyncStartedEvent";
+export * from "./OfflineModelsSyncCompletedEvent";
+export * from "./OfflineModelsSyncAbortedEvent";
 export * from "./OfflineModelSyncErrorEvent";
 export * from "./OfflineModelDeletedEvent";
 export * from "./OfflineModelPermissionsRevokedEvent";

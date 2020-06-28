@@ -13,33 +13,28 @@
  */
 
 import {IConvergenceEvent} from "../../util";
-import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when a specific model complete it synchronization process.
+ * Emitted when local offline changes have successfully synchronized
+ * with the Convergence Server.
  *
  * @module Real Time Data
  *
  * @experimental
  */
-export class OfflineModelSyncCompletedEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_sync_completed";
+export class OfflineModelsSyncCompletedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_models_sync_completed";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelSyncCompletedEvent.NAME;
+  public readonly name: string = OfflineModelsSyncCompletedEvent.NAME;
 
   /**
    * @hidden
    * @internal
    */
-  constructor(
-    /**
-     * The id of the model that completed its sync.
-     */
-    public readonly modelId: string
-  ) {
+  constructor() {
     Object.freeze(this);
   }
 }

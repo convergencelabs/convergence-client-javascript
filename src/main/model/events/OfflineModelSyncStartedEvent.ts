@@ -13,10 +13,10 @@
  */
 
 import {IConvergenceEvent} from "../../util";
+import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when local offline changes have started to sync up to the
- * Convergence Server.
+ * Emitted when a specific model starts it synchronization process.
  *
  * @module Real Time Data
  *
@@ -34,7 +34,12 @@ export class OfflineModelSyncStartedEvent implements IConvergenceEvent {
    * @hidden
    * @internal
    */
-  constructor() {
+  constructor(
+    /**
+     * The id of the model that started to sync.
+     */
+    public readonly modelId: string
+  ) {
     Object.freeze(this);
   }
 }

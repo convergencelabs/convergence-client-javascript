@@ -15,20 +15,20 @@
 import {IConvergenceEvent} from "../../util";
 
 /**
- * Emitted when a change to the subscription for offline models changes and
- * the change results in new models needing to be downloaded.
+ * Emitted when local offline changes have started to sync up to the
+ * Convergence Server.
  *
  * @module Real Time Data
  *
  * @experimental
  */
-export class OfflineModelDownloadPendingEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_download_pending";
+export class OfflineModelsSyncStartedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_models_sync_started";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelDownloadPendingEvent.NAME;
+  public readonly name: string = OfflineModelsSyncStartedEvent.NAME;
 
   /**
    * @hidden

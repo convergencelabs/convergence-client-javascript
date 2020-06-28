@@ -37,8 +37,8 @@ import {OfflineModelStatusChangedEvent} from "./events/OfflineModelStatusChanged
 import {
   OfflineModelDeletedEvent,
   OfflineModelPermissionsRevokedEvent,
-  OfflineModelDownloadCompletedEvent,
-  OfflineModelDownloadPendingEvent, ModelCommittedEvent, ModelModifiedEvent
+  OfflineModelsDownloadCompletedEvent,
+  OfflineModelsDownloadPendingEvent, ModelCommittedEvent, ModelModifiedEvent
 } from "./events/";
 
 import {com} from "@convergence/convergence-proto";
@@ -46,6 +46,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import IOfflineModelUpdatedMessage = com.convergencelabs.convergence.proto.model.IOfflineModelUpdatedMessage;
 import IModelOfflineSubscriptionData = com.convergencelabs.convergence.proto
   .model.ModelOfflineSubscriptionChangeRequestMessage.IModelOfflineSubscriptionData;
+import {OfflineModelsDownloadProgressEvent} from "./events/OfflineModelsDownloadProgressEvent";
 
 /**
  * @hidden
@@ -573,19 +574,25 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _checkAndSetAllDownloaded(): void {
-    let allDownloaded = true;
+    let needed = 0;
     this._subscribedModels.forEach(record => {
       if (!record.available) {
-        allDownloaded = false;
+        needed++;
       }
     });
 
+    const allDownloaded = needed === 0;
+
+    // Note we emit the progress event in all three blocks.
+    // This is so the events come out in the right order.
     if (this._allModelsDownloaded && !allDownloaded) {
-      const event = new OfflineModelDownloadPendingEvent();
-      this._emitEvent(event);
+      this._emitEvent(new OfflineModelsDownloadPendingEvent());
+      this._emitEvent(new OfflineModelsDownloadProgressEvent(needed));
     } else if (!this._allModelsDownloaded && allDownloaded) {
-      const event = new OfflineModelDownloadCompletedEvent();
-      this._emitEvent(event);
+      this._emitEvent(new OfflineModelsDownloadProgressEvent(needed));
+      this._emitEvent(new OfflineModelsDownloadCompletedEvent());
+    } else if (!this._allModelsDownloaded || !allDownloaded) {
+      this._emitEvent(new OfflineModelsDownloadProgressEvent(needed));
     }
 
     this._allModelsDownloaded = allDownloaded;

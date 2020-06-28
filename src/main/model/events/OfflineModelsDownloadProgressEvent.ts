@@ -13,22 +13,22 @@
  */
 
 import {IConvergenceEvent} from "../../util";
-import {RealTimeModel} from "../rt";
 
 /**
- * Emitted when a specific model complete it synchronization process.
+ * Emitted when the number of models needing to be downloaded changes either
+ * because the subscriptions changed or because a model downloaded.
  *
  * @module Real Time Data
  *
  * @experimental
  */
-export class OfflineModelSyncCompletedEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_model_sync_completed";
+export class OfflineModelsDownloadProgressEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_models_download_progress";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelSyncCompletedEvent.NAME;
+  public readonly name: string = OfflineModelsDownloadProgressEvent.NAME;
 
   /**
    * @hidden
@@ -36,9 +36,9 @@ export class OfflineModelSyncCompletedEvent implements IConvergenceEvent {
    */
   constructor(
     /**
-     * The id of the model that completed its sync.
+     * The number of models left to download.
      */
-    public readonly modelId: string
+    public readonly modelsToDownload: number
   ) {
     Object.freeze(this);
   }
