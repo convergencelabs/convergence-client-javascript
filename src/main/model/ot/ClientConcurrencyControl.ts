@@ -35,7 +35,7 @@ export interface IClientConcurrencyControlEvent extends IConvergenceEvent {
  * @internal
  */
 export interface ICommitStatusChanged extends IClientConcurrencyControlEvent {
-  name: "commitStateChanged";
+  name: "commit_state_changed";
   committed: boolean;
 }
 
@@ -46,7 +46,7 @@ export interface ICommitStatusChanged extends IClientConcurrencyControlEvent {
 export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientConcurrencyControlEvent> {
 
   public static Events: any = {
-    COMMIT_STATE_CHANGED: "commitStateChanged"
+    COMMIT_STATE_CHANGED: "commit_state_changed"
   };
 
   private _lastSequenceNumber: number;
@@ -98,7 +98,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
   }
 
   public isCommitted(): boolean {
-    return !this.hasInflightOperation();
+    return !this.hasInflightOperation() || this._pendingCompoundOperation.length > 0;
   }
 
   public hasInflightOperation(): boolean {
@@ -195,7 +195,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     return this._compoundOpInProgress;
   }
 
-  public processOutgoingOperation(operation: DiscreteOperation): ClientOperationEvent {
+  public processOutgoingOperation(operation: DiscreteOperation): ClientOperationEvent | null {
     if (this._compoundOpInProgress && !(operation instanceof DiscreteOperation)) {
       throw new Error("Can't process a compound operation that is in progress");
     }
@@ -203,9 +203,26 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     // transform against unapplied operations.
     const outgoingOperation: DiscreteOperation = this.transformOutgoing(this._unappliedOperations, operation);
 
-    if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
-      // we had no inflight ops or compound ops before. Now we have one.
-      // so now we have uncommitted operations.
+    // Were we committed before? We were committed if there were no in flight
+    // operations and no compound in progress.
+    const wasCommitted = this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0;
+
+    let outgoingEvent: ClientOperationEvent | null = null;
+
+    if (this._compoundOpInProgress) {
+      this._pendingCompoundOperation.push(outgoingOperation);
+    } else {
+      outgoingEvent = new ClientOperationEvent(
+        this._sessionId(),
+        ++this._lastSequenceNumber,
+        this._contextVersion,
+        new Date(),
+        outgoingOperation);
+      this._inflightOperations.push(outgoingEvent);
+    }
+
+    if (wasCommitted) {
+      // We were committed, but we are not now, so signal the state change.
       const evt: ICommitStatusChanged = {
         name: ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED,
         committed: false
@@ -213,19 +230,7 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
       this._emitEvent(evt);
     }
 
-    if (this._compoundOpInProgress) {
-      this._pendingCompoundOperation.push(outgoingOperation);
-      return null;
-    } else {
-      const outgoingEvent = new ClientOperationEvent(
-        this._sessionId(),
-        ++this._lastSequenceNumber,
-        this._contextVersion,
-        new Date(),
-        outgoingOperation);
-      this._inflightOperations.push(outgoingEvent);
-      return outgoingEvent;
-    }
+    return outgoingEvent;
   }
 
   public processOutgoingSetReference(r: ModelReferenceData): ModelReferenceData {
@@ -259,8 +264,10 @@ export class ClientConcurrencyControl extends ConvergenceEventEmitter<IClientCon
     this._contextVersion++;
 
     if (this._inflightOperations.length === 0 && this._pendingCompoundOperation.length === 0) {
-      // we had inflight ops before. Now we have none. So now we have
-      // changed commit state.
+      // To get an ack we must have had an inflight operation before, so we were in an
+      // uncommitted state.  If we have no in flight operations now, and if there is no
+      // pending compound operation, then we are not committed and should signal a
+      // state transition.
       const evt: ICommitStatusChanged = {
         name: ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED,
         committed: true

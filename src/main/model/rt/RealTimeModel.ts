@@ -306,11 +306,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _committed: boolean;
-
-  /**
-   * @internal
-   */
   private readonly _referencesBySession: Map<string, ModelReference[]>;
 
   /**
@@ -503,8 +498,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
     this._concurrencyControl
       .on(ClientConcurrencyControl.Events.COMMIT_STATE_CHANGED, (event: ICommitStatusChanged) => {
-        this._committed = event.committed;
-        const evt: IModelEvent = this._committed ?
+        const evt: IModelEvent = event.committed ?
           new ModelCommittedEvent(this) : new ModelModifiedEvent(this);
         this._emitEvent(evt);
       });
@@ -529,7 +523,6 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._wrapperFactory = new RealTimeWrapperFactory(this._callbacks, this, this._identityCache);
 
     this._open = true;
-    this._committed = true;
 
     this._initializeReferences(references);
 
