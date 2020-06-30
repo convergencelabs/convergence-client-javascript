@@ -75,106 +75,170 @@ import {OfflineModelSyncCompletedEvent} from "./events/OfflineModelSyncCompleted
  *
  * @module Real Time Data
  */
-export interface ModelServiceEvents {
+export interface IModelServiceEvents {
+
+  /**
+   * Emitted local offline changes to models are being synchronized with the
+   * server.
+   *
+   * The event emitted will be an [[OfflineModelSyncStartedEvent]].
+   *
+   * @event [[OfflineModelSyncStartedEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started";
+
+  /**
+   * Emitted when all local offline changes have been synchronized with the.
+   * server.
+   *
+   * The event emitted will be an [[OfflineModelSyncCompletedEvent]]
+   *
+   * @event [[OfflineModelSyncCompletedEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
+
+  /**
+   * Emitted a particular model encounters an error during the resync
+   * process.
+   *
+   * The event emitted will be an [[OfflineModelSyncErrorEvent]]
+   *
+   * @event [[OfflineModelSyncErrorEvent]]
+   */
+  readonly OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error";
+
+
   /**
    * Emitted when a model is initially downloaded after it was first subscribed
-   * to offline. The event emitted will be an [[OfflineModelAvailableEvent]]
+   * to offline.
+   *
+   * The event emitted will be an [[OfflineModelStatusChangedEvent]]
    *
    * @event [[OfflineModelStatusChangedEvent]]
    */
   readonly OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed";
 
   /**
-   * Emitted when an already downloaded offline model is deleted. The event
-   * emitted will be an [[OfflineModelDeleted]].
-   *
-   * @event [[OfflineModelDeleted]]
-   */
-  readonly OFFLINE_MODEL_DELETED: "offline_model_deleted";
-
-  /**
-   * Emitted when an already downloaded offline model's permissions are
-   * updated and the local user no longer has read permissions. The event
-   * emitted will be an [[OfflineModelPermissionsRevoked]].
-   *
-   * @event [[OfflineModelPermissionsRevoked]]
-   */
-  readonly OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked";
-
-  /**
    * Emitted whenever a model that is subscribed to offline is updated via the
-   * periodic background synchronization process. the event emitted will be
-   * an [[OfflineModelUpdatedEvent]]
+   * periodic background synchronization process.
+   *
+   * The event emitted will be an [[OfflineModelUpdatedEvent]]
    *
    * @event [[OfflineModelUpdatedEvent]]
    */
   readonly OFFLINE_MODEL_UPDATED: "offline_model_updated";
 
   /**
+   * Emitted when an already downloaded offline model is deleted.
+   *
+   * The event emitted will be an [[OfflineModelDeletedEvent]].
+   *
+   * @event [[OfflineModelDeletedEvent]]
+   */
+  readonly OFFLINE_MODEL_DELETED: "offline_model_deleted";
+
+  /**
+   * Emitted when an already downloaded offline model's permissions are
+   * updated and the local user no longer has read permissions.
+   *
+   * The event emitted will be an [[OfflineModelPermissionsRevokedEvent]].
+   *
+   * @event [[OfflineModelPermissionsRevokedEvent]]
+   */
+  readonly OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked";
+
+
+  /**
    * Emitted whenever a change to the set of subscribed models results in new
-   * models needing to be downloaded. The event emitted will be an
-   * [[OfflineModelsDownloadPendingEvent]].
+   * models needing to be downloaded.
+   *
+   * The event emitted will be an [[OfflineModelsDownloadPendingEvent]].
    *
    * @event [[OfflineModelsDownloadPendingEvent]]
    */
-  readonly OFFLINE_MODEL_DOWNLOAD_PENDING: "offline_model_download_pending";
+  readonly OFFLINE_MODELS_DOWNLOAD_PENDING: "offline_models_download_pending";
+
+  /**
+   * Emitted when the number of models to download changes either because of
+   * a successful download or a change to the subscription.
+   *
+   * The event emitted will be an [[OfflineModelsDownloadProgressEvent]]
+   *
+   * @event [[OfflineModelsDownloadProgressEvent]]
+   */
+  readonly OFFLINE_MODELS_DOWNLOAD_PROGRESS: "offline_models_download_progress";
 
   /**
    * Emitted when all models have been downloaded after a subscription change
-   * that required additional models to be downloaded. The event emitted
-   * will be an [[OfflineModelDownloadCompletedEvent]]
+   * that required additional models to be downloaded.
    *
-   * @event [[OfflineModelDownloadCompletedEvent]]
+   * The event emitted will be an [[OfflineModelsDownloadCompletedEvent]]
+   *
+   * @event [[OfflineModelsDownloadCompletedEvent]]
    */
-  readonly OFFLINE_MODEL_DOWNLOAD_COMPLETED: "offline_model_download_completed";
+  readonly OFFLINE_MODELS_DOWNLOAD_COMPLETED: "offline_models_download_completed";
 
   /**
-   * Emitted local offline changes to models are being synchronized with the
-   * server. The event emitted will be an [[OfflineModelsSyncStartedEvent]].
+   * Emitted when local offline changes to models are being synchronized with
+   * the server.
+   *
+   * The event emitted will be an [[OfflineModelsSyncStartedEvent]].
    *
    * @event [[OfflineModelsSyncStartedEvent]]
    */
-  readonly OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started";
+  readonly OFFLINE_MODELS_SYNC_STARTED: "offline_models_sync_started";
+
+  /**
+   * Emitted when the number of outstanding models to synchronize has
+   * changed.
+   *
+   * The event emitted will be an [[OfflineModelsSyncProgressEvent]]
+   *
+   * @event [[OfflineModelsSyncProgressEvent]]
+   */
+  readonly OFFLINE_MODELS_SYNC_PROGRESS: "offline_models_sync_progress";
 
   /**
    * Emitted when all local offline changes have been synchronized with the.
-   * server. The event emitted will be an [[OfflineModelsSyncCompletedEvent]]
+   * server.
+   *
+   * The event emitted will be an [[OfflineModelsSyncCompletedEvent]]
    *
    * @event [[OfflineModelsSyncCompletedEvent]]
    */
-  readonly OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed";
+  readonly OFFLINE_MODELS_SYNC_COMPLETED: "offline_models_sync_completed";
 
   /**
-   * Emitted when the offline model synchronization process aborts. The
-   * event emitted will be an [[OfflineModelsSyncAbortedEvent]]
+   * Emitted when the offline model synchronization process aborts.
+   *
+   * The event emitted will be an [[OfflineModelsSyncAbortedEvent]]
    *
    * @event [[OfflineModelsSyncAbortedEvent]]
    */
-  readonly OFFLINE_MODEL_SYNC_ABORTED: "offline_model_sync_aborted";
-
-  /**
-   * Emitted a particular model encounters an error during the resync
-   * process.
-   *
-   * @event [[OfflineModelSyncErrorEvent]]
-   */
-  readonly OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error";
+  readonly OFFLINE_MODELS_SYNC_ABORTED: "offline_models_sync_aborted";
 }
 
 /**
  * @module Real Time Data
  */
-export const ModelServiceEventConstants: ModelServiceEvents = {
-  OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed",
-  OFFLINE_MODEL_UPDATED: "offline_model_updated",
-  OFFLINE_MODEL_DOWNLOAD_PENDING: "offline_model_download_pending",
-  OFFLINE_MODEL_DOWNLOAD_COMPLETED: "offline_model_download_completed",
+export const ModelServiceEventConstants: IModelServiceEvents = {
   OFFLINE_MODEL_SYNC_STARTED: "offline_model_sync_started",
   OFFLINE_MODEL_SYNC_COMPLETED: "offline_model_sync_completed",
-  OFFLINE_MODEL_SYNC_ABORTED: "offline_model_sync_aborted",
+  OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error",
+
+  OFFLINE_MODEL_STATUS_CHANGED: "offline_model_status_changed",
+  OFFLINE_MODEL_UPDATED: "offline_model_updated",
   OFFLINE_MODEL_DELETED: "offline_model_deleted",
   OFFLINE_MODEL_PERMISSIONS_REVOKED: "offline_model_permissions_revoked",
-  OFFLINE_MODEL_SYNC_ERROR: "offline_model_sync_error"
+
+  OFFLINE_MODELS_DOWNLOAD_PENDING: "offline_models_download_pending",
+  OFFLINE_MODELS_DOWNLOAD_PROGRESS: "offline_models_download_progress",
+  OFFLINE_MODELS_DOWNLOAD_COMPLETED: "offline_models_download_completed",
+
+  OFFLINE_MODELS_SYNC_STARTED: "offline_models_sync_started",
+  OFFLINE_MODELS_SYNC_PROGRESS: "offline_models_sync_progress",
+  OFFLINE_MODELS_SYNC_COMPLETED: "offline_models_sync_completed",
+  OFFLINE_MODELS_SYNC_ABORTED: "offline_models_sync_aborted",
 };
 Object.freeze(ModelServiceEventConstants);
 
@@ -183,7 +247,7 @@ Object.freeze(ModelServiceEventConstants);
  * [real time data models](https://docs.convergence.io/guide/models/overview.html).
  * [[RealTimeModel]]s can be created, opened, deleted, and managed from the [[ModelService]].
  *
- * See [[ModelServiceEvents]] for the events that may be emitted on this model.
+ * See [[IModelServiceEvents]] for the events that may be emitted on this model.
  *
  * @module Real Time Data
  */
@@ -194,12 +258,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * Use this to refer an event name:
    *
    * ```typescript
-   * modelService.on(ModelService.Events.MODEL_DELETED, function listener(e) {
+   * modelService.on(ModelService.Events.OFFLINE_MODEL_DELETED, (e) => {
    *   // ...
    * })
    * ```
+   *
+   * See [[IModelServiceEvents]] for information on each event.
    */
-  public static readonly Events: ModelServiceEvents = ModelServiceEventConstants;
+  public static readonly Events: IModelServiceEvents = ModelServiceEventConstants;
 
   /**
    * @internal
