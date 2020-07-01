@@ -746,6 +746,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * and cleaning up any opened resources.
    */
   public close(): Promise<void> {
+    this._log.debug("RealtimeModel.close() called: " + this._modelId);
     if (this._closingData.closing) {
       return Promise.reject(new ConvergenceError(`The model '${this._modelId}' is already closing`));
     }
@@ -755,11 +756,13 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     }
 
     if (this._resyncData !== null) {
+      this._debug("Close called on a resyncing model");
       // We are resyncing, so we just need to set the flag
       // that we don't want to open.
       this._resyncOnly = true;
       return Promise.resolve();
     } else {
+      this._debug("Close called on a NON resyncing model");
       // Close the model and emit the appropriate events.
       const event: ModelClosedEvent = new ModelClosedEvent(this, true);
       this._initiateClose(true, event);
@@ -959,7 +962,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       throw new ConvergenceError(`The model '${this._modelId}' is already closing.`, "already_closing");
     }
 
-    this._debug("Initiating close");
+    this._debug("Close initiated");
 
     this._closingData.closing = true;
     this._closingData.event = event;

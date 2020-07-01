@@ -530,30 +530,30 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   public async remove(id: string): Promise<void> {
     Validation.assertNonEmptyString(id, "id");
 
-    if (this._openModels.get(id)) {
-      // The model is open. Let's close it. Wait for it to close and then
-      // delete it.
-      const model = this._openModels.get(id);
-      model._handleLocallyDeleted();
-      await model.whenClosed();
-    }
-
     if (this._offlineSyncStartedDeferred !== null) {
       // We are in the process of starting to sync. Wait for it to start.
       await this._offlineSyncStartedDeferred.promise();
     }
 
     if (this._resyncingModels.has(id)) {
-      // This is a resyncing model.  Let it start resyncing.  Then if it is a
-      // resync close the model, and wait for it to close. If it was a "delete"
-      // action when it is ready its already been deleted.
+      // This is a resyncing model.  Let it start resyncing.
       const entry = this._resyncingModels.get(id);
-      await entry.ready;
-      if (entry.action === "resync") {
-        const model = entry.resyncModel!;
-        model._handleLocallyDeleted();
-        await model.whenClosed();
+
+      if (entry.action === "delete") {
+        return Promise.reject(
+          new Error("The model has already been deleted locally and resynchronization is in process."));
       }
+
+      this._log.debug(`Removing model "${id}" the is resynchronizing. Waiting for resynchronization to complete before removing`);
+      await entry.done.promise();
+    }
+
+    if (this._openModels.get(id)) {
+      // The model is open. Let's close it. Wait for it to close and then
+      // delete it.
+      const model = this._openModels.get(id);
+      model._handleLocallyDeleted();
+      await model.whenClosed();
     }
 
     if (this._modelOfflineManager.isOfflineEnabled()) {
@@ -805,6 +805,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   public _resyncCompleted(modelId: string): void {
     this._emitEvent(new OfflineModelSyncCompletedEvent(modelId));
     this._log.debug(`Resync completed for model: "${modelId}"`);
+    const entry = this._resyncingModels.get(modelId);
+    entry.done.resolve();
     this._resyncingModels.delete(modelId);
     this._checkResyncQueue();
   }
@@ -979,6 +981,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       modelId,
       action,
       inProgress: model !== undefined,
+      done: new ReplayDeferred<void>(),
       ready: model !== undefined ? ReplayDeferred.resolved() : new ReplayDeferred<void>(),
       resyncModel: model || null
     };
@@ -1365,7 +1368,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const modelId = this._resourceIdToModelId.get(resourceId);
 
     if (modelId === undefined) {
-      this._log.warn("Received a message for an unknown resourceId: " + resourceId);
       return null;
     }
 
@@ -1719,6 +1721,7 @@ class InitialIdGenerator {
 interface IResyncEntry {
   modelId: string;
   action: "resync" | "delete";
+  done: ReplayDeferred<void>;
   inProgress: boolean;
   ready: ReplayDeferred<void>;
   resyncModel: RealTimeModel | null;
