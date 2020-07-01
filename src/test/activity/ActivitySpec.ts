@@ -33,6 +33,8 @@ import {jsonToProtoValue} from "../../main/connection/ProtocolUtil";
 import { StringMap } from "../../main/util/StringMap";
 import {expect, assert} from "chai";
 import {createStubInstance, SinonStub, match} from "sinon";
+import {com} from "@convergence/convergence-proto";
+import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 
 const ACTIVITY_ID = "test";
 const RECONNECT_TOKEN = "reconnectToken";
@@ -329,6 +331,7 @@ describe("Activity", () => {
             leftDeferred.resolve();
           }
         });
+        mockLeave(connection);
         activity.leave();
       });
       leftDeferred.promise()
@@ -343,6 +346,7 @@ describe("Activity", () => {
       const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
+        mockLeave(connection);
         activity.leave();
         expect(activity.isJoined()).to.be.false;
         done();
@@ -357,8 +361,9 @@ describe("Activity", () => {
       activity._join();
 
       activity._whenJoined().then(() => {
+        mockLeave(connection);
         activity.leave();
-        assert(connection.sendStub.calledWith({
+        assert(connection.requestStub.calledWith({
           activityLeaveRequest: {activityId: ACTIVITY_ID}
         }));
         done();
@@ -687,6 +692,16 @@ function mockJoin(connection: IMockConnection, joinState: any = {}, remoteSessio
         state: responseState
       }
     }));
+}
+
+
+function mockLeave(connection: IMockConnection): void {
+  connection.requestStub
+    .withArgs(match.has("activityLeaveRequest", match.has("activityId", ACTIVITY_ID)))
+    .returns(Promise.resolve({
+      activityLeaveResponse: {
+      }
+    } as IConvergenceMessage));
 }
 
 interface IMockConnection {
