@@ -40,9 +40,22 @@ export class OfflineModelStatusChangedEvent implements IConvergenceEvent {
      * The id of the model that was updated.
      */
     public readonly id: string,
+    /**
+     * If the model is currently subscribed to for proactive downloading.
+     */
     public readonly subscribed: boolean,
+    /**
+     * If he model is available locally.
+     */
     public readonly available: boolean,
+    /**
+     * If the model contains changes that need to be synced to the server.
+     */
     public readonly uncommitted: boolean,
+    /**
+     * If this model was created locally, and has not yet been pushed to
+     * the server.
+     */
     public readonly local: boolean
   ) {
     Object.freeze(this);

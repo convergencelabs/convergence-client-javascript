@@ -279,7 +279,11 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   public createOfflineModel(creationData: IModelCreationData): Promise<void> {
     return this._storage
       .modelStore()
-      .createModelOffline(creationData);
+      .createModelOffline(creationData)
+      .then(() => {
+        const event = new OfflineModelStatusChangedEvent(creationData.modelId, false, true, false, true);
+        this._emitEvent(event);
+      });
   }
 
   public getOfflineModelState(modelId: string): Promise<IModelState | undefined> {
@@ -603,12 +607,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       .then(removed => {
         if (removed) {
           this._subscribedModels.delete(modelId);
-          const event = new OfflineModelStatusChangedEvent(
-            modelId,
-            false,
-            false,
-            false,
-            false);
+          const event = new OfflineModelStatusChangedEvent(modelId, false, false, false, false);
           this._emitEvent(event);
         }
       });
