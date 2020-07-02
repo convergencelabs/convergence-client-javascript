@@ -544,8 +544,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           new Error("The model has already been deleted locally and resynchronization is in process."));
       }
 
-      this._log.debug(`Removing model "${id}" the is resynchronizing. Waiting for resynchronization to complete before removing`);
-      await entry.done.promise();
+      if (entry.inProgress) {
+        // If we are in progress we must wait for it to complete.
+        this._log.debug(`Removing model "${id}" the is resynchronizing. Waiting for resynchronization to complete before removing`);
+        await entry.done.promise();
+      } else {
+        // If we are not we change this from a resync to a delete.
+        entry.action = "delete";
+      }
     }
 
     if (this._openModels.get(id)) {
@@ -571,7 +577,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     if (!this._connection.isOnline() && !this._modelOfflineManager.isOfflineEnabled()) {
       throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
-    } else {
+    } else if (this._connection.isOnline()) {
       return this._removeOnline(id);
     }
   }
@@ -696,6 +702,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getSubscribedModelIds());
   }
 
+  /**
   /**
    * Gets the meta data for all models currently stored offline.
    *
