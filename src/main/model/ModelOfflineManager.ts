@@ -32,20 +32,20 @@ import {ReplayDeferred} from "../util/ReplayDeferred";
 import {getOrDefaultBoolean, getOrDefaultNumber, getOrDefaultString, timestampToDate} from "../connection/ProtocolUtil";
 import {toModelPermissions, toObjectValue} from "./ModelMessageConverter";
 import {ConvergenceEventEmitter, IConvergenceEvent} from "../util";
-import {OfflineModelUpdatedEvent} from "./events/OfflineModelUpdatedEvent";
 import {ModelPermissions} from "./ModelPermissions";
-import {OfflineModelStatusChangedEvent} from "./events/OfflineModelStatusChangedEvent";
 import {
   ModelCommittedEvent,
   ModelModifiedEvent,
   OfflineModelDeletedEvent,
   OfflineModelPermissionsRevokedEvent,
   OfflineModelsDownloadCompletedEvent,
-  OfflineModelsDownloadPendingEvent
+  OfflineModelsDownloadPendingEvent,
+  OfflineModelsDownloadProgressEvent,
+  OfflineModelStatusChangedEvent,
+  OfflineModelUpdatedEvent
 } from "./events/";
 
 import {com} from "@convergence/convergence-proto";
-import {OfflineModelsDownloadProgressEvent} from "./events/OfflineModelsDownloadProgressEvent";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IOfflineModelUpdatedMessage = com.convergencelabs.convergence.proto.model.IOfflineModelUpdatedMessage;
 import IModelOfflineSubscriptionData = com.convergencelabs.convergence.proto
@@ -68,7 +68,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     };
   }
 
-  private readonly _subscribedModels: Map<string, ISubscribedModelRecord>;
+  private readonly _offlineModels: Map<string, IOfflineModelInfo>;
   private readonly _openModels: Map<string, IOpenModelRecord>;
   private readonly _storage: StorageEngine;
   private readonly _connection: ConvergenceConnection;
@@ -77,22 +77,20 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   private readonly _log = Logging.logger("models.offline");
 
   private _online: boolean;
-  private _allModelsDownloaded: boolean;
+  private _downloadInProgress: boolean;
 
   constructor(connection: ConvergenceConnection, snapshotInterval: number, storage: StorageEngine) {
     super();
     this._connection = connection;
     this._storage = storage;
-    this._subscribedModels = new Map();
+    this._offlineModels = new Map();
     this._openModels = new Map();
     this._ready = new ReplayDeferred<void>();
     this._snapshotInterval = snapshotInterval;
 
     this._online = false;
 
-    // We set this to true.  When we resubscribe if we are missing some
-    // then this will trigger the pending event.
-    this._allModelsDownloaded = true;
+    this._downloadInProgress = false;
 
     this._connection
       .messages()
@@ -112,20 +110,28 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       for (const modelMetaData of models) {
         // If we are subscribed we know we need the model and we add it
         // to the subscribed models.
-        if (modelMetaData.subscribed) {
-          this._subscribedModels.set(
-            modelMetaData.modelId, {
-              version: modelMetaData.details ? modelMetaData.details.version : 0,
-              permissions: modelMetaData.details ?
-                ModelPermissions.fromJSON(modelMetaData.details.permissions) : undefined,
-              available: modelMetaData.available
-            });
-        } else {
+        const entry: IOfflineModelInfo = {
+          version: modelMetaData.details ? modelMetaData.details.version : 0,
+          permissions: modelMetaData.details ?
+            ModelPermissions.fromJSON(modelMetaData.details.permissions) : undefined,
+          available: modelMetaData.available,
+          subscribed: modelMetaData.subscribed,
+          local: modelMetaData.created,
+          synchronized: !modelMetaData.uncommitted
+        }
+        this._offlineModels.set(modelMetaData.modelId, entry);
+
+        if (!modelMetaData.subscribed) {
           // We are not subscribe, purge this model if it was not here
           // because it was not cleanly closed.
-          await this._storage.modelStore().deleteIfNotNeeded(modelMetaData.modelId);
+          const deleted = await this._storage.modelStore().deleteIfNotNeeded(modelMetaData.modelId);
+          if (deleted) {
+            this._offlineModels.delete(modelMetaData.modelId);
+          }
         }
       }
+
+      this._checkAndUpdateModelDownloadStatus();
 
       this._ready.resolve();
     } catch (e) {
@@ -168,12 +174,12 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     model.off(RealTimeModel.Events.COMMITTED, this._modelCommitted);
   }
 
-  public isModelStoredOffline(modelId: string): boolean {
-    return this._subscribedModels.has(modelId);
+  public isModelSubscribed(modelId: string): boolean {
+    return this._offlineModels.has(modelId) && this._offlineModels.get(modelId).subscribed;
   }
 
   public getSubscribedModelIds(): string[] {
-    return Array.from(this._subscribedModels.keys());
+    return Array.from(this._offlineModels.keys());
   }
 
   public getModelsRequiringSync(): Promise<IModelMetaData[]> {
@@ -181,30 +187,15 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public subscribe(modelIds: string[]): Promise<void> {
-    const notSubscribed = modelIds.filter(id => !this._subscribedModels.has(id));
-    // Check to see if we need any.
-    const notSubscribedAndNotOpen = notSubscribed.filter(id => !this._openModels.has(id));
-    notSubscribedAndNotOpen.forEach((modelId) => this._handleNewSubscriptions(modelId));
+    const notSubscribed = modelIds.filter(id => !this.isModelSubscribed(id));
+    notSubscribed.forEach((modelId) => this._handleNewSubscriptions(modelId));
 
-    // We won't expect these from the server, since we already have the model.
-    // We just need need to set it to be available immediately.
-    const notSubscribedAndOpen = notSubscribed.filter(id => this._openModels.has(id));
-    notSubscribedAndOpen.forEach(id => {
-      const model = this._openModels.get(id);
-      this._subscribedModels.set(id, {
-        version: model.model.version(),
-        permissions: model.model.permissions(),
-        available: true
-      });
-    });
-
-    this._checkAndSetAllDownloaded();
+    this._checkAndUpdateModelDownloadStatus();
 
     return this._storage
       .modelStore()
       .addSubscriptions(notSubscribed)
       .then(() => {
-
         // Even though we don't need the data for all of them, we still need to let the server know
         // about all of them.
         const request = notSubscribed.map(modelId => {
@@ -225,9 +216,9 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public unsubscribe(modelIds: string[]): Promise<void> {
-    const subscribed = modelIds.filter(id => this._subscribedModels.has(id));
+    const subscribed = modelIds.filter(id => this.isModelSubscribed(id));
     subscribed.forEach(modelId => this._handleUnsubscribed(modelId));
-    this._checkAndSetAllDownloaded();
+    this._checkAndUpdateModelDownloadStatus();
 
     return this._storage
       .modelStore()
@@ -238,19 +229,20 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public setSubscriptions(modelIds: string[]): Promise<void> {
+    const subscribedModels = this._getSubscribedModelIds();
     // process model ids that need to be subscribed.
-    const subscribe = modelIds.filter(id => !this._subscribedModels.has(id));
+    const subscribe = modelIds.filter(id => !subscribedModels.has(id));
     subscribe.forEach(modelId => this._handleNewSubscriptions(modelId));
 
     // process model ids that need to be unsubscribed.
-    const unsubscribe = Array.from(this._subscribedModels.keys()).filter(id => !modelIds.includes(id));
+    const unsubscribe = Array.from(subscribedModels).filter(id => !modelIds.includes(id));
     unsubscribe.forEach(modelId => this._handleUnsubscribed(modelId));
 
     // Iterate over what is now subscribed, and send that over.
-    const subscriptions: string[] = Array.from(this._subscribedModels.keys());
+    const subscriptions: string[] = Array.from(this._offlineModels.keys());
 
     const requests: IModelOfflineSubscriptionData[] = subscriptions.map(modelId => {
-      const record = this._subscribedModels.get(modelId);
+      const record = this._offlineModels.get(modelId);
       return {
         modelId,
         currentVersion: record.version,
@@ -258,7 +250,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       };
     });
 
-    this._checkAndSetAllDownloaded();
+    this._checkAndUpdateModelDownloadStatus();
 
     return this._storage
       .modelStore()
@@ -278,12 +270,19 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public createOfflineModel(creationData: IModelCreationData): Promise<void> {
+    this._offlineModels.set(creationData.modelId, {
+      subscribed: false,
+      available: true,
+      synchronized: false,
+      local: true,
+      version: 0
+    });
+
     return this._storage
       .modelStore()
       .createModelOffline(creationData)
       .then(() => {
-        const event = new OfflineModelStatusChangedEvent(creationData.modelId, false, true, true, true);
-        this._emitEvent(event);
+        this._emitOfflineStatusChanged(creationData.modelId);
       });
   }
 
@@ -338,7 +337,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   public markModelForDeletion(modelId: string): Promise<void> {
-    this._subscribedModels.delete(modelId);
+    this._offlineModels.delete(modelId);
     return this._storage.modelStore().deleteModel(modelId)
       .then(() => this._deleteIfNotNeeded(modelId));
   }
@@ -376,9 +375,9 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _resubscribe(): Promise<void> {
-    this._checkAndSetAllDownloaded();
+    this._checkAndUpdateModelDownloadStatus();
     const subscriptionRequest: IModelOfflineSubscriptionData[] = [];
-    this._subscribedModels.forEach((record, modelId) => {
+    this._offlineModels.forEach((record, modelId) => {
       subscriptionRequest.push({
         modelId,
         currentPermissions: record.permissions ? record.permissions.toJSON() : undefined,
@@ -390,18 +389,46 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _handleNewSubscriptions(modelId: string): void {
-    if (this._subscribedModels.has(modelId)) {
-      throw new Error(`Model is already subscribed: ${modelId}`);
+    const model = this._offlineModels.get(modelId)
+    if (model) {
+      if (model.subscribed) {
+        throw new Error(`Model is already subscribed: ${modelId}`);
+      } else {
+        model.subscribed = true;
+      }
+    } else {
+      const entry: IOfflineModelInfo = {
+        version: 0,
+        subscribed: true,
+        available: false,
+        local: false,
+        synchronized: true
+      }
+      this._offlineModels.set(modelId, entry);
     }
 
-    this._subscribedModels.set(modelId, {
-      version: 0,
-      available: this._openModels.has(modelId)
-    });
+    this._emitOfflineStatusChanged(modelId);
   }
 
   private _handleUnsubscribed(modelId: string): void {
-    this._subscribedModels.delete(modelId);
+    const entry = this._offlineModels.get(modelId);
+    // If the model is available local we don't delete
+    // the entry since we are still tracking it.
+    if (entry) {
+      entry.subscribed = false;
+      this._deleteOfflineModelRecordIfNotNeeded(modelId);
+    }
+
+    this._emitOfflineStatusChanged(modelId);
+  }
+
+  private _deleteOfflineModelRecordIfNotNeeded(modelId: string): void {
+    const entry = this._offlineModels.get(modelId);
+    // If the model is available local we don't delete
+    // the entry since we are still tracking it.
+    if (entry && !entry.subscribed && !entry.available) {
+      this._offlineModels.delete(modelId);
+    }
   }
 
   private _sendSubscriptionRequest(subscribe: IModelOfflineSubscriptionData[],
@@ -433,15 +460,14 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         //  a method that indicates a delete.
         this._storage.modelStore().removeSubscriptions([modelId])
           .then(() => {
-            this._subscribedModels.delete(modelId);
+            this._offlineModels.delete(modelId);
 
             const deletedEvent = new OfflineModelDeletedEvent(modelId);
             this._emitEvent(deletedEvent);
 
-            const statusEvent = new OfflineModelStatusChangedEvent(modelId, false, false, false, false);
-            this._emitEvent(statusEvent);
+            this._emitOfflineStatusChanged(modelId);
 
-            this._checkAndSetAllDownloaded();
+            this._checkAndUpdateModelDownloadStatus();
           })
           .catch(e => {
             // TODO emmit error event.
@@ -452,22 +478,21 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         this._storage.modelStore()
           .removeSubscriptions([modelId])
           .then(() => {
-            this._subscribedModels.delete(modelId);
+            this._offlineModels.delete(modelId);
 
             const revokedEvent = new OfflineModelPermissionsRevokedEvent(modelId);
             this._emitEvent(revokedEvent);
 
-            const statusEvent = new OfflineModelStatusChangedEvent(modelId, false, false, false, false);
-            this._emitEvent(statusEvent);
+            this._emitOfflineStatusChanged(modelId);
 
-            this._checkAndSetAllDownloaded();
+            this._checkAndUpdateModelDownloadStatus();
           })
           .catch(e => {
             // TODO emmit error event.
             this._log.error("Could not delete offline model after permissions revoked.", e);
           });
       } else if (message.initial) {
-        if (this._subscribedModels.has(modelId)) {
+        if (this.isModelSubscribed(modelId)) {
           const {collection, model, permissions, valueIdPrefix} = message.initial;
           const modelPermissions = toModelPermissions(permissions);
           const version = getOrDefaultNumber(model.version);
@@ -500,63 +525,78 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
           this._storage.modelStore().putModelState(modelState).catch(e => {
             this._log.error("Error synchronizing subscribed model from server", e);
           }).then(() => {
-            this._subscribedModels.set(modelId, {
+            this._offlineModels.set(modelId, {
               version,
               permissions: modelPermissions,
-              available: true
+              available: true,
+              subscribed: true,
+              synchronized: true,
+              local: false
             });
 
-            const statusEvent = new OfflineModelStatusChangedEvent(modelId, true, true, false, false);
-            this._emitEvent(statusEvent);
+            this._emitOfflineStatusChanged(modelId);
 
             const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
             this._emitEvent(updateEvent);
 
-            this._checkAndSetAllDownloaded();
+            this._checkAndUpdateModelDownloadStatus();
           });
         }
       } else if (message.updated) {
-        const {model, permissions} = message.updated;
-        const dataUpdate: any = model ? {
-          version: getOrDefaultNumber(model.version),
-          createdTime: timestampToDate(model.createdTime),
-          modifiedTime: timestampToDate(model.modifiedTime),
-          data: toObjectValue(model.data)
-        } : undefined;
+        if (this.isModelSubscribed(modelId)) {
+          const {model, permissions} = message.updated;
+          const dataUpdate: any = model ? {
+            version: getOrDefaultNumber(model.version),
+            createdTime: timestampToDate(model.createdTime),
+            modifiedTime: timestampToDate(model.modifiedTime),
+            data: toObjectValue(model.data)
+          } : undefined;
 
-        const permissionsUpdate = toModelPermissions(permissions);
+          const permissionsUpdate = toModelPermissions(permissions);
 
-        const update: IModelUpdate = {
-          modelId,
-          dataUpdate,
-          permissionsUpdate
-        };
+          const update: IModelUpdate = {
+            modelId,
+            dataUpdate,
+            permissionsUpdate
+          };
 
-        // We have already checked that the model is not open. We only
-        // subscribe after we have synced any models with outstanding
-        // changes.  So at this point, we have a model that is not open
-        // and has no local changes. So it is safe to update it.
-        this._storage.modelStore()
-          .updateOfflineModel(update)
-          .catch(e => {
-            this._log.error("Error synchronizing subscribed model from server", e);
-          })
-          .then(() => {
-            if (dataUpdate) {
-              this._subscribedModels.set(modelId, {
-                version: getOrDefaultNumber(model.version),
-                permissions: permissionsUpdate,
-                available: true
-              });
-            }
+          // We have already checked that the model is not open. We only
+          // subscribe after we have synced any models with outstanding
+          // changes.  So at this point, we have a model that is not open
+          // and has no local changes. So it is safe to update it.
+          this._storage.modelStore()
+            .updateOfflineModel(update)
+            .catch(e => {
+              this._log.error("Error synchronizing subscribed model from server", e);
+            })
+            .then(() => {
+              if (dataUpdate) {
+                this._offlineModels.set(modelId, {
+                  version: getOrDefaultNumber(model.version),
+                  permissions: permissionsUpdate,
+                  available: true,
+                  subscribed: true,
+                  local: false,
+                  synchronized: true
+                });
+              }
 
-            const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
-            const version = dataUpdate ? dataUpdate.version : null;
-            const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
-            this._emitEvent(updateEvent);
-          });
+              const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
+              const version = dataUpdate ? dataUpdate.version : null;
+              const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
+              this._emitEvent(updateEvent);
+            });
+        }
       }
     }
+  }
+
+  private _emitOfflineStatusChanged(modelId: string): void {
+    const entry = this._offlineModels.get(modelId);
+    const statusEvent = entry ?
+      new OfflineModelStatusChangedEvent(modelId, entry.subscribed, entry.available, entry.synchronized, entry.local) :
+      new OfflineModelStatusChangedEvent(modelId, false, false, false, false);
+    this._emitEvent(statusEvent);
   }
 
   private async _handleOperation(modelId: string): Promise<void> {
@@ -596,29 +636,45 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     };
   }
 
-  private _checkAndSetAllDownloaded(): void {
-    const howManyModelsNeeded = this._howManyModelToDownload();
-    const allModelsDownloadedNow = howManyModelsNeeded === 0;
-    const allModelsDownloadedBefore = this._allModelsDownloaded;
+  private _checkAndUpdateModelDownloadStatus(): void {
+    const howManyModelsNeeded = this._howManyModelsToDownload();
+    const downloadsNeeded = howManyModelsNeeded > 0;
 
-    // Note we emit the progress event in all three blocks.
-    // This is so the events come out in the right order.
-    if (allModelsDownloadedBefore && !allModelsDownloadedNow) {
-      this._emitEvent(new OfflineModelsDownloadPendingEvent());
-      this._emitEvent(new OfflineModelsDownloadProgressEvent(howManyModelsNeeded));
-    } else if (!allModelsDownloadedBefore && allModelsDownloadedNow) {
-      this._emitEvent(new OfflineModelsDownloadProgressEvent(howManyModelsNeeded));
-      this._emitEvent(new OfflineModelsDownloadCompletedEvent());
-    } else if (!allModelsDownloadedBefore || !allModelsDownloadedNow) {
-      this._emitEvent(new OfflineModelsDownloadProgressEvent(howManyModelsNeeded));
+    if (this._downloadInProgress) {
+      if (downloadsNeeded) {
+        this._handleDownloadProgressUpdate(howManyModelsNeeded);
+      } else {
+        this._handleDownloadCompleted();
+      }
+    } else {
+      if (downloadsNeeded) {
+        this._handleDownloadStarted(howManyModelsNeeded)
+      } else {
+        // No-op. Download not in progress and we don't need any
+        // models.
+      }
     }
-
-    this._allModelsDownloaded = allModelsDownloadedNow;
   }
 
-  private _howManyModelToDownload(): number {
+  private _handleDownloadStarted(modelsToDownload: number): void {
+    this._downloadInProgress = true;
+    this._emitEvent(new OfflineModelsDownloadPendingEvent());
+    this._emitEvent(new OfflineModelsDownloadProgressEvent(modelsToDownload));
+  }
+
+  private _handleDownloadCompleted(): void {
+    this._downloadInProgress = false;
+    this._emitEvent(new OfflineModelsDownloadProgressEvent(0));
+    this._emitEvent(new OfflineModelsDownloadCompletedEvent());
+  }
+
+  private _handleDownloadProgressUpdate(modelsToDownload: number): void {
+    this._emitEvent(new OfflineModelsDownloadProgressEvent(modelsToDownload));
+  }
+
+  private _howManyModelsToDownload(): number {
     let needed = 0;
-    this._subscribedModels.forEach(record => {
+    this._offlineModels.forEach(record => {
       if (!record.available) {
         needed++;
       }
@@ -627,13 +683,23 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     return needed;
   }
 
+  private _getSubscribedModelIds(): Set<string> {
+    const subscribed = new Set<string>();
+    this._offlineModels.forEach((v, k) => {
+      if (v.subscribed) {
+        subscribed.add(k);
+      }
+    });
+
+    return subscribed;
+  }
+
   private _deleteIfNotNeeded(modelId: string): Promise<void> {
     return this._storage.modelStore().deleteIfNotNeeded(modelId)
       .then(removed => {
         if (removed) {
-          this._subscribedModels.delete(modelId);
-          const event = new OfflineModelStatusChangedEvent(modelId, false, false, false, false);
-          this._emitEvent(event);
+          this._offlineModels.delete(modelId);
+          this._emitOfflineStatusChanged(modelId);
         }
       });
   }
@@ -651,13 +717,9 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     // don't need to emit an event.  The only way the commit status
     // can change is when the model is not local.
     if (!model.isLocal()) {
-      const e = new OfflineModelStatusChangedEvent(
-        model.modelId(),
-        this._subscribedModels.has(model.modelId()),
-        true,
-        !model.isCommitted(),
-        model.isLocal());
-      this._emitEvent(e);
+      const entry = this._offlineModels.get(model.modelId());
+      entry.synchronized = model.isCommitted();
+      this._emitOfflineStatusChanged(model.modelId());
     }
   }
 }
@@ -666,10 +728,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
  * @hidden
  * @internal
  */
-interface ISubscribedModelRecord {
+interface IOfflineModelInfo {
   permissions?: ModelPermissions;
   version: number;
   available: boolean;
+  subscribed: boolean;
+  local: boolean;
+  synchronized: boolean;
 }
 
 /**

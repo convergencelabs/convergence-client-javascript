@@ -13,7 +13,6 @@
  */
 
 import {IConvergenceEvent} from "../../util";
-import {ModelPermissions} from "../ModelPermissions";
 
 /**
  * Emitted when a [[RealTimeModel]] is subscribed to for offline availability
@@ -49,9 +48,9 @@ export class OfflineModelStatusChangedEvent implements IConvergenceEvent {
      */
     public readonly available: boolean,
     /**
-     * If the model contains changes that need to be synced to the server.
+     * If is fully stored on the server.
      */
-    public readonly uncommitted: boolean,
+    public readonly synchronized: boolean,
     /**
      * If this model was created locally, and has not yet been pushed to
      * the server.

@@ -61,10 +61,19 @@ export * from "./ModelCommittedEvent";
 export * from "./ModelModifiedEvent";
 
 export * from "./OfflineModelsDownloadPendingEvent";
+export * from "./OfflineModelsDownloadProgressEvent"
 export * from "./OfflineModelsDownloadCompletedEvent";
+
 export * from "./OfflineModelsSyncStartedEvent";
+export * from "./OfflineModelsSyncProgressEvent";
 export * from "./OfflineModelsSyncCompletedEvent";
 export * from "./OfflineModelsSyncAbortedEvent";
+
+export * from "./OfflineModelSyncStartedEvent";
+export * from "./OfflineModelSyncCompletedEvent";
 export * from "./OfflineModelSyncErrorEvent";
+
 export * from "./OfflineModelDeletedEvent";
+export * from "./OfflineModelUpdatedEvent";
 export * from "./OfflineModelPermissionsRevokedEvent";
+export * from "./OfflineModelStatusChangedEvent";

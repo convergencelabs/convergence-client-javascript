@@ -56,15 +56,18 @@ import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 import {RandomStringGenerator} from "../util/RandomStringGenerator";
-import {OfflineModelsSyncCompletedEvent, OfflineModelsSyncStartedEvent} from "./events/";
+import {
+  OfflineModelsSyncCompletedEvent,
+  OfflineModelsSyncProgressEvent,
+  OfflineModelsSyncStartedEvent,
+  OfflineModelSyncCompletedEvent,
+  OfflineModelSyncStartedEvent
+} from "./events/";
 
 import {com} from "@convergence/convergence-proto";
 import {ErrorEvent} from "../events";
 import {ReplayDeferred} from "../util/ReplayDeferred";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
-import {OfflineModelsSyncProgressEvent} from "./events/OfflineModelsSyncProgressEvent";
-import {OfflineModelSyncStartedEvent} from "./events/OfflineModelSyncStartedEvent";
-import {OfflineModelSyncCompletedEvent} from "./events/OfflineModelSyncCompletedEvent";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage =
   com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
@@ -1206,7 +1209,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._connection
       .request(request)
       .then(() => {
-        this._handleOnlineDeletion(id);
+        return this._handleOnlineDeletion(id);
       })
       .catch(e => {
         // We want to handle the delete as long as it wasn't a request timeout.
@@ -1224,9 +1227,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @hidden
    */
-  private _handleOnlineDeletion(id: string): void {
+  private _handleOnlineDeletion(id: string): Promise<void> {
     if (this._modelOfflineManager.isOfflineEnabled()) {
-      this._modelOfflineManager
+      return this._modelOfflineManager
         .getModelMetaData(id)
         .then(meta => {
           if (meta) {
@@ -1240,6 +1243,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           );
           this._log.error("Error removing model from offline store.", e);
         });
+    } else {
+      return Promise.resolve();
     }
   }
 

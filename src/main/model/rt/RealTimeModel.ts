@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../../util";
+import {ConvergenceError, ConvergenceEventEmitter, ConvergenceServerError, IConvergenceEvent} from "../../util";
 import {RealTimeObject} from "./RealTimeObject";
 import {
   ElementReference,
@@ -88,7 +88,7 @@ import {Logger} from "../../util/log/Logger";
 import {Logging} from "../../util/log/Logging";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
-import {ILocalOperationData, IServerOperationData} from "../../storage/api";
+import {ILocalOperationData, IModelCreationData, IModelMetaData, IServerOperationData} from "../../storage/api";
 import {DomainUser} from "../../identity";
 import {ICreateModelOptions} from "../ICreateModelOptions";
 import {IConcurrencyControlState} from "../IModeStateSnapshot";
@@ -96,6 +96,7 @@ import {ReplayDeferred} from "../../util/ReplayDeferred";
 
 import {com} from "@convergence/convergence-proto";
 import {ErrorEvent} from "../../events";
+import {ConvergenceErrorCodes} from "../../util/ConvergenceErrorCodes";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IModelPermissionsChangedMessage = com.convergencelabs.convergence.proto.model.IModelPermissionsChangedMessage;
 import IModelForceCloseMessage = com.convergencelabs.convergence.proto.model.IModelForceCloseMessage;
@@ -936,7 +937,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @experimental
    */
   public isSubscribedOffline(): boolean {
-    return this._offlineManager.isModelStoredOffline(this._modelId);
+    return this._offlineManager.isModelSubscribed(this._modelId);
   }
 
   //
@@ -1235,46 +1236,69 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     };
 
     if (this._local) {
-      // If the model is not local, its possible that it was deleted offline
-      // If it wasn't local and its open.. the that means the local user did not
-      // deleted it and recreate it.  Thus we only need to check for deletion
-      // if we are local.
-      this._offlineManager.getModelMetaData(this._modelId).then(metaData => {
-        if (metaData.deleted) {
-          return this._modelService.remove(this._modelId)
-            .catch((e) => {
-              // TODO we should explicitly check for model_not_found and only
-              //  ignore that.
-              console.log(e);
-            }).then(() => {
-              return this._offlineManager.modelDeleted(this._modelId);
-            });
-        } else {
-          return Promise.resolve();
-        }
-      }).then(() => {
-        return this._offlineManager.getModelCreationData(this._modelId);
-      }).then(creation => {
-        this._debug("Creating offline model at the server");
-        const options: ICreateModelOptions = {
-          id: creation.modelId,
-          collection: creation.collection,
-          overrideCollectionWorldPermissions: creation.overrideCollectionWorldPermissions,
-          worldPermissions: creation.worldPermissions,
-          userPermissions: creation.userPermissions
-        };
-        return this._modelService._create(options, creation.initialData);
-      }).then(() => {
-        this._local = false;
-        return this._offlineManager.modelCreated(this._modelId);
-      }).then(() => {
-        this._resynchronize();
-      }).catch((e: Error) => {
-        this._resyncError(e.message);
-        this._log.error("Error synchronizing offline model on reconnect.", e);
+      this.createLocalModelAtServer().catch(e => {
+        this._log.error("An unexpected error occurred while synchronizing offline model on reconnect.", e);
       });
     } else {
       this._resynchronize();
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private async createLocalModelAtServer(): Promise<void> {
+    try {
+      const metaData = await this._offlineManager.getModelMetaData(this._modelId)
+      await this._deleteBeforeCreateIfNeeded(metaData);
+      const creationData = await this._offlineManager.getModelCreationData(this._modelId);
+      await this.createLocalModel(creationData);
+      this._local = false;
+      await this._offlineManager.modelCreated(this._modelId);
+      this._resynchronize();
+    } catch (e) {
+      this._resyncError(e.message);
+      if (!(e instanceof ConvergenceServerError) || e.code !== ConvergenceErrorCodes.MODEL_ALREADY_EXISTS) {
+        throw e;
+      }
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private createLocalModel(creation: IModelCreationData) {
+    this._debug("Creating offline model at the server");
+    const options: ICreateModelOptions = {
+      id: creation.modelId,
+      collection: creation.collection,
+      overrideCollectionWorldPermissions: creation.overrideCollectionWorldPermissions,
+      worldPermissions: creation.worldPermissions,
+      userPermissions: creation.userPermissions
+    };
+    return this._modelService._create(options, creation.initialData);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _deleteBeforeCreateIfNeeded(metaData: IModelMetaData) {
+    // It's possible that the model was deleted and then re-created
+    // if so we need to delete at the server before creating it.
+    if (metaData.deleted) {
+      return this._modelService.remove(this._modelId)
+        .catch((e) => {
+          // TODO we should explicitly check for model_not_found and only
+          //  ignore that.
+          console.log(e);
+        }).then(() => {
+          return this._offlineManager.modelDeleted(this._modelId);
+        });
+    } else {
+      return Promise.resolve();
     }
   }
 
@@ -1755,7 +1779,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
       this._debug("All local operations resent during resynchronization");
 
-      this._completeReconnect();
+      this._completeResynchronization();
     }
   }
 
@@ -1764,7 +1788,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _completeReconnect(): void {
+  private _completeResynchronization(): void {
     this._debug("Requesting resynchronization completion");
 
     this._resyncData.resyncCompleted = true;
