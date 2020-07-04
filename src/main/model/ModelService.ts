@@ -61,14 +61,14 @@ import {OfflineModelsSyncCompletedEvent, OfflineModelsSyncStartedEvent} from "./
 import {com} from "@convergence/convergence-proto";
 import {ErrorEvent} from "../events";
 import {ReplayDeferred} from "../util/ReplayDeferred";
-import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
-import IAutoCreateModelConfigRequestMessage =
-  com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
-import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import {OfflineModelsSyncProgressEvent} from "./events/OfflineModelsSyncProgressEvent";
 import {OfflineModelSyncStartedEvent} from "./events/OfflineModelSyncStartedEvent";
 import {OfflineModelSyncCompletedEvent} from "./events/OfflineModelSyncCompletedEvent";
+import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
+import IAutoCreateModelConfigRequestMessage =
+  com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
+import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
 
 /**
  * The complete list of events that could be emitted by the [[ModelService]].
@@ -702,7 +702,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getSubscribedModelIds());
   }
 
-  /**
   /**
    * Gets the meta data for all models currently stored offline.
    *
@@ -1486,6 +1485,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       this._syncCompletedDeferred = null;
     }
 
+    this._modelOfflineManager.setOffline();
+
     this._resourceIdToModelId.clear();
 
     this._checkResyncQueue();
@@ -1526,7 +1527,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     // We might have gone offline.
     if (this._connection.isOnline()) {
-      await this._modelOfflineManager.resubscribe();
+      await this._modelOfflineManager.setOnline();
     }
   }
 
