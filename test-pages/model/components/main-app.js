@@ -40,7 +40,7 @@ Vue.component('main-app', {
   created() {
     this.domain.models().events().subscribe(e => {
       console.log(e);
-      if (e.name.startsWith("offline_models")) {
+      if (e.name.startsWith("offline_model")) {
         this.refreshOfflineModels();
         if (e.name === "offline_models_sync_completed") {
           this.refreshOnlineModels();

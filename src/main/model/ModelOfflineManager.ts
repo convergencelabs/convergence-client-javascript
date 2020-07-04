@@ -37,10 +37,11 @@ import {
   ModelCommittedEvent,
   ModelModifiedEvent,
   OfflineModelDeletedEvent,
+  OfflineModelDownloadedEvent,
   OfflineModelPermissionsRevokedEvent,
-  OfflineModelsDownloadCompletedEvent,
-  OfflineModelsDownloadPendingEvent,
-  OfflineModelsDownloadProgressEvent,
+  OfflineModelsDownloadStartedEvent,
+  OfflineModelsDownloadStatusChangedEvent,
+  OfflineModelsDownloadStoppedEvent,
   OfflineModelStatusChangedEvent,
   OfflineModelUpdatedEvent
 } from "./events/";
@@ -78,6 +79,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   private _online: boolean;
   private _downloadInProgress: boolean;
+  private _modelsToDownload: number;
 
   constructor(connection: ConvergenceConnection, snapshotInterval: number, storage: StorageEngine) {
     super();
@@ -91,6 +93,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     this._online = false;
 
     this._downloadInProgress = false;
+    this._modelsToDownload = 0;
 
     this._connection
       .messages()
@@ -131,7 +134,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
         }
       }
 
-      this._checkAndUpdateModelDownloadStatus();
+      this._checkAndUpdateModelDownloadStatus(false);
 
       this._ready.resolve();
     } catch (e) {
@@ -155,6 +158,10 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public setOffline(): void {
     this._online = false;
+    if (this._downloadInProgress) {
+      this._downloadInProgress = false;
+      this._emitEvent(new OfflineModelsDownloadStoppedEvent());
+    }
   }
 
   public modelOpened(model: RealTimeModel, opsSinceSnapshot: number): void {
@@ -190,7 +197,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     const notSubscribed = modelIds.filter(id => !this.isModelSubscribed(id));
     notSubscribed.forEach((modelId) => this._handleNewSubscriptions(modelId));
 
-    this._checkAndUpdateModelDownloadStatus();
+    this._checkAndUpdateModelDownloadStatus(false);
 
     return this._storage
       .modelStore()
@@ -218,7 +225,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   public unsubscribe(modelIds: string[]): Promise<void> {
     const subscribed = modelIds.filter(id => this.isModelSubscribed(id));
     subscribed.forEach(modelId => this._handleUnsubscribed(modelId));
-    this._checkAndUpdateModelDownloadStatus();
+    this._checkAndUpdateModelDownloadStatus(false);
 
     return this._storage
       .modelStore()
@@ -250,7 +257,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       };
     });
 
-    this._checkAndUpdateModelDownloadStatus();
+    this._checkAndUpdateModelDownloadStatus(false);
 
     return this._storage
       .modelStore()
@@ -375,7 +382,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   }
 
   private _resubscribe(): Promise<void> {
-    this._checkAndUpdateModelDownloadStatus();
+    this._checkAndUpdateModelDownloadStatus(false);
     const subscriptionRequest: IModelOfflineSubscriptionData[] = [];
     this._offlineModels.forEach((record, modelId) => {
       subscriptionRequest.push({
@@ -426,7 +433,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     const entry = this._offlineModels.get(modelId);
     // If the model is available local we don't delete
     // the entry since we are still tracking it.
-    if (entry && !entry.subscribed && !entry.available) {
+    if (entry && !entry.subscribed && !entry.local && entry.synchronized) {
       this._offlineModels.delete(modelId);
     }
   }
@@ -467,7 +474,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
             this._emitOfflineStatusChanged(modelId);
 
-            this._checkAndUpdateModelDownloadStatus();
+            this._checkAndUpdateModelDownloadStatus(false);
           })
           .catch(e => {
             // TODO emmit error event.
@@ -485,7 +492,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
             this._emitOfflineStatusChanged(modelId);
 
-            this._checkAndUpdateModelDownloadStatus();
+            this._checkAndUpdateModelDownloadStatus(false);
           })
           .catch(e => {
             // TODO emmit error event.
@@ -534,12 +541,11 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
               local: false
             });
 
+            this._emitEvent(new OfflineModelDownloadedEvent(modelId, version, modelPermissions));
+
             this._emitOfflineStatusChanged(modelId);
 
-            const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
-            this._emitEvent(updateEvent);
-
-            this._checkAndUpdateModelDownloadStatus();
+            this._checkAndUpdateModelDownloadStatus(true);
           });
         }
       } else if (message.updated) {
@@ -583,8 +589,8 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
               const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
               const version = dataUpdate ? dataUpdate.version : null;
-              const updateEvent = new OfflineModelUpdatedEvent(modelId, version, modelPermissions);
-              this._emitEvent(updateEvent);
+
+              this._emitEvent(new OfflineModelUpdatedEvent(modelId, version, modelPermissions));
             });
         }
       }
@@ -636,40 +642,25 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     };
   }
 
-  private _checkAndUpdateModelDownloadStatus(): void {
+  private _checkAndUpdateModelDownloadStatus(modelDownloaded: boolean): void {
     const howManyModelsNeeded = this._howManyModelsToDownload();
     const downloadsNeeded = howManyModelsNeeded > 0;
 
-    if (this._downloadInProgress) {
-      if (downloadsNeeded) {
-        this._handleDownloadProgressUpdate(howManyModelsNeeded);
-      } else {
-        this._handleDownloadCompleted();
-      }
-    } else {
-      if (downloadsNeeded) {
-        this._handleDownloadStarted(howManyModelsNeeded)
-      } else {
-        // No-op. Download not in progress and we don't need any
-        // models.
+    if (this._modelsToDownload !== howManyModelsNeeded) {
+      const trigger = modelDownloaded ? "download" : "subscription_changed";
+      this._emitEvent(new OfflineModelsDownloadStatusChangedEvent(howManyModelsNeeded, trigger));
+      this._modelsToDownload = howManyModelsNeeded;
+    }
+
+    if (this._online) {
+      if (this._downloadInProgress && !downloadsNeeded) {
+        this._downloadInProgress = false;
+        this._emitEvent(new OfflineModelsDownloadStoppedEvent());
+      } else if (!this._downloadInProgress && downloadsNeeded) {
+        this._downloadInProgress = true;
+        this._emitEvent(new OfflineModelsDownloadStartedEvent(howManyModelsNeeded));
       }
     }
-  }
-
-  private _handleDownloadStarted(modelsToDownload: number): void {
-    this._downloadInProgress = true;
-    this._emitEvent(new OfflineModelsDownloadPendingEvent());
-    this._emitEvent(new OfflineModelsDownloadProgressEvent(modelsToDownload));
-  }
-
-  private _handleDownloadCompleted(): void {
-    this._downloadInProgress = false;
-    this._emitEvent(new OfflineModelsDownloadProgressEvent(0));
-    this._emitEvent(new OfflineModelsDownloadCompletedEvent());
-  }
-
-  private _handleDownloadProgressUpdate(modelsToDownload: number): void {
-    this._emitEvent(new OfflineModelsDownloadProgressEvent(modelsToDownload));
   }
 
   private _howManyModelsToDownload(): number {

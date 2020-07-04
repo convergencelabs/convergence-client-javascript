@@ -22,13 +22,13 @@ import {IConvergenceEvent} from "../../util";
  *
  * @experimental
  */
-export class OfflineModelsDownloadPendingEvent implements IConvergenceEvent {
-  public static readonly NAME = "offline_models_download_pending";
+export class OfflineModelsDownloadStoppedEvent implements IConvergenceEvent {
+  public static readonly NAME = "offline_models_download_stopped";
 
   /**
    * @inheritdoc
    */
-  public readonly name: string = OfflineModelsDownloadPendingEvent.NAME;
+  public readonly name: string = OfflineModelsDownloadStoppedEvent.NAME;
 
   /**
    * @hidden
