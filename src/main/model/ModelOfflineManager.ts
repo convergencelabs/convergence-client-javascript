@@ -159,8 +159,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   public setOffline(): void {
     this._online = false;
     if (this._downloadInProgress) {
-      this._downloadInProgress = false;
-      this._emitEvent(new OfflineModelsDownloadStoppedEvent());
+      this._handleDownloadStopped();
     }
   }
 
@@ -647,20 +646,32 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
     const downloadsNeeded = howManyModelsNeeded > 0;
 
     if (this._modelsToDownload !== howManyModelsNeeded) {
-      const trigger = modelDownloaded ? "download" : "subscription_changed";
-      this._emitEvent(new OfflineModelsDownloadStatusChangedEvent(howManyModelsNeeded, trigger));
-      this._modelsToDownload = howManyModelsNeeded;
+      this._handleDownloadStatusChanged(modelDownloaded, howManyModelsNeeded);
     }
 
     if (this._online) {
       if (this._downloadInProgress && !downloadsNeeded) {
-        this._downloadInProgress = false;
-        this._emitEvent(new OfflineModelsDownloadStoppedEvent());
+        this._handleDownloadStopped();
       } else if (!this._downloadInProgress && downloadsNeeded) {
-        this._downloadInProgress = true;
-        this._emitEvent(new OfflineModelsDownloadStartedEvent(howManyModelsNeeded));
+        this._handleDownloadStarted(howManyModelsNeeded);
       }
     }
+  }
+
+  private _handleDownloadStarted(howManyModelsNeeded: number) {
+    this._downloadInProgress = true;
+    this._emitEvent(new OfflineModelsDownloadStartedEvent(howManyModelsNeeded));
+  }
+
+  private _handleDownloadStopped() {
+    this._downloadInProgress = false;
+    this._emitEvent(new OfflineModelsDownloadStoppedEvent());
+  }
+
+  private _handleDownloadStatusChanged(modelDownloaded: boolean, howManyModelsNeeded: number) {
+    const trigger = modelDownloaded ? "download" : "subscription_changed";
+    this._emitEvent(new OfflineModelsDownloadStatusChangedEvent(howManyModelsNeeded, trigger));
+    this._modelsToDownload = howManyModelsNeeded;
   }
 
   private _howManyModelsToDownload(): number {
