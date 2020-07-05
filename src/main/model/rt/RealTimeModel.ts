@@ -1612,8 +1612,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._offlineManager
         .processOperationAck(this.modelId(), sequenceNumber, serverOp)
         .catch(e => {
-          // FIXME handle error. Should we close the model? Just emit and error?
-          this._log.error(e);
+          this._emitErrorEvent(`Error storing operation ack: ${this._modelId}`, e);
         });
     }
 
@@ -1693,8 +1692,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const inflight = this._concurrencyControl.getInFlightOperations();
       this._offlineManager
         .processServerOperationEvent(this._modelId, processed, inflight)
-        .catch(e => this._log.error(e));
-      // FIXME handle this error
+        .catch(e => {
+          this._emitErrorEvent(`Error storing remote operation: ${this._modelId}`, e);
+        });
     }
   }
 
@@ -1703,13 +1703,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   private _handleConcurrencyControlError(e: Error): void {
-    const message = `A concurrency control error occurred within model "${this._modelId}".`
-    this._log.error(message, e);
+    const message = `A concurrency control error occurred within model "${this._modelId}".`;
 
-    const errorEvent = new ErrorEvent(this._connection.session().domain(), message, e);
-    this._emitEvent(errorEvent);
-
-    this._modelService._emitError(errorEvent);
+    this._emitErrorEvent(message, e);
 
     const closedEvent = new ModelClosedEvent(this, false, "A concurrency control error occurred.");
     this._initiateClose(true, closedEvent);
@@ -1870,8 +1866,11 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _handleLocalOperation(opEvent: ClientOperationEvent): void {
     if (this._storeOffline) {
-      this._offlineManager.processLocalOperation(this._modelId, opEvent)
-        .catch(e => this._log.error(`Error storing local operation: ${this._modelId}`, e));
+      this._offlineManager
+        .processLocalOperation(this._modelId, opEvent)
+        .catch(e => {
+          this._emitErrorEvent(`Error storing local operation: ${this._modelId}`, e);
+        });
     }
     this._sendOperation(opEvent);
   }
@@ -2076,12 +2075,26 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
+   * @hidden
    * @internal
    */
   private _sendEvents(): boolean {
     return this._connection.isOnline() &&
       !this._offline &&
       (this._resyncData === null || this._resyncData.upToDate);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _emitErrorEvent(message: string, e: Error) {
+    this._log.error(message, e);
+
+    const errorEvent = new ErrorEvent(this._connection.session().domain(), message, e);
+    this._emitEvent(errorEvent);
+
+    this._modelService._emitError(errorEvent);
   }
 }
 

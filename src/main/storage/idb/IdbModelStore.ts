@@ -96,12 +96,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return metaData;
   }
 
-  private static async _putModelState(
+  private static async _mergeAndPutModelState(
     modelState: IModelState,
     modelMetaDataStore: IDBObjectStore,
     modelDataStore: IDBObjectStore,
     localOpStore: IDBObjectStore,
-    serverOpStore: IDBObjectStore): Promise<void> {
+    serverOpStore: IDBObjectStore): Promise<IModelMetaData> {
 
     const currentMetaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelState.modelId));
 
@@ -158,15 +158,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     await IdbModelStore._deleteLocalOperationsForModel(localOpStore, meta.modelId);
     await IdbModelStore._putLocalOperationsForModel(localOpStore, modelState.snapshot.localOperations);
     await IdbModelStore._putServerOperationsForModel(serverOpStore, modelState.snapshot.serverOperations);
+
+    return IdbModelStore._metaDataDocToMetaData(meta);
   }
 
   private static async _removeSubscriptions(
     modelIds: string[],
-    createStore: IDBObjectStore,
-    modelMetaDataStore: IDBObjectStore,
-    modelDataStore: IDBObjectStore,
-    localOpStore: IDBObjectStore,
-    serverOpStore: IDBObjectStore): Promise<void> {
+    modelMetaDataStore: IDBObjectStore): Promise<void> {
 
     for (const modelId of modelIds) {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
@@ -177,13 +175,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       delete metaData.subscribed;
 
       IdbModelStore._setSyncRequired(metaData);
-
-      // If we don't have changes to go up to the server we can remove.
-      if (!IdbModelStore._isMetaDataNeeded(metaData)) {
-        await this._deleteModel(modelId, createStore, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
-      } else {
-        await modelMetaDataStore.put(metaData);
-      }
+      await modelMetaDataStore.put(metaData);
     }
   }
 
@@ -228,11 +220,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     }
   }
 
-  private static _isMetaDataNeeded(meta: IModelMetaDataDocument): boolean {
-    return meta.subscribed === 1 || meta.syncRequired === 1;
-  }
-
-  public createModelOffline(modelCreation: IModelCreationData): Promise<void> {
+  public initiateModelCreation(modelCreation: IModelCreationData): Promise<IModelMetaData> {
     const stores = [
       IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store,
@@ -283,11 +271,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
         },
       };
 
-      await IdbModelStore._putModelState(modelState, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
+      return IdbModelStore._mergeAndPutModelState(
+        modelState, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore);
     });
   }
 
-  public deleteModel(modelId: string): Promise<void> {
+  public initiateModelDeletion(modelId: string): Promise<void> {
     const stores = [
       IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store,
@@ -333,7 +322,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public modelDeleted(modelId: string): Promise<void> {
+  public completeModelDeletion(modelId: string): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store
     ];
@@ -348,7 +337,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public modelCreated(modelId: string): Promise<void> {
+  public completeModelCreation(modelId: string): Promise<void> {
     const stores = [
       IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store
@@ -364,7 +353,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public deleteIfNotNeeded(modelId: string): Promise<boolean> {
+  public deleteModels(modelIds: string[]): Promise<void> {
     const storeNames = [
       IdbSchema.ModelCreation.Store,
       IdbSchema.ModelMetaData.Store,
@@ -373,15 +362,19 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       IdbSchema.ModelServerOperation.Store
     ];
     return this._withWriteStores(
-      storeNames,
-      async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
-        const metaData = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
-        if (metaData && !IdbModelStore._isMetaDataNeeded(metaData)) {
-          await IdbModelStore._deleteModel(
-            modelId, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
-          return true;
-        } else {
-          return false;
+      storeNames, async ([
+                           createStore,
+                           metaDataStore,
+                           dataStore,
+                           localOpStore,
+                           serverOpStore
+                         ]) => {
+        for (let modelId of modelIds) {
+          const metaData = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
+          if (metaData !== undefined) {
+            await IdbModelStore._deleteModel(
+              modelId, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
+          }
         }
       });
   }
@@ -400,7 +393,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       IdbSchema.ModelServerOperation.Store
     ];
     return this._withWriteStores(stores, async ([modelMetaData, modelDataStore, localOpStore, serverOpStore]) => {
-      await IdbModelStore._putModelState(modelState, modelMetaData, modelDataStore, localOpStore, serverOpStore);
+      await IdbModelStore._mergeAndPutModelState(modelState, modelMetaData, modelDataStore, localOpStore, serverOpStore);
     });
   }
 
@@ -505,7 +498,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
     if (!localOp) {
-      throw new Error("localOp was undefined.");
+      throw new ConvergenceError("localOp is required.");
     }
 
     const stores = [
@@ -516,12 +509,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return this._withWriteStores(stores, async ([modelMetaDataStore, localOpStore]) => {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(localOp.modelId));
       if (!metaData) {
-        throw new Error(`Model meta data for model '${localOp.modelId}' not found when processing a local operation.`);
+        throw new ConvergenceError(
+          `Model meta data not found for '${localOp.modelId}' while processing local operation.`);
       }
 
       if (!metaData.details) {
-        throw new Error(
-          `Can't store local operation for Model '${localOp.modelId}' because the model details are missing from storage.`);
+        throw new ConvergenceError(
+          `Model details not found for '${localOp.modelId}' while processing local operation.`);
       }
 
       metaData.uncommitted = 1;
@@ -546,12 +540,13 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
 
       if (!metaData) {
-        throw new Error(`Model meta data for model '${modelId}' not found when processing a local operation acknowledgement.`);
+        throw new ConvergenceError(
+          `Model meta data not found for '${modelId}' while processing operation acknowledgement.`);
       }
 
       if (!metaData.details) {
-        throw new Error(
-          `Can't store operation ack for Model '${modelId}' because the model details are missing from storage.`);
+        throw new ConvergenceError(
+          `Model details not found for '${modelId}' while processing operation acknowledgement.`);
       }
 
       metaData.details.version = serverOp.version + 1;
@@ -647,27 +642,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public setModelSubscriptions(modelIds: string[]): Promise<void> {
-    const storeNames = [
-      IdbSchema.ModelCreation.Store,
-      IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelData.Store,
-      IdbSchema.ModelLocalOperation.Store,
-      IdbSchema.ModelServerOperation.Store
-    ];
-    return this._withWriteStores(
-      storeNames,
-      async ([createStore, metaDataStore, dataStore, localOpStore, serverOpStore]) => {
-        const index = metaDataStore.index(IdbSchema.ModelMetaData.Indices.Subscribed);
-        const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
-        const subscribedModelIds = subscribed.map(s => s.modelId);
-        const toAdd = modelIds.filter(id => !subscribedModelIds.includes(id));
-        const toRemove = subscribedModelIds.filter(id => !modelIds.includes(id));
-
-        await IdbModelStore._removeSubscriptions(
-          toRemove, createStore, metaDataStore, dataStore, localOpStore, serverOpStore);
-        await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
-      });
+  public updateSubscriptions(toAdd: string[], toRemove: string[]): Promise<void> {
+    const storeNames = [IdbSchema.ModelMetaData.Store];
+    return this._withWriteStores(storeNames, async ([metaDataStore]) => {
+      await IdbModelStore._removeSubscriptions(toRemove, metaDataStore);
+      await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
+    });
   }
 
   public getSubscribedModels(): Promise<IModelMetaData[]> {
@@ -677,32 +657,6 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
       return subscribed.map(IdbModelStore._metaDataDocToMetaData);
     });
-  }
-
-  public addSubscriptions(modelIds: string[]): Promise<void> {
-    const storeName = IdbSchema.ModelMetaData.Store;
-    return this._withWriteStore(storeName, (store) => IdbModelStore._addSubscriptions(modelIds, store));
-  }
-
-  public removeSubscriptions(modelIds: string[]): Promise<void> {
-    const stores = [
-      IdbSchema.ModelCreation.Store,
-      IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelData.Store,
-      IdbSchema.ModelLocalOperation.Store,
-      IdbSchema.ModelServerOperation.Store,
-    ];
-
-    return this._withWriteStores(stores,
-      async ([createStore, modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
-        return IdbModelStore._removeSubscriptions(
-          modelIds,
-          createStore,
-          modelMetaDataStore,
-          modelDataStore,
-          localOpStore,
-          serverOpStore);
-      });
   }
 
   public snapshotModel(modelId: string,

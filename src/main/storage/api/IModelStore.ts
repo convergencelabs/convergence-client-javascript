@@ -25,21 +25,17 @@ import {IObjectValue} from "../../model";
 export interface IModelStore {
   getSubscribedModels(): Promise<IModelMetaData[]>;
 
-  addSubscriptions(modelIds: string[]): Promise<void>;
+  updateSubscriptions(subscribe: string[], unsubscribe: string[]): Promise<void>;
 
-  removeSubscriptions(modelId: string[]): Promise<void>;
+  initiateModelCreation(model: IModelCreationData): Promise<IModelMetaData>;
 
-  setModelSubscriptions(subscriptions: string[]): Promise<void>;
-
-  createModelOffline(model: IModelCreationData): Promise<void>;
-
-  modelCreated(modelId: string): Promise<void>;
+  completeModelCreation(modelId: string): Promise<void>;
 
   getModelCreationData(modelId: string): Promise<IModelCreationData>;
 
-  deleteModel(modelId: string): Promise<void>;
+  initiateModelDeletion(modelId: string): Promise<void>;
 
-  modelDeleted(modelId: string): Promise<void>;
+  completeModelDeletion(modelId: string): Promise<void>;
 
   getModelState(modelId: string): Promise<IModelState | undefined>;
 
@@ -59,7 +55,7 @@ export interface IModelStore {
 
   getModelsRequiringSync(): Promise<IModelMetaData[]>;
 
-  deleteIfNotNeeded(modelId: string): Promise<boolean>;
+  deleteModels(modelId: string[]): Promise<void>;
 
   processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void>;
 
