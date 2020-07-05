@@ -42,7 +42,9 @@ Vue.component('main-app', {
       console.log(e);
       if (e.name.startsWith("offline_model")) {
         this.refreshOfflineModels();
-        if (e.name === "offline_models_sync_completed") {
+        if (e.name === "offline_models_sync_completed" ||
+            e.name === "offline_model_deleted" ||
+            e.name === "offline_model_permissions_revoked") {
           this.refreshOnlineModels();
         }
       }
