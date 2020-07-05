@@ -169,6 +169,7 @@ const dist = series(
 
 export {
   typings,
+  webpackBundle,
   compile,
   test,
   lint,
