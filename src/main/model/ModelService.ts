@@ -701,8 +701,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *
    * @experimental
    */
-  public getOfflineSubscriptions(): Promise<string[]> {
-    return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getSubscribedModelIds());
+  public async getOfflineSubscriptions(): Promise<string[]> {
+    await this._modelOfflineManager.ready();
+    const ids = await this._modelOfflineManager.getSubscribedModelIds();
+    return Array.from(ids);
   }
 
   /**
@@ -712,8 +714,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    *
    * @experimental
    */
-  public getOfflineModelMetaData(): Promise<IModelMetaData[]> {
-    return this._modelOfflineManager.ready().then(() => this._modelOfflineManager.getAllModelMetaData());
+  public async getOfflineModelMetaData(): Promise<IModelMetaData[]> {
+    await this._modelOfflineManager.ready();
+    return this._modelOfflineManager.getAllModelMetaData();
   }
 
   /**
