@@ -13,7 +13,7 @@
  */
 
 import {IdbStorageAdapter} from "../../../main/storage/idb";
-import {ILocalOperationData, IModelState} from "../../../main/storage/api/";
+import {ILocalOperationData, IModelMetaData, IModelState} from "../../../main/storage/api/";
 import {ModelPermissions} from "../../../main/model/";
 
 import {expect} from "chai";
@@ -56,16 +56,54 @@ describe("IdbModelStore", () => {
   });
 
   describe("deleteModel()", () => {
-    it("deletes and existing model ", () => withStorage(async (adapter) => {
+    it("deletes and existing model", () => withStorage(async (adapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
         const exists = await modelStore.modelExists(modelState.modelId);
         expect(exists).to.be.true;
 
-        await modelStore.removeSubscriptions([modelState.modelId]);
+        await modelStore.deleteModels([modelState.modelId]);
         const afterDelete = await modelStore.modelExists(modelState.modelId);
         expect(afterDelete).to.be.false;
+      })
+    );
+  });
+
+  describe("updateSubscriptions()", () => {
+    it("correctly adds new subscriptions", () => withStorage(async (adapter: IdbStorageAdapter) => {
+        const modelStore = adapter.modelStore();
+        const toSubscribe = ["model1", "model2"];
+        await modelStore.updateSubscriptions(toSubscribe, []);
+        const subscribed = await modelStore.getSubscribedModels();
+        const expected = new Set<IModelMetaData>();
+
+        expected.add({...DefaultMetaData, modelId: "model1"});
+        expected.add({...DefaultMetaData, modelId: "model2"});
+
+        expect(new Set(subscribed)).to.be.deep.equals(expected);
+      })
+    );
+
+    it("correctly removes existing subscriptions", () => withStorage(async (adapter: IdbStorageAdapter) => {
+        const modelStore = adapter.modelStore();
+        const toSubscribe = ["model1", "model2"];
+        await modelStore.updateSubscriptions(toSubscribe, []);
+        await modelStore.updateSubscriptions([], ["model1"]);
+        const subscribed = await modelStore.getSubscribedModels();
+
+        const expectedSubscribed = new Set<IModelMetaData>();
+        expectedSubscribed.add({...DefaultMetaData, modelId: "model2"});
+
+        expect(new Set(subscribed)).to.be.deep.equals(expectedSubscribed);
+
+        const all = await modelStore.getAllModelMetaData();
+
+        const expectedAll = new Set<IModelMetaData>();
+        expectedAll.add({...DefaultMetaData, subscribed: false, modelId: "model1"});
+        expectedAll.add({...DefaultMetaData, modelId: "model2"});
+
+        expect(new Set(all)).to.be.deep.equals(expectedAll);
       })
     );
   });
@@ -116,6 +154,15 @@ function createModelState(): IModelState {
       serverOperations: []
     }
   };
+}
+
+const DefaultMetaData = {
+  created: false,
+  deleted: false,
+  subscribed: true,
+  available: false,
+  syncRequired: false,
+  uncommitted: false
 }
 
 let counter = 1;
