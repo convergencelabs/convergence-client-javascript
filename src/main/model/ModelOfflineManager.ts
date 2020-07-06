@@ -116,6 +116,9 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       this._ready.resolve();
     } catch (e) {
       this._ready.reject(e);
+      // we only caught the exception so we can also reject
+      // the ready deferred. Thus, we need to rethrow here.
+      throw e;
     }
   }
 
@@ -221,8 +224,6 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       .modelStore()
       .initiateModelCreation(creationData)
       .then((metaData) => {
-        // FIXME make a helper method to create out offline state
-        //  from meta data. We woul use it in init also.
         this._offlineModels.set(creationData.modelId, {
           subscribed: false,
           available: true,
@@ -334,7 +335,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       permissions: model.permissions(),
       snapshot
     };
-    return this._storage.modelStore().putModelState(state);
+    return this._storage.modelStore().setModelState(state);
   }
 
   private _resubscribe(): Promise<void> {
@@ -524,28 +525,33 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
       // changes.  So at this point, we have a model that is not open
       // and has no local changes. So it is safe to update it.
       this._storage.modelStore()
-        .updateOfflineModel(update)
+        .processOfflineModelUpdate(update)
         .catch(e => {
           this._emitErrorEvent("Could not update offline model after download.", e);
         })
         .then(() => {
-          // FIXME since this is async we need to make sure we still want this.
-          if (dataUpdate) {
-            this._offlineModels.set(modelId, {
-              version: getOrDefaultNumber(model.version),
-              permissions: permissionsUpdate,
-              available: true,
-              subscribed: true,
-              created: false,
-              uncommited: false,
-              deleted: false
-            });
+          const current = this._offlineModels.get(modelId);
+          // Since this is all async it's entirely possible that
+          // we have gotten rid of this model by now and that we
+          // don't want to deal with this update now.
+          if (current && current.available) {
+            if (dataUpdate) {
+              this._offlineModels.set(modelId, {
+                version: getOrDefaultNumber(model.version),
+                permissions: permissionsUpdate,
+                available: true,
+                subscribed: true,
+                created: false,
+                uncommited: false,
+                deleted: false
+              });
+            }
+
+            const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
+            const version = dataUpdate ? dataUpdate.version : null;
+
+            this._emitEvent(new OfflineModelUpdatedEvent(modelId, version, modelPermissions));
           }
-
-          const modelPermissions = permissionsUpdate ? ModelPermissions.fromJSON(permissionsUpdate) : null;
-          const version = dataUpdate ? dataUpdate.version : null;
-
-          this._emitEvent(new OfflineModelUpdatedEvent(modelId, version, modelPermissions));
         });
     }
   }
@@ -583,7 +589,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
       this._storage
         .modelStore()
-        .putModelState(modelState)
+        .setModelState(modelState)
         .catch(e => this._emitErrorEvent("Could not store offline model after download.", e))
         .then(() => {
           this._offlineModels.set(modelId, {

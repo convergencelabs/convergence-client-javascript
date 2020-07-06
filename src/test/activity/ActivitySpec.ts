@@ -15,38 +15,28 @@
 import {IdentityCache} from "../../main/identity/IdentityCache";
 import {
   Activity,
-  ActivitySessionJoinedEvent, ActivityStateClearedEvent,
+  ActivitySessionJoinedEvent,
+  ActivityStateClearedEvent,
   ActivityStateDeltaEvent,
   ActivityStateRemovedEvent,
   ActivityStateSetEvent,
-  ConvergenceDomain,
-  ConvergenceSession,
   DomainUser,
   DomainUserType,
 } from "../../main";
-import {ConvergenceConnection, IConnectionEvent, MessageEvent} from "../../main/connection/ConvergenceConnection";
-import {Subject} from "rxjs";
+import {MessageEvent} from "../../main/connection/ConvergenceConnection";
 import {Deferred} from "../../main/util/Deferred";
 import {ActivityLeftEvent} from "../../main/activity/events/ActivityLeftEvent";
 import {mapObjectValues} from "../../main/util/ObjectUtils";
 import {jsonToProtoValue} from "../../main/connection/ProtocolUtil";
-import { StringMap } from "../../main/util/StringMap";
-import {expect, assert} from "chai";
-import {createStubInstance, SinonStub, match} from "sinon";
+import {StringMap} from "../../main/util/StringMap";
+import {assert, expect} from "chai";
+import {createStubInstance, match, SinonStub} from "sinon";
 import {com} from "@convergence/convergence-proto";
+import {IMockConnection, mockConvergenceConnection} from "../MockConvergenceConnection";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
+import {LOCAL_SESSION_ID, LOCAL_USER, RECONNECT_TOKEN} from "../MockingConstants";
 
 const ACTIVITY_ID = "test";
-const RECONNECT_TOKEN = "reconnectToken";
-
-const LOCAL_SESSION_ID = "localSession";
-const LOCAL_USER = new DomainUser(
-  DomainUserType.NORMAL,
-  "localUser",
-  "local",
-  "user",
-  "Test User",
-  "local@example.com");
 
 const REMOTE_SESSION_ID = "remoteSession1";
 
@@ -704,15 +694,7 @@ function mockLeave(connection: IMockConnection): void {
     } as IConvergenceMessage));
 }
 
-interface IMockConnection {
-  connection: ConvergenceConnection;
-  messageSubject: Subject<MessageEvent>;
-  eventSubject: Subject<IConnectionEvent>;
-  requestStub: SinonStub;
-  sendStub: SinonStub;
-}
-
-function mockIdentityCache(users?: Array<{ user: DomainUser, sessionIds: string[] }>): IdentityCache {
+function mockIdentityCache(users?: { user: DomainUser, sessionIds: string[] }[]): IdentityCache {
   users = users || [];
 
   const identityCache = createStubInstance(IdentityCache);
@@ -733,29 +715,5 @@ function mockIdentityCache(users?: Array<{ user: DomainUser, sessionIds: string[
 }
 
 function mockConnection(): IMockConnection {
-  const connectionStub = createStubInstance(ConvergenceConnection);
-  const messageSubject = new Subject<MessageEvent>();
-  connectionStub.messages.callsFake(() => messageSubject.asObservable());
-
-  const eventSubject = new Subject<IConnectionEvent>();
-  connectionStub.events.callsFake(() => eventSubject.asObservable());
-
-  const domain = createStubInstance(ConvergenceDomain) as any as ConvergenceDomain;
-  const connection = connectionStub as any as ConvergenceConnection;
-
-  const session = new ConvergenceSession(domain, connection, LOCAL_USER, LOCAL_SESSION_ID, RECONNECT_TOKEN);
-
-  (connection.session as SinonStub).returns(session);
-  (connection.isOnline as SinonStub).returns(true);
-
-  const requestStub = (connection.request as SinonStub);
-  const sendStub = (connection.send as SinonStub);
-
-  return {
-    connection,
-    messageSubject,
-    eventSubject,
-    requestStub,
-    sendStub
-  };
+  return mockConvergenceConnection(LOCAL_USER, LOCAL_SESSION_ID, RECONNECT_TOKEN);
 }

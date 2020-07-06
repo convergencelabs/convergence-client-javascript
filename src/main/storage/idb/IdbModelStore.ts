@@ -138,6 +138,12 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     }
 
     meta.available = 1;
+    if (modelState.snapshot.localOperations.length > 0) {
+      meta.uncommitted = 1;
+    } else {
+      delete meta.uncommitted;
+    }
+
 
     if (currentMetaData) {
       meta.subscribed = currentMetaData.subscribed;
@@ -244,7 +250,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
 
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
       if (TypeChecker.isSet(metaData) && metaData.available) {
-        return Promise.reject(new Error(`An offline model with the specified id already exists: ${modelId}`));
+        return Promise.reject(new ConvergenceError(`An offline model with the specified id already exists: ${modelId}`));
       }
 
       await toVoidPromise(creationStore.put(modelCreation));
@@ -281,9 +287,9 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public getModelCreationData(modelId: string): Promise<IModelCreationData> {
+  public getModelCreationData(modelId: string): Promise<IModelCreationData | null> {
     return this._withReadStore(IdbSchema.ModelCreation.Store, async store => {
-      return toPromise(store.get(modelId));
+      return toPromise(store.get(modelId)).then(data => data || null);
     });
   }
 
@@ -296,7 +302,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     return this._withWriteStores(stores, async ([creationStore, modelMetaDataStore]) => {
       const data = await toPromise(creationStore.get(modelId));
       if (!data) {
-        throw new Error("Can't complete model creation for a model that was created.");
+        throw new ConvergenceError("Can't complete model creation for a model that was created.");
       }
 
       await toVoidPromise(creationStore.delete(modelId));
@@ -327,7 +333,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(modelId));
 
       if (!metaData) {
-        throw new Error(`Can't delete model '${modelId}' because it doesn't exist.`);
+        throw new ConvergenceError(`Can't delete model '${modelId}' because it doesn't exist.`);
       }
 
       delete metaData.details;
@@ -393,7 +399,57 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       });
   }
 
-  public putModelState(modelState: IModelState): Promise<void> {
+  public modelMetaDataExists(modelId: string): Promise<boolean> {
+    if (modelId === undefined || modelId === null) {
+      throw new ConvergenceError("modelId must be defined");
+    }
+
+    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
+      const idx = store.index(IdbSchema.ModelMetaData.Indices.ModelId);
+      return toPromise(idx.count(modelId)).then((count => count > 0));
+    });
+  }
+
+  public getModelMetaData(modelId: string): Promise<IModelMetaData | undefined> {
+    return this._withReadStore(IdbSchema.ModelMetaData.Store, async (store) => {
+      const doc = await toPromise<IModelMetaDataDocument>(store.get(modelId))
+      if (doc) {
+        return IdbModelStore._metaDataDocToMetaData(doc);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  public getAllModelMetaData(): Promise<IModelMetaData[]> {
+    return this._getAll(IdbSchema.ModelMetaData.Store)
+      .then(results => results.map(IdbModelStore._metaDataDocToMetaData));
+  }
+
+  public getModelsRequiringSync(): Promise<IModelMetaData[]> {
+    return this
+      ._getAllFromIndex(IdbSchema.ModelMetaData.Store, IdbSchema.ModelMetaData.Indices.SyncRequired)
+      .then((docs: IModelMetaDataDocument[]) => docs.map(IdbModelStore._metaDataDocToMetaData));
+  }
+
+  public getSubscribedModels(): Promise<IModelMetaData[]> {
+    const storeName = IdbSchema.ModelMetaData.Store;
+    return this._withReadStore(storeName, async (store) => {
+      const index = store.index(IdbSchema.ModelMetaData.Indices.Subscribed);
+      const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
+      return subscribed.map(IdbModelStore._metaDataDocToMetaData);
+    });
+  }
+
+  public updateSubscriptions(toAdd: string[], toRemove: string[]): Promise<void> {
+    const storeNames = [IdbSchema.ModelMetaData.Store];
+    return this._withWriteStores(storeNames, async ([metaDataStore]) => {
+      await IdbModelStore._removeSubscriptions(toRemove, metaDataStore);
+      await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
+    });
+  }
+
+  public setModelState(modelState: IModelState): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
@@ -405,7 +461,64 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public updateOfflineModel(update: IModelUpdate): Promise<void> {
+  public getModelState(modelId: string): Promise<IModelState | null> {
+    if (modelId === undefined || modelId === null) {
+      return Promise.reject(new ConvergenceError("modelId must be defined"));
+    }
+
+    const stores = [
+      IdbSchema.ModelMetaData.Store,
+      IdbSchema.ModelData.Store,
+      IdbSchema.ModelLocalOperation.Store,
+      IdbSchema.ModelServerOperation.Store
+    ];
+    return this._withReadStores(stores,
+      async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
+        const meta: IModelMetaDataDocument = await toPromise(modelMetaDataStore.get(modelId));
+        const data: IModelData = await toPromise(modelDataStore.get(modelId));
+        if (meta && data) {
+          const localOpsIndex = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
+          const localOperations = await IdbPersistenceStore._getAllFromOpenIndex<ILocalOperationData>(localOpsIndex, modelId);
+
+          const serverOpsIndex = serverOpStore.index(IdbSchema.ModelServerOperation.Indices.ModelId);
+          const serverOperations = await IdbPersistenceStore._getAllFromOpenIndex<IServerOperationData>(serverOpsIndex, modelId);
+
+          const snapshot: IModelSnapshot = {
+            version: meta.details.snapshotVersion,
+            sequenceNumber: meta.details.snapshotSequenceNumber,
+            data: data.data,
+            localOperations,
+            serverOperations
+          };
+
+          const version = meta.details.version;
+          const lastSequenceNumber = meta.details.lastSequenceNumber;
+
+          return {
+            modelId: meta.modelId,
+            collection: meta.details.collection,
+            createdTime: meta.details.createdTime,
+            modifiedTime: meta.details.modifiedTime,
+            version,
+            lastSequenceNumber,
+            valueIdPrefix: {...meta.details.valueIdPrefix},
+            permissions: new ModelPermissions(
+              meta.details.permissions.read,
+              meta.details.permissions.write,
+              meta.details.permissions.remove,
+              meta.details.permissions.manage,
+            ),
+
+            local: meta.created === 1,
+            snapshot
+          } as IModelState;
+        } else {
+          return null;
+        }
+      });
+  }
+
+  public processOfflineModelUpdate(update: IModelUpdate): Promise<void> {
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
@@ -424,7 +537,8 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       if (modelMetaData.uncommitted) {
         // If we allow this to go through the uncommitted local operations
         // would no longer be compatible to the document state.
-        throw new Error(`A model update was received for an model ('${modelId}')with uncommitted operations.`);
+        throw new ConvergenceError(
+          `A model update was received for an model ('${modelId}')with uncommitted operations.`);
       }
 
       await IdbModelStore._deleteServerOperationsForModel(serverOpStore, modelId);
@@ -455,44 +569,37 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public modelExists(modelId: string): Promise<boolean> {
-    if (modelId === undefined || modelId === null) {
-      throw new Error("modelId must be defined");
+  public processServerOperation(serverOp: IServerOperationData, localOps: ILocalOperationData[]): Promise<void> {
+    if (!serverOp) {
+      return Promise.reject(new ConvergenceError("serverOp was undefined."));
     }
 
-    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
-      const idx = store.index(IdbSchema.ModelMetaData.Indices.ModelId);
-      return toPromise(idx.count(modelId)).then((count => count > 0));
-    });
-  }
+    if (!Array.isArray(localOps)) {
+      return Promise.reject(new ConvergenceError("localOps was not an array."));
+    }
 
-  public getModelsRequiringSync(): Promise<IModelMetaData[]> {
-    return this
-      ._getAllFromIndex(IdbSchema.ModelMetaData.Store, IdbSchema.ModelMetaData.Indices.SyncRequired)
-      .then((docs: IModelMetaDataDocument[]) => docs.map(IdbModelStore._metaDataDocToMetaData));
-  }
-
-
-  public processServerOperation(serverOp: IServerOperationData): Promise<void> {
-    if (!serverOp) {
-      throw new Error("serverOp was undefined.");
+    if (!localOps.every(op => op.modelId === serverOp.modelId)) {
+      return Promise.reject(new ConvergenceError("localOp modelId did not match the serverOp modelId."));
     }
 
     const stores = [
       IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelServerOperation.Store
+      IdbSchema.ModelServerOperation.Store,
+      IdbSchema.ModelLocalOperation.Store
     ];
 
-    return this._withWriteStores(stores, async ([modelMetaDataStore, serverOpStore]) => {
+    return this._withWriteStores(stores, async ([modelMetaDataStore,
+                                                  serverOpStore,
+                                                  localOpStore]) => {
       const metaData = await toPromise<IModelMetaDataDocument>(modelMetaDataStore.get(serverOp.modelId));
 
       if (!metaData) {
-        throw new Error(
+        throw new ConvergenceError(
           `Model meta data for model '${serverOp.modelId}' not found when processing a server operation.`);
       }
 
       if (!metaData.details) {
-        throw new Error(
+        throw new ConvergenceError(
           `Can't store server operation for Model '${serverOp.modelId}' because the model details are missing from storage.`);
       }
 
@@ -500,13 +607,17 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       metaData.details.modifiedTime = serverOp.timestamp;
 
       await toVoidPromise(serverOpStore.add(serverOp));
+
+      await IdbModelStore._deleteLocalOperationsForModel(localOpStore, serverOp.modelId);
+      await IdbModelStore._putLocalOperationsForModel(localOpStore, localOps);
+
       await toVoidPromise(modelMetaDataStore.put(metaData));
     });
   }
 
   public processLocalOperation(localOp: ILocalOperationData): Promise<void> {
     if (!localOp) {
-      throw new ConvergenceError("localOp is required.");
+      return Promise.reject(new ConvergenceError("localOp is required."));
     }
 
     const stores = [
@@ -577,100 +688,15 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
     });
   }
 
-  public getModelState(modelId: string): Promise<IModelState | undefined> {
-    if (modelId === undefined || modelId === null) {
-      throw new Error("modelId must be defined");
-    }
-
-    const stores = [
-      IdbSchema.ModelMetaData.Store,
-      IdbSchema.ModelData.Store,
-      IdbSchema.ModelLocalOperation.Store,
-      IdbSchema.ModelServerOperation.Store
-    ];
-    return this._withReadStores(stores,
-      async ([modelMetaDataStore, modelDataStore, localOpStore, serverOpStore]) => {
-        const meta: IModelMetaDataDocument = await toPromise(modelMetaDataStore.get(modelId));
-        const data: IModelData = await toPromise(modelDataStore.get(modelId));
-        if (meta && data) {
-          const localOpsIndex = localOpStore.index(IdbSchema.ModelLocalOperation.Indices.ModelId);
-          const localOperations = await IdbPersistenceStore._getAllFromOpenIndex<ILocalOperationData>(localOpsIndex, modelId);
-
-          const serverOpsIndex = serverOpStore.index(IdbSchema.ModelServerOperation.Indices.ModelId);
-          const serverOperations = await IdbPersistenceStore._getAllFromOpenIndex<IServerOperationData>(serverOpsIndex, modelId);
-
-          const snapshot: IModelSnapshot = {
-            version: meta.details.snapshotVersion,
-            sequenceNumber: meta.details.snapshotSequenceNumber,
-            data: data.data,
-            localOperations,
-            serverOperations
-          };
-
-          const version = meta.details.version;
-          const lastSequenceNumber = meta.details.lastSequenceNumber;
-
-          return {
-            modelId: meta.modelId,
-            collection: meta.details.collection,
-            createdTime: meta.details.createdTime,
-            modifiedTime: meta.details.modifiedTime,
-            version,
-            lastSequenceNumber,
-            valueIdPrefix: {...meta.details.valueIdPrefix},
-            permissions: new ModelPermissions(
-              meta.details.permissions.read,
-              meta.details.permissions.write,
-              meta.details.permissions.remove,
-              meta.details.permissions.manage,
-            ),
-
-            local: meta.created === 1,
-            snapshot
-          } as IModelState;
-        } else {
-          return;
-        }
-      });
-  }
-
-  public getAllModelMetaData(): Promise<IModelMetaData[]> {
-    return this._getAll(IdbSchema.ModelMetaData.Store)
-      .then(results => results.map(IdbModelStore._metaDataDocToMetaData));
-  }
-
-  public getModelMetaData(modelId: string): Promise<IModelMetaData | undefined> {
-    return this._withReadStore(IdbSchema.ModelMetaData.Store, (store) => {
-      return toPromise<IModelMetaDataDocument>(store.get(modelId))
-        .then(doc => {
-          if (doc) {
-            return IdbModelStore._metaDataDocToMetaData(doc);
-          }
-        });
-    });
-  }
-
-  public updateSubscriptions(toAdd: string[], toRemove: string[]): Promise<void> {
-    const storeNames = [IdbSchema.ModelMetaData.Store];
-    return this._withWriteStores(storeNames, async ([metaDataStore]) => {
-      await IdbModelStore._removeSubscriptions(toRemove, metaDataStore);
-      await IdbModelStore._addSubscriptions(toAdd, metaDataStore);
-    });
-  }
-
-  public getSubscribedModels(): Promise<IModelMetaData[]> {
-    const storeName = IdbSchema.ModelMetaData.Store;
-    return this._withReadStore(storeName, async (store) => {
-      const index = store.index(IdbSchema.ModelMetaData.Indices.Subscribed);
-      const subscribed = await IdbPersistenceStore._getAllFromOpenIndex<IModelMetaDataDocument>(index);
-      return subscribed.map(IdbModelStore._metaDataDocToMetaData);
-    });
-  }
-
   public snapshotModel(modelId: string,
                        version: number,
                        sequenceNumber: number,
                        modelData: IObjectValue): Promise<void> {
+
+    if (!modelData) {
+      return Promise.reject(new ConvergenceError(`modelData must be defined`));
+    }
+
     const stores = [
       IdbSchema.ModelMetaData.Store,
       IdbSchema.ModelData.Store,
@@ -680,6 +706,16 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       async ([metaDataStore, modelDataStore, serverOpStore]) => {
 
         const meta = await toPromise<IModelMetaDataDocument>(metaDataStore.get(modelId));
+        if (!meta) {
+          throw new ConvergenceError(
+            `Model meta data not found for '${modelId}' while snapshotting model.`);
+        }
+
+        if (!meta.available) {
+          throw new ConvergenceError(
+            `Model '${modelId}' is not available locally.`);
+        }
+
         meta.details.snapshotVersion = version;
         meta.details.snapshotSequenceNumber = sequenceNumber;
 
@@ -700,7 +736,7 @@ export class IdbModelStore extends IdbPersistenceStore implements IModelStore {
       const meta = await toPromise<IModelMetaDataDocument>(store.get(modelId));
 
       if (!meta || !meta.details) {
-        throw new ConvergenceError("No such offline model available: " + modelId);
+        throw new ConvergenceError("The specified model is not available offline: " + modelId);
       }
 
       const result = {...meta.details.valueIdPrefix};
