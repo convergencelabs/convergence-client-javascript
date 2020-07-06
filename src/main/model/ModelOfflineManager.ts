@@ -253,6 +253,12 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
 
   public processLocalOperation(modelId: string, clientEvent: ClientOperationEvent): Promise<void> {
     const localOpData = ModelOfflineManager._mapClientOperationEvent(modelId, clientEvent);
+
+    const entry = this._offlineModels.get(modelId);
+    if (entry) {
+      entry.uncommited = true;
+    }
+
     return this._storage
       .modelStore()
       .processLocalOperation(localOpData)
@@ -262,6 +268,13 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   public processOperationAck(modelId: string,
                              seqNo: number,
                              serverOp: IServerOperationData): Promise<void> {
+
+    const entry = this._offlineModels.get(modelId);
+    const model = this._openModels.get(modelId);
+    if (entry && model) {
+      entry.uncommited = !model.model.isCommitted();
+    }
+
     return this._storage
       .modelStore()
       .processOperationAck(modelId, seqNo, serverOp);
@@ -474,8 +487,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   private _handleModelOfflineUpdated(message: IOfflineModelUpdatedMessage): void {
     const modelId = getOrDefaultString(message.modelId);
 
-    // If the model is open this is going to be handled by the open
-    // real time model.
+    // If the model is open the message will be handled by the open model.
     if (!this._openModels.has(modelId)) {
       if (getOrDefaultBoolean(message.deleted)) {
         this._handleOfflineModelDeleted(modelId);

@@ -13,7 +13,7 @@
  */
 
 import {IdbStorageAdapter} from "../../../main/storage/idb";
-import {ILocalOperationData, IModelMetaData, IModelState} from "../../../main/storage/api/";
+import {ILocalOperationData, IModelCreationData, IModelMetaData, IModelState} from "../../../main/storage/api/";
 import {ModelPermissions} from "../../../main/model/";
 
 import {expect} from "chai";
@@ -21,42 +21,284 @@ import {expect} from "chai";
 import * as chai from "chai";
 import "fake-indexeddb/auto";
 import * as chaiAsPromised from "chai-as-promised";
+import {fail} from "assert";
 
 chai.use(chaiAsPromised);
 
 describe("IdbModelStore", () => {
-  describe("modelExists()", () => {
-    it("returns false for a model that does not exist", () => withStorage(async (adapter) => {
+
+  describe("initiateModelCreation()", () => {
+    it("returns the correct metadata", () => withStorage(async (adapter: IdbStorageAdapter) => {
         const modelStore = adapter.modelStore();
-        const modelState = createModelState();
-        const exists = await modelStore.modelExists(modelState.modelId);
-        expect(exists).to.be.false;
+
+        const created: IModelMetaData = await modelStore.initiateModelCreation(DefaultModelCreationData);
+        const expected: IModelMetaData = {
+          modelId: DefaultModelCreationData.modelId,
+          available: true,
+          created: true,
+          subscribed: false,
+          uncommitted: false,
+          syncRequired: true,
+          deleted: false,
+          details: {
+            collection: DefaultModelCreationData.collection,
+            valueIdPrefix: {prefix: DefaultModelCreationData.valueIdPrefix, increment: 0},
+            version: 1,
+            lastSequenceNumber: 0,
+
+            createdTime: DefaultModelCreationData.createdTime,
+            modifiedTime: DefaultModelCreationData.createdTime,
+            permissions: new ModelPermissions(true, true, true, true),
+
+            snapshotVersion: 1,
+            snapshotSequenceNumber: 0
+          }
+        }
+        expect(created).to.deep.equals(expected);
+
+        const read: IModelMetaData = await modelStore.getModelMetaData(DefaultModelCreationData.modelId);
+        expect(read).to.deep.equals(expected);
       })
     );
 
-    it("returns true for a model that does not exist", () => withStorage(async (adapter) => {
+    it("returns an error for an already created model", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.initiateModelCreation(DefaultModelCreationData);
+
+      try {
+        await modelStore.initiateModelCreation(DefaultModelCreationData);
+        fail("should have thrown an error");
+      } catch (e) {
+        // no-op
+      }
+    }));
+  });
+
+  describe("completeModelCreation()", () => {
+    it("throws error if creation not in progress", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      try {
         const modelStore = adapter.modelStore();
-        const modelState = createModelState();
-        await modelStore.putModelState(modelState);
-        const exists = await modelStore.modelExists(modelState.modelId);
-        expect(exists).to.be.true;
-      })
-    );
+        await modelStore.completeModelCreation("not-created");
+        fail("should have thrown an error");
+      } catch (e) {
+        // no-op
+      }
+    }));
+
+    it("correctly removes create data", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.initiateModelCreation(DefaultModelCreationData);
+      await modelStore.completeModelCreation(DefaultModelCreationData.modelId);
+      const createData = await modelStore.getModelCreationData(DefaultModelCreationData.modelId);
+      expect(createData).to.be.undefined;
+    }));
+
+    it("correctly updated model meta data", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.initiateModelCreation(DefaultModelCreationData);
+      await modelStore.completeModelCreation(DefaultModelCreationData.modelId);
+      const metaData = await modelStore.getModelMetaData(DefaultModelCreationData.modelId);
+      const expectedMetaData: IModelMetaData = {
+        modelId: DefaultModelCreationData.modelId,
+        available: true,
+        created: false,
+        subscribed: false,
+        uncommitted: false,
+        syncRequired: false,
+        deleted: false,
+        details: {
+          collection: DefaultModelCreationData.collection,
+          valueIdPrefix: {prefix: DefaultModelCreationData.valueIdPrefix, increment: 0},
+          version: 1,
+          lastSequenceNumber: 0,
+
+          createdTime: DefaultModelCreationData.createdTime,
+          modifiedTime: DefaultModelCreationData.createdTime,
+          permissions: new ModelPermissions(true, true, true, true),
+
+          snapshotVersion: 1,
+          snapshotSequenceNumber: 0
+        }
+      }
+      expect(metaData).to.deep.equals(expectedMetaData);
+    }));
+  });
+
+  describe("getModelCreationData()", () => {
+    it("returns correct data for a model that does not exist", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.initiateModelCreation(DefaultModelCreationData);
+      const createData = await modelStore.getModelCreationData(DefaultModelCreationData.modelId);
+      expect(createData).to.deep.equal(DefaultModelCreationData);
+    }));
+
+    it("returns undefined for a model not being created", () => withStorage(async (adapter) => {
+      const modelStore = adapter.modelStore();
+      const createData = await modelStore.getModelCreationData(DefaultModelCreationData.modelId);
+      expect(createData).to.be.undefined;
+    }));
+  });
+
+  describe("initiateModelDeletion()", () => {
+    it("returns false for a model that does not exist", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      try {
+        await modelStore.initiateModelDeletion("does-not-exist");
+        fail("expecting an error when deleting a non-existent model");
+      } catch {
+        // pass
+      }
+    }));
+
+    it("removes details and sets meta-data appropriately an existing model", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState = createModelState();
+      await modelStore.putModelState(modelState);
+      await modelStore.updateSubscriptions([modelState.modelId], []);
+      await modelStore.initiateModelDeletion(modelState.modelId);
+      const afterDelete = await modelStore.getModelMetaData(modelState.modelId);
+      const expectedAfterDelete: IModelMetaData = {
+        modelId: modelState.modelId,
+        subscribed: false,
+        available: false,
+        created: false,
+        syncRequired: true,
+        uncommitted: false,
+        deleted: true
+      };
+      expect(afterDelete).to.deep.equal(expectedAfterDelete);
+    }));
+
+    it("removes a locally created model", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.initiateModelCreation(DefaultModelCreationData);
+      await modelStore.initiateModelDeletion(DefaultModelCreationData.modelId);
+      const afterDelete = await modelStore.getModelMetaData(DefaultModelCreationData.modelId);
+      const expectedAfterDelete: IModelMetaData = {
+        subscribed: false,
+        modelId: DefaultModelCreationData.modelId,
+        available: false,
+        created: false,
+        syncRequired: false,
+        uncommitted: false,
+        deleted: false
+      };
+      expect(afterDelete).to.deep.equal(expectedAfterDelete);
+    }));
+  });
+
+  describe("completeModelDeletion()", () => {
+    it("removes the delete flag for a model that is deleting", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState = createModelState();
+      await modelStore.putModelState(modelState);
+      await modelStore.initiateModelDeletion(modelState.modelId);
+      await modelStore.completeModelDeletion(modelState.modelId);
+      const afterDelete = await modelStore.getModelMetaData(modelState.modelId);
+      const expectedAfterDelete: IModelMetaData = {
+        modelId: modelState.modelId,
+        subscribed: false,
+        available: false,
+        created: false,
+        syncRequired: false,
+        uncommitted: false,
+        deleted: false
+      };
+      expect(afterDelete).to.deep.equal(expectedAfterDelete);
+    }));
+
+    it("ignores a model that isn't deleting", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState = createModelState();
+      await modelStore.putModelState(modelState);
+      await modelStore.completeModelDeletion(modelState.modelId);
+      const afterDelete = await modelStore.getModelMetaData(modelState.modelId);
+      const expectedAfterDelete: IModelMetaData = {
+        modelId: modelState.modelId,
+        subscribed: false,
+        available: true,
+        created: false,
+        syncRequired: false,
+        uncommitted: false,
+        deleted: false,
+        details: {
+          collection: modelState.collection,
+          createdTime: modelState.createdTime,
+          lastSequenceNumber: modelState.lastSequenceNumber,
+          modifiedTime: modelState.modifiedTime,
+          permissions: modelState.permissions,
+          snapshotSequenceNumber: modelState.snapshot.sequenceNumber,
+          snapshotVersion: modelState.snapshot.version,
+          valueIdPrefix: {prefix: modelState.valueIdPrefix.prefix, increment: modelState.valueIdPrefix.increment!},
+          version: modelState.version
+        }
+      };
+      expect(afterDelete).to.deep.equal(expectedAfterDelete);
+    }));
+  });
+
+
+  describe("deleteModels()", () => {
+    it("delete only the models specified", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState1 = createModelState();
+      await modelStore.putModelState(modelState1);
+
+      const modelState2 = createModelState();
+      await modelStore.putModelState(modelState2);
+
+      const modelState3 = createModelState();
+      await modelStore.putModelState(modelState3);
+
+      await modelStore.deleteModels([modelState1.modelId, modelState3.modelId]);
+      const model1Read = await modelStore.getModelMetaData(modelState1.modelId);
+      const model2Read = await modelStore.getModelMetaData(modelState2.modelId);
+      const model3Read = await modelStore.getModelMetaData(modelState3.modelId);
+
+      expect(model1Read).to.be.undefined;
+      expect(model2Read).to.not.be.undefined;
+      expect(model3Read).to.be.undefined;
+    }));
+
+    it("not fail on an empty array", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.deleteModels([]);
+    }));
+
+    it("not fail on an non-existent model id", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      await modelStore.deleteModels(["no-model"]);
+    }));
+  });
+
+  describe("modelExists()", () => {
+    it("returns false for a model that does not exist", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const exists = await modelStore.modelExists("any-id");
+      expect(exists).to.be.false;
+    }));
+
+    it("returns true for a model that exists", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState = createModelState();
+      await modelStore.putModelState(modelState);
+      const exists = await modelStore.modelExists(modelState.modelId);
+      expect(exists).to.be.true;
+    }));
   });
 
   describe("putModel()", () => {
-    it("stores the correct model", () => withStorage(async (adapter) => {
-        const modelStore = adapter.modelStore();
-        const modelState = createModelState();
-        await modelStore.putModelState(modelState);
-        const retrieved = await modelStore.getModelState(modelState.modelId);
-        expect(retrieved).to.deep.equal(modelState);
-      })
-    );
+    it("stores the correct model", () => withStorage(async (adapter: IdbStorageAdapter) => {
+      const modelStore = adapter.modelStore();
+      const modelState = createModelState();
+      await modelStore.putModelState(modelState);
+      const retrieved = await modelStore.getModelState(modelState.modelId);
+      expect(retrieved).to.deep.equal(modelState);
+    }));
   });
 
   describe("deleteModel()", () => {
-    it("deletes and existing model", () => withStorage(async (adapter) => {
+    it("deletes and existing model", () => withStorage(async (adapter: IdbStorageAdapter) => {
         const modelStore = adapter.modelStore();
         const modelState = createModelState();
         await modelStore.putModelState(modelState);
@@ -164,6 +406,26 @@ const DefaultMetaData = {
   syncRequired: false,
   uncommitted: false
 }
+Object.freeze(DefaultMetaData);
+
+const DefaultModelCreationData: IModelCreationData = {
+  modelId: "test-model",
+  collection: "test-collection",
+  initialData: {
+    id: "0",
+    type: "object",
+    value: {}
+  },
+  valueIdPrefix: "@",
+  createdTime: new Date(),
+  overrideCollectionWorldPermissions: false,
+  worldPermissions: new ModelPermissions(true, true, true, true),
+  userPermissions: {
+    "user1": new ModelPermissions(true, true, true, true)
+  }
+};
+
+Object.freeze(DefaultModelCreationData);
 
 let counter = 1;
 

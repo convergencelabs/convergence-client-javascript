@@ -753,6 +753,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         modelId: id,
         collection: options.collection,
         initialData: dataValue,
+        createdTime: new Date(),
+        valueIdPrefix: "@",
         overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
         worldPermissions: options.worldPermissions,
         userPermissions: options.userPermissions
@@ -1139,6 +1141,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         modelId: id,
         collection: options.collection,
         initialData: snapshot.data,
+        createdTime: new Date(),
+        valueIdPrefix: "@",
         overrideCollectionWorldPermissions: options.overrideCollectionWorldPermissions,
         worldPermissions: options.worldPermissions,
         userPermissions: options.userPermissions

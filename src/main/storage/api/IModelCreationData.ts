@@ -35,6 +35,16 @@ export interface IModelCreationData {
   initialData: IObjectValue;
 
   /**
+   * The date / time the model was created.
+   */
+  createdTime: Date;
+
+  /**
+   * The value id prefix to use for the model.
+   */
+  valueIdPrefix: string,
+
+  /**
    * Set to true if the permissions set in this object should override those set
    * in the parent collection.
    */
