@@ -1533,7 +1533,6 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   private async _initiateOfflineModelSync(): Promise<void> {
     if (this._connection.isOnline()) {
-      this._emitEvent(new OfflineModelsSyncStartedEvent());
       await this._syncDirtyModelsToServer();
     }
 
@@ -1554,6 +1553,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     const syncNeeded = await this._modelOfflineManager.getModelsRequiringSync();
 
+    this._emitEvent(new OfflineModelsSyncStartedEvent(syncNeeded.length));
+
     // If the model is open, it already was going to be resyncing
     syncNeeded.forEach(metaData => {
       // If a model is already open, opening, or resyncing, then we
@@ -1565,6 +1566,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     });
 
+    // The _checkResyncQueue queue could null out the
+    // this._syncCompletedDeferred. So we want to grab
+    // this now
     const promise = this._syncCompletedDeferred.promise();
 
     if (this._offlineSyncStartedDeferred !== null) {

@@ -34,7 +34,11 @@ export class OfflineModelsSyncStartedEvent implements IConvergenceEvent {
    * @hidden
    * @internal
    */
-  constructor() {
+  constructor(
+    /**
+     * The number of models that must sync up to the server.
+     */
+    public readonly modelsToSync: number) {
     Object.freeze(this);
   }
 }
