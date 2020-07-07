@@ -432,11 +432,7 @@ export class ModelOfflineManager extends ConvergenceEventEmitter<IConvergenceEve
   private _setModeSubscribed(modelId: string): void {
     const model = this._offlineModels.get(modelId)
     if (model) {
-      if (model.subscribed) {
-        throw new Error(`Model is already subscribed: ${modelId}`);
-      } else {
         model.subscribed = true;
-      }
     } else {
       const entry: IOfflineModelState = {
         version: 0,
