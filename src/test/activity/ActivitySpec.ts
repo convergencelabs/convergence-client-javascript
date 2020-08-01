@@ -35,6 +35,7 @@ import {com} from "@convergence/convergence-proto";
 import {IMockConnection, mockConvergenceConnection} from "../MockConvergenceConnection";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import {LOCAL_SESSION_ID, LOCAL_USER, RECONNECT_TOKEN} from "../MockingConstants";
+import {Done} from "mocha";
 
 const ACTIVITY_ID = "test";
 
@@ -73,7 +74,7 @@ describe("Activity", () => {
 
   describe("incoming messages", () => {
 
-    it("activitySessionJoined message is handled correctly ", (done: MochaDone) => {
+    it("activitySessionJoined message is handled correctly ", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -103,7 +104,7 @@ describe("Activity", () => {
       });
     });
 
-    it("activityStateUpdated for setting state is handled correctly", (done: MochaDone) => {
+    it("activityStateUpdated for setting state is handled correctly", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -175,7 +176,7 @@ describe("Activity", () => {
         });
     });
 
-    it("activityStateUpdated for removing state is handled correctly ", (done: MochaDone) => {
+    it("activityStateUpdated for removing state is handled correctly ", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -241,7 +242,7 @@ describe("Activity", () => {
         });
     });
 
-    it("activityStateUpdated for clearing state is handled correctly ", (done: MochaDone) => {
+    it("activityStateUpdated for clearing state is handled correctly ", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -301,7 +302,7 @@ describe("Activity", () => {
   });
 
   describe("leave()", () => {
-    it("leave emits correct event", (done: MochaDone) => {
+    it("leave emits correct event", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -329,7 +330,7 @@ describe("Activity", () => {
         .catch(e => done(e));
     });
 
-    it("isJoined() is false after leave", (done: MochaDone) => {
+    it("isJoined() is false after leave", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -343,7 +344,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("leave sends correct message", (done: MochaDone) => {
+    it("leave sends correct message", (done: Done) => {
       const connection = mockConnection();
       mockJoin(connection);
 
@@ -362,7 +363,7 @@ describe("Activity", () => {
   });
 
   describe("setState()", () => {
-    it("key-value set of new property handled correctly", (done: MochaDone) => {
+    it("key-value set of new property handled correctly", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -378,7 +379,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("map update of new properties handled correctly", (done: MochaDone) => {
+    it("map update of new properties handled correctly", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -394,7 +395,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("object update of new properties handled correctly", (done: MochaDone) => {
+    it("object update of new properties handled correctly", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -410,7 +411,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("key-value set of existing property handled correctly", (done: MochaDone) => {
+    it("key-value set of existing property handled correctly", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -426,7 +427,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("key-value set of property emits ActivityStateSetEvent and ActivityStateDeltaEvent", (done: MochaDone) => {
+    it("key-value set of property emits ActivityStateSetEvent and ActivityStateDeltaEvent", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -464,7 +465,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("set of multiple properties sends correct message", (done: MochaDone) => {
+    it("set of multiple properties sends correct message", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -490,7 +491,7 @@ describe("Activity", () => {
   });
 
   describe("removeState()", () => {
-    it("single key handled correctly", (done: MochaDone) => {
+    it("single key handled correctly", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -507,7 +508,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("remove array of keys handled properly", (done: MochaDone) => {
+    it("remove array of keys handled properly", (done: Done) => {
       const initialState = {key1: true, key2: false, key3: 10};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -525,7 +526,7 @@ describe("Activity", () => {
       }).catch(e => done(e));
     });
 
-    it("multiple property remove emits ActivityStateSetEvent and ActivityStateDeltaEvent", (done: MochaDone) => {
+    it("multiple property remove emits ActivityStateSetEvent and ActivityStateDeltaEvent", (done: Done) => {
       const initialState = {key1: true, key2: false, key3: 10};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -574,7 +575,7 @@ describe("Activity", () => {
       }).then(done, done);
     });
 
-    it("set of multiple properties sends correct message", (done: MochaDone) => {
+    it("set of multiple properties sends correct message", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -597,7 +598,7 @@ describe("Activity", () => {
   });
 
   describe("clearState()", () => {
-    it("clears local state", (done: MochaDone) => {
+    it("clears local state", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -610,7 +611,7 @@ describe("Activity", () => {
       }).then(done, done);
     });
 
-    it("fires correct events", (done: MochaDone) => {
+    it("fires correct events", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);
@@ -647,7 +648,7 @@ describe("Activity", () => {
       }).then(done, done);
     });
 
-    it("sends correct message", (done: MochaDone) => {
+    it("sends correct message", (done: Done) => {
       const initialState = {key1: true, key2: false};
       const connection = mockConnection();
       mockJoin(connection, initialState);

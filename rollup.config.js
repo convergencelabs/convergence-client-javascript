@@ -20,8 +20,7 @@ import json from "rollup-plugin-json";
 
 const commonPlugins = [
   resolve({
-    jsnext: true,
-    main: true
+    mainFields: ["module", "main"]
   }),
   commonjs({include: ['node_modules/**'], exclude: ["*.json"]}),
   json(),
