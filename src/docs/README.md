@@ -3,7 +3,7 @@ This is the API Documentation for the Convergence JavaScript client.  The main e
 The API Docs are organized by module which roughly relate to the main services that Convergence provides.  There are a few odds and ends that don't fit neatly into a service. They documentation modules are as follows:
 
 * [Connection and Authentication](modules/connection_and_authentication.html)
-* [Activities](modules/activitIes.html)
+* [Activities](modules/activities.html)
 * [Chat](modules/chat.html)
 * [Identity](modules/users_and_identity.html)
 * [Presence](modules/presence.html)
