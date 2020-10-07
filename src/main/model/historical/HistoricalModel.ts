@@ -456,7 +456,7 @@ export class HistoricalModel implements ObservableModel {
     if (delta < 1) {
       throw new Error("delta must be > 0");
     } else if (this._targetVersion - delta < 0) {
-      throw new Error(`Cannot move backawrd by ${delta}, because that would move beyond version 0.`);
+      throw new Error(`Cannot move backward by ${delta}, because that would move beyond version 0.`);
     }
 
     const desiredVersion: number = this._targetVersion - delta;
