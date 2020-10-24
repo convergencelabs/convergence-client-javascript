@@ -553,7 +553,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
       // We have an array. We need to see if the first element is an Array or not.
       // whatever the first one is, they all have to be that.
       const firstIsArray = Array.isArray(users[0]);
-      const allArrays = users.every(u => Array.isArray(u));
+      const allArrays = (users as any[]).every(u => Array.isArray(u));
 
       if (firstIsArray !== allArrays) {
         throw new ConvergenceError(
