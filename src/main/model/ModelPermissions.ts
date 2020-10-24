@@ -12,12 +12,16 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+import {IModelPermissions} from "./IModelPermissions";
+
 /**
  * A set of permissions that are configurable on a given model.
  *
  * @module Real Time Data
  */
-export class ModelPermissions {
+export class ModelPermissions implements IModelPermissions {
+
+  public static readonly NONE = new ModelPermissions(false, false, false, false);
 
   /**
    * Creates a new ModelPermissions class from a JSON representation.
@@ -26,13 +30,12 @@ export class ModelPermissions {
    *
    * @returns A ModelPermissions instance initialized from the JSON Object.
    */
-  public static fromJSON(json: { read: boolean; write: boolean; remove: boolean; manage: boolean; }): ModelPermissions {
+  public static fromJSON(json: IModelPermissions): ModelPermissions {
     return new ModelPermissions(json.read, json.write, json.remove, json.manage);
   }
 
   /**
-   * @hidden
-   * @internal
+   * Creates a new ModelPermissions object.
    */
   constructor(
     /**
@@ -55,7 +58,7 @@ export class ModelPermissions {
     Object.freeze(this);
   }
 
-  public toJSON(): { read: boolean; write: boolean; remove: boolean; manage: boolean; } {
+  public toJSON(): IModelPermissions {
     return {read: this.read, write: this.write, remove: this.remove, manage: this.manage};
   }
 }

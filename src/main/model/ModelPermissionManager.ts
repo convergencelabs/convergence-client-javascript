@@ -53,21 +53,20 @@ export class ModelPermissionManager {
     this._connection = connection;
   }
 
-  get modelId() {
+  /**
+   * The id of the model this permission manager works with.
+   */
+  get modelId(): string {
     return this._modelId;
   }
 
+  /**
+   * Gets the permissions of the local user for this model
+   */
   public getPermissions(): Promise<ModelPermissions> {
-    const request: IConvergenceMessage = {
-      getModelPermissionsRequest: {
-        modelId: this._modelId
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getModelPermissionsResponse} = response;
-      const permissionsData = getModelPermissionsResponse.userPermissions[this._connection.session().user().username];
-      return toModelPermissions(permissionsData);
+    return this.getAllUserPermissions().then(permissionMap => {
+      const mine = permissionMap.get(this._connection.session().user().userId.toGuid());
+      return mine !== undefined ? mine : ModelPermissions.NONE;
     });
   }
 

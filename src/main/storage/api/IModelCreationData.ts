@@ -13,7 +13,7 @@
  */
 
 
-import {ModelPermissions, IObjectValue} from "../../model";
+import {ModelPermissions, IObjectValue, IModelPermissions} from "../../model";
 
 /**
  * @module Offline
@@ -53,10 +53,10 @@ export interface IModelCreationData {
   /**
    * Generic permissions for this model for all users.
    */
-  worldPermissions?: ModelPermissions;
+  worldPermissions?: IModelPermissions;
 
   /**
    * Per-user permissions can be set here, where the key is an existing user's username.
    */
-  userPermissions?: { [username: string]: ModelPermissions };
+  userPermissions?: { [username: string]: IModelPermissions };
 }

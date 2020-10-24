@@ -45,3 +45,4 @@ export * from "./ModelPermissions";
 export * from "./ICreateModelOptions";
 export * from "./ModelDataInitializer";
 export * from "./IAutoCreateModelOptions";
+export * from "./IModelPermissions";

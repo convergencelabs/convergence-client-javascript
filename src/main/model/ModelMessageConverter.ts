@@ -29,7 +29,7 @@ import {
   getOrDefaultBoolean,
   getOrDefaultNumber,
   getOrDefaultObject,
-  getOrDefaultString,
+  getOrDefaultString, protoToDomainUserId,
   protoValueToJson,
   timestampToDate
 } from "../connection/ProtocolUtil";
@@ -63,6 +63,7 @@ import IRemoteClientResyncCompletedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
 import IModelResyncServerCompleteMessage =
   com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
+import {IModelPermissions} from "./IModelPermissions";
 
 /**
  * @hidden
@@ -187,7 +188,7 @@ export function toModelResult(result: IModelResult): ModelResult {
  * @internal
  */
 export function modelUserPermissionMapToProto(
-  perms: { [key: string]: ModelPermissions } | undefined): IUserModelPermissionsData[] {
+  perms: { [key: string]: IModelPermissions } | undefined): IUserModelPermissionsData[] {
   if (perms === undefined || perms === null) {
     return [];
   } else {
@@ -210,7 +211,8 @@ export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]
   const map = new Map();
   if (TypeChecker.isArray(perms)) {
     perms.forEach(entry => {
-      map.set(entry.user.username, toModelPermissions(entry.permissions));
+      const domainUserId = protoToDomainUserId(entry.user);
+      map.set(domainUserId.toGuid(), toModelPermissions(entry.permissions));
     });
   }
   return map;

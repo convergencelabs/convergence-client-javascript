@@ -14,6 +14,7 @@
 
 import {ModelPermissions} from "./ModelPermissions";
 import {ModelDataInitializer} from "./ModelDataInitializer";
+import {IModelPermissions} from "./IModelPermissions";
 
 /**
  * The configuration available when creating a model with the
@@ -49,10 +50,10 @@ export interface ICreateModelOptions {
   /**
    * Generic permissions for this model for all users.
    */
-  worldPermissions?: ModelPermissions;
+  worldPermissions?: IModelPermissions;
 
   /**
    * Per-user permissions can be set here, where the key is an existing user's username.
    */
-  userPermissions?: { [username: string]: ModelPermissions };
+  userPermissions?: { [username: string]: IModelPermissions };
 }
