@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DomainUserIdentifier} from "./DomainUser";
+import {DomainUserIdentifier} from "./DomainUserIdentifier";
 
 /**
  * The different "types" of [[DomainUser]]s in Convergence.

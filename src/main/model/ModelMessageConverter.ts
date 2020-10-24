@@ -64,6 +64,7 @@ import IRemoteClientResyncCompletedMessage =
 import IModelResyncServerCompleteMessage =
   com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
 import {IModelPermissions} from "./IModelPermissions";
+import {DomainUserIdMap} from "../identity/DomainUserIdMap";
 
 /**
  * @hidden
@@ -207,12 +208,12 @@ export function modelUserPermissionMapToProto(
  * @hidden
  * @internal
  */
-export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]): Map<string, ModelPermissions> {
-  const map = new Map();
+export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]): DomainUserIdMap<ModelPermissions> {
+  const map = new DomainUserIdMap<ModelPermissions>();
   if (TypeChecker.isArray(perms)) {
     perms.forEach(entry => {
       const domainUserId = protoToDomainUserId(entry.user);
-      map.set(domainUserId.toGuid(), toModelPermissions(entry.permissions));
+      map.set(domainUserId, toModelPermissions(entry.permissions));
     });
   }
   return map;

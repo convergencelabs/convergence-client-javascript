@@ -15,13 +15,6 @@
 import {DomainUserId, DomainUserType} from "./DomainUserId";
 
 /**
- * A username or [[DomainUserId]].
- *
- * @module Users and Identity
- */
-export type DomainUserIdentifier = string | DomainUserId;
-
-/**
  * A read-only representation of a particular user in Convergence. Any identification information
  * available in Convergence for this user can be accessed here.
  *

@@ -14,13 +14,12 @@
 
 import {ModelPermissions} from "./ModelPermissions";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
-import {StringMap} from "../util/StringMap";
 import {
   modelUserPermissionMapToProto,
   protoToModelUserPermissionMap,
   toModelPermissions
 } from "./ModelMessageConverter";
-import {DomainUserId, DomainUserIdentifier} from "../identity";
+import {DomainUserId, DomainUserIdentifier, DomainUserIdMap} from "../identity";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 
 import {com} from "@convergence/convergence-proto";
@@ -70,11 +69,18 @@ export class ModelPermissionManager {
     });
   }
 
+  /**
+   * Sets this model to override it's collection's world permissions or
+   * not.
+   *
+   * @param overrideCollection True to override this model's collection
+   * world permissions.
+   */
   public setOverridesCollection(overrideCollection: boolean): Promise<void> {
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
-        overrideCollection: { value: overrideCollection },
+        overrideCollection: {value: overrideCollection},
         removeAllUserPermissionsBeforeSet: false,
         setUserPermissions: [],
         removedUserPermissions: []
@@ -86,6 +92,13 @@ export class ModelPermissionManager {
     });
   }
 
+  /**
+   * Determines if this model overrides the world permissions
+   * from the model's collection.
+   *
+   * @returns True if the model overrides it's collection's
+   * world permissions.
+   */
   public getOverridesCollection(): Promise<boolean> {
     const request: IConvergenceMessage = {
       getModelPermissionsRequest: {
@@ -99,6 +112,11 @@ export class ModelPermissionManager {
     });
   }
 
+  /**
+   * Gets the model's world permissions.
+   *
+   * @returns The model's world permissions.
+   */
   public getWorldPermissions(): Promise<ModelPermissions> {
     const request: IConvergenceMessage = {
       getModelPermissionsRequest: {
@@ -128,7 +146,7 @@ export class ModelPermissionManager {
     });
   }
 
-  public getAllUserPermissions(): Promise<Map<string, ModelPermissions>> {
+  public getAllUserPermissions(): Promise<DomainUserIdMap<ModelPermissions>> {
     const request: IConvergenceMessage = {
       getModelPermissionsRequest: {
         modelId: this._modelId
@@ -142,22 +160,32 @@ export class ModelPermissionManager {
   }
 
   public setAllUserPermissions(permissions: { [key: string]: ModelPermissions }): Promise<void>;
-  public setAllUserPermissions(permissions: Map<string, ModelPermissions>): Promise<void>;
+  public setAllUserPermissions(permissions: Map<DomainUserIdentifier, ModelPermissions>): Promise<void>;
+  public setAllUserPermissions(permissions: DomainUserIdMap<ModelPermissions>): Promise<void>;
   public setAllUserPermissions(
-    permissions: Map<string, ModelPermissions> | { [key: string]: ModelPermissions }): Promise<void> {
-    if (!(permissions instanceof Map)) {
-      const permsObject = permissions as { [key: string]: ModelPermissions };
-      const map = new Map<string, ModelPermissions>();
-      Object.keys(permsObject).forEach(key => {
-        map.set(key, permsObject[key]);
+    permissions: Map<DomainUserIdentifier, ModelPermissions> |
+      DomainUserIdMap<ModelPermissions> |
+      { [key: string]: ModelPermissions }): Promise<void> {
+
+    const permsObject = {} as { [key: string]: ModelPermissions };
+    if (permissions instanceof DomainUserIdMap) {
+      permissions.forEach((p, u) => {
+        permsObject[u.toGuid()] = p;
       });
-      permissions = map;
+    } else if (permissions instanceof Map) {
+      permissions.forEach((p, u) => {
+        permsObject[DomainUserId.toDomainUserId(u).toGuid()] = p;
+      });
+    } else {
+      Object.keys(permissions).forEach(username => {
+        permsObject[DomainUserId.toDomainUserId(username).toGuid()] = permissions[username];
+      })
     }
 
     const request: IConvergenceMessage = {
       setModelPermissionsRequest: {
         modelId: this._modelId,
-        setUserPermissions: modelUserPermissionMapToProto(StringMap.mapToObject(permissions)),
+        setUserPermissions: modelUserPermissionMapToProto(permsObject),
         removeAllUserPermissionsBeforeSet: true
       }
     };
@@ -167,16 +195,9 @@ export class ModelPermissionManager {
     });
   }
 
-  public getUserPermissions(username: string): Promise<ModelPermissions | undefined> {
-    const request: IConvergenceMessage = {
-      getModelPermissionsRequest: {
-        modelId: this._modelId
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getModelPermissionsResponse} = response;
-      return toModelPermissions(getModelPermissionsResponse.userPermissions[username]);
+  public getUserPermissions(userId: DomainUserIdentifier): Promise<ModelPermissions | undefined> {
+    return this.getAllUserPermissions().then(perms => {
+      return perms.get(userId);
     });
   }
 

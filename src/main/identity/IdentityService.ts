@@ -13,7 +13,7 @@
  */
 
 import {ConvergenceSession} from "../ConvergenceSession";
-import {DomainUser, DomainUserIdentifier} from "./DomainUser";
+import {DomainUser} from "./DomainUser";
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {UserQuery} from "./UserQuery";
 import {UserGroup} from "./UserGroup";
@@ -24,6 +24,7 @@ import {toDomainUser, toUserFieldCode, toUserGroup} from "./IdentityMessageUtils
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
+import {DomainUserIdentifier} from "./DomainUserIdentifier";
 
 /**
  * The fields of a user that are available to be queried on. See [[search]]

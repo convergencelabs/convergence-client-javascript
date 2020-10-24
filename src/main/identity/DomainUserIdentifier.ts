@@ -12,18 +12,11 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-/**
- * This subsystem provides a suite of utilities for looking up users and groups
- * in the current domain.
- *
- * See some common use cases in the [developer guide](https://docs.convergence.io/guide/identity/overview.html).
- *
- * @moduledefinition Users and Identity
- */
+import {DomainUserId} from "./DomainUserId";
 
-export * from "./DomainUser";
-export * from "./IdentityService";
-export * from "./UserQuery";
-export * from "./DomainUserId";
-export * from "./DomainUserIdentifier";
-export * from "./DomainUserIdMap";
+/**
+ * A username or [[DomainUserId]].
+ *
+ * @module Users and Identity
+ */
+export type DomainUserIdentifier = string | DomainUserId;
