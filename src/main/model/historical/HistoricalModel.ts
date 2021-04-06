@@ -26,7 +26,7 @@ import {AppliedCompoundOperation} from "../ot/applied/AppliedCompoundOperation";
 import {AppliedDiscreteOperation} from "../ot/applied/AppliedDiscreteOperation";
 import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} from "../observable/ObservableModel";
 import {Path, PathElement} from "../Path";
-import {toModelOperation} from "./ModelOperationMapper";
+import {toModelOperation} from "./HistoricalModelOperationMapper";
 import {IdentityCache} from "../../identity/IdentityCache";
 import {getOrDefaultArray} from "../../connection/ProtocolUtil";
 

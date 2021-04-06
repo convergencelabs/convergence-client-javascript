@@ -29,18 +29,20 @@ import {
   getOrDefaultBoolean,
   getOrDefaultNumber,
   getOrDefaultObject,
-  getOrDefaultString, protoToDomainUserId,
+  getOrDefaultString,
+  protoToDomainUserId,
   protoValueToJson,
   timestampToDate
 } from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
 import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 import {ModelPermissions} from "./ModelPermissions";
-import {DomainUserId} from "../identity";
+import {DomainUserId, DomainUserIdMap} from "../identity";
 import {ModelResult} from "./query";
 import {TypeChecker} from "../util/TypeChecker";
 
 import {com} from "@convergence/convergence-proto";
+import {IModelPermissions} from "./IModelPermissions";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IDataValueData = com.convergencelabs.convergence.proto.model.IDataValue;
 import IObjectValueData = com.convergencelabs.convergence.proto.model.IObjectValue;
@@ -63,8 +65,6 @@ import IRemoteClientResyncCompletedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
 import IModelResyncServerCompleteMessage =
   com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
-import {IModelPermissions} from "./IModelPermissions";
-import {DomainUserIdMap} from "../identity/DomainUserIdMap";
 
 /**
  * @hidden
