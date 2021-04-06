@@ -47,7 +47,7 @@
     "@babel/register": "7.12.1",
     "@convergence/convergence-proto": "1.0.0-rc.4",
     "@convergencelabs/typedoc-plugin-custom-modules": "^0.4.0",
-    "@convergencelabs/typedoc-theme": "^1.2.0",
+    "@convergencelabs/typedoc-theme": "1.3.0",
     "@testdeck/mocha": "0.1.0",
     "@types/chai": "4.2.14",
     "@types/chai-as-promised": "7.1.3",
