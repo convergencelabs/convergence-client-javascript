@@ -26,6 +26,8 @@ import IErrorMessage = com.convergencelabs.convergence.proto.core.IErrorMessage;
 import IHandshakeResponseMessage = com.convergencelabs.convergence.proto.core.IHandshakeResponseMessage;
 import IHandshakeRequestMessage = com.convergencelabs.convergence.proto.core.IHandshakeRequestMessage;
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
+import {getOrDefaultObject, protoValueToJson} from "./ProtocolUtil";
+import {mapObjectValues} from "../util/ObjectUtils";
 
 /**
  * @hidden
@@ -296,8 +298,9 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       clearTimeout(record.timeoutTask);
       if (message.error) {
         const errorMessage: IErrorMessage = message.error;
+        const details = mapObjectValues(getOrDefaultObject(errorMessage.details), protoValueToJson);
         record.replyDeferred.reject(
-          new ConvergenceServerError(errorMessage.message, errorMessage.code, errorMessage.details));
+          new ConvergenceServerError(errorMessage.message, errorMessage.code, details));
       } else {
         record.replyDeferred.resolve(message);
       }

@@ -1236,7 +1236,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     };
 
     if (this._local) {
-      this.createLocalModelAtServer().catch(e => {
+      this._createLocalModelAtServer().catch(e => {
         this._log.error("An unexpected error occurred while synchronizing offline model on reconnect.", e);
       });
     } else {
@@ -1248,20 +1248,18 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private async createLocalModelAtServer(): Promise<void> {
+  private async _createLocalModelAtServer(): Promise<void> {
     try {
       const metaData = await this._offlineManager.getModelMetaData(this._modelId)
       await this._deleteBeforeCreateIfNeeded(metaData);
       const creationData = await this._offlineManager.getModelCreationData(this._modelId);
-      await this.createLocalModel(creationData);
+      await this._createLocalModel(creationData)
+        .catch(e => this._handleCreationErrorOnResync(creationData, e));
       this._local = false;
       await this._offlineManager.modelCreated(this._modelId);
       this._resynchronize();
     } catch (e) {
       this._resyncError(e.message);
-      if (!(e instanceof ConvergenceServerError) || e.code !== ConvergenceErrorCodes.MODEL_ALREADY_EXISTS) {
-        throw e;
-      }
     }
   }
 
@@ -1269,7 +1267,21 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private createLocalModel(creation: IModelCreationData) {
+  private _handleCreationErrorOnResync(creationData: IModelCreationData, e: any): Promise<void> {
+    if (e instanceof ConvergenceServerError && e.code !== ConvergenceErrorCodes.MODEL_ALREADY_EXISTS) {
+      const fp = e.details["fingerprint"];
+      if (creationData.createdTime.getTime().toString() === fp) {
+        return;
+      }
+    }
+    return Promise.reject(e);
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _createLocalModel(creation: IModelCreationData) {
     this._debug("Creating offline model at the server");
     const options: ICreateModelOptions = {
       id: creation.modelId,
