@@ -15,6 +15,7 @@
 export * from "./ElementReference";
 export * from "./IndexReference";
 export * from "./LocalElementReference";
+export * from "./LocalIndexReference";
 export * from "./LocalModelReference";
 export * from "./LocalPropertyReference";
 export * from "./LocalRangeReference";
