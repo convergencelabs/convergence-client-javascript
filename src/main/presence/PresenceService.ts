@@ -356,7 +356,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * Make sure to [[UserPresenceSubscription.unsubscribe]] when you're done with
    * the returned subscriptions.
    *
-   * @param user an array of usernames or [[DomainUserId]]s
+   * @param users an array of usernames or [[DomainUserId]]s
    *
    * @returns a promise that resolves with an array of subscriptions to the
    * given users' presence changes
@@ -493,7 +493,11 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * @hidden
    */
   private _mapUserPresence(p: IUserPresenceData): UserPresence {
-    const user = this._identityCache.getUser(protoToDomainUserId(p.user));
+    const userId = protoToDomainUserId(p.user);
+    let user = this._identityCache.getUser(userId);
+    if (!user) {
+      user = new DomainUser(userId.userType, userId.username);
+    }
     const available = getOrDefaultBoolean(p.available);
     const state = StringMap.objectToMap(mapObjectValues(getOrDefaultObject(p.state), protoValueToJson));
     return new UserPresence(user, available, state);
