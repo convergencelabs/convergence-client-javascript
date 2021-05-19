@@ -4,7 +4,7 @@ import {connect} from "./connect";
 
 let domain;
 
-connect()
+connect(undefined, false)
   .then(d => {
     domain = d;
     return domain.dispose();

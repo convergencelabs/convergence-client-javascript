@@ -343,13 +343,21 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           this._emitEvent(authenticatedEvent);
           return Promise.resolve();
         } else {
+          const message = authResponse.failure.message;
           const authenticationFailedEvent: IAuthenticationFailedEvent = {
             name: ConvergenceConnection.Events.AUTHENTICATION_FAILED,
-            method
+            method,
+            message
           };
           this._emitEvent(authenticationFailedEvent);
+
+          let errorMessage = `Authentication failed`;
+          if (message) {
+            errorMessage += ` (${message})`;
+          }
+
           return Promise.reject(
-            new ConvergenceError("Authentication failed", ConvergenceErrorCodes.AUTHENTICATION_FAILED));
+              new ConvergenceError(errorMessage, ConvergenceErrorCodes.AUTHENTICATION_FAILED));
         }
       });
   }
@@ -574,6 +582,7 @@ export interface IAuthenticatedEvent extends IConnectionEvent {
 export interface IAuthenticationFailedEvent extends IConnectionEvent {
   name: "authenticationFailed";
   method: AuthenticationMethod;
+  message?: string;
 }
 
 /**
