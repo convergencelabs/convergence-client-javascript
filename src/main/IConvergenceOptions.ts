@@ -102,7 +102,7 @@ export interface IConvergenceOptions {
      *
      * ```
      * options.reconnect.fallbackAuth = (authChallenge:IFallbackAuthChallenge) => {
-     *   return Authentication.fetchJWT().then(jwt => {
+     *   return YourAuthenticationService.getNewJwt().then(jwt => {
      *     authChallenge.jwt(jwt);
      *   })
      * };
