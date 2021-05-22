@@ -83,7 +83,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private _socket: ConvergenceSocket;
   private _protocolConfig: ProtocolConfiguration;
   private _nextRequestId: number = 0;
-  private readonly _requests: Map<number, any>;
+  private readonly _requests: Map<number, RequestRecord>;
   private _closeRequested: boolean = false;
 
   private _messageLogger = Logging.logger("protocol.messages");
@@ -182,7 +182,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       },
       requestTimeout);
 
-    this._requests.set(reqId, {reqId, replyDeferred, timeoutTask} as RequestRecord);
+    this._requests.set(reqId, {reqId, replyDeferred, timeoutTask});
 
     this.sendMessage({...message, requestId: {value: reqId}});
 
@@ -209,6 +209,13 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     }
 
     this._socket.close();
+
+    this._requests.forEach(task => {
+      clearTimeout(task.timeoutTask);
+      task.replyDeferred.reject(
+          new Error("The connection was closed while waiting for a reply to a request message.")
+      )
+    });
   }
 
   public sendMessage(message: IConvergenceMessage): void {
@@ -291,7 +298,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
   private _onReply(message: IConvergenceMessage): void {
     const requestId: number = message.responseId!.value || 0;
-    const record: RequestRecord = this._requests.get(requestId);
+    const record = this._requests.get(requestId);
     this._requests.delete(requestId);
 
     if (record) {
