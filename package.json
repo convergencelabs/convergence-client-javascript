@@ -1,6 +1,6 @@
 {
   "name": "@convergence/convergence",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-SNAPSHOT",
   "description": "Convergence JavaScript Client",
   "private": true,
   "keywords": [
@@ -109,7 +109,7 @@
     "webpack-merge": "5.7.3",
     "webpack-rxjs-externals": "2.0.0",
     "webpack-stream": "6.1.2",
-    "ws": "7.4.4"
+    "ws": "7.4.6"
   },
   "nyc": {
     "include": [
