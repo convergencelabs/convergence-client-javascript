@@ -15,7 +15,7 @@
 import {WebSocketFactory} from "./connection/WebSocketFactory";
 import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
-import {IStorageAdapter} from "./storage/api";
+import {IStorageAdapter} from "./storage";
 
 /**
  * The [[IConvergenceOptions]] interface represents that options that can be
@@ -80,14 +80,31 @@ export interface IConvergenceOptions {
   };
 
   /**
-   * Options that configure how Convergence will reconnect when a connection is
-   * lost.
+   * Options that configure how Convergence will reconnect when an established
+   * connection is lost unexpectedly or when the intial connection fails.
    */
   reconnect?: {
     /**
-     * Whether to automatically reconnect.  Default is true.
+     * Whether to automatically reconnect when the connection is unexpectedly
+     * dropped. Note this setting only applies to connections that have
+     * succeeded and then were lost. This setting does not apply
+     * to the initial connection, or the first connection made after
+     * disconnect is called on the domain. Default is true.
      */
     autoReconnect?: boolean;
+
+    /**
+     * Whether to automatically reconnect if the initial connection
+     * fails. Setting this to false will prevent Convergence from
+     * reconnecting automatically if the initial connection (as
+     * requested by directly calling one of the connect methods), but
+     * will still allow Convergence to reconnect if it was disconnected
+     * unintentionally after the first connection was made. Note that
+     * if a connection is successful, and then disconnect is called,
+     * the subsequent call to connect will be treated as an initial
+     * connection. Default is true.
+     */
+    autoReconnectOnInitial?: boolean;
 
     /**
      * The intervals to use between reconnects. This array will be sorted from

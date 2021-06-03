@@ -38,7 +38,8 @@ const OPTIONS: IConvergenceOptions = {
     class: WebSocket
   },
   reconnect: {
-    autoReconnect: true,
+    autoReconnect: false,
+    autoReconnectOnInitial: false,
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous(DISPLAY_NAME);
     }
@@ -88,7 +89,8 @@ export function connect(cancellationToken?: CancellationToken, anonymous: boolea
   }
 
   if (anonymous) {
-    return domain.connectAnonymously(() => Promise.resolve(DISPLAY_NAME)).then(() => domain);
+    return domain
+        .connectAnonymously(() => Promise.resolve(DISPLAY_NAME)).then(() => domain);
   } else {
     return domain
       .connectWithPassword(() => Promise.resolve({

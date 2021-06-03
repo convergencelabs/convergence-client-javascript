@@ -18,7 +18,7 @@ import {IWebSocketClass} from "./connection/IWebSocketClass";
 import {ConvergenceError} from "./util";
 import {TypeChecker} from "./util/TypeChecker";
 import {IFallbackAuthChallenge} from "./IFallbackAuthChallenge";
-import {IStorageAdapter} from "./storage/api";
+import {IStorageAdapter} from "./storage";
 
 /**
  * @hidden
@@ -29,6 +29,7 @@ export class ConvergenceOptions {
   public static DEFAULT_HANDSHAKE_TIMEOUT = 5;
 
   public static DEFAULT_AUTO_RECONNECT = true;
+  public static DEFAULT_AUTO_RECONNECT_ON_INITIAL = true;
   public static DEFAULT_RECONNECT_INTERVALS = [0, 5, 10, 20, 30];
 
   public static DEFAULT_REQUEST_TIMEOUT = 10;
@@ -59,6 +60,7 @@ export class ConvergenceOptions {
   public readonly handshakeTimeout: number;
 
   public readonly autoReconnect: boolean;
+  public readonly autoReconnectOnInitial: boolean;
   public readonly reconnectIntervals: number[];
 
   public readonly fallbackAuth: (authChallenge: IFallbackAuthChallenge) => void;
@@ -95,12 +97,14 @@ export class ConvergenceOptions {
 
     const defaultReconnectOptions = {
       autoReconnect: ConvergenceOptions.DEFAULT_AUTO_RECONNECT,
+      autoReconnectOnInitial: ConvergenceOptions.DEFAULT_AUTO_RECONNECT_ON_INITIAL,
       reconnectIntervals: ConvergenceOptions.DEFAULT_RECONNECT_INTERVALS,
       fallbackAuth: {jwt: null, password: null, anonymous: null}
     };
-    const {autoReconnect, reconnectIntervals, fallbackAuth} = {...defaultReconnectOptions, ...options.reconnect};
+    const {autoReconnect, autoReconnectOnInitial, reconnectIntervals, fallbackAuth} = {...defaultReconnectOptions, ...options.reconnect};
 
     this.autoReconnect = autoReconnect;
+    this.autoReconnectOnInitial = autoReconnectOnInitial;
     this.reconnectIntervals = reconnectIntervals;
     this.fallbackAuth = null;
     if (TypeChecker.isFunction(fallbackAuth)) {
