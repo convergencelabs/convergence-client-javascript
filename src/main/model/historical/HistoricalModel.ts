@@ -169,7 +169,7 @@ export class HistoricalModel implements ObservableModel {
 
     this._modelId = modelId;
     this._collectionId = collectionId;
-    this._model = new Model(this.session(), null, data);
+    this._model = new Model(this.session(), null, data, "error", "error");
     this._wrapperFactory = new HistoricalWrapperFactory(this);
 
     this._version = version;

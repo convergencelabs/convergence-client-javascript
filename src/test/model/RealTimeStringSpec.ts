@@ -16,26 +16,29 @@ import {StringSetOperation} from "../../main/model/ot/ops/StringSetOperation";
 import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperation";
 import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {RealTimeModel, RealTimeString} from "../../main/model/rt";
-import {IStringValue} from "../../main/model/";
+import {
+  ConvergenceSession,
+  DomainUser,
+  DomainUserType,
+  IStringValue,
+  ModelChangedEvent,
+  ModelPermissions,
+  RealTimeModel,
+  RealTimeString,
+  StringInsertEvent,
+  StringRemoveEvent,
+  StringSetValueEvent
+} from "../../main";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {Model} from "../../main/model/internal/Model";
 import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {StringNode} from "../../main/model/internal/StringNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
-import {
-  ModelChangedEvent,
-  StringSetValueEvent,
-  StringInsertEvent,
-  StringRemoveEvent
-} from "../../main/model/events";
-import {DomainUser, DomainUserType} from "../../main/identity";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession, ModelPermissions} from "../../main";
 
 import {expect} from "chai";
-import {SinonSpy, spy, createStubInstance} from "sinon";
+import {createStubInstance, SinonSpy, spy} from "sinon";
 
 describe("RealTimeString", () => {
 
@@ -46,9 +49,8 @@ describe("RealTimeString", () => {
   const timestamp = new Date();
 
   const gen: TestIdGenerator = new TestIdGenerator();
-  const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-    return gen.id();
-  });
+  const dataValueFactory: DataValueFactory = new DataValueFactory(
+      () => gen.id(), "error", "error");
 
   const initialValue = dataValueFactory.createDataValue("MyString") as IStringValue;
 

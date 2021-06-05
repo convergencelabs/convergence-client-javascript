@@ -10,8 +10,10 @@ connect()
     console.log("connected: ", d.session().sessionId());
     return d.models().create({
       collection: "test",
-      id: "my-test-id",
+      id: "my-test-id2",
       data: {
+        prop: undefined,
+        array: [1, undefined, 2],
         nested: {
           property: "foo"
         }

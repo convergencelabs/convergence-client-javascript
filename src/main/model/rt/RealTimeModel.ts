@@ -457,7 +457,9 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
               connection: ConvergenceConnection,
               identityCache: IdentityCache,
               modelService: ModelService,
-              modelOfflineManager: ModelOfflineManager) {
+              modelOfflineManager: ModelOfflineManager,
+              undefinedObjectValues: "error" | "omit",
+              undefinedArrayValues: "error" | "null") {
     super();
 
     this._resourceId = resourceId;
@@ -481,7 +483,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       closing: false
     };
 
-    this._model = new Model(this.session(), valueIdPrefix, data);
+    this._model = new Model(this.session(), valueIdPrefix, data, undefinedObjectValues, undefinedArrayValues);
 
     // we keep a map of all references by session so we can easily dispose of them
     // when a session disconnects.  It might be possible to do this by walking the

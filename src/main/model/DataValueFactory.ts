@@ -13,71 +13,88 @@
  */
 
 import {
+  IArrayValue,
+  IBooleanValue,
   IDataValue,
   IDateValue,
   INullValue,
-  IStringValue,
-  IArrayValue,
-  IObjectValue,
   INumberValue,
-  IBooleanValue
+  IObjectValue,
+  IStringValue
 } from "./dataValue";
+import {TypeChecker} from "../util/TypeChecker";
+import {ConvergenceError} from "../util";
 
 /**
  * @hidden
  * @internal
  */
 export class DataValueFactory {
-  constructor(private idGenerator: () => string) {
+  constructor(private _idGenerator: () => string,
+              private _undefinedObjectValues: "error" | "omit",
+              private _undefinedArrayValues: "error" | "null"
+              ) {
   }
 
-  public createDataValue(data: any): IDataValue {
-    const id: string = this.idGenerator();
-    const type: string = typeof data;
-    if (data === null) {
-      const nullValue: INullValue = {id, type: "null", value: null};
-      return nullValue;
-    } else if (type === "string") {
-      const stringValue: IStringValue = {id, type, value: data};
-      return stringValue;
-    } else if (data instanceof Date) {
-      const dateValue: IDateValue = {id, type: "date", value: data};
-      return dateValue;
-    } else if (Array.isArray(data)) {
+  public createDataValue(data: any,
+                         ): IDataValue {
+    const id: string = this._idGenerator();
+    if (TypeChecker.isNull(data)) {
+      return {id, type: "null", value: null} as INullValue;
+    } else if (TypeChecker.isString(data)) {
+      return {id, type: "string", value: data} as IStringValue;
+    } else if (TypeChecker.isDate(data)) {
+      return {id, type: "date", value: data} as IDateValue;
+    } else if (TypeChecker.isArray(data)) {
       const list: IDataValue[] = data.map((child: any) => {
-        return this.createDataValue(child);
+        if (child === undefined) {
+          if (this._undefinedArrayValues === "null") {
+            return this.createDataValue(null);
+          } else {
+            throw new ConvergenceError("Found an undefined value within an array. " +
+                "To convert undefined values in arrays to null, set the " +
+                "options.model.data.undefinedArrayValues option to 'null'");
+          }
+        } else {
+          return this.createDataValue(child);
+        }
       });
-      const arrayValue: IArrayValue = {id, type: "array", value: list};
-      return arrayValue;
-    } else if (type === "object") {
+      return {id, type: "array", value: list} as IArrayValue;
+    } else if (TypeChecker.isObject(data)) {
       if (data.hasOwnProperty("$convergenceType")) {
         const convergenceType: string = data["$convergenceType"];
         if (convergenceType === "date") {
           if (data.hasOwnProperty("value")) {
-            const dateValue: IDateValue = {id, type: "date", value: new Date(data["delta"])};
-            return dateValue;
+            return {id, type: "date", value: new Date(data["value"])} as IDateValue;
           } else {
-            throw new Error("Invalid convergence data type: " + type + " delta field missing.");
+            throw new ConvergenceError("Invalid convergence data type 'data': The value field missing.");
           }
         } else {
-          throw new Error("Invalid convergence data type: " + type + " supported types are [date].");
+          throw new ConvergenceError("Invalid convergence data type: " + convergenceType + " supported types are [date].");
         }
       } else {
         const props: { [key: string]: IDataValue } = {};
         Object.getOwnPropertyNames(data).forEach((prop: string) => {
-          props[prop] = this.createDataValue(data[prop]);
+          const child = data[prop];
+          if (child === undefined) {
+            if (this._undefinedObjectValues !== "omit") {
+              throw new ConvergenceError("Found an undefined value within an object. " +
+                  "To simply omit undefined values within objects, set the " +
+                  "options.model.data.undefinedArrayValues " +
+                  "option to 'omit'");
+            }
+          } else {
+            props[prop] = this.createDataValue(child);
+          }
         });
-        const objectValue: IObjectValue = {id, type, value: props};
-        return objectValue;
+        return {id, type: "object", value: props} as IObjectValue;
       }
-    } else if (type === "number") {
-      const numberValue: INumberValue = {id, type, value: data};
-      return numberValue;
-    } else if (type === "boolean") {
-      const booleanValue: IBooleanValue = {id, type, value: data};
-      return booleanValue;
+    } else if (TypeChecker.isNumber(data)) {
+      return {id, type: "number", value: data} as INumberValue;
+    } else if (TypeChecker.isBoolean(data)) {
+      return {id, type: "boolean", value: data} as IBooleanValue;
     } else {
-      throw new Error("Invalid data type: " + type);
+      throw new ConvergenceError("Unsupported data type found within model data: " + typeof data);
     }
   }
 }

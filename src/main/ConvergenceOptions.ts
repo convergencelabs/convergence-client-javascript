@@ -40,6 +40,11 @@ export class ConvergenceOptions {
   public static DEFAULT_WEBSOCKET_FACTORY = null;
   public static DEFAULT_WEBSOCKET_CONSTRUCTOR = null;
 
+  public static DEFAULT_MODEL_DATA_OPTIONS = {
+    undefinedObjectValues: "error" as "error" | "omit",
+    undefinedArrayValues: "error" as "error" | "null"
+  }
+
   public static validate(options?: IConvergenceOptions): void {
     let webSockets = false;
     try {
@@ -77,6 +82,9 @@ export class ConvergenceOptions {
   public readonly storageAdapter: IStorageAdapter | null;
   public readonly offlineModelOperationSnapshotInterval: number;
 
+  public readonly modelDataUndefinedObjectValues: "error" | "omit";
+  public readonly modelDataUndefinedArrayValues: "error" | "null";
+
   /**
    * @hidden
    * @internal
@@ -101,7 +109,12 @@ export class ConvergenceOptions {
       reconnectIntervals: ConvergenceOptions.DEFAULT_RECONNECT_INTERVALS,
       fallbackAuth: {jwt: null, password: null, anonymous: null}
     };
-    const {autoReconnect, autoReconnectOnInitial, reconnectIntervals, fallbackAuth} = {...defaultReconnectOptions, ...options.reconnect};
+    const {
+      autoReconnect,
+      autoReconnectOnInitial,
+      reconnectIntervals,
+      fallbackAuth
+    } = {...defaultReconnectOptions, ...options.reconnect};
 
     this.autoReconnect = autoReconnect;
     this.autoReconnectOnInitial = autoReconnectOnInitial;
@@ -122,11 +135,11 @@ export class ConvergenceOptions {
     const {defaultRequestTimeout, heartbeat} = {...defaultProtocolOptions, ...options.protocol};
     this.defaultRequestTimeout = defaultRequestTimeout;
     this.heartbeatEnabled = heartbeat.enabled !== undefined ?
-      heartbeat.enabled : ConvergenceOptions.DEFAULT_HEARTBEAT_ENABLED;
+        heartbeat.enabled : ConvergenceOptions.DEFAULT_HEARTBEAT_ENABLED;
     this.pingInterval = heartbeat.pingInterval !== undefined ?
-      heartbeat.pingInterval : ConvergenceOptions.DEFAULT_PING_INTERVAL;
+        heartbeat.pingInterval : ConvergenceOptions.DEFAULT_PING_INTERVAL;
     this.pongTimeout = heartbeat.pongTimeout !== undefined ?
-      heartbeat.pongTimeout : ConvergenceOptions.DEFAULT_PONG_TIMEOUT;
+        heartbeat.pongTimeout : ConvergenceOptions.DEFAULT_PONG_TIMEOUT;
 
     const defaultWebSocketOptions = {
       factory: ConvergenceOptions.DEFAULT_WEBSOCKET_FACTORY,
@@ -141,6 +154,12 @@ export class ConvergenceOptions {
     this.storageAdapter = offlineOpts.storage || null;
     this.offlineStorageEnabled = this.storageAdapter !== null;
     this.offlineModelOperationSnapshotInterval = offlineOpts.modelSnapshotInterval || 100;
+
+    const {data} = (options.models || {});
+    const dataOptions = {...ConvergenceOptions.DEFAULT_MODEL_DATA_OPTIONS, ...data} ;
+
+    this.modelDataUndefinedObjectValues = dataOptions.undefinedObjectValues;
+    this.modelDataUndefinedArrayValues = dataOptions.undefinedArrayValues;
   }
 
   /**
@@ -163,6 +182,7 @@ export class ConvergenceOptions {
       },
       reconnect: {
         autoReconnect: this.autoReconnect,
+        autoReconnectOnInitial: this.autoReconnectOnInitial,
         reconnectIntervals: this.reconnectIntervals,
         fallbackAuth: this.fallbackAuth
       },

@@ -43,9 +43,8 @@ describe("RealTimeObject", () => {
 
   const gen: TestIdGenerator = new TestIdGenerator();
 
-  const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-    return gen.id();
-  });
+  const dataValueFactory: DataValueFactory = new DataValueFactory(
+      () => gen.id(), "error", "error");
 
   const model = createStubInstance(Model) as any as Model;
   const identityCache = createStubInstance(IdentityCache) as any as IdentityCache;

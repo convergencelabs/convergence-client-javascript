@@ -289,7 +289,12 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       this._options.offlineModelOperationSnapshotInterval,
       this._storage
     );
-    this._modelService = new ModelService(this._connection, this._identityCache, this._modelOfflineManager);
+    this._modelService = new ModelService(
+        this._connection,
+        this._identityCache,
+        this._modelOfflineManager,
+        this._options.modelDataUndefinedObjectValues,
+        this._options.modelDataUndefinedArrayValues);
     this._identityService = new IdentityService(this._connection);
     this._activityService = new ActivityService(this._connection, this._identityCache);
     // FIXME if we have a username we should construct a user, and potentially get from the cache.

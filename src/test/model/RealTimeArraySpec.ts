@@ -18,24 +18,32 @@ import {ArrayRemoveOperation} from "../../main/model/ot/ops/ArrayRemoveOperation
 import {ArrayReplaceOperation} from "../../main/model/ot/ops/ArrayReplaceOperation";
 import {ArrayMoveOperation} from "../../main/model/ot/ops/ArrayMoveOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
-import {IArrayValue, IDataValue, ModelPermissions, IStringValue} from "../../main/model/";
+import {
+  ArrayInsertEvent,
+  ArrayRemoveEvent,
+  ArrayReorderEvent,
+  ArraySetEvent,
+  ArraySetValueEvent,
+  ConvergenceSession,
+  DomainUser,
+  DomainUserType,
+  IArrayValue,
+  IDataValue,
+  IStringValue,
+  ModelPermissions,
+  RealTimeArray,
+  RealTimeElement,
+  RealTimeModel,
+  RealTimeString
+} from "../../main";
 import {TestIdGenerator} from "./TestIdGenerator";
 import {DataValueFactory} from "../../main/model/DataValueFactory";
 import {Model} from "../../main/model/internal/Model";
 import {ModelEventCallbacks} from "../../main/model/internal/ModelEventCallbacks";
 import {ArrayNode} from "../../main/model/internal/ArrayNode";
 import {RealTimeWrapperFactory} from "../../main/model/rt/RealTimeWrapperFactory";
-import {
-  ArrayInsertEvent,
-  ArrayRemoveEvent,
-  ArrayReorderEvent,
-  ArraySetEvent,
-  ArraySetValueEvent
-} from "../../main/model/events";
-import {RealTimeArray, RealTimeElement, RealTimeModel, RealTimeString} from "../../main/model/rt";
 import {StringNode} from "../../main/model/internal/StringNode";
 import {IdentityCache} from "../../main/identity/IdentityCache";
-import {ConvergenceSession, DomainUser, DomainUserType} from "../../main";
 import {expect} from "chai";
 import {createStubInstance, SinonSpy, spy} from "sinon";
 
@@ -48,10 +56,8 @@ describe("RealTimeArray", () => {
   const timestamp: Date = new Date();
 
   const gen: TestIdGenerator = new TestIdGenerator();
-
-  const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-    return gen.id();
-  });
+  const dataValueFactory: DataValueFactory = new DataValueFactory(
+      () => gen.id(), "error", "error");
 
   const model = createStubInstance(Model) as any as Model;
   const identityCache = createStubInstance(IdentityCache) as any as IdentityCache;

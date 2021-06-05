@@ -47,7 +47,10 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   constructor(session: ConvergenceSession,
               valueIdPrefix: string,
-              data: IObjectValue) {
+              data: IObjectValue,
+              undefinedObjectValues: "error" | "omit",
+              undefinedArrayValues: "error" | "null"
+              ) {
     super();
 
     this._session = session;
@@ -56,13 +59,13 @@ export class Model extends ConvergenceEventEmitter<IConvergenceEvent> {
     this._idToValue = new Map<string, ModelNode<any>>();
     this._vidCounter = 0;
 
-    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return this._valueIdPrefix + VALUE_SEPARATOR + this._vidCounter++;
-    });
+    const idGenerator = () => this._valueIdPrefix + VALUE_SEPARATOR + this._vidCounter++;
+    const dataValueFactory: DataValueFactory = new DataValueFactory(
+        idGenerator,
+        undefinedObjectValues,
+        undefinedArrayValues);
 
-    this._data = new ObjectNode(data, () => {
-      return [];
-    }, this, session, dataValueFactory);
+    this._data = new ObjectNode(data, () => [], this, session, dataValueFactory);
   }
 
   public root(): ObjectNode {

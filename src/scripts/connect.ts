@@ -43,6 +43,12 @@ const OPTIONS: IConvergenceOptions = {
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous(DISPLAY_NAME);
     }
+  },
+  models: {
+    data: {
+      undefinedObjectValues: "omit",
+      undefinedArrayValues: "null"
+    }
   }
 };
 

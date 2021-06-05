@@ -52,7 +52,7 @@ import {Validation} from "../util/Validation";
 import {ModelOfflineManager} from "./ModelOfflineManager";
 import {OfflineModelsSyncAbortedEvent, OfflineModelSyncErrorEvent} from "./events";
 import {ModelPermissions} from "./ModelPermissions";
-import {IModelCreationData, IModelMetaData, IModelState} from "../storage/api/";
+import {IModelCreationData, IModelMetaData, IModelState} from "../storage";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 import {RandomStringGenerator} from "../util/RandomStringGenerator";
@@ -70,7 +70,7 @@ import {ReplayDeferred} from "../util/ReplayDeferred";
 import {ConvergenceErrorCodes} from "../util/ConvergenceErrorCodes";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IAutoCreateModelConfigRequestMessage =
-  com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
+    com.convergencelabs.convergence.proto.model.IAutoCreateModelConfigRequestMessage;
 import IReferenceData = com.convergencelabs.convergence.proto.model.IReferenceData;
 
 /**
@@ -341,18 +341,31 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private readonly _modelIdGenerator: RandomStringGenerator;
 
   /**
+   * @internal
+   */
+  private readonly _undefinedObjectValues: "error" | "omit";
+
+  /**
+   * @internal
+   */
+  private readonly _undefinedArrayValues: "error" | "null"
+
+  /**
    * @hidden
    * @internal
    */
   constructor(connection: ConvergenceConnection,
               identityCache: IdentityCache,
-              modelOfflineManager: ModelOfflineManager) {
+              modelOfflineManager: ModelOfflineManager,
+              undefinedObjectValues: "error" | "omit",
+              undefinedArrayValues: "error" | "null"
+  ) {
     super();
     this._connection = connection;
     this._identityCache = identityCache;
     this._connection
-      .messages()
-      .subscribe(message => this._handleMessage(message));
+        .messages()
+        .subscribe(message => this._handleMessage(message));
     this._autoRequestId = 0;
     this._autoCreateRequests = new Map();
 
@@ -367,6 +380,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._modelOfflineManager = modelOfflineManager;
     this._emitFrom(modelOfflineManager.events());
+
+    this._undefinedArrayValues = undefinedArrayValues;
+    this._undefinedObjectValues = undefinedObjectValues;
 
     this._modelIdGenerator = new RandomStringGenerator(32, RandomStringGenerator.AlphaNumeric);
     this._log = Logging.logger("models");
@@ -412,14 +428,14 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     };
 
     return this._connection
-      .request(request)
-      .then((response: IConvergenceMessage) => {
-        const {modelsQueryResponse} = response;
-        const data = getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
-        const offset = getOrDefaultNumber(modelsQueryResponse.offset);
-        const totalResults = getOrDefaultNumber(modelsQueryResponse.totalResults);
-        return new PagedData<ModelResult>(data, offset, totalResults);
-      });
+        .request(request)
+        .then((response: IConvergenceMessage) => {
+          const {modelsQueryResponse} = response;
+          const data = getOrDefaultArray(modelsQueryResponse.models).map(toModelResult);
+          const offset = getOrDefaultNumber(modelsQueryResponse.offset);
+          const totalResults = getOrDefaultNumber(modelsQueryResponse.totalResults);
+          return new PagedData<ModelResult>(data, offset, totalResults);
+        });
   }
 
   /**
@@ -544,7 +560,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
       if (entry.action === "delete") {
         return Promise.reject(
-          new Error("The model has already been deleted locally and resynchronization is in process."));
+            new Error("The model has already been deleted locally and resynchronization is in process."));
       }
 
       if (entry.inProgress) {
@@ -567,15 +583,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     if (this._modelOfflineManager.isOfflineEnabled()) {
       await this._modelOfflineManager
-        .getModelMetaData(id)
-        .then(meta => {
-          if (meta) {
-            return this._modelOfflineManager.markModelForDeletion(id);
-          }
-        })
-        .catch(e => {
-          this._log.error("Could not mark model for deletion", e);
-        });
+          .getModelMetaData(id)
+          .then(meta => {
+            if (meta) {
+              return this._modelOfflineManager.markModelForDeletion(id);
+            }
+          })
+          .catch(e => {
+            this._log.error("Could not mark model for deletion", e);
+          });
     }
 
     if (!this._connection.isOnline() && !this._modelOfflineManager.isOfflineEnabled()) {
@@ -606,15 +622,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {historicalDataResponse} = response;
       return new HistoricalModel(
-        toObjectValue(historicalDataResponse.data),
-        getOrDefaultNumber(historicalDataResponse.version),
-        timestampToDate(historicalDataResponse.modifiedTime),
-        timestampToDate(historicalDataResponse.createdTime),
-        id,
-        historicalDataResponse.collectionId,
-        this._connection,
-        this.session(),
-        this._identityCache);
+          toObjectValue(historicalDataResponse.data),
+          getOrDefaultNumber(historicalDataResponse.version),
+          timestampToDate(historicalDataResponse.modifiedTime),
+          timestampToDate(historicalDataResponse.createdTime),
+          id,
+          historicalDataResponse.collectionId,
+          this._connection,
+          this.session(),
+          this._identityCache);
     });
   }
 
@@ -856,8 +872,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    */
   public _dispose(): void {
     this._openModels.forEach(model => model
-      .close()
-      .catch(err => this._log.error(err)));
+        .close()
+        .catch(err => this._log.error(err)));
   }
 
   /**
@@ -955,7 +971,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       open = this._openOffline(id, autoRequestId);
     } else {
       open = Promise.reject(
-        new ConvergenceError("Can not open a model while not online and without offline enabled."));
+          new ConvergenceError("Can not open a model while not online and without offline enabled."));
     }
 
     const result = open.then(model => {
@@ -1080,40 +1096,40 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     };
 
     return this._connection.request(request)
-      .then((response: IConvergenceMessage) => {
-        const {openRealTimeModelResponse} = response;
-        const data = toObjectValue(openRealTimeModelResponse.data);
-        const model = this._createModel(
-          getOrDefaultString(openRealTimeModelResponse.resourceId),
-          getOrDefaultString(openRealTimeModelResponse.modelId),
-          getOrDefaultString(openRealTimeModelResponse.collection),
-          false,
-          false,
-          getOrDefaultNumber(openRealTimeModelResponse.version),
-          0,
-          timestampToDate(openRealTimeModelResponse.createdTime),
-          timestampToDate(openRealTimeModelResponse.modifiedTime),
-          getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
-          getOrDefaultArray(openRealTimeModelResponse.connectedClients),
-          getOrDefaultArray(openRealTimeModelResponse.resyncingClients),
-          getOrDefaultArray(openRealTimeModelResponse.references),
-          toModelPermissions(openRealTimeModelResponse.permissions),
-          data
-        );
+        .then((response: IConvergenceMessage) => {
+          const {openRealTimeModelResponse} = response;
+          const data = toObjectValue(openRealTimeModelResponse.data);
+          const model = this._createModel(
+              getOrDefaultString(openRealTimeModelResponse.resourceId),
+              getOrDefaultString(openRealTimeModelResponse.modelId),
+              getOrDefaultString(openRealTimeModelResponse.collection),
+              false,
+              false,
+              getOrDefaultNumber(openRealTimeModelResponse.version),
+              0,
+              timestampToDate(openRealTimeModelResponse.createdTime),
+              timestampToDate(openRealTimeModelResponse.modifiedTime),
+              getOrDefaultString(openRealTimeModelResponse.valueIdPrefix),
+              getOrDefaultArray(openRealTimeModelResponse.connectedClients),
+              getOrDefaultArray(openRealTimeModelResponse.resyncingClients),
+              getOrDefaultArray(openRealTimeModelResponse.references),
+              toModelPermissions(openRealTimeModelResponse.permissions),
+              data
+          );
 
-        this._registerResourceId(model.modelId(), getOrDefaultString(openRealTimeModelResponse.resourceId));
+          this._registerResourceId(model.modelId(), getOrDefaultString(openRealTimeModelResponse.resourceId));
 
-        if (this._modelOfflineManager.isOfflineEnabled()) {
-          return this._modelOfflineManager
-            .storeOpenModelOffline(model)
-            .then(() => {
-              this._modelOfflineManager.modelOpened(model, 0);
-              return model;
-            });
-        } else {
-          return model;
-        }
-      });
+          if (this._modelOfflineManager.isOfflineEnabled()) {
+            return this._modelOfflineManager
+                .storeOpenModelOffline(model)
+                .then(() => {
+                  this._modelOfflineManager.modelOpened(model, 0);
+                  return model;
+                });
+          } else {
+            return model;
+          }
+        });
   }
 
   /**
@@ -1169,31 +1185,31 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     // Note we initialize the model with the dataVersion. The rehydration
     // process will then take us to the current version.
     const model = this._createModel(
-      resourceId,
-      state.modelId,
-      state.collection,
-      state.local,
-      resyncOnly,
-      state.snapshot.version,
-      state.snapshot.sequenceNumber,
-      state.createdTime,
-      state.modifiedTime,
-      `${valueIdPrefix.prefix}-${valueIdPrefix.increment}`,
-      [],
-      [],
-      [],
-      state.permissions,
-      state.snapshot.data
+        resourceId,
+        state.modelId,
+        state.collection,
+        state.local,
+        resyncOnly,
+        state.snapshot.version,
+        state.snapshot.sequenceNumber,
+        state.createdTime,
+        state.modifiedTime,
+        `${valueIdPrefix.prefix}-${valueIdPrefix.increment}`,
+        [],
+        [],
+        [],
+        state.permissions,
+        state.snapshot.data
     );
 
     model._setOffline();
     model._rehydrateFromOfflineState(
-      state.version,
-      state.snapshot.serverOperations,
-      state.snapshot.localOperations);
+        state.version,
+        state.snapshot.serverOperations,
+        state.snapshot.localOperations);
 
     const opsSinceSnapshot =
-      (state.version - state.snapshot.version) + (state.lastSequenceNumber - state.snapshot.sequenceNumber);
+        (state.version - state.snapshot.version) + (state.lastSequenceNumber - state.snapshot.sequenceNumber);
 
     this._modelOfflineManager.modelOpened(model, opsSinceSnapshot);
 
@@ -1214,20 +1230,20 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     };
 
     return this._connection
-      .request(request)
-      .then(() => {
-        return this._handleOnlineDeletion(id);
-      })
-      .catch(e => {
-        // We want to handle the delete as long as it wasn't a request timeout.
-        // if it was a request timeout, then its possible the server did
-        // not get our request.
-        if (!(e instanceof ConvergenceError && e.code === ConvergenceErrorCodes.REQUEST_TIMEOUT)) {
-          this._handleOnlineDeletion(id);
-        }
+        .request(request)
+        .then(() => {
+          return this._handleOnlineDeletion(id);
+        })
+        .catch(e => {
+          // We want to handle the delete as long as it wasn't a request timeout.
+          // if it was a request timeout, then its possible the server did
+          // not get our request.
+          if (!(e instanceof ConvergenceError && e.code === ConvergenceErrorCodes.REQUEST_TIMEOUT)) {
+            this._handleOnlineDeletion(id);
+          }
 
-        return Promise.reject(e);
-      });
+          return Promise.reject(e);
+        });
   }
 
   /**
@@ -1237,19 +1253,19 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _handleOnlineDeletion(id: string): Promise<void> {
     if (this._modelOfflineManager.isOfflineEnabled()) {
       return this._modelOfflineManager
-        .getModelMetaData(id)
-        .then(meta => {
-          if (meta) {
-            return this._modelOfflineManager.modelDeleted(id);
-          }
-        })
-        .catch((e: Error) => {
-          this._emitEvent(new ErrorEvent(
-            this._connection.session().domain(),
-            `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
-          );
-          this._log.error("Error removing model from offline store.", e);
-        });
+          .getModelMetaData(id)
+          .then(meta => {
+            if (meta) {
+              return this._modelOfflineManager.modelDeleted(id);
+            }
+          })
+          .catch((e: Error) => {
+            this._emitEvent(new ErrorEvent(
+                this._connection.session().domain(),
+                `There was an error removing the model with id '${id}' from the offline store: ${e.message}`)
+            );
+            this._log.error("Error removing model from offline store.", e);
+          });
     } else {
       return Promise.resolve();
     }
@@ -1274,21 +1290,21 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const resyncOnly = false;
 
     const model = this._createModel(
-      resourceId,
-      id,
-      options.collection,
-      local,
-      resyncOnly,
-      version,
-      0,
-      currentTime,
-      currentTime,
-      valueIdPrefix,
-      [],
-      [],
-      [],
-      permissions,
-      dataValue
+        resourceId,
+        id,
+        options.collection,
+        local,
+        resyncOnly,
+        version,
+        0,
+        currentTime,
+        currentTime,
+        valueIdPrefix,
+        [],
+        [],
+        [],
+        permissions,
+        dataValue
     );
 
     model._setOffline();
@@ -1303,52 +1319,54 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _createModel(
-    resourceId: string,
-    modelId: string,
-    collection: string,
-    local: boolean,
-    resyncModel: boolean,
-    version: number,
-    sequenceNumber: number,
-    createdTime: Date,
-    modifiedTime: Date,
-    valueIdPrefix: string,
-    connectedClients: string[],
-    resyncingClients: string[],
-    references: IReferenceData[],
-    permissions: ModelPermissions,
-    data: IObjectValue): RealTimeModel {
+      resourceId: string,
+      modelId: string,
+      collection: string,
+      local: boolean,
+      resyncModel: boolean,
+      version: number,
+      sequenceNumber: number,
+      createdTime: Date,
+      modifiedTime: Date,
+      valueIdPrefix: string,
+      connectedClients: string[],
+      resyncingClients: string[],
+      references: IReferenceData[],
+      permissions: ModelPermissions,
+      data: IObjectValue): RealTimeModel {
 
     const transformer: OperationTransformer = new OperationTransformer(new TransformationFunctionRegistry());
     const referenceTransformer: ReferenceTransformer =
-      new ReferenceTransformer(new TransformationFunctionRegistry());
+        new ReferenceTransformer(new TransformationFunctionRegistry());
     const clientConcurrencyControl: ClientConcurrencyControl =
-      new ClientConcurrencyControl(
-        () => this._connection.session().sessionId(),
-        version,
-        sequenceNumber,
-        transformer,
-        referenceTransformer);
+        new ClientConcurrencyControl(
+            () => this._connection.session().sessionId(),
+            version,
+            sequenceNumber,
+            transformer,
+            referenceTransformer);
 
     const model = new RealTimeModel(
-      resourceId,
-      valueIdPrefix,
-      data,
-      local,
-      resyncModel,
-      connectedClients,
-      resyncingClients,
-      references,
-      permissions,
-      createdTime,
-      modifiedTime,
-      modelId,
-      collection,
-      clientConcurrencyControl,
-      this._connection,
-      this._identityCache,
-      this,
-      this._modelOfflineManager
+        resourceId,
+        valueIdPrefix,
+        data,
+        local,
+        resyncModel,
+        connectedClients,
+        resyncingClients,
+        references,
+        permissions,
+        createdTime,
+        modifiedTime,
+        modelId,
+        collection,
+        clientConcurrencyControl,
+        this._connection,
+        this._identityCache,
+        this,
+        this._modelOfflineManager,
+        this._undefinedObjectValues,
+        this._undefinedArrayValues
     );
 
     return model;
@@ -1369,12 +1387,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
         model._handleMessage(messageEvent);
       } else {
         this._log.warn(
-          "Received a message for a model that is not open or resynchronizing: " + JSON.stringify(message));
+            "Received a message for a model that is not open or resynchronizing: " + JSON.stringify(message));
       }
     } else if (message.modelAutoCreateConfigRequest) {
       this._handleModelDataRequest(
-        message.modelAutoCreateConfigRequest,
-        messageEvent.callback);
+          message.modelAutoCreateConfigRequest,
+          messageEvent.callback);
     }
   }
 
@@ -1455,9 +1473,10 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     data = {...data};
 
     const idGen: InitialIdGenerator = new InitialIdGenerator();
-    const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-      return idGen.id();
-    });
+    const dataValueFactory: DataValueFactory = new DataValueFactory(
+        () => idGen.id(),
+        this._undefinedObjectValues,
+        this._undefinedArrayValues);
     return dataValueFactory.createDataValue(data) as IObjectValue;
   }
 
@@ -1521,9 +1540,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     if (this._modelOfflineManager.isOfflineEnabled()) {
       this._offlineSyncStartedDeferred = new ReplayDeferred<void>();
       this._modelOfflineManager
-        .ready()
-        .then(() => this._initiateOfflineModelSync())
-        .catch((e) => this._log.error("Error resynchronizing models after reconnect", e));
+          .ready()
+          .then(() => this._initiateOfflineModelSync())
+          .catch((e) => this._log.error("Error resynchronizing models after reconnect", e));
     }
   }
 
@@ -1560,8 +1579,8 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       // If a model is already open, opening, or resyncing, then we
       // don't need to add it again because it will be handled.
       if (!this._openModels.has(metaData.modelId) &&
-        !this._openModelRequests.has(metaData.modelId) &&
-        !this._resyncingModels.has(metaData.modelId)) {
+          !this._openModelRequests.has(metaData.modelId) &&
+          !this._resyncingModels.has(metaData.modelId)) {
         this._addResyncModel(metaData.modelId, metaData.available ? "resync" : "delete");
       }
     });
@@ -1660,11 +1679,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
       }
     } else {
       return this._deleteResyncModel(entry.modelId)
-        .then(() => entry.ready.resolve())
-        .catch((e: Error) => {
-          this._resyncError(modelId, e.message);
-          return Promise.reject(new Error(e.message));
-        });
+          .then(() => entry.ready.resolve())
+          .catch((e: Error) => {
+            this._resyncError(modelId, e.message);
+            return Promise.reject(new Error(e.message));
+          });
     }
   }
 
@@ -1675,15 +1694,15 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _deleteResyncModel(modelId: string): Promise<void> {
     this._log.debug(`Deleting resync model from the server: "${modelId}"`);
     return this._removeOnline(modelId)
-      .then(() => this._resyncCompleted(modelId))
-      .catch((e) => {
-        if (e instanceof ConvergenceServerError && e.code === "model_not_found") {
-          this._resyncCompleted(modelId);
-          return Promise.resolve();
-        } else {
-          return Promise.reject(e);
-        }
-      });
+        .then(() => this._resyncCompleted(modelId))
+        .catch((e) => {
+          if (e instanceof ConvergenceServerError && e.code === "model_not_found") {
+            this._resyncCompleted(modelId);
+            return Promise.resolve();
+          } else {
+            return Promise.reject(e);
+          }
+        });
   }
 
   /**

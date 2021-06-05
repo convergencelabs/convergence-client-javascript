@@ -171,4 +171,34 @@ export interface IConvergenceOptions {
      */
     class?: IWebSocketClass;
   };
+
+  /**
+   * Configures the model subsystem.
+   */
+  models?: {
+    /**
+     * Configure how data is handled within models.
+     */
+    data?: {
+      /**
+       * Determines what happens when data is supplied to an object that
+       * contains a property with a value of undefined.  If set to
+       * **"error"** (the default) the client will throw an error if
+       * if it detects an undefined value in an object.  If set to
+       * "omit", the property will simply be omitted from the
+       * resultant RealTimeObject.
+       */
+      undefinedObjectValues?: "error" | "omit";
+
+      /**
+       * Determines what happens when data is supplied that contains
+       * an array that contains **undefined** at one or more
+       * indices.  If set to **"error"** (the default) the
+       * client will throw an error if if it detects an undefined value
+       * within an array.  If set to "null", the value will be
+       * converted to **null**.
+       */
+      undefinedArrayValues?: "error" | "null";
+    }
+  }
 }

@@ -16,17 +16,15 @@ import {expect} from "chai";
 import {createStubInstance} from "sinon";
 import {TestIdGenerator} from "../TestIdGenerator";
 import {DataValueFactory} from "../../../main/model/DataValueFactory";
-import {IArrayValue} from "../../../main/model/dataValue";
 import {ArrayNode} from "../../../main/model/internal/ArrayNode";
 import {Model} from "../../../main/model/internal/Model";
-import {ConvergenceSession} from "../../../main";
+import {ConvergenceSession, IArrayValue} from "../../../main";
 
 describe("ArrayNode", () => {
   const gen: TestIdGenerator = new TestIdGenerator();
 
-  const dataValueFactory: DataValueFactory = new DataValueFactory(() => {
-    return gen.id();
-  });
+  const dataValueFactory: DataValueFactory = new DataValueFactory(
+      () => gen.id(), "error", "error");
 
   const session = createStubInstance(ConvergenceSession) as any as ConvergenceSession;
   const model = createStubInstance(Model) as any as Model;
