@@ -297,7 +297,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   /**
    * @internal
    */
-  private _resourceId: string | null;
+  private _resourceId: number | null;
 
   /**
    * @internal
@@ -440,7 +440,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    *
    * Constructs a new RealTimeModel.
    */
-  constructor(resourceId: string | null,
+  constructor(resourceId: number | null,
               valueIdPrefix: string,
               data: IObjectValue,
               local: boolean,
@@ -951,7 +951,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @private
    */
-  public _getResourceId(): string | null {
+  public _getResourceId(): number | null {
     return this._resourceId;
   }
 
@@ -1356,7 +1356,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       const {modelResyncResponse} = response;
       this._permissions = toModelPermissions(modelResyncResponse.permissions);
       this._resyncData.reconnectVersion = getOrDefaultNumber(modelResyncResponse.currentVersion) as number;
-      this._resourceId = getOrDefaultString(modelResyncResponse.resourceId);
+      this._resourceId = getOrDefaultNumber(modelResyncResponse.resourceId);
 
       this._modelService._resyncStarted(this._modelId, this._resourceId);
 

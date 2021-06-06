@@ -283,7 +283,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   /**
    * @internal
    */
-  private readonly _resourceIdToModelId: Map<string, string> = new Map();
+  private readonly _resourceIdToModelId: Map<number, string> = new Map();
 
   /**
    * @internal
@@ -823,7 +823,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    * @private
    */
-  public _resyncStarted(modelId: string, resourceId: string): void {
+  public _resyncStarted(modelId: string, resourceId: number): void {
     this._registerResourceId(modelId, resourceId);
   }
 
@@ -880,7 +880,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _registerResourceId(modelId: string, resourceId: string): void {
+  private _registerResourceId(modelId: string, resourceId: number): void {
     this._log.debug(`Registering resource id: {modelId: "${modelId}", resourceId: ${resourceId}}`);
     this._resourceIdToModelId.set(resourceId, modelId);
   }
@@ -1100,7 +1100,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           const {openRealTimeModelResponse} = response;
           const data = toObjectValue(openRealTimeModelResponse.data);
           const model = this._createModel(
-              getOrDefaultString(openRealTimeModelResponse.resourceId),
+              getOrDefaultNumber(openRealTimeModelResponse.resourceId as number),
               getOrDefaultString(openRealTimeModelResponse.modelId),
               getOrDefaultString(openRealTimeModelResponse.collection),
               false,
@@ -1117,7 +1117,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
               data
           );
 
-          this._registerResourceId(model.modelId(), getOrDefaultString(openRealTimeModelResponse.resourceId));
+          this._registerResourceId(model.modelId(), getOrDefaultNumber(openRealTimeModelResponse.resourceId));
 
           if (this._modelOfflineManager.isOfflineEnabled()) {
             return this._modelOfflineManager
@@ -1319,7 +1319,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @internal
    */
   private _createModel(
-      resourceId: string,
+      resourceId: number,
       modelId: string,
       collection: string,
       local: boolean,
@@ -1379,7 +1379,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _handleMessage(messageEvent: MessageEvent): void {
     const message = messageEvent.message;
 
-    const resourceId: string = getModelMessageResourceId(message);
+    const resourceId: number = getModelMessageResourceId(message);
 
     if (resourceId) {
       const model = this._getModelForResourceId(resourceId);
@@ -1400,7 +1400,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    * @internal
    */
-  private _getModelForResourceId(resourceId: string): RealTimeModel | null {
+  private _getModelForResourceId(resourceId: number): RealTimeModel | null {
     const modelId = this._resourceIdToModelId.get(resourceId);
 
     if (modelId === undefined) {

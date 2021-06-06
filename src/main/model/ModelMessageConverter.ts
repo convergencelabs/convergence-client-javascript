@@ -223,7 +223,7 @@ export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]
  * @hidden
  * @internal
  */
-export function getModelMessageResourceId(message: IConvergenceMessage): string {
+export function getModelMessageResourceId(message: IConvergenceMessage): number {
   const modelMessage = toModelMessage(message);
   return modelMessage ? modelMessage.resourceId : null;
 }

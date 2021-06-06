@@ -20,7 +20,7 @@ import {ReferenceType} from "./ReferenceType";
  */
 export class RemoteReferenceEvent {
   constructor(public readonly sessionId: string,
-              public readonly resourceId: string,
+              public readonly resourceId: number,
               public readonly valueId: string | null,
               public readonly key: string) {
   }
@@ -32,7 +32,7 @@ export class RemoteReferenceEvent {
  */
 export class RemoteReferenceShared extends RemoteReferenceEvent {
   constructor(sessionId: string,
-              resourceId: string,
+              resourceId: number,
               valueId: string | null,
               key: string,
               public readonly referenceType: ReferenceType,
@@ -47,7 +47,7 @@ export class RemoteReferenceShared extends RemoteReferenceEvent {
  */
 export class RemoteReferenceUnshared extends RemoteReferenceEvent {
   constructor(sessionId: string,
-              resourceId: string,
+              resourceId: number,
               valueId: string | null,
               key: string) {
     super(sessionId, resourceId, valueId, key);
@@ -60,7 +60,7 @@ export class RemoteReferenceUnshared extends RemoteReferenceEvent {
  */
 export class RemoteReferenceSet extends RemoteReferenceEvent {
   constructor(sessionId: string,
-              resourceId: string,
+              resourceId: number,
               valueId: string | null,
               key: string,
               public readonly values: any[]) {
@@ -74,7 +74,7 @@ export class RemoteReferenceSet extends RemoteReferenceEvent {
  */
 export class RemoteReferenceCleared extends RemoteReferenceEvent {
   constructor(sessionId: string,
-              resourceId: string,
+              resourceId: number,
               valueId: string,
               key: string) {
     super(sessionId, resourceId, valueId, key);
