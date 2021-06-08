@@ -38,6 +38,7 @@ import {LOCAL_SESSION_ID, LOCAL_USER, RECONNECT_TOKEN} from "../MockingConstants
 import {Done} from "mocha";
 
 const ACTIVITY_ID = "test";
+const RESOURCE_ID = 0;
 
 const REMOTE_SESSION_ID = "remoteSession1";
 
@@ -57,7 +58,7 @@ const IDENTITY_CACHE = mockIdentityCache([
 const REMOTE_1_JOIN_MESSAGE: MessageEvent = {
   message: {
     activitySessionJoined: {
-      activityId: ACTIVITY_ID,
+      resourceId: RESOURCE_ID,
       sessionId: REMOTE_SESSION_ID,
       state: {
         cursor: {numberValue: 10},
@@ -147,7 +148,7 @@ describe("Activity", () => {
         connection.messageSubject.next({
           message: {
             activityStateUpdated: {
-              activityId: ACTIVITY_ID,
+              resourceId: RESOURCE_ID,
               sessionId: REMOTE_SESSION_ID,
               set: {
                 cursor: {numberValue: 12},
@@ -217,7 +218,7 @@ describe("Activity", () => {
         connection.messageSubject.next({
           message: {
             activityStateUpdated: {
-              activityId: ACTIVITY_ID,
+              resourceId: RESOURCE_ID,
               sessionId: REMOTE_SESSION_ID,
               set: {},
               complete: false,
@@ -275,7 +276,7 @@ describe("Activity", () => {
         connection.messageSubject.next({
           message: {
             activityStateUpdated: {
-              activityId: ACTIVITY_ID,
+              resourceId: RESOURCE_ID,
               sessionId: REMOTE_SESSION_ID,
               set: {},
               complete: true,
@@ -338,9 +339,10 @@ describe("Activity", () => {
       activity._join();
       activity._whenJoined().then(() => {
         mockLeave(connection);
-        activity.leave();
-        expect(activity.isJoined()).to.be.false;
-        done();
+        activity.leave().then(() => {
+          expect(activity.isJoined()).to.be.false;
+          done();
+        });
       }).catch(e => done(e));
     });
 
@@ -355,7 +357,7 @@ describe("Activity", () => {
         mockLeave(connection);
         activity.leave();
         assert(connection.requestStub.calledWith({
-          activityLeaveRequest: {activityId: ACTIVITY_ID}
+          activityLeaveRequest: {resourceId: RESOURCE_ID}
         }));
         done();
       }).catch(e => done(e));
@@ -476,7 +478,7 @@ describe("Activity", () => {
         activity.setState({key3: false, key4: 10});
         assert(connection.sendStub.calledWith({
           activityUpdateState: {
-            activityId: ACTIVITY_ID,
+            resourceId: RESOURCE_ID,
             set: {
               key3: {boolValue: false},
               key4: {numberValue: 10}
@@ -586,7 +588,7 @@ describe("Activity", () => {
         activity.removeState(["key1", "key2"]);
         assert(connection.sendStub.calledWith({
           activityUpdateState: {
-            activityId: ACTIVITY_ID,
+            resourceId: RESOURCE_ID,
             set: {},
             complete: false,
             removed: ["key1", "key2"]
@@ -659,7 +661,7 @@ describe("Activity", () => {
         activity.clearState();
         assert(connection.sendStub.calledWith({
           activityUpdateState: {
-            activityId: ACTIVITY_ID,
+            resourceId: RESOURCE_ID,
             set: {},
             complete: true,
             removed: []
@@ -680,6 +682,7 @@ function mockJoin(connection: IMockConnection, joinState: any = {}, remoteSessio
     .withArgs(match.has("activityJoinRequest", match.has("activityId", ACTIVITY_ID)))
     .returns(Promise.resolve({
       activityJoinResponse: {
+        resourceId: RESOURCE_ID,
         state: responseState
       }
     }));
@@ -688,7 +691,7 @@ function mockJoin(connection: IMockConnection, joinState: any = {}, remoteSessio
 
 function mockLeave(connection: IMockConnection): void {
   connection.requestStub
-    .withArgs(match.has("activityLeaveRequest", match.has("activityId", ACTIVITY_ID)))
+    .withArgs(match.has("activityLeaveRequest", match.has("resourceId", RESOURCE_ID)))
     .returns(Promise.resolve({
       activityLeaveResponse: {
       }

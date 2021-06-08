@@ -30,6 +30,7 @@ import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
 import {
   getOrDefaultArray,
   getOrDefaultBoolean,
+  getOrDefaultNumber,
   getOrDefaultObject,
   getOrDefaultString,
   jsonToProtoValue,
@@ -139,6 +140,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * @internal
    */
+  private _resource: number | null;
+
+  /**
+   * @internal
+   */
   private readonly _identityCache: IdentityCache;
 
   /**
@@ -186,6 +192,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     super();
     this._identityCache = identityCache;
     this._id = id;
+    this._resource = null;
 
     this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(new Map());
     this._joined = true;
@@ -198,19 +205,22 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
 
     this._connectionMessageSubscription = this._connection
-      .messages()
-      .subscribe((event: MessageEvent) => {
-        const message = event.message;
-        if (message.activitySessionJoined && message.activitySessionJoined.activityId === this._id) {
-          this._onSessionJoined(message.activitySessionJoined);
-        } else if (message.activitySessionLeft && message.activitySessionLeft.activityId === this._id) {
-          this._onSessionLeft(message.activitySessionLeft);
-        } else if (message.activityStateUpdated && message.activityStateUpdated.activityId === this._id) {
-          this._onRemoteStateUpdated(message.activityStateUpdated);
-        } else {
-          // no-op
-        }
-      });
+        .messages()
+        .subscribe((event: MessageEvent) => {
+          const message = event.message;
+          if (message.activitySessionJoined &&
+              getOrDefaultNumber(message.activitySessionJoined.resourceId) === this._resource) {
+            this._onSessionJoined(message.activitySessionJoined);
+          } else if (message.activitySessionLeft &&
+              getOrDefaultNumber(message.activitySessionLeft.resourceId) === this._resource) {
+            this._onSessionLeft(message.activitySessionLeft);
+          } else if (message.activityStateUpdated &&
+              getOrDefaultNumber(message.activityStateUpdated.resourceId) === this._resource) {
+            this._onRemoteStateUpdated(message.activityStateUpdated);
+          } else {
+            // no-op
+          }
+        });
   }
 
   /**
@@ -243,23 +253,21 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public leave(): Promise<void> {
     if (this.isJoined()) {
-      this._joined = false;
-      return this._connection
-        .request({
-          activityLeaveRequest: {activityId: this._id}
-        })
-        .then(() => {
-          const user = this._connection.session().user();
-          const sessionId = this._connection.session().sessionId();
-          const event = new ActivityLeftEvent(this, user, sessionId, true);
-          this._emitEvent(event);
-          this._connectionMessageSubscription.unsubscribe();
-          this._completeEventStream();
-
-          return;
-        });
+      if (this._connection.isOnline()) {
+        return this._connection
+            .request({
+              activityLeaveRequest: {resourceId: this._resource}
+            })
+            .then(() => {
+              this._completeLeave()
+              return;
+            });
+      } else {
+        this._completeLeave();
+        return Promise.resolve();
+      }
     } else {
-      return Promise.reject(new ConvergenceError(`The activity was not joined: $this._id`));
+      return Promise.reject(new ConvergenceError(`The activity was not joined: ${this._id}`));
     }
   }
 
@@ -346,20 +354,20 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         const session = this._connection.session();
 
         const deltaEvent = new ActivityStateDeltaEvent(
-          this,
-          session.user(),
-          session.sessionId(),
-          true,
-          state,
-          false,
-          [],
-          oldValues);
+            this,
+            session.user(),
+            session.sessionId(),
+            true,
+            state,
+            false,
+            [],
+            oldValues);
         this._emitEvent(deltaEvent);
 
         state.forEach((v, k) => {
           const oldValue = oldValues.get(k);
           const event =
-            new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, k, v, oldValue);
+              new ActivityStateSetEvent(this, session.user(), session.sessionId(), true, k, v, oldValue);
           this._emitEvent(event);
         });
       }
@@ -411,20 +419,20 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         const session = this._connection.session();
 
         const deltaEvent = new ActivityStateDeltaEvent(
-          this,
-          session.user(),
-          session.sessionId(),
-          true,
-          new Map(),
-          false,
-          keys,
-          oldValues);
+            this,
+            session.user(),
+            session.sessionId(),
+            true,
+            new Map(),
+            false,
+            keys,
+            oldValues);
         this._emitEvent(deltaEvent);
 
         keys.forEach(key => {
           const oldValue = oldValues.get(key);
           const event =
-            new ActivityStateRemovedEvent(this, session.user(), session.sessionId(), true, key, oldValue);
+              new ActivityStateRemovedEvent(this, session.user(), session.sessionId(), true, key, oldValue);
           this._emitEvent(event);
         });
       }
@@ -445,14 +453,14 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         const session = this._connection.session();
 
         const deltaEvent = new ActivityStateDeltaEvent(
-          this,
-          session.user(),
-          session.sessionId(),
-          true,
-          new Map(),
-          true,
-          [],
-          oldValues);
+            this,
+            session.user(),
+            session.sessionId(),
+            true,
+            new Map(),
+            true,
+            [],
+            oldValues);
         this._emitEvent(deltaEvent);
 
         const clearedEvent = new ActivityStateClearedEvent(this, session.user(), session.sessionId(), true, oldValues);
@@ -499,8 +507,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public participantsAsObservable(): Observable<ActivityParticipant[]> {
     return this._participants
-      .asObservable()
-      .pipe(map(mappedValues => Array.from(mappedValues.values())));
+        .asObservable()
+        .pipe(map(mappedValues => Array.from(mappedValues.values())));
   }
 
   /**
@@ -512,8 +520,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       options = options || {};
       const deferred = new Deferred<void>();
       const initialState: Map<string, any> = options.state ?
-        StringMap.coerceToMap(options.state) :
-        new Map<string, any>();
+          StringMap.coerceToMap(options.state) :
+          new Map<string, any>();
 
       if (this._connection.isOnline()) {
         this._joinWhileOnline(deferred, initialState);
@@ -568,12 +576,27 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
+  private _completeLeave(): void {
+    this._joined = false;
+    this._resource = null;
+    const user = this._connection.session().user();
+    const sessionId = this._connection.session().sessionId();
+    const event = new ActivityLeftEvent(this, user, sessionId, true);
+    this._emitEvent(event);
+    this._connectionMessageSubscription.unsubscribe();
+    this._completeEventStream();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
   private _onSessionJoined(joined: IActivitySessionJoinedMessage): void {
     const user = this._identityCache.getUserForSession(joined.sessionId);
     const state = mapObjectValues(getOrDefaultObject(joined.state), protoValueToJson);
 
     const participant: ActivityParticipant =
-      new ActivityParticipant(this, user, joined.sessionId, false, StringMap.objectToMap(state));
+        new ActivityParticipant(this, user, joined.sessionId, false, StringMap.objectToMap(state));
 
     this._mutateParticipants((participants) => participants.set(participant.sessionId, participant));
 
@@ -586,7 +609,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   private _emitParticipantJoined(participant: ActivityParticipant): void {
     const event =
-      new ActivitySessionJoinedEvent(this, participant.user, participant.sessionId, false, participant);
+        new ActivitySessionJoinedEvent(this, participant.user, participant.sessionId, false, participant);
     this._emitEvent(event);
   }
 
@@ -666,7 +689,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
 
     const deltaEvent =
-      new ActivityStateDeltaEvent(this, user, sessionId, true, mapped, false, [], oldValues);
+        new ActivityStateDeltaEvent(this, user, sessionId, true, mapped, false, [], oldValues);
     this._emitEvent(deltaEvent);
 
     mapped.forEach((v, k) => {
@@ -704,7 +727,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
 
     const deltaEvent =
-      new ActivityStateDeltaEvent(this, user, sessionId, true, newState, false, removed, oldValues);
+        new ActivityStateDeltaEvent(this, user, sessionId, true, newState, false, removed, oldValues);
     this._emitEvent(deltaEvent);
 
     removed.forEach((key) => {
@@ -736,7 +759,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
 
     const deltaEvent =
-      new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), true, [], oldValues);
+        new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), true, [], oldValues);
     this._emitEvent(deltaEvent);
 
     const event = new ActivityStateClearedEvent(this, user, sessionId, false, oldValues);
@@ -762,7 +785,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     });
 
     const deltaEvent =
-      new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), false, keys, oldValues);
+        new ActivityStateDeltaEvent(this, user, sessionId, true, new Map(), false, keys, oldValues);
     this._emitEvent(deltaEvent);
 
     keys.forEach((key) => {
@@ -806,55 +829,58 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
       }
     };
 
+    this._resource = null;
+
     this._connection
-      .request(message)
-      .then((response: IConvergenceMessage) => {
-        const joinResponse = response.activityJoinResponse;
+        .request(message)
+        .then((response: IConvergenceMessage) => {
+          const joinResponse = response.activityJoinResponse;
 
-        const localSessionId = this._connection.session().sessionId();
+          const localSessionId = this._connection.session().sessionId();
+          this._resource = getOrDefaultNumber(joinResponse.resourceId);
 
-        const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
-        const responseState = getOrDefaultObject(joinResponse.state);
-        objectForEach(responseState, (sessionId) => {
-          // We need to handle the case where the state for this session was
-          // not in protobuf because it is an empty map.
-          const activityState = responseState[sessionId] || {};
-          const user = this._identityCache.getUserForSession(sessionId);
-          const local: boolean = sessionId === localSessionId;
-          const rawState = getOrDefaultObject(activityState.state);
-          const jsonState = mapObjectValues(rawState, protoValueToJson);
-          const stateMap: Map<string, any> = StringMap.objectToMap(jsonState);
-          const participant = new ActivityParticipant(this, user, sessionId, local, stateMap);
-          participants.set(sessionId, participant);
+          const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
+          const responseState = getOrDefaultObject(joinResponse.state);
+          objectForEach(responseState, (sessionId) => {
+            // We need to handle the case where the state for this session was
+            // not in protobuf because it is an empty map.
+            const activityState = responseState[sessionId] || {};
+            const user = this._identityCache.getUserForSession(sessionId);
+            const local: boolean = sessionId === localSessionId;
+            const rawState = getOrDefaultObject(activityState.state);
+            const jsonState = mapObjectValues(rawState, protoValueToJson);
+            const stateMap: Map<string, any> = StringMap.objectToMap(jsonState);
+            const participant = new ActivityParticipant(this, user, sessionId, local, stateMap);
+            participants.set(sessionId, participant);
+          });
+
+          // If we had a previous state, then we will emit that that participant has left, but
+          // we will merge its state into the new local participant and make sure we send any
+          // outstanding state changes to the server.
+          if (this._localParticipant !== undefined) {
+            this._emitParticipantLeft(this._localParticipant);
+
+            // The local participant as joined, may have out of date state.
+            const joinedLocalParticipant = participants.get(localSessionId);
+
+            const updatedJoinedLocalParticipant =
+                joinedLocalParticipant.clone({state: this._localParticipant.state});
+            this._syncStateAfterJoinOnline(joinedLocalParticipant.state, this._localParticipant.state);
+
+            participants.set(localSessionId, updatedJoinedLocalParticipant);
+          }
+
+          this._localParticipant = participants.get(localSessionId);
+          this._participants.next(participants);
+
+          participants.forEach(p => this._emitParticipantJoined(p));
+
+          deferred.resolve();
+        })
+        .catch(e => {
+          // fixme maybe go offline?
+          deferred.reject(e);
         });
-
-        // If we had a previous state, then we will emit that that participant has left, but
-        // we will merge its state into the new local participant and make sure we send any
-        // outstanding state changes to the server.
-        if (this._localParticipant !== undefined) {
-          this._emitParticipantLeft(this._localParticipant);
-
-          // The local participant as joined, may have out of date state.
-          const joinedLocalParticipant = participants.get(localSessionId);
-
-          const updatedJoinedLocalParticipant =
-            joinedLocalParticipant.clone({state: this._localParticipant.state});
-          this._syncStateAfterJoinOnline(joinedLocalParticipant.state, this._localParticipant.state);
-
-          participants.set(localSessionId, updatedJoinedLocalParticipant);
-        }
-
-        this._localParticipant = participants.get(localSessionId);
-        this._participants.next(participants);
-
-        participants.forEach(p => this._emitParticipantJoined(p));
-
-        deferred.resolve();
-      })
-      .catch(e => {
-        // fixme maybe go offline?
-        deferred.reject(e);
-      });
   }
 
   /**
@@ -886,9 +912,10 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private _joinWhileOffline(deferred: Deferred<void>, initialState: Map<string, any>): void {
+    this._joined = true;
     const session = this._connection.session();
     this._localParticipant =
-      new ActivityParticipant(undefined, session.user(), session.sessionId(), true, initialState);
+        new ActivityParticipant(undefined, session.user(), session.sessionId(), true, initialState);
 
     const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
     participants.set(this._localParticipant.sessionId, this._localParticipant);
@@ -907,7 +934,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     if (this._connection.isOnline()) {
       const message: IConvergenceMessage = {
-        activityUpdateState: {activityId: this._id, set, complete, removed}
+        activityUpdateState: {resourceId: this._resource, set, complete, removed}
       };
       this._connection.send(message);
     }
