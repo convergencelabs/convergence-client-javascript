@@ -556,7 +556,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _handleDisconnected(): void {
-    console.error("_handleDisconnected");
     if (this._connectionState !== ConnectionState.DISCONNECTED) {
       this._connectionState = ConnectionState.DISCONNECTED;
       this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
