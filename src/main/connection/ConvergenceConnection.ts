@@ -23,7 +23,7 @@ import {ConvergenceSession} from "../ConvergenceSession";
 import {ConvergenceDomain} from "../ConvergenceDomain";
 import {Deferred} from "../util/Deferred";
 import {ConvergenceError, ConvergenceEventEmitter, IConvergenceEvent} from "../util";
-import {Observable} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {filter} from "rxjs/operators";
 import {getOrDefaultBoolean, getOrDefaultObject, getOrDefaultString, toOptional} from "./ProtocolUtil";
 import {toDomainUser} from "../identity/IdentityMessageUtils";
@@ -87,12 +87,13 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   private _connectionTimeoutTask: any;
   private _initialConnection: boolean;
   private _connectionRequestGenerator: (() => Promise<IConnectionRequestMessage>) | null;
-  private _authMethod: AuthenticationMethod | null = null;
+  private _authMethod: AuthenticationMethod | null;
   private _connectionState: ConnectionState;
-  private _protocolConnection: ProtocolConnection;
+  private _protocolConnection: ProtocolConnection | null;
 
   private _namespace: string;
   private _domainId: string;
+  private _protocolConnectionSubscription: Subscription | null;
 
   constructor(url: string, domain: ConvergenceDomain, options: ConvergenceOptions) {
     super();
@@ -113,6 +114,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionTimeoutTask = null;
     this._connectionAttemptTask = null;
     this._initialConnection = true;
+    this._protocolConnection = null;
+    this._protocolConnectionSubscription = null;
+    this._connectionRequestGenerator = null;
+    this._authMethod = null;
 
     const initialSessionId = "offline:" + ConvergenceConnection._SessionIdGenerator.nextString();
     this._session = new ConvergenceSession(domain, this, null, initialSessionId, null);
@@ -131,6 +136,9 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   public disconnect(): Promise<void> {
+    this._connectionRequestGenerator = null;
+    this._authMethod = null;
+
     if (this._connectionTimeoutTask !== null) {
       clearTimeout(this._connectionTimeoutTask);
       this._connectionTimeoutTask = null;
@@ -156,6 +164,9 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
       }
 
       return this._protocolConnection.close().then(() => {
+        this._protocolConnectionSubscription.unsubscribe();
+        this._protocolConnection = null;
+        this._protocolConnectionSubscription = null;
         this._handleDisconnected();
       });
     }
@@ -379,7 +390,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
           }
         });
 
-    protocolConnection
+    this._protocolConnectionSubscription = protocolConnection
         .events()
         .subscribe(e => {
           switch (e.name) {
@@ -446,8 +457,6 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
 
     this._connectionState = ConnectionState.CONNECTED;
 
-    this._connectionRequestGenerator = null;
-
     const connectedEvent: IConnectedEvent = {
       name: ConvergenceConnection.Events.CONNECTED,
       state: getOrDefaultObject(connectionSuccessData.presenceState)
@@ -475,22 +484,21 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     };
     this._emitEvent(connectionFailedEvent);
 
-    this._connectionRequestGenerator = null;
-
+    this._protocolConnectionSubscription.unsubscribe();
     this._protocolConnection.close()
         .catch(e => this._logger.error("Error closing protocol connection after connection failure", e));
 
     this._protocolConnection = null;
+    this._protocolConnectionSubscription = null;
 
     if (!getOrDefaultBoolean(retryOk)) {
-      const message =
-          `The initial connection to '${this._url}' failed, the server indicated that retrying was not allowed`;
-      this._connectionDeferred.reject(new ConvergenceError(message, getOrDefaultString(code)));
+      this._connectionDeferred.reject(new ConvergenceError(getOrDefaultString(details), getOrDefaultString(code)));
       this._handleDisconnected();
     } else if (!this._initialConnection || this._options.autoReconnectOnInitial) {
       this._scheduleConnection();
     } else {
       this._connectionRequestGenerator = null;
+      this._authMethod = null;
       const message =
           `The initial connection to '${this._url}' failed, and 'reconnect.autoReconnectOnInitial' was set to false.`;
       this._connectionDeferred.reject(new ConvergenceError(message, getOrDefaultString(code)));
@@ -548,6 +556,7 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
   }
 
   private _handleDisconnected(): void {
+    console.error("_handleDisconnected");
     if (this._connectionState !== ConnectionState.DISCONNECTED) {
       this._connectionState = ConnectionState.DISCONNECTED;
       this._emitEvent({name: ConvergenceConnection.Events.DISCONNECTED});
