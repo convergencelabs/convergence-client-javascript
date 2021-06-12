@@ -566,9 +566,10 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     this._connectionState = ConnectionState.INTERRUPTED;
     this._emitEvent({name: ConvergenceConnection.Events.INTERRUPTED});
     if (this._options.autoReconnect && this._session.reconnectToken()) {
-      this
-          .reconnect()
+      this.reconnect()
           .catch(e => this._logger.error("Unexpected error reconnecting", e));
+    } else {
+      this._handleDisconnected()
     }
   }
 }

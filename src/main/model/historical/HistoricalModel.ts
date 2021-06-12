@@ -522,12 +522,21 @@ export class HistoricalModel implements ObservableModel {
 
     // tslint:disable-next-line
     if (inverse) {
+      // TODO this is correct, but when we fix the FIXME below
+      //   we should consolidate this code with the approach for
+      //   using the prior operation's data.
       this._version = op.version - 1;
     } else {
       this._version = op.version;
     }
 
-    // fixme this is wrong.  Might be the op before.
+    // FIXME if going backwards this is the wrong timestamp. The
+    //  correct timestamp would be that of the operation just
+    //  prior to this one. Of if this is the first operation
+    //  in the history, the timestamp would need to be set
+    //  to the creation time of the model. We don't that data
+    //  here but we need it.
+    //  See: https://github.com/convergencelabs/convergence-project/issues/220
     this._currentTime = new Date(op.timestamp);
   }
 }
