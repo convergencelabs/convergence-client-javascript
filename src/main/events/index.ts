@@ -18,8 +18,6 @@ export * from "./ConnectionFailedEvent";
 export * from "./ConnectionScheduledEvent";
 export * from "./ConnectingEvent";
 export * from "./AuthenticatingEvent";
-export * from "./AuthenticatedEvent";
-export * from "./AuthenticationFailedEvent";
 export * from "./DisconnectedEvent";
 export * from "./InterruptedEvent";
 export * from "./ErrorEvent";
