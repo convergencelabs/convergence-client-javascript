@@ -39,7 +39,6 @@ export function mockConvergenceConnection(user: DomainUser, sessionId: string, r
   const session = new ConvergenceSession(domain, connection, user, sessionId, reconnectToken);
 
   (connection.session as SinonStub).returns(session);
-  (connection.isOnline as SinonStub).returns(true);
 
   const requestStub = (connection.request as SinonStub);
   const sendStub = (connection.send as SinonStub);
