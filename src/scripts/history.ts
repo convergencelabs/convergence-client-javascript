@@ -1,36 +1,86 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "./connect";
-import {ConvergenceDomain} from "../main";
 
-let domain: ConvergenceDomain;
+async function run() {
+  const domain = await connect(undefined, true);
+  console.log("connected");
 
-connect(undefined, true)
-    .then(d => {
-      domain = d;
-      domain.on(ConvergenceDomain.Events.DISCONNECTED, () => {
-        console.log("disconnected");
-        domain.dispose().catch(e => console.log(e));
-      })
-      console.log("connected: ", d.session().sessionId());
-      return d.models().openAutoCreate({
-        ephemeral: true,
-        collection: "test",
-        id: "my-test-id",
-        data: {
-          nested: {
-            property: "foo"
-          }
-        }
-      });
-    })
-    .then(model => {
-      console.log("Model Created");
-      model.root().set("other", true);
-      return model.close();
-    })
-    .then(() => {
-      console.log("Model closed");
-      // return domain.dispose();
-    })
-    .catch(e => console.error(e));
+  console.log("Creating model");
+  const model = await domain.models().openAutoCreate({
+    ephemeral: true,
+    collection: "history-test",
+    id: "my-test-id",
+    data: {}
+  });
+
+  console.log("\nGenerating model operations\n");
+
+  console.log(`version ${model.version()}:`, model.time());
+  await sleep(2000);
+
+  model.root().set("k1", "v1");
+  await sleep(2000);
+  console.log(`version ${model.version()}:`, model.time());
+
+  model.root().set("k2", "v2");
+  await sleep(2000);
+  console.log(`version ${model.version()}:`, model.time());
+
+  model.root().set("k3", "v3");
+  await sleep(2000);
+  console.log(`version ${model.version()}:`, model.time());
+
+  model.root().set("k4", "v4");
+  await sleep(2000);
+  console.log(`version ${model.version()}:`, model.time());
+
+
+  //
+  // History
+  //
+  console.log("\nHistorical Playback\n");
+  const historical = await domain.models().history(model.modelId());
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(4);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(3);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(2);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(1);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+
+  await historical.playTo(2);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(3);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(4);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(5);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(1);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await historical.playTo(5);
+  console.log(`version ${historical.version()}:`, historical.time());
+
+  await model.close();
+
+  await domain.dispose()
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+run().catch(e => console.error(e));

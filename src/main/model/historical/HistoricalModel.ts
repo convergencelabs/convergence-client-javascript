@@ -37,6 +37,7 @@ interface OperationRequest {
   forward: boolean;
   completed: boolean;
   operations: ModelOperation[];
+  precedingOp?: ModelOperation;
 }
 
 /**
@@ -147,7 +148,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _identityCache: IdentityCache;
+  private readonly _identityCache: IdentityCache;
 
   /**
    * @hidden
@@ -391,7 +392,7 @@ export class HistoricalModel implements ObservableModel {
       forward = true;
     } else {
       // going backwards
-      firstVersion = version + 1;
+      firstVersion = version;
       lastVersion = this._targetVersion;
       forward = false;
     }
@@ -417,8 +418,12 @@ export class HistoricalModel implements ObservableModel {
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {historicalOperationsResponse} = response;
       opRequest.completed = true;
-      opRequest.operations = getOrDefaultArray(historicalOperationsResponse.operations).map(
-        op => toModelOperation(op, this._identityCache));
+      opRequest.operations = getOrDefaultArray(historicalOperationsResponse.operations)
+        .map(op => toModelOperation(op, this._identityCache));
+
+      if (!opRequest.forward && firstVersion !== 1) {
+        opRequest.precedingOp = opRequest.operations.shift();
+      }
 
       this._checkAndProcess();
 
@@ -431,7 +436,7 @@ export class HistoricalModel implements ObservableModel {
    *
    * @param delta the number of versions to move forward
    *
-   * @returns A Promise, which on resolve indicates that the playforward has completed.
+   * @returns A Promise, which on resolve indicates that the play forward has completed.
    */
   public forward(delta: number = 1): Promise<void> {
     if (delta < 1) {
@@ -442,7 +447,6 @@ export class HistoricalModel implements ObservableModel {
 
     const desiredVersion: number = this._targetVersion + delta;
     return this.playTo(desiredVersion);
-
   }
 
   /**
@@ -472,7 +476,8 @@ export class HistoricalModel implements ObservableModel {
     }
 
     while (this._opRequests.length > 0 && this._opRequests[0].completed) {
-      this._playOperations(this._opRequests[0].operations, this._opRequests[0].forward);
+      const opRequest = this._opRequests[0];
+      this._playOperations(opRequest.operations, opRequest.forward, opRequest.precedingOp);
       this._opRequests.shift();
     }
   }
@@ -480,17 +485,19 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _playOperations(operations: ModelOperation[], forward: boolean): void {
+  private _playOperations(operations: ModelOperation[], forward: boolean, precedingOp?: ModelOperation): void {
     // Going backwards
     if (!forward) {
-      operations.reverse().forEach((op: ModelOperation) => {
+      const backwardsOps = operations.reverse();
+      backwardsOps.forEach((op: ModelOperation, index: number) => {
+        const before = index === backwardsOps.length - 1 ? precedingOp : backwardsOps[index + 1];
         if (op.operation.type === OperationType.COMPOUND) {
           const compoundOp: AppliedCompoundOperation = op.operation as AppliedCompoundOperation;
           compoundOp.ops.reverse().forEach((discreteOp: AppliedDiscreteOperation) => {
-            this._playDiscreteOp(op, discreteOp, true);
+            this._playDiscreteOp(op, discreteOp, true, before);
           });
         } else {
-          this._playDiscreteOp(op, op.operation as AppliedDiscreteOperation, true);
+          this._playDiscreteOp(op, op.operation as AppliedDiscreteOperation, true, before);
         }
       });
     } else {
@@ -511,7 +518,7 @@ export class HistoricalModel implements ObservableModel {
   /**
    * @internal
    */
-  private _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean): void {
+  private _playDiscreteOp(op: ModelOperation, discreteOp: AppliedDiscreteOperation, inverse: boolean, precedingOp?: ModelOperation): void {
     if (!discreteOp.noOp) {
       const dOp: AppliedDiscreteOperation = inverse ?
         discreteOp.inverse() as AppliedDiscreteOperation :
@@ -520,23 +527,26 @@ export class HistoricalModel implements ObservableModel {
         new ModelOperationEvent(op.sessionId, op.user, op.version, op.timestamp, dOp));
     }
 
-    // tslint:disable-next-line
     if (inverse) {
-      // TODO this is correct, but when we fix the FIXME below
-      //   we should consolidate this code with the approach for
-      //   using the prior operation's data.
-      this._version = op.version - 1;
+      // tslint:disable-next-line
+      if (op.version === 2) {
+        // We are going backwards, and just played back the inverted
+        // operation that will the model from version 2 to version
+        // 1, which is the first version.  Set the version to 1
+        // and the time to the created time of the model.
+        this._version = 1;
+        this._currentTime = this._createdTime;
+      } else if (precedingOp !== undefined) {
+        // Else we are higher that version 2, and should use the
+        // preceding operation's meta data.
+        this._version = precedingOp.version;
+        this._currentTime = precedingOp.timestamp;
+      } else {
+        throw new Error("no preceding operation was supplied to _playDiscreteOp");
+      }
     } else {
       this._version = op.version;
+      this._currentTime = new Date(op.timestamp);
     }
-
-    // FIXME if going backwards this is the wrong timestamp. The
-    //  correct timestamp would be that of the operation just
-    //  prior to this one. Of if this is the first operation
-    //  in the history, the timestamp would need to be set
-    //  to the creation time of the model. We don't that data
-    //  here but we need it.
-    //  See: https://github.com/convergencelabs/convergence-project/issues/220
-    this._currentTime = new Date(op.timestamp);
   }
 }
