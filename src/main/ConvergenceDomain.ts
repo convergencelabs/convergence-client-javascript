@@ -429,7 +429,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       this._modelService._dispose();
     }
 
-    return this._connection.disconnect();
+    if (this._connection.isConnected()) {
+      return this._connection.disconnect();
+    } else {
+      return Promise.resolve();
+    }
   }
 
   /**
