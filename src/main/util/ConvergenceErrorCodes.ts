@@ -22,6 +22,8 @@ export const ConvergenceErrorCodes = {
 
   REQUEST_TIMEOUT: "request_timeout",
 
+  CONNECTION_FAILED: "connection_failed",
+
   AUTHENTICATION_FAILED: "authentication_failed",
 
   OFFLINE: "offline",

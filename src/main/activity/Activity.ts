@@ -202,7 +202,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+    this._connection.on(ConvergenceConnection.Events.CONNECTED, this._setOnline);
 
     this._connectionMessageSubscription = this._connection
         .messages()
@@ -253,7 +253,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public leave(): Promise<void> {
     if (this.isJoined()) {
-      if (this._connection.isOnline()) {
+      if (this._connection.isConnected()) {
         return this._connection
             .request({
               activityLeaveRequest: {resourceId: this._resource}
@@ -523,7 +523,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
           StringMap.coerceToMap(options.state) :
           new Map<string, any>();
 
-      if (this._connection.isOnline()) {
+      if (this._connection.isConnected()) {
         this._joinWhileOnline(deferred, initialState);
       } else {
         this._joinWhileOffline(deferred, initialState);
@@ -932,7 +932,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     const set = state !== null ? mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue) : {};
     const removed = removedKeys !== null ? removedKeys : [];
 
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       const message: IConvergenceMessage = {
         activityUpdateState: {resourceId: this._resource, set, complete, removed}
       };

@@ -14,10 +14,10 @@
 
 import {
   ConvergenceConnection,
-  IAuthenticatedEvent,
   IAuthenticatingEvent,
-  IAuthenticationFailedEvent,
+  IConnectedEvent,
   IConnectionErrorEvent,
+  IConnectionFailedEvent,
   IConnectionScheduledEvent
 } from "./connection/ConvergenceConnection";
 import {IConvergenceOptions} from "./IConvergenceOptions";
@@ -29,9 +29,7 @@ import {PresenceService} from "./presence";
 import {ChatService} from "./chat";
 import {ConvergenceEventEmitter} from "./util";
 import {
-  AuthenticatedEvent,
   AuthenticatingEvent,
-  AuthenticationFailedEvent,
   ConnectedEvent,
   ConnectingEvent,
   ConnectionFailedEvent,
@@ -95,6 +93,14 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     CONNECTING: ConnectingEvent.NAME,
 
     /**
+     * Emitted when the domain is actively attempting to authenticate.
+     * The actual emitted event is an [[AuthenticatingEvent]].
+     *
+     * @event [[AuthenticatingEvent]]
+     */
+    AUTHENTICATING: AuthenticatingEvent.NAME,
+
+    /**
      * Emitted when the domain successfully (re)connected to the server.
      * The actual emitted event is a [[ConnectedEvent]].
      *
@@ -109,30 +115,6 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
      * @event [[ConnectionFailedEvent]]
      */
     CONNECTION_FAILED: ConnectionFailedEvent.NAME,
-
-    /**
-     * Emitted when the domain is actively attempting to authenticate.
-     * The actual emitted event is an [[AuthenticatingEvent]].
-     *
-     * @event [[AuthenticatingEvent]]
-     */
-    AUTHENTICATING: AuthenticatingEvent.NAME,
-
-    /**
-     * Emitted when the domain successfully (re)authenticated.
-     * The actual emitted event is an [[AuthenticatedEvent]].
-     *
-     * @event [[AuthenticatedEvent]]
-     */
-    AUTHENTICATED: AuthenticatedEvent.NAME,
-
-    /**
-     * Emitted when the domain attempted to (re)authenticate but failed.
-     * The actual emitted event is an [[AuthenticationFailedEvent]].
-     *
-     * @event [[AuthenticationFailedEvent]]
-     */
-    AUTHENTICATION_FAILED: AuthenticationFailedEvent.NAME,
 
     /**
      * Emitted when the domain's connection was interrupted. This indicates that
@@ -171,8 +153,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       return () => Promise.resolve(undefined as T);
     } else {
       return typeof value === "function" ?
-        value as (() => Promise<T>) :
-        () => Promise.resolve(value as T);
+          value as (() => Promise<T>) :
+          () => Promise.resolve(value as T);
     }
   }
 
@@ -285,9 +267,9 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
     this._identityCache = new IdentityCache(this._connection, this._storage);
     this._modelOfflineManager = new ModelOfflineManager(
-      this._connection,
-      this._options.offlineModelOperationSnapshotInterval,
-      this._storage
+        this._connection,
+        this._options.offlineModelOperationSnapshotInterval,
+        this._storage
     );
     this._modelService = new ModelService(
         this._connection,
@@ -441,13 +423,13 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @return
    *   A promise that is resolved when the ConvergenceDomain is disposed.
    */
-  public dispose(): void {
+  public dispose(): Promise<void> {
     this._disposed = true;
     if (this._modelService !== undefined) {
       this._modelService._dispose();
     }
 
-    this._connection.disconnect();
+    return this._connection.disconnect();
   }
 
   /**
@@ -474,14 +456,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   public connectWithPassword(credentials: IUsernameAndPassword | (() => Promise<IUsernameAndPassword>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(credentials);
     return this._connection
-      .connect()
-      .then(() => promiseCallback())
-      .then((creds: IUsernameAndPassword) => {
-        Validation.assertNonEmptyString(creds.username, "username");
-        Validation.assertNonEmptyString(creds.password, "password");
-        return this._authenticateWithPassword(creds);
-      })
-      .then(() => this._init(this._connection.session().user().username));
+        .connectWithPassword(promiseCallback)
+        .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -498,10 +474,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   public connectAnonymously(displayName?: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(displayName);
     return this._connection
-      .connect()
-      .then(() => promiseCallback())
-      .then((d) => this._authenticateAnonymously(d))
-      .then(() => this._init(this._connection.session().user().username));
+        .connectAnonymously(promiseCallback)
+        .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -519,13 +493,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   public connectWithJwt(jwt: string | (() => Promise<string>)): Promise<void> {
     const promiseCallback = ConvergenceDomain._toPromiseCallback(jwt);
     return this._connection
-      .connect()
-      .then(() => promiseCallback())
-      .then((j: string) => {
-        Validation.assertNonEmptyString(j, "jwt");
-        return this._authenticateWithJwt(j);
-      })
-      .then(() => this._init(this._connection.session().user().username));
+        .connectWithJwt(promiseCallback)
+        .then(() => this._init(this._connection.session().user().username));
   }
 
   /**
@@ -545,13 +514,8 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     } else {
       const promiseCallback = ConvergenceDomain._toPromiseCallback(token);
       return this._connection
-        .connect()
-        .then(() => promiseCallback())
-        .then((t) => {
-          Validation.assertNonEmptyString(t, "token");
-          return this._authenticateWithReconnectToken(t);
-        })
-        .then(() => this._init(this._connection.session().user().username));
+          .connectWithReconnectToken(promiseCallback)
+          .then(() => this._init(this._connection.session().user().username));
     }
   }
 
@@ -584,9 +548,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
   /**
    * Disconnects from the server, if connected.
    */
-  public disconnect(): void {
+  public disconnect(): Promise<void> {
     if (!this._connection.isDisconnected()) {
-      this._connection.disconnect();
+      return this._connection.disconnect();
+    } else {
+      return Promise.resolve();
     }
   }
 
@@ -622,10 +588,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _authenticateWithPassword(credentials: IUsernameAndPassword): Promise<void> {
+  public _authenticateWithJwt(jwt: () => Promise<string>): Promise<void> {
     return this._connection
-      .authenticateWithPassword(credentials)
-      .then(() => undefined);
+        .connectWithJwt(jwt)
+        .then(() => undefined);
   }
 
   /**
@@ -633,10 +599,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _authenticateWithJwt(jwt: string): Promise<void> {
+  public _authenticateWithReconnectToken(token: () => Promise<string>): Promise<void> {
     return this._connection
-      .authenticateWithJwt(jwt)
-      .then(() => undefined);
+        .connectWithReconnectToken(token)
+        .then(() => undefined);
   }
 
   /**
@@ -644,21 +610,10 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  public _authenticateWithReconnectToken(token: string): Promise<void> {
+  public _authenticateAnonymously(displayName: () => Promise<string | undefined>): Promise<void> {
     return this._connection
-      .authenticateWithReconnectToken(token)
-      .then(() => undefined);
-  }
-
-  /**
-   * @hidden
-   * @internal
-   * @private
-   */
-  public _authenticateAnonymously(displayName?: string): Promise<void> {
-    return this._connection
-      .authenticateAnonymously(displayName)
-      .then(() => undefined);
+        .connectAnonymously(displayName)
+        .then(() => undefined);
   }
 
   /**
@@ -666,24 +621,24 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @private
    */
   private _bindConnectionEvents(): void {
-    this._connection.on(ConvergenceConnection.Events.CONNECTING,
-      () => this._emitEvent(new ConnectingEvent(this)));
-    this._connection.on(ConvergenceConnection.Events.CONNECTED,
-      () => this._emitEvent(new ConnectedEvent(this)));
     this._connection.on(ConvergenceConnection.Events.CONNECTION_SCHEDULED,
-      (e: IConnectionScheduledEvent) => this._emitEvent(new ConnectionScheduledEvent(this, e.delay)));
-    this._connection.on(ConvergenceConnection.Events.CONNECTION_FAILED,
-      () => this._emitEvent(new ConnectionFailedEvent(this)));
+        (e: IConnectionScheduledEvent) => this._emitEvent(new ConnectionScheduledEvent(this, e.delay)));
+
+    this._connection.on(ConvergenceConnection.Events.CONNECTING,
+        () => this._emitEvent(new ConnectingEvent(this)));
 
     this._connection.on(ConvergenceConnection.Events.AUTHENTICATING,
-      (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED,
-      (e: IAuthenticatedEvent) => {
-        this._emitEvent(new AuthenticatedEvent(this, e.method));
-        this._onAuthenticated(e);
-      });
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATION_FAILED,
-      (e: IAuthenticationFailedEvent) => this._emitEvent(new AuthenticationFailedEvent(this, e.method)));
+        (e: IAuthenticatingEvent) => this._emitEvent(new AuthenticatingEvent(this, e.method)));
+
+    this._connection.on(ConvergenceConnection.Events.CONNECTED,
+        (e: IConnectedEvent) => {
+          this._emitEvent(new ConnectedEvent(this));
+          this._onAuthenticated(e);
+        });
+
+    this._connection.on(ConvergenceConnection.Events.CONNECTION_FAILED, (e: IConnectionFailedEvent) => {
+      this._emitEvent(new ConnectionFailedEvent(this, e.code, e.authMethod, e.details))
+    });
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, () => {
       this._emitEvent(new InterruptedEvent(this));
@@ -693,7 +648,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
     });
 
     this._connection.on(ConvergenceConnection.Events.ERROR,
-      (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
+        (evt: IConnectionErrorEvent) => this._emitEvent(new ErrorEvent(this, evt.error.message))
     );
   }
 
@@ -714,11 +669,11 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
       // FIXME do we need to make sure we are not an anonymous user here?
       this._log.debug("options.offline.storage is set, opening offline storage");
       return this._storage.openStore(this._namespace, this._domainId, username)
-        .then(async () => {
-          this._initialized = true;
-          await this._modelOfflineManager.init();
-          await this._identityCache.init();
-        });
+          .then(async () => {
+            this._initialized = true;
+            await this._modelOfflineManager.init();
+            await this._identityCache.init();
+          });
     } else {
       this._initialized = true;
       return Promise.resolve();
@@ -730,7 +685,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    * @internal
    * @private
    */
-  private _onAuthenticated(authEvent: IAuthenticatedEvent): void {
+  private _onAuthenticated(authEvent: IConnectedEvent): void {
     const state = mapObjectValues(getOrDefaultObject(authEvent.state), protoValueToJson);
     this._presenceService._setInternalState(StringMap.objectToMap(state));
   }

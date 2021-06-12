@@ -371,7 +371,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+    this._connection.on(ConvergenceConnection.Events.CONNECTED, this._setOnline);
 
     this._modelResyncQueue = [];
 
@@ -594,9 +594,9 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
           });
     }
 
-    if (!this._connection.isOnline() && !this._modelOfflineManager.isOfflineEnabled()) {
+    if (!this._connection.isConnected() && !this._modelOfflineManager.isOfflineEnabled()) {
       throw new ConvergenceError("Can not delete a model while not connected and without offline support enabled.");
-    } else if (this._connection.isOnline()) {
+    } else if (this._connection.isConnected()) {
       return this._removeOnline(id);
     }
   }
@@ -743,7 +743,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   public async _create(options: ICreateModelOptions, data?: IObjectValue): Promise<string> {
     const collection = options.collection;
 
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       const userPermissions = modelUserPermissionMapToProto(options.userPermissions);
       const dataValue = data || this._getDataFromCreateOptions(options);
       const request: IConvergenceMessage = {
@@ -778,7 +778,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
       await this._modelOfflineManager.createOfflineModel(creationData);
 
-      if (this._connection.isOnline()) {
+      if (this._connection.isConnected()) {
         // we went online between when we started to create this model and now.
         // we need to see if we are still resyncing. If so, just add to the queue
         // else, we need to start another sync.
@@ -965,7 +965,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
 
     let open: Promise<RealTimeModel>;
 
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       open = this._openOnline(id, autoRequestId);
     } else if (this._modelOfflineManager.isOfflineEnabled()) {
       open = this._openOffline(id, autoRequestId);
@@ -977,7 +977,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
     const result = open.then(model => {
       this._clearOpenRequestRecords(id, autoRequestId);
       this._openModels.set(model.modelId(), model);
-      if (model._isOffline() && this._connection.isOnline()) {
+      if (model._isOffline() && this._connection.isConnected()) {
         // in case this was an offline open, and we are now online. So
         // we start this model syncing.
         this._resyncOpenModel(model);
@@ -1379,9 +1379,11 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   private _handleMessage(messageEvent: MessageEvent): void {
     const message = messageEvent.message;
 
-    const resourceId: number = getModelMessageResourceId(message);
+    // This method will return null if the message is not a model
+    // message that contains a resource id.
+    const resourceId: number | null = getModelMessageResourceId(message);
 
-    if (resourceId) {
+    if (resourceId !== null) {
       const model = this._getModelForResourceId(resourceId);
       if (model) {
         model._handleMessage(messageEvent);
@@ -1551,12 +1553,12 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private async _initiateOfflineModelSync(): Promise<void> {
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       await this._syncDirtyModelsToServer();
     }
 
     // We might have gone offline.
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       await this._modelOfflineManager.setOnline();
     }
   }
@@ -1605,7 +1607,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * @hidden
    */
   private _checkResyncQueue(): void {
-    if (!this._connection.isOnline()) {
+    if (!this._connection.isConnected()) {
       return;
     }
 

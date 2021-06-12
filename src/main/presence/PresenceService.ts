@@ -183,7 +183,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
-    this._connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+    this._connection.on(ConvergenceConnection.Events.CONNECTED, this._setOnline);
   }
 
   /**
@@ -232,7 +232,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
 
     this._localManager.set(state);
 
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       const message: IConvergenceMessage = {
         presenceSetState: {
           state: mapObjectValues(StringMap.mapToObject(state), jsonToProtoValue)
@@ -267,7 +267,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
     if (existingKeys.length > 0) {
       this._localManager.remove(existingKeys);
 
-      if (this._connection.isOnline()) {
+      if (this._connection.isConnected()) {
         const message: IConvergenceMessage = {
           presenceRemoveState: {
             keys: existingKeys
@@ -286,7 +286,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
   public clearState(): void {
     this._localManager.clear();
 
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       const message: IConvergenceMessage = {
         presenceClearState: {}
       };
@@ -475,7 +475,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
    * @hidden
    */
   private _unsubscribe(userId: DomainUserId): void {
-    if (this._connection.isOnline()) {
+    if (this._connection.isConnected()) {
       const message: IConvergenceMessage = {
         presenceUnsubscribe: {
           users: [domainUserIdToProto(userId)]

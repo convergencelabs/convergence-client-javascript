@@ -79,10 +79,6 @@ const Events: IChatServiceEvents = {
 };
 Object.freeze(Events);
 
-interface IChatRecord {
-  chat: Chat;
-  references: number;
-}
 
 /**
  * The `ChatService` is the entry point for chat functionality.  Chat is defined
@@ -296,7 +292,7 @@ export class ChatService extends ConvergenceEventEmitter<IChatEvent> {
    *   A promise that is resolved with the joined chats.
    */
   public joined(): Promise<IChatInfo[]> {
-    if (!this.session().isAuthenticated()) {
+    if (!this.session().isConnected()) {
       return Promise.resolve([]);
     }
     return this._connection

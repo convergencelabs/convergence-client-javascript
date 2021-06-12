@@ -14,6 +14,7 @@
 
 import {IConvergenceDomainEvent} from "./IConvergenceDomainEvent";
 import {ConvergenceDomain} from "../ConvergenceDomain";
+import {AuthenticationMethod} from "../connection/AuthenticationMethod";
 
 /**
  * Emitted when a [[ConvergenceDomain]]'s (re)connection attempt fails.
@@ -33,10 +34,16 @@ export class ConnectionFailedEvent implements IConvergenceDomainEvent {
    * @internal
    */
   constructor(
-    /**
-     * @inheritdoc
-     */
-    public readonly domain: ConvergenceDomain
+      /**
+       * @inheritdoc
+       */
+      public readonly domain: ConvergenceDomain,
+      public readonly code: string,
+      public readonly authMethod: AuthenticationMethod,
+      /**
+       * A message providing additional details on why the connection failed.
+       */
+      public readonly message?: string
   ) {
     Object.freeze(this);
   }

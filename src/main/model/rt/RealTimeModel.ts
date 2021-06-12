@@ -426,6 +426,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   private readonly _closingData: {
     deferred: ReplayDeferred<void>;
     closing: boolean;
+    waitingForServer: boolean;
     event?: ModelClosedEvent;
   };
 
@@ -480,7 +481,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     this._resyncData = null;
     this._closingData = {
       deferred: new ReplayDeferred<void>(),
-      closing: false
+      closing: false,
+      waitingForServer: false
     };
 
     this._model = new Model(this.session(), valueIdPrefix, data, undefinedObjectValues, undefinedArrayValues);
@@ -765,7 +767,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._resyncOnly = true;
       return Promise.resolve();
     } else {
-      this._debug("Close called on a NON resyncing model");
+      this._debug("Close called on a non-resyncing model");
       // Close the model and emit the appropriate events.
       const event: ModelClosedEvent = new ModelClosedEvent(this, true);
       this._initiateClose(true, event);
@@ -965,12 +967,12 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       throw new ConvergenceError(`The model '${this._modelId}' is already closing.`, "already_closing");
     }
 
-    this._debug("Close initiated");
-
     this._closingData.closing = true;
     this._closingData.event = event;
 
-    if (this._connection.isOnline() && closeWithServer) {
+    if (this._connection.isConnected() && closeWithServer) {
+      this._debug("Close initiated (online)");
+      this._closingData.waitingForServer = true;
       // Inform the server that we are closed.
       const request: IConvergenceMessage = {
         closeRealTimeModelRequest: {
@@ -981,6 +983,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
       this._connection
         .request(request)
         .then(() => {
+          this._debug("Closed with server");
+          this._closingData.waitingForServer = false;
           this._checkIfCanClose();
         })
         .catch(err => {
@@ -988,6 +992,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           this._closingData.deferred.reject(err);
         });
     } else {
+      this._debug("Close initiated (offline)");
       this._checkIfCanClose();
     }
   }
@@ -1007,8 +1012,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    */
   public _checkIfCanClose(): void {
-    if (this._closingData.closing &&
-      (this._concurrencyControl.isCommitted() || !this._connection.isOnline())) {
+    if (this._closingData.closing && !this._closingData.waitingForServer &&
+      (this._concurrencyControl.isCommitted() || !this._connection.isConnected())) {
       this._close();
     }
   }
@@ -1169,7 +1174,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
     } else if (remoteOperation) {
       this._handleRemoteOperation(remoteOperation);
     } else if (operationAck) {
-      this._handelOperationAck(operationAck);
+      this._handleOperationAck(operationAck);
     } else if (referenceShared || referenceSet || referenceCleared || referenceUnshared) {
       const remoteRefEvent = toRemoteReferenceEvent(event.message);
       this._handleRemoteReferenceEvent(remoteRefEvent);
@@ -1571,6 +1576,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _close(): void {
+    this._debug("Finishing close");
     const {deferred, event} = this._closingData;
     this._modelService._close(this);
 
@@ -1597,8 +1603,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @hidden
    * @internal
    */
-  private _handelOperationAck(message: IOperationAcknowledgementMessage): void {
-
+  private _handleOperationAck(message: IOperationAcknowledgementMessage): void {
     const version = getOrDefaultNumber(message.version);
     const sequenceNumber = getOrDefaultNumber(message.sequenceNumber);
     let acknowledgedOperation;
@@ -1655,7 +1660,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
           version: message.contextVersion,
           timestamp: message.timestamp
         };
-        this._handelOperationAck(syntheticAck);
+        this._handleOperationAck(syntheticAck);
         this._checkForReconnectUpToDate();
       } else {
         this._processRemoteOperation(message);
@@ -2093,7 +2098,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * @internal
    */
   private _sendEvents(): boolean {
-    return this._connection.isOnline() &&
+    return this._connection.isConnected() &&
       !this._offline &&
       (this._resyncData === null || this._resyncData.upToDate);
   }

@@ -225,7 +225,7 @@ export function protoToModelUserPermissionMap(perms: IUserModelPermissionsData[]
  */
 export function getModelMessageResourceId(message: IConvergenceMessage): number {
   const modelMessage = toModelMessage(message);
-  return modelMessage ? modelMessage.resourceId : null;
+  return modelMessage !== null ? getOrDefaultNumber(modelMessage.resourceId) : null;
 }
 
 type ModelMessage =
@@ -243,7 +243,7 @@ type ModelMessage =
   IRemoteClientResyncCompletedMessage |
   IModelResyncServerCompleteMessage;
 
-function toModelMessage(message: IConvergenceMessage): ModelMessage {
+function toModelMessage(message: IConvergenceMessage): ModelMessage | null {
   return message.forceCloseRealTimeModel ||
     message.remoteOperation ||
     message.referenceShared ||
@@ -256,5 +256,6 @@ function toModelMessage(message: IConvergenceMessage): ModelMessage {
     message.modelPermissionsChanged ||
     message.remoteClientResyncStarted ||
     message.remoteClientResyncCompleted ||
-    message.modelResyncServerComplete;
+    message.modelResyncServerComplete ||
+    null;
 }

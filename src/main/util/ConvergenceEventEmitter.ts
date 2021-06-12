@@ -46,7 +46,7 @@ export abstract class ConvergenceEventEmitter<T extends IConvergenceEvent> {
     if (typeof event === "string") {
       return event.toLowerCase();
     } else {
-      throw new Error("Event names must be strings");
+      throw new Error("Event names must be strings: " + typeof event);
     }
   }
 

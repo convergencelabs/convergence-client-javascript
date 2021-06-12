@@ -103,13 +103,6 @@ export class ConvergenceSession {
   }
 
   /**
-   * @returns True if the client is authenticated
-   */
-  public isAuthenticated(): boolean {
-    return this._connection.isAuthenticated();
-  }
-
-  /**
    * @returns True if the client is connected to the domain
    */
   public isConnected(): boolean {
@@ -120,7 +113,7 @@ export class ConvergenceSession {
    * Asserts that the user is currently authenticated, throwing a [[ConvergenceError]] if not.
    */
   public assertOnline(): void {
-    if (!this.isAuthenticated()) {
+    if (!this.isConnected()) {
       const message = `Cannot perform this action while offline`;
       throw new ConvergenceError(message, ConvergenceErrorCodes.OFFLINE);
     }
