@@ -1,7 +1,5 @@
 import {
-  AuthenticatedEvent,
   AuthenticatingEvent,
-  AuthenticationFailedEvent,
   CancellationToken,
   ConnectedEvent,
   ConnectingEvent,
@@ -21,7 +19,10 @@ import {TypeChecker} from "../main/util/TypeChecker";
 Convergence.configureLogging({
   root: LogLevel.INFO,
   loggers: {
-    models: LogLevel.DEBUG
+    "connection": LogLevel.DEBUG,
+    "protocol.messages": LogLevel.INFO,
+    "models": LogLevel.INFO,
+    "socket": LogLevel.DEBUG
   }
 });
 
@@ -38,16 +39,16 @@ const OPTIONS: IConvergenceOptions = {
     class: WebSocket
   },
   reconnect: {
-    autoReconnect: false,
-    autoReconnectOnInitial: false,
+    autoReconnect: true,
+    autoReconnectOnInitial: true,
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous(DISPLAY_NAME);
     }
   },
   models: {
     data: {
-      undefinedObjectValues: "omit",
-      undefinedArrayValues: "null"
+      undefinedObjectValues: "error",
+      undefinedArrayValues: "error"
     }
   }
 };
@@ -63,15 +64,11 @@ export function createDomain(options?: IConvergenceOptions): ConvergenceDomain {
       } else if (event instanceof ConnectingEvent) {
         console.log(`Connecting to: ${domain.url()}`);
       } else if (event instanceof ConnectionFailedEvent) {
-        console.log(`Connection failed`);
+        console.log(`Connection failed: {code: "${event.code}", message: "${event.message}"}`);
       } else if (event instanceof ConnectedEvent) {
         console.log(`Connected to ${event.domain.namespace()}/${event.domain.id()}`);
       } else if (event instanceof AuthenticatingEvent) {
         console.log(`Authenticating {method: "${event.method}"}`);
-      } else if (event instanceof AuthenticationFailedEvent) {
-        console.log(`Authentication failed {method: "${event.method}"}`);
-      } else if (event instanceof AuthenticatedEvent) {
-        console.log(`Authenticated {method: "${event.method}"}`);
       } else if (event instanceof DisconnectedEvent) {
         console.log(`Disconnected`);
       } else if (event instanceof InterruptedEvent) {

@@ -1,27 +1,32 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "./connect";
-import {ConvergenceDomain, RealTimeObject} from "../main";
+import {ConvergenceDomain} from "../main";
+
 let domain: ConvergenceDomain;
 
-connect()
-  .then(d => {
-    domain = d;
-    console.log("connected: ", d.session().sessionId());
-    return d.models().create({
-      collection: "test",
-      id: "my-test-id2",
-      data: {
-        prop: undefined,
-        array: [1, undefined, 2],
-        nested: {
-          property: "foo"
+connect(undefined, true)
+    .then(d => {
+      domain = d;
+      console.log("connected: ", d.session().sessionId());
+      return d.models().openAutoCreate({
+        ephemeral: true,
+        collection: "test",
+        id: "my-test-id",
+        data: {
+          nested: {
+            property: "foo"
+          }
         }
-      }
-    });
-  })
-  .then(model => {
-    console.log("Model Created");
-    domain.dispose();
-  })
-  .catch(e => console.error(e));
+      });
+    })
+    .then(model => {
+      console.log("Model Created");
+      model.root().set("other", true);
+      return model.close();
+    })
+    .then(() => {
+      console.log("Model closed");
+      return domain.dispose();
+    })
+    .catch(e => console.error(e));
