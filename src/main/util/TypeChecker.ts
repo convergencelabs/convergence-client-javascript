@@ -21,6 +21,10 @@ export class TypeChecker {
     return Array.isArray(value);
   }
 
+  public static isMap(value: any): value is Map<any, any> {
+    return value instanceof Map;
+  }
+
   public static isBoolean(value: any): value is boolean {
     return typeof value === "boolean";
   }

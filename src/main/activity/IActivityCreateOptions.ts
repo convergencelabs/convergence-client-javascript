@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -12,19 +12,14 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {StringMapLike} from "../util/StringMap";
 import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
 
 /**
- * Represents the options that can be set when Joining an activity.
+ * Represents the options that can be set when creating an activity.
  *
  * @module Activities
  */
-export interface IActivityJoinOptions {
-  /**
-   * Initial state to set when joining an activity.
-   */
-  state?: StringMapLike;
-
-  autoCreate?: IActivityAutoCreateOptions;
+export interface IActivityCreateOptions extends IActivityAutoCreateOptions {
+  activityType: string;
+  activityId: string;
 }

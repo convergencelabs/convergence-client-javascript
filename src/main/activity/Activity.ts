@@ -53,6 +53,10 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import IActivitySessionJoinedMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionLeftMessage;
 import IActivityStateUpdatedMessage = com.convergencelabs.convergence.proto.activity.IActivityStateUpdatedMessage;
+import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
+import IActivityJoinRequestMessage = com.convergencelabs.convergence.proto.activity.IActivityJoinRequestMessage;
+import IAutoCreateData = com.convergencelabs.convergence.proto.activity.ActivityJoinRequestMessage.IAutoCreateData;
+import {ActivityPermissionUtils} from "./ActivityPermissionUtils";
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -135,6 +139,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * @internal
    */
+  private readonly _type: string;
+
+  /**
+   * @internal
+   */
   private readonly _id: string;
 
   /**
@@ -186,11 +195,13 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  constructor(id: string,
+  constructor(type: string,
+              id: string,
               identityCache: IdentityCache,
               connection: ConvergenceConnection) {
     super();
     this._identityCache = identityCache;
+    this._type = type;
     this._id = id;
     this._resource = null;
 
@@ -234,7 +245,18 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Gets the unique id of this [[Activity]].
+   * Gets the user defined type of this [[Activity]].
+   *
+   * @returns
+   *   The [[Activity]] type.
+   */
+  public type(): string {
+    return this._type;
+  }
+
+  /**
+   * Gets the id of this [[Activity]], which is unique within
+   * its user defined type.
    *
    * @returns
    *   The [[Activity]] id.
@@ -820,13 +842,31 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  private _joinWhileOnline(deferred: Deferred<void>, initialState: Map<string, any>): void {
+  private _joinWhileOnline(deferred: Deferred<void>,
+                           initialState: Map<string, any>,
+                           autoCreateOptions?: IActivityAutoCreateOptions): void {
+    let autoCreateData: IAutoCreateData | undefined;
+
+    if (autoCreateOptions) {
+      const worldPermissions = ActivityPermissionUtils.permissionToStrings(autoCreateOptions.worldPermissions);
+      const userPermissions = ActivityPermissionUtils.userPermissions(autoCreateOptions.userPermissions);
+      const groupPermissions = ActivityPermissionUtils.toGroupPermissionsProto(autoCreateOptions.groupPermissions);
+      autoCreateData =  {
+        worldPermissions,
+        userPermissions,
+        groupPermissions,
+        ephemeral: autoCreateOptions.ephemeral
+      };
+    }
+
     const mappedState = mapObjectValues(StringMap.mapToObject(initialState), jsonToProtoValue);
     const message: IConvergenceMessage = {
       activityJoinRequest: {
+        activityType: this._type,
         activityId: this._id,
-        state: mappedState
-      }
+        state: mappedState,
+        autoCreateData
+      } as IActivityJoinRequestMessage
     };
 
     this._resource = null;
