@@ -1,20 +1,27 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
-
 import {connect} from "./connect";
 
-connect()
-    .then(domain => {
-      return domain.activities().join("type", "foo", {state: {foo: "bar"}});
-    })
-    .then(activity => {
-      console.log("Activity Joined");
-      console.log("state", activity.state());
-      activity.setState({"bar": false});
-      return activity.leave()
-    })
-    .then(() => {
-      console.log("Activity Left");
-    })
-    .catch(e => console.error(e));
+async function run() {
+  const domain = await connect();
+  const activity = await domain.activities()
+    .join("test", "ephemeral-test-activity", {
+      state: {foo: "bar"},
+      lurk: false,
+      autoCreate: {
+        ephemeral: true,
+        worldPermissions: ["join", "lurk", "view_state", "set_state"]
+      }
+    });
 
-process.stdin.resume();
+  console.log("Activity Joined");
+  console.log("state", activity.state());
+  activity.setState({"bar": false});
+
+  const world = await activity.permissions().getWorldPermissions();
+  console.log("World permissions: ", world);
+
+  await activity.leave();
+  await domain.dispose();
+}
+
+run().catch(e => console.error(e));

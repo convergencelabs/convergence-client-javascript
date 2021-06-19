@@ -12,7 +12,6 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IActivityPermissions} from "./IActivityPermissions";
 import {DomainUserId, DomainUserIdentifier, DomainUserIdMap} from "../identity";
 import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
 import {com} from "../../../../../convergence-proto/npm-dist";
@@ -20,6 +19,7 @@ import {TypeChecker} from "../util/TypeChecker";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {objectForEach} from "../util/ObjectUtils";
 import {StringMap} from "../util/StringMap";
+import {ActivityPermission} from "./ActivityPermission";
 import IUserPermissionsEntry = com.convergencelabs.convergence.proto.core.IUserPermissionsEntry;
 import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermissionsList;
 
@@ -29,50 +29,14 @@ import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermission
  */
 export class ActivityPermissionUtils {
 
-  public static permissionToStrings(permissions?: IActivityPermissions): string[] {
-    const result = [];
-
-    if (!permissions) return result;
-
-    if (permissions.join) result.push(JOIN);
-    if (permissions.manage) result.push(MANAGE);
-    if (permissions.viewState) result.push(VIEW_STATE);
-    if (permissions.setState) result.push(SET_STATE);
-
-    return result;
-  }
-
-  public static stringsToPermissions(permissions: string[]): IActivityPermissions {
-    const result: IActivityPermissions = {join: false, manage: false, setState: false, viewState: false};
-    permissions.forEach(permission => {
-      switch (permission) {
-        case JOIN:
-          result.join = true;
-          break;
-        case MANAGE:
-          result.manage = true;
-          break;
-        case SET_STATE:
-          result.setState = true;
-          break;
-        case VIEW_STATE:
-          result.viewState = true;
-          break;
-        default:
-      }
-    });
-
-    return result;
-  }
-
   public static userPermissions(userPermissions?: ActivityUserPermissionsMap): IUserPermissionsEntry[] {
     const result: IUserPermissionsEntry[] = [];
     if (userPermissions instanceof DomainUserIdMap) {
-      userPermissions.forEach((permissions: IActivityPermissions, userId: DomainUserId) => {
+      userPermissions.forEach((permissions: ActivityPermission[], userId: DomainUserId) => {
         result.push(ActivityPermissionUtils.toUserPermissionEntry(userId, permissions));
       });
     } else if (TypeChecker.isMap(userPermissions)) {
-      userPermissions.forEach((permissions: IActivityPermissions, userId: DomainUserIdentifier) => {
+      userPermissions.forEach((permissions: ActivityPermission[], userId: DomainUserIdentifier) => {
         userId = DomainUserId.toDomainUserId(userId);
         result.push(ActivityPermissionUtils.toUserPermissionEntry(userId, permissions));
       });
@@ -86,7 +50,7 @@ export class ActivityPermissionUtils {
     return result;
   }
 
-  public static toGroupPermissionsProto(groupPermissions?: Map<string, IActivityPermissions> | { [key: string]: IActivityPermissions }): { [key: string]: IPermissionsList } {
+  public static toGroupPermissionsProto(groupPermissions?: Map<string, ActivityPermission[]> | { [key: string]: ActivityPermission[] }): { [key: string]: IPermissionsList } {
     const results = {};
 
     if (TypeChecker.isMap(groupPermissions) || TypeChecker.isObject(groupPermissions)) {
@@ -98,15 +62,10 @@ export class ActivityPermissionUtils {
     return results;
   }
 
-  public static toUserPermissionEntry(userId: DomainUserId, permissions: IActivityPermissions): IUserPermissionsEntry {
+  public static toUserPermissionEntry(userId: DomainUserId, permissions: ActivityPermission[]): IUserPermissionsEntry {
     return {
       user: domainUserIdToProto(userId),
-      permissions: ActivityPermissionUtils.permissionToStrings(permissions)
+      permissions
     } as IUserPermissionsEntry;
   }
 }
-
-const JOIN = "join";
-const MANAGE = "manage";
-const VIEW_STATE = "view_state";
-const SET_STATE = "set_state";

@@ -12,6 +12,6 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 import {DomainUserIdentifier, DomainUserIdMap} from "../identity";
-import {IActivityPermissions} from "./IActivityPermissions";
+import {ActivityPermission} from "./ActivityPermission";
 
-export type ActivityUserPermissionsMap = DomainUserIdMap<IActivityPermissions> | Map<DomainUserIdentifier, IActivityPermissions> | { [key: string]: IActivityPermissions }
+export type ActivityUserPermissionsMap = DomainUserIdMap<ActivityPermission[]> | Map<DomainUserIdentifier, ActivityPermission[]> | { [key: string]: ActivityPermission[] }

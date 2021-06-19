@@ -14,6 +14,7 @@
 
 import {IActivityPermissions} from "./IActivityPermissions";
 import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
+import {ActivityPermission} from "./ActivityPermission";
 
 /**
  * Represents the options that can be set to automatically
@@ -23,9 +24,9 @@ import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
  */
 export interface IActivityAutoCreateOptions {
 
-  ephemeral: boolean;
+  ephemeral?: boolean;
 
-  worldPermissions?: IActivityPermissions;
+  worldPermissions?: ActivityPermission[];
 
   userPermissions?: ActivityUserPermissionsMap;
 

@@ -87,7 +87,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   public create(options: IActivityCreateOptions): Promise<void> {
     Validation.assertNonEmptyString(options.activityType, "options.activityType");
 
-    const worldPermissions = ActivityPermissionUtils.permissionToStrings(options.worldPermissions);
+    const worldPermissions = options.worldPermissions || [];
     const userPermissions = ActivityPermissionUtils.userPermissions(options.userPermissions);
     const groupPermissions = ActivityPermissionUtils.toGroupPermissionsProto(options.groupPermissions);
 

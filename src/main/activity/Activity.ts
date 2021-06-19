@@ -52,6 +52,7 @@ import {ActivityPermissionUtils} from "./ActivityPermissionUtils";
 import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
 
 import {com} from "@convergence/convergence-proto";
+import {ActivityPermissionManager} from "./ActivityPermissionManager";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IActivitySessionJoinedMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionLeftMessage;
@@ -161,6 +162,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * @internal
    */
+  private _autoCreateOptions: IActivityAutoCreateOptions | undefined;
+
+  /**
+   * @internal
+   */
   private _created: Date;
 
   /**
@@ -172,6 +178,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private readonly _identityCache: IdentityCache;
+
+  /**
+   * @internal
+   */
+  private readonly _permissionsManager: ActivityPermissionManager;
 
   /**
    * @internal
@@ -221,6 +232,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     this._type = type;
     this._id = id;
     this._resource = null;
+    this._permissionsManager = new ActivityPermissionManager(type, id, connection);
 
     this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(new Map());
     this._joined = true;
@@ -303,6 +315,10 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   public isEphemeral(): boolean {
     return this._ephemeral;
+  }
+
+  public permissions(): ActivityPermissionManager {
+    return this._permissionsManager;
   }
 
   /**
@@ -597,6 +613,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         new Map<string, any>();
 
       this._lurking = options.lurk;
+      this._autoCreateOptions = options.autoCreate || null;
 
       if (this._connection.isConnected()) {
         this._joinWhileOnline(deferred, initialState);
@@ -622,7 +639,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   private _setOnline = () => {
     this._logger.debug(() => `Activity '${this._id}' is online`);
-    const initialState = this._localParticipant.state;
+    const initialState = this._lurking ? new Map() : this._localParticipant.state;
     const deferred = new Deferred<void>();
     this._joinWhileOnline(deferred, initialState);
   }
@@ -638,7 +655,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     // emit events for the leaving of each participant.
     this._mutateParticipants((participants) => {
       for (const [sessionId, participant] of participants) {
-        if (sessionId !== this._localParticipant.sessionId) {
+        if (sessionId !== this._localParticipant?.sessionId) {
           participants.delete(sessionId);
           const event = new ActivitySessionLeftEvent(this, participant.user, participant.sessionId, false);
           this._emitEvent(event);
@@ -906,19 +923,18 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private _joinWhileOnline(deferred: Deferred<void>,
-                           initialState: Map<string, any>,
-                           autoCreateOptions?: IActivityAutoCreateOptions): void {
-    let autoCreateData: IAutoCreateData | undefined;
+                           initialState: Map<string, any>): void {
 
-    if (autoCreateOptions) {
-      const worldPermissions = ActivityPermissionUtils.permissionToStrings(autoCreateOptions.worldPermissions);
-      const userPermissions = ActivityPermissionUtils.userPermissions(autoCreateOptions.userPermissions);
-      const groupPermissions = ActivityPermissionUtils.toGroupPermissionsProto(autoCreateOptions.groupPermissions);
+    let autoCreateData: IAutoCreateData;
+    if (this._autoCreateOptions) {
+      const worldPermissions = this._autoCreateOptions.worldPermissions || [];
+      const userPermissions = ActivityPermissionUtils.userPermissions(this._autoCreateOptions.userPermissions);
+      const groupPermissions = ActivityPermissionUtils.toGroupPermissionsProto(this._autoCreateOptions.groupPermissions);
       autoCreateData = {
         worldPermissions,
         userPermissions,
         groupPermissions,
-        ephemeral: autoCreateOptions.ephemeral
+        ephemeral: this._autoCreateOptions.ephemeral
       };
     }
 

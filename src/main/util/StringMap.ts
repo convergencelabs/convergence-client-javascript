@@ -15,7 +15,7 @@
 /**
  * Represents a Javascript Map or Object literal.
  */
-export type StringMapLike = Map<string, any> | {[key: string]: any};
+export type StringMapLike<T = any> = Map<string, T> | {[key: string]: T};
 
 /**
  * @hidden

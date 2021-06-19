@@ -28,7 +28,8 @@ export * from "./ActivityParticipant";
 export * from "./Activity";
 export * from "./IActivityJoinOptions";
 export * from "./IActivityCreateOptions";
-export * from "./IActivityPermissions"
 export * from "./IActivityAutoCreateOptions";
 export * from "./ActivityService";
+export * from "./ActivityPermission";
+export * from "./ActivityPermissionManager";
 export * from "./events";
