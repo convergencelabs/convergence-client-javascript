@@ -26,5 +26,7 @@ export interface IActivityJoinOptions {
    */
   state?: StringMapLike;
 
+  lurk?: boolean;
+
   autoCreate?: IActivityAutoCreateOptions;
 }
