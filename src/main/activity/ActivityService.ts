@@ -184,8 +184,10 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
   /**
    * Determines if an Activity with the specified id is already joined.
    *
+   * @param type
+   *   The user defined type of activity.
    * @param id
-   *   The id of the Activity to check.
+   *   The id (unique within the type) of the Activity to check.
    * @returns
    *   True if the Activity with the specified id is joined; false otherwise.
    */
