@@ -15,7 +15,7 @@
 import {DomainUserId} from "./DomainUserId";
 
 /**
- * A username or [[DomainUserId]].
+ * A string representing the username of a "normal" user or [[DomainUserId]].
  *
  * @module Users and Identity
  */

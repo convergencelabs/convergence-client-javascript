@@ -13,6 +13,8 @@
  */
 
 import {DomainUserIdentifier} from "./DomainUserIdentifier";
+import {Validation} from "../util/Validation";
+import {ConvergenceError} from "../util";
 
 /**
  * The different "types" of [[DomainUser]]s in Convergence.
@@ -53,7 +55,7 @@ export class DomainUserId {
   /**
    * Constructs a "normal" `DomainUserId` by username.
    *
-   * @param username an existing DomainUser's username
+   * @param username the normal user's unique username
    */
   public static normal(username: string): DomainUserId {
     return new DomainUserId(DomainUserType.NORMAL, username);
@@ -62,10 +64,19 @@ export class DomainUserId {
   /**
    * Constructs a "anonymous" `DomainUserId` by username.
    *
-   * @param username the anonymous unique users username.
+   * @param username the anonymous user's unique username.
    */
   public static anonymous(username: string): DomainUserId {
     return new DomainUserId(DomainUserType.ANONYMOUS, username);
+  }
+
+  /**
+   * Constructs a "convergence" `DomainUserId` by username.
+   *
+   * @param username the convergence user's unique username.
+   */
+  public static convergence(username: string): DomainUserId {
+    return new DomainUserId(DomainUserType.CONVERGENCE, username);
   }
 
   /**
@@ -81,11 +92,63 @@ export class DomainUserId {
   }
 
   /**
+   * Constructs a DomainUserId from a guid.
+   *
+   * @param guid the type of user
+   *
+   * @returns A new DomainUserId, deserialized from the guid.
+   * @see guid
+   */
+  public static fromGuid(guid: string): DomainUserId {
+    Validation.assertNonEmptyString(guid, "guid");
+
+    const index = guid.indexOf(":");
+    if (index < 0) {
+      throw new Error("Invalid guid value. Not separator found: " + guid);
+    }
+
+    const userType = DomainUserId.toDomainUserType(guid.substring(0, index));
+    const username = guid.substring(index + 1, guid.length)
+
+    return new DomainUserId(userType, username)
+  }
+
+  /**
+   * Validates a string value is a proper DomainUserType string
+   * and returns it. Otherwise will throw and error.
+   *
+   * @param typeStr The type string to validate.
+   * @returns A valid DomainUserType string.
+   */
+  public static toDomainUserType(typeStr: string): DomainUserType {
+    switch (typeStr) {
+      case DomainUserType.NORMAL:
+        return DomainUserType.NORMAL;
+      case DomainUserType.CONVERGENCE:
+        return DomainUserType.CONVERGENCE;
+      case DomainUserType.ANONYMOUS:
+        return DomainUserType.ANONYMOUS;
+      default:
+        throw new ConvergenceError("Invalid guid value. Unrecognized user type: " + typeStr);
+    }
+  }
+
+  /**
+   * This is a convenience function to construct a `DomainUserId` from a bare username.
+   *
+   * @param userId a "normal" user's username or DomainUserId
+   * @deprecated use of().
+   */
+  public static toDomainUserId(userId: DomainUserIdentifier): DomainUserId {
+    return DomainUserId.of(userId);
+  }
+
+  /**
    * This is a convenience function to construct a `DomainUserId` from a bare username.
    *
    * @param userId a "normal" user's username or DomainUserId
    */
-  public static toDomainUserId(userId: DomainUserIdentifier): DomainUserId {
+  public static of(userId: DomainUserIdentifier): DomainUserId {
     return (userId instanceof DomainUserId) ? userId : DomainUserId.normal(userId);
   }
 
@@ -105,6 +168,7 @@ export class DomainUserId {
     public readonly userType: DomainUserType,
     public readonly username: string
   ) {
+    Validation.assertString(username, "username");
     this._guid = DomainUserId.guid(this.userType, this.username);
     Object.freeze(this);
   }

@@ -14,37 +14,83 @@
 import {DomainUserIdentifier} from "./DomainUserIdentifier";
 import {DomainUserId} from "./DomainUserId";
 import {StringMap} from "../util/StringMap";
+import {TypeChecker} from "../util/TypeChecker";
+import {ConvergenceError} from "../util";
+import {DomainUserMapping} from "./DomainUserMapping";
 
+/**
+ * The DomainUserIdMap is a utility class that will uniquely map a set
+ * of Convergence Domain User Ids to values.
+ */
 export class DomainUserIdMap<V> {
+
+  /**
+   * Creates a new DomainUserIdMap from a source. If the soruce is a Map
+   * whose keys are strings, the strings will be assumed to be normal
+   * usernames and will be converted into DomainUserIds using the
+   * DomainUserIds.normal() method.
+   *
+   * @param source The source of user mapping data.
+   *
+   * @returns A new DomainUserIdMap object.
+   */
+  public static of<V>(source: DomainUserMapping<V>): DomainUserIdMap<V> {
+    if (TypeChecker.isObject(source)) {
+      source = StringMap.coerceToMap(source)
+    }
+
+    if (source instanceof DomainUserIdMap || TypeChecker.isMap(source)) {
+      const result = new DomainUserIdMap<V>();
+      source.forEach((val: V, user: DomainUserIdentifier) => {
+        result.set(user, val);
+      });
+      return result;
+    } else {
+      throw new ConvergenceError("Can not convert the supplied value to a DomainUserIdMap");
+    }
+  }
+
+  /**
+   * @internal
+   * @hidden
+   */
   private readonly _map: Map<string, V>;
 
-  constructor(map?: Map<string, V> | {[key: string]: V}) {
-    this._map = StringMap.coerceToMap(map) || new Map();
+  constructor() {
+    this._map = new Map<string, V>();
   }
 
   public get(user: DomainUserIdentifier): V | undefined {
-    return this._map.get(DomainUserId.toDomainUserId(user).toGuid());
+    return this._map.get(DomainUserId.of(user).toGuid());
   }
 
   public set(user: DomainUserIdentifier, value: V): void {
-    this._map.set(DomainUserId.toDomainUserId(user).toGuid(), value);
+    this._map.set(DomainUserId.of(user).toGuid(), value);
   }
 
   public has(user: DomainUserIdentifier): boolean {
-    return this._map.has(DomainUserId.toDomainUserId(user).toGuid());
+    return this._map.has(DomainUserId.of(user).toGuid());
   }
 
   public delete(user: DomainUserIdentifier): void {
-    this._map.delete(DomainUserId.toDomainUserId(user).toGuid());
+    this._map.delete(DomainUserId.of(user).toGuid());
   }
 
   public keys(): DomainUserId[] {
-    return Array.from(this._map.keys()).map(DomainUserId.toDomainUserId);
+    return Array.from(this._map.keys()).map(DomainUserId.fromGuid);
+  }
+
+  public entries(): [DomainUserId, V][] {
+    return Array.from(this._map.entries()).map(v => [DomainUserId.fromGuid(v[0]), v[1]]);
+  }
+
+  public size(): number {
+    return this._map.size;
   }
 
   public forEach(callback: (value: V, userId: DomainUserId) => void): void {
-    this._map.forEach((v: V, userId: string) => {
-      callback(v, DomainUserId.toDomainUserId(userId));
+    this._map.forEach((v: V, guid: string) => {
+      callback(v, DomainUserId.fromGuid(guid));
     });
   }
 }

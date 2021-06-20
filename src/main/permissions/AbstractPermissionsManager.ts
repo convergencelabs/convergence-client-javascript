@@ -15,16 +15,17 @@
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {StringMap, StringMapLike} from "../util/StringMap";
 import {
-  domainUserTypeToProto,
+  domainUserIdToProto,
   getOrDefaultArray,
   getOrDefaultObject,
   protoToDomainUserId
 } from "../connection/ProtocolUtil";
-import {DomainUserId, DomainUserIdMap, DomainUserType} from "../identity";
+import {DomainUserId, DomainUserIdMap} from "../identity";
 import {mapObjectValues} from "../util/ObjectUtils";
 
 import {com} from "@convergence/convergence-proto";
 import {IAllPermissions} from "./IAllPermissions";
+import {DomainUserMapping} from "../identity/DomainUserMapping";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = com.convergencelabs.convergence.proto.core.IUserPermissionsEntry;
 import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermissionsList;
@@ -100,10 +101,10 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * Adds the given permissions to any existing WORLD permissions for this [[chatId]].
    *
-   * @param permissions an array of permission strings
+   * @param permissions an set of permission strings
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public addWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
@@ -122,10 +123,10 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * Removes the given permissions from any existing WORLD permissions for this [[chatId]].
    *
-   * @param permissions an array of permission strings
+   * @param permissions an set of permission strings
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public removeWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
@@ -144,10 +145,10 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * Sets the given permissions for WORLD for this [[chatId]].
    *
-   * @param permissions an array of permission strings
+   * @param permissions an set of permission strings
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public setWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
@@ -167,7 +168,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * Returns the permissions for WORLD for this [[chatId]].
    *
    * @returns
-   *   A promise, which resolves with an array of permission strings
+   *   A promise, which resolves with an set of permission strings
    */
   public getWorldPermissions(): Promise<Set<T>> {
     this._connection.session().assertOnline();
@@ -183,20 +184,20 @@ export abstract class AbstractPermissionManager<T extends string> {
    * given users.
    *
    * @param permissions
-   *   an object, mapping usernames to an array of desired permission strings to be added
+   *   an object, mapping usernames to an set of desired permission strings to be added
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
-  public addUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
+  public addUserPermissions(permissions: DomainUserMapping<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
 
-    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
+    const userIdMap = DomainUserIdMap.of(permissions);
 
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         target: this._getTarget(),
-        user: this._permissionsMapToPermissionEntries(map)
+        user: this._permissionsMapToPermissionEntries(userIdMap)
       }
     };
 
@@ -210,19 +211,19 @@ export abstract class AbstractPermissionManager<T extends string> {
    * [[chatId]].
    *
    * @param permissions
-   *   An object, mapping usernames to an array of desired permission strings to be removed
+   *   An object, mapping usernames to an set of desired permission strings to be removed
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
-  public removeUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
+  public removeUserPermissions(permissions: DomainUserMapping<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
-    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
+    const userIdMap = DomainUserIdMap.of(permissions);
 
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         target: this._getTarget(),
-        user: this._permissionsMapToPermissionEntries(map)
+        user: this._permissionsMapToPermissionEntries(userIdMap)
       }
     };
 
@@ -238,17 +239,17 @@ export abstract class AbstractPermissionManager<T extends string> {
    *   an object which maps one or more usernames to their new set of permissions
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
-  public setUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
+  public setUserPermissions(permissions: DomainUserMapping<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
-    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
+    const userIdMap = DomainUserIdMap.of(permissions);
 
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         target: this._getTarget(),
         user: {
-          permissions: this._permissionsMapToPermissionEntries(map)
+          permissions: this._permissionsMapToPermissionEntries(userIdMap)
         }
       }
     };
@@ -275,7 +276,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @param username an existing user's username
    *
    * @returns
-   *   A promise, which resolves with an array of permission strings
+   *   A promise, which resolves with an set of permission strings
    */
   public getUserPermissions(username: string): Promise<Set<T>> {
     this._connection.session().assertOnline();
@@ -292,10 +293,10 @@ export abstract class AbstractPermissionManager<T extends string> {
    * given groups.
    *
    * @param permissions
-   *   an object, mapping group IDs to an array of desired permission strings to be added
+   *   an object, mapping group Ids to an set of desired permission strings to be added
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public addGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
@@ -317,10 +318,10 @@ export abstract class AbstractPermissionManager<T extends string> {
    * [[chatId]].
    *
    * @param permissions
-   *   An object, mapping group IDs to an array of desired permission strings to be removed
+   *   An object, mapping group IDs to an set of desired permission strings to be removed
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public removeGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
@@ -344,7 +345,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    *   an object which maps one or more group IDs to their new set of permissions
    *
    * @returns
-   *   A promise if successful
+   *   A resolved promise if successful
    */
   public setGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
@@ -382,7 +383,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @param groupId an existing group ID
    *
    * @returns
-   *   A promise, which resolves with an array of permission strings
+   *   A promise, which resolves with an set of permission strings
    */
   public getGroupPermissions(groupId: string): Promise<Set<T>> {
     this._connection.session().assertOnline();
@@ -394,11 +395,11 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * @internal
    */
-  private _permissionsMapToPermissionEntries(map: Map<string, Set<T> | T[]>): IUserPermissionsEntry[] {
+  private _permissionsMapToPermissionEntries(userIdMap: DomainUserIdMap<Set<T> | T[]>): IUserPermissionsEntry[] {
     const userPermissions: IUserPermissionsEntry[] = [];
-    map.forEach((userPerms, username) => {
+    userIdMap.forEach((userPerms, userId) => {
       userPermissions.push({
-        user: {userType: domainUserTypeToProto(DomainUserType.NORMAL), username},
+        user: domainUserIdToProto(userId),
         permissions: Array.from(userPerms)
       });
     });

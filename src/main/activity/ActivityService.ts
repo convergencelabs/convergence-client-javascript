@@ -140,11 +140,11 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    *   [[Activity]].
    */
   public join(type: string, id: string, options?: IActivityJoinOptions): Promise<Activity> {
-    let activity = this._joinedActivities.get(id);
+    let activity = this._joinedActivities.get(ActivityService._activityToIdString(type, id));
     if (activity === undefined) {
       activity = new Activity(type, id, this._identityCache, this._connection);
 
-      this._joinedActivities.set(id, activity);
+      this._joinedActivities.set(ActivityService._activityToIdString(type, id), activity);
 
       // The activity services will consolidate all events from all activities.
       // we tap this to look for the activity left event and remove that activity
@@ -192,7 +192,7 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    *   True if the Activity with the specified id is joined; false otherwise.
    */
   public isJoined(type: string, id: string): boolean {
-    return this._joinedActivities.has(id);
+    return this._joinedActivities.has(ActivityService._activityToIdString(type, id));
   }
 
   /**
@@ -200,6 +200,14 @@ export class ActivityService extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private _onActivityLeave(type: string, id: string): void {
-    this._joinedActivities.delete(id);
+    this._joinedActivities.delete(ActivityService._activityToIdString(type, id));
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private static _activityToIdString(type: string, id: string): string {
+    return `${type}/${id}`;
   }
 }
