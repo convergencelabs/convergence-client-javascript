@@ -14,11 +14,17 @@
 
 import {ConvergenceConnection} from "../connection/ConvergenceConnection";
 import {StringMap, StringMapLike} from "../util/StringMap";
-import {domainUserIdToProto, domainUserTypeToProto, getOrDefaultArray} from "../connection/ProtocolUtil";
-import {DomainUserId, DomainUserType} from "../identity";
+import {
+  domainUserTypeToProto,
+  getOrDefaultArray,
+  getOrDefaultObject,
+  protoToDomainUserId
+} from "../connection/ProtocolUtil";
+import {DomainUserId, DomainUserIdMap, DomainUserType} from "../identity";
 import {mapObjectValues} from "../util/ObjectUtils";
 
 import {com} from "@convergence/convergence-proto";
+import {IAllPermissions} from "./IAllPermissions";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IUserPermissionsEntry = com.convergencelabs.convergence.proto.core.IUserPermissionsEntry;
 import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermissionsList;
@@ -41,11 +47,11 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the *resolved* permissions for the current user for this [[chatId]].
+   * Returns the *resolved* permissions for the current user for this target.
    * Resolved means computed from the set of any relevant `world`, `group` or `user`
    * permissions.
    */
-  public getPermissions(): Promise<T[]> {
+  public resolveSessionPermissions(): Promise<Set<T>> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       resolvePermissionsForConnectedSessionRequest: {
@@ -55,9 +61,37 @@ export abstract class AbstractPermissionManager<T extends string> {
 
     return this._connection.request(request).then((response: IConvergenceMessage) => {
       const {resolvePermissionsForConnectedSessionResponse} = response;
-      return getOrDefaultArray(resolvePermissionsForConnectedSessionResponse.permissions as T[]);
+      return new Set(getOrDefaultArray(resolvePermissionsForConnectedSessionResponse.permissions as T[]));
     });
   }
+
+  public getPermissions(): Promise<IAllPermissions<T>> {
+    this._connection.session().assertOnline();
+    const request: IConvergenceMessage = {
+      getPermissionsRequest: {
+        target: this._getTarget()
+      }
+    };
+
+    return this._connection
+      .request(request)
+      .then((response: IConvergenceMessage) => {
+        const {getPermissionsResponse} = response;
+
+        const worldPermissions = new Set(getOrDefaultArray(getPermissionsResponse.world as T[]));
+        const userPermissions = this._permissionsEntriesToUserMap(getOrDefaultArray(getPermissionsResponse.user));
+        const groupPermissions = StringMap.coerceToMap<Set<T>>(mapObjectValues(getOrDefaultObject(getPermissionsResponse.group), permissionsList => {
+          return new Set(getOrDefaultArray(permissionsList.values as T[]));
+        }));
+
+        return {
+          worldPermissions,
+          groupPermissions,
+          userPermissions
+        };
+      });
+  }
+
 
   /**
    * WORLD permissions
@@ -71,12 +105,12 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public addWorldPermissions(permissions: T[]): Promise<void> {
+  public addWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
         target: this._getTarget(),
-        world: permissions as string[]
+        world: Array.from(permissions)
       }
     };
 
@@ -93,12 +127,12 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public removeWorldPermissions(permissions: T[]): Promise<void> {
+  public removeWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
         target: this._getTarget(),
-        world: permissions
+        world: Array.from(permissions)
       }
     };
 
@@ -115,14 +149,12 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public setWorldPermissions(permissions: T[]): Promise<void> {
+  public setWorldPermissions(permissions: Set<T> | T[]): Promise<void> {
     this._connection.session().assertOnline();
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
         target: this._getTarget(),
-        world: {
-          permissions
-        }
+        world: {permissions: Array.from(permissions)}
       }
     };
 
@@ -137,18 +169,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise, which resolves with an array of permission strings
    */
-  public getWorldPermissions(): Promise<T[]> {
+  public getWorldPermissions(): Promise<Set<T>> {
     this._connection.session().assertOnline();
-    const request: IConvergenceMessage = {
-      getWorldPermissionsRequest: {
-        target: this._getTarget(),
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getWorldPermissionsResponse} = response;
-      return getOrDefaultArray(getWorldPermissionsResponse.permissions as T[]);
-    });
+    return this.getPermissions().then(permissions => permissions.worldPermissions);
   }
 
   /**
@@ -165,10 +188,10 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public addUserPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public addUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
 
-    let map = StringMap.coerceToMap<T[]>(permissions);
+    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
 
     const request: IConvergenceMessage = {
       addPermissionsRequest: {
@@ -192,9 +215,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public removeUserPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public removeUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
-    let map = StringMap.coerceToMap<T[]>(permissions);
+    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
 
     const request: IConvergenceMessage = {
       removePermissionsRequest: {
@@ -217,9 +240,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public setUserPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public setUserPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
-    let map = StringMap.coerceToMap<T[]>(permissions);
+    let map = StringMap.coerceToMap<Set<T> | T[]>(permissions);
 
     const request: IConvergenceMessage = {
       setPermissionsRequest: {
@@ -241,18 +264,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise, which resolves with a map of permission strings per username.
    */
-  public getAllUserPermissions(): Promise<Map<string, T[]>> {
+  public getAllUserPermissions(): Promise<DomainUserIdMap<Set<T>>> {
     this._connection.session().assertOnline();
-    const request: IConvergenceMessage = {
-      getAllUserPermissionsRequest: {
-        target: this._getTarget()
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getAllUserPermissionsResponse} = response;
-      return this._permissionsEntriesToUserMap(getAllUserPermissionsResponse.users);
-    });
+    return this.getPermissions().then(p => p.userPermissions);
   }
 
   /**
@@ -263,19 +277,10 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise, which resolves with an array of permission strings
    */
-  public getUserPermissions(username: string): Promise<T[]> {
+  public getUserPermissions(username: string): Promise<Set<T>> {
     this._connection.session().assertOnline();
-    const request: IConvergenceMessage = {
-      getUserPermissionsRequest: {
-        target: this._getTarget(),
-        user: domainUserIdToProto(DomainUserId.normal(username))
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getUserPermissionsResponse} = response;
-      return getOrDefaultArray(getUserPermissionsResponse.permissions as T[]);
-    });
+    return this.getPermissions()
+      .then(p => p.userPermissions.get(DomainUserId.normal(username)) || new Set());
   }
 
   /**
@@ -292,7 +297,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public addGroupPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public addGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
     let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
     const request: IConvergenceMessage = {
@@ -317,7 +322,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public removeGroupPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public removeGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
     let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
     const request: IConvergenceMessage = {
@@ -341,7 +346,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise if successful
    */
-  public setGroupPermissions(permissions: StringMapLike<T>): Promise<void> {
+  public setGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
     this._connection.session().assertOnline();
 
     let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
@@ -366,23 +371,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise, which resolves with a map of permission strings per group ID.
    */
-  public getAllGroupPermissions(): Promise<Map<string, T[]>> {
+  public getAllGroupPermissions(): Promise<Map<string, Set<T>>> {
     this._connection.session().assertOnline();
-    const request: IConvergenceMessage = {
-      getAllGroupPermissionsRequest: {
-        target: this._getTarget()
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getAllGroupPermissionsResponse} = response;
-
-      let permissions = mapObjectValues(getAllGroupPermissionsResponse.groups, permissionsList => {
-        return getOrDefaultArray(permissionsList.values as T[]);
-      });
-
-      return StringMap.objectToMap(permissions);
-    });
+    return this.getPermissions().then(p => p.groupPermissions);
   }
 
   /**
@@ -393,19 +384,9 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @returns
    *   A promise, which resolves with an array of permission strings
    */
-  public getGroupPermissions(groupId: string): Promise<T[]> {
+  public getGroupPermissions(groupId: string): Promise<Set<T>> {
     this._connection.session().assertOnline();
-    const request: IConvergenceMessage = {
-      getGroupPermissionsRequest: {
-        target: this._getTarget(),
-        groupId
-      }
-    };
-
-    return this._connection.request(request).then((response: IConvergenceMessage) => {
-      const {getGroupPermissionsResponse} = response;
-      return getOrDefaultArray(getGroupPermissionsResponse.permissions as T[]);
-    });
+    return this.getPermissions().then(p => p.groupPermissions.get(groupId) || new Set());
   }
 
   protected abstract _getTarget(): IPermissionTarget;
@@ -413,12 +394,12 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * @internal
    */
-  private _permissionsMapToPermissionEntries(map: Map<string, T[]>): IUserPermissionsEntry[] {
+  private _permissionsMapToPermissionEntries(map: Map<string, Set<T> | T[]>): IUserPermissionsEntry[] {
     const userPermissions: IUserPermissionsEntry[] = [];
     map.forEach((userPerms, username) => {
       userPermissions.push({
         user: {userType: domainUserTypeToProto(DomainUserType.NORMAL), username},
-        permissions: userPerms
+        permissions: Array.from(userPerms)
       });
     });
     return userPermissions;
@@ -427,13 +408,13 @@ export abstract class AbstractPermissionManager<T extends string> {
   /**
    * @internal
    */
-  private _permissionsEntriesToUserMap(entries: IUserPermissionsEntry[]): Map<string, T[]> {
-    const userPermissions = new Map<string, T[]>();
+  private _permissionsEntriesToUserMap(entries: IUserPermissionsEntry[]): DomainUserIdMap<Set<T>> {
+    const userPermissions = new DomainUserIdMap<Set<T>>();
 
     entries.forEach((entry: IUserPermissionsEntry) => {
-      const username = entry.user.username;
-      let permissions = getOrDefaultArray(entry.permissions as T[]);
-      userPermissions.set(username, permissions);
+      const userId = protoToDomainUserId(entry.user);
+      let permissions = new Set(getOrDefaultArray(entry.permissions as T[]));
+      userPermissions.set(userId, permissions);
     });
 
     return userPermissions;
@@ -443,12 +424,12 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @internal
    */
   private _coercePermissionsToGroupedProtoPermissionList(
-    permissions: StringMapLike<T>): {[key: string]: IPermissionsList} {
-      let groupedPermissions = StringMap.coerceToObject<T[]>(permissions);
-      return mapObjectValues(groupedPermissions, permissionsArr => {
-        return {
-          values: permissionsArr
-        };
-      });
-    }
+    permissions: StringMapLike<Set<T> | T[]>): { [key: string]: IPermissionsList } {
+    let groupedPermissions = StringMap.coerceToObject<Set<T> | T[]>(permissions);
+    return mapObjectValues(groupedPermissions, permissionsArr => {
+      return {
+        values: Array.from(permissionsArr)
+      };
+    });
+  }
 }
