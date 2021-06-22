@@ -75,22 +75,22 @@ export abstract class AbstractPermissionManager<T extends string> {
     };
 
     return this._connection
-      .request(request)
-      .then((response: IConvergenceMessage) => {
-        const {getPermissionsResponse} = response;
+        .request(request)
+        .then((response: IConvergenceMessage) => {
+          const {getPermissionsResponse} = response;
 
-        const worldPermissions = new Set(getOrDefaultArray(getPermissionsResponse.world as T[]));
-        const userPermissions = this._permissionsEntriesToUserMap(getOrDefaultArray(getPermissionsResponse.user));
-        const groupPermissions = StringMap.coerceToMap<Set<T>>(mapObjectValues(getOrDefaultObject(getPermissionsResponse.group), permissionsList => {
-          return new Set(getOrDefaultArray(permissionsList.values as T[]));
-        }));
+          const worldPermissions = new Set(getOrDefaultArray(getPermissionsResponse.world as T[]));
+          const userPermissions = this._permissionsEntriesToUserMap(getOrDefaultArray(getPermissionsResponse.user));
+          const groupPermissions = StringMap.coerceToMap<Set<T>>(mapObjectValues(getOrDefaultObject(getPermissionsResponse.group), permissionsList => {
+            return new Set(getOrDefaultArray(permissionsList.values as T[]));
+          }));
 
-        return {
-          worldPermissions,
-          groupPermissions,
-          userPermissions
-        };
-      });
+          return {
+            worldPermissions,
+            groupPermissions,
+            userPermissions
+          };
+        });
   }
 
 
@@ -99,7 +99,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    */
 
   /**
-   * Adds the given permissions to any existing WORLD permissions for this [[chatId]].
+   * Adds the given permissions to any existing WORLD permissions.
    *
    * @param permissions an set of permission strings
    *
@@ -121,7 +121,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Removes the given permissions from any existing WORLD permissions for this [[chatId]].
+   * Removes the given permissions from any existing WORLD permissions.
    *
    * @param permissions an set of permission strings
    *
@@ -143,7 +143,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Sets the given permissions for WORLD for this [[chatId]].
+   * Sets the given permissions for WORLD.
    *
    * @param permissions an set of permission strings
    *
@@ -165,7 +165,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the permissions for WORLD for this [[chatId]].
+   * Returns the permissions for WORLD.
    *
    * @returns
    *   A promise, which resolves with an set of permission strings
@@ -180,7 +180,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    */
 
   /**
-   * Adds the given permissions to any existing permissions for this [[chatId]] for all
+   * Adds the given permissions to any existing permissions for all
    * given users.
    *
    * @param permissions
@@ -233,15 +233,19 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Sets the given permissions for the given users for this [[chatId]].
+   * Sets the given permissions for the given users
    *
    * @param permissions
    *   an object which maps one or more usernames to their new set of permissions
+   * @param replaceAll
+   *   Determines if the map passed in represents the entire set of user
+   *   permissions to set.  All permissions for other user will be removed.
+   *   The default is false.
    *
    * @returns
    *   A resolved promise if successful
    */
-  public setUserPermissions(permissions: DomainUserMapping<Set<T> | T[]>): Promise<void> {
+  public setUserPermissions(permissions: DomainUserMapping<Set<T> | T[]>, replaceAll: boolean = false): Promise<void> {
     this._connection.session().assertOnline();
     const userIdMap = DomainUserIdMap.of(permissions);
 
@@ -249,7 +253,8 @@ export abstract class AbstractPermissionManager<T extends string> {
       setPermissionsRequest: {
         target: this._getTarget(),
         user: {
-          permissions: this._permissionsMapToPermissionEntries(userIdMap)
+          permissions: this._permissionsMapToPermissionEntries(userIdMap),
+          replaceAll
         }
       }
     };
@@ -260,7 +265,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the permissions for all users for this [[chatId]].
+   * Returns the permissions for all users.
    *
    * @returns
    *   A promise, which resolves with a map of permission strings per username.
@@ -271,7 +276,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the permissions for the given user for this [[chatId]].
+   * Returns the permissions for the given user.
    *
    * @param username an existing user's username
    *
@@ -281,7 +286,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   public getUserPermissions(username: string): Promise<Set<T>> {
     this._connection.session().assertOnline();
     return this.getPermissions()
-      .then(p => p.userPermissions.get(DomainUserId.normal(username)) || new Set());
+        .then(p => p.userPermissions.get(DomainUserId.normal(username)) || new Set());
   }
 
   /**
@@ -289,7 +294,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    */
 
   /**
-   * Adds the given permissions to any existing permissions for this [[chatId]] for all
+   * Adds the given permissions to any existing permissions for all
    * given groups.
    *
    * @param permissions
@@ -339,15 +344,19 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Sets the given permissions for the given groups for this [[chatId]].
+   * Sets the given permissions for the given groups.
    *
    * @param permissions
    *   an object which maps one or more group IDs to their new set of permissions
+   * @param replaceAll
+   *   Determines if the map passed in represents the entire set of group
+   *   permissions to set.  All permissions for other groups will be removed.
+   *   The default is false.
    *
    * @returns
    *   A resolved promise if successful
    */
-  public setGroupPermissions(permissions: StringMapLike<Set<T> | T[]>): Promise<void> {
+  public setGroupPermissions(permissions: StringMapLike<Set<T> | T[]>, replaceAll: boolean = false): Promise<void> {
     this._connection.session().assertOnline();
 
     let permissionsByGroup = this._coercePermissionsToGroupedProtoPermissionList(permissions);
@@ -356,7 +365,8 @@ export abstract class AbstractPermissionManager<T extends string> {
       setPermissionsRequest: {
         target: this._getTarget(),
         group: {
-          permissions: permissionsByGroup
+          permissions: permissionsByGroup,
+          replaceAll
         }
       }
     };
@@ -367,7 +377,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the permissions for all groups for this [[chatId]].
+   * Returns the permissions for all groups.
    *
    * @returns
    *   A promise, which resolves with a map of permission strings per group ID.
@@ -378,7 +388,7 @@ export abstract class AbstractPermissionManager<T extends string> {
   }
 
   /**
-   * Returns the permissions for the given group for this [[chatId]].
+   * Returns the permissions for the given group.
    *
    * @param groupId an existing group ID
    *
@@ -425,7 +435,7 @@ export abstract class AbstractPermissionManager<T extends string> {
    * @internal
    */
   private _coercePermissionsToGroupedProtoPermissionList(
-    permissions: StringMapLike<Set<T> | T[]>): { [key: string]: IPermissionsList } {
+      permissions: StringMapLike<Set<T> | T[]>): { [key: string]: IPermissionsList } {
     let groupedPermissions = StringMap.coerceToObject<Set<T> | T[]>(permissions);
     return mapObjectValues(groupedPermissions, permissionsArr => {
       return {

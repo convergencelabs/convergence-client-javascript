@@ -14,12 +14,12 @@
 
 import {DomainUserId, DomainUserIdentifier, DomainUserIdMap} from "../identity";
 import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
-import {com} from "../../../../../convergence-proto/npm-dist";
 import {TypeChecker} from "../util/TypeChecker";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {objectForEach} from "../util/ObjectUtils";
 import {StringMap} from "../util/StringMap";
 import {ActivityPermission} from "./ActivityPermission";
+import {com} from "@convergence/convergence-proto";
 import IUserPermissionsEntry = com.convergencelabs.convergence.proto.core.IUserPermissionsEntry;
 import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermissionsList;
 
