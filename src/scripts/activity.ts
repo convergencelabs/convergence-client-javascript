@@ -4,14 +4,14 @@ import {connect} from "./connect";
 async function run() {
   const domain = await connect();
   const activity = await domain.activities()
-    .join("test", "ephemeral-test-activity", {
-      state: {foo: "bar"},
-      lurk: false,
-      autoCreate: {
-        ephemeral: true,
-        worldPermissions: ["join", "lurk", "view_state", "set_state"]
-      }
-    });
+      .join("test", "ephemeral-test-activity", {
+        state: {foo: "bar"},
+        lurk: false,
+        autoCreate: {
+          ephemeral: true,
+          worldPermissions: ["join", "lurk", "view_state", "set_state"]
+        }
+      });
 
   console.log("Activity Joined");
   console.log("state", activity.state());
@@ -20,8 +20,12 @@ async function run() {
   const world = await activity.permissions().getWorldPermissions();
   console.log("World permissions: ", world);
 
-  await activity.leave();
-  await domain.dispose();
+  setInterval(() => {
+    activity.setState({"time": new Date().getTime()})
+  }, 3000);
+
+  // await activity.leave();
+  // await domain.dispose();
 }
 
 run().catch(e => console.error(e));
