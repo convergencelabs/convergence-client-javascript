@@ -13,6 +13,7 @@
  */
 
 import {StringMapLike} from "../util/StringMap";
+import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
 
 /**
  * Represents the options that can be set when Joining an activity.
@@ -24,4 +25,8 @@ export interface IActivityJoinOptions {
    * Initial state to set when joining an activity.
    */
   state?: StringMapLike;
+
+  lurk?: boolean;
+
+  autoCreate?: IActivityAutoCreateOptions;
 }

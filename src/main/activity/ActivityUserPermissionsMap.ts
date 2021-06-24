@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -11,12 +11,7 @@
  * <https://www.gnu.org/licenses/lgpl-3.0.html> for the full text of the GPLv3
  * and LGPLv3 licenses, if they were not provided.
  */
+import {DomainUserIdentifier, DomainUserIdMap} from "../identity";
+import {ActivityPermission} from "./ActivityPermission";
 
-import {DomainUserId} from "./DomainUserId";
-
-/**
- * A string representing the username of a "normal" user or [[DomainUserId]].
- *
- * @module Users and Identity
- */
-export type DomainUserIdentifier = string | DomainUserId;
+export type ActivityUserPermissionsMap = DomainUserIdMap<ActivityPermission[]> | Map<DomainUserIdentifier, ActivityPermission[]> | { [key: string]: ActivityPermission[] }

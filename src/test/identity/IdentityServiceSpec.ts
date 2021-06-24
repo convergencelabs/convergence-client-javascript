@@ -17,7 +17,7 @@ import {
   DomainUser,
   DomainUserType,
   DomainUserId
-} from "../../main/identity";
+} from "../../main";
 
 import {UserGroup} from "../../main/identity/UserGroup";
 import {createStubInstance} from "sinon";

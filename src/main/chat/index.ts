@@ -26,6 +26,7 @@ export * from "./ChatService";
 export * from "./Chat";
 export * from "./ChatChannel";
 export {IChatInfo, ChatType, ChatTypes } from "./IChatInfo";
+export * from "./ChatPermission";
 export * from "./ChatPermissionManager";
 export * from "./ChatRoom";
 export * from "./DirectChat";

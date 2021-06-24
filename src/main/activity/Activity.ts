@@ -34,7 +34,8 @@ import {
   getOrDefaultObject,
   getOrDefaultString,
   jsonToProtoValue,
-  protoValueToJson
+  protoValueToJson,
+  timestampToDate
 } from "../connection/ProtocolUtil";
 import {IdentityCache} from "../identity/IdentityCache";
 import {ActivityLeftEvent} from "./events/ActivityLeftEvent";
@@ -46,13 +47,23 @@ import {EqualsUtil} from "../util/EqualsUtil";
 import {Logger} from "../util/log/Logger";
 import {Logging} from "../util/log/Logging";
 import {StringMap, StringMapLike} from "../util/StringMap";
+import {ConvergenceError} from "../util";
+import {ActivityPermissionUtils} from "./ActivityPermissionUtils";
+import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
 
 import {com} from "@convergence/convergence-proto";
-import {ConvergenceError} from "../util";
+import {ActivityPermissionManager} from "./ActivityPermissionManager";
+import {ActivityForceLeaveEvent} from "./events/ActivityForceLeaveEvent";
+import {ActivityDeletedEvent} from "./events/ActivityDeletedEvent";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IActivitySessionJoinedMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionJoinedMessage;
 import IActivitySessionLeftMessage = com.convergencelabs.convergence.proto.activity.IActivitySessionLeftMessage;
 import IActivityStateUpdatedMessage = com.convergencelabs.convergence.proto.activity.IActivityStateUpdatedMessage;
+import IActivityJoinRequestMessage = com.convergencelabs.convergence.proto.activity.IActivityJoinRequestMessage;
+import IAutoCreateData = com.convergencelabs.convergence.proto.activity.ActivityJoinRequestMessage.IAutoCreateData;
+import IActivityDeletedMessage = com.convergencelabs.convergence.proto.activity.IActivityDeletedMessage;
+import IActivityForceLeaveMessage = com.convergencelabs.convergence.proto.activity.IActivityForceLeaveMessage;
+
 
 /**
  * The [[Activity]] class represents a activity that the users of a
@@ -119,9 +130,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      * This is a batch event whereas [[ActivityStateClearedEvent]] and
      * [[ActivityStateSetEvent]] are fired for individual properties.
      *
-     * @event [[ActivityStateSetEvent]]
+     * @event [[ActivityStateDeltaEvent]]
      */
-    STATE_DELTA: ActivityStateRemovedEvent.EVENT_NAME,
+    STATE_DELTA: ActivityStateDeltaEvent.EVENT_NAME,
 
     /**
      * Fired when a the activity is left by the local session. The resulting event
@@ -129,13 +140,52 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      *
      * @event [[ActivityLeftEvent]]
      */
-    LEFT: ActivityLeftEvent.EVENT_NAME
+    LEFT: ActivityLeftEvent.EVENT_NAME,
+
+    /**
+     * Fired when a the activity was deleted while joined.
+     *
+     * @event [[ActivityDeletedEvent]]
+     */
+    DELETED: ActivityLeftEvent.EVENT_NAME,
+
+    /**
+     * Fired when the server forces the local session to leave the activity.
+     *
+     * @event [[ActivityForceLeaveEvent]]
+     */
+    FORCE_LEAVE: ActivityForceLeaveEvent.EVENT_NAME
   };
 
   /**
    * @internal
    */
+  private readonly _type: string;
+
+  /**
+   * @internal
+   */
   private readonly _id: string;
+
+  /**
+   * @internal
+   */
+  private _ephemeral: boolean;
+
+  /**
+   * @internal
+   */
+  private _lurking: boolean;
+
+  /**
+   * @internal
+   */
+  private _autoCreateOptions: IActivityAutoCreateOptions | undefined;
+
+  /**
+   * @internal
+   */
+  private _created: Date;
 
   /**
    * @internal
@@ -146,6 +196,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @internal
    */
   private readonly _identityCache: IdentityCache;
+
+  /**
+   * @internal
+   */
+  private readonly _permissionsManager: ActivityPermissionManager;
 
   /**
    * @internal
@@ -186,19 +241,24 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  constructor(id: string,
+  constructor(type: string,
+              id: string,
               identityCache: IdentityCache,
               connection: ConvergenceConnection) {
     super();
     this._identityCache = identityCache;
+    this._type = type;
     this._id = id;
     this._resource = null;
+    this._permissionsManager = new ActivityPermissionManager(type, id, connection);
 
     this._participants = new BehaviorSubject<Map<string, ActivityParticipant>>(new Map());
     this._joined = true;
     this._connection = connection;
     this._logger = Logging.logger("activities.activity");
     this._joinPromise = null;
+
+    this._lurking = false;
 
     this._connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     this._connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
@@ -217,6 +277,12 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
           } else if (message.activityStateUpdated &&
               getOrDefaultNumber(message.activityStateUpdated.resourceId) === this._resource) {
             this._onRemoteStateUpdated(message.activityStateUpdated);
+          } else if (message.activityDeleted &&
+              getOrDefaultNumber(message.activityDeleted.resourceId) === this._resource) {
+            this._onDeleted(message.activityDeleted);
+          } else if (message.activityForceLeave &&
+              getOrDefaultNumber(message.activityForceLeave.resourceId) === this._resource) {
+            this._onForceLeave(message.activityForceLeave)
           } else {
             // no-op
           }
@@ -234,13 +300,49 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Gets the unique id of this [[Activity]].
+   * Gets the user defined type of this [[Activity]].
+   *
+   * @returns
+   *   The [[Activity]] type.
+   */
+  public type(): string {
+    return this._type;
+  }
+
+  /**
+   * Gets the id of this [[Activity]], which is unique within
+   * its user defined type.
    *
    * @returns
    *   The [[Activity]] id.
    */
   public id(): string {
     return this._id;
+  }
+
+  /**
+   * Gets the time this [[Activity]] was created.
+   *
+   * @returns
+   *   The [[Activity]] created time.
+   */
+  public createdTime(): Date {
+    return this._created;
+  }
+
+  /**
+   * Determines if this [[Activity]] is ephemeral.  If so,
+   * it will be deleted when the last participant leaves.
+   *
+   * @returns
+   *   True if the [[Activity]] is ephemeral, false otherwise.
+   */
+  public isEphemeral(): boolean {
+    return this._ephemeral;
+  }
+
+  public permissions(): ActivityPermissionManager {
+    return this._permissionsManager;
   }
 
   /**
@@ -288,7 +390,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    *   The local sessions state.
    */
   public state(): Map<string, any> {
-    return this._localParticipant.state;
+    if (!this._lurking) {
+      return this._localParticipant.state;
+    } else {
+      return new Map();
+    }
   }
 
   /**
@@ -331,6 +437,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public setState(state: StringMapLike): void;
 
   public setState(): void {
+    this._assertNotLurking();
+
     if (this.isJoined()) {
       let state: Map<string, any>;
       if (arguments.length === 1) {
@@ -399,6 +507,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public removeState(keys: string[]): void;
 
   public removeState(keys: string | string[]): void {
+    this._assertNotLurking();
+
     if (this.isJoined()) {
       if (TypeChecker.isString(keys)) {
         keys = [keys];
@@ -443,6 +553,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * Removes all local state from this [[Activity]].
    */
   public clearState(): void {
+    this._assertNotLurking();
+
     if (this.isJoined()) {
       if (this._localParticipant.state.size > 0) {
         this._sendStateUpdate(new Map(), true, null);
@@ -518,10 +630,14 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public _join(options?: IActivityJoinOptions): void {
     if (this._joinPromise === null) {
       options = options || {};
+      options = {lurk: false, ...options}
       const deferred = new Deferred<void>();
       const initialState: Map<string, any> = options.state ?
           StringMap.coerceToMap(options.state) :
           new Map<string, any>();
+
+      this._lurking = options.lurk;
+      this._autoCreateOptions = options.autoCreate || null;
 
       if (this._connection.isConnected()) {
         this._joinWhileOnline(deferred, initialState);
@@ -547,7 +663,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    */
   private _setOnline = () => {
     this._logger.debug(() => `Activity '${this._id}' is online`);
-    const initialState = this._localParticipant.state;
+    const initialState = this._lurking ? new Map() : this._localParticipant.state;
     const deferred = new Deferred<void>();
     this._joinWhileOnline(deferred, initialState);
   }
@@ -563,7 +679,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
     // emit events for the leaving of each participant.
     this._mutateParticipants((participants) => {
       for (const [sessionId, participant] of participants) {
-        if (sessionId !== this._localParticipant.sessionId) {
+        if (sessionId !== this._localParticipant?.sessionId) {
           participants.delete(sessionId);
           const event = new ActivitySessionLeftEvent(this, participant.user, participant.sessionId, false);
           this._emitEvent(event);
@@ -636,6 +752,16 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
+  private _assertNotLurking(): void {
+    if (this._lurking) {
+      throw new ConvergenceError("Can not mutate local activity state when lurking.");
+    }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
   private _onRemoteStateUpdated(updated: IActivityStateUpdatedMessage): void {
     const sessionId = getOrDefaultString(updated.sessionId);
 
@@ -662,6 +788,37 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
         this._handleStateSet(sessionId, set);
       }
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _onDeleted(_: IActivityDeletedMessage): void {
+    const event = new ActivityDeletedEvent(
+        this,
+        this._connection.session().user(),
+        this._connection.session().sessionId(),
+        true
+    );
+    this._emitEvent(event);
+    this._completeLeave();
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private _onForceLeave(updated: IActivityForceLeaveMessage): void {
+    const event = new ActivityForceLeaveEvent(
+        this,
+        this._connection.session().user(),
+        this._connection.session().sessionId(),
+        true,
+        getOrDefaultString(updated.reason)
+    );
+    this._emitEvent(event);
+    this._completeLeave();
   }
 
   /**
@@ -820,13 +977,31 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * @hidden
    * @internal
    */
-  private _joinWhileOnline(deferred: Deferred<void>, initialState: Map<string, any>): void {
+  private _joinWhileOnline(deferred: Deferred<void>,
+                           initialState: Map<string, any>): void {
+
+    let autoCreateData: IAutoCreateData;
+    if (this._autoCreateOptions) {
+      const worldPermissions = this._autoCreateOptions.worldPermissions || [];
+      const userPermissions = ActivityPermissionUtils.userPermissions(this._autoCreateOptions.userPermissions);
+      const groupPermissions = ActivityPermissionUtils.toGroupPermissionsProto(this._autoCreateOptions.groupPermissions);
+      autoCreateData = {
+        worldPermissions,
+        userPermissions,
+        groupPermissions,
+        ephemeral: this._autoCreateOptions.ephemeral
+      };
+    }
+
     const mappedState = mapObjectValues(StringMap.mapToObject(initialState), jsonToProtoValue);
     const message: IConvergenceMessage = {
       activityJoinRequest: {
+        activityType: this._type,
         activityId: this._id,
-        state: mappedState
-      }
+        lurk: this._lurking,
+        state: mappedState,
+        autoCreateData
+      } as IActivityJoinRequestMessage
     };
 
     this._resource = null;
@@ -838,6 +1013,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
 
           const localSessionId = this._connection.session().sessionId();
           this._resource = getOrDefaultNumber(joinResponse.resourceId);
+          this._ephemeral = getOrDefaultBoolean(joinResponse.ephemeral);
+          this._created = timestampToDate(joinResponse.created);
 
           const participants: Map<string, ActivityParticipant> = new Map<string, ActivityParticipant>();
           const responseState = getOrDefaultObject(joinResponse.state);

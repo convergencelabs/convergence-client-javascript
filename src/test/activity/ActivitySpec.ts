@@ -37,6 +37,7 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
 import {LOCAL_SESSION_ID, LOCAL_USER, RECONNECT_TOKEN} from "../MockingConstants";
 import {Done} from "mocha";
 
+const ACTIVITY_TYPE = "test-type";
 const ACTIVITY_ID = "test";
 const RESOURCE_ID = 0;
 
@@ -79,7 +80,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       activity._whenJoined().then(() => {
@@ -109,7 +110,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       const cursorEvent = new Deferred<void>();
@@ -181,7 +182,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       const cursorEvent = new Deferred<void>();
@@ -247,7 +248,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       const clearedEvent = new Deferred<void>();
@@ -307,7 +308,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       const leftDeferred = new Deferred<void>();
@@ -335,7 +336,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         mockLeave(connection);
@@ -350,7 +351,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
 
       activity._whenJoined().then(() => {
@@ -370,7 +371,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -386,7 +387,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -402,7 +403,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -418,7 +419,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -434,7 +435,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         const stateSet = new Deferred<void>();
@@ -472,7 +473,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         activity.setState({key3: false, key4: 10});
@@ -498,7 +499,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -515,7 +516,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         expect(StringMap.mapToObject(activity.state())).to.deep.equal(initialState);
@@ -533,7 +534,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         const k1 = new Deferred<void>();
@@ -582,7 +583,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         activity.removeState(["key1", "key2"]);
@@ -605,7 +606,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         activity.clearState();
@@ -618,7 +619,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         const clear = new Deferred<void>();
@@ -655,7 +656,7 @@ describe("Activity", () => {
       const connection = mockConnection();
       mockJoin(connection, initialState);
 
-      const activity = new Activity(ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
+      const activity = new Activity(ACTIVITY_TYPE, ACTIVITY_ID, IDENTITY_CACHE, connection.connection);
       activity._join();
       activity._whenJoined().then(() => {
         activity.clearState();

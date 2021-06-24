@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -12,11 +12,14 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DomainUserId} from "./DomainUserId";
+import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
 
 /**
- * A string representing the username of a "normal" user or [[DomainUserId]].
+ * Represents the options that can be set when creating an activity.
  *
- * @module Users and Identity
+ * @module Activities
  */
-export type DomainUserIdentifier = string | DomainUserId;
+export interface IActivityCreateOptions extends IActivityAutoCreateOptions {
+  activityType: string;
+  activityId: string;
+}

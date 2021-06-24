@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -17,22 +17,22 @@ import {IActivityEvent} from "./IActivityEvent";
 import {DomainUser} from "../../identity";
 
 /**
- * The ActivityLeftEvent is fired when a local session leaves the
- * [[Activity]].
+ * The ActivityDeletedEvent is fired when an activity was deleted while the
+ * local session was joined to an [[Activity]].
  *
  * @module Activities
  */
-export class ActivityLeftEvent implements IActivityEvent {
+export class ActivityDeletedEvent implements IActivityEvent {
 
   /**
    * The event name that all instances of this class will use.
    */
-  public static readonly EVENT_NAME: string = "left";
+  public static readonly EVENT_NAME: string = "deleted";
 
   /**
    * @inheritDoc
    */
-  public readonly name: string = ActivityLeftEvent.EVENT_NAME;
+  public readonly name: string = ActivityDeletedEvent.EVENT_NAME;
 
   /**
    * @hidden

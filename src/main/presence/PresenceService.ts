@@ -317,7 +317,7 @@ export class PresenceService extends ConvergenceEventEmitter<IPresenceEvent> {
   /**
    * Returns the current presence of all the provided users.
    *
-   * @param user an array of usernames or [[DomainUserId]]s
+   * @param users an array of usernames or [[DomainUserId]]s
    *
    * @returns a promise that resolves with the give users' presences
    */

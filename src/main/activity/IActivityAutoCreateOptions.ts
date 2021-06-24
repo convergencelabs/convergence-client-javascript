@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -12,11 +12,23 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DomainUserId} from "./DomainUserId";
+import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
+import {ActivityPermission} from "./ActivityPermission";
+import {StringMapLike} from "../util/StringMap";
 
 /**
- * A string representing the username of a "normal" user or [[DomainUserId]].
+ * Represents the options that can be set to automatically
+ * create an activity when joining.
  *
- * @module Users and Identity
+ * @module Activities
  */
-export type DomainUserIdentifier = string | DomainUserId;
+export interface IActivityAutoCreateOptions {
+
+  ephemeral?: boolean;
+
+  worldPermissions?: ActivityPermission[];
+
+  userPermissions?: ActivityUserPermissionsMap;
+
+  groupPermissions?: StringMapLike<ActivityPermission[]>;
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -17,22 +17,22 @@ import {IActivityEvent} from "./IActivityEvent";
 import {DomainUser} from "../../identity";
 
 /**
- * The ActivityLeftEvent is fired when a local session leaves the
- * [[Activity]].
+ * The ActivityForceLeaveEvent is fired when an the local session is forced to
+ * leave an [[Activity]] by the server.
  *
  * @module Activities
  */
-export class ActivityLeftEvent implements IActivityEvent {
+export class ActivityForceLeaveEvent implements IActivityEvent {
 
   /**
    * The event name that all instances of this class will use.
    */
-  public static readonly EVENT_NAME: string = "left";
+  public static readonly EVENT_NAME: string = "force_leave";
 
   /**
    * @inheritDoc
    */
-  public readonly name: string = ActivityLeftEvent.EVENT_NAME;
+  public readonly name: string = ActivityForceLeaveEvent.EVENT_NAME;
 
   /**
    * @hidden
@@ -54,7 +54,11 @@ export class ActivityLeftEvent implements IActivityEvent {
     /**
      * @inheritDoc
      */
-    public readonly local: boolean) {
+    public readonly local: boolean,
+    /**
+     * The reason the session was forced to leave.
+     */
+    public readonly reason: string) {
     Object.freeze(this);
   }
 }
