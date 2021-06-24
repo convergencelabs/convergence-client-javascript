@@ -130,9 +130,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
      * This is a batch event whereas [[ActivityStateClearedEvent]] and
      * [[ActivityStateSetEvent]] are fired for individual properties.
      *
-     * @event [[ActivityStateSetEvent]]
+     * @event [[ActivityStateDeltaEvent]]
      */
-    STATE_DELTA: ActivityStateRemovedEvent.EVENT_NAME,
+    STATE_DELTA: ActivityStateDeltaEvent.EVENT_NAME,
 
     /**
      * Fired when a the activity is left by the local session. The resulting event
