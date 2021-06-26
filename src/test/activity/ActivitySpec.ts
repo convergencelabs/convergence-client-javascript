@@ -27,7 +27,7 @@ import {MessageEvent} from "../../main/connection/ConvergenceConnection";
 import {Deferred} from "../../main/util/Deferred";
 import {ActivityLeftEvent} from "../../main/activity/events/ActivityLeftEvent";
 import {mapObjectValues} from "../../main/util/ObjectUtils";
-import {jsonToProtoValue} from "../../main/connection/ProtocolUtil";
+import {dateToTimestamp, jsonToProtoValue} from "../../main/connection/ProtocolUtil";
 import {StringMap} from "../../main/util/StringMap";
 import {assert, expect} from "chai";
 import {createStubInstance, match, SinonStub} from "sinon";
@@ -71,6 +71,8 @@ const REMOTE_1_JOIN_MESSAGE: MessageEvent = {
   name: "message",
   request: false
 };
+
+const NOW = new Date();
 
 describe("Activity", () => {
 
@@ -680,11 +682,14 @@ function mockJoin(connection: IMockConnection, joinState: any = {}, remoteSessio
     state: localProtoState
   };
   connection.requestStub
-    .withArgs(match.has("activityJoinRequest", match.has("activityId", ACTIVITY_ID)))
+    .withArgs(match.has("activityJoinRequest",
+        match.has("activityId", ACTIVITY_ID).and(match.has("activityType", ACTIVITY_TYPE))))
     .returns(Promise.resolve({
       activityJoinResponse: {
         resourceId: RESOURCE_ID,
-        state: responseState
+        state: responseState,
+        ephemeral: false,
+        created: dateToTimestamp(NOW)
       }
     }));
 }
@@ -720,5 +725,8 @@ function mockIdentityCache(users?: { user: DomainUser, sessionIds: string[] }[])
 }
 
 function mockConnection(): IMockConnection {
-  return mockConvergenceConnection(LOCAL_USER, LOCAL_SESSION_ID, RECONNECT_TOKEN);
+  const mock =  mockConvergenceConnection(LOCAL_USER, LOCAL_SESSION_ID, RECONNECT_TOKEN);
+  const connectedStub = (mock.connection.isConnected as SinonStub);
+  connectedStub.returns(true);
+  return mock;
 }
