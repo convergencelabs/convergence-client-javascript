@@ -13,13 +13,13 @@
  */
 
 import {DomainUserId, DomainUserIdentifier, DomainUserIdMap} from "../identity";
-import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
 import {TypeChecker} from "../util/TypeChecker";
 import {domainUserIdToProto} from "../connection/ProtocolUtil";
 import {objectForEach} from "../util/ObjectUtils";
 import {StringMap} from "../util/StringMap";
 import {ActivityPermission} from "./ActivityPermission";
 import {com} from "@convergence/convergence-proto";
+import {DomainUserMapping} from "../identity/DomainUserMapping";
 import IUserPermissionsEntry = com.convergencelabs.convergence.proto.core.IUserPermissionsEntry;
 import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermissionsList;
 
@@ -29,7 +29,7 @@ import IPermissionsList = com.convergencelabs.convergence.proto.core.IPermission
  */
 export class ActivityPermissionUtils {
 
-  public static userPermissions(userPermissions?: ActivityUserPermissionsMap): IUserPermissionsEntry[] {
+  public static userPermissions(userPermissions?: DomainUserMapping<ActivityPermission[]>): IUserPermissionsEntry[] {
     const result: IUserPermissionsEntry[] = [];
     if (userPermissions instanceof DomainUserIdMap) {
       userPermissions.forEach((permissions: ActivityPermission[], userId: DomainUserId) => {
@@ -37,12 +37,12 @@ export class ActivityPermissionUtils {
       });
     } else if (TypeChecker.isMap(userPermissions)) {
       userPermissions.forEach((permissions: ActivityPermission[], userId: DomainUserIdentifier) => {
-        userId = DomainUserId.toDomainUserId(userId);
+        userId = DomainUserId.of(userId);
         result.push(ActivityPermissionUtils.toUserPermissionEntry(userId, permissions));
       });
     } else if (TypeChecker.isObject(userPermissions)) {
       objectForEach(userPermissions, (username, permissions) => {
-        const userId = DomainUserId.toDomainUserId(username);
+        const userId = DomainUserId.of(username);
         result.push(ActivityPermissionUtils.toUserPermissionEntry(userId, permissions));
       });
     }

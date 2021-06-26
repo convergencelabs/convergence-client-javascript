@@ -14,6 +14,8 @@
 
 /**
  * A pure JSON representation of ModelPermissions.
+ *
+ * @module Real Time Data
  */
 export interface IModelPermissions {
   /**

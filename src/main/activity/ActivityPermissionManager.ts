@@ -14,6 +14,10 @@ export class ActivityPermissionManager extends AbstractPermissionManager<Activit
 
   private readonly _target: IPermissionTarget;
 
+  /**
+   * @internal
+   * @hidden
+   */
   constructor(type: string, id: string, connection: ConvergenceConnection) {
     super(connection);
     this._target = {

@@ -15,6 +15,12 @@
 import {ChatType} from "./IChatInfo";
 import {ChatMembership} from "./MembershipChat";
 
+/**
+ * This interface represents the search criteria that can be used
+ * when searching for chat messages.
+ *
+ * @module Chat
+ */
 export interface IChatSearchCriteria {
   searchTerm?: string;
   searchFields?: ("id" | "topic" | "name")[];

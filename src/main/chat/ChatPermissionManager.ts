@@ -36,6 +36,10 @@ export class ChatPermissionManager extends AbstractPermissionManager<ChatPermiss
 
   private readonly _target: IPermissionTarget;
 
+  /**
+   * @internal
+   * @hidden
+   */
   constructor(id: string, connection: ConvergenceConnection) {
     super(connection);
     this._target = {

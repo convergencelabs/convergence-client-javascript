@@ -400,6 +400,10 @@ export abstract class AbstractPermissionManager<T extends string> {
     return this.getPermissions().then(p => p.groupPermissions.get(groupId) || new Set());
   }
 
+  /**
+   * @hidden
+   * @internal
+   */
   protected abstract _getTarget(): IPermissionTarget;
 
   /**

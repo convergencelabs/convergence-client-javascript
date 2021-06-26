@@ -12,9 +12,9 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {ActivityUserPermissionsMap} from "./ActivityUserPermissionsMap";
 import {ActivityPermission} from "./ActivityPermission";
 import {StringMapLike} from "../util/StringMap";
+import {DomainUserMapping} from "../identity/DomainUserMapping";
 
 /**
  * Represents the options that can be set to automatically
@@ -28,7 +28,7 @@ export interface IActivityAutoCreateOptions {
 
   worldPermissions?: ActivityPermission[];
 
-  userPermissions?: ActivityUserPermissionsMap;
+  userPermissions?: DomainUserMapping<ActivityPermission[]>;
 
   groupPermissions?: StringMapLike<ActivityPermission[]>;
 }

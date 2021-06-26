@@ -21,6 +21,8 @@ import {DomainUserMapping} from "./DomainUserMapping";
 /**
  * The DomainUserIdMap is a utility class that will uniquely map a set
  * of Convergence Domain User Ids to values.
+ *
+ * @module Users and Identity
  */
 export class DomainUserIdMap<V> {
 
@@ -60,34 +62,72 @@ export class DomainUserIdMap<V> {
     this._map = new Map<string, V>();
   }
 
+  /**
+   * Gets the current value for the given user.
+   * @param user The user to get the value for.
+   * @returns The value mapped to for the supplied user, or undefined
+   *   if the user does not exist in the map.
+   */
   public get(user: DomainUserIdentifier): V | undefined {
     return this._map.get(DomainUserId.of(user).toGuid());
   }
 
+  /**
+   * Sets a mapping between a user and a value in the map.
+   *
+   * @param user The user to set the value for.
+   * @param value The value to set.
+   */
   public set(user: DomainUserIdentifier, value: V): void {
     this._map.set(DomainUserId.of(user).toGuid(), value);
   }
 
+  /**
+   * Determines if the map contains a particular domain user.
+   *
+   * @param user The user to check.
+   * @returns True if the user is in the map, false otherwise.
+   */
   public has(user: DomainUserIdentifier): boolean {
     return this._map.has(DomainUserId.of(user).toGuid());
   }
 
+  /**
+   * Removes a user from the map.
+   *
+   * @param user The user to remove.
+   */
   public delete(user: DomainUserIdentifier): void {
     this._map.delete(DomainUserId.of(user).toGuid());
   }
 
+  /**
+   * @returns the [[DomainUserId]]s of all of the users in the map.
+   */
   public keys(): DomainUserId[] {
     return Array.from(this._map.keys()).map(DomainUserId.fromGuid);
   }
 
+  /**
+   * @returns All mappings in the map as tuples. Each tuple is represented by
+   * and array in the format of [key, value].
+   */
   public entries(): [DomainUserId, V][] {
     return Array.from(this._map.entries()).map(v => [DomainUserId.fromGuid(v[0]), v[1]]);
   }
 
+  /**
+   * @return The number of users contained in the map.
+   */
   public size(): number {
     return this._map.size;
   }
 
+  /**
+   * Allows consumers to iterate of the maps (key, value) pairs.
+   *
+   * @param callback The iteration callback.
+   */
   public forEach(callback: (value: V, userId: DomainUserId) => void): void {
     this._map.forEach((v: V, guid: string) => {
       callback(v, DomainUserId.fromGuid(guid));

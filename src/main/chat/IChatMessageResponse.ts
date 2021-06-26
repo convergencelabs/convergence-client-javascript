@@ -12,7 +12,22 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+/**
+ * The data in this interface is returned when a chat message
+ * has been confirmed to have been sent.
+ *
+ * @module Chat
+ */
 export interface IChatMessageResponse {
+
+  /**
+   * The event number that the sent message event was assigned
+   * by the server.
+   */
   eventNumber: number;
+
+  /**
+   * The timestamp the server assigned to the message.
+   */
   timestamp: Date;
 }
