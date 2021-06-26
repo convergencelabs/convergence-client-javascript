@@ -45,7 +45,7 @@ export class ChatRoom extends MembershipChat {
 
     connection.on(ConvergenceConnection.Events.INTERRUPTED, this._setOffline);
     connection.on(ConvergenceConnection.Events.DISCONNECTED, this._setOffline);
-    connection.on(ConvergenceConnection.Events.AUTHENTICATED, this._setOnline);
+    connection.on(ConvergenceConnection.Events.CONNECTED, this._setOnline);
   }
 
   /**
