@@ -15,9 +15,10 @@
 import {ConvergenceError, ConvergenceEventEmitter, PagedData} from "../util";
 import {
   ChatEvent,
+  ChatEventsMarkedSeenEvent,
   ChatMessageEvent,
   ChatNameChangedEvent,
-  ChatTopicChangedEvent, ChatEventsMarkedSeenEvent,
+  ChatTopicChangedEvent,
   IChatEvent,
   UserAddedEvent,
   UserJoinedEvent,
@@ -38,6 +39,7 @@ import {createChatInfo, IChatInfo} from "./IChatInfo";
 import {com} from "@convergence/convergence-proto";
 import {IChatHistorySearchOptions} from "./IChatHistorySearchOptions";
 import {IChatMessageResponse} from "./IChatMessageResponse";
+import {ChatPermissionManager} from "./ChatPermissionManager";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IChatInfoData = com.convergencelabs.convergence.proto.chat.IChatInfoData;
 
@@ -86,11 +88,6 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   /**
    * @internal
    */
-  protected _joined: boolean;
-
-  /**
-   * @internal
-   */
   private readonly _identityCache: IdentityCache;
 
   /**
@@ -104,9 +101,6 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     this._connection = connection;
     this._identityCache = identityCache;
     this._info = chatInfo;
-
-    // TODO this might not make sense for rooms
-    this._calculateJoinedState();
 
     messageStream.subscribe(event => {
       this._processEvent(event);
@@ -139,7 +133,7 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
    *   True if the chat is joined, false otherwise.
    */
   public isJoined(): boolean {
-    return this._joined;
+    return this._info.joined;
   }
 
   /**
@@ -263,13 +257,19 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
   }
 
   /**
+   * Returns the permissions manager for this chat.
+   * @returns the permissions manager for this chat.
+   */
+  public permissions(): ChatPermissionManager {
+    return new ChatPermissionManager(this._info.chatId, this._connection);
+  }
+
+  /**
    * @hidden
    * @internal
    */
   public _updateWithData(chatData: IChatInfoData) {
     this._info = createChatInfo(this._connection.session(), this._identityCache, chatData);
-    // TODO this might not make sense for rooms
-    this._calculateJoinedState();
   }
 
   /**
@@ -314,15 +314,15 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
       const member = {user, maxSeenEventNumber: -1};
       members.push(member);
       if (event.user.username === this.session().user().username) {
-        // FIXME this might not be right for rooms
-        this._joined = true;
+        // TODO this might not be right for rooms
+        this._info = {...this._info, joined: true};
       }
       this._info = {...this._info, members};
     } else if (event instanceof UserLeftEvent || event instanceof UserRemovedEvent) {
       const removedUser = (event instanceof UserLeftEvent) ? event.user : event.removedUser;
       if (this.session().user().userId.equals(removedUser.userId)) {
-        // FIXME this might not be right for rooms
-        this._joined = false;
+        // TODO this might not be right for rooms
+        this._info = {...this._info, joined: false};
       }
       const members = this._info.members.filter(member => !member.user.userId.equals(removedUser.userId));
       this._info = {...this._info, members};
@@ -348,15 +348,5 @@ export abstract class Chat extends ConvergenceEventEmitter<IChatEvent> {
     }
 
     Immutable.make(this._info);
-  }
-
-  /**
-   * @internal
-   * @hidden
-   */
-  private _calculateJoinedState() {
-    this._joined = this._info.members
-      .map(m => m.user.userId)
-      .findIndex(userId => this.session().user().userId.equals(userId)) >= 0;
   }
 }

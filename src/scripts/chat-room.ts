@@ -4,29 +4,33 @@ import {ChatMessageEvent, ChatRoom} from "../main/";
 import {connect} from "./connect";
 
 let domain;
-const chatId = "testId";
+const roomId = "test-room";
 
 connect()
   .then(async (d) => {
     domain = d;
 
-    const roomId = await domain.chat().create({
-      id: chatId,
+
+    await domain.chat().create({
+      id: roomId,
       type: "room",
       membership: "public",
       ignoreExistsError: true
     });
-
     console.log(`Room exists or was created: ${roomId}`);
 
-    const room = await domain.chat().join(chatId);
+    const chatRoom = await domain.chat().get(roomId);
+    console.log("is joined: " + chatRoom.isJoined());
 
-    console.log("Room Joined");
+
+    console.log("Joining joined");
+    const room = await domain.chat().join(roomId);
+    console.log("Room joined");
 
     room.events().subscribe(evt => {
       if (evt instanceof ChatMessageEvent) {
         console.log(`Message received: ${evt.message}`);
-        leave(room);
+        //leave(room);
       }
     });
 

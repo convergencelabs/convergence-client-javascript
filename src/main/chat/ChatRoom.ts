@@ -53,7 +53,7 @@ export class ChatRoom extends MembershipChat {
    * @hidden
    */
   private _setOnline = () => {
-    this._join();
+    this._join().catch(e => console.log(e));
   }
 
   /**
@@ -61,6 +61,6 @@ export class ChatRoom extends MembershipChat {
    * @hidden
    */
   private _setOffline = () => {
-    this._joined = false;
+    this._info = {...this._info, joined: false};
   }
 }
