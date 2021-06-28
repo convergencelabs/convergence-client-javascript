@@ -12,14 +12,21 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IActivityCommonOptions} from "./IActivityCommonOptions";
+import {ActivityPermission} from "./ActivityPermission";
+import {StringMapLike} from "../util/StringMap";
+import {DomainUserMapping} from "../identity/DomainUserMapping";
 
 /**
- * Represents the options that can be set to automatically
- * create an activity when joining.
+ * Represents the common options that can be set when creating or auto
+ * creating (when joining) and Activity.
  *
  * @module Activities
  */
-export interface IActivityAutoCreateOptions extends IActivityCommonOptions {
-  ephemeral?: boolean;
+export interface IActivityCommonOptions {
+
+  worldPermissions?: ActivityPermission[];
+
+  userPermissions?: DomainUserMapping<ActivityPermission[]>;
+
+  groupPermissions?: StringMapLike<ActivityPermission[]>;
 }

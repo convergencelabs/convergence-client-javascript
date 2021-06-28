@@ -12,14 +12,14 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {IActivityAutoCreateOptions} from "./IActivityAutoCreateOptions";
+import {IActivityCommonOptions} from "./IActivityCommonOptions";
 
 /**
  * Represents the options that can be set when creating an activity.
  *
  * @module Activities
  */
-export interface IActivityCreateOptions extends IActivityAutoCreateOptions {
+export interface IActivityCreateOptions extends IActivityCommonOptions {
   activityType: string;
   activityId: string;
 }
