@@ -56,7 +56,7 @@ Convergence.connectWithPassword(url, credentials).then(domain => {
 ```
 
 # Documentation
-The full compliment of Convergence documentation can be found here:
+The full complement of Convergence documentation can be found here:
 
 https://convergence.io/learn/
 
@@ -64,7 +64,7 @@ https://convergence.io/learn/
 Convergence requires RxJS 6.x.  This dependency is taken care of when using the npm module.  If including via a script tag, you must also include rxjs.
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.4.0/rxjs.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.3/rxjs.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@convergence/convergence/convergence.global.js"></script>
 ```
 
@@ -72,7 +72,7 @@ This will add a `Convergence` variable to the global namespace.
 
 There is also an AMD version:
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.4.0/rxjs.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.3/rxjs.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@convergence/convergence/convergence.amd.js"></script>
 ```
 
