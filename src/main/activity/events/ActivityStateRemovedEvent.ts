@@ -18,7 +18,8 @@ import {DomainUser} from "../../identity";
 
 /**
  * The ActivityStateRemovedEvent is fired when a remote session removes one or
- * elements from its state within the [[Activity]].
+ * elements from its state within the [[Activity]]. An event will be fired
+ * for each key that was removed.
  *
  * @module Activities
  */

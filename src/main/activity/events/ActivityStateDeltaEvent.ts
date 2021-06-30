@@ -18,7 +18,9 @@ import {DomainUser} from "../../identity";
 
 /**
  * The ActivityStateSetEvent is fired when a remote session sets one or
- * elements from its state within the [[Activity]].
+ * elements from its state within the [[Activity]]. This is a batch
+ * event that summarizes all the changes made to a participants
+ * state in a single action.
  *
  * @module Activities
  */

@@ -398,7 +398,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Sets a single key-delta pair within this Activity's local state.
+   * Sets a single key-value pair within this Activity's local state. This will
+   * result in a single "state_set" event being emitted for other joined
+   * participants to listen for.
    *
    * ```typescript
    * activity.setState("key1", "delta");
@@ -412,9 +414,11 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public setState(key: string, value: any): void;
 
   /**
-   * Sets multiple key-delta pairs within this Activity's local state. This
+   * Sets multiple key-value pairs within this Activity's local state. This
    * method does not replace all state; that is, keys not supplied in the map
-   * will not be altered.
+   * will not be altered. This method will result in multiple "state_set"
+   * events being fired for other joined participants to list for; one for
+   * each key set.
    *
    * ```typescript
    * const state = {
@@ -432,7 +436,7 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
    * activity.setState(state);
    * ```
    * @param state
-   *   A map containing the key-delta pairs to set.
+   *   A mapping containing the key-value pairs to set.
    */
   public setState(state: StringMapLike): void;
 
@@ -483,7 +487,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Removes a single local state entry from the [[Activity]].
+   * Removes a single local state entry from the [[Activity]]. This will fire
+   * a single "state_removed" event for other joined participants to listen
+   * for.
    *
    * ```typescript
    * activity.removeState("pointer");
@@ -495,7 +501,9 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   public removeState(key: string): void;
 
   /**
-   * Removes one or more local state entries from the [[Activity]].
+   * Removes one or more local state entries from the [[Activity]]. This will
+   * fire a multiple "state_removed" event for other joined participants to
+   * listen for; one for each key removed.
    *
    * ```typescript
    * activity.removeState(["pointer", "viewport"]);
@@ -550,7 +558,8 @@ export class Activity extends ConvergenceEventEmitter<IActivityEvent> {
   }
 
   /**
-   * Removes all local state from this [[Activity]].
+   * Clears all local state from this [[Activity]]. This will fire a single
+   * "state_cleared" event for other joined participants to listen for.
    */
   public clearState(): void {
     this._assertNotLurking();
