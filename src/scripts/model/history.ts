@@ -1,6 +1,6 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
-import {connect} from "./connect";
+import {connect} from "../connect";
 
 async function run() {
   const domain = await connect(undefined, true);

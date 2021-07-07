@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
-import {connect} from "./connect";
-import {ConvergenceDomain} from "../main";
+import {connect} from "../connect";
+import {ConvergenceDomain} from "../../main";
 
 let domain: ConvergenceDomain;
 

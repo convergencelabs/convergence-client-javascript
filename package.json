@@ -1,6 +1,6 @@
 {
   "name": "@convergence/convergence",
-  "version": "1.0.0-rc.9",
+  "version": "1.0.0-SNAPSHOT",
   "description": "Convergence JavaScript Client",
   "private": true,
   "keywords": [

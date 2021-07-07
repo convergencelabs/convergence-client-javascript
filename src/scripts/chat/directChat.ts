@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
-import {CancellationToken, ConvergenceDomain, DirectChat} from "../main/";
-import {connect} from "./connect";
+import {CancellationToken, ConvergenceDomain, DirectChat} from "../../main";
+import {connect} from "../connect";
 
 
 const chatId = "testId";

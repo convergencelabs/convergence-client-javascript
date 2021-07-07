@@ -1,9 +1,9 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
-import {createDomain} from "../connect";
-import {IdbStorageAdapter} from "../../main/storage/idb/";
-import {OfflineModelsSyncCompletedEvent} from "../../main/model/events/";
-import {RealTimeModel} from "../../main";
+import {createDomain} from "../../connect";
+import {IdbStorageAdapter} from "../../../main/storage/idb";
+import {OfflineModelsSyncCompletedEvent} from "../../../main/model/events";
+import {RealTimeModel} from "../../../main";
 
 // tslint:disable-next-line
 require("fake-indexeddb/auto");

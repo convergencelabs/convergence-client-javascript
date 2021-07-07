@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
-import {ChatMessageEvent, ChatRoom} from "../main/";
-import {connect} from "./connect";
+import {ChatMessageEvent, ChatRoom} from "../../main";
+import {connect} from "../connect";
 
 let domain;
 const roomId = "test-room";
