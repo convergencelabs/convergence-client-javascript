@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -15,27 +15,35 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {StringInsert} from "./operationChanges";
+import {StringInsert, StringSplice} from "./operationChanges";
 
 /**
  * @hidden
  * @internal
  */
-export class StringInsertOperation extends DiscreteOperation implements StringInsert {
+export class StringSpliceOperation extends DiscreteOperation implements StringSplice {
 
   constructor(id: string,
               noOp: boolean,
               public readonly index: number,
-              public readonly value: string) {
-    super(OperationType.STRING_INSERT, id, noOp);
+              public readonly deleteCount: number,
+              public readonly insertValue: string) {
+    super(OperationType.STRING_SPLICE, id, noOp);
     Object.freeze(this);
   }
 
-  public copy(updates: any): StringInsertOperation {
-    return new StringInsertOperation(
+  public copy(updates: {
+    id?: string,
+    noOp?: boolean,
+    index?: number,
+    deleteCount?: number,
+    insertValue?: string
+  }): StringSpliceOperation {
+    return new StringSpliceOperation(
       Immutable.update(this.id, updates.id),
       Immutable.update(this.noOp, updates.noOp),
       Immutable.update(this.index, updates.index),
-      Immutable.update(this.value, updates.value));
+      Immutable.update(this.deleteCount, updates.deleteCount),
+      Immutable.update(this.insertValue, updates.insertValue));
   }
 }

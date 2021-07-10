@@ -17,6 +17,7 @@ import {ModelReference} from "./ModelReference";
 import {RangeTransformer} from "../ot/xform/reference/RangeTransformer";
 import {ReferenceManager} from "./ReferenceManager";
 import {DomainUser} from "../../identity";
+import {IndexTransformer} from "../ot/xform/reference/IndexTransformer";
 
 /**
  * A single range to be used with a [[RangeReference]].
@@ -81,6 +82,15 @@ export class RangeReference extends ModelReference<IndexRange> {
    */
   public _handleRemove(index: number, length: number): void {
     this._setIfChanged(RangeTransformer.handleRemove(this._values, index, length), true);
+  }
+
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
+  public _handleSplice(index: number, deleteCount: number, insertCount: number): void {
+    this._setIfChanged(RangeTransformer.handleSplice(this._values, index, deleteCount, insertCount), true);
   }
 
   /**

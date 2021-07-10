@@ -26,8 +26,7 @@ const types: {[key: string]: string}  = {
   OBJECT_REMOVE: "ObjectRemove",
   OBJECT_SET: "ObjectSet",
   OBJECT_VALUE: "ObjectValue",
-  STRING_INSERT: "StringInsert",
-  STRING_REMOVE: "StringRemove",
+  STRING_SPLICE: "StringSplice",
   STRING_VALUE: "StringValue",
   DATE_VALUE: "DateValue"
 };

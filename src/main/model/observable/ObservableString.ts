@@ -37,6 +37,14 @@ export interface ObservableStringEvents extends ObservableElementEvents {
   readonly REMOVE: string;
 
   /**
+   * Emitted when characters are [[RealTimeString.splice|spliced]] on a [[RealTimeString]].
+   * See [[StringSpliceEvent]] for the actual emitted event.
+   *
+   * @event
+   */
+  readonly SPLICE: string;
+
+  /**
    * Emitted when the entire [[RealTimeString.value|value]] of a [[RealTimeString]] is set,
    * meaning its entire contents were replaced (or initially set).
    * See [[StringSetValueEvent]] for the actual emitted event.
@@ -52,6 +60,7 @@ export interface ObservableStringEvents extends ObservableElementEvents {
 export const ObservableStringEventConstants: ObservableStringEvents = {
   INSERT: "insert",
   REMOVE: "remove",
+  SPLICE: "splice",
   ...ObservableElementEventConstants
 };
 Object.freeze(ObservableStringEventConstants);

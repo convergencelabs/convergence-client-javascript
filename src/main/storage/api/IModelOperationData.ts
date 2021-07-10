@@ -41,7 +41,7 @@ export interface ILocalOperationData {
  * @module Offline
  */
 export interface IModelOperationData {
-  type: "string_insert" | "string_remove" | "string_set" |
+  type: "string_splice" | "string_set" |
     "array_insert" | "array_remove" | "array_replace" | "array_move" | "array_set" |
     "object_set_property" | "object_add_property" | "object_remove_property" | "object_set" |
     "number_delta" | "number_set" |
@@ -66,7 +66,7 @@ export interface ICompoundOperationData extends IModelOperationData {
 export interface IModelDiscreteOperationData extends IModelOperationData {
   id: string;
   noOp: boolean;
-  type: "string_insert" | "string_remove" | "string_set" |
+  type: "string_splice" | "string_set" |
     "array_insert" | "array_remove" | "array_replace" | "array_move" | "array_set" |
     "object_set_property" | "object_add_property" | "object_remove_property" | "object_set" |
     "number_delta" | "number_set" |
@@ -82,20 +82,11 @@ export interface IModelDiscreteOperationData extends IModelOperationData {
  * @hidden
  * @internal
  */
-export interface IStringInsertOperationData extends IModelDiscreteOperationData {
-  type: "string_insert";
+export interface IStringSpliceOperationData extends IModelDiscreteOperationData {
+  type: "string_splice";
   index: number;
-  value: string;
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface IStringRemoveOperationData extends IModelDiscreteOperationData {
-  type: "string_remove";
-  index: number;
-  value: string;
+  deleteCount: number;
+  insertedValue: string;
 }
 
 /**

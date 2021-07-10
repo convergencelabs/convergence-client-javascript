@@ -27,8 +27,7 @@ import {AppliedObjectSetPropertyOperation} from "../ot/applied/AppliedObjectSetP
 import {AppliedObjectRemovePropertyOperation} from "../ot/applied/AppliedObjectRemovePropertyOperation";
 import {AppliedObjectSetOperation} from "../ot/applied/AppliedObjectSetOperation";
 import {mapObjectValues} from "../../util/ObjectUtils";
-import {AppliedStringInsertOperation} from "../ot/applied/AppliedStringInsertOperation";
-import {AppliedStringRemoveOperation} from "../ot/applied/AppliedStringRemoveOperation";
+import {AppliedStringSpliceOperation} from "../ot/applied/AppliedStringSpliceOperation";
 import {AppliedStringSetOperation} from "../ot/applied/AppliedStringSetOperation";
 import {AppliedNumberDeltaOperation} from "../ot/applied/AppliedNumberDeltaOperation";
 import {AppliedNumberSetOperation} from "../ot/applied/AppliedNumberSetOperation";
@@ -153,20 +152,16 @@ function toDiscreteOperation(discreteOperationData: IAppliedDiscreteOperationDat
       mapObjectValues(getOrDefaultObject(values), toDataValue),
       oldVal
       );
-  } else if (discreteOperationData.stringInsertOperation) {
-    const {id, noOp, index, value} = discreteOperationData.stringInsertOperation;
-    return new AppliedStringInsertOperation(
+  } else if (discreteOperationData.stringSpliceOperation) {
+    const {id, noOp, index, deletedValue, insertedValue} = discreteOperationData.stringSpliceOperation;
+    return new AppliedStringSpliceOperation(
       id,
       getOrDefaultBoolean(noOp),
       getOrDefaultNumber(index),
-      getOrDefaultString(value));
-  } else if (discreteOperationData.stringRemoveOperation) {
-    const {id, noOp, index, oldValue} = discreteOperationData.stringRemoveOperation;
-    const oldVal = noOp ? undefined : getOrDefaultString(oldValue);
-    return new AppliedStringRemoveOperation(id,
-      getOrDefaultBoolean(noOp),
-      getOrDefaultNumber(index),
-      oldVal);
+      getOrDefaultString(deletedValue),
+      getOrDefaultString(deletedValue).length,
+      getOrDefaultString(insertedValue),
+      );
   } else if (discreteOperationData.stringSetOperation) {
     const {id, noOp, value, oldValue} = discreteOperationData.stringSetOperation;
     const oldVal = noOp ? undefined : getOrDefaultString(oldValue);

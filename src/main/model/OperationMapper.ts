@@ -27,8 +27,7 @@ import {ObjectSetPropertyOperation} from "./ot/ops/ObjectSetPropertyOperation";
 import {ObjectRemovePropertyOperation} from "./ot/ops/ObjectRemovePropertyOperation";
 import {ObjectSetOperation} from "./ot/ops/ObjectSetOperation";
 import {mapObjectValues} from "../util/ObjectUtils";
-import {StringInsertOperation} from "./ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "./ot/ops/StringRemoveOperation";
+import {StringSpliceOperation} from "./ot/ops/StringSpliceOperation";
 import {StringSetOperation} from "./ot/ops/StringSetOperation";
 import {NumberDeltaOperation} from "./ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "./ot/ops/NumberSetOperation";
@@ -127,20 +126,14 @@ function toDiscreteOperation(discreteOperationData: IDiscreteOperationData): Dis
       id,
       getOrDefaultBoolean(noOp),
       mapObjectValues(values, toDataValue));
-  } else if (discreteOperationData.stringInsertOperation) {
-    const {id, noOp, index, value} = discreteOperationData.stringInsertOperation;
-    return new StringInsertOperation(
+  } else if (discreteOperationData.stringSpliceOperation) {
+    const {id, noOp, index, deleteCount, insertedValue} = discreteOperationData.stringSpliceOperation;
+    return new StringSpliceOperation(
       id,
       getOrDefaultBoolean(noOp),
       getOrDefaultNumber(index),
-      getOrDefaultString(value));
-  } else if (discreteOperationData.stringRemoveOperation) {
-    const {id, noOp, index, value} = discreteOperationData.stringRemoveOperation;
-    return new StringRemoveOperation(
-      id,
-      getOrDefaultBoolean(noOp),
-      getOrDefaultNumber(index),
-      getOrDefaultString(value));
+      getOrDefaultNumber(deleteCount),
+      getOrDefaultString(insertedValue));
   } else if (discreteOperationData.stringSetOperation) {
     const {id, noOp, value} = discreteOperationData.stringSetOperation;
     return new StringSetOperation(
@@ -221,12 +214,9 @@ function toIDiscreteOperationData(op: DiscreteOperation): IDiscreteOperationData
   } else if (op instanceof ObjectSetOperation) {
     const {id, noOp, value} = op;
     return {objectSetOperation: {id, noOp, values: mapObjectValues(value, toIDataValue)}};
-  } else if (op instanceof StringInsertOperation) {
-    const {id, noOp, index, value} = op;
-    return {stringInsertOperation: {id, noOp, index, value}};
-  } else if (op instanceof StringRemoveOperation) {
-    const {id, noOp, index, value} = op;
-    return {stringRemoveOperation: {id, noOp, index, value}};
+  } else if (op instanceof StringSpliceOperation) {
+    const {id, noOp, index, deleteCount, insertValue} = op;
+    return {stringSpliceOperation: {id, noOp, index, deleteCount, insertedValue: insertValue}};
   } else if (op instanceof StringSetOperation) {
     const {id, noOp, value} = op;
     return {stringSetOperation: {id, noOp, value}};

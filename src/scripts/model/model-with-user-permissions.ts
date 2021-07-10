@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node --compiler-options {"module":"commonjs"}
 
 import {connect} from "../connect";
-import {ConvergenceDomain, RealTimeString} from "../../main";
+import {ConvergenceDomain} from "../../main";
 
 let domain: ConvergenceDomain;
 
@@ -14,18 +14,18 @@ connect(undefined, true)
       collection: "test",
       id: "my-test-id",
       data: {
-        string: "Hello World",
         nested: {
           property: "foo"
         }
+      },
+      userPermissions: {
+        "test": {read: true, write: true, manage: false, remove: false}
       }
     });
   })
   .then(model => {
     console.log("Model Created");
     model.root().set("other", true);
-    const str = model.root().get("string") as RealTimeString;
-    str.splice(6, 5, "everyone");
     return model.close();
   })
   .then(() => {

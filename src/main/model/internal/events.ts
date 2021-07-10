@@ -270,6 +270,25 @@ export class ObjectNodeSetValueEvent implements NodeValueChangedEvent {
  * @hidden
  * @internal
  */
+export class StringNodeSpliceEvent implements NodeValueChangedEvent {
+  public static readonly NAME = "splice";
+  public name: string = StringNodeSpliceEvent.NAME;
+
+  constructor(public readonly src: StringNode,
+              public readonly local: boolean,
+              public readonly index: number,
+              public readonly deleteCount: number,
+              public readonly insertValue: string,
+              public readonly sessionId: string,
+              public readonly user: DomainUser) {
+    Object.freeze(this);
+  }
+}
+
+/**
+ * @hidden
+ * @internal
+ */
 export class StringNodeInsertEvent implements NodeValueChangedEvent {
   public static readonly NAME = "insert";
   public name: string = StringNodeInsertEvent.NAME;

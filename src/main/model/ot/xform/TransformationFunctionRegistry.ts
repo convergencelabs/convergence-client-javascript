@@ -39,14 +39,8 @@ import {ArraySetRemoveOTF} from "./array/ArraySetRemoveOTF";
 import {ArraySetReplaceOTF} from "./array/ArraySetReplaceOTF";
 import {ArraySetMoveOTF} from "./array/ArraySetMoveOTF";
 import {ArraySetSetOTF} from "./array/ArraySetSetOTF";
-import {StringInsertInsertOTF} from "./string/StringInsertInsertOTF";
-import {StringInsertRemoveOTF} from "./string/StringInsertRemoveOTF";
-import {StringInsertSetOTF} from "./string/StringInsertSetOTF";
-import {StringRemoveInsertOTF} from "./string/StringRemoveInsertOTF";
-import {StringRemoveRemoveOTF} from "./string/StringRemoveRemoveOTF";
-import {StringRemoveSetOTF} from "./string/StringRemoveSetOTF";
-import {StringSetInsertOTF} from "./string/StringSetInsertOTF";
-import {StringSetRemoveOTF} from "./string/StringSetRemoveOTF";
+import {StringSpliceSetOTF} from "./string/StringSpliceSetOTF";
+import {StringSetSpliceOTF} from "./string/StringSetSpliceOTF";
 import {StringSetSetOTF} from "./string/StringSetSetOTF";
 import {NumberAddAddOTF} from "./number/NumberAddAddOTF";
 import {NumberAddSetOTF} from "./number/NumberAddSetOTF";
@@ -71,43 +65,36 @@ import {ObjectSetRemovePropertyOTF} from "./object/ObjectSetRemovePropertyOTF";
 import {ObjectSetSetOTF} from "./object/ObjectSetSetOTF";
 import {ReferenceTransformationFunction} from "./ReferenceTransformationFunction";
 import {ModelReferenceData} from "./ReferenceTransformer";
-import {ModelReference} from "../../reference/ModelReference";
+import {ModelReference} from "../../reference";
 import {
-  StringInsertIndexTransformationFunction,
-  StringRemoveIndexTransformationFunction,
+  StringSpliceIndexTransformationFunction,
   StringSetIndexTransformationFunction
 } from "./reference/IndexTransformationFunctions";
 import {OperationType} from "../ops/OperationType";
 import {
-  StringInsertRangeTransformationFunction,
-  StringRemoveRangeTransformationFunction,
+  StringSpliceRangeTransformationFunction,
   StringSetRangeTransformationFunction
 } from "./reference/RangeTransformationFunctions";
 import {DateSetSetOTF} from "./date/DateSetSetOTF";
+import {StringSpliceSpliceOTF} from "./string/StringSpliceSpliceOTF";
 
 /**
  * @hidden
  * @internal
  */
 export class TransformationFunctionRegistry {
-  private _otfs: { [key: string]: OperationTransformationFunction<any, any> };
-  private _rtfs: { [key: string]: ReferenceTransformationFunction };
+  private readonly _otfs: { [key: string]: OperationTransformationFunction<any, any> };
+  private readonly _rtfs: { [key: string]: ReferenceTransformationFunction };
 
   constructor() {
     this._otfs = {};
     this._rtfs = {};
 
     // string Functions
-    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_INSERT, StringInsertInsertOTF);
-    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_REMOVE, StringInsertRemoveOTF);
-    this.registerOtf(OperationType.STRING_INSERT, OperationType.STRING_VALUE, StringInsertSetOTF);
+    this.registerOtf(OperationType.STRING_SPLICE, OperationType.STRING_SPLICE, StringSpliceSpliceOTF);
+    this.registerOtf(OperationType.STRING_SPLICE, OperationType.STRING_VALUE, StringSpliceSetOTF);
 
-    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_INSERT, StringRemoveInsertOTF);
-    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_REMOVE, StringRemoveRemoveOTF);
-    this.registerOtf(OperationType.STRING_REMOVE, OperationType.STRING_VALUE, StringRemoveSetOTF);
-
-    this.registerOtf(OperationType.STRING_VALUE, OperationType.STRING_INSERT, StringSetInsertOTF);
-    this.registerOtf(OperationType.STRING_VALUE, OperationType.STRING_REMOVE, StringSetRemoveOTF);
+    this.registerOtf(OperationType.STRING_VALUE, OperationType.STRING_SPLICE, StringSetSpliceOTF);
     this.registerOtf(OperationType.STRING_VALUE, OperationType.STRING_VALUE, StringSetSetOTF);
 
     // object Functions
@@ -178,12 +165,10 @@ export class TransformationFunctionRegistry {
     //
     // Reference Transformation Functions
     //
-    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_INSERT, StringInsertIndexTransformationFunction);
-    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_REMOVE, StringRemoveIndexTransformationFunction);
+    this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_SPLICE, StringSpliceIndexTransformationFunction);
     this.registerRtf(ModelReference.Types.INDEX, OperationType.STRING_VALUE, StringSetIndexTransformationFunction);
 
-    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_INSERT, StringInsertRangeTransformationFunction);
-    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_REMOVE, StringRemoveRangeTransformationFunction);
+    this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_SPLICE, StringSpliceRangeTransformationFunction);
     this.registerRtf(ModelReference.Types.RANGE, OperationType.STRING_VALUE, StringSetRangeTransformationFunction);
   }
 

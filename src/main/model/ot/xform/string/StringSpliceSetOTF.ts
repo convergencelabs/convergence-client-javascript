@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -14,19 +14,16 @@
 
 import {OperationPair} from "../OperationPair";
 import {OperationTransformationFunction} from "../OperationTransformationFunction";
-import {StringInsertOperation} from "../../ops/StringInsertOperation";
+import {StringSpliceOperation} from "../../ops/StringSpliceOperation";
+import {StringSetOperation} from "../../ops/StringSetOperation";
 
 /**
  * @hidden
  * @internal
+ * @ignore
  */
-export const StringInsertInsertOTF: OperationTransformationFunction<StringInsertOperation, StringInsertOperation> =
-  (s: StringInsertOperation, c: StringInsertOperation) => {
-    if (s.index <= c.index) {
-      // S-II-1 and S-II-2
-      return new OperationPair(s, c.copy({index: c.index + s.value.length}));
-    } else {
-      // S-II-3
-      return new OperationPair(s.copy({index: s.index + c.value.length}), c);
-    }
+export const StringSpliceSetOTF: OperationTransformationFunction<StringSpliceOperation, StringSetOperation> =
+  (s: StringSpliceOperation, c: StringSetOperation) => {
+    // S-RS-1
+    return new OperationPair(s.copy({noOp: true}), c);
   };

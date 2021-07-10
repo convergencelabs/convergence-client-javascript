@@ -71,6 +71,15 @@ export class IndexReference extends ModelReference<number> {
    * @hidden
    * @internal
    */
+  public _handleSplice(index: number, deleteCount: number, insertCount: number): void {
+    this._setIfChanged(IndexTransformer.handleSplice(this._values, index, deleteCount, insertCount), true);
+  }
+
+  /**
+   * @private
+   * @hidden
+   * @internal
+   */
   public _handleReorder(fromIndex: number, toIndex: number): void {
     this._setIfChanged(IndexTransformer.handleReorder(this._values, fromIndex, toIndex), true);
   }

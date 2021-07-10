@@ -13,8 +13,7 @@
  */
 
 import {TransformationFunctionRegistry} from "../../../../main/model/ot/xform/TransformationFunctionRegistry";
-import {StringInsertOperation} from "../../../../main/model/ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "../../../../main/model/ot/ops/StringRemoveOperation";
+import {StringSpliceOperation} from "../../../../main/model/ot/ops/StringSpliceOperation";
 import {StringSetOperation} from "../../../../main/model/ot/ops/StringSetOperation";
 import {ArrayInsertOperation} from "../../../../main/model/ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../../../../main/model/ot/ops/ArrayRemoveOperation";
@@ -79,10 +78,8 @@ function json2Operation(opData: any): DiscreteOperation {
   "use strict";
 
   switch (opData.type) {
-    case "StringInsert":
-      return new StringInsertOperation(commonId, opData.noOp, opData.index, opData.value);
-    case "StringRemove":
-      return new StringRemoveOperation(commonId, opData.noOp, opData.index, opData.value);
+    case "StringSplice":
+      return new StringSpliceOperation(commonId, opData.noOp, opData.index, opData.deleteCount, opData.insertValue);
     case "StringSet":
       return new StringSetOperation(commonId, opData.noOp, opData.value);
 
