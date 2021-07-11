@@ -85,7 +85,7 @@ async function run() {
 
   console.log("\nPlay to Time\n");
 
-  // Play to time exactly at version 2, because we request the
+  // Play to version 2, because we request the
   // exact time.
   await historical.playToTime(version2Time);
   printHistoricalTimeAndVersion(historical);
