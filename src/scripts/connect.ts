@@ -20,9 +20,9 @@ Convergence.configureLogging({
   root: LogLevel.INFO,
   loggers: {
     "connection": LogLevel.DEBUG,
-    "protocol.messages": LogLevel.INFO,
+    "protocol.messages": LogLevel.DEBUG,
     "models": LogLevel.INFO,
-    "socket": LogLevel.DEBUG
+    "socket": LogLevel.INFO
   }
 });
 

@@ -26,7 +26,7 @@ import {
 } from "../api";
 import {toPromise, toVoidPromise} from "./promise";
 import {IdbSchema} from "./IdbSchema";
-import {ModelPermissions, IObjectValue} from "../../model";
+import {IObjectValue, ModelPermissions} from "../../model";
 import {IModelMetaDataDocument} from "../api/IModelMetaDataDocument";
 import {ConvergenceError} from "../../util";
 import {TypeChecker} from "../../util/TypeChecker";

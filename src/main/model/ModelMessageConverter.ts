@@ -35,14 +35,14 @@ import {
   timestampToDate
 } from "../connection/ProtocolUtil";
 import {ConvergenceError} from "../util";
-import {mapObjectValues, objectForEach} from "../util/ObjectUtils";
+import {mapObjectValues} from "../util/ObjectUtils";
 import {ModelPermissions} from "./ModelPermissions";
 import {DomainUserId, DomainUserIdMap} from "../identity";
 import {ModelResult} from "./query";
 import {TypeChecker} from "../util/TypeChecker";
+import {IModelPermissions} from "./IModelPermissions";
 
 import {com} from "@convergence/convergence-proto";
-import {IModelPermissions} from "./IModelPermissions";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 import IDataValueData = com.convergencelabs.convergence.proto.model.IDataValue;
 import IObjectValueData = com.convergencelabs.convergence.proto.model.IObjectValue;
@@ -65,6 +65,7 @@ import IRemoteClientResyncCompletedMessage =
   com.convergencelabs.convergence.proto.model.IRemoteClientResyncCompletedMessage;
 import IModelResyncServerCompleteMessage =
   com.convergencelabs.convergence.proto.model.IModelResyncServerCompleteMessage;
+
 
 /**
  * @hidden
@@ -189,14 +190,14 @@ export function toModelResult(result: IModelResult): ModelResult {
  * @internal
  */
 export function modelUserPermissionMapToProto(
-  perms: { [key: string]: IModelPermissions } | undefined): IUserModelPermissionsData[] {
+  perms: DomainUserIdMap<IModelPermissions> | undefined): IUserModelPermissionsData[] {
   if (perms === undefined || perms === null) {
     return [];
   } else {
     const mapped: IUserModelPermissionsData[] = [];
-    objectForEach(perms, (username, permissions) => {
+    perms.forEach((permissions: IModelPermissions, userId: DomainUserId) => {
       mapped.push({
-        user: domainUserIdToProto(DomainUserId.normal(username)),
+        user: domainUserIdToProto(userId),
         permissions
       });
     });

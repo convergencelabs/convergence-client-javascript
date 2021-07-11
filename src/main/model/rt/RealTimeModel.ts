@@ -89,7 +89,7 @@ import {Logging} from "../../util/log/Logging";
 import {ModelOfflineManager} from "../ModelOfflineManager";
 import {fromOfflineOperationData, toOfflineOperationData} from "../../storage/OfflineOperationMapper";
 import {ILocalOperationData, IModelCreationData, IModelMetaData, IServerOperationData} from "../../storage/api";
-import {DomainUser} from "../../identity";
+import {DomainUser, DomainUserIdMap} from "../../identity";
 import {ICreateModelOptions} from "../ICreateModelOptions";
 import {IConcurrencyControlState} from "../IModeStateSnapshot";
 import {ReplayDeferred} from "../../util/ReplayDeferred";
@@ -1290,12 +1290,15 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    */
   private _createLocalModel(creation: IModelCreationData) {
     this._debug("Creating offline model at the server");
+    const userPermissions = creation.userPermissions &&
+      DomainUserIdMap.fromGuidObjectMap(creation.userPermissions);
+
     const options: ICreateModelOptions = {
       id: creation.modelId,
       collection: creation.collection,
       overrideCollectionWorldPermissions: creation.overrideCollectionWorldPermissions,
       worldPermissions: creation.worldPermissions,
-      userPermissions: creation.userPermissions
+      userPermissions
     };
     return this._modelService._create(options, creation.initialData);
   }

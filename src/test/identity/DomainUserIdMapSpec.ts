@@ -12,7 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {DomainUserId, DomainUserIdMap, DomainUserType} from "../../main";
+import {DomainUserId, DomainUserIdMap} from "../../main";
 
 import {expect} from "chai";
 
@@ -113,6 +113,42 @@ describe("DomainUserIdMap", () => {
       map.set(anonymous2, 4);
       const entries = map.entries();
       expect(entries.length).to.equal(4);
+    });
+  });
+
+  describe("toGuidObjectMap", () => {
+    it("Return the correct mapping using guids", () => {
+      const map = new DomainUserIdMap();
+      map.set(normal1, 1);
+      map.set(normal2, 2);
+      map.set(convergence1, 3);
+      map.set(anonymous2, 4);
+
+      const expected: any = {};
+      expected[normal1.toGuid()] = 1;
+      expected[normal2.toGuid()] = 2;
+      expected[convergence1.toGuid()] = 3;
+      expected[anonymous2.toGuid()] = 4;
+
+      const guidMap = map.toGuidObjectMap();
+      expect(guidMap).to.deep.equal(expected);
+    });
+  });
+
+  describe("fromGuidObjectMap", () => {
+    it("Return the correct mapping using guids", () => {
+      const guidMap: any = {};
+      guidMap[normal1.toGuid()] = 1;
+      guidMap[normal2.toGuid()] = 2;
+      guidMap[convergence1.toGuid()] = 3;
+      guidMap[anonymous2.toGuid()] = 4;
+
+      const map = DomainUserIdMap.fromGuidObjectMap(guidMap);
+      expect(map.size()).to.equal(4);
+      expect(map.get(normal1)).to.equal(1);
+      expect(map.get(normal2)).to.equal(2);
+      expect(map.get(convergence1)).to.equal(3);
+      expect(map.get(anonymous2)).to.equal(4);
     });
   });
 });
