@@ -51,7 +51,8 @@ import {ModelOfflineManager} from "./model/ModelOfflineManager";
 import {Logger} from "./util/log/Logger";
 import {Logging} from "./util/log/Logging";
 import {StringMap} from "./util/StringMap";
-import {com} from "../../../../shared/convergence-proto/npm-dist";
+
+import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 
 /**
