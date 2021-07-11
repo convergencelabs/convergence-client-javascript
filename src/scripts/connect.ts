@@ -19,10 +19,10 @@ import {TypeChecker} from "../main/util/TypeChecker";
 Convergence.configureLogging({
   root: LogLevel.INFO,
   loggers: {
-    "connection": LogLevel.DEBUG,
+    "connection": LogLevel.INFO,
     "protocol.messages": LogLevel.INFO,
     "models": LogLevel.INFO,
-    "socket": LogLevel.DEBUG
+    "socket": LogLevel.INFO
   }
 });
 

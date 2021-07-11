@@ -17,6 +17,7 @@ import {StringMap} from "../util/StringMap";
 import {TypeChecker} from "../util/TypeChecker";
 import {ConvergenceError} from "../util";
 import {DomainUserMapping} from "./DomainUserMapping";
+import {objectForEach} from "../util/ObjectUtils";
 
 /**
  * The DomainUserIdMap is a utility class that will uniquely map a set
@@ -50,6 +51,23 @@ export class DomainUserIdMap<V> {
     } else {
       throw new ConvergenceError("Can not convert the supplied value to a DomainUserIdMap");
     }
+  }
+
+  /**
+   * Creates a new DomainUserIdMap from a plan JavaScript object
+   * whose keys are DomainUserId guid's.
+   *
+   * @param map The guid mapping.
+   *
+   * @returns The JavaScript object map converted to a DomainUserIdMap.
+   */
+  public static fromGuidObjectMap<V>(map: { [key: string]: V }): DomainUserIdMap<V> {
+    const result = new DomainUserIdMap<V>();
+    objectForEach(map, (key, val) => {
+      result.set(DomainUserId.fromGuid(key), val)
+    });
+
+    return result;
   }
 
   /**
@@ -132,5 +150,18 @@ export class DomainUserIdMap<V> {
     this._map.forEach((v: V, guid: string) => {
       callback(v, DomainUserId.fromGuid(guid));
     });
+  }
+
+  /**
+   * Returns this user id mapping as a plain JavaScript Object
+   * using the DomainUserId's guidas the map key.
+   */
+  public toGuidObjectMap(): { [key: string]: V } {
+    const result: { [key: string]: V } = {};
+    this._map.forEach((v: V, guid: string) => {
+      result[guid] = v;
+    });
+
+    return result;
   }
 }

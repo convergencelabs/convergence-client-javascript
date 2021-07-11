@@ -15,6 +15,7 @@
 import {ModelPermissions} from "./ModelPermissions";
 import {ModelDataInitializer} from "./ModelDataInitializer";
 import {IModelPermissions} from "./IModelPermissions";
+import {DomainUserMapping} from "../identity/DomainUserMapping";
 
 /**
  * The configuration available when creating a model with the
@@ -55,5 +56,5 @@ export interface ICreateModelOptions {
   /**
    * Per-user permissions can be set here, where the key is an existing user's username.
    */
-  userPermissions?: { [username: string]: IModelPermissions };
+  userPermissions?: DomainUserMapping<IModelPermissions>;
 }

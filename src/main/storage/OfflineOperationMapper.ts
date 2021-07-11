@@ -30,9 +30,8 @@ import {
   IObjectRemovePropertyOperationData,
   IObjectSetOperationData,
   IObjectSetPropertyOperationData,
-  IStringInsertOperationData,
-  IStringRemoveOperationData,
-  IStringSetOperationData
+  IStringSetOperationData,
+  IStringSpliceOperationData
 } from "./api/IModelOperationData";
 import {ArrayInsertOperation} from "../model/ot/ops/ArrayInsertOperation";
 import {ArrayRemoveOperation} from "../model/ot/ops/ArrayRemoveOperation";
@@ -43,14 +42,13 @@ import {ObjectAddPropertyOperation} from "../model/ot/ops/ObjectAddPropertyOpera
 import {ObjectSetPropertyOperation} from "../model/ot/ops/ObjectSetPropertyOperation";
 import {ObjectRemovePropertyOperation} from "../model/ot/ops/ObjectRemovePropertyOperation";
 import {ObjectSetOperation} from "../model/ot/ops/ObjectSetOperation";
-import {StringInsertOperation} from "../model/ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "../model/ot/ops/StringRemoveOperation";
 import {StringSetOperation} from "../model/ot/ops/StringSetOperation";
 import {NumberDeltaOperation} from "../model/ot/ops/NumberDeltaOperation";
 import {NumberSetOperation} from "../model/ot/ops/NumberSetOperation";
 import {BooleanSetOperation} from "../model/ot/ops/BooleanSetOperation";
 import {DateSetOperation} from "../model/ot/ops/DateSetOperation";
 import {CompoundOperation} from "../model/ot/ops/CompoundOperation";
+import {StringSpliceOperation} from "../model/ot/ops/StringSpliceOperation";
 
 /**
  * @hidden
@@ -128,22 +126,15 @@ export function toOfflineOperationData(op: Operation): IModelOperationData {
       noOp: op.noOp,
       value: op.value
     } as IObjectSetOperationData;
-  } else if (op instanceof StringInsertOperation) {
+  } else if (op instanceof StringSpliceOperation) {
     return {
-      type: "string_insert",
+      type: "string_splice",
       id: op.id,
       noOp: op.noOp,
       index: op.index,
-      value: op.value
-    } as IStringInsertOperationData;
-  } else if (op instanceof StringRemoveOperation) {
-    return {
-      type: "string_remove",
-      id: op.id,
-      noOp: op.noOp,
-      index: op.index,
-      value: op.value
-    } as IStringRemoveOperationData;
+      deleteCount: op.deleteCount,
+      insertedValue: op.insertValue
+    } as IStringSpliceOperationData;
   } else if (op instanceof StringSetOperation) {
     return {
       type: "string_set",
@@ -217,12 +208,9 @@ export function fromOfflineOperationData(op: IModelOperationData): Operation {
       const os = op as IObjectSetOperationData;
       return new ObjectSetOperation(os.id, os.noOp, os.value);
 
-    case "string_insert":
-      const si = op as IStringInsertOperationData;
-      return new StringInsertOperation(si.id, si.noOp, si.index, si.value);
-    case "string_remove":
-      const sr = op as IStringRemoveOperationData;
-      return new StringRemoveOperation(sr.id, sr.noOp, sr.index, sr.value);
+    case "string_splice":
+      const sp = op as IStringSpliceOperationData;
+      return new StringSpliceOperation(sp.id, sp.noOp, sp.index, sp.deleteCount, sp.insertedValue);
     case "string_set":
       const ss = op as IStringSetOperationData;
       return new StringSetOperation(ss.id, ss.noOp, ss.value);

@@ -38,7 +38,7 @@ import {
   ObjectNodeSetEvent,
   StringNodeInsertEvent,
   StringNodeRemoveEvent,
-  StringNodeSetValueEvent
+  StringNodeSetValueEvent, StringNodeSpliceEvent
 } from "./internal/events";
 import {
   IValueChangedEvent,
@@ -60,6 +60,7 @@ import {
   StringSetValueEvent,
   ElementDetachedEvent
 } from "./events";
+import {StringSpliceEvent} from "./events/StringSpliceEvent";
 
 /**
  * @hidden
@@ -132,6 +133,13 @@ export class ModelEventConverter {
         event.key,
         wrapperFactory.wrap(event.value),
         wrapperFactory.wrap(event.oldValue));
+    } else if (event instanceof StringNodeSpliceEvent) {
+      return new StringSpliceEvent(
+        wrapperFactory.wrap(event.src) as ObservableString,
+        event.user, event.sessionId, event.local,
+        event.index,
+        event.deleteCount,
+        event.insertValue);
     } else if (event instanceof StringNodeInsertEvent) {
       return new StringInsertEvent(
         wrapperFactory.wrap(event.src) as ObservableString,

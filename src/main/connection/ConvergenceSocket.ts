@@ -247,7 +247,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
     };
 
     socket.onclose = (evt: CloseEvent) => {
-      this._logger.debug(() => `WebSocket close event: {code: ${evt.code}, reason: "${evt.reason}"}`);
+      this._logger.trace(() => `WebSocket close event: {code: ${evt.code}, reason: "${evt.reason}"}`);
       ConvergenceSocket._detachFromSocket(socket);
       this._socket = null;
       try {

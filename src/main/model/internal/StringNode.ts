@@ -16,16 +16,15 @@ import {ModelNode} from "./ModelNode";
 import {IStringValue} from "../dataValue";
 import {Model} from "./Model";
 import {ModelElementType} from "../ModelElementType";
-import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
 import {ModelOperationEvent} from "../ModelOperationEvent";
 import {OperationType} from "../ot/ops/OperationType";
 import {Path} from "../Path";
-import {StringNodeInsertEvent, StringNodeRemoveEvent, StringNodeSetValueEvent} from "./events";
+import {StringNodeInsertEvent, StringNodeRemoveEvent, StringNodeSetValueEvent, StringNodeSpliceEvent} from "./events";
 import {ConvergenceSession} from "../../ConvergenceSession";
 import {DomainUser} from "../../identity";
 import {Validation} from "../../util/Validation";
+import {StringSpliceOperation} from "../ot/ops/StringSpliceOperation";
 
 /**
  * @hidden
@@ -67,12 +66,16 @@ export class StringNode extends ModelNode<string> {
     return this._data;
   }
 
+  public splice(index: number, deleteCount: number, inserValue: string): void {
+    this._applySplice(index, deleteCount, inserValue, true, this._session.sessionId(), this._session.user());
+  }
+
   public insert(index: number, value: string): void {
-    this._applyInsert(index, value, true, this._session.sessionId(), this._session.user());
+    this._applySplice(index, 0, value, true, this._session.sessionId(), this._session.user());
   }
 
   public remove(index: number, length: number): void {
-    this._applyRemove(index, length, true, this._session.sessionId(), this._session.user());
+    this._applySplice(index, length, "", true, this._session.sessionId(), this._session.user());
   }
 
   public length(): number {
@@ -81,10 +84,8 @@ export class StringNode extends ModelNode<string> {
 
   public _handleModelOperationEvent(operationEvent: ModelOperationEvent): void {
     const type: string = operationEvent.operation.type;
-    if (type === OperationType.STRING_INSERT) {
-      this._handleInsertOperation(operationEvent);
-    } else if (type === OperationType.STRING_REMOVE) {
-      this._handleRemoveOperation(operationEvent);
+    if (type === OperationType.STRING_SPLICE) {
+      this._handleSpliceOperation(operationEvent);
     } else if (type === OperationType.STRING_VALUE) {
       this._handleSetOperation(operationEvent);
     } else {
@@ -104,22 +105,25 @@ export class StringNode extends ModelNode<string> {
     return this._data;
   }
 
-  private _applyInsert(index: number, value: string, local: boolean, sessionId: string, user: DomainUser): void {
+  private _applySplice(index: number, deleteCount: number, insertValue, local: boolean, sessionId: string, user: DomainUser): void {
     Validation.assertValidStringIndex(index, this._data, true, "index");
-    this._data = this._data.slice(0, index) + value + this._data.slice(index, this._data.length);
-    const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, value, sessionId, user);
-    this._emitValueEvent(event);
-  }
+    Validation.assertValidStringIndex(index + deleteCount, this._data, true);
 
-  private _applyRemove(index: number, length: number, local: boolean, sessionId: string, user: DomainUser): void {
-    Validation.assertValidStringIndex(index, this._data, false, "index");
-    Validation.assertValidStringIndex(index + length, this._data, true);
+    const removedVal: string = this._data.slice(index, index + deleteCount);
+    this._data = this._data.slice(0, index) + insertValue + this._data.slice(index + deleteCount, this._data.length);
 
-    const removedVal: string = this._data.slice(index, index + length);
-    this._data = this._data.slice(0, index) + this._data.slice(index + length, this._data.length);
-
-    const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, user);
-    this._emitValueEvent(event);
+    if (deleteCount > 0 && insertValue.length === 0) {
+      const event: StringNodeRemoveEvent = new StringNodeRemoveEvent(this, local, index, removedVal, sessionId, user);
+      this._emitValueEvent(event);
+    } else if (deleteCount === 0 && insertValue.length > 0) {
+      const event: StringNodeInsertEvent = new StringNodeInsertEvent(this, local, index, insertValue, sessionId, user);
+      this._emitValueEvent(event);
+    } else if (deleteCount > 0 && insertValue.length > 0) {
+      const event: StringNodeSpliceEvent = new StringNodeSpliceEvent(this, local, index, deleteCount, insertValue, sessionId, user);
+      this._emitValueEvent(event);
+    } else {
+      // No mutation, so do not emit an event.
+    }
   }
 
   private _applySetValue(value: string, local: boolean, sessionId: string, user: DomainUser): void {
@@ -134,15 +138,9 @@ export class StringNode extends ModelNode<string> {
   // Operations
   //
 
-  private _handleInsertOperation(operationEvent: ModelOperationEvent): void {
-    const operation: StringInsertOperation = operationEvent.operation as StringInsertOperation;
-    this._applyInsert(operation.index, operation.value, false, operationEvent.sessionId, operationEvent.user);
-  }
-
-  private _handleRemoveOperation(operationEvent: ModelOperationEvent): void {
-    const operation: StringRemoveOperation = operationEvent.operation as StringRemoveOperation;
-    this._applyRemove(operation.index, operation.value.length, false,
-      operationEvent.sessionId, operationEvent.user);
+  private _handleSpliceOperation(operationEvent: ModelOperationEvent): void {
+    const operation: StringSpliceOperation = operationEvent.operation as StringSpliceOperation;
+    this._applySplice(operation.index, operation.deleteCount, operation.insertValue, false, operationEvent.sessionId, operationEvent.user);
   }
 
   private _handleSetOperation(operationEvent: ModelOperationEvent): void {

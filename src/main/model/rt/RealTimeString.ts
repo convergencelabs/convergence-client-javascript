@@ -19,18 +19,16 @@ import {
   LocalModelReference,
   ModelReference,
   IndexReference,
+  LocalIndexReference,
   LocalRangeReference,
   RangeReference
 } from "../reference";
-import {StringInsertOperation} from "../ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "../ot/ops/StringRemoveOperation";
-import {LocalIndexReference} from "../reference/LocalIndexReference";
 import {StringSetOperation} from "../ot/ops/StringSetOperation";
 import {
   StringNodeInsertEvent,
   StringNodeRemoveEvent,
   StringNodeSetValueEvent,
-  ModelNodeEvent
+  ModelNodeEvent, StringNodeSpliceEvent
 } from "../internal/events";
 import {ModelEventCallbacks} from "../internal/ModelEventCallbacks";
 import {RealTimeWrapperFactory} from "./RealTimeWrapperFactory";
@@ -40,6 +38,7 @@ import {
   ObservableStringEventConstants
 } from "../observable/ObservableString";
 import {IdentityCache} from "../../identity/IdentityCache";
+import {StringSpliceOperation} from "../ot/ops/StringSpliceOperation";
 
 /**
  * @module Real Time Data
@@ -94,7 +93,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
     super(delegate, callbacks, wrapperFactory, model,
       [ModelReference.Types.INDEX, ModelReference.Types.RANGE], identityCache);
 
-    (this._delegate as StringNode).events().subscribe(e => this._handleReferenceModelEvents(e));
+    this._delegate.events().subscribe(e => this._handleDelegateModelEvents(e));
   }
 
   /**
@@ -114,7 +113,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    */
   public insert(index: number, value: string): void {
     this._assertWritable();
-    (this._delegate as StringNode).insert(index, value);
+    this._string.insert(index, value);
   }
 
   /**
@@ -134,7 +133,48 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    */
   public remove(index: number, length: number): void {
     this._assertWritable();
-    ((this._delegate as StringNode) as StringNode).remove(index, length);
+    this._string.remove(index, length);
+  }
+
+  /**
+   * Replaces a portion of the string with a new value at `index`. The splice
+   * method will remove `deleteCount` characters at `index` (inclusive) and then
+   * insert `insertValue` at `index`.Subsequent characters are shifted left or right
+   * based on if more characters are inserted or removed.
+   *
+   * Note that it is possible to perform a remove, without inserting a new value.
+   * Likewise, it is possible to insert a new string without removing any
+   * existing characters.  In this way, splice can be used to model both an
+   * insert and a remove.  The `insert` and `remove` methods are provide a
+   * simplifications.
+   *
+   * On a successful `splice`, one of three events will be emitted base on how
+   * the method was called (and the effect change that will be made to the string
+   * after any remote conflicts are resolved) as follows:
+   *
+   * 1. A [[StringInsertEvent]] will be emitted to any remote users if
+   *    `deleteCount` equals 0 and `insertValue` is a non-empty string.
+   * 2. A [[StringRemoveEvent]] will be emitted to any remote users if
+   *    `deleteCount` is greater than zero and `insertValue` is an
+   *    empty string.
+   * 3. A [[StringSpliceEvent]] will be emitted to any remote users if
+   *    `deleteCount` is greater than zero and `insertValue` is non-
+   *    empty string.
+   *
+   * @example
+   * ```typescript
+   * console.log(rtString.value());      // "Hello world"
+   * rtString.splice(6, 5, "everyone");
+   * console.log(rtString.value());      // "Hello everyone"
+   * ```
+   *
+   * @param index the zero-based index at which to start removing characters
+   * @param deleteCount the number of characters to remove in the current string.
+   * @param insertValue The value to insert at the index.
+   */
+  public splice(index: number, deleteCount: number, insertValue: string): void {
+    this._assertWritable();
+    this._string.splice(index, deleteCount, insertValue);
   }
 
   /**
@@ -147,7 +187,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * ```
    */
   public length(): number {
-    return (this._delegate as StringNode).length();
+    return this._string.length();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -224,12 +264,13 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * @hidden
    * @internal
    */
-  public _handleReferenceModelEvents(event: ModelNodeEvent): void {
+  public _handleDelegateModelEvents(event: ModelNodeEvent): void {
     if (event instanceof StringNodeInsertEvent) {
       if (event.local) {
-        this._sendOperation(new StringInsertOperation(this.id(), false, event.index, event.value));
+        this._sendOperation(new StringSpliceOperation(this.id(), false, event.index, 0, event.value));
       }
-      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
+
+      this._referenceManager.getAll().forEach((ref: ModelReference) => {
         if (ref instanceof IndexReference) {
           ref._handleInsert(event.index, event.value.length);
         } else if (ref instanceof RangeReference) {
@@ -238,21 +279,43 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
       });
     } else if (event instanceof StringNodeRemoveEvent) {
       if (event.local) {
-        this._sendOperation(new StringRemoveOperation(this.id(), false, event.index, event.value));
+        this._sendOperation(new StringSpliceOperation(this.id(), false, event.index, event.value.length, ""));
       }
-      this._referenceManager.getAll().forEach((ref: ModelReference<any>) => {
+
+      this._referenceManager.getAll().forEach((ref: ModelReference) => {
         if (ref instanceof IndexReference) {
           ref._handleRemove(event.index, event.value.length);
         } else if (ref instanceof RangeReference) {
           ref._handleRemove(event.index, event.value.length);
         }
       });
+    } else if (event instanceof StringNodeSpliceEvent) {
+      if (event.local) {
+        this._sendOperation(new StringSpliceOperation(this.id(), false, event.index, event.deleteCount, event.insertValue));
+      }
+
+      this._referenceManager.getAll().forEach((ref: ModelReference) => {
+        if (ref instanceof IndexReference) {
+          ref._handleSplice(event.index, event.deleteCount, event.insertValue.length);
+        } else if (ref instanceof RangeReference) {
+          ref._handleSplice(event.index, event.deleteCount, event.insertValue.length);
+        }
+      });
     } else if (event instanceof StringNodeSetValueEvent) {
       if (event.local) {
         this._sendOperation(new StringSetOperation(this.id(), false, event.value));
       }
+
       this._referenceManager.removeAll();
     }
+  }
+
+  /**
+   * @hidden
+   * @internal
+   */
+  private get _string(): StringNode {
+    return this._delegate as StringNode;
   }
 }
 

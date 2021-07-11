@@ -13,8 +13,7 @@
  */
 
 import {StringSetOperation} from "../../main/model/ot/ops/StringSetOperation";
-import {StringInsertOperation} from "../../main/model/ot/ops/StringInsertOperation";
-import {StringRemoveOperation} from "../../main/model/ot/ops/StringRemoveOperation";
+import {StringSpliceOperation} from "../../main/model/ot/ops/StringSpliceOperation";
 import {ModelOperationEvent} from "../../main/model/ModelOperationEvent";
 import {
   ConvergenceSession,
@@ -39,6 +38,7 @@ import {IdentityCache} from "../../main/identity/IdentityCache";
 
 import {expect} from "chai";
 import {createStubInstance, SinonSpy, spy} from "sinon";
+import {StringSpliceEvent} from "../../main/model/events/StringSpliceEvent";
 
 describe("RealTimeString", () => {
 
@@ -130,7 +130,7 @@ describe("RealTimeString", () => {
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
     myString.insert(2, "Edited");
 
-    const expectedOp: StringInsertOperation = new StringInsertOperation(initialValue.id, false, 2, "Edited");
+    const expectedOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 2, 0, "Edited");
     expect((callbacks.sendOperationCallback as SinonSpy).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
@@ -140,7 +140,7 @@ describe("RealTimeString", () => {
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
     myString.remove(0, 2);
 
-    const expectedOp: StringRemoveOperation = new StringRemoveOperation(initialValue.id, false, 0, "My");
+    const expectedOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 0, 2, "");
     expect((callbacks.sendOperationCallback as SinonSpy).lastCall.args[0]).to.deep.equal(expectedOp);
   });
 
@@ -162,7 +162,7 @@ describe("RealTimeString", () => {
     const delegate: StringNode = new StringNode(initialValue, () => [], model, session);
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
 
-    const incomingOp: StringInsertOperation = new StringInsertOperation(initialValue.id, false, 2, "Edited");
+    const incomingOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 2, 0, "Edited");
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
@@ -175,7 +175,7 @@ describe("RealTimeString", () => {
     const delegate: StringNode = new StringNode(initialValue, () => [], model, session);
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
 
-    const incomingOp: StringRemoveOperation = new StringRemoveOperation(initialValue.id, false, 0, "My");
+    const incomingOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 0, 2, "");
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
@@ -200,14 +200,14 @@ describe("RealTimeString", () => {
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
-  it("Correct event is fired after StringInsertOperation", () => {
+  it("Correct event is fired after StringSpliceOperation (insert)", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
     const delegate: StringNode = new StringNode(initialValue, () =>  [], model, session);
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
     myString.on(RealTimeString.Events.INSERT, lastEventCallback);
 
-    const incomingOp: StringInsertOperation = new StringInsertOperation(initialValue.id, false, 2, "Edited");
+    const incomingOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 2, 0, "Edited");
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
@@ -216,19 +216,35 @@ describe("RealTimeString", () => {
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 
-  it("Correct event is fired after StringRemoveOperation", () => {
+  it("Correct event is fired after StringSpliceOperation (remove)", () => {
     lastEvent = null;
     const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
     const delegate: StringNode = new StringNode(initialValue, () => [], model, session);
     const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
     myString.on("Remove", lastEventCallback);
 
-    const incomingOp: StringRemoveOperation = new StringRemoveOperation(initialValue.id, false, 0, "My");
+    const incomingOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 0, 2, "");
     const incomingEvent: ModelOperationEvent =
       new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
     delegate._handleModelOperationEvent(incomingEvent);
 
     const expectedEvent: StringRemoveEvent = new StringRemoveEvent(myString, user, sessionId, false, 0, "My");
+    expect(lastEvent).to.deep.equal(expectedEvent);
+  });
+
+  it("Correct event is fired after StringSpliceOperation (splice)", () => {
+    lastEvent = null;
+    const wrapperFactory: RealTimeWrapperFactory = new RealTimeWrapperFactory(callbacks, rtModel, identityCache);
+    const delegate: StringNode = new StringNode(initialValue, () => [], model, session);
+    const myString: RealTimeString = wrapperFactory.wrap(delegate) as RealTimeString;
+    myString.on("Splice", lastEventCallback);
+
+    const incomingOp: StringSpliceOperation = new StringSpliceOperation(initialValue.id, false, 1, 2, "X");
+    const incomingEvent: ModelOperationEvent =
+      new ModelOperationEvent(sessionId, user, version, timestamp, incomingOp);
+    delegate._handleModelOperationEvent(incomingEvent);
+
+    const expectedEvent: StringSpliceEvent = new StringSpliceEvent(myString, user, sessionId, false, 1, 2, "X");
     expect(lastEvent).to.deep.equal(expectedEvent);
   });
 });

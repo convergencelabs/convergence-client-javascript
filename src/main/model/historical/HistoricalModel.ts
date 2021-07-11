@@ -28,7 +28,7 @@ import {ObservableModel, ObservableModelEventConstants, ObservableModelEvents} f
 import {Path, PathElement} from "../Path";
 import {toModelOperation} from "./HistoricalModelOperationMapper";
 import {IdentityCache} from "../../identity/IdentityCache";
-import {getOrDefaultArray} from "../../connection/ProtocolUtil";
+import {dateToTimestamp, getOrDefaultArray, getOrDefaultNumber} from "../../connection/ProtocolUtil";
 
 import {com} from "@convergence/convergence-proto";
 import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
@@ -370,7 +370,9 @@ export class HistoricalModel implements ObservableModel {
    * At this point calling `version`, `time`, `root` and `elementAt` will return the
    * data / metadata of this model at the desired version.
    *
-   * @param version the version of the model at which point in time you're interested
+   * @param version the version of the model at which point in time you're interested.
+   * @returns A promise that will be resolved when the model has arrived at
+   *          the requested version.
    */
   public playTo(version: number): Promise<void> {
     if (version < 0) {
@@ -429,6 +431,42 @@ export class HistoricalModel implements ObservableModel {
 
       return;
     });
+  }
+
+  /**
+   * Enables "playing" the current model to the given version it was at, at a
+   * specific point in time. If the time corresponds exactly to a time an
+   * operation was applied to the model, the model will be played to that
+   * version. If the time does not correspond directly to a model version then
+   * the model will be played to the version corresponding to the most recent
+   * operation **before** the time request. This is because that would have
+   * been the state of the model had a user opened it at that time.
+   *
+   * This is an asynchronous call because it may take some time to traverse
+   * over potentially thousands of versions of this model.
+   *
+   * The returned promise resolves when the playback process is complete.
+   * At this point calling `version`, `time`, `root` and `elementAt` will return the
+   * data / metadata of this model at the desired version.
+   *
+   * @param time the time to play back the model to.
+   * @returns A promise that will be resolved when the model has arrived at
+   *          the requested time.
+   */
+  public playToTime(time: Date): Promise<void> {
+    const request: IConvergenceMessage = {
+      modelGetVersionAtTimeRequest: {
+        modelId: this._modelId,
+        targetTime: dateToTimestamp(time)
+      }
+    };
+
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {modelGetVersionAtTimeResponse} = response;
+      const version = getOrDefaultNumber(modelGetVersionAtTimeResponse.versionAtTime);
+
+      return this.playTo(version);
+    })
   }
 
   /**

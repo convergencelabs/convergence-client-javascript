@@ -17,6 +17,16 @@
  * @internal
  */
 export class IndexTransformer {
+  public static handleSplice(indices: number[], spliceIndex: number, deleteCount: number, insertCount: number): number[] {
+    return indices.map(index => {
+      if (index >= index) {
+        return (index - Math.min(index - spliceIndex, deleteCount)) + insertCount
+      } else {
+        return index
+      }
+    });
+  }
+
   public static handleInsert(indices: number[], insertIndex: number, length: number): number[] {
     return indices.map((index: number) => {
       if (index >= insertIndex) {

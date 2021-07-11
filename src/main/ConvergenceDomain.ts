@@ -43,7 +43,7 @@ import {Validation} from "./util/Validation";
 import {IdentityCache} from "./identity/IdentityCache";
 import {ConvergenceOptions} from "./ConvergenceOptions";
 import {IUsernameAndPassword} from "./IUsernameAndPassword";
-import {getOrDefaultObject, protoValueToJson} from "./connection/ProtocolUtil";
+import {getOrDefaultObject, protoValueToJson, timestampToDate} from "./connection/ProtocolUtil";
 import {mapObjectValues} from "./util/ObjectUtils";
 import {StorageEngine} from "./storage/StorageEngine";
 import {TypeChecker} from "./util/TypeChecker";
@@ -51,6 +51,9 @@ import {ModelOfflineManager} from "./model/ModelOfflineManager";
 import {Logger} from "./util/log/Logger";
 import {Logging} from "./util/log/Logging";
 import {StringMap} from "./util/StringMap";
+
+import {com} from "@convergence/convergence-proto";
+import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceMessage;
 
 /**
  * This represents a single connection to a specific Domain in
@@ -406,6 +409,36 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
    */
   public chat(): ChatService {
     return this._chatService;
+  }
+
+  /**
+   * Gets the server's current time.  Callers should not that this will be an approximate
+   * time based on network latency between the client and server. A potential way to get
+   * a more accurate estimate would be to monitor the round trip time and decrease the
+   * response by half the round trip time. For example:
+   *
+   * @example
+   *
+   * ```ts
+   * const requestTime = Date.now();
+   * domain.serverTime().then(serverTime => {
+   *   const responseTime = Date.now();
+   *   const delta = responseTime - requestTime;
+   *   const serverTimeEstimate = new Date(serverTime.getTime() - delta);
+   *   console.log(serverTimeEstimate);
+   * });
+   * ```
+   * @returns The current server time, at the time the server received the request.
+   */
+  public serverTime(): Promise<Date> {
+    const request: IConvergenceMessage = {
+      serverTimeRequest: {}
+    };
+
+    return this._connection.request(request).then((response: IConvergenceMessage) => {
+      const {serverTime} = response.serverTimeResponse;
+      return timestampToDate(serverTime);
+    })
   }
 
   /**

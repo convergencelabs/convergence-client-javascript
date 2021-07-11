@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Convergence Labs, Inc.
+ * Copyright (c) 2021 - Convergence Labs, Inc.
  *
  * This file is part of the Convergence JavaScript Client, which is released
  * under the terms of the GNU Lesser General Public License version 3
@@ -12,26 +12,27 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
-import {AppliedStringInsertOperation} from "./AppliedStringInsertOperation";
 import {AppliedDiscreteOperation} from "./AppliedDiscreteOperation";
-import {StringRemove} from "../ops/operationChanges";
+import {StringSplice} from "../ops/operationChanges";
 import {OperationType} from "../ops/OperationType";
 
 /**
  * @hidden
  * @internal
  */
-export class AppliedStringRemoveOperation extends AppliedDiscreteOperation implements StringRemove {
+export class AppliedStringSpliceOperation extends AppliedDiscreteOperation implements StringSplice {
 
   constructor(id: string,
               noOp: boolean,
               public readonly index: number,
-              public readonly value: string) {
-    super(OperationType.STRING_REMOVE, id, noOp);
+              public readonly deletedValue: string,
+              public readonly deleteCount: number,
+              public readonly insertValue: string) {
+    super(OperationType.STRING_INSERT, id, noOp);
     Object.freeze(this);
   }
 
-  public inverse(): AppliedStringInsertOperation {
-    return new AppliedStringInsertOperation(this.id, this.noOp, this.index, this.value);
+  public inverse(): AppliedStringSpliceOperation {
+    return new AppliedStringSpliceOperation(this.id, this.noOp, this.index, this.insertValue, this.insertValue.length, this.deletedValue);
   }
 }

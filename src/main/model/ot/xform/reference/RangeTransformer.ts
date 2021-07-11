@@ -20,6 +20,14 @@ import {IndexTransformer} from "./IndexTransformer";
  * @internal
  */
 export class RangeTransformer {
+  public static handleSplice(ranges: IndexRange[], insertIndex: number, deleteCount: number, insertCount: number): IndexRange[] {
+    return ranges.map(range => {
+      const indices: number[] = RangeTransformer._rangeToTuple(range);
+      const xFormed: number[] = IndexTransformer.handleSplice(indices, insertIndex, deleteCount, insertCount);
+      return RangeTransformer._tupleToRange(xFormed);
+    });
+  }
+
   public static handleInsert(ranges: IndexRange[], insertIndex: number, length: number): IndexRange[] {
     return ranges.map(range => {
       const indices: number[] = RangeTransformer._rangeToTuple(range);
