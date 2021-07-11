@@ -85,16 +85,19 @@ async function run() {
 
   console.log("\nPlay to Time\n");
 
-  // Play to time exactly at version 2.
+  // Play to time exactly at version 2, because we request the
+  // exact time.
   await historical.playToTime(version2Time);
   printHistoricalTimeAndVersion(historical);
 
-  // Should play to version 3.
+  // Should play to version 3, because we ask for a time
+  // between version 3 and version 4.
   const betweenVersion3And4 = new Date((version3Time.getTime() + version4Time.getTime()) / 2);
   await historical.playToTime(betweenVersion3And4);
   printHistoricalTimeAndVersion(historical);
 
-  // Should play to version 5.
+  // Should play to version 5, because we ask for a time
+  // after the last operation in the model.
   await historical.playToTime(new Date());
   printHistoricalTimeAndVersion(historical);
 
