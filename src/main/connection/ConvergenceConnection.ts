@@ -438,7 +438,8 @@ export class ConvergenceConnection extends ConvergenceEventEmitter<IConnectionEv
     };
     this._emitEvent(authenticatingEvent);
 
-    const response: IConvergenceMessage = await this.request({connectionRequest})
+    const requestTimeout = this._options.connectionRequestTimeout;
+    const response: IConvergenceMessage = await this.request({connectionRequest}, requestTimeout)
 
     const connectionResponse: IConnectionResponseMessage = response.connectionResponse;
     if (connectionResponse.success) {

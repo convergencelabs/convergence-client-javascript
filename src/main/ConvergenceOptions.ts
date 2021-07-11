@@ -26,7 +26,7 @@ import {IStorageAdapter} from "./storage";
  */
 export class ConvergenceOptions {
   public static DEFAULT_CONNECTION_TIMEOUT = 5;
-  public static DEFAULT_HANDSHAKE_TIMEOUT = 5;
+  public static DEFAULT_CONNECTION_REQUEST_TIMEOUT = 10;
 
   public static DEFAULT_AUTO_RECONNECT = true;
   public static DEFAULT_AUTO_RECONNECT_ON_INITIAL = true;
@@ -62,7 +62,7 @@ export class ConvergenceOptions {
   }
 
   public readonly connectionTimeout: number;
-  public readonly handshakeTimeout: number;
+  public readonly connectionRequestTimeout: number;
 
   public readonly autoReconnect: boolean;
   public readonly autoReconnectOnInitial: boolean;
@@ -96,12 +96,12 @@ export class ConvergenceOptions {
 
     const defaultConnectionOptions = {
       timeout: ConvergenceOptions.DEFAULT_CONNECTION_TIMEOUT,
-      handshakeTimeout: ConvergenceOptions.DEFAULT_HANDSHAKE_TIMEOUT
+      connectionRequestTimeout: ConvergenceOptions.DEFAULT_CONNECTION_REQUEST_TIMEOUT
     };
-    const {timeout, handshakeTimeout} = {...defaultConnectionOptions, ...options.connection};
+    const {timeout, connectionRequestTimeout} = {...defaultConnectionOptions, ...options.connection};
 
     this.connectionTimeout = timeout;
-    this.handshakeTimeout = handshakeTimeout;
+    this.connectionRequestTimeout = connectionRequestTimeout;
 
     const defaultReconnectOptions = {
       autoReconnect: ConvergenceOptions.DEFAULT_AUTO_RECONNECT,
@@ -170,7 +170,7 @@ export class ConvergenceOptions {
     return {
       connection: {
         timeout: this.connectionTimeout,
-        handshakeTimeout: this.handshakeTimeout
+        connectionRequestTimeout: this.connectionRequestTimeout
       },
       protocol: {
         defaultRequestTimeout: this.defaultRequestTimeout,

@@ -34,15 +34,15 @@ export interface IConvergenceOptions {
   connection?: {
     /**
      * The maximum time in seconds to wait for a successful web socket
-     * connection to be made.
+     * connection to be made. The default value is 5 seconds.
      */
     timeout?: number;
 
     /**
-     * The maximum time in seconds to wait for a successful handshake to be
-     * made after the web socket connection is successful.
+     * The maximum time in seconds to wait for a successful connection
+     * request to be completed. The default value is 10 seconds.
      */
-    handshakeTimeout?: number;
+    connectionRequestTimeout?: number;
   };
 
   /**
@@ -50,7 +50,8 @@ export interface IConvergenceOptions {
    */
   protocol?: {
     /**
-     * The timeout for a request to the server, in seconds.  Defaults to 10.
+     * The timeout for a request to the server, in seconds.  The default value
+     * is 10 seconds.
      */
     defaultRequestTimeout: number;
 
@@ -65,15 +66,15 @@ export interface IConvergenceOptions {
 
       /**
        * Configures how long the client will wait, in seconds after the last
-       * message is received from the server before a ping will be sent. Defaults
-       * to 5.
+       * message is received from the server before a ping will be sent. The default
+       * value is 5 seconds.
        */
       pingInterval?: number;
 
       /**
        * Specifies the time in seconds the client will wait for a response
-       * from the server to a ping before considering the connection dead. Defaults
-       * to 10.
+       * from the server to a ping before considering the connection dead. The
+       * default value is 10 seconds.
        */
       pongTimeout?: number;
     };
