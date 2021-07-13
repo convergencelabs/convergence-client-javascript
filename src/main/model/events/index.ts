@@ -35,6 +35,7 @@ export * from "./NumberDeltaEvent";
 
 export * from "./StringInsertEvent";
 export * from "./StringRemoveEvent";
+export * from "./StringSpliceEvent";
 export * from "./StringSetValueEvent";
 
 export * from "./ElementDetachedEvent";
