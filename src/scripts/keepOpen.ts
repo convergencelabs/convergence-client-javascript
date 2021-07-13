@@ -2,13 +2,10 @@
 
 import {connect} from "./connect";
 
-let domain;
 
-connect()
-  .then(d => {
-    domain = d;
-    return;
-  })
-  .catch(e => console.error(e));
+async function run() {
+  await connect();
+  console.log("connected");
+}
 
-process.stdin.resume();
+run().catch(e => console.error(e));

@@ -40,6 +40,7 @@ const OPTIONS: IConvergenceOptions = {
   },
   reconnect: {
     autoReconnect: true,
+    // reconnectIntervals: [1],
     autoReconnectOnInitial: true,
     fallbackAuth: (authChallenge) => {
       authChallenge.anonymous(DISPLAY_NAME);
