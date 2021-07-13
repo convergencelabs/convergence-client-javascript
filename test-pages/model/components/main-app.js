@@ -12,6 +12,7 @@
  * and LGPLv3 licenses, if they were not provided.
  */
 
+
 Vue.component('main-app', {
   data: () => {
     const options = {
@@ -34,7 +35,8 @@ Vue.component('main-app', {
       model: null,
       domain: domain,
       offlineModels: [],
-      onlineModels: []
+      onlineModels: [],
+      username: null
     };
   },
   created() {
@@ -52,6 +54,7 @@ Vue.component('main-app', {
   },
   methods: {
     onConnect(username, password) {
+      this.username = username;
       this.domain
         .connectWithPassword({username: username, password: password})
         .then(() => {
@@ -62,6 +65,7 @@ Vue.component('main-app', {
         .catch(e => console.error(e))
     },
     onInitOffline(username) {
+      this.username = username;
       this.domain
         .initializeOffline(username)
         .then(() => {
@@ -158,6 +162,8 @@ Vue.component('main-app', {
         });
     },
     buildCreateOptions(id) {
+      const userPermissions = {};
+      userPermissions[this.username] = {read: true, write: true, remove: true, manage: true};
       return {
         collection: "model-test-page",
         id: id,
@@ -180,7 +186,8 @@ Vue.component('main-app', {
           "date": new Date()
         },
         overrideWorld: true,
-        worldPermissions: {read: true, write: true, remove: false, manage: false}
+        worldPermissions: {read: true, write: true, remove: false, manage: false},
+        userPermissions: userPermissions
       }
     }
   },
