@@ -70,7 +70,7 @@ export class DateNode extends ModelNode<Date> {
     if (type === OperationType.DATE_VALUE) {
       this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid operation type for a Date: " + operationEvent.operation.type);
     }
   }
 

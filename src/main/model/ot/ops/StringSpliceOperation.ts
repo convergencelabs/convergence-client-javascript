@@ -15,7 +15,7 @@
 import {Immutable} from "../../../util/Immutable";
 import {DiscreteOperation} from "./DiscreteOperation";
 import {OperationType} from "./OperationType";
-import {StringInsert, StringSplice} from "./operationChanges";
+import {StringSplice} from "./operationChanges";
 
 /**
  * @hidden

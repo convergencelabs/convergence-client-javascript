@@ -189,7 +189,7 @@ export class ArrayNode extends ContainerNode<any[]> {
     } else if (type === OperationType.ARRAY_VALUE) {
       this._handleSetValueOperation(operationEvent);
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid operation type for an Array: " + operationEvent.operation.type);
     }
   }
 

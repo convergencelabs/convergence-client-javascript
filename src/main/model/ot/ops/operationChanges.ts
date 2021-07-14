@@ -143,28 +143,10 @@ export interface ObjectSet extends DiscreteChange {
  * @hidden
  * @internal
  */
-export interface StringInsert extends DiscreteChange {
-  index: number;
-  value: string;
-}
-
-/**
- * @hidden
- * @internal
- */
 export interface StringSplice extends DiscreteChange {
   index: number;
   deleteCount: number;
   insertValue: string;
-}
-
-/**
- * @hidden
- * @internal
- */
-export interface StringRemove extends DiscreteChange {
-  index: number;
-  value: string;
 }
 
 /**

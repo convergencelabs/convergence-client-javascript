@@ -86,7 +86,7 @@ export class NumberNode extends ModelNode<number> {
     } else if (type === OperationType.NUMBER_VALUE) {
       this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid operation type for a Number: " + operationEvent.operation.type);
     }
   }
 

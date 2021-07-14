@@ -67,7 +67,7 @@ export class BooleanNode extends ModelNode<boolean> {
     if (type === OperationType.BOOLEAN_VALUE) {
       this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid operation type for a Boolean: " + operationEvent.operation.type);
     }
   }
 

@@ -145,7 +145,7 @@ export class ObjectNode extends ContainerNode<{ [key: string]: any }> {
         this._handleSetOperation(operationEvent);
         break;
       default:
-        throw new Error("Invalid operation for RealTimeObject");
+        throw new Error("Invalid operation type for an Object: " + operationEvent.operation.type);
     }
   }
 

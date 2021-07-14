@@ -28,7 +28,7 @@ export class AppliedStringSpliceOperation extends AppliedDiscreteOperation imple
               public readonly deletedValue: string,
               public readonly deleteCount: number,
               public readonly insertValue: string) {
-    super(OperationType.STRING_INSERT, id, noOp);
+    super(OperationType.STRING_SPLICE, id, noOp);
     Object.freeze(this);
   }
 

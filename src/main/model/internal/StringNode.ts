@@ -89,7 +89,7 @@ export class StringNode extends ModelNode<string> {
     } else if (type === OperationType.STRING_VALUE) {
       this._handleSetOperation(operationEvent);
     } else {
-      throw new Error("Invalid operation!");
+      throw new Error("Invalid operation type for a String: " + operationEvent.operation.type);
     }
   }
 
