@@ -17,6 +17,8 @@ async function run() {
     data: {}
   });
 
+  const version1Time = model.time();
+
   console.log("\nGenerating model operations\n");
 
   printModelTimeAndVersion(model);
@@ -85,6 +87,11 @@ async function run() {
 
   console.log("\nPlay to Time\n");
 
+  // Play to version 1, because we request the
+  // exact time.
+  await historical.playToTime(version1Time);
+  printHistoricalTimeAndVersion(historical);
+
   // Play to version 2, because we request the
   // exact time.
   await historical.playToTime(version2Time);
@@ -100,6 +107,20 @@ async function run() {
   // after the last operation in the model.
   await historical.playToTime(new Date());
   printHistoricalTimeAndVersion(historical);
+
+  // Playback to version 1.
+  await historical.playToTime(version1Time);
+  printHistoricalTimeAndVersion(historical);
+
+
+  try {
+    // This should fail because this is prior to the creation
+    // time of the model.
+    await historical.playToTime(new Date(version1Time.getTime() - 60 * 60 * 24));
+    console.error("The play back to time was expected to fail, but succeeded");
+  } catch (e: any) {
+    console.log("The play back to time failed (correctly): " + e.message);
+  }
 
   await model.close();
 
