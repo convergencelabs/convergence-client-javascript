@@ -145,31 +145,25 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
 
   private _doClose(clean: boolean, reason?: string): Promise<void> {
     if (!this._socket || this._socket.readyState === this._webSocketClass.CLOSED) {
-      this._logger.debug("Attempted to close a WebSocket that is in the CLOSED state.");
+      this._logger.trace("Attempted to close a WebSocket that is in the CLOSED state.");
       return Promise.reject(new Error("Can not call close on a WebSocket in the CLOSED state."));
     } else if (this._socket.readyState === this._webSocketClass.CLOSING) {
-      this._logger.debug("Attempted to close a WebSocket that is in the CLOSING state.");
+      this._logger.trace("Attempted to close a WebSocket that is in the CLOSING state.");
       return Promise.reject(new Error("Can not call close on a WebSocket in the CLOSING state."));
     } else {
       if (this._socket.readyState === this._webSocketClass.CONNECTING) {
-        this._logger.debug("Closing a connecting WebSocket.");
+        this._logger.trace("Closing a connecting WebSocket.");
       } else {
-        this._logger.debug("Closing an open WebSocket.");
+        this._logger.trace("Closing an open WebSocket.");
       }
 
       this._closeDeferred = new Deferred<void>();
 
-      // The socket was open or opening.  This is a normal request to close.
-      // this._detachFromSocket(this._socket);
-      //
-      // const socket = this._socket;
-      // this._socket = null;
-
       if (clean) {
         this._logger.debug("Closing WebSocket normally.");
-        this._socket.close(1000, "The client closed the connection");
+        this._socket.close(1000, reason || "The client closed the connection");
       } else {
-        this._logger.debug("Closing WebSocket abnormally.");
+        this._logger.debug("Closing WebSocket abnormally: " + reason);
         this._socket.close(4006, reason);
       }
 
@@ -208,7 +202,7 @@ export default class ConvergenceSocket extends ConvergenceEventEmitter<IConverge
       }
     };
 
-    socket.onopen = (evt: Event) => {
+    socket.onopen = (_: Event) => {
       if (this._openDeferred) {
         this._logger.debug("WebSocket connection opened");
         try {

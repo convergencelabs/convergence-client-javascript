@@ -35,8 +35,8 @@ export class HeartbeatHelper {
   private _timeoutFuture: any;
 
   private readonly _handler: HeartbeatHandler;
-  private _pingInterval: number;
-  private _pongTimeout: number;
+  private readonly _pingInterval: number;
+  private readonly _pongTimeout: number;
   private _started: boolean;
   private readonly _logger: Logger;
 
@@ -60,7 +60,7 @@ export class HeartbeatHelper {
       throw new Error("Can't start the HeartbeatManager unless the callback is set.");
     }
 
-    this._logger.debug(() =>
+    this._logger.trace(() =>
       "HeartbeatHelper started with Ping Interval " + this._pingInterval +
       " and Pong Timeout " + this._pongTimeout);
 
@@ -73,7 +73,7 @@ export class HeartbeatHelper {
     this._stopPingTimer();
     this._cancelPongTimeout();
 
-    this._logger.debug(() => "HeartbeatHelper stopped.");
+    this._logger.trace(() => "HeartbeatHelper stopped.");
   }
 
   get started(): boolean {
@@ -116,7 +116,7 @@ export class HeartbeatHelper {
   }
 
   private _onTimeout = () => {
-    this._logger.debug(() => "A pong timeout occurred");
+    this._logger.trace(() => "A pong timeout occurred");
     this._handler.onTimeout();
   }
 }

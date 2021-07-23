@@ -84,10 +84,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   private readonly _requests: Map<number, RequestRecord>;
   private _closeRequested: boolean = false;
   private _connected = false;
-
-  private _messageLogger = Logging.logger("protocol.messages");
-  private _pingLogger = Logging.logger("protocol.ping");
-  private _logger = Logging.logger("protocol");
+  private readonly _logger = Logging.logger("protocol");
 
   constructor(socket: ConvergenceSocket, protocolConfig: ProtocolConfiguration) {
     super();
@@ -125,19 +122,19 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
         },
         onTimeout: () => {
           this.abort("heartbeat pong timeout")
-              .then(() => {
-                this._logger.debug("Connection aborted after pong timeout");
-              })
-              .catch(err => {
-                this._logger.error("Error aborting connection after a pong timeout", err);
-              });
+            .then(() => {
+              this._logger.debug("Connection aborted after pong timeout");
+            })
+            .catch(err => {
+              this._logger.error("Error aborting connection after a pong timeout", err);
+            });
         }
       };
 
       this._heartbeatHelper = new HeartbeatHelper(
-          heartbeatHandler,
-          this._protocolConfig.heartbeatConfig.pingInterval,
-          this._protocolConfig.heartbeatConfig.pongTimeout);
+        heartbeatHandler,
+        this._protocolConfig.heartbeatConfig.pingInterval,
+        this._protocolConfig.heartbeatConfig.pongTimeout);
 
       if (this._protocolConfig.heartbeatConfig.enabled) {
         this._heartbeatHelper.start();
@@ -165,16 +162,16 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
 
     const requestTimeout = (timeout !== undefined ? timeout : this._protocolConfig.defaultRequestTimeout) * 1000;
     const timeoutTask: any = setTimeout(
-        () => {
-          const req: RequestRecord = this._requests.get(reqId);
-          if (req) {
-            req.replyDeferred.reject(new ConvergenceError(
-                "A request timeout occurred.",
-                ConvergenceErrorCodes.REQUEST_TIMEOUT,
-                {message}));
-          }
-        },
-        requestTimeout);
+      () => {
+        const req: RequestRecord = this._requests.get(reqId);
+        if (req) {
+          req.replyDeferred.reject(new ConvergenceError(
+            "A request timeout occurred.",
+            ConvergenceErrorCodes.REQUEST_TIMEOUT,
+            {message}));
+        }
+      },
+      requestTimeout);
 
     this._requests.set(reqId, {reqId, replyDeferred, timeoutTask});
 
@@ -189,7 +186,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     }
 
     const result: Promise<void> = this._socket.isOpen() || this._socket.isConnecting() ?
-        this._socket.terminate(reason) : Promise.resolve();
+      this._socket.terminate(reason) : Promise.resolve();
 
     this._onSocketDropped();
 
@@ -206,7 +203,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
     this._requests.forEach(task => {
       clearTimeout(task.timeoutTask);
       task.replyDeferred.reject(
-          new Error("The connection was closed while waiting for a reply to a request message.")
+        new Error("The connection was closed while waiting for a reply to a request message.")
       )
     });
 
@@ -214,8 +211,11 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
   }
 
   public sendMessage(message: IConvergenceMessage): void {
-    const logger = !message.ping && !message.pong ? this._messageLogger : this._pingLogger;
-    logger.debug(() => "SND: " + JSON.stringify(message));
+    if (message.ping || message.pong) {
+      this._logger.trace(() => "SND: " + JSON.stringify(message));
+    } else {
+      this._logger.debug(() => "SND: " + JSON.stringify(message));
+    }
 
     try {
       const bytes = ConvergenceMessageIO.encode(message);
@@ -233,8 +233,11 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
       this._heartbeatHelper.messageReceived();
     }
 
-    const logger = !convergenceMessage.ping && !convergenceMessage.pong ? this._messageLogger : this._pingLogger;
-    logger.debug(() => "RCV: " + JSON.stringify(convergenceMessage));
+    if (convergenceMessage.ping || convergenceMessage.pong) {
+      this._logger.trace(() => "RCV: " + JSON.stringify(convergenceMessage));
+    } else {
+      this._logger.debug(() => "RCV: " + JSON.stringify(convergenceMessage));
+    }
 
     if (convergenceMessage.ping) {
       this._onPing();
@@ -304,7 +307,7 @@ export class ProtocolConnection extends ConvergenceEventEmitter<IProtocolConnect
         const errorMessage: IErrorMessage = message.error;
         const details = mapObjectValues(getOrDefaultObject(errorMessage.details), protoValueToJson);
         record.replyDeferred.reject(
-            new ConvergenceServerError(errorMessage.message, errorMessage.code, details));
+          new ConvergenceServerError(errorMessage.message, errorMessage.code, details));
       } else {
         record.replyDeferred.resolve(message);
       }
