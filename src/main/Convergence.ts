@@ -182,9 +182,9 @@ export class Convergence {
    *
    * The available loggers (and where / how they are used) are:
    *
-   * - "connection" (Connection and authentication messages)
-   * - "protocol.messages" (All messages to/from the server)
-   * - "protocol.ping" (All ping/pong messages to/from the server)
+   * - "protocol" (All messages to/from the server)
+   * - "connection" (High level connection and authentication messages)
+   * - "socket" (Low level WebSocket logs)
    * - "heartbeat" (Heartbeat messages)
    * - "activities.activity" ([[Activity]])
    * - "activities.service" ([[ActivityService]])
