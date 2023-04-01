@@ -10,3 +10,4 @@ npm-debug.log
 .npmrc
 .nyc_output
 .rpt2_cache
+.DS_Store
