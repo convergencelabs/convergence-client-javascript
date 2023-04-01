@@ -13,4 +13,4 @@
   publish = "dist/docs"
 
   # Default build command.
-  command = "npm install; npm run docs"
+  command = "npm install; npm run dist; npm run docs"
