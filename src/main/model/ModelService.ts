@@ -248,7 +248,7 @@ Object.freeze(ModelServiceEventConstants);
 
 /**
  * This is the main entry point in Convergence for working with
- * [real time data models](https://docs.convergence.io/guide/models/overview.html).
+ * [real time data models](https://guide.convergence.io/models/overview.html).
  * [[RealTimeModel]]s can be created, opened, deleted, and managed from the [[ModelService]].
  *
  * See [[IModelServiceEvents]] for the events that may be emitted on this model.
@@ -402,7 +402,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
-   * Searches for models using the model [query syntax](https://docs.convergence.io/guide/models/queries.html).
+   * Searches for models using the model [query syntax](https://guide.convergence.io/models/queries.html).
    * Only `SELECT`s are currently supported.  The grammar is as follows:
    *
    * ```
@@ -491,7 +491,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
    * be opened. If the model does not exist it will be created first, and then
    * opened.
    *
-   * [See here](https://docs.convergence.io/guide/models/model-service.html#note-about-race-conditions)
+   * [See here](https://guide.convergence.io/models/model-service.html#note-about-race-conditions)
    * for more context about race conditions this alleviates.
    *
    * @param options
@@ -603,7 +603,7 @@ export class ModelService extends ConvergenceEventEmitter<IConvergenceEvent> {
   }
 
   /**
-   * Opens an existing model, by id, in [history mode](https://docs.convergence.io/guide/models/history.html).
+   * Opens an existing model, by id, in [history mode](https://guide.convergence.io/models/history.html).
    *
    * @param id
    *   The id of the model to open in history mode.

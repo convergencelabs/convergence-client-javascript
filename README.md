@@ -5,7 +5,7 @@
 # Convergence JavaScript Client
 [![Build](https://github.com/convergencelabs/convergence-client-javascript/actions/workflows/build.yml/badge.svg)](https://github.com/convergencelabs/convergence-client-javascript/actions/workflows/build.yml)
 
-This is the first (and only) client for the [Convergence Collaboration Framework](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://docs.convergence.io/guide/getting-started.html)).
+This is the first (and only) client for the [Convergence Collaboration Framework](https://convergence.io).  It runs in all evergreen browsers and node.js as well (with a [slight configuration](https://guide.convergence.io/getting-started.html)).
 
 The client is implemented in typescript.  The build system uses both Rollup and WebPack to bundle and transpile the typescript to single files using a variety of module systems.  For testing, the typescript compiler is used to compile the code into ES5 and commonjs modules to support direct unit testing in node.
 
@@ -18,7 +18,7 @@ The core Convergence capability is composed of multiple individual projects that
 npm install @convergence/convergence
 ```
 
-See our [developer guide](https://docs.convergence.io/guide/getting-started.html) for a quick overview and some getting started code snippets.
+See our [developer guide](https://guide.convergence.io/getting-started.html) for a quick overview and some getting started code snippets.
 
 ## Versioning
 The Convergence JavaScript Client follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) with two notable exceptions:
@@ -27,16 +27,6 @@ The Convergence JavaScript Client follows [Semantic Versioning 2.0.0](https://se
 2. API marked with an `@experimental` tag is considered unstable and subject to breaking changes in a future release.
 
 These deviations from strict Semantic Versioning are intended to get potential new functionality to the community as fast as possible in order to get rapid feedback before the API is finalized. If you do not want to be an early adopter, then you should refrain from using pre-release versions or API marked as `@experimental`.
-
-## Support
-
-[Convergence Labs](https://convergencelabs.com) provides several different channels for support:
-
-- Please use the [Discourse Forum](https://forum.convergence.io) for general and technical questions, so the whole community can benefit.
-- For paid dedicated support, integration assistance, or other custom development services, [contact us](https://convergence.io/contact-sales/) directly.
-- Chat with us on the [Convergence Public Slack](https://slack.convergence.io).
-- Email <support@convergencelabs.com> for all other inquiries.
-
 
 ## Developing
 To build a distribution build:

@@ -55,12 +55,12 @@ export interface RealTimeStringEvents extends ObservableStringEvents {
  * changes to this object.
  *
  * Convergence supports two types of
- * [references](https://docs.convergence.io/guide/models/references/realtimestring.html)
+ * [references](https://guide.convergence.io/models/references/realtimestring.html)
  * unique to [[RealTimeString]]s.  These are useful for rendering remote cursors and
  * selections.
  *
  * See the
- * [developer guide](https://docs.convergence.io/guide/models/data/real-time-string.html)
+ * [developer guide](https://guide.convergence.io/models/data/real-time-string.html)
  * for the most common use cases.
  *
  * @module Real Time Data
@@ -198,7 +198,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * Creates an [IndexReference](LocalIndexReference) anchored to this string. Its index
    * is automatically updated on all local and remote changes.
    *
-   * See the [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+   * See the [developer guide](https://guide.convergence.io/models/references/realtimestring.html)
    * for more information.
    *
    * @param key a unique name for the reference
@@ -231,7 +231,7 @@ export class RealTimeString extends RealTimeElement<string> implements Observabl
    * Creates a [[LocalRangeReference]] bound to this object.  Its index bounds are
    * automatically updated on all local and remote changes.
    *
-   * See the [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+   * See the [developer guide](https://guide.convergence.io/models/references/realtimestring.html)
    * for more information.
    *
    * @param key a unique name for the range reference

@@ -60,11 +60,11 @@ import IConvergenceMessage = com.convergencelabs.convergence.proto.IConvergenceM
  * Convergence. All interactions with the Domain start with this class, through
  * several "services" that provide the following functionality:
  *
- * - [[ModelService]]: Manage [models (data)](https://docs.convergence.io/guide/models/model-service.html)
- * - [[IdentityService]]: Manage [users and groups](https://docs.convergence.io/guide/identity/overview.html)
- * - [[ActivityService]]: Manage [activities](https://docs.convergence.io/guide/activities/overview.html)
- * - [[PresenceService]]: Manage [presence](https://docs.convergence.io/guide/presence/overview.html)
- * - [[ChatService]]: Create [chat](https://docs.convergence.io/guide/chat/overview.html)s and send and receive messages
+ * - [[ModelService]]: Manage [models (data)](https://guide.convergence.io/models/model-service.html)
+ * - [[IdentityService]]: Manage [users and groups](https://guide.convergence.io/identity/overview.html)
+ * - [[ActivityService]]: Manage [activities](https://guide.convergence.io/activities/overview.html)
+ * - [[PresenceService]]: Manage [presence](https://guide.convergence.io/presence/overview.html)
+ * - [[ChatService]]: Create [chat](https://guide.convergence.io/chat/overview.html)s and send and receive messages
  *
  * This object itself is the result of a successful connection and authentication
  * to a Convergence server via one of the [[Convergence]] connection methods.
@@ -333,7 +333,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Gets the ModelService, which is used for interacting with
-   * [Real Time Models](https://docs.convergence.io/guide/models/overview.html).
+   * [Real Time Models](https://guide.convergence.io/models/overview.html).
    *
    * ```typescript
    * const modelService = domain.models();
@@ -348,7 +348,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Gets the IdentityService, which is used for obtaining information about
-   * [Users](https://docs.convergence.io/guide/identity/overview.html).
+   * [Users](https://guide.convergence.io/identity/overview.html).
    *
    * ```typescript
    * const identityService = domain.identity();
@@ -363,7 +363,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Gets the ActivityService, which is used for interacting with
-   * [Activities](https://docs.convergence.io/guide/activities/overview.html).
+   * [Activities](https://guide.convergence.io/activities/overview.html).
    *
    * ```typescript
    * const activityService = domain.activities();
@@ -378,7 +378,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Gets the PresenceService, which is used to gain insight into the
-   * [presence](https://docs.convergence.io/guide/presence/overview.html)
+   * [presence](https://guide.convergence.io/presence/overview.html)
    * of Domain Users.
    *
    * @example
@@ -396,7 +396,7 @@ export class ConvergenceDomain extends ConvergenceEventEmitter<IConvergenceDomai
 
   /**
    * Gets the ChatService, which is used to send and receive
-   * [chat messages](https://docs.convergence.io/guide/chat/overview.html).
+   * [chat messages](https://guide.convergence.io/chat/overview.html).
    *
    * @example
    * ```typescript

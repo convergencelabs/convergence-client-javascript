@@ -54,7 +54,7 @@ export interface RealTimeObjectEvents extends ObservableObjectEvents {
  * See [[RealTimeObjectEvents]] for the many events that may be emitted on remote changes
  * to this underlying data of this object.
  *
- * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-object.html)
+ * Also see the [developer guide](https://guide.convergence.io/models/data/real-time-object.html)
  * for examples of some of the most common use cases.
  *
  * @module Real Time Data
@@ -235,7 +235,7 @@ export class RealTimeObject extends RealTimeElement<{ [key: string]: any; }>
    * Creates a [[LocalPropertyReference]] bound to this object.  Once it's created,
    * you can `set` the property to which the reference can be bound.
    *
-   * See the [developer guide](https://docs.convergence.io/guide/models/references/realtimeobject.html)
+   * See the [developer guide](https://guide.convergence.io/models/references/realtimeobject.html)
    * for more information and examples.
    *
    * @param key a unique name for the property reference

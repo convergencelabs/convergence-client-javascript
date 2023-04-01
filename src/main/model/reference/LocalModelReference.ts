@@ -31,7 +31,7 @@ export interface ModelReferenceCallbacks {
 
 /**
  * The parent class for a
- * [local reference](https://docs.convergence.io/guide/models/references/local-references.html).
+ * [local reference](https://guide.convergence.io/models/references/local-references.html).
  *
  * @module Real Time Data
  */

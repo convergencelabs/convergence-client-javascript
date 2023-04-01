@@ -39,7 +39,7 @@ export interface IndexRange {
 /**
  * Represents a range of text in a [[RealTimeString]] that must be adjusted while
  * the data is changing.  See the
- * [developer guide](https://docs.convergence.io/guide/models/references/realtimestring.html)
+ * [developer guide](https://guide.convergence.io/models/references/realtimestring.html)
  * for some examples.
  *
  * @module Real Time Data

@@ -19,7 +19,7 @@ import {UserField} from "./IdentityService";
  * A configuration for a query for [[DomainUser]]s. [[term]] and [[fields]] are
  * required.
  *
- * See the [developer guide](https://docs.convergence.io/guide/identity/overview.html)
+ * See the [developer guide](https://guide.convergence.io/identity/overview.html)
  * for an example.
  *
  * @module Users and Identity

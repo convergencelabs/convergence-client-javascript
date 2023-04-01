@@ -33,9 +33,9 @@ import {Logging} from "./util/log/Logging";
  * This is the entry point for the Convergence JS client. It allows users to connect
  * to the Convergence Engine using a variety of authentication methods. On success,
  * each connection method returns a [[ConvergenceDomain]] bound to the
- * [Domain](https://docs.convergence.io/guide/domain/overview.html) at the specified URL.
+ * [Domain](https://guide.convergence.io/domain/overview.html) at the specified URL.
  *
- * See the [Developer Guide](https://docs.convergence.io/guide/authentication/overview.html)
+ * See the [Developer Guide](https://guide.convergence.io/authentication/overview.html)
  * for more information about authentication options.
  */
 export class Convergence {
@@ -119,7 +119,7 @@ export class Convergence {
 
   /**
    * Connects to a Convergence Domain using a JSON Web Token (JWT) for
-   * authentication. See the [developer guide](https://docs.convergence.io/guide/authentication/json-web-tokens.html)
+   * authentication. See the [developer guide](https://guide.convergence.io/authentication/json-web-tokens.html)
    * for information about configuring the server to accept JWTs.
    *
    * @param url

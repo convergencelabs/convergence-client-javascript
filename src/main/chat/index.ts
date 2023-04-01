@@ -16,7 +16,7 @@
  * The Chat API allows users to communicate via text embedded directly within
  * the application.
  *
- * See the [developer guide](https://docs.convergence.io/guide/chat/overview.html)
+ * See the [developer guide](https://guide.convergence.io/chat/overview.html)
  * for a few chat examples.
  *
  * @moduledefinition Chat

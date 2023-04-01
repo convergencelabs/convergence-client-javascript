@@ -49,7 +49,7 @@ export interface ObservableElementEvents {
   readonly MODEL_CHANGED: string;
 
   /**
-   * Emitted when a remote [reference](https://docs.convergence.io/guide/models/references/references.html)
+   * Emitted when a remote [reference](https://guide.convergence.io/models/references/references.html)
    * is created on this [[RealTimeElement]].  See [[RemoteReferenceCreatedEvent]] for the actual emitted event.
    *
    * @event

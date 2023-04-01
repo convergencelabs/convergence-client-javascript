@@ -25,7 +25,7 @@ import {DomainUser} from "../../identity";
 import { RealTimeElement, RealTimeModel } from "../rt";
 
 /**
- * All the different types of [references](https://docs.convergence.io/guide/models/references/references.html).
+ * All the different types of [references](https://guide.convergence.io/models/references/references.html).
  *
  * @module Real Time Data
  */
@@ -60,7 +60,7 @@ export interface ModelReferenceEvents {
 }
 
 /**
- * The base class for all [references](https://docs.convergence.io/guide/models/references/references.html),
+ * The base class for all [references](https://guide.convergence.io/models/references/references.html),
  * which are essentially pointers to elements and data within a [[RealTimeModel]].
  * They are typically used to implement transient UX constructs such as text selections
  * and cursors.

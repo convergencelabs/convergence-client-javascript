@@ -11,7 +11,7 @@ The API Docs are organized by module which roughly relate to the main services t
 * [Offline](modules/offline.html)
 
 ## Getting Started
-The example below shows a simple use case: Connecting to a <a href="https://docs.convergence.io/guide/domain/overview.html" class="tsd-external-link">domain</a>, opening a [[RealTimeModel]] from the domain's [[ModelService]], and finally writing out the contents of that model to the console.  
+The example below shows a simple use case: Connecting to a <a href="https://guide.convergence.io/domain/overview.html" class="tsd-external-link">domain</a>, opening a [[RealTimeModel]] from the domain's [[ModelService]], and finally writing out the contents of that model to the console.  
 
 ```Typescript
 import {Convergence} from "@convergence/convergence";

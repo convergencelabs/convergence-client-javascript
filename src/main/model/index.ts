@@ -20,7 +20,7 @@
  * developers from the difficulties of implementing Operational Transformation.
  * It does this by supporting a strict set of data: JSON.
  *
- * See our [developer guide](https://docs.convergence.io/guide/models/overview.html)
+ * See our [developer guide](https://guide.convergence.io/models/overview.html)
  * for additional information.
  *
  * To get started with Real Time Data, get an instance of the [[ModelService]]

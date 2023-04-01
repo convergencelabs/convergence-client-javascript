@@ -97,7 +97,7 @@ export interface PresenceServiceEvents {
  * system can set presence state. Presence state is global for each user
  * in that the state is shared across all sessions.
  *
- * See the [developer guide](https://docs.convergence.io/guide/presence/overview.html) for additional background.
+ * See the [developer guide](https://guide.convergence.io/presence/overview.html) for additional background.
  *
  * See [[PresenceServiceEvents]] for the events that may be emitted on this service.
  *

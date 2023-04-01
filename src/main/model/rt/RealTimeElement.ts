@@ -50,7 +50,7 @@ export interface RealTimeElementEvents extends ObservableElementEvents {
  * all data elements, like getting the element's [[value]], a unique [[id]], its
  * [[path]] within the complete data tree, and much more.
  *
- * See the [developer guide](https://docs.convergence.io/guide/models/data/real-time-elements.html)
+ * See the [developer guide](https://guide.convergence.io/models/data/real-time-elements.html)
  * for a more in-depth analysis of the potential types of data this could wrap.
  *
  * Use [[value]] to get the current actual value of this element.
@@ -247,7 +247,7 @@ export abstract class RealTimeElement<T = any>
 
   /**
    * True if the element is no longer synchronizing with the server.  See the
-   * [developer guide](https://docs.convergence.io/guide/models/data/real-time-elements.html)
+   * [developer guide](https://guide.convergence.io/models/data/real-time-elements.html)
    * for more information.
    */
   public isDetached(): boolean {
@@ -306,7 +306,7 @@ export abstract class RealTimeElement<T = any>
    * Returns the remote [[ModelReference]] created by the given `sessionId` with
    * the unique name `key`, or `undefined` if no such reference exists.
    *
-   * See [Remote References](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * See [Remote References](https://guide.convergence.io/models/references/remote-references.html)
    * in the developer guide.
    *
    * @param sessionId The session ID that created the reference

@@ -51,7 +51,7 @@ export interface RealTimeArrayEvents extends ObservableArrayEvents {
  * See [[RealTimeArrayEvents]] for the events that may be emitted on remote changes
  * to this object.
  *
- * Also see the [developer guide](https://docs.convergence.io/guide/models/data/real-time-array.html)
+ * Also see the [developer guide](https://guide.convergence.io/models/data/real-time-array.html)
  * for more information.
  *
  * @module Real Time Data

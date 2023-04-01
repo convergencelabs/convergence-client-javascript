@@ -38,7 +38,7 @@ export interface RealTimeNumberEvents extends ObservableNumberEvents {
  * changes to this object.
  *
  * See the
- * [developer guide](https://docs.convergence.io/guide/models/data/real-time-number.html)
+ * [developer guide](https://guide.convergence.io/models/data/real-time-number.html)
  * for the most common use cases.
  *
  * @module Real Time Data

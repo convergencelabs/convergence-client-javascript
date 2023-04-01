@@ -71,7 +71,7 @@ Object.freeze(HistoricalModelEventConstants);
  * to access the data associated with this model's "current" version. Note that these
  * return a read-only [[HistoricalObject]] or [[HistoricalElement]] respectively.
  *
- * See the [developer guide](https://docs.convergence.io/guide/models/history.html)
+ * See the [developer guide](https://guide.convergence.io/models/history.html)
  * for some examples and additional information.
  *
  * @module Real Time Data

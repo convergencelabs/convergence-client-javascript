@@ -42,7 +42,7 @@ export interface RealTimeBooleanEvents extends ObservableBooleanEvents {
  * changes to this object.
  *
  * Common use cases are documented in the
- * [developer guide](https://docs.convergence.io/guide/models/data/real-time-boolean.html).
+ * [developer guide](https://guide.convergence.io/models/data/real-time-boolean.html).
  *
  * @module Real Time Data
  */

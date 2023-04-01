@@ -217,7 +217,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly COLLABORATOR_CLOSED: string;
 
   /**
-   * Emitted when a [Remote Reference](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * Emitted when a [Remote Reference](https://guide.convergence.io/models/references/remote-references.html)
    * is created on this model with [[RealTimeModel.elementReference]].
    *
    * The actual emitted event is a [[RemoteReferenceCreatedEvent]].
@@ -227,7 +227,7 @@ export interface RealTimeModelEvents extends ObservableModelEvents {
   readonly REFERENCE: string;
 
   /**
-   * Emitted when the [permissions](https://docs.convergence.io/guide/models/permissions.html)
+   * Emitted when the [permissions](https://guide.convergence.io/models/permissions.html)
    * on this model change.  The actual emitted event is a [[ModelPermissionsChangedEvent]].
    *
    * @event [[ModelPermissionsChangedEvent]]
@@ -261,7 +261,7 @@ const RealTimeModelEventConstants: RealTimeModelEvents = {
  * Any co-modification conflicts are resolved automatically and consistently
  * for all connected users so that everybody sees the same thing.
  *
- * See [this page](https://docs.convergence.io/guide/models/overview.html) in the
+ * See [this page](https://guide.convergence.io/models/overview.html) in the
  * developer guide for a few of the interesting things you can do with a [[RealTimeModel]].
  *
  * Any data that can be represented with JSON can be stored in a [[RealTimeModel]].  This
@@ -614,7 +614,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
-   * Returns an [observable](https://docs.convergence.io/guide/overview/events-and-observables.html)
+   * Returns an [observable](https://guide.convergence.io/overview/events-and-observables.html)
    * which emits whenever a collaborator opens or closes this model.  This is useful
    * for keeping an up-to-date listing of current collaborators.
    *
@@ -794,7 +794,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
 
   /**
    * Sets a flag on this model to indicate that any subsequent changes will be batched into
-   * one atomic operation.  See [Batch Changes](https://docs.convergence.io/guide/models/batch-changes.html)
+   * one atomic operation.  See [Batch Changes](https://guide.convergence.io/models/batch-changes.html)
    * in the developer guide.
    *
    * Note that a single batch operation must be fully encompassed in a single JS
@@ -853,8 +853,8 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
   }
 
   /**
-   * Creates an [Element Reference](https://docs.convergence.io/guide/models/references/realtimemodel.html),
-   * which is a [Reference](https://docs.convergence.io/guide/models/references/references.html)
+   * Creates an [Element Reference](https://guide.convergence.io/models/references/realtimemodel.html),
+   * which is a [Reference](https://guide.convergence.io/models/references/references.html)
    * bound to one more [elements](#elementat) in this model's data.
    *
    * @param key a unique name for this ElementReference
@@ -887,7 +887,7 @@ export class RealTimeModel extends ConvergenceEventEmitter<IConvergenceEvent> im
    * Returns the remote [[ModelReference]] created by the given `sessionId` with
    * the unique name `key`, or `undefined` if no such reference exists.
    *
-   * See [Remote References](https://docs.convergence.io/guide/models/references/remote-references.html)
+   * See [Remote References](https://guide.convergence.io/models/references/remote-references.html)
    * in the developer guide.
    *
    * @param sessionId The session ID that created the reference

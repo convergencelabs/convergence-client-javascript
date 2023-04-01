@@ -36,7 +36,7 @@ import {ActivityPermissionUtils} from "./ActivityPermissionUtils";
  * Activities in Convergence. Activities provide a mechanism to communicate
  * `where` users are operating within a system and `what` they are doing.
  *
- * See the [developer guide](https://docs.convergence.io/guide/activities/overview.html)
+ * See the [developer guide](https://guide.convergence.io/activities/overview.html)
  * for an introduction to Activities.
  *
  * @module Activities

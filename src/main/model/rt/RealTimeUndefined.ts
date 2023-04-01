@@ -39,7 +39,7 @@ export interface RealTimeUndefinedEvents extends ObservableUndefinedEvents {
  * the requested element does not exist.
  *
  * More information is in the
- * [developer guide](https://docs.convergence.io/guide/models/data/real-time-undefined.html).
+ * [developer guide](https://guide.convergence.io/models/data/real-time-undefined.html).
  *
  * @module Real Time Data
  */

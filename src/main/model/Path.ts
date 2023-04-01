@@ -43,7 +43,7 @@ export type PathElement = string | number;
  * ```
  *
  * See the
- * [developer guide](https://docs.convergence.io/guide/models/overview.html#paths) for
+ * [developer guide](https://guide.convergence.io/models/overview.html#paths) for
  * more examples of using paths to get parts of a model's contents.
  *
  * @module Real Time Data

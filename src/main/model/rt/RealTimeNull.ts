@@ -36,7 +36,7 @@ export interface RealTimeNullEvents extends ObservableNullEvents {
  * changes to this object.
  *
  * More information is in the
- * [developer guide](https://docs.convergence.io/guide/models/data/real-time-null.html).
+ * [developer guide](https://guide.convergence.io/models/data/real-time-null.html).
  *
  * @module Real Time Data
  */

@@ -20,7 +20,7 @@ import {DomainUser} from "../../identity";
 /**
  * Represents one or more properties in a [[RealTimeObject]] that must be adjusted while
  * the data is changing.  See the
- * [developer guide](https://docs.convergence.io/guide/models/references/realtimeobject.html)
+ * [developer guide](https://guide.convergence.io/models/references/realtimeobject.html)
  * for some examples.
  *
  * @module Real Time Data

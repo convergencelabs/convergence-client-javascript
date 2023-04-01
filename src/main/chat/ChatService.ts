@@ -85,7 +85,7 @@ Object.freeze(Events);
  * as textual communication limited to either a fixed set of participants, or a
  * [[ChatRoom]] in which any members can send and receive messages.
  *
- * See the [developer guide](https://docs.convergence.io/guide/chat/overview.html)
+ * See the [developer guide](https://guide.convergence.io/chat/overview.html)
  * for a few chat examples.
  *
  * @module Chat

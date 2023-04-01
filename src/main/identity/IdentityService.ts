@@ -38,7 +38,7 @@ const validSearchFields: UserField[] = ["username", "email", "firstName", "lastN
 /**
  * Provides a suite of utilities for looking up users and groups in the current domain.
  *
- * See some common use cases in the [developer guide](https://docs.convergence.io/guide/identity/overview.html).
+ * See some common use cases in the [developer guide](https://guide.convergence.io/identity/overview.html).
  *
  * Note that users and groups cannot (yet) be managed through this service.  See the
  * REST API for domain user and group management.
