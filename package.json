@@ -31,7 +31,7 @@
     "docs": "gulp docs"
   },
   "dependencies": {
-    "protobufjs": "6.11.2",
+    "protobufjs": "6.11.3",
     "rxjs": "6.6.3"
   },
   "devDependencies": {
